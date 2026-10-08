@@ -1,0 +1,82 @@
+{
+  "expo": {
+    "name": "Kepi",
+    "slug": "kepi",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": ["kepi", "vilocket"],
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0E1620"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.kepi.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Kepi sử dụng Camera để bạn chụp lại ảnh món đồ chi tiêu và quét nhanh mã VietQR chuyển khoản.",
+        "NSPhotoLibraryUsageDescription": "Kepi cần quyền truy cập thư viện ảnh để bạn tải ảnh hóa đơn, biên lai hoặc món đồ lên sổ chi tiêu.",
+        "LSApplicationQueriesSchemes": [
+          "zalopay",
+          "zalopay.api.v2",
+          "momo",
+          "tcb",
+          "techcombank",
+          "vcb",
+          "vietcombank",
+          "mb",
+          "mbbank",
+          "vietinbankpay",
+          "bidvsmartbanking",
+          "vpbankneo",
+          "acbone",
+          "ocb",
+          "tpbank"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0E1620"
+      },
+      "package": "com.kepi.app",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Ví Locket cần quyền truy cập camera để bạn chụp ảnh món đồ trước khi mua."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#E59844"
+        }
+      ],
+      "expo-asset",
+      "expo-status-bar",
+      "expo-image",
+      "expo-image-picker",
+      "expo-sharing"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
