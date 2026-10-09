@@ -24,7 +24,8 @@ export default function RootLayout() {
         router.replace('/(auth)/login');
       }
     } else if (!hasCompletedBudgetSetup) {
-      if (segments[1] !== 'budget-setup') {
+      const subSegment = (segments as string[])[1];
+      if (subSegment !== 'budget-setup') {
         router.replace('/(auth)/budget-setup');
       }
     } else {

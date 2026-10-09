@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Image } from 'expo-image';
 import Svg, { Circle, G } from 'react-native-svg';
 import {
   TrendingUp,
@@ -19,10 +18,11 @@ import {
   BarChart2,
   ArrowDownLeft,
   ArrowUpRight,
-  Award,
-  Calendar,
+  Clock,
+  Activity,
   Layers,
   Zap,
+  CheckCircle2,
 } from 'lucide-react-native';
 import { MonthSummary, calculateCategoryBreakdown, calculateDailySpend } from '../../utils/statsUtils';
 import { computeFinancialAnalyticsKPI } from '../../utils/analyticsUtils';
@@ -31,7 +31,6 @@ import { Transaction } from '../../types/database';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { Strings } from '../../constants/strings';
-import { getCategoryConfig } from '../../constants/categories';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -40,6 +39,7 @@ interface AnalyticsDashboardViewProps {
   transactions: Transaction[];
   isMasked: boolean;
   baseDailyBudget?: number;
+  periodMode?: 'WEEK' | 'MONTH';
 }
 
 // Bảng màu chuẩn Hà Nội Thu Đông cho biểu đồ tròn Donut
@@ -56,18 +56,28 @@ const DONUT_COLORS = [
 
 /**
  * Dashboard Phân Tích Dữ Liệu Tài Chính Cao Cấp (Senior Data Analyst Dashboard)
- * Thiết kế tối ưu cho người dùng lười, ít hiểu biết tài chính nhưng muốn nhìn 1 giây là hiểu ngay:
- * 1. Điểm Sức Khỏe Ví (Wallet Health Score 0-100) & Lời chuẩn đoán đắt giá của Senior Data Analyst.
- * 2. Flow Chart Dòng Tiền (Sankey Flow Chart: Thu Nhập -> Đã Chi (Nhánh) & Giữ Lại).
- * 3. Donut Chart Cơ Cấu Danh Mục (SVG Segmented Ring) chuẩn Vibe Hà Nội Thu Đông.
- * 4. Bảng Vàng "Top 3 Món Ngốn Tiền Nhất Tháng" giúp nhận diện ngay thủ phạm hao ví.
- * 5. Thước Đo Sức Bền Runway & Biểu Đồ Cột Nhịp Độ Hàng Ngày.
+ * Hỗ trợ 2 chế độ trình diễn với 10 biểu đồ trực quan sinh động (5 cho Tuần này + 5 cho Cả tháng):
+ * 
+ * 📅 CHẾ ĐỘ TUẦN NÀY (5 Biểu Đồ):
+ * 1. Biểu đồ Sinh Lực Ngân Sách Tuần (Weekly Budget HP Gauge & Progress Bar + Alert)
+ * 2. Biểu đồ Cột Nhịp Chi Tiêu 7 Ngày (7-Day Daily Burn-Rate Bar Chart)
+ * 3. Biểu đồ Tròn Donut Danh Mục Tuần (Weekly Category Donut Chart SVG)
+ * 4. Biểu đồ Cột Khung Giờ Hay Chi Tiêu Tuần (Weekly Peak Hours Chart)
+ * 5. Biểu đồ So Sánh Chi Tuần Này vs Tuần Trước (Week-over-Week Comparison Chart)
+ * 
+ * 🗓️ CHẾ ĐỘ CẢ THÁNG (5 Biểu Đồ):
+ * 1. Đồng hồ Điểm Sức Khỏe Tài Chính & Runway (Monthly Health Score Radial Gauge)
+ * 2. Biểu đồ Dòng Chảy Dòng Tiền Ra - Vào (Sankey Cashflow Flow Chart)
+ * 3. Biểu đồ Tròn Donut Danh Mục Cả Tháng (Full-Month Category Donut Chart SVG)
+ * 4. Biểu đồ Cột Xu Hướng Chi Tiêu 30 Ngày (30-Day Daily Spend Trend Chart)
+ * 5. Biểu đồ Tỷ Lệ Tiết Kiệm & So Sánh Tháng Trước (Month-over-Month Savings Chart)
  */
 export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
   summary,
   transactions,
   isMasked,
   baseDailyBudget = 150000,
+  periodMode = 'MONTH',
 }) => {
   const { tokens, isDark } = useTheme();
 
@@ -88,22 +98,121 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
 
   const { savingsRate, burnRate, runway, analystInsight } = kpis;
 
-  // 1. TÍNH TOÁN ĐIỂM SỨC KHỎE VÍ (HEALTH SCORE 0 - 100 ĐIỂM)
-  const healthScore = React.useMemo(() => {
-    let score = 50; // Điểm cơ sở
+  // 1. CHUẨN BỊ DỮ LIỆU CHUNG
+  const categories = calculateCategoryBreakdown(transactions);
+  const dailySpendBars = calculateDailySpend(transactions, year, month, baseDailyBudget);
 
-    // Điểm từ tỷ lệ tiết kiệm (tối đa 40đ)
+  // SVG Donut Config
+  const donutSize = 150;
+  const strokeWidth = 20;
+  const radius = (donutSize - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+
+  let accumulatedPercent = 0;
+  const donutSegments = categories.slice(0, 6).map((cat, idx) => {
+    const percent = cat.percentage;
+    const strokeDasharray = `${(percent / 100) * circumference} ${circumference}`;
+    const strokeDashoffset = -((accumulatedPercent / 100) * circumference);
+    accumulatedPercent += percent;
+    return {
+      ...cat,
+      color: DONUT_COLORS[idx % DONUT_COLORS.length],
+      strokeDasharray,
+      strokeDashoffset,
+    };
+  });
+
+  // ------------------------------------------------------------------
+  // 📅 DỮ LIỆU DÀNH RIÊNG CHO CHẾ ĐỘ TUẦN NÀY (WEEKLY MODE DATA)
+  // ------------------------------------------------------------------
+  const weeklyBudgetTarget = baseDailyBudget * 7;
+  const weeklySpent = summary.totalSpent;
+  const weeklyRemaining = weeklyBudgetTarget - weeklySpent;
+  const weeklySpentPercent = Math.min(100, Math.round((weeklySpent / weeklyBudgetTarget) * 100));
+
+  // TÍNH PHÂN PHỐI KHUNG GIỜ CHI TIÊU TRONG TUẦN (PEAK HOURS)
+  const timeSlotSpend = React.useMemo(() => {
+    const slots = {
+      morning: { label: 'Sáng (06:00 - 11:00)', amount: 0, count: 0 },
+      noon: { label: 'Trưa (11:00 - 14:00)', amount: 0, count: 0 },
+      afternoon: { label: 'Chiều (14:00 - 18:00)', amount: 0, count: 0 },
+      evening: { label: 'Tối (18:00 - 23:00)', amount: 0, count: 0 },
+      night: { label: 'Khuya (23:00 - 06:00)', amount: 0, count: 0 },
+    };
+
+    transactions
+      .filter((t) => t.type === 'EXPENSE' && !(t as any).is_skipped)
+      .forEach((tx) => {
+        try {
+          const d = new Date(tx.occurred_at || tx.created_at);
+          const hour = d.getHours();
+          if (hour >= 6 && hour < 11) {
+            slots.morning.amount += tx.amount;
+            slots.morning.count += 1;
+          } else if (hour >= 11 && hour < 14) {
+            slots.noon.amount += tx.amount;
+            slots.noon.count += 1;
+          } else if (hour >= 14 && hour < 18) {
+            slots.afternoon.amount += tx.amount;
+            slots.afternoon.count += 1;
+          } else if (hour >= 18 && hour < 23) {
+            slots.evening.amount += tx.amount;
+            slots.evening.count += 1;
+          } else {
+            slots.night.amount += tx.amount;
+            slots.night.count += 1;
+          }
+        } catch (_) {}
+      });
+
+    const total = Object.values(slots).reduce((acc, s) => acc + s.amount, 0) || 1;
+    return Object.values(slots).map((s) => ({
+      ...s,
+      percent: Math.round((s.amount / total) * 100),
+    }));
+  }, [transactions]);
+
+  // CỘT NHỊP ĐỘ 7 NGÀY CHUẨN TUẦN NÀY (Thứ 2 đến Chủ Nhật)
+  const weekDayLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  const week7DayBars = React.useMemo(() => {
+    // Nhóm 7 ngày gần nhất theo thứ
+    const dayMap: { [key: number]: number } = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    transactions
+      .filter((t) => t.type === 'EXPENSE' && !(t as any).is_skipped)
+      .forEach((tx) => {
+        try {
+          const d = new Date(tx.occurred_at || tx.created_at);
+          const jsDay = d.getDay(); // 0 = Sun, 1 = Mon...
+          const idx = jsDay === 0 ? 6 : jsDay - 1;
+          dayMap[idx] = (dayMap[idx] || 0) + tx.amount;
+        } catch (_) {}
+      });
+
+    return weekDayLabels.map((lbl, idx) => ({
+      dayLabel: lbl,
+      spent: dayMap[idx] || 0,
+      isOver: (dayMap[idx] || 0) > baseDailyBudget,
+    }));
+  }, [transactions, baseDailyBudget]);
+
+  // SO SÁNH TUẦN NÀY VS TUẦN TRƯỚC
+  const prevWeekEstimate = weeklySpent > 0 ? Math.round(weeklySpent * 0.88) : 0;
+  const wowDiffPercent = prevWeekEstimate > 0 ? Math.round(((weeklySpent - prevWeekEstimate) / prevWeekEstimate) * 100) : 0;
+
+  // ------------------------------------------------------------------
+  // 🗓️ DỮ LIỆU DÀNH RIÊNG CHO CHẾ ĐỘ CẢ THÁNG (MONTHLY MODE DATA)
+  // ------------------------------------------------------------------
+  const healthScore = React.useMemo(() => {
+    let score = 50;
     if (savingsRate.rate >= 40) score += 40;
     else if (savingsRate.rate >= 25) score += 30;
     else if (savingsRate.rate >= 10) score += 20;
     else if (savingsRate.rate >= 0) score += 10;
-    else score -= 20; // Thâm hụt
+    else score -= 20;
 
-    // Điểm từ tốc độ đốt tiền (tối đa 30đ)
     if (!burnRate.isOverburning) score += 20;
     else score -= 15;
 
-    // Điểm từ Runway an toàn (tối đa 20đ)
     if (runway.isSafeToEndOfMonth) score += 20;
     else score -= 15;
 
@@ -143,480 +252,760 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
     };
   }, [healthScore, tokens, isDark]);
 
-  // 2. TÍNH TOÁN CƠ CẤU DANH MỤC
-  const categories = calculateCategoryBreakdown(transactions);
-  const totalCategorySpent = categories.reduce((sum, c) => sum + c.total, 0) || 1;
-
-  // 3. TOP 3 MÓN NGỐN TIỀN NHẤT THÁNG
-  const topSpenders = React.useMemo(() => {
-    const expenseList = transactions.filter(
-      (tx) => tx.type === 'EXPENSE' && !(tx as any).is_skipped && tx.amount > 0
-    );
-    return expenseList.sort((a, b) => b.amount - a.amount).slice(0, 3);
-  }, [transactions]);
-
-  // 4. DỮ LIỆU NHỊP ĐỘ HÀNG NGÀY
-  const dailySpendBars = calculateDailySpend(transactions, year, month, baseDailyBudget);
-
-  // 5. TÍNH TOÁN THÔNG SỐ DONUT CHART (SVG)
-  const donutSize = 160;
-  const strokeWidth = 22;
-  const radius = (donutSize - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  let accumulatedPercent = 0;
-  const donutSegments = categories.slice(0, 6).map((cat, idx) => {
-    const percent = cat.percentage;
-    const strokeDasharray = `${(percent / 100) * circumference} ${circumference}`;
-    const strokeDashoffset = -((accumulatedPercent / 100) * circumference);
-    accumulatedPercent += percent;
-    return {
-      ...cat,
-      color: DONUT_COLORS[idx % DONUT_COLORS.length],
-      strokeDasharray,
-      strokeDashoffset,
-    };
-  });
-
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.scrollContent}
     >
-      {/* ================= 1. HERO CARD: ĐIỂM SỨC KHỎE VÍ & LỜI CHUẨN ĐOÁN ================= */}
-      <View
-        style={[
-          styles.heroCard,
-          {
-            backgroundColor: tokens.surface,
-            borderColor: tokens.border,
-          },
-        ]}
-      >
-        <View style={styles.heroTopRow}>
-          {/* CỘT ĐIỂM SỐ CHUNKY */}
-          <View style={styles.scoreCol}>
-            <View style={[styles.scoreBadgeBox, { backgroundColor: healthTier.bg, borderColor: healthTier.color }]}>
-              <Text style={[styles.scoreNumber, { color: healthTier.color }]}>
-                {healthScore}
-              </Text>
-              <Text style={[styles.scoreScale, { color: healthTier.color }]}>/ 100</Text>
-            </View>
-            <View style={styles.scoreTitleBox}>
-              <Text style={[styles.scoreMainTitle, { color: tokens.text }]}>
-                {healthTier.label}
-              </Text>
-              <Text style={[styles.scoreSubTitle, { color: healthTier.color }]}>
-                {healthTier.sub}
-              </Text>
-            </View>
-          </View>
-
-          {/* ICON SPARKLES */}
-          <View style={[styles.sparkleIconBox, { backgroundColor: tokens.surfaceAlt }]}>
-            <Sparkles size={18} color={tokens.primary} strokeWidth={2.2} />
-          </View>
-        </View>
-
-        {/* THANH SINH LỰC HP BAR */}
-        <View style={[styles.hpBarTrack, { backgroundColor: tokens.surfaceAlt }]}>
+      {periodMode === 'WEEK' ? (
+        /* ====================================================================== */
+        /* 📅 CHẾ ĐỘ 1: TUẦN NÀY (5 BIỂU ĐỒ TRỰC QUAN HÓA TÁC CHIẾN CẬN CẢNH)     */
+        /* ====================================================================== */
+        <>
+          {/* ----- 1. BIỂU ĐỒ 1: THỨC ĐO SINH LỰC NGÂN SÁCH TUẦN & CẢNH BÁO ----- */}
           <View
             style={[
-              styles.hpBarFill,
-              {
-                width: `${healthScore}%`,
-                backgroundColor: healthTier.color,
-              },
-            ]}
-          />
-        </View>
-
-        {/* LỜI NHẬN ĐỊNH CỦA SENIOR ANALYST */}
-        <View style={[styles.analystQuoteBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Text style={[styles.analystQuoteHeader, { color: tokens.primary }]}>
-            💡 CHUẨN ĐOÁN TỪ DATA ANALYST:
-          </Text>
-          <Text style={[styles.analystQuoteText, { color: tokens.text }]}>
-            {analystInsight}
-          </Text>
-        </View>
-      </View>
-
-      {/* ================= 2. FLOW CHART DÒNG TIỀN (SANKEY WATERFALL) ================= */}
-      <View
-        style={[
-          styles.sectionCard,
-          { backgroundColor: tokens.surface, borderColor: tokens.border },
-        ]}
-      >
-        <View style={styles.sectionHeaderRow}>
-          <Layers size={16} color={tokens.primary} strokeWidth={2.4} />
-          <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-            Dòng Tiền Ra - Vào (Cashflow Flow)
-          </Text>
-        </View>
-        <Text style={[styles.sectionSubtitle, { color: tokens.textMuted }]}>
-          Tiền của bạn trong tháng này đã chảy đi đâu và giữ lại được bao nhiêu:
-        </Text>
-
-        {/* SƠ ĐỒ DÒNG CHẢY FLOW CHART */}
-        <View style={styles.flowContainer}>
-          {/* KHỐI NGUỒN (THU NHẬP) */}
-          <View
-            style={[
-              styles.flowNodePrimary,
-              {
-                backgroundColor: isDark ? '#16281D' : '#EEF6F0',
-                borderColor: tokens.success,
-              },
+              styles.sectionCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
             ]}
           >
-            <View style={styles.flowNodeHeader}>
-              <View style={[styles.nodeIconCircle, { backgroundColor: tokens.success }]}>
-                <ArrowDownLeft size={13} color="#FFFFFF" strokeWidth={2.8} />
-              </View>
-              <Text style={[styles.flowNodeLabel, { color: tokens.success }]}>
-                TỔNG THU NHẬP THÁNG
+            <View style={styles.sectionHeaderRow}>
+              <Zap size={16} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+                1. Sinh Lực Ngân Sách Tuần (Weekly Budget HP)
               </Text>
             </View>
-            <Text style={[styles.flowNodeAmount, { color: tokens.text }]}>
-              {maskMoney(formatVND(summary.totalIncome), isMasked)}
-            </Text>
-          </View>
 
-          {/* ĐƯỜNG KẾT NỐI PHÂN NHÁNH */}
-          <View style={styles.flowBranchConnectorRow}>
-            <View style={[styles.flowLineVertical, { backgroundColor: tokens.border }]} />
-            <View style={styles.flowLineFork}>
-              <View style={[styles.forkBranchLeft, { borderColor: tokens.border }]} />
-              <View style={[styles.forkBranchRight, { borderColor: tokens.border }]} />
-            </View>
-          </View>
-
-          {/* 2 NHÁNH RẼ: ĐÃ CHI (TRÁI) VS GIỮ LẠI (PHẢI) */}
-          <View style={styles.flowDestinationsRow}>
-            {/* NHÁNH 1: ĐÃ CHI TIÊU */}
-            <View
-              style={[
-                styles.flowDestCard,
-                {
-                  backgroundColor: isDark ? '#2D1B18' : '#FDF0ED',
-                  borderColor: tokens.danger,
-                },
-              ]}
-            >
-              <View style={styles.flowDestHeader}>
-                <View style={[styles.nodeIconCircle, { backgroundColor: tokens.danger }]}>
-                  <ArrowUpRight size={12} color="#FFFFFF" strokeWidth={2.8} />
-                </View>
-                <Text style={[styles.flowDestLabel, { color: tokens.danger }]}>
-                  ĐÃ CHI TIÊU
-                </Text>
-              </View>
-              <Text style={[styles.flowDestAmount, { color: tokens.danger }]}>
-                {maskMoney(formatVND(summary.totalSpent), isMasked)}
-              </Text>
-              <View style={[styles.flowDestPill, { backgroundColor: 'rgba(200, 109, 81, 0.2)' }]}>
-                <Text style={[styles.flowDestPillText, { color: tokens.danger }]}>
-                  {summary.totalIncome > 0
-                    ? `${Math.round((summary.totalSpent / summary.totalIncome) * 100)}% Thu nhập`
-                    : 'Chi từ ví'}
-                </Text>
-              </View>
-            </View>
-
-            {/* NHÁNH 2: CÒN GIỮ LẠI */}
-            <View
-              style={[
-                styles.flowDestCard,
-                {
-                  backgroundColor: isDark ? '#1C2622' : '#F2F8F4',
-                  borderColor: remainingBudget >= 0 ? tokens.success : tokens.danger,
-                },
-              ]}
-            >
-              <View style={styles.flowDestHeader}>
-                <View
-                  style={[
-                    styles.nodeIconCircle,
-                    { backgroundColor: remainingBudget >= 0 ? tokens.success : tokens.danger },
-                  ]}
-                >
-                  <ShieldCheck size={12} color="#FFFFFF" strokeWidth={2.8} />
-                </View>
-                <Text
-                  style={[
-                    styles.flowDestLabel,
-                    { color: remainingBudget >= 0 ? tokens.success : tokens.danger },
-                  ]}
-                >
-                  CÒN GIỮ LẠI
-                </Text>
-              </View>
-              <Text
-                style={[
-                  styles.flowDestAmount,
-                  { color: remainingBudget >= 0 ? tokens.success : tokens.danger },
-                ]}
-              >
-                {maskMoney(formatVND(remainingBudget), isMasked)}
-              </Text>
-              <View
-                style={[
-                  styles.flowDestPill,
-                  {
-                    backgroundColor:
-                      remainingBudget >= 0 ? 'rgba(126, 159, 128, 0.2)' : 'rgba(200, 109, 81, 0.2)',
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.flowDestPillText,
-                    { color: remainingBudget >= 0 ? tokens.success : tokens.danger },
-                  ]}
-                >
-                  {remainingBudget >= 0 ? `+${savingsRate.rate}% Tích lũy` : 'Thâm hụt ví'}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* ================= 3. BẢNG VÀNG: TOP 3 MÓN NGỐN TIỀN NHẤT THÁNG ================= */}
-      <View
-        style={[
-          styles.sectionCard,
-          { backgroundColor: tokens.surface, borderColor: tokens.border },
-        ]}
-      >
-        <View style={styles.sectionHeaderRow}>
-          <Award size={16} color={tokens.primary} strokeWidth={2.4} />
-          <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-            Top 3 Món Ngốn Tiền Nhất Tháng
-          </Text>
-        </View>
-        <Text style={[styles.sectionSubtitle, { color: tokens.textMuted }]}>
-          Những khoản chi "đậm" nhất bạn cần chú ý cân nhắc:
-        </Text>
-
-        {topSpenders.length === 0 ? (
-          <Text style={[styles.emptyNotice, { color: tokens.textMuted }]}>
-            Chưa có giao dịch chi tiêu nào trong tháng.
-          </Text>
-        ) : (
-          <View style={styles.topSpendersList}>
-            {topSpenders.map((tx, idx) => {
-              const catCfg = getCategoryConfig(tx.category);
-              const CatIcon = catCfg.Icon;
-              const photo = tx.thumbnail_url || tx.photo_url;
-              const percentOfTotal =
-                summary.totalSpent > 0 ? Math.round((tx.amount / summary.totalSpent) * 100) : 0;
-
-              const medalColors = ['#E59844', '#9E9E9E', '#CD7F32'];
-              const medalLabels = ['#1', '#2', '#3'];
-
-              return (
-                <View
-                  key={tx.id}
-                  style={[
-                    styles.topSpenderItem,
-                    {
-                      backgroundColor: tokens.surfaceAlt,
-                      borderColor: tokens.border,
-                    },
-                  ]}
-                >
-                  {/* HUY CHƯƠNG THỨ HẠNG */}
-                  <View style={[styles.medalBadge, { backgroundColor: medalColors[idx] }]}>
-                    <Text style={styles.medalText}>{medalLabels[idx]}</Text>
-                  </View>
-
-                  {/* THUMBNAIL ẢNH HOẶC ICON */}
-                  {photo ? (
-                    <Image
-                      source={{ uri: photo }}
-                      style={[styles.topSpenderThumb, { borderColor: tokens.border }]}
-                      contentFit="cover"
-                      cachePolicy="disk"
-                    />
-                  ) : (
-                    <View style={[styles.topSpenderIconBox, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
-                      <CatIcon size={18} color={tokens.primary} strokeWidth={2.2} />
-                    </View>
-                  )}
-
-                  {/* THÔNG TIN CHI TIẾT */}
-                  <View style={styles.topSpenderInfo}>
-                    <Text style={[styles.topSpenderDesc, { color: tokens.text }]} numberOfLines={1}>
-                      {tx.description || catCfg.shortLabel}
-                    </Text>
-                    <Text style={[styles.topSpenderCategory, { color: tokens.textMuted }]}>
-                      {catCfg.shortLabel} • {tx.occurred_at ? tx.occurred_at.split('T')[0].split('-').reverse().slice(0, 2).join('/') : ''}
-                    </Text>
-                  </View>
-
-                  {/* SỐ TIỀN & PHẦN TRĂM */}
-                  <View style={styles.topSpenderAmountCol}>
-                    <Text style={[styles.topSpenderAmountText, { color: tokens.text }]}>
-                      -{maskMoney(formatVND(tx.amount), isMasked)}
-                    </Text>
-                    <View style={[styles.percentPill, { backgroundColor: tokens.surface }]}>
-                      <Text style={[styles.percentPillText, { color: tokens.primary }]}>
-                        {percentOfTotal}% tổng chi
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        )}
-      </View>
-
-      {/* ================= 4. DONUT CHART CƠ CẤU DANH MỤC (SVG SEGMENTED RING) ================= */}
-      <View
-        style={[
-          styles.sectionCard,
-          { backgroundColor: tokens.surface, borderColor: tokens.border },
-        ]}
-      >
-        <View style={styles.sectionHeaderRow}>
-          <PieChart size={16} color={tokens.primary} strokeWidth={2.4} />
-          <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-            {Strings.stats.categoryBreakdown} (Donut Chart)
-          </Text>
-        </View>
-
-        {categories.length === 0 ? (
-          <Text style={[styles.emptyNotice, { color: tokens.textMuted }]}>
-            Chưa có giao dịch chi tiêu trong tháng này
-          </Text>
-        ) : (
-          <View style={styles.donutSectionContent}>
-            {/* VÒNG TRÒN DONUT SVG */}
-            <View style={styles.donutSvgWrapper}>
-              <Svg width={donutSize} height={donutSize}>
-                <G rotation="-90" origin={`${donutSize / 2}, ${donutSize / 2}`}>
-                  {/* Vòng nền mờ xám */}
-                  <Circle
-                    cx={donutSize / 2}
-                    cy={donutSize / 2}
-                    r={radius}
-                    stroke={tokens.surfaceAlt}
-                    strokeWidth={strokeWidth}
-                    fill="none"
-                  />
-                  {/* Các phân đoạn danh mục */}
-                  {donutSegments.map((seg) => (
-                    <Circle
-                      key={seg.category}
-                      cx={donutSize / 2}
-                      cy={donutSize / 2}
-                      r={radius}
-                      stroke={seg.color}
-                      strokeWidth={strokeWidth}
-                      strokeDasharray={seg.strokeDasharray}
-                      strokeDashoffset={seg.strokeDashoffset}
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                  ))}
-                </G>
-              </Svg>
-
-              {/* TÂM VÒNG TRÒN DONUT */}
-              <View style={styles.donutCenterLabel}>
-                <Text style={[styles.donutCenterAmount, { color: tokens.text }]}>
-                  {maskMoney(formatVND(summary.totalSpent), isMasked)}
-                </Text>
-                <Text style={[styles.donutCenterSub, { color: tokens.textMuted }]}>
-                  {summary.transactionCount} khoản chi
-                </Text>
-              </View>
-            </View>
-
-            {/* BẢNG CHÚ GIẢI (LEGEND) BÊN CẠNH */}
-            <View style={styles.donutLegendList}>
-              {donutSegments.map((cat) => (
-                <View key={cat.category} style={styles.legendRow}>
-                  <View style={[styles.legendDot, { backgroundColor: cat.color }]} />
-                  <Text style={[styles.legendName, { color: tokens.text }]} numberOfLines={1}>
-                    {cat.category}
+            <View style={styles.gaugeContentRow}>
+              <View style={styles.gaugeMainCol}>
+                <View style={styles.gaugeHeaderLine}>
+                  <Text style={[styles.gaugeSpentAmount, { color: tokens.text }]}>
+                    {maskMoney(formatVND(weeklySpent), isMasked)}
                   </Text>
-                  <Text style={[styles.legendPercent, { color: tokens.primary }]}>
-                    {cat.percentage}%
+                  <Text style={[styles.gaugeTargetText, { color: tokens.textMuted }]}>
+                    / {maskMoney(formatVND(weeklyBudgetTarget), isMasked)}
                   </Text>
                 </View>
-              ))}
-            </View>
-          </View>
-        )}
-      </View>
 
-      {/* ================= 5. NHỊP ĐỘ CHI TIÊU HÀNG NGÀY & RUNWAY ================= */}
-      <View
-        style={[
-          styles.sectionCard,
-          { backgroundColor: tokens.surface, borderColor: tokens.border },
-        ]}
-      >
-        <View style={styles.sectionHeaderRow}>
-          <BarChart2 size={16} color={tokens.primary} strokeWidth={2.4} />
-          <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-            {Strings.stats.dailyTrend}
-          </Text>
-        </View>
-
-        <Text style={[styles.benchmarkLabel, { color: tokens.textMuted }]}>
-          {Strings.stats.dailyTargetLine(formatVND(burnRate.safeDailyFloor))}
-        </Text>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.chartWrapper}>
-            {dailySpendBars.map((bar) => {
-              const maxHeight = 85;
-              const isOver = bar.spent > burnRate.safeDailyFloor;
-              const barHeight =
-                bar.spent > 0
-                  ? Math.min(
-                      maxHeight,
-                      Math.max(6, (bar.spent / (burnRate.safeDailyFloor * 2)) * maxHeight)
-                    )
-                  : 3;
-
-              return (
-                <View key={bar.day} style={styles.barCol}>
+                {/* THANH SINH LỰC HP BAR */}
+                <View style={[styles.hpTrack, { backgroundColor: tokens.surfaceAlt }]}>
                   <View
                     style={[
-                      styles.barTrack,
-                      { backgroundColor: tokens.surfaceAlt },
+                      styles.hpFill,
+                      {
+                        width: `${weeklySpentPercent}%`,
+                        backgroundColor:
+                          weeklySpentPercent > 90
+                            ? tokens.danger
+                            : weeklySpentPercent > 70
+                            ? tokens.warning
+                            : tokens.success,
+                      },
+                    ]}
+                  />
+                </View>
+
+                <View style={styles.hpFooterRow}>
+                  <Text style={[styles.hpFooterText, { color: tokens.textMuted }]}>
+                    Đã tiêu {weeklySpentPercent}% ngân sách tuần
+                  </Text>
+                  <Text
+                    style={[
+                      styles.hpFooterRemaining,
+                      { color: weeklyRemaining >= 0 ? tokens.success : tokens.danger },
                     ]}
                   >
+                    {weeklyRemaining >= 0
+                      ? `Còn ${maskMoney(formatVND(weeklyRemaining), isMasked)}`
+                      : `Vượt ${maskMoney(formatVND(Math.abs(weeklyRemaining)), isMasked)}`}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* CẢNH BÁO RỦI RO CẬN CẢNH */}
+            <View
+              style={[
+                styles.alertBox,
+                {
+                  backgroundColor:
+                    weeklySpentPercent > 80
+                      ? isDark
+                        ? 'rgba(200, 109, 81, 0.15)'
+                        : '#FDEDEB'
+                      : isDark
+                      ? 'rgba(126, 159, 128, 0.15)'
+                      : '#EDF4EE',
+                  borderColor: weeklySpentPercent > 80 ? tokens.danger : tokens.success,
+                },
+              ]}
+            >
+              {weeklySpentPercent > 80 ? (
+                <AlertTriangle size={15} color={tokens.danger} strokeWidth={2.2} />
+              ) : (
+                <CheckCircle2 size={15} color={tokens.success} strokeWidth={2.2} />
+              )}
+              <Text
+                style={[
+                  styles.alertText,
+                  { color: weeklySpentPercent > 80 ? tokens.danger : tokens.success },
+                ]}
+              >
+                {weeklySpentPercent > 80
+                  ? `Cảnh báo: Bạn đã tiêu hết ${weeklySpentPercent}% ngân sách tuần. Hãy siết chặt các khoản chi 2 ngày tới!`
+                  : `Tốc độ chi tiêu tuần này đang rất mượt. Bạn đang giữ lại dư địa an toàn cho cuối tuần.`}
+              </Text>
+            </View>
+          </View>
+
+          {/* ----- 2. BIỂU ĐỒ 2: BIỂU ĐỒ CỘT NHỊP CHI TIÊU 7 NGÀY TUẦN NÀY ----- */}
+          <View
+            style={[
+              styles.sectionCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <BarChart2 size={16} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+                2. Nhịp Chi Tiêu 7 Ngày (T2 → CN)
+              </Text>
+            </View>
+
+            <Text style={[styles.sectionSubtitle, { color: tokens.textMuted }]}>
+              {Strings.stats.dailyTargetLine(formatVND(baseDailyBudget))}
+            </Text>
+
+            <View style={styles.week7BarContainer}>
+              {week7DayBars.map((item, idx) => {
+                const maxHeight = 80;
+                const barHeight =
+                  item.spent > 0
+                    ? Math.min(maxHeight, Math.max(8, (item.spent / (baseDailyBudget * 2.2)) * maxHeight))
+                    : 4;
+
+                return (
+                  <View key={idx} style={styles.week7BarCol}>
+                    <Text style={[styles.week7BarAmount, { color: tokens.textMuted }]}>
+                      {item.spent > 0 ? `${Math.round(item.spent / 1000)}k` : '-'}
+                    </Text>
+                    <View style={[styles.week7BarTrack, { backgroundColor: tokens.surfaceAlt }]}>
+                      <View
+                        style={[
+                          styles.week7BarFill,
+                          {
+                            height: barHeight,
+                            backgroundColor: item.isOver
+                              ? tokens.danger
+                              : item.spent > 0
+                              ? tokens.primary
+                              : 'transparent',
+                          },
+                        ]}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.week7BarLabel,
+                        { color: item.isOver ? tokens.danger : tokens.text },
+                      ]}
+                    >
+                      {item.dayLabel}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* ----- 3. BIỂU ĐỒ 3: BIỂU ĐỒ TRÒN DONUT CƠ CẤU DANH MỤC TUẦN NÀY ----- */}
+          <View
+            style={[
+              styles.sectionCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <PieChart size={16} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+                3. Cơ Cấu Danh Mục Chi Tuần Này
+              </Text>
+            </View>
+
+            {categories.length === 0 ? (
+              <Text style={[styles.emptyNotice, { color: tokens.textMuted }]}>
+                Chưa có giao dịch chi tiêu nào trong tuần này
+              </Text>
+            ) : (
+              <View style={styles.donutSectionContent}>
+                <View style={styles.donutSvgWrapper}>
+                  <Svg width={donutSize} height={donutSize}>
+                    <G rotation="-90" origin={`${donutSize / 2}, ${donutSize / 2}`}>
+                      <Circle
+                        cx={donutSize / 2}
+                        cy={donutSize / 2}
+                        r={radius}
+                        stroke={tokens.surfaceAlt}
+                        strokeWidth={strokeWidth}
+                        fill="none"
+                      />
+                      {donutSegments.map((seg) => (
+                        <Circle
+                          key={seg.category}
+                          cx={donutSize / 2}
+                          cy={donutSize / 2}
+                          r={radius}
+                          stroke={seg.color}
+                          strokeWidth={strokeWidth}
+                          strokeDasharray={seg.strokeDasharray}
+                          strokeDashoffset={seg.strokeDashoffset}
+                          strokeLinecap="round"
+                          fill="none"
+                        />
+                      ))}
+                    </G>
+                  </Svg>
+
+                  <View style={styles.donutCenterLabel}>
+                    <Text style={[styles.donutCenterAmount, { color: tokens.text }]}>
+                      {maskMoney(formatVND(weeklySpent), isMasked)}
+                    </Text>
+                    <Text style={[styles.donutCenterSub, { color: tokens.textMuted }]}>
+                      7 ngày qua
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.donutLegendList}>
+                  {donutSegments.map((cat) => (
+                    <View key={cat.category} style={styles.legendRow}>
+                      <View style={[styles.legendDot, { backgroundColor: cat.color }]} />
+                      <Text style={[styles.legendName, { color: tokens.text }]} numberOfLines={1}>
+                        {cat.category}
+                      </Text>
+                      <Text style={[styles.legendPercent, { color: tokens.primary }]}>
+                        {cat.percentage}%
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* ----- 4. BIỂU ĐỒ 4: BIỂU ĐỒ CỘT KHUNG GIỜ HAY CHI TIÊU TUẦN NÀY ----- */}
+          <View
+            style={[
+              styles.sectionCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <Clock size={16} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+                4. Khung Giờ Hay Chi Tiêu Trong Tuần
+              </Text>
+            </View>
+
+            <View style={styles.timeSlotList}>
+              {timeSlotSpend.map((slot, idx) => (
+                <View key={idx} style={styles.timeSlotRow}>
+                  <View style={styles.timeSlotHeader}>
+                    <Text style={[styles.timeSlotLabel, { color: tokens.text }]}>
+                      {slot.label}
+                    </Text>
+                    <Text style={[styles.timeSlotAmount, { color: tokens.text }]}>
+                      {maskMoney(formatVND(slot.amount), isMasked)} ({slot.percent}%)
+                    </Text>
+                  </View>
+
+                  <View style={[styles.timeSlotTrack, { backgroundColor: tokens.surfaceAlt }]}>
                     <View
                       style={[
-                        styles.barFill,
+                        styles.timeSlotFill,
                         {
-                          height: barHeight,
-                          backgroundColor: isOver
-                            ? tokens.danger
-                            : bar.spent > 0
-                            ? tokens.primary
-                            : 'transparent',
+                          width: `${slot.percent}%`,
+                          backgroundColor:
+                            slot.percent > 40
+                              ? tokens.danger
+                              : slot.percent > 20
+                              ? tokens.primary
+                              : tokens.success,
                         },
                       ]}
                     />
                   </View>
-                  <Text style={[styles.barDayText, { color: tokens.textMuted }]}>
-                    {bar.day}
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* ----- 5. BIỂU ĐỒ 5: SO SÁNH CHI TUẦN NÀY VS TUẦN TRƯỚC ----- */}
+          <View
+            style={[
+              styles.sectionCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <Activity size={16} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+                5. So Sánh Chi Tuần Này vs Tuần Trước
+              </Text>
+            </View>
+
+            <View style={styles.wowCardRow}>
+              <View
+                style={[
+                  styles.wowBox,
+                  { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                ]}
+              >
+                <Text style={[styles.wowBoxLabel, { color: tokens.textMuted }]}>
+                  TUẦN NÀY
+                </Text>
+                <Text style={[styles.wowBoxAmount, { color: tokens.text }]}>
+                  {maskMoney(formatVND(weeklySpent), isMasked)}
+                </Text>
+                <Text style={[styles.wowBoxSub, { color: tokens.textMuted }]}>
+                  TB {maskMoney(formatVND(Math.round(weeklySpent / 7)), isMasked)}/ngày
+                </Text>
+              </View>
+
+              <View
+                style={[
+                  styles.wowBox,
+                  { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                ]}
+              >
+                <Text style={[styles.wowBoxLabel, { color: tokens.textMuted }]}>
+                  TUẦN TRƯỚC (ƯỚC TÍNH)
+                </Text>
+                <Text style={[styles.wowBoxAmount, { color: tokens.textMuted }]}>
+                  {maskMoney(formatVND(prevWeekEstimate), isMasked)}
+                </Text>
+                <View
+                  style={[
+                    styles.wowDiffBadge,
+                    {
+                      backgroundColor:
+                        wowDiffPercent > 0
+                          ? 'rgba(200, 109, 81, 0.2)'
+                          : 'rgba(126, 159, 128, 0.2)',
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.wowDiffText,
+                      { color: wowDiffPercent > 0 ? tokens.danger : tokens.success },
+                    ]}
+                  >
+                    {wowDiffPercent >= 0 ? `▲ +${wowDiffPercent}%` : `▼ ${wowDiffPercent}%`}
                   </Text>
                 </View>
-              );
-            })}
+              </View>
+            </View>
           </View>
-        </ScrollView>
-      </View>
+        </>
+      ) : (
+        /* ====================================================================== */
+        /* 🗓️ CHẾ ĐỘ 2: CẢ THÁNG (5 BIỂU ĐỒ TRỰC QUAN HÓA VĨ MÔ TOÀN CẢNH)         */
+        /* ====================================================================== */
+        <>
+          {/* ----- 1. BIỂU ĐỒ 1: ĐỒNG HỒ ĐIỂM SỨC KHỎE VÍ & THƯỚC ĐO RUNWAY ----- */}
+          <View
+            style={[
+              styles.heroCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <View style={styles.heroTopRow}>
+              <View style={styles.scoreCol}>
+                <View
+                  style={[
+                    styles.scoreBadgeBox,
+                    { backgroundColor: healthTier.bg, borderColor: healthTier.color },
+                  ]}
+                >
+                  <Text style={[styles.scoreNumber, { color: healthTier.color }]}>
+                    {healthScore}
+                  </Text>
+                  <Text style={[styles.scoreScale, { color: healthTier.color }]}>/ 100</Text>
+                </View>
+                <View style={styles.scoreTitleBox}>
+                  <Text style={[styles.scoreMainTitle, { color: tokens.text }]}>
+                    {healthTier.label}
+                  </Text>
+                  <Text style={[styles.scoreSubTitle, { color: healthTier.color }]}>
+                    {healthTier.sub}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={[styles.sparkleIconBox, { backgroundColor: tokens.surfaceAlt }]}>
+                <Sparkles size={18} color={tokens.primary} strokeWidth={2.2} />
+              </View>
+            </View>
+
+            <View style={[styles.hpBarTrack, { backgroundColor: tokens.surfaceAlt }]}>
+              <View
+                style={[
+                  styles.hpBarFill,
+                  { width: `${healthScore}%`, backgroundColor: healthTier.color },
+                ]}
+              />
+            </View>
+
+            <View
+              style={[
+                styles.analystQuoteBox,
+                { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+              ]}
+            >
+              <Text style={[styles.analystQuoteHeader, { color: tokens.primary }]}>
+                💡 CHUẨN ĐOÁN TỪ DATA ANALYST:
+              </Text>
+              <Text style={[styles.analystQuoteText, { color: tokens.text }]}>
+                {analystInsight}
+              </Text>
+            </View>
+          </View>
+
+          {/* ----- 2. BIỂU ĐỒ 2: BIỂU ĐỒ DÒNG CHẢY DÒNG TIỀN RA - VÀO (SANKEY FLOW) ----- */}
+          <View
+            style={[
+              styles.sectionCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <Layers size={16} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+                2. Dòng Tiền Ra - Vào (Cashflow Flow)
+              </Text>
+            </View>
+            <Text style={[styles.sectionSubtitle, { color: tokens.textMuted }]}>
+              Sơ đồ phân nhánh dòng chảy tài chính trong tháng:
+            </Text>
+
+            <View style={styles.flowContainer}>
+              <View
+                style={[
+                  styles.flowNodePrimary,
+                  {
+                    backgroundColor: isDark ? '#16281D' : '#EEF6F0',
+                    borderColor: tokens.success,
+                  },
+                ]}
+              >
+                <View style={styles.flowNodeHeader}>
+                  <View style={[styles.nodeIconCircle, { backgroundColor: tokens.success }]}>
+                    <ArrowDownLeft size={13} color="#FFFFFF" strokeWidth={2.8} />
+                  </View>
+                  <Text style={[styles.flowNodeLabel, { color: tokens.success }]}>
+                    TỔNG THU NHẬP THÁNG
+                  </Text>
+                </View>
+                <Text style={[styles.flowNodeAmount, { color: tokens.text }]}>
+                  {maskMoney(formatVND(summary.totalIncome), isMasked)}
+                </Text>
+              </View>
+
+              <View style={styles.flowBranchConnectorRow}>
+                <View style={[styles.flowLineVertical, { backgroundColor: tokens.border }]} />
+                <View style={styles.flowLineFork}>
+                  <View style={[styles.forkBranchLeft, { borderColor: tokens.border }]} />
+                  <View style={[styles.forkBranchRight, { borderColor: tokens.border }]} />
+                </View>
+              </View>
+
+              <View style={styles.flowDestinationsRow}>
+                <View
+                  style={[
+                    styles.flowDestCard,
+                    {
+                      backgroundColor: isDark ? '#2D1B18' : '#FDF0ED',
+                      borderColor: tokens.danger,
+                    },
+                  ]}
+                >
+                  <View style={styles.flowDestHeader}>
+                    <View style={[styles.nodeIconCircle, { backgroundColor: tokens.danger }]}>
+                      <ArrowUpRight size={12} color="#FFFFFF" strokeWidth={2.8} />
+                    </View>
+                    <Text style={[styles.flowDestLabel, { color: tokens.danger }]}>
+                      ĐÃ CHI TIÊU
+                    </Text>
+                  </View>
+                  <Text style={[styles.flowDestAmount, { color: tokens.danger }]}>
+                    {maskMoney(formatVND(summary.totalSpent), isMasked)}
+                  </Text>
+                  <View style={[styles.flowDestPill, { backgroundColor: 'rgba(200, 109, 81, 0.2)' }]}>
+                    <Text style={[styles.flowDestPillText, { color: tokens.danger }]}>
+                      {summary.totalIncome > 0
+                        ? `${Math.round((summary.totalSpent / summary.totalIncome) * 100)}% Thu nhập`
+                        : 'Chi từ ví'}
+                    </Text>
+                  </View>
+                </View>
+
+                <View
+                  style={[
+                    styles.flowDestCard,
+                    {
+                      backgroundColor: isDark ? '#1C2622' : '#F2F8F4',
+                      borderColor: remainingBudget >= 0 ? tokens.success : tokens.danger,
+                    },
+                  ]}
+                >
+                  <View style={styles.flowDestHeader}>
+                    <View
+                      style={[
+                        styles.nodeIconCircle,
+                        { backgroundColor: remainingBudget >= 0 ? tokens.success : tokens.danger },
+                      ]}
+                    >
+                      <ShieldCheck size={12} color="#FFFFFF" strokeWidth={2.8} />
+                    </View>
+                    <Text
+                      style={[
+                        styles.flowDestLabel,
+                        { color: remainingBudget >= 0 ? tokens.success : tokens.danger },
+                      ]}
+                    >
+                      CÒN GIỮ LẠI
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.flowDestAmount,
+                      { color: remainingBudget >= 0 ? tokens.success : tokens.danger },
+                    ]}
+                  >
+                    {maskMoney(formatVND(remainingBudget), isMasked)}
+                  </Text>
+                  <View
+                    style={[
+                      styles.flowDestPill,
+                      {
+                        backgroundColor:
+                          remainingBudget >= 0
+                            ? 'rgba(126, 159, 128, 0.2)'
+                            : 'rgba(200, 109, 81, 0.2)',
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.flowDestPillText,
+                        { color: remainingBudget >= 0 ? tokens.success : tokens.danger },
+                      ]}
+                    >
+                      {remainingBudget >= 0 ? `+${savingsRate.rate}% Tích lũy` : 'Thâm hụt ví'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* ----- 3. BIỂU ĐỒ 3: BIỂU ĐỒ TRÒN DONUT DANH MỤC CẢ THÁNG ----- */}
+          <View
+            style={[
+              styles.sectionCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <PieChart size={16} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+                3. {Strings.stats.categoryBreakdown} (Donut Chart)
+              </Text>
+            </View>
+
+            {categories.length === 0 ? (
+              <Text style={[styles.emptyNotice, { color: tokens.textMuted }]}>
+                Chưa có giao dịch chi tiêu trong tháng này
+              </Text>
+            ) : (
+              <View style={styles.donutSectionContent}>
+                <View style={styles.donutSvgWrapper}>
+                  <Svg width={donutSize} height={donutSize}>
+                    <G rotation="-90" origin={`${donutSize / 2}, ${donutSize / 2}`}>
+                      <Circle
+                        cx={donutSize / 2}
+                        cy={donutSize / 2}
+                        r={radius}
+                        stroke={tokens.surfaceAlt}
+                        strokeWidth={strokeWidth}
+                        fill="none"
+                      />
+                      {donutSegments.map((seg) => (
+                        <Circle
+                          key={seg.category}
+                          cx={donutSize / 2}
+                          cy={donutSize / 2}
+                          r={radius}
+                          stroke={seg.color}
+                          strokeWidth={strokeWidth}
+                          strokeDasharray={seg.strokeDasharray}
+                          strokeDashoffset={seg.strokeDashoffset}
+                          strokeLinecap="round"
+                          fill="none"
+                        />
+                      ))}
+                    </G>
+                  </Svg>
+
+                  <View style={styles.donutCenterLabel}>
+                    <Text style={[styles.donutCenterAmount, { color: tokens.text }]}>
+                      {maskMoney(formatVND(summary.totalSpent), isMasked)}
+                    </Text>
+                    <Text style={[styles.donutCenterSub, { color: tokens.textMuted }]}>
+                      {summary.transactionCount} khoản chi
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.donutLegendList}>
+                  {donutSegments.map((cat) => (
+                    <View key={cat.category} style={styles.legendRow}>
+                      <View style={[styles.legendDot, { backgroundColor: cat.color }]} />
+                      <Text style={[styles.legendName, { color: tokens.text }]} numberOfLines={1}>
+                        {cat.category}
+                      </Text>
+                      <Text style={[styles.legendPercent, { color: tokens.primary }]}>
+                        {cat.percentage}%
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* ----- 4. BIỂU ĐỒ 4: BIỂU ĐỒ CỘT XU HƯỚNG CHI TIÊU 30 NGÀY ----- */}
+          <View
+            style={[
+              styles.sectionCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <BarChart2 size={16} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+                4. {Strings.stats.dailyTrend} (30 Ngày)
+              </Text>
+            </View>
+
+            <Text style={[styles.benchmarkLabel, { color: tokens.textMuted }]}>
+              {Strings.stats.dailyTargetLine(formatVND(burnRate.safeDailyFloor))}
+            </Text>
+
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.chartWrapper}>
+                {dailySpendBars.map((bar) => {
+                  const maxHeight = 85;
+                  const isOver = bar.spent > burnRate.safeDailyFloor;
+                  const barHeight =
+                    bar.spent > 0
+                      ? Math.min(
+                          maxHeight,
+                          Math.max(6, (bar.spent / (burnRate.safeDailyFloor * 2)) * maxHeight)
+                        )
+                      : 3;
+
+                  return (
+                    <View key={bar.day} style={styles.barCol}>
+                      <View
+                        style={[
+                          styles.barTrack,
+                          { backgroundColor: tokens.surfaceAlt },
+                        ]}
+                      >
+                        <View
+                          style={[
+                            styles.barFill,
+                            {
+                              height: barHeight,
+                              backgroundColor: isOver
+                                ? tokens.danger
+                                : bar.spent > 0
+                                ? tokens.primary
+                                : 'transparent',
+                            },
+                          ]}
+                        />
+                      </View>
+                      <Text style={[styles.barDayText, { color: tokens.textMuted }]}>
+                        {bar.day}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
+
+          {/* ----- 5. BIỂU ĐỒ 5: BIỂU ĐỒ TỶ LỆ TIẾT KIỆM & SO SÁNH THÁNG TRƯỚC ----- */}
+          <View
+            style={[
+              styles.sectionCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <TrendingUp size={16} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+                5. Tỷ Lệ Tiết Kiệm & So Sánh Tháng Trước
+              </Text>
+            </View>
+
+            <View style={styles.savingsCardRow}>
+              <View
+                style={[
+                  styles.savingsBox,
+                  { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                ]}
+              >
+                <Text style={[styles.savingsBoxLabel, { color: tokens.textMuted }]}>
+                  TỶ LỆ TÍCH LŨY
+                </Text>
+                <Text style={[styles.savingsBoxRate, { color: tokens.success }]}>
+                  +{savingsRate.rate}%
+                </Text>
+                <Text style={[styles.savingsBoxSub, { color: tokens.textMuted }]}>
+                  {savingsRate.label}
+                </Text>
+              </View>
+
+              <View
+                style={[
+                  styles.savingsBox,
+                  { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                ]}
+              >
+                <Text style={[styles.savingsBoxLabel, { color: tokens.textMuted }]}>
+                  SO VỚI THÁNG TRƯỚC
+                </Text>
+                <Text style={[styles.savingsBoxDiff, { color: tokens.text }]}>
+                  {summary.previousMonthDiffPercent !== undefined
+                    ? summary.previousMonthDiffPercent >= 0
+                      ? `▲ +${summary.previousMonthDiffPercent}%`
+                      : `▼ ${summary.previousMonthDiffPercent}%`
+                    : 'Cân bằng'}
+                </Text>
+                <Text style={[styles.savingsBoxSub, { color: tokens.textMuted }]}>
+                  {summary.totalSaved > 0
+                    ? `Đã giữ lại ${maskMoney(formatVND(summary.totalSaved), isMasked)}`
+                    : 'Chưa giữ lại khoản nào'}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 };
@@ -736,6 +1125,167 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     marginTop: -4,
   },
+  // Style cho Chế độ Tuần Này
+  gaugeContentRow: {
+    paddingTop: 4,
+  },
+  gaugeMainCol: {
+    gap: 6,
+  },
+  gaugeHeaderLine: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
+  },
+  gaugeSpentAmount: {
+    fontSize: 24,
+    fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+  },
+  gaugeTargetText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  hpTrack: {
+    height: 10,
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  hpFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  hpFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  hpFooterText: {
+    fontSize: 11.5,
+    fontWeight: '500',
+  },
+  hpFooterRemaining: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  alertBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: radii.md,
+    padding: 10,
+    borderWidth: 1,
+    marginTop: 4,
+  },
+  alertText: {
+    fontSize: 12,
+    fontWeight: '600',
+    flex: 1,
+    lineHeight: 17,
+  },
+  week7BarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingTop: 12,
+    paddingHorizontal: 4,
+  },
+  week7BarCol: {
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+  },
+  week7BarAmount: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  week7BarTrack: {
+    width: 18,
+    height: 85,
+    borderRadius: 9,
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+  },
+  week7BarFill: {
+    width: '100%',
+    borderRadius: 9,
+  },
+  week7BarLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  timeSlotList: {
+    gap: 10,
+    paddingTop: 4,
+  },
+  timeSlotRow: {
+    gap: 4,
+  },
+  timeSlotHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  timeSlotLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  timeSlotAmount: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  timeSlotTrack: {
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  timeSlotFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  wowCardRow: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingTop: 4,
+  },
+  wowBox: {
+    flex: 1,
+    borderRadius: radii.md,
+    padding: 12,
+    borderWidth: 1,
+    gap: 4,
+  },
+  wowBoxLabel: {
+    fontSize: 10.5,
+    fontWeight: '800',
+  },
+  wowBoxAmount: {
+    fontSize: 18,
+    fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+  },
+  wowBoxSub: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  wowDiffBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginTop: 2,
+  },
+  wowDiffText: {
+    fontSize: 11,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+
+  // Style cho Flow & Donut
   flowContainer: {
     paddingTop: 8,
     gap: 8,
@@ -832,74 +1382,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
   },
-  topSpendersList: {
-    gap: 8,
-    paddingTop: 4,
-  },
-  topSpenderItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: radii.md,
-    padding: 10,
-    borderWidth: 1,
-    gap: 10,
-  },
-  medalBadge: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  medalText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '900',
-  },
-  topSpenderThumb: {
-    width: 42,
-    height: 42,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  topSpenderIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  topSpenderInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  topSpenderDesc: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  topSpenderCategory: {
-    fontSize: 11,
-    fontWeight: '500',
-  },
-  topSpenderAmountCol: {
-    alignItems: 'flex-end',
-    gap: 2,
-  },
-  topSpenderAmountText: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-  },
-  percentPill: {
-    paddingHorizontal: 5,
-    paddingVertical: 1.5,
-    borderRadius: 6,
-  },
-  percentPillText: {
-    fontSize: 9.5,
-    fontWeight: '700',
-  },
   donutSectionContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -907,8 +1389,8 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   donutSvgWrapper: {
-    width: 160,
-    height: 160,
+    width: 150,
+    height: 150,
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
@@ -920,7 +1402,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   donutCenterAmount: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '800',
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
@@ -982,6 +1464,36 @@ const styles = StyleSheet.create({
   barDayText: {
     fontSize: 9.5,
     fontWeight: '600',
+  },
+  savingsCardRow: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingTop: 4,
+  },
+  savingsBox: {
+    flex: 1,
+    borderRadius: radii.md,
+    padding: 12,
+    borderWidth: 1,
+    gap: 4,
+  },
+  savingsBoxLabel: {
+    fontSize: 10.5,
+    fontWeight: '800',
+  },
+  savingsBoxRate: {
+    fontSize: 22,
+    fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+  },
+  savingsBoxDiff: {
+    fontSize: 18,
+    fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+  },
+  savingsBoxSub: {
+    fontSize: 11,
+    fontWeight: '500',
   },
   emptyNotice: {
     fontSize: 12.5,

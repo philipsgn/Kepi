@@ -40,7 +40,7 @@ export const Strings = {
     itemsCount: (count: number) => `${count} khoản`,
     unpricedChip: (count: number) => `${count} chưa có giá`,
     unpricedLabel: 'Chưa có giá',
-    detailBtn: 'Chi tiết ›',
+    detailBtn: 'Chi tiết',
     emptyTitle: 'Chưa có tấm ảnh chi tiêu nào',
     emptyDesc: 'Chụp thử món gần nhất để mở cuốn album tiền của bạn',
     emptyCta: 'Mở máy ảnh ngay',

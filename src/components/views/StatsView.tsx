@@ -586,6 +586,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
               summary={displayAnalyticsSummary}
               transactions={displayAnalyticsTransactions}
               isMasked={isMasked}
+              periodMode={periodMode}
             />
           ) : (
             <View style={styles.emptyContainer}>

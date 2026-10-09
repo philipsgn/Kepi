@@ -28,7 +28,7 @@
 │ Thống kê                                    [Ẩn tiền]  │
 │ [📸 Album] (Mặc định)                 [📊 Phân tích]   │ (Segmented Switch)
 ├────────────────────────────────────────────────────────┤
-│ CHẾ ĐỘ 1: PHÂN TÍCH DATA (In-App Analytics Dashboard)   │
+│ CHẾ ĐỘ 1: PHÂN TÍCH DATA (10 Biểu Đồ Trực Quan Hóa)     │
 │ Tháng: [10] [9] [8] [7] ... (thanh chọn tháng)         │
 │ Chu kỳ: [Tuần Này]          [Cả Tháng]                 │ (Period Switcher)
 │ ┌ Lời Nhận Định Data Analyst ────────────────────────┐ │
@@ -54,7 +54,7 @@
 │ [Tất cả] [Chi] [Thu] [Không mua] [Chưa có giá] [Ăn uống]│ (chip cuộn ngang)
 │ Tháng: [10] [9] [8] [7] ...                            │
 │ ┌ Tiêu Đề Tháng Dính (Sticky Month Header) ──────────┐ │
-│ │ Tháng 10, 2026  · Đang diễn ra          Chi tiết › │ │
+│ │ Tháng 10, 2026                         [Chi tiết >]│ │
 │ │ Đã chi 2.550.000 đ                 ▲ 12% so tháng 9 │ │
 │ │ 42 khoản · Thu 5.000.000 đ · Đã giữ lại 640.000 đ  │ │
 │ └────────────────────────────────────────────────────┘ │

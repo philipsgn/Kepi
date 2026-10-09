@@ -60,11 +60,6 @@ export const MonthStickyHeader: React.FC<MonthStickyHeaderProps> = ({
       <View style={styles.topRow}>
         <View style={styles.titleWithBadge}>
           <Text style={[styles.monthTitle, { color: tokens.text }]}>{monthLabel}</Text>
-          {isCurrentMonth && (
-            <View style={[styles.ongoingBadge, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-              <Text style={[styles.ongoingText, { color: tokens.primary }]}>{Strings.stats.ongoing}</Text>
-            </View>
-          )}
         </View>
 
         <TouchableOpacity

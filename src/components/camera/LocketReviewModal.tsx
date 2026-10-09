@@ -464,7 +464,6 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     paddingHorizontal: 16,
     borderRadius: radii.full,
-    backdropFilter: 'blur(10px)',
   },
   onPhotoTagText: {
     color: '#FFFFFF',
