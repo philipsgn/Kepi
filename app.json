@@ -7,12 +7,6 @@
     "icon": "./assets/icon.png",
     "scheme": ["kepi", "vilocket"],
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0E1620"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.kepi.app",
@@ -68,12 +62,7 @@
         {
           "color": "#E59844"
         }
-      ],
-      "expo-asset",
-      "expo-status-bar",
-      "expo-image",
-      "expo-image-picker",
-      "expo-sharing"
+      ]
     ],
     "experiments": {
       "typedRoutes": true

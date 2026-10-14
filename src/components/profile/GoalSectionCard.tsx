@@ -57,14 +57,11 @@ export const GoalSectionCard: React.FC<GoalSectionCardProps> = ({
         </View>
 
         <TouchableOpacity
-          style={[styles.editBtn, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}
+          style={[styles.editIconBtn, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}
           onPress={handleEdit}
-          activeOpacity={0.8}
+          activeOpacity={0.75}
         >
-          <Edit3 size={12} color={tokens.textSub} strokeWidth={2} />
-          <Text style={[styles.editBtnText, { color: tokens.textSub }]}>
-            {hasGoal ? Strings.profile.editGoalBtn : Strings.profile.createGoalBtn}
-          </Text>
+          <Edit3 size={14} color={tokens.textSub} strokeWidth={2.2} />
         </TouchableOpacity>
       </View>
 
@@ -165,18 +162,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  editBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: radii.full,
+  editIconBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     borderWidth: 1,
-    gap: 4,
-  },
-  editBtnText: {
-    fontSize: 11.5,
-    fontWeight: '600',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   contentBody: {
     marginTop: 2,

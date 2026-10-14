@@ -1,10 +1,12 @@
 import { create } from 'zustand';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Linking from 'expo-linking';
 import { supabase } from '../services/supabase';
 import { Profile, Transaction } from '../types/database';
 import { enqueueMutation, flushSyncQueue } from '../services/offlineSync';
 import { teardownRealtimeTransactionSync } from '../services/realtimeSync';
+import { uploadExpensePhotoAsync } from '../services/storage';
 
 
 export interface UserSession {
@@ -20,12 +22,30 @@ const STORAGE_IS_GUEST_KEY = 'vi_locket_is_guest';
 const STORAGE_BUDGET_SETUP_KEY = 'vi_locket_budget_setup';
 
 /**
- * DỌN DẸP DỮ LIỆU DEMO & CHUYỂN GIAO DỊCH THỰC SANG TÀI KHOẢN THẬT:
- * 1. Xóa sạch 7 khoản seed demo ('tx-seed-*', 'seed-user') để số liệu của user bắt đầu từ 0.
- * 2. Nếu khách có tự tay ghi các khoản chi thật lúc dùng thử, giữ lại và đổi user_id sang tài khoản mới.
- * 3. Đẩy các khoản chi thật đó lên Supabase Database.
+ * KIỂM TRA TÀI KHOẢN GOOGLE ĐÃ CÓ DỮ LIỆU CŨ TRÊN CLOUD HAY CHƯA
  */
-async function cleanSeedDataAndMigrate(newUserId: string) {
+export async function checkHasCloudTransactions(userId: string): Promise<boolean> {
+  try {
+    const { count, error } = await supabase
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId);
+    return Boolean(!error && typeof count === 'number' && count > 0);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * DỌN DẸP DỮ LIỆU DEMO, ĐỒNG BỘ ẢNH LOCAL LÊN CLOUD VÀ CHUYỂN GIAO DỊCH THỰC SANG TÀI KHOẢN THẬT:
+ * 1. Xóa sạch mọi khoản seed demo cũ ('tx-seed-*', 'seed-user') để số liệu bắt đầu từ 0.
+ * 2. Tự động đẩy toàn bộ ảnh chụp local (file://) lên Supabase Storage bucket receipt-photos.
+ * 3. Chuyển user_id của các giao dịch đã tạo lúc 'Vào ngay' sang user_id mới và enqueueMutation lên Supabase.
+ */
+export async function cleanSeedDataAndMigrate(
+  newUserId: string,
+  option: 'MERGE' | 'RESTORE' = 'MERGE'
+) {
   try {
     const rawTxs = await AsyncStorage.getItem(STORAGE_TRANSACTIONS_KEY);
     if (!rawTxs) return;
@@ -37,20 +57,52 @@ async function cleanSeedDataAndMigrate(newUserId: string) {
       (t) => !t.id.startsWith('tx-seed-') && t.user_id !== 'seed-user'
     );
 
-    // Cập nhật user_id cho các giao dịch do khách tự tạo
-    const updated = realTransactions.map((t) => {
+    if (option === 'RESTORE') {
+      // Người dùng chọn phục hồi dữ liệu đám mây: Xóa các khoản tạm của khách
+      const nonGuestTxs = realTransactions.filter((t) => !t.user_id.startsWith('guest-'));
+      await AsyncStorage.setItem(STORAGE_TRANSACTIONS_KEY, JSON.stringify(nonGuestTxs));
+      return;
+    }
+
+    // Cập nhật user_id cho các giao dịch do khách tự tạo & upload ảnh local
+    const updated: Transaction[] = [];
+    for (const t of realTransactions) {
       if (t.user_id.startsWith('guest-') || t.user_id.startsWith('demo-')) {
-        return { ...t, user_id: newUserId };
+        let photoUrl = t.photo_url;
+        let thumbUrl = t.thumbnail_url;
+
+        // Nếu ảnh đang là local URI, nén & upload lên Supabase Storage
+        if (photoUrl && (photoUrl.startsWith('file://') || photoUrl.startsWith('/'))) {
+          try {
+            const uploadResult = await uploadExpensePhotoAsync({
+              userId: newUserId,
+              transactionId: t.id,
+              fullPhotoUri: photoUrl,
+              thumbnailUri: thumbUrl || undefined,
+            });
+            if (uploadResult.uploadedToCloud) {
+              photoUrl = uploadResult.photoUrl;
+              thumbUrl = uploadResult.thumbnailUrl;
+            }
+          } catch (uploadErr) {
+            console.warn('[AuthStore] Failed to upload local photo during migration:', uploadErr);
+          }
+        }
+
+        const migratedTx: Transaction = {
+          ...t,
+          user_id: newUserId,
+          photo_url: photoUrl,
+          thumbnail_url: thumbUrl,
+        };
+        updated.push(migratedTx);
+        await enqueueMutation('ADD_TRANSACTION', migratedTx);
+      } else {
+        updated.push(t);
       }
-      return t;
-    });
+    }
 
     await AsyncStorage.setItem(STORAGE_TRANSACTIONS_KEY, JSON.stringify(updated));
-
-    // Đẩy các giao dịch thật này lên Supabase Database
-    for (const t of updated) {
-      await enqueueMutation('ADD_TRANSACTION', t);
-    }
     flushSyncQueue().catch(() => {});
   } catch (err) {
     console.warn('[AuthStore] Error during seed clean and migration:', err);
@@ -125,6 +177,8 @@ interface AuthState {
   signOut: () => Promise<void>;
   setHasCompletedBudgetSetup: (completed: boolean) => void;
   updateProfile: (data: Partial<Profile>) => Promise<void>;
+  checkCloudConflict: (newUserId: string) => Promise<boolean>;
+  migrateGuestDataToCloud: (newUserId: string, choice?: 'MERGE' | 'RESTORE') => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -177,15 +231,65 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           error: null,
         });
 
-        // Dọn dẹp seed demo nếu có
-        cleanSeedDataAndMigrate(user.id).catch(() => {});
+        // Xử lý di chuyển dữ liệu từ phiên 'Vào ngay' (nếu có)
+        try {
+          const hasCloudData = await checkHasCloudTransactions(user.id);
+          const rawTxs = await AsyncStorage.getItem(STORAGE_TRANSACTIONS_KEY);
+          const hasGuestTxs = rawTxs
+            ? JSON.parse(rawTxs).some((t: Transaction) => t.user_id.startsWith('guest-'))
+            : false;
+
+          if (hasGuestTxs && hasCloudData) {
+            Alert.alert(
+              'Đồng bộ tài khoản Google',
+              'Tài khoản Google của bạn đã có dữ liệu trước đó trên đám mây. Bạn muốn gộp các khoản vừa ghi hay dùng lại dữ liệu cũ?',
+              [
+                {
+                  text: 'Dùng dữ liệu đám mây',
+                  style: 'cancel',
+                  onPress: () => cleanSeedDataAndMigrate(user.id, 'RESTORE'),
+                },
+                {
+                  text: 'Gộp dữ liệu',
+                  onPress: () => cleanSeedDataAndMigrate(user.id, 'MERGE'),
+                },
+              ]
+            );
+          } else {
+            cleanSeedDataAndMigrate(user.id, 'MERGE').catch(() => {});
+          }
+        } catch {
+          cleanSeedDataAndMigrate(user.id, 'MERGE').catch(() => {});
+        }
         return;
       }
 
-      // 2. Không có session thật trên Supabase:
-      // Dọn dẹp toàn bộ rác demo cũ từ M0 để bắt buộc hiển thị màn hình Đăng Nhập / Đăng Ký
-      await AsyncStorage.multiRemove([STORAGE_USER_KEY, STORAGE_IS_GUEST_KEY]);
+      // 2. Không có session thật trên Supabase -> Kiểm tra xem có phiên 'Vào ngay' hợp lệ không
+      const cachedIsGuest = await AsyncStorage.getItem(STORAGE_IS_GUEST_KEY);
+      const cachedUserStr = await AsyncStorage.getItem(STORAGE_USER_KEY);
+      const cachedSetup = await AsyncStorage.getItem(STORAGE_BUDGET_SETUP_KEY);
+      const cachedGuestProfileStr = await AsyncStorage.getItem('@vi_locket_guest_profile');
+      if (cachedIsGuest === 'true' && cachedUserStr) {
+        try {
+          const cachedGuestUser: UserSession = JSON.parse(cachedUserStr);
+          const cachedGuestProfile: Profile | null = cachedGuestProfileStr ? JSON.parse(cachedGuestProfileStr) : null;
+          const isSetupDone = cachedSetup === 'true' && Boolean(cachedGuestProfile?.full_name);
+          set({
+            user: cachedGuestUser,
+            profile: cachedGuestProfile,
+            isAuthenticated: true,
+            isGuest: true,
+            hasCompletedBudgetSetup: isSetupDone,
+            isLoading: false,
+            error: null,
+          });
+          return;
+        } catch {
+          // JSON lỗi thì rơi vào reset
+        }
+      }
 
+      // Chưa đăng nhập và chưa vào ngay: Hiển thị màn hình Chào mừng (Đăng nhập / Vào ngay)
       set({
         user: null,
         profile: null,
@@ -357,11 +461,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * CHẾ ĐỘ KHÁCH (GUEST MODE) - 100% OFFLINE LOCAL
    * Tuyệt đối không lưu dữ liệu lên Supabase Database / Storage
    */
+  /**
+   * CHẾ ĐỘ KHÁCH (GUEST MODE) - 100% OFFLINE LOCAL
+   * Tuyệt đối không lưu dữ liệu lên Supabase Database / Storage
+   */
   continueAsGuest: async () => {
+    const cachedSetup = await AsyncStorage.getItem(STORAGE_BUDGET_SETUP_KEY);
+    const cachedProfileStr = await AsyncStorage.getItem('@vi_locket_guest_profile');
+    const cachedProfile: Profile | null = cachedProfileStr ? JSON.parse(cachedProfileStr) : null;
+    const isSetupDone = cachedSetup === 'true' && Boolean(cachedProfile?.full_name);
+
     const guestUser: UserSession = {
       id: `guest-${Date.now()}`,
       email: '',
-      full_name: 'Khách Ghé Phố',
+      full_name: cachedProfile?.full_name || '',
     };
 
     await AsyncStorage.setItem(STORAGE_USER_KEY, JSON.stringify(guestUser));
@@ -369,10 +482,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({
       user: guestUser,
-      profile: null,
+      profile: cachedProfile,
       isAuthenticated: true,
       isGuest: true,
-      hasCompletedBudgetSetup: true, // Cho phép vào thẳng trải nghiệm app
+      hasCompletedBudgetSetup: isSetupDone,
       error: null,
       otpSent: false,
     });
@@ -387,10 +500,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await AsyncStorage.removeItem(STORAGE_USER_KEY);
     await AsyncStorage.removeItem(STORAGE_IS_GUEST_KEY);
     await AsyncStorage.removeItem(STORAGE_BUDGET_SETUP_KEY);
+    await AsyncStorage.removeItem('@vi_locket_guest_profile');
 
     // Hủy đăng ký Realtime WebSocket
     teardownRealtimeTransactionSync();
-
 
     set({
       user: null,
@@ -412,8 +525,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { user, profile, isGuest } = get();
     if (!user) return;
 
-    const updatedProfile = { ...profile, ...data } as Profile;
+    const updatedProfile = { ...(profile || {}), ...data } as Profile;
     set({ profile: updatedProfile });
+
+    // Lưu bền vững offline cho cả Guest và User
+    await AsyncStorage.setItem('@vi_locket_guest_profile', JSON.stringify(updatedProfile));
 
     // Nếu là Guest thì không đẩy lên Supabase
     if (isGuest) return;
@@ -428,4 +544,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Local first, sync sau
     }
   },
+
+  checkCloudConflict: async (newUserId: string) => {
+    return await checkHasCloudTransactions(newUserId);
+  },
+
+  migrateGuestDataToCloud: async (newUserId: string, choice: 'MERGE' | 'RESTORE' = 'MERGE') => {
+    await cleanSeedDataAndMigrate(newUserId, choice);
+  },
 }));
+

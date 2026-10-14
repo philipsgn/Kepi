@@ -14,6 +14,7 @@ export default function AuthLayout() {
     >
       <Stack.Screen name="login" />
       <Stack.Screen name="budget-setup" />
+      <Stack.Screen name="callback" options={{ animation: 'fade' }} />
     </Stack>
   );
 }

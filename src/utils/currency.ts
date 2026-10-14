@@ -10,7 +10,7 @@ export const formatVND = (amount: number): string => {
   if (isNaN(amount) || amount === 0) return '0 đ';
   const isNegative = amount < 0;
   const absAmount = Math.abs(Math.round(amount));
-  const formatted = absAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const formatted = BigInt(absAmount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return `${isNegative ? '-' : ''}${formatted} đ`;
 };
 
@@ -19,6 +19,16 @@ export const formatCompactVND = (amount: number): string => {
   const isNegative = amount < 0;
   const absAmount = Math.abs(Math.round(amount));
 
+  if (absAmount >= 1_000_000_000_000) {
+    const trillions = absAmount / 1_000_000_000_000;
+    const str = (trillions % 1 === 0 ? trillions.toFixed(0) : trillions.toFixed(1)).replace('.', ',');
+    return `${isNegative ? '-' : ''}${str}T`;
+  }
+  if (absAmount >= 1_000_000_000) {
+    const billions = absAmount / 1_000_000_000;
+    const str = (billions % 1 === 0 ? billions.toFixed(0) : billions.toFixed(1)).replace('.', ',');
+    return `${isNegative ? '-' : ''}${str}B`;
+  }
   if (absAmount >= 1_000_000) {
     const millions = absAmount / 1_000_000;
     const str = (millions % 1 === 0 ? millions.toFixed(0) : millions.toFixed(1)).replace('.', ',');

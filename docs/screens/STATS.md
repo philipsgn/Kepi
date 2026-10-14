@@ -53,10 +53,9 @@
 │ CHẾ ĐỘ 2: CUỐN ALBUM ẢNH (Lưới 3 Cột Polaroid Locket)   │
 │ [Tất cả] [Chi] [Thu] [Không mua] [Chưa có giá] [Ăn uống]│ (chip cuộn ngang)
 │ Tháng: [10] [9] [8] [7] ...                            │
-│ ┌ Tiêu Đề Tháng Dính (Sticky Month Header) ──────────┐ │
-│ │ Tháng 10, 2026                         [Chi tiết >]│ │
-│ │ Đã chi 2.550.000 đ                 ▲ 12% so tháng 9 │ │
-│ │ 42 khoản · Thu 5.000.000 đ · Đã giữ lại 640.000 đ  │ │
+│ ┌ Tiêu Đề Tháng Dính Tinh Gọn (Sticky Month Header) ──┐ │
+│ │ Tháng 10, 2026                 Đã chi 2,55tr ›     │ │ (Thu gọn chiều dọc 50%)
+│ │ 42 khoản · Thu 5tr · Đã giữ lại 640k   ▲ 12%       │ │
 │ └────────────────────────────────────────────────────┘ │
 ```
 │ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐    │

@@ -24,10 +24,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import {
+  Bell,
   BookOpen,
   Calendar,
   Camera,
   Check,
+  ChevronDown,
   ChevronUp,
   ArrowUpRight,
   ArrowDownLeft,
@@ -90,6 +92,9 @@ import { EWalletDetectedCard } from '../../src/components/camera/EWalletDetected
 import { PendingReturnPromptModal } from '../../src/components/camera/PendingReturnPromptModal';
 import { ConfirmationPillBanner, ConfirmationInboxModal, UploadReceiptModal } from '../../src/components/inbox';
 import { OnCameraPhotoOverlay } from '../../src/components/camera/OnCameraPhotoOverlay';
+import { BankNotificationFloatingPill } from '../../src/components/camera/BankNotificationFloatingPill';
+import { BankNotificationSettingsModal } from '../../src/components/profile/BankNotificationSettingsModal';
+import { bankNotificationService } from '../../src/services/bankNotificationService';
 import { useVietQRScanner } from '../../src/hooks/useVietQRScanner';
 import { useConfirmationInbox } from '../../src/hooks/useConfirmationInbox';
 
@@ -182,6 +187,7 @@ export default function MainAppScreen() {
   const [showInboxModal, setShowInboxModal] = useState<boolean>(false);
   const [showUploadReceiptModal, setShowUploadReceiptModal] = useState<boolean>(false);
   const [uploadPhotoUri, setUploadPhotoUri] = useState<string | null>(null);
+  const [showBankSettingsFromCamera, setShowBankSettingsFromCamera] = useState<boolean>(false);
 
   // CHỈ lấy các giao dịch đã CONFIRMED cho feed và ảnh mới nhất
   const confirmedTransactions = transactions.filter((t) => t.status === 'CONFIRMED' || (!t.status as any));
@@ -292,12 +298,12 @@ export default function MainAppScreen() {
       if (!isCameraActive) {
         setIsCameraActive(true);
       }
-      // Nếu đang ở tab Camera (hoặc cuộn xuống ảnh cũ) -> bấm vào icon Camera trên bar sẽ cuộn mượt về đỉnh!
+      // Luôn luôn quay về mặt kính Camera ở trang đầu (y = 0)
+      verticalHistoryScrollRef.current?.scrollTo({
+        y: 0,
+        animated: true,
+      });
       if (activeTabIndex === 2 && currentOffsetYRef.current > 5) {
-        verticalHistoryScrollRef.current?.scrollTo({
-          y: 0,
-          animated: true,
-        });
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
         return;
       }
@@ -465,6 +471,9 @@ export default function MainAppScreen() {
         fullPhotoUri: capturedPhotoUri,
         thumbnailUri: capturedThumbUri || undefined,
       }).catch(() => {});
+
+      // Nếu có sự kiện thông báo ngân hàng vừa đến, tự động gắn ảnh vào giao dịch ngân hàng đó
+      bankNotificationService.attachPhotoToLatestTransaction(capturedPhotoUri).catch(() => {});
     }
 
     setLastSavedOrDeletedTx({ action: 'ADD', tx });
@@ -761,6 +770,10 @@ export default function MainAppScreen() {
         <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}>
           <ScrollView
             ref={verticalHistoryScrollRef}
+            pagingEnabled
+            decelerationRate="fast"
+            snapToInterval={SCREEN_HEIGHT}
+            snapToAlignment="start"
             showsVerticalScrollIndicator={false}
             onScroll={handleVerticalScroll}
             scrollEventThrottle={16}
@@ -820,6 +833,14 @@ export default function MainAppScreen() {
 
                   <TouchableOpacity
                     style={styles.headerIconButton}
+                    onPress={() => setShowBankSettingsFromCamera(true)}
+                    activeOpacity={0.8}
+                  >
+                    <Bell size={18} color={Colors.accentOrange} strokeWidth={2.4} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.headerIconButton}
                     onPress={() => router.push('/(main)/wait-basket')}
                     activeOpacity={0.8}
                   >
@@ -832,6 +853,9 @@ export default function MainAppScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
+
+              {/* BANNER NỔI THÔNG BÁO NGÂN HÀNG (3-IN-1 QUICK HUB) */}
+              <BankNotificationFloatingPill />
 
               {/* DẢI THÔNG BÁO HỘP XÁC NHẬN NỔI Ở CAMERA */}
               {inboxCount > 0 && (
@@ -1100,6 +1124,20 @@ export default function MainAppScreen() {
                   </View>
                 </>
               )}
+
+              {/* CHỈ DẪN TRƯỢT LÊN SANG TRANG LỊCH SỬ KHI KHÔNG ĐANG REVIEW ẢNH */}
+              {!capturedPhotoUri && (
+                <TouchableOpacity
+                  style={[styles.historySwipeIndicator, { bottom: insets.bottom + 68 }]}
+                  onPress={scrollToHistory}
+                  activeOpacity={0.75}
+                >
+                  <ChevronUp size={14} color={isDark ? 'rgba(255, 255, 255, 0.75)' : '#4A5568'} strokeWidth={2.4} />
+                  <Text style={[styles.historySwipeText, { color: isDark ? 'rgba(255, 255, 255, 0.75)' : '#4A5568' }]}>
+                    Lịch sử
+                  </Text>
+                </TouchableOpacity>
+              )}
             </LinearGradient>
 
             {/* --- DÒNG KHOẢNH KHẮC LIÊN TỤC CHUẨN LOCKET (HÌNH #3) --- */}
@@ -1113,6 +1151,17 @@ export default function MainAppScreen() {
                 },
               ]}
             >
+              {/* NÚT TRỞ LẠI CAMERA Ở ĐỈNH LỊCH SỬ */}
+              <TouchableOpacity
+                style={styles.backToCameraPill}
+                onPress={scrollToCamera}
+                activeOpacity={0.8}
+              >
+                <ChevronDown size={14} color={tokens.textMuted} strokeWidth={2.5} />
+                <Text style={[styles.backToCameraText, { color: tokens.textMuted }]}>
+                  Trở lại Camera
+                </Text>
+              </TouchableOpacity>
               {confirmedTransactions.map((tx) => (
                 <LocketMomentCard
                   key={tx.id}
@@ -1269,6 +1318,11 @@ export default function MainAppScreen() {
         onClose={() => setShowInboxModal(false)}
       />
 
+      {/* MODAL CÀI ĐẶT & THỬ NGHIỆM THÔNG BÁO NGÂN HÀNG (3-IN-1 QUICK HUB) */}
+      <BankNotificationSettingsModal
+        visible={showBankSettingsFromCamera}
+        onClose={() => setShowBankSettingsFromCamera(false)}
+      />
 
     </View>
   );
@@ -1505,6 +1559,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
     letterSpacing: 0.2,
+  },
+  historySwipeIndicator: {
+    position: 'absolute',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: radii.full,
+    backgroundColor: 'rgba(0, 0, 0, 0.32)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    zIndex: 25,
+  },
+  historySwipeText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  backToCameraPill: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: radii.full,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    marginBottom: spacing.sm,
+  },
+  backToCameraText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   historyPeekTab: {
     position: 'absolute',

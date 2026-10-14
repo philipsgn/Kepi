@@ -12,82 +12,146 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
+import Svg, { Circle, Line, Rect } from 'react-native-svg';
 import {
-  ArrowLeft,
-  ArrowRight,
   Check,
   Coffee,
   Coins,
-  HeartHandshake,
   Sparkles,
   Target,
+  User,
   Utensils,
+  Wallet,
 } from 'lucide-react-native';
 import { Colors } from '../../src/constants/colors';
-import { BorderRadius, Shadows, Spacing } from '../../src/constants/layout';
-import { Typography } from '../../src/constants/typography';
-import { AutumnButton } from '../../src/components/common/AutumnButton';
-import { HanoiCard } from '../../src/components/common/HanoiCard';
 import { FavoriteUnit } from '../../src/types/database';
 import { useAuthStore } from '../../src/store/authStore';
 import { useBudgetStore } from '../../src/store/budgetStore';
 import { formatVND, calculateBaseDailyBudget } from '../../src/utils/currency';
+import { useTheme } from '../../src/theme/ThemeContext';
+
+/**
+ * Biểu tượng Monogram Kepi Monogram
+ */
+function KepiMonogram({ size = 52 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 56 56">
+      <Circle cx="28" cy="28" r="26" fill="rgba(229, 152, 68, 0.15)" />
+      <Rect x="15" y="12" width="6.5" height="32" rx="3.25" fill="#0F2F24" />
+      <Line
+        x1="22"
+        y1="27"
+        x2="39"
+        y2="13"
+        stroke="#E59844"
+        strokeWidth="6.5"
+        strokeLinecap="round"
+      />
+      <Line
+        x1="23.5"
+        y1="27"
+        x2="39"
+        y2="43"
+        stroke="#1B4D3E"
+        strokeWidth="6.5"
+        strokeLinecap="round"
+      />
+      <Circle cx="40" cy="12" r="3.5" fill="#E59844" />
+    </Svg>
+  );
+}
 
 export default function BudgetSetupScreen() {
   const router = useRouter();
-  const { user, setHasCompletedBudgetSetup } = useAuthStore();
+  const { tokens, isDark } = useTheme();
+  const { user, profile, updateProfile, setHasCompletedBudgetSetup } = useAuthStore();
   const { setupBudget, isLoading } = useBudgetStore();
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  // Tab phương thức thiết lập: 'DAILY' (Nhập hạn mức ngày nhanh) | 'MONTHLY' (Thu nhập & Cố định)
+  const [budgetTab, setBudgetTab] = useState<'DAILY' | 'MONTHLY'>('DAILY');
 
-  // Dữ liệu ngân sách
-  const [incomeStr, setIncomeStr] = useState('7000000');
-  const [fixedCostsStr, setFixedCostsStr] = useState('2500000');
-  const [goalName, setGoalName] = useState('Laptop mới');
-  const [goalAmountStr, setGoalAmountStr] = useState('1500000');
+  // Trường thông tin - 100% bắt đầu từ trống (0 HARDCODE)
+  const [name, setName] = useState(profile?.full_name || user?.full_name || '');
+  const [dailyBudgetStr, setDailyBudgetStr] = useState('');
+  const [incomeStr, setIncomeStr] = useState('');
+  const [fixedCostsStr, setFixedCostsStr] = useState('');
+  const [goalName, setGoalName] = useState('');
+  const [goalAmountStr, setGoalAmountStr] = useState('');
   const [favUnit, setFavUnit] = useState<FavoriteUnit>('tra_sua');
 
-  const income = parseInt(incomeStr, 10) || 0;
-  const fixedCosts = parseInt(fixedCostsStr, 10) || 0;
-  const goalAmount = parseInt(goalAmountStr, 10) || 0;
+  // Tính toán hạn mức ngày dựa trên tab
+  const parsedDaily = parseInt(dailyBudgetStr.replace(/\D/g, ''), 10) || 0;
+  const parsedIncome = parseInt(incomeStr.replace(/\D/g, ''), 10) || 0;
+  const parsedFixed = parseInt(fixedCostsStr.replace(/\D/g, ''), 10) || 0;
+  const parsedGoal = parseInt(goalAmountStr.replace(/\D/g, ''), 10) || 0;
 
-  // Tính toán ngân sách ngày cơ sở
-  const dailyBudget = calculateBaseDailyBudget(income, fixedCosts, goalAmount, 30);
+  const effectiveDailyBudget =
+    budgetTab === 'DAILY'
+      ? parsedDaily
+      : calculateBaseDailyBudget(parsedIncome, parsedFixed, parsedGoal, 30);
 
-  const handleNext = () => {
-    if (step === 1 && income <= 0) {
-      Alert.alert('Lời nhắn nhẹ', 'Bạn hãy nhập thu nhập ước tính hàng tháng nhé.');
-      return;
-    }
-    if (step < 4) {
-      setStep((prev) => (prev + 1) as 1 | 2 | 3 | 4);
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 1) {
-      setStep((prev) => (prev - 1) as 1 | 2 | 3 | 4);
-    }
+  // Chọn nhanh chip hạn mức ngày
+  const handleSelectQuickDailyChip = (amount: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setDailyBudgetStr(amount.toString());
   };
 
   const handleFinish = async () => {
-    if (!user) return;
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert('Chào bạn!', 'Hãy cho Kepi biết tên gọi hoặc biệt danh của bạn nhé.');
+      return;
+    }
 
+    if (effectiveDailyBudget <= 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert(
+        'Ngân sách chi tiêu',
+        budgetTab === 'DAILY'
+          ? 'Vui lòng nhập hoặc chọn hạn mức chi tiêu mỗi ngày của bạn.'
+          : 'Vui lòng nhập thu nhập ước tính hàng tháng của bạn.'
+      );
+      return;
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    const targetUserId = user?.id || `guest-${Date.now()}`;
+    const monthlyIncome = budgetTab === 'DAILY' ? effectiveDailyBudget * 30 : parsedIncome;
+    const monthlyFixed = budgetTab === 'DAILY' ? 0 : parsedFixed;
+
+    // 1. Lưu hồ sơ người dùng (Tên & Đơn vị yêu thích)
+    await updateProfile({
+      full_name: trimmedName,
+      fav_unit: favUnit,
+    });
+
+    // 2. Thiết lập cấu hình ngân sách
     await setupBudget({
-      userId: user.id,
-      monthlyIncome: income,
-      monthlyFixedCosts: fixedCosts,
-      goalName,
-      goalTargetAmount: goalAmount,
+      userId: targetUserId,
+      monthlyIncome,
+      monthlyFixedCosts: monthlyFixed,
+      goalName: goalName.trim() || 'Chuyến đi Hà Nội',
+      goalTargetAmount: parsedGoal,
       favUnit,
     });
 
+    // 3. Đánh dấu hoàn tất setup
     setHasCompletedBudgetSetup(true);
+
+    // 4. Mở thẳng màn hình chính (Camera & Sổ)
     router.replace('/(main)');
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        { backgroundColor: isDark ? '#0E1620' : '#FAF6EC' },
+      ]}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
@@ -95,271 +159,373 @@ export default function BudgetSetupScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {/* Header tiến trình */}
-          <View style={styles.topNav}>
-            {step > 1 && (
-              <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
-                <ArrowLeft size={20} color={Colors.textCharcoal} />
-              </TouchableOpacity>
-            )}
-            <View style={styles.progressBar}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${(step / 4) * 100}%` },
-                ]}
-              />
+          {/* HEADER CHÀO MỪNG */}
+          <View style={styles.header}>
+            <View style={styles.monogramBox}>
+              <KepiMonogram size={56} />
             </View>
-            <Text style={[Typography.caption, styles.stepIndicator]}>
-              Bước {step}/4
+            <Text style={[styles.welcomeTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+              Chào mừng bạn đến với Kepi
+            </Text>
+            <Text style={[styles.welcomeSubtitle, { color: isDark ? 'rgba(250, 246, 236, 0.7)' : '#55606D' }]}>
+              Thiết lập nhanh trong 10 giây để cùng giữ ví tỉnh táo
             </Text>
           </View>
 
-          {/* BƯỚC 1: THU NHẬP HÀNG THÁNG */}
-          {step === 1 && (
-            <View style={styles.stepContent}>
-              <Text style={[Typography.heading1, styles.title]}>
-                Thu Nhập Mỗi Tháng Của Bạn?
+          {/* SECTION 1: TÊN BẠN */}
+          <View
+            style={[
+              styles.cardSection,
+              {
+                backgroundColor: isDark ? '#162231' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+              },
+            ]}
+          >
+            <View style={styles.sectionLabelRow}>
+              <User size={18} color="#E59844" strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+                Tên hoặc Biệt danh của bạn <Text style={styles.requiredStar}>*</Text>
               </Text>
-              <Text style={[Typography.bodyMedium, styles.subtitle]}>
-                Tiền lương, làm thêm hoặc gia đình gửi. Chúng mình sẽ dùng số này để tính ngân sách ngày cho bạn.
-              </Text>
-
-              <HanoiCard style={styles.card}>
-                <Text style={[Typography.caption, styles.inputLabel]}>
-                  SỐ TIỀN THU NHẬP (VNĐ)
-                </Text>
-                <TextInput
-                  style={[Typography.heroDisplay, styles.bigInput]}
-                  keyboardType="numeric"
-                  value={incomeStr}
-                  onChangeText={(val) => setIncomeStr(val.replace(/\D/g, ''))}
-                  placeholder="0"
-                />
-                <Text style={[Typography.bodyMedium, styles.formattedText]}>
-                  Tương đương: {formatVND(income)}
-                </Text>
-
-                {/* Gợi ý nhanh */}
-                <View style={styles.quickOptions}>
-                  {[4_000_000, 7_000_000, 12_000_000].map((amt) => (
-                    <TouchableOpacity
-                      key={amt}
-                      style={[
-                        styles.quickPill,
-                        income === amt && styles.quickPillActive,
-                      ]}
-                      onPress={() => setIncomeStr(amt.toString())}
-                    >
-                      <Text
-                        style={[
-                          Typography.caption,
-                          income === amt ? styles.quickPillTextActive : styles.quickPillText,
-                        ]}
-                      >
-                        {formatVND(amt)}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </HanoiCard>
             </View>
-          )}
+            <TextInput
+              style={[
+                styles.textInput,
+                {
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
+                  color: isDark ? '#FFFFFF' : '#1B2733',
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+                },
+              ]}
+              placeholder="Ví dụ: Hà An, Minh Duy, Cún..."
+              placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+            />
+          </View>
 
-          {/* BƯỚC 2: CHI PHÍ CỐ ĐỊNH */}
-          {step === 2 && (
-            <View style={styles.stepContent}>
-              <Text style={[Typography.heading1, styles.title]}>
-                Chi Phí Cố Định Hàng Tháng?
+          {/* SECTION 2: CÁCH QUẢN LÝ NGÂN SÁCH (SEGMENTED TABS) */}
+          <View
+            style={[
+              styles.cardSection,
+              {
+                backgroundColor: isDark ? '#162231' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+              },
+            ]}
+          >
+            <View style={styles.sectionLabelRow}>
+              <Wallet size={18} color="#E59844" strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+                Hạn mức chi tiêu <Text style={styles.requiredStar}>*</Text>
               </Text>
-              <Text style={[Typography.bodyMedium, styles.subtitle]}>
-                Tiền thuê trọ, tiền mạng, học phí, hóa đơn không thể cắt giảm.
-              </Text>
-
-              <HanoiCard style={styles.card}>
-                <Text style={[Typography.caption, styles.inputLabel]}>
-                  TIỀN CỐ ĐỊNH PHẢI CHI (VNĐ)
-                </Text>
-                <TextInput
-                  style={[Typography.heroDisplay, styles.bigInput]}
-                  keyboardType="numeric"
-                  value={fixedCostsStr}
-                  onChangeText={(val) => setFixedCostsStr(val.replace(/\D/g, ''))}
-                  placeholder="0"
-                />
-                <Text style={[Typography.bodyMedium, styles.formattedText]}>
-                  Tương đương: {formatVND(fixedCosts)}
-                </Text>
-
-                {/* Gợi ý nhanh */}
-                <View style={styles.quickOptions}>
-                  {[1_500_000, 2_500_000, 4_000_000].map((amt) => (
-                    <TouchableOpacity
-                      key={amt}
-                      style={[
-                        styles.quickPill,
-                        fixedCosts === amt && styles.quickPillActive,
-                      ]}
-                      onPress={() => setFixedCostsStr(amt.toString())}
-                    >
-                      <Text
-                        style={[
-                          Typography.caption,
-                          fixedCosts === amt ? styles.quickPillTextActive : styles.quickPillText,
-                        ]}
-                      >
-                        {formatVND(amt)}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </HanoiCard>
             </View>
-          )}
 
-          {/* BƯỚC 3: MỤC TIÊU & ĐƠN VỊ QUY ĐỔI */}
-          {step === 3 && (
-            <View style={styles.stepContent}>
-              <Text style={[Typography.heading1, styles.title]}>
-                Mục Tiêu & Đơn Vị Yêu Thích
-              </Text>
-              <Text style={[Typography.bodyMedium, styles.subtitle]}>
-                Khoản tiền bạn muốn tích lũy mỗi tháng và đơn vị quen thuộc để AI quy đổi trên Thẻ Phán Quyết.
-              </Text>
+            {/* TAB GẠT CHUYỂN PHƯƠNG THỨC */}
+            <View
+              style={[
+                styles.tabSegmentContainer,
+                { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.05)' },
+              ]}
+            >
+              <TouchableOpacity
+                style={[
+                  styles.tabSegmentButton,
+                  budgetTab === 'DAILY' && {
+                    backgroundColor: '#E59844',
+                    shadowColor: '#E59844',
+                    shadowOpacity: 0.25,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  },
+                ]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setBudgetTab('DAILY');
+                }}
+                activeOpacity={0.8}
+              >
+                <Text
+                  style={[
+                    styles.tabSegmentText,
+                    {
+                      color: budgetTab === 'DAILY' ? '#0E1620' : isDark ? '#FAF6EC' : '#55606D',
+                      fontWeight: budgetTab === 'DAILY' ? '700' : '500',
+                    },
+                  ]}
+                >
+                  ⚡ Hạn mức ngày (Nhanh)
+                </Text>
+              </TouchableOpacity>
 
-              <HanoiCard style={styles.card}>
-                <Text style={[Typography.caption, styles.inputLabel]}>
-                  BẠN ĐANG DÀNH TIỀN CHO ĐIỀU GÌ?
+              <TouchableOpacity
+                style={[
+                  styles.tabSegmentButton,
+                  budgetTab === 'MONTHLY' && {
+                    backgroundColor: '#E59844',
+                    shadowColor: '#E59844',
+                    shadowOpacity: 0.25,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  },
+                ]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setBudgetTab('MONTHLY');
+                }}
+                activeOpacity={0.8}
+              >
+                <Text
+                  style={[
+                    styles.tabSegmentText,
+                    {
+                      color: budgetTab === 'MONTHLY' ? '#0E1620' : isDark ? '#FAF6EC' : '#55606D',
+                      fontWeight: budgetTab === 'MONTHLY' ? '700' : '500',
+                    },
+                  ]}
+                >
+                  📊 Thu nhập & Cố định
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* NỘI DUNG TAB 1: NHẬP TRỰC TIẾP HẠN MỨC NGÀY */}
+            {budgetTab === 'DAILY' ? (
+              <View style={styles.tabContentBox}>
+                <Text style={[styles.fieldSubLabel, { color: isDark ? 'rgba(250, 246, 236, 0.7)' : '#667085' }]}>
+                  Mỗi ngày bạn muốn cho phép mình tiêu tối đa bao nhiêu?
                 </Text>
                 <TextInput
-                  style={[Typography.bodyLarge, styles.textInput]}
-                  value={goalName}
-                  onChangeText={setGoalName}
-                  placeholder="Ví dụ: Laptop mới, Chuyến đi Đà Lạt..."
-                  placeholderTextColor={Colors.textMuted}
-                />
-
-                <Text style={[Typography.caption, styles.inputLabel, { marginTop: Spacing.md }]}>
-                  TIỀN GIỮ LẠI MỖI THÁNG CHO MỤC TIÊU (VNĐ)
-                </Text>
-                <TextInput
-                  style={[Typography.currencyLarge, styles.bigInput]}
+                  style={[
+                    styles.textInput,
+                    styles.amountInput,
+                    {
+                      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
+                      color: isDark ? '#FFFFFF' : '#1B2733',
+                      borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+                    },
+                  ]}
+                  placeholder="0 đ (hoặc bấm chọn bên dưới)"
+                  placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
                   keyboardType="numeric"
-                  value={goalAmountStr}
-                  onChangeText={(val) => setGoalAmountStr(val.replace(/\D/g, ''))}
-                  placeholder="0"
+                  value={parsedDaily > 0 ? formatVND(parsedDaily) : dailyBudgetStr}
+                  onChangeText={(val) => setDailyBudgetStr(val.replace(/\D/g, ''))}
                 />
-                <Text style={[Typography.bodyMedium, styles.formattedText]}>
-                  Tương đương: {formatVND(goalAmount)}
-                </Text>
 
-                <Text style={[Typography.caption, styles.inputLabel, { marginTop: Spacing.lg }]}>
-                  CHỌN ĐƠN VỊ AI QUY ĐỔI BẠN THÍCH NHẤT:
-                </Text>
-                <View style={styles.unitSelector}>
-                  {[
-                    { key: 'tra_sua', label: 'Ly Trà Sữa (30k)', icon: Coins },
-                    { key: 'ca_phe', label: 'Cà Phê Trứng (30k)', icon: Coffee },
-                    { key: 'to_pho', label: 'Bát Phở Bò (40k)', icon: Utensils },
-                  ].map((unit) => {
-                    const isSelected = favUnit === unit.key;
-                    const IconComp = unit.icon;
+                {/* CHIPS CHỌN NHANH HẠN MỨC NGÀY */}
+                <View style={styles.chipsRow}>
+                  {[50000, 100000, 150000, 200000].map((amt) => {
+                    const isSelected = parsedDaily === amt;
                     return (
                       <TouchableOpacity
-                        key={unit.key}
+                        key={amt}
                         style={[
-                          styles.unitPill,
-                          isSelected && styles.unitPillActive,
+                          styles.chipButton,
+                          {
+                            backgroundColor: isSelected
+                              ? '#E59844'
+                              : isDark
+                              ? 'rgba(255, 255, 255, 0.08)'
+                              : '#FAF6EC',
+                            borderColor: isSelected ? '#E59844' : isDark ? 'transparent' : 'rgba(0, 0, 0, 0.06)',
+                          },
                         ]}
-                        onPress={() => setFavUnit(unit.key as FavoriteUnit)}
+                        onPress={() => handleSelectQuickDailyChip(amt)}
+                        activeOpacity={0.8}
                       >
-                        <IconComp size={16} color={isSelected ? '#FFFFFF' : Colors.textCharcoal} />
                         <Text
                           style={[
-                            Typography.bodyMedium,
-                            isSelected ? styles.unitTextActive : styles.unitText,
+                            styles.chipText,
+                            {
+                              color: isSelected ? '#0E1620' : isDark ? '#FAF6EC' : '#1B2733',
+                              fontWeight: isSelected ? '700' : '500',
+                            },
                           ]}
                         >
-                          {unit.label}
+                          {amt / 1000}k
                         </Text>
                       </TouchableOpacity>
                     );
                   })}
                 </View>
-              </HanoiCard>
-            </View>
-          )}
-
-          {/* BƯỚC 4: TỔNG KẾT & KHỞI TẠO NGÂN SÁCH NGÀY */}
-          {step === 4 && (
-            <View style={styles.stepContent}>
-              <Text style={[Typography.heading1, styles.title]}>
-                Ngân Sách Ngày Đầu Tiên Của Bạn!
-              </Text>
-              <Text style={[Typography.bodyMedium, styles.subtitle]}>
-                Mọi thứ đã sẵn sàng. Dưới đây là hạn mức tiêu dùng mỗi ngày được tính toán công bằng cho bạn:
-              </Text>
-
-              <HanoiCard style={styles.summaryCard}>
-                <View style={styles.summaryHero}>
-                  <Text style={[Typography.caption, styles.summaryHeroLabel]}>
-                    MỖI NGÀY BẠN ĐƯỢC TIÊU TỰ DO:
-                  </Text>
-                  <Text style={[Typography.heroDisplay, styles.summaryDailyNumber]}>
-                    {formatVND(dailyBudget)}
-                  </Text>
-                  <Text style={[Typography.bodyPoetic, styles.summaryQuote]}>
-                    "Ngày nào tiêu ít hơn số này, phần dư sẽ tự cộng dồn sang ngày mai tiêu tiếp nhé."
-                  </Text>
-                </View>
-
-                <View style={styles.breakdownList}>
-                  <View style={styles.breakdownRow}>
-                    <Text style={styles.breakdownLabel}>Thu nhập hàng tháng:</Text>
-                    <Text style={styles.breakdownVal}>{formatVND(income)}</Text>
-                  </View>
-                  <View style={styles.breakdownRow}>
-                    <Text style={styles.breakdownLabel}>Chi phí cố định:</Text>
-                    <Text style={styles.breakdownVal}>- {formatVND(fixedCosts)}</Text>
-                  </View>
-                  <View style={styles.breakdownRow}>
-                    <Text style={styles.breakdownLabel}>Giữ cho {goalName}:</Text>
-                    <Text style={styles.breakdownVal}>- {formatVND(goalAmount)}</Text>
-                  </View>
-                  <View style={[styles.breakdownRow, styles.breakdownTotal]}>
-                    <Text style={styles.breakdownTotalLabel}>Tiền chi tiêu tự do cả tháng:</Text>
-                    <Text style={styles.breakdownTotalVal}>
-                      {formatVND(Math.max(0, income - fixedCosts - goalAmount))}
-                    </Text>
-                  </View>
-                </View>
-              </HanoiCard>
-            </View>
-          )}
-
-          {/* Nút Tiếp tục / Hoàn tất */}
-          <View style={styles.bottomActions}>
-            {step < 4 ? (
-              <AutumnButton
-                title="Tiếp Tục"
-                variant="primary"
-                size="lg"
-                onPress={handleNext}
-                icon={<ArrowRight size={18} color="#FFFFFF" />}
-                style={styles.ctaBtn}
-              />
+              </View>
             ) : (
-              <AutumnButton
-                title="Bắt Đầu Ghi Sổ & Cản Ví"
-                variant="safe"
-                size="lg"
-                loading={isLoading}
-                onPress={handleFinish}
-                icon={<Sparkles size={18} color="#FFFFFF" />}
-                style={styles.ctaBtn}
-              />
+              /* NỘI DUNG TAB 2: THU NHẬP & CHI PHÍ CỐ ĐỊNH */
+              <View style={styles.tabContentBox}>
+                <Text style={[styles.fieldSubLabel, { color: isDark ? 'rgba(250, 246, 236, 0.7)' : '#667085' }]}>
+                  Thu nhập hàng tháng ước tính:
+                </Text>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    {
+                      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
+                      color: isDark ? '#FFFFFF' : '#1B2733',
+                      borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+                    },
+                  ]}
+                  placeholder="Ví dụ: 8.000.000 đ"
+                  placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
+                  keyboardType="numeric"
+                  value={parsedIncome > 0 ? formatVND(parsedIncome) : incomeStr}
+                  onChangeText={(val) => setIncomeStr(val.replace(/\D/g, ''))}
+                />
+
+                <Text style={[styles.fieldSubLabel, { marginTop: 12, color: isDark ? 'rgba(250, 246, 236, 0.7)' : '#667085' }]}>
+                  Chi tiêu cố định (tiền trọ, điện nước, học phí...):
+                </Text>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    {
+                      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
+                      color: isDark ? '#FFFFFF' : '#1B2733',
+                      borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+                    },
+                  ]}
+                  placeholder="Ví dụ: 2.500.000 đ"
+                  placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
+                  keyboardType="numeric"
+                  value={parsedFixed > 0 ? formatVND(parsedFixed) : fixedCostsStr}
+                  onChangeText={(val) => setFixedCostsStr(val.replace(/\D/g, ''))}
+                />
+
+                {effectiveDailyBudget > 0 && (
+                  <View style={styles.calculatedPreviewBox}>
+                    <Text style={styles.calculatedPreviewLabel}>Ngân sách ngày ước tính:</Text>
+                    <Text style={styles.calculatedPreviewValue}>{formatVND(effectiveDailyBudget)} / ngày</Text>
+                  </View>
+                )}
+              </View>
             )}
+          </View>
+
+          {/* SECTION 3: MỤC TIÊU TIẾT KIỆM (TÙY CHỌN) */}
+          <View
+            style={[
+              styles.cardSection,
+              {
+                backgroundColor: isDark ? '#162231' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+              },
+            ]}
+          >
+            <View style={styles.sectionLabelRow}>
+              <Target size={18} color="#7E9F80" strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+                Mục tiêu tích lũy <Text style={styles.optionalTag}>(Tùy chọn)</Text>
+              </Text>
+            </View>
+
+            <TextInput
+              style={[
+                styles.textInput,
+                {
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
+                  color: isDark ? '#FFFFFF' : '#1B2733',
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+                  marginBottom: 10,
+                },
+              ]}
+              placeholder="Ví dụ: Chuyến đi Hà Nội, Laptop mới..."
+              placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
+              value={goalName}
+              onChangeText={setGoalName}
+            />
+
+            <TextInput
+              style={[
+                styles.textInput,
+                {
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
+                  color: isDark ? '#FFFFFF' : '#1B2733',
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+                },
+              ]}
+              placeholder="Số tiền cần có (Ví dụ: 2.000.000 đ)"
+              placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
+              keyboardType="numeric"
+              value={parsedGoal > 0 ? formatVND(parsedGoal) : goalAmountStr}
+              onChangeText={(val) => setGoalAmountStr(val.replace(/\D/g, ''))}
+            />
+          </View>
+
+          {/* SECTION 4: ĐƠN VỊ QUY ĐỔI YÊU THÍCH */}
+          <View
+            style={[
+              styles.cardSection,
+              {
+                backgroundColor: isDark ? '#162231' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+              },
+            ]}
+          >
+            <View style={styles.sectionLabelRow}>
+              <Sparkles size={18} color="#E59844" strokeWidth={2.4} />
+              <Text style={[styles.sectionTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+                Đơn vị quy đổi vui vẻ
+              </Text>
+            </View>
+            <Text style={[styles.fieldSubLabel, { color: isDark ? 'rgba(250, 246, 236, 0.7)' : '#667085', marginBottom: 10 }]}>
+              Khi bạn phân vân mua sắm, Kepi sẽ quy đổi số tiền ra món này:
+            </Text>
+
+            <View style={styles.favUnitsRow}>
+              {[
+                { id: 'tra_sua' as FavoriteUnit, label: 'Trà sữa', price: '30k' },
+                { id: 'ca_phe' as FavoriteUnit, label: 'Cà phê', price: '30k' },
+                { id: 'bat_pho' as FavoriteUnit, label: 'Bát phở', price: '40k' },
+              ].map((unit) => {
+                const isSelected = favUnit === unit.id;
+                return (
+                  <TouchableOpacity
+                    key={unit.id}
+                    style={[
+                      styles.favUnitChip,
+                      {
+                        backgroundColor: isSelected
+                          ? '#E59844'
+                          : isDark
+                          ? 'rgba(255, 255, 255, 0.08)'
+                          : '#FAF6EC',
+                        borderColor: isSelected ? '#E59844' : isDark ? 'transparent' : 'rgba(0, 0, 0, 0.06)',
+                      },
+                    ]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setFavUnit(unit.id);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text
+                      style={[
+                        styles.favUnitText,
+                        {
+                          color: isSelected ? '#0E1620' : isDark ? '#FAF6EC' : '#1B2733',
+                          fontWeight: isSelected ? '700' : '500',
+                        },
+                      ]}
+                    >
+                      {unit.label} ({unit.price})
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* NÚT HOÀN TẤT BẮT ĐẦU NGAY */}
+          <View style={styles.actionSection}>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={handleFinish}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.primaryButtonText}>🍂 BẮT ĐẦU NGAY</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -370,196 +536,172 @@ export default function BudgetSetupScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.bgPrimary,
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
-    padding: Spacing.xl,
-    paddingBottom: Spacing.xxxl,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 40,
   },
-  topNav: {
+  header: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  monogramBox: {
+    marginBottom: 12,
+  },
+  welcomeTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    fontFamily: 'System',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  welcomeSubtitle: {
+    fontSize: 14,
+    fontFamily: 'System',
+    textAlign: 'center',
+  },
+  cardSection: {
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  sectionLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.xl,
+    marginBottom: 12,
+    gap: 8,
   },
-  backBtn: {
-    marginRight: Spacing.md,
-    padding: Spacing.xs,
-  },
-  progressBar: {
-    flex: 1,
-    height: 6,
-    backgroundColor: Colors.borderSoft,
-    borderRadius: BorderRadius.full,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.accentGold,
-    borderRadius: BorderRadius.full,
-  },
-  stepIndicator: {
-    marginLeft: Spacing.md,
-    color: Colors.textMuted,
-    fontWeight: '600',
-  },
-  stepContent: {
-    marginBottom: Spacing.xl,
-  },
-  title: {
-    color: Colors.textCharcoal,
-    marginBottom: Spacing.xs,
-  },
-  subtitle: {
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xl,
-    lineHeight: 22,
-  },
-  card: {
-    padding: Spacing.xl,
-  },
-  inputLabel: {
-    color: Colors.textMuted,
+  sectionTitle: {
+    fontSize: 16,
     fontWeight: '700',
-    letterSpacing: 0.5,
-    marginBottom: Spacing.sm,
+    fontFamily: 'System',
   },
-  bigInput: {
-    color: Colors.accentGold,
-    paddingVertical: Spacing.xs,
-    borderBottomWidth: 1.5,
-    borderBottomColor: Colors.borderGold,
-    marginBottom: Spacing.xs,
+  requiredStar: {
+    color: '#C86D51',
+  },
+  optionalTag: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: '#7E9F80',
+  },
+  fieldSubLabel: {
+    fontSize: 13,
+    fontFamily: 'System',
+    marginBottom: 8,
   },
   textInput: {
-    color: Colors.textCharcoal,
-    paddingVertical: Spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSoft,
-    marginBottom: Spacing.xs,
-  },
-  formattedText: {
-    color: Colors.textMuted,
-    marginTop: Spacing.xs,
-  },
-  quickOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-    marginTop: Spacing.xl,
-  },
-  quickPill: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.bgPrimary,
+    height: 48,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.borderSoft,
+    paddingHorizontal: 14,
+    fontSize: 15,
+    fontFamily: 'System',
   },
-  quickPillActive: {
-    backgroundColor: Colors.accentGoldLight,
-    borderColor: Colors.accentGold,
-  },
-  quickPillText: {
-    color: Colors.textCharcoal,
-    fontWeight: '500',
-  },
-  quickPillTextActive: {
-    color: Colors.accentGold,
+  amountInput: {
+    fontSize: 17,
     fontWeight: '700',
   },
-  unitSelector: {
-    gap: Spacing.sm,
-    marginTop: Spacing.xs,
-  },
-  unitPill: {
+  tabSegmentContainer: {
     flexDirection: 'row',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 14,
+  },
+  tabSegmentButton: {
+    flex: 1,
+    height: 38,
+    borderRadius: 10,
     alignItems: 'center',
-    gap: Spacing.sm,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.bgPrimary,
+    justifyContent: 'center',
+  },
+  tabSegmentText: {
+    fontSize: 13,
+    fontFamily: 'System',
+  },
+  tabContentBox: {
+    marginTop: 2,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
+  },
+  chipButton: {
+    flex: 1,
+    height: 36,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.borderSoft,
-  },
-  unitPillActive: {
-    backgroundColor: Colors.incomeMint,
-    borderColor: Colors.incomeMint,
-  },
-  unitText: {
-    color: Colors.textCharcoal,
-    fontWeight: '500',
-  },
-  unitTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  summaryCard: {
-    padding: Spacing.xl,
-    backgroundColor: Colors.surfacePaper,
-  },
-  summaryHero: {
     alignItems: 'center',
-    paddingVertical: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSoft,
-    marginBottom: Spacing.lg,
+    justifyContent: 'center',
   },
-  summaryHeroLabel: {
-    color: Colors.textMuted,
-    fontWeight: '700',
+  chipText: {
+    fontSize: 13,
+    fontFamily: 'System',
   },
-  summaryDailyNumber: {
-    color: Colors.incomeMint,
-    marginVertical: Spacing.xs,
-  },
-  summaryQuote: {
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: Spacing.md,
-    marginTop: Spacing.xs,
-  },
-  breakdownList: {
-    gap: Spacing.sm,
-  },
-  breakdownRow: {
+  calculatedPreviewBox: {
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(126, 159, 128, 0.15)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  breakdownLabel: {
-    ...Typography.bodyMedium,
-    color: Colors.textSecondary,
-  },
-  breakdownVal: {
-    ...Typography.bodyMedium,
-    color: Colors.textCharcoal,
+  calculatedPreviewLabel: {
+    fontSize: 13,
+    color: '#7E9F80',
     fontWeight: '600',
-    fontVariant: ['tabular-nums'],
   },
-  breakdownTotal: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderSoft,
-    paddingTop: Spacing.sm,
-    marginTop: Spacing.xs,
-  },
-  breakdownTotalLabel: {
-    ...Typography.bodyMedium,
+  calculatedPreviewValue: {
+    fontSize: 14,
+    color: '#7E9F80',
     fontWeight: '700',
-    color: Colors.textCharcoal,
   },
-  breakdownTotalVal: {
-    ...Typography.bodyLarge,
-    fontWeight: '700',
-    color: Colors.accentGold,
-    fontVariant: ['tabular-nums'],
+  favUnitsRow: {
+    flexDirection: 'row',
+    gap: 8,
   },
-  bottomActions: {
-    marginTop: Spacing.md,
+  favUnitChip: {
+    flex: 1,
+    height: 38,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  ctaBtn: {
-    width: '100%',
+  favUnitText: {
+    fontSize: 12,
+    fontFamily: 'System',
+  },
+  actionSection: {
+    marginTop: 12,
+  },
+  primaryButton: {
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#E59844',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#E59844',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0E1620',
+    letterSpacing: 0.5,
   },
 });

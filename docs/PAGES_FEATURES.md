@@ -236,7 +236,7 @@ Gom mọi thứ thuộc về cá nhân: mục tiêu, số liệu tài chính, th
   - Xóa từng ảnh/khoản, nút **Xóa toàn bộ dữ liệu một chạm** (có hộp thoại cảnh báo).
   - Nút **Xóa tài khoản in-app** (đáp ứng bắt buộc của Apple Store Review).
   - Xuất dữ liệu CSV chuẩn UTF-8 BOM `[M1]`.
-- **Tài khoản `[M0]`:** Đăng nhập ẩn danh theo thiết bị (Anonymous Device ID) để vào dùng ngay không rào cản; liên kết tài khoản Apple / Google sẽ làm ở `[M1]`.
+- **Tài khoản `[M0/M1]`:** Cổng vào kép tối giản: **"Tiếp tục với Google"** (sao lưu đám mây Supabase vĩnh viễn) và **"Vào ngay"** (1-chạm mở thẳng Camera, bắt đầu từ số 0, sandbox trên máy); hỗ trợ liên kết Google tại Hồ Sơ với cơ chế chống thất thoát dữ liệu.
 
 ---
 
@@ -282,7 +282,7 @@ Gom mọi thứ thuộc về cá nhân: mục tiêu, số liệu tài chính, th
 | **4** | Ngăn Bạn bè (Chat) | **Hiện màn "Sắp ra mắt"** + nút "Báo khi có" ở M0. | Kích thích tò mò và đón đầu giai đoạn M2. |
 | **5** | Hạn mức AI Free | **Không giới hạn ở M0** để tối đa hóa trải nghiệm & kiểm thử sớm. | Áp dụng hạn mức khi ra mắt gói Premium. |
 | **6** | Tiêu đề & Cử chỉ Camera/Lịch sử | **Tiêu đề "Lịch sử"**. Vuốt lên ảnh gần nhất lộ dần, camera mờ dần; trượt giữ 50% hiện nửa camera nửa ảnh cũ kèm mốc giờ. | Trải nghiệm tactile vật lý độc bản. |
-| **7** | Cơ chế Đăng nhập | **Ẩn danh theo thiết bị (Anonymous Device ID) ở M0**. | M1 bổ sung liên kết Apple/Google để sao lưu. |
+| **7** | Cơ chế Đăng nhập | **Cổng vào kép tối giản: Tiếp tục với Google & Vào ngay (Mở thẳng Camera từ số 0)**. | Bỏ Email OTP rườm rà; liên kết Google tại Hồ Sơ gộp dữ liệu hoặc phục hồi mây an toàn. |
 | **8** | Xuất dữ liệu | **Đưa sang M1**. M0 tập trung Xóa 1 chạm & Xóa tài khoản in-app. | Đáp ứng chuẩn Apple Store Review. |
 | **9** | Thu nhập ở Camera | **Ảnh là tùy chọn (optional)**. Cho phép chỉ nói hoặc gõ số tiền. | Không ảnh thì dùng khối màu theo danh mục. |
 | **10**| Ngôn ngữ & Strings | **100% Tiếng Việt đời thường ở M0, gom toàn bộ vào `src/constants/strings.ts`**. | Sẵn sàng mở rộng i18n không cần refactor code. |

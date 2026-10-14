@@ -22,6 +22,7 @@ import { HourlyWageModal } from '../profile/HourlyWageModal';
 import { CoachAddress, CoachSettingsCard, CoachTone } from '../profile/CoachSettingsCard';
 import { QRPaySettingsCard } from '../profile/QRPaySettingsCard';
 import { LockScreenSettingsCard } from '../profile/LockScreenSettingsCard';
+import { BankNotificationSettingsCard } from '../profile/BankNotificationSettingsCard';
 import { PrivacySecurityCard } from '../profile/PrivacySecurityCard';
 import { DataManagementCard } from '../profile/DataManagementCard';
 import { ThemeSettingsCard } from '../profile/ThemeSettingsCard';
@@ -280,10 +281,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
           onPressLogin={() => router.push('/(auth)/login')}
         />
 
-        {/* KHỐI 2: CHỌN GIAO DIỆN SÁNG / TỐI / HỆ THỐNG */}
-        <ThemeSettingsCard />
+        {/* ================= NHÓM 1: MỤC TIÊU & KẾ HOẠCH TÀI CHÍNH ================= */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+            Mục tiêu & Kế hoạch
+          </Text>
+        </View>
 
-        {/* KHỐI 3: MỤC TIÊU 4 TRƯỜNG */}
+        {/* 1.1: MỤC TIÊU 4 TRƯỜNG */}
         <GoalSectionCard
           goalName={goalName}
           goalTargetAmount={goalTargetAmount}
@@ -294,7 +299,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
           onPressEdit={() => setShowGoalModal(true)}
         />
 
-        {/* KHỐI 4: ĐỊNH MỨC & THU CHI ĐỊNH KỲ */}
+        {/* 1.2: ĐỊNH MỨC & THU CHI ĐỊNH KỲ */}
         <BudgetSettingsCard
           monthlyIncome={monthlyIncome}
           monthlyFixedCosts={monthlyFixedCosts}
@@ -305,17 +310,24 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
           onOpenFixedCostsModal={() => setShowFixedCostsModal(true)}
         />
 
-        {/* KHỐI 4B: QUY ĐỔI GIỜ CÔNG LAO ĐỘNG */}
+        {/* 1.3: QUY ĐỔI GIỜ CÔNG LAO ĐỘNG */}
         <HourlyWageSettingsCard
           hourlyRate={hourlyRate}
           isMasked={isMasked}
           onOpenEditModal={() => setShowHourlyWageModal(true)}
         />
 
-        {/* KHỐI 4C: QUẢN LÝ DANH MỤC THU & CHI (CUSTOM CATEGORIES) */}
+        {/* 1.4: QUẢN LÝ DANH MỤC THU & CHI */}
         <CategorySettingsCard />
 
-        {/* KHỐI 5: HUẤN LUYỆN VIÊN ANH MINH */}
+        {/* ================= NHÓM 2: TRỢ LÝ & CÁ NHÂN HÓA ================= */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+            Trợ lý & Cá nhân hóa
+          </Text>
+        </View>
+
+        {/* 2.1: HUẤN LUYỆN VIÊN ANH MINH */}
         <CoachSettingsCard
           currentTone={coachTone}
           currentAddress={coachAddress}
@@ -323,19 +335,32 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
           onChangeAddress={handleChangeAddress}
         />
 
-        {/* KHỐI 6: THANH TOÁN VIETQR */}
-        <QRPaySettingsCard />
+        {/* 2.2: CHỌN GIAO DIỆN SÁNG / TỐI / MÁT */}
+        <ThemeSettingsCard />
 
-        {/* KHỐI 6B: TIỆN ÍCH MÀN HÌNH KHÓA */}
-        <LockScreenSettingsCard />
+        {/* ================= NHÓM 3: BẢO MẬT & HỆ THỐNG ================= */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+            Bảo mật & Dữ liệu
+          </Text>
+        </View>
 
-        {/* KHỐI 7: QUYỀN RIÊNG TƯ & BẢO MẬT */}
+        {/* 3.1: QUYỀN RIÊNG TƯ & BẢO MẬT */}
         <PrivacySecurityCard
           isMasked={isMasked}
           onToggleMask={handleToggleMask}
         />
 
-        {/* KHỐI 8: DỮ LIỆU & QUẢN TRỊ TÀI KHOẢN */}
+        {/* 3.2: TIỆN ÍCH MÀN HÌNH KHÓA */}
+        <LockScreenSettingsCard />
+
+        {/* 3.3: TỰ ĐỘNG GHI SỔ THÔNG BÁO NGÂN HÀNG (ANDORID) */}
+        <BankNotificationSettingsCard />
+
+        {/* 3.4: THANH TOÁN VIETQR */}
+        <QRPaySettingsCard />
+
+        {/* 3.4: DỮ LIỆU & QUẢN TRỊ TÀI KHOẢN */}
         <DataManagementCard
           onResetAllData={handleResetAllData}
           onDeleteAccount={handleDeleteAccount}
@@ -398,5 +423,16 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingTop: 6,
+  },
+  sectionHeaderRow: {
+    paddingHorizontal: 2,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  sectionHeaderText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
 });

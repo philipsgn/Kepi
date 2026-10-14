@@ -66,13 +66,22 @@ export const RollingNumber: React.FC<RollingNumberProps> = ({
   }, [value, durationMs]);
 
   if (isHidden) {
-    return <Text style={[styles.text, style]}>••••</Text>;
+    return (
+      <Text numberOfLines={1} style={[styles.text, style]}>
+        ••••
+      </Text>
+    );
   }
 
   const formattedStr = format === 'compact' ? formatCompactVND(displayValue) : formatVND(displayValue);
 
   return (
-    <Text style={[styles.text, style]}>
+    <Text
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.7}
+      style={[styles.text, style]}
+    >
       {prefix}
       {formattedStr}
       {suffix}

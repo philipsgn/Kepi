@@ -89,20 +89,23 @@ Ví Locket v3.1 xây dựng kiến trúc Mobile tối ưu hóa với **AI Coach 
 
 ---
 
-## 4. HỆ THỐNG STATE MANAGEMENT & STORE (ZUSTAND)
+## 4. HỆ THỐNG STATE MANAGEMENT & SINGLE SOURCE OF TRUTH (ZUSTAND)
 
-1. **`minhCoachStore.ts`**:
+1. **`budgetStore.ts` & Kiến Trúc Single Source of Truth:**
+   - Các trường `todaySpent`, `todayIncome`, `weeklySpent`, `realBalance` được tính toán dẫn xuất trực tiếp từ mảng `transactions` (`status === 'CONFIRMED'`).
+   - Hàm `recalculateBudgetFromTransactions(transactions)` đảm bảo khi người dùng Thêm, Sửa (update), Xóa (delete), hoặc Hoàn tác (undo), mọi chỉ số ngân sách ngày, tuần và số dư đều lập tức đồng bộ 100%.
+   - **Hard Daily Rollover Engine:** Hàm `checkAndApplyDailyRollover()` tự động kiểm tra mốc `lastActiveDate`. Khi sang ngày mới (qua 00:00), `todayBudget = baseDailyBudget + (yesterdayBudget - yesterdaySpent)` (thừa cộng dồn, lố trừ thẳng).
+2. **`transactionStore.ts`:**
+   - Quản lý mảng `transactions`, ảnh WebP 1080px, thumbnail 240px, offline mutation queue.
+   - Khi `addTransaction`, `updateTransaction`, `deleteTransaction`, hoặc `confirmPendingTransaction`, tự động kích hoạt cập nhật lại `budgetStore`.
+   - **Xử lý PENDING:** Sau 24h gắn nhãn cảnh báo; sau 7 ngày tự động chuyển sang `CANCELLED`.
+3. **`minhCoachStore.ts`**:
    - Quản lý trạng thái hiện tại của Minh 3D (Biểu cảm, Lời thoại động).
    - Động cơ phân tích 3 câu hỏi: Tiện ích thực tế, Cảnh báo trend, Tác động mục tiêu cá nhân.
-   - Báo cáo thói quen hàng tuần.
-2. **`authStore.ts` / `budgetStore.ts`**:
-   - Lưu trữ `personalGoal`: Tên mục tiêu (Laptop, Du lịch...), Số tiền mục tiêu, Hạn mức ngày, Giờ công.
-3. **`transactionStore.ts`**:
-   - Giao dịch, ảnh WebP 1080px, thumbnail 240px, offline mutation queue.
-4. **`lessonStore.ts`**:
-   - Danh sách bài học tài chính bỏ túi, điểm kinh nghiệm hiểu biết tài chính.
-5. **`statsStore.ts`**:
-   - Thanh sinh lực HP, biểu đồ phân bổ chi tiêu.
+4. **`authStore.ts`**:
+   - Quản lý phiên đăng nhập Google OAuth (hỗ trợ `/(auth)/callback`) và chế độ Khách (Guest) 100% offline.
+5. **`categoryStore.ts`**:
+   - Danh mục tùy biến (Thu / Chi), icon vector, màu sắc, đồng bộ AsyncStorage.
 
 ---
 
@@ -200,15 +203,73 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
 
 ---
 
-## 6. KIẾN TRÚC XÁC THỰC PRODUCTION (AUTH V2) & GUEST SYNC GUARD
+## 6. KIẾN TRÚC XÁC THỰC PRODUCTION TỐI GIẢN & DI CHUYỂN DỮ LIỆU ĐÁM MÂY
 
-### 6.1. Phương Thức Đăng Nhập Đa Kênh
-- **In-app 6-Digit Email OTP:** Người dùng nhận mã OTP 6 số qua email và nhập trực tiếp trong giao diện app (có auto-focus và đếm ngược 60 giây). Gọi trực tiếp `supabase.auth.verifyOtp` không phụ thuộc vào deep link trình duyệt ngoài.
-- **Google Sign-In (OAuth Web Session):** Kết nối qua `supabase.auth.signInWithOAuth` mở trình duyệt hệ thống và chuyển tiếp về app qua URL scheme `vilocket://`.
+### 6.1. Cổng Vào Kép Tối Giản Tuyệt Đối & Bảng Màu Xanh Mint Ban Mai
+- **Tiêu chí:** Tối giản 100%, triệt tiêu ô nhập liệu Email và bước gửi nhận OTP rườm rà.
+- **Thẩm mỹ:** Nền LinearGradient Xanh Mặt Trời nhạt (`#E0F2FE`) hòa quyện Xanh Mint thanh mát (`#D1F4E0`) và Kem Ngà (`#F4FBF7`), xóa tan cảm giác u tối. Monogram K kết hợp Xanh Rừng Đậm (`#0F2F24`) và Vàng Hổ Phách (`#E59844`).
+- **Thông điệp:** Quote nghệ thuật in nghiêng nhẹ trong ngoặc kép: *“Góp chút nhỏ, dựng tương lai to”* (đã loại bỏ dòng phụ đề rườm rà).
+- **2 Lối vào duy nhất:**
+  1. **"Tiếp tục với Google" (OAuth Web Session):** Nền Trắng Sứ (`#FFFFFF` đổ bóng mềm). Dữ liệu giao dịch & ảnh WebP tự động đồng bộ lên Supabase Cloud Database & Storage, **bảo toàn vĩnh viễn 100% khi xóa app hoặc đổi điện thoại**.
+  2. **"Vào ngay" (Instant Camera Entry):** Nền Xanh Ngọc Đậm (`#0F2F24` chữ Trắng Kem). Thuần chữ căn giữa, triệt tiêu icon tia sét để đạt độ tối giản tuyệt đối. 1-chạm mở thẳng Camera Viewfinder (Tab 2) trong $< 0.5$s, **toàn bộ dữ liệu bắt đầu từ con số 0đ trung thực**.
 
-### 6.2. Cơ Chế Bảo Vệ CSDL (Guest Sync Guard)
-- **Nguyên tắc cốt lõi:** Khi người dùng ở chế độ Khách (`isGuest = true`), toàn bộ dữ liệu chi tiêu và hình ảnh chỉ được lưu trữ cục bộ tại thiết bị (`AsyncStorage` và `cacheDirectory`).
-- **Chặn toàn bộ Mutation:** `enqueueMutation` và `uploadExpensePhotoAsync` tự động phát hiện `userId` có tiền tố `guest-` hoặc `demo-` để ngắt kết nối lên Supabase Database và Storage.
-- **Làm sạch Seed Data:** Khi người dùng chuyển đổi sang tài khoản thật, toàn bộ 7 giao dịch mẫu seed demo (`tx-seed-*`) tự động được làm sạch khỏi bộ nhớ, chỉ đồng bộ các giao dịch thật do người dùng tạo.
+### 6.2. Cơ Chế Bảo Vệ Sandbox & Bản Chất Hệ Điều Hành
+- **Bản chất HĐH:** Khi người dùng "Vào ngay", toàn bộ dữ liệu lưu trong App Sandbox (`AsyncStorage` và thư mục nội bộ máy). Cả **iOS và Android** đều xóa sạch 100% dữ liệu này khi gỡ cài đặt (Uninstall).
+- **Guest Sync Guard:** Chặn toàn bộ mutation và upload ảnh của phiên "Vào ngay" lên Cloud (`0 byte cloud writes`) để bảo vệ server.
+- **Điểm chạm nhắc khéo:** Để tránh người dùng mất dữ liệu oan khi xóa app, app chỉ đặt huy hiệu nhắc nhẹ tại **Tab Hồ Sơ** (`ProfileIdentityCard.tsx`), tuyệt đối không spam modal cảnh báo hay banner trên màn hình chính.
 
+### 6.3. Động Cơ Di Chuyển Dữ Liệu Không Thất Thoát (Zero-Data-Loss Migration Engine)
+- Khi người dùng "Vào ngay" quyết định bấm `[Liên kết Google]` tại Tab Hồ Sơ:
+  1. **Tài khoản Google mới tinh:**
+     - Tự động gán `user_id` mới cho các khoản chi đã ghi trên máy.
+     - Tự động nén và upload toàn bộ ảnh local (`file:///...`) lên Supabase Storage bucket `receipt-photos`.
+     - Đẩy các giao dịch lên Supabase Database qua `enqueueMutation` $\rightarrow$ Chuyển `isGuest = false` liền mạch (Zero data loss).
+  2. **Tài khoản Google đã có dữ liệu cũ trên Cloud:**
+     - Hiển thị hộp thoại xác nhận quyền quyết định cho người dùng:
+       - **[Gộp dữ liệu]**: Giữ các khoản chi vừa ghi trên máy và thêm vào tài khoản Google.
+       - **[Dùng dữ liệu đám mây]**: Tải toàn bộ dữ liệu lịch sử từ Google về máy, bỏ dữ liệu tạm thời.
 
+---
+
+## 7. KIẾN TRÚC ENTRY POINT & PHÒNG VỆ RUNTIME NATIVE (NATIVE RESILIENCE)
+
+### 7.1. Cấu Trúc Entry Point Phân Tầng (`index.js`)
+- Tránh import trực tiếp `expo-router/entry` làm main entry mà qua tầng bọc bảo vệ `index.js`.
+- `index.js` nạp `src/utils/nativeSafetyPolyfill.ts` trước khi nạp bất kỳ module nào của Expo Router.
+
+### 7.2. Native Safety Polyfill (`nativeSafetyPolyfill.ts`)
+- Phát hiện môi trường thiếu native TurboModule (`ExpoAsset`, `ExponentConstants`) khi chạy trên Expo Go / device test chưa link Pods mới.
+- Tự động thiết lập mock an toàn `globalThis.expo.modules.ExpoAsset.downloadAsync` để chặn đứng lỗi văng `Cannot find native module 'ExpoAsset'`.
+- Đảm bảo `AppRegistry.registerComponent('main')` luôn được gọi trơn tru 100%, không bao giờ xuất hiện lỗi `Invariant Violation: "main" has not been registered`.
+
+### 7.3. Tiêu Chuẩn Cấu Hình Production App (`app.json` & `package.json`)
+- Loại bỏ toàn bộ cờ cũ không hợp lệ trong Expo SDK hiện đại (`newArchEnabled` ở root, `splash` ở root).
+- Dọn dẹp mảng `plugins` chỉ giữ lại các plugin chính thức có native config hooks (`expo-router`, `expo-camera`, `expo-notifications`).
+- Gỡ bỏ hoàn toàn dependency rác `expo-audio` và quyền `RECORD_AUDIO`.
+- Đạt 21/21 tiêu chí kiểm định nghiêm ngặt từ `npx expo-doctor`.
+
+---
+
+## 8. ĐỘNG CƠ TỰ ĐỘNG GHI SỔ THÔNG BÁO NGÂN HÀNG TRÊN ANDROID (ANDROID NOTIFICATION ENGINE)
+
+### 8.1. Triết Lý Xử Lý 100% Offline & Bảo Vệ Quyền Riêng Tư (Zero Server Leakage)
+- Không yêu cầu cài phím tắt rườm rà, không cần webhook server Cloudflare Workers.
+- Hệ thống lắng nghe thông báo trực tiếp trên Android qua quyền `Notification Access` (`android.permission.BIND_NOTIFICATION_LISTENER_SERVICE`).
+- Toàn bộ quá trình phân tích chuỗi ký tự, nhận dạng ngân hàng, bóc tách số tiền và phân loại danh mục đều diễn ra **100% trong bộ nhớ cục bộ (In-Memory)** của điện thoại. Tuyệt đối không gửi 1 byte dữ liệu thông báo nào ra Internet.
+
+### 8.2. Bộ Lọc An Toàn Đa Tầng (Multi-Tier Security & OTP Shield)
+1. **Chặn 100% Tin Mã Xác Thực:** Nếu thông báo chứa bất kỳ từ khóa nào như `OTP`, `mã xác thực`, `verification code`, `mã kích hoạt`, bộ lọc ngay lập tức hủy bỏ và không lưu bất kỳ dấu vết nào.
+2. **Chặn 100% Tin Tiếp Thị & Rác:** Loại trừ các thông báo chứa `khuyến mãi`, `hoàn tiền`, `ưu đãi`, `vay nhanh`, `mở thẻ`, `bảo hiểm`.
+3. **Phân Định Chi Tiêu (EXPENSE) vs Thu Nhập (INCOME):** Dựa trên dấu âm/dương (`-48.000VND`, `+`, `nhan tien`, `thanh toan`, `chuyen tien`).
+
+### 8.3. Bóc Tách Đa Ngân Hàng Hàng Đầu Việt Nam
+- **TPBank:** Cú pháp `TK: xxxx / PS: -48.000VND / SD: ...` hoặc `GD: -48,000 VND`.
+- **Vietcombank (VCB):** Cú pháp `SD TK ... -48,000 VND luc ...` hoặc `bien dong so du`.
+- **MBBank (MB):** Cú pháp `TK ...|-48,000VND|...`.
+- **Techcombank (TCB):** Cú pháp `Giao dich: -48,000 VND...`.
+- **ACB, VPBank, OCB...:** Các mẫu biểu chuẩn của hệ thống Core Banking Việt Nam.
+
+### 8.4. Tự Động Phân Loại Danh Mục & Sinh Card Đồ Họa Vector Ngân Hàng
+- Bóc tách từ khóa nội dung: `Highlands / Phuc Long / Com / Bun` $\rightarrow$ `Ăn uống`; `Grab / Be / Xanh SM / Xang` $\rightarrow$ `Đi lại`; `Shopee / Lazada / WinMart` $\rightarrow$ `Mua sắm`.
+- Khởi tạo Card đồ họa nhận diện ngân hàng đặc trưng (TPBank tím cam, VCB xanh ngọc, MB xanh dương đậm, TCB đỏ trắng).
+- Ghi thẳng vào `transactionStore` với trạng thái `CONFIRMED`, tự động gọi `recalculateFromTransactions` để cập nhật hạn mức ngày và số dư khả dụng ngay lập tức (Single Source of Truth).

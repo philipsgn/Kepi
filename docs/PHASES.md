@@ -59,9 +59,9 @@
 * **Mục tiêu:** Tạo trải nghiệm mở đầu ấm áp, cho phép người dùng đăng nhập tài khoản và cấu hình toàn bộ dòng tiền ban đầu (Thu nhập, Chi cố định, Mục tiêu) để sinh ra Ngân sách ngày đầu tiên.
 
 ### Danh sách Tasks chi tiết
-- [ ] **Task 1.1 — Giao diện Đăng nhập Thơ mộng (`app/(auth)/login.tsx`):**
-  - Thiết kế màn hình nền kem ấm áp với trích dẫn văn học mùa thu nhẹ nhàng.
-  - Nút đăng nhập nhanh bằng Google, Apple và Email Magic Link / OTP.
+- [ ] **Task 1.1 — Giao diện Đăng nhập Tối Giản 2 Lối Vào (`app/(auth)/login.tsx`):**
+  - Biểu tượng Monogram K Thụy Điển phát sáng nhẹ, nhận diện Kepi — KEEP WHAT MATTERS.
+  - Loại bỏ hoàn toàn ô nhập Email OTP; đúng 2 nút bấm duy nhất: `[G] Tiếp tục với Google` (Cloud sync) và `[⚡] Vào ngay` (mở thẳng Camera, bắt đầu từ số 0đ).
 - [ ] **Task 1.2 — Wizard Thiết lập Ngân sách 3 bước (`app/(auth)/budget-setup.tsx`):**
   - *Bước 1:* Khai báo Thu nhập hàng tháng (Lương hoặc tiền trợ cấp gia đình).
   - *Bước 2:* Khai báo Chi tiêu cố định (Tiền trọ, điện nước, internet, học phí).

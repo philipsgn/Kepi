@@ -9,7 +9,7 @@ import * as Haptics from 'expo-haptics';
 import { AlertCircle, ChevronRight } from 'lucide-react-native';
 import { Strings } from '../../constants/strings';
 import { MonthSummary } from '../../utils/statsUtils';
-import { formatVND, maskMoney } from '../../utils/currency';
+import { formatCompactVND, formatVND, maskMoney } from '../../utils/currency';
 import { RollingNumber } from '../common/RollingNumber';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
@@ -22,14 +22,7 @@ interface MonthStickyHeaderProps {
 }
 
 /**
- * Tiêu đề dính đầu màn hình cho từng khối tháng trong Thống kê — Phong cách "Ấm, tĩnh, sang"
- * Tuân thủ mục 2.4 của đặc tả docs/screens/STATS.md:
- * - Tên tháng + năm; tháng hiện tại có nhãn "Đang diễn ra"
- * - Số tiền Đã chi to rõ, dùng hiệu ứng RollingNumber
- * - Dòng phụ: số khoản, Thu, Đã giữ lại
- * - So với tháng trước: ▲ / ▼ % màu trung tính
- * - Chip cảnh báo "N chưa có giá" nếu có khoản thiếu giá
- * - Chạm mở màn "Chi tiết tháng"
+ * Tiêu đề dính đầu màn hình cho từng khối tháng trong Thống kê — Tinh gọn, thanh thoát
  */
 export const MonthStickyHeader: React.FC<MonthStickyHeaderProps> = ({
   summary,
@@ -40,7 +33,6 @@ export const MonthStickyHeader: React.FC<MonthStickyHeaderProps> = ({
   const { tokens } = useTheme();
   const {
     monthLabel,
-    isCurrentMonth,
     totalSpent,
     totalIncome,
     totalSaved,
@@ -56,34 +48,48 @@ export const MonthStickyHeader: React.FC<MonthStickyHeaderProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.bg, borderBottomColor: tokens.border }]}>
-      {/* 1. HÀNG TIÊU ĐỀ THÁNG & NÚT CHI TIẾT */}
-      <View style={styles.topRow}>
-        <View style={styles.titleWithBadge}>
-          <Text style={[styles.monthTitle, { color: tokens.text }]}>{monthLabel}</Text>
-        </View>
+      {/* 1. HÀNG CHÍNH: THÁNG & SỐ TIỀN ĐÃ CHI */}
+      <View style={styles.mainRow}>
+        <Text style={[styles.monthTitle, { color: tokens.text }]}>{monthLabel}</Text>
 
         <TouchableOpacity
-          activeOpacity={0.8}
+          activeOpacity={0.75}
           onPress={handleOpenDetail}
-          style={[styles.detailButton, { backgroundColor: tokens.primary }]}
+          style={styles.spentActionGroup}
         >
-          <Text style={styles.detailButtonText}>{Strings.stats.detailBtn}</Text>
-          <ChevronRight size={13} color="#1B2733" strokeWidth={2.5} />
-        </TouchableOpacity>
-      </View>
-
-      {/* 2. SỐ TIỀN ĐÃ CHI & TỶ LỆ SO SÁNH */}
-      <View style={styles.amountRow}>
-        <View style={styles.spentAmountBox}>
           <Text style={[styles.spentPrefix, { color: tokens.textMuted }]}>{Strings.stats.spentPrefix}</Text>
           {isMasked ? (
             <Text style={[styles.spentValueMasked, { color: tokens.text }]}>••••</Text>
           ) : (
             <RollingNumber
               value={totalSpent}
-              format="full"
+              format="compact"
               style={[styles.spentValue, { color: tokens.text }]}
             />
+          )}
+          <ChevronRight size={13} color={tokens.textMuted} strokeWidth={2.4} style={{ marginLeft: 2 }} />
+        </TouchableOpacity>
+      </View>
+
+      {/* 2. DÒNG THÔNG SỐ PHỤ & TỶ LỆ SO SÁNH */}
+      <View style={styles.subStatsRow}>
+        <View style={styles.subStatsLeft}>
+          <Text style={[styles.subStatText, { color: tokens.textMuted }]}>
+            {Strings.stats.itemsCount(transactionCount)}
+          </Text>
+          <Text style={[styles.subStatDot, { color: tokens.textMuted }]}>·</Text>
+          <Text style={[styles.subStatText, { color: tokens.textMuted }]}>
+            {Strings.stats.incomePrefix}
+            {maskMoney(formatCompactVND(totalIncome), isMasked)}
+          </Text>
+          {totalSaved > 0 && (
+            <>
+              <Text style={[styles.subStatDot, { color: tokens.textMuted }]}>·</Text>
+              <Text style={[styles.subStatSaved, { color: tokens.success }]}>
+                {Strings.stats.savedPrefix}
+                {maskMoney(formatCompactVND(totalSaved), isMasked)}
+              </Text>
+            </>
           )}
         </View>
 
@@ -98,31 +104,14 @@ export const MonthStickyHeader: React.FC<MonthStickyHeaderProps> = ({
         )}
       </View>
 
-      {/* 3. DÒNG THÔNG SỐ PHỤ */}
-      <View style={styles.subStatsRow}>
-        <Text style={[styles.subStatText, { color: tokens.textMuted }]}>
-          {Strings.stats.itemsCount(transactionCount)}
-        </Text>
-        <Text style={[styles.subStatDot, { color: tokens.textMuted }]}>·</Text>
-        <Text style={[styles.subStatText, { color: tokens.textMuted }]}>
-          {Strings.stats.incomePrefix}
-          {maskMoney(formatVND(totalIncome), isMasked)}
-        </Text>
-        <Text style={[styles.subStatDot, { color: tokens.textMuted }]}>·</Text>
-        <Text style={[styles.subStatSaved, { color: tokens.success }]}>
-          {Strings.stats.savedPrefix}
-          {maskMoney(formatVND(totalSaved), isMasked)}
-        </Text>
-      </View>
-
-      {/* 4. CHIP NHẮC KHOẢN CHƯA CÓ GIÁ (NẾU CÓ) */}
+      {/* 3. CHIP NHẮC KHOẢN CHƯA CÓ GIÁ (NẾU CÓ) */}
       {unpricedCount > 0 && (
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={onUnpricedChipPress}
           style={[styles.unpricedWarningRow, { backgroundColor: tokens.warning + '18', borderColor: tokens.warning + '40' }]}
         >
-          <AlertCircle size={13} color={tokens.warning} strokeWidth={2.2} />
+          <AlertCircle size={12} color={tokens.warning} strokeWidth={2.2} />
           <Text style={[styles.unpricedWarningText, { color: tokens.warning }]}>
             {Strings.stats.unpricedChip(unpricedCount)}
           </Text>
@@ -135,115 +124,85 @@ export const MonthStickyHeader: React.FC<MonthStickyHeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 10,
+    paddingTop: 8,
+    paddingBottom: 6,
     borderBottomWidth: 1,
-    marginBottom: 6,
+    marginBottom: 4,
   },
-  topRow: {
+  mainRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  titleWithBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   monthTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
-  ongoingBadge: {
-    borderWidth: 1,
-    borderRadius: radii.full,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    marginLeft: 8,
-  },
-  ongoingText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-  },
-  detailButton: {
+  spentActionGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: radii.full,
-    gap: 2,
-  },
-  detailButtonText: {
-    color: '#1B2733',
-    fontSize: 11.5,
-    fontWeight: '700',
-  },
-  amountRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    marginVertical: 3,
-  },
-  spentAmountBox: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    gap: 3,
   },
   spentPrefix: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
-    marginRight: 5,
   },
   spentValue: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
   },
   spentValueMasked: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: '800',
     letterSpacing: 2,
-  },
-  diffBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  diffText: {
-    fontSize: 11,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
   },
   subStatsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    justifyContent: 'space-between',
+    marginTop: 3,
+  },
+  subStatsLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   subStatText: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '500',
   },
   subStatSaved: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '600',
   },
   subStatDot: {
-    marginHorizontal: 5,
-    fontSize: 12,
+    marginHorizontal: 4,
+    fontSize: 11,
+  },
+  diffBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  diffText: {
+    fontSize: 10,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   unpricedWarningRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: 4,
     alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
     borderRadius: radii.full,
     borderWidth: 1,
   },
   unpricedWarningText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '600',
     marginLeft: 4,
   },

@@ -45,6 +45,13 @@ describe('Định dạng tiền tệ chuẩn (formatVND)', () => {
       expect(formatCompactVND(1200000)).toBe('1,2tr');
       expect(formatCompactVND(5500000)).toBe('5,5tr');
     });
+
+    test('Từ 1 tỷ trở lên rút gọn theo "B" và 1 nghìn tỷ trở lên rút gọn theo "T"', () => {
+      expect(formatCompactVND(1000000000)).toBe('1B');
+      expect(formatCompactVND(1200000000)).toBe('1,2B');
+      expect(formatCompactVND(1000000000000)).toBe('1T');
+      expect(formatCompactVND(2500000000000)).toBe('2,5T');
+    });
   });
 
   describe('Che giấu số tiền riêng tư (maskMoney)', () => {

@@ -142,14 +142,13 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
           />
         </BlurView>
 
-        {/* VIÊN THUỐC TRƯỢT NỘI SUY (SLIDING PILL) */}
+        {/* VIÊN THUỐC TRƯỢT NỘI SUY (SLIDING PILL) - BORDERLESS */}
         <Animated.View
           style={[
             styles.slidingPill,
             {
               width: tabWidth,
               backgroundColor: tokens.primarySoft,
-              borderColor: isDark ? 'rgba(255, 201, 60, 0.25)' : 'rgba(246, 184, 0, 0.25)',
             },
             animatedPillStyle,
           ]}
@@ -175,7 +174,6 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
                       styles.centerCameraCircle,
                       {
                         backgroundColor: tokens.primary,
-                        borderColor: 'rgba(0, 0, 0, 0.08)',
                       },
                       isSelected && styles.centerCameraCircleActive,
                     ]}
@@ -232,7 +230,6 @@ const styles = StyleSheet.create({
     bottom: INNER_PADDING,
     left: INNER_PADDING,
     borderRadius: radii.full,
-    borderWidth: 1,
   },
   tabIconsRow: {
     flexDirection: 'row',
@@ -251,7 +248,6 @@ const styles = StyleSheet.create({
     borderRadius: radii.full,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,

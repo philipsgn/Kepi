@@ -28,7 +28,7 @@
 ```text
 ┌────────────────────────────────────────────────────────────┐
 │ CHÀO BUỔI TRƯA                                             │
-│ Lâm Lơ  [✨ 14]              [👁 Ẩn tiền] [⚙️ Cài đặt] [👤]│ (Header không viền, nền mềm)
+│ Bạn  [✨ 14]                 [👁 Ẩn tiền] [⚙️ Cài đặt] [👤]│ (Header không viền, nền mềm)
 │ 💼 Ví: 12.450.000 đ          (Số dư khả dụng tóm tắt inline)│
 ├────────────────────────────────────────────────────────────┤
 │                                                            │
@@ -52,7 +52,7 @@
 │ * Ở chế độ THÁNG: Lưới 31 Ngày Cả Tháng (Photo Grid)       │
 │                                                            │
 │ 4. MINI PILL GỢI Ý CHỤP (~36PX, KHÔNG VIỀN CỨNG)           │
-│   [✨ Chưa có ghi chép hôm nay — Chạm để chụp             ›]│ (Nền mềm surfaceAlt)
+│   [✨ Chưa có ghi chép hôm nay — Chụp hoặc ghi nhanh       ›]│ (Nền mềm surfaceAlt)
 └────────────────────────────────────────────────────────────┘
 ```
 

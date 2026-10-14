@@ -37,7 +37,7 @@
 │ │  └──────────────┴──────────────┴────────────────┘  │ │
 │ └────────────────────────────────────────────────────┘ │
 │                                                        │
-│ ┌ 1. MỤC TIÊU CỦA BẠN ────────────────────── [Sửa] ──┐ │
+│ ┌ 1. MỤC TIÊU CỦA BẠN ────────────────────── [✏️] ──┐ │ (Nút tròn icon cây viết tối giản)
 │ │ 🎯 Chuyến đi Sa Pa mùa đông                         │ │
 │ │ Tiến độ: 4.200.000 đ / 15.000.000 đ (28%)          │ │
 │ │ ▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░                 │ │
@@ -78,6 +78,11 @@
 ### 3.1. Thẻ Đầu Trang: Người Đồng Hành (`ProfileIdentityCard.tsx`)
 - **Avatar khối vuông:** Khối vuông 56x56px viền đen 2px, nền vàng `#FFC800`, biểu tượng cá nhân hoặc chữ cái đầu.
 - **Tên hiển thị & Chạm để sửa:** Chạm vào tên mở popup nhập nhanh biệt danh mới.
+- **Phân định Trạng thái Tài khoản & Nhắc khéo liên kết:**
+  - *Đã đăng nhập Google (`isGuest = false`):* Hiển thị email liên kết Google, dữ liệu tự động đồng bộ trên Supabase Cloud.
+  - *Tài khoản "Vào ngay" (`isGuest = true`):* Hiển thị huy hiệu ấm áp *"Dữ liệu lưu trên máy này"*, kèm nút bấm thanh lịch `[G Liên kết Google]`. Khi bấm:
+    - Nếu tài khoản Google mới: Tự động di chuyển dữ liệu máy (giao dịch, ảnh WebP local) lên Supabase Cloud.
+    - Nếu tài khoản Google đã có dữ liệu mây cũ: Mở Dialog xác nhận hỏi người dùng muốn **[Gộp dữ liệu]** hay **[Dùng dữ liệu đám mây]**.
 - **Dải 3 chỉ số tóm tắt (3-Stat Mini Strip):**
   1. *Chuỗi ghi (Streak):* Số ngày liên tiếp có phát sinh ghi chép chi tiêu.
   2. *Đã giữ lại (Total Saved):* Tổng số tiền đã bấm "Không mua" từ màn Giá thật hoặc chat.
@@ -172,6 +177,7 @@
 | Trạng Thái | Điều Kiện | Giao Diện Hiển Thị | Hành Vi Người Dùng |
 | :--- | :--- | :--- | :--- |
 | **Bình thường** | Đã thiết lập mục tiêu & thu nhập | Hiển thị đầy đủ thông tin, tiến độ đạt % có màu sắc trực quan | Cuộn xem, chạm "Sửa" nếu muốn đổi mục tiêu |
+| **Tài khoản trên máy (Vào ngay)** | `isGuest === true` | Thẻ Profile hiển thị huy hiệu "Lưu trên máy này" & nút "Liên kết Google" | Chạm để liên kết tài khoản Google sao lưu vĩnh viễn |
 | **Chưa đặt mục tiêu** | `goalTargetAmount === 0` | Thẻ Mục tiêu hiển thị banner khuyến khích: "Đặt mục tiêu đầu tiên để cùng Anh Minh tích lũy!" | Chạm "Tạo mục tiêu" |
 | **Đang sửa mục tiêu** | Bấm nút "Sửa" | Mở Bottom Sheet 4 trường dữ liệu kèm nút Lưu và Hủy | Điền form và bấm "LƯU MỤC TIÊU" |
 | **Bật Ẩn tiền** | Công tắc chuyển sang BẬT | Mọi con số số dư thực, tiền giữ lại chuyển thành `••••` | Tắt công tắc để xem lại số tiền |

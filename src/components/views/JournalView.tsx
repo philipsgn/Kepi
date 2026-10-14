@@ -213,7 +213,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
   const spentRatio = todayBudget > 0 ? todaySpent / todayBudget : 0;
   const daysLeftInMonth = getDaysRemainingInMonth();
   const greeting = getGreetingByHour();
-  const userName = profile?.full_name || user?.email?.split('@')[0] || 'Lâm Lơ';
+  const userName = profile?.full_name || user?.full_name || user?.email?.split('@')[0] || 'Bạn';
 
   // Định nghĩa danh mục: GỘP "Ăn uống" và "Cà Phê & Chill" thành "Ăn uống & Cà phê"
   const CATEGORIES = useMemo(() => [
@@ -450,12 +450,15 @@ export const JournalView: React.FC<JournalViewProps> = ({
                 ĐÃ CHI HÔM NAY
               </Text>
               <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
                 style={[
                   styles.todaySpentValue,
                   { color: todaySpent > 0 ? tokens.danger : tokens.textMuted },
                 ]}
               >
-                {maskMoney(formatVND(todaySpent), isPrivacyHidden)}
+                {maskMoney(todaySpent >= 1_000_000_000 ? formatCompactVND(todaySpent) : formatVND(todaySpent), isPrivacyHidden)}
               </Text>
             </View>
           </View>
@@ -679,7 +682,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
               <Text style={[styles.todayMiniPillText, { color: tokens.textMuted }]}>
                 Chưa có ghi chép hôm nay —{' '}
                 <Text style={{ color: tokens.primary, fontWeight: '600' }}>
-                  Chạm để chụp
+                  Chụp hoặc ghi nhanh
                 </Text>
               </Text>
             </View>

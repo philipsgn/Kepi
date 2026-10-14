@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Svg, { Circle, G } from 'react-native-svg';
+import Svg, { Circle, Defs, G, LinearGradient as SvgLinearGradient, Path, Stop } from 'react-native-svg';
 import {
   TrendingUp,
   Flame,
@@ -26,7 +26,7 @@ import {
 } from 'lucide-react-native';
 import { MonthSummary, calculateCategoryBreakdown, calculateDailySpend } from '../../utils/statsUtils';
 import { computeFinancialAnalyticsKPI } from '../../utils/analyticsUtils';
-import { formatVND, maskMoney } from '../../utils/currency';
+import { formatCompactVND, formatVND, maskMoney } from '../../utils/currency';
 import { Transaction } from '../../types/database';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
@@ -245,12 +245,41 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
       };
     }
     return {
-      label: 'Cần Cấp Cứu',
+      label: 'Cần Kiểm Soát',
       sub: 'Nguy Cơ Thâm Hụt Cao',
       color: tokens.danger,
       bg: isDark ? 'rgba(200, 109, 81, 0.15)' : '#FDEDEB',
     };
   }, [healthScore, tokens, isDark]);
+
+  // DỰNG SVG WAVE AREA CHART CHO KHUNG GIỜ CHI TIÊU
+  const waveWidth = SCREEN_WIDTH - 64;
+  const waveHeight = 90;
+  const maxSlotPercent = Math.max(...timeSlotSpend.map((s) => s.percent), 1);
+  const peakSlot = timeSlotSpend.reduce(
+    (prev, current) => (current.percent > prev.percent ? current : prev),
+    timeSlotSpend[0]
+  );
+
+  const slotPoints = timeSlotSpend.map((slot, index) => {
+    const x = 16 + (index / (timeSlotSpend.length - 1)) * (waveWidth - 32);
+    const ratio = slot.percent / (maxSlotPercent || 1);
+    const y = (waveHeight - 16) - ratio * (waveHeight - 34);
+    return { x, y, slot };
+  });
+
+  let wavePathD = `M ${slotPoints[0].x} ${slotPoints[0].y}`;
+  for (let i = 0; i < slotPoints.length - 1; i++) {
+    const p0 = slotPoints[i];
+    const p1 = slotPoints[i + 1];
+    const cp1x = p0.x + (p1.x - p0.x) / 2;
+    const cp1y = p0.y;
+    const cp2x = p0.x + (p1.x - p0.x) / 2;
+    const cp2y = p1.y;
+    wavePathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p1.x} ${p1.y}`;
+  }
+
+  const areaPathD = `${wavePathD} L ${slotPoints[slotPoints.length - 1].x} ${waveHeight} L ${slotPoints[0].x} ${waveHeight} Z`;
 
   return (
     <ScrollView
@@ -262,7 +291,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
         /* 📅 CHẾ ĐỘ 1: TUẦN NÀY (5 BIỂU ĐỒ TRỰC QUAN HÓA TÁC CHIẾN CẬN CẢNH)     */
         /* ====================================================================== */
         <>
-          {/* ----- 1. BIỂU ĐỒ 1: THỨC ĐO SINH LỰC NGÂN SÁCH TUẦN & CẢNH BÁO ----- */}
+          {/* ----- TIẾN ĐỘ NGÂN SÁCH TUẦN & CẢNH BÁO ----- */}
           <View
             style={[
               styles.sectionCard,
@@ -272,7 +301,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <Zap size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                1. Sinh Lực Ngân Sách Tuần (Weekly Budget HP)
+                Tiến Độ Ngân Sách Tuần
               </Text>
             </View>
 
@@ -368,7 +397,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <BarChart2 size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                2. Nhịp Chi Tiêu 7 Ngày (T2 → CN)
+                Nhịp Chi Tiêu 7 Ngày
               </Text>
             </View>
 
@@ -418,7 +447,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             </View>
           </View>
 
-          {/* ----- 3. BIỂU ĐỒ 3: BIỂU ĐỒ TRÒN DONUT CƠ CẤU DANH MỤC TUẦN NÀY ----- */}
+          {/* ----- CƠ CẤU DANH MỤC TUẦN NÀY ----- */}
           <View
             style={[
               styles.sectionCard,
@@ -428,7 +457,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <PieChart size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                3. Cơ Cấu Danh Mục Chi Tuần Này
+                Cơ Cấu Danh Mục Tuần Này
               </Text>
             </View>
 
@@ -493,7 +522,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             )}
           </View>
 
-          {/* ----- 4. BIỂU ĐỒ 4: BIỂU ĐỒ CỘT KHUNG GIỜ HAY CHI TIÊU TUẦN NÀY ----- */}
+          {/* ----- KHUNG GIỜ HAY CHI TIÊU (SVG WAVE AREA CHART) ----- */}
           <View
             style={[
               styles.sectionCard,
@@ -503,44 +532,99 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <Clock size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                4. Khung Giờ Hay Chi Tiêu Trong Tuần
+                Khung Giờ Hay Chi Tiêu
               </Text>
             </View>
 
-            <View style={styles.timeSlotList}>
-              {timeSlotSpend.map((slot, idx) => (
-                <View key={idx} style={styles.timeSlotRow}>
-                  <View style={styles.timeSlotHeader}>
-                    <Text style={[styles.timeSlotLabel, { color: tokens.text }]}>
-                      {slot.label}
-                    </Text>
-                    <Text style={[styles.timeSlotAmount, { color: tokens.text }]}>
-                      {maskMoney(formatVND(slot.amount), isMasked)} ({slot.percent}%)
-                    </Text>
-                  </View>
+            {/* BADGE CAO ĐIỂM TINH TẾ */}
+            <View style={styles.peakBadgeHeader}>
+              <View style={[styles.peakPill, { backgroundColor: isDark ? 'rgba(229, 152, 68, 0.15)' : '#FDF6ED' }]}>
+                <Flame size={12} color={tokens.primary} strokeWidth={2.4} />
+                <Text style={[styles.peakPillText, { color: tokens.primary }]}>
+                  Cao điểm: {peakSlot.label.split(' ')[0]} ({peakSlot.percent}%)
+                </Text>
+              </View>
+            </View>
 
-                  <View style={[styles.timeSlotTrack, { backgroundColor: tokens.surfaceAlt }]}>
-                    <View
-                      style={[
-                        styles.timeSlotFill,
-                        {
-                          width: `${slot.percent}%`,
-                          backgroundColor:
-                            slot.percent > 40
-                              ? tokens.danger
-                              : slot.percent > 20
-                              ? tokens.primary
-                              : tokens.success,
-                        },
-                      ]}
-                    />
-                  </View>
-                </View>
-              ))}
+            {/* SVG WAVE AREA */}
+            <View style={styles.waveChartContainer}>
+              <Svg width={waveWidth} height={waveHeight}>
+                <Defs>
+                  <SvgLinearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0" stopColor={tokens.primary} stopOpacity={isDark ? '0.45' : '0.35'} />
+                    <Stop offset="0.8" stopColor={tokens.primary} stopOpacity="0.05" />
+                    <Stop offset="1" stopColor={tokens.primary} stopOpacity="0" />
+                  </SvgLinearGradient>
+                </Defs>
+
+                {/* Vùng đổ màu bên dưới đường sóng */}
+                <Path d={areaPathD} fill="url(#waveGradient)" />
+
+                {/* Đường sóng chính */}
+                <Path
+                  d={wavePathD}
+                  fill="none"
+                  stroke={tokens.primary}
+                  strokeWidth={2.8}
+                  strokeLinecap="round"
+                />
+
+                {/* Các điểm mốc thời gian */}
+                {slotPoints.map((pt, idx) => {
+                  const isPeak = pt.slot.percent === peakSlot.percent && pt.slot.percent > 0;
+                  return (
+                    <G key={idx}>
+                      {isPeak && (
+                        <Circle
+                          cx={pt.x}
+                          cy={pt.y}
+                          r={10}
+                          fill={tokens.primary}
+                          fillOpacity={0.25}
+                        />
+                      )}
+                      <Circle
+                        cx={pt.x}
+                        cy={pt.y}
+                        r={isPeak ? 5 : 3.5}
+                        fill={isPeak ? tokens.primary : tokens.surface}
+                        stroke={tokens.primary}
+                        strokeWidth={2}
+                      />
+                    </G>
+                  );
+                })}
+              </Svg>
+
+              {/* HÀNG NHÃN 5 KHUNG GIỜ BÊN DƯỚI */}
+              <View style={styles.waveLabelsRow}>
+                {timeSlotSpend.map((slot, idx) => {
+                  const shortName = slot.label.split(' ')[0];
+                  const isPeak = slot.percent === peakSlot.percent && slot.percent > 0;
+                  return (
+                    <View key={idx} style={styles.waveLabelCol}>
+                      <Text
+                        style={[
+                          styles.waveSlotName,
+                          { color: isPeak ? tokens.primary : tokens.text, fontWeight: isPeak ? '800' : '600' },
+                        ]}
+                      >
+                        {shortName}
+                      </Text>
+                      <Text style={[styles.waveSlotPercent, { color: isPeak ? tokens.primary : tokens.textMuted }]}>
+                        {slot.percent}%
+                      </Text>
+                      <Text style={[styles.waveSlotAmount, { color: tokens.textMuted }]}>
+                        {maskMoney(formatCompactVND(slot.amount), isMasked)}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
             </View>
           </View>
 
-          {/* ----- 5. BIỂU ĐỒ 5: SO SÁNH CHI TUẦN NÀY VS TUẦN TRƯỚC ----- */}
+          {/* ----- SO SÁNH TUẦN NÀY VS TUẦN TRƯỚC ----- */}
           <View
             style={[
               styles.sectionCard,
@@ -550,7 +634,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <Activity size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                5. So Sánh Chi Tuần Này vs Tuần Trước
+                So Sánh Tuần Này vs Tuần Trước
               </Text>
             </View>
 
@@ -664,7 +748,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
               ]}
             >
               <Text style={[styles.analystQuoteHeader, { color: tokens.primary }]}>
-                💡 CHUẨN ĐOÁN TỪ DATA ANALYST:
+                💡 NHẬN ĐỊNH TÀI CHÍNH:
               </Text>
               <Text style={[styles.analystQuoteText, { color: tokens.text }]}>
                 {analystInsight}
@@ -682,7 +766,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <Layers size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                2. Dòng Tiền Ra - Vào (Cashflow Flow)
+                Dòng Tiền Ra - Vào
               </Text>
             </View>
             <Text style={[styles.sectionSubtitle, { color: tokens.textMuted }]}>
@@ -820,7 +904,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <PieChart size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                3. {Strings.stats.categoryBreakdown} (Donut Chart)
+                Cơ Cấu Danh Mục
               </Text>
             </View>
 
@@ -895,7 +979,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <BarChart2 size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                4. {Strings.stats.dailyTrend} (30 Ngày)
+                Xu Hướng Chi Tiêu 30 Ngày
               </Text>
             </View>
 
@@ -958,7 +1042,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <TrendingUp size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                5. Tỷ Lệ Tiết Kiệm & So Sánh Tháng Trước
+                Tỷ Lệ Tiết Kiệm & Tích Lũy
               </Text>
             </View>
 
@@ -1499,5 +1583,51 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     paddingVertical: 12,
     textAlign: 'center',
+  },
+  peakBadgeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  peakPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: radii.full,
+  },
+  peakPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  waveChartContainer: {
+    marginTop: 4,
+    alignItems: 'center',
+  },
+  waveLabelsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 8,
+    paddingHorizontal: 2,
+  },
+  waveLabelCol: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  waveSlotName: {
+    fontSize: 11,
+  },
+  waveSlotPercent: {
+    fontSize: 11,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+    marginTop: 1,
+  },
+  waveSlotAmount: {
+    fontSize: 9.5,
+    fontVariant: ['tabular-nums'],
+    marginTop: 1,
   },
 });

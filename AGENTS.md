@@ -13,13 +13,14 @@
 * **Trước khi chạm vào bất kỳ dòng code nào**, Agent bắt buộc phải tra cứu và đọc kỹ tài liệu tương ứng với Module / Feature / Screen sắp thực hiện (xem *Ma Trận Tra Cứu Tài Liệu* ở Mục 2).
 * **Quy tắc Đồng bộ Ngược (Reverse Sync):** Bất kỳ khi nào có sự thay đổi về quyết định kỹ thuật, cấu trúc dữ liệu, hoặc luồng người dùng (UX flow), Agent bắt buộc phải cập nhật ngược lại vào các tài liệu liên quan trong `/docs` để giữ cho tài liệu luôn là **Nguồn Sự Thật Duy Nhất (Single Source of Truth)**.
 
-### 2. QUY TRÌNH 2 ĐẦU BẮT BUỘC TRƯỚC VÀ SAU MỖI PHASE / TASK
-* **TRƯỚC MỖI PHASE / TASK (Pre-Phase Plan):**
-  1. Đọc tất cả các tài liệu liên quan trong `/docs`.
-  2. Trình bày **Implementation Plan** chi tiết: Liệt kê các tài liệu đã tham chiếu, các file sẽ tạo/chỉnh sửa, các component/state liên quan và tiêu chí nghiệm thu.
-* **SAU MỖI PHASE / TASK (Post-Phase Walkthrough):**
+### 2. QUY TRÌNH 2 ĐẦU BẮT BUỘC: CẬP NHẬT TÀI LIỆU TRƯỚC KHI PROCEED / VIẾT CODE
+* **TRƯỚC KHI PROCEED / VIẾT CODE (Pre-Execution Spec Sync — Chuẩn Logic Nhất):**
+  1. Đọc tất cả tài liệu liên quan trong `/docs`.
+  2. **Bắt buộc cập nhật tài liệu `/docs` trước khi chạm vào code:** Cập nhật ngay các quyết định thiết kế, kiến trúc mới vào tài liệu để tài liệu luôn là Bản Thiết Kế (Blueprint) định hình code. Tuyệt đối không để xảy ra tình trạng "viết code xong mới đối phó cập nhật tài liệu".
+  3. Trình bày **Implementation Plan** chi tiết: Liệt kê các tài liệu đã cập nhật, các file sẽ thay đổi và tiêu chí nghiệm thu.
+* **SAU KHI THỰC THI & KIỂM THỬ (Post-Execution Walkthrough):**
   1. Chạy toàn bộ kiểm thử xác thực: `npx tsc --noEmit` (0 lỗi) và `node run-all-tests.js` (100% pass).
-  2. Cung cấp **Walkthrough Report** minh bạch: Bằng chứng thực tế (ai kiểm, máy nào, kết quả), các số đo thời gian thực, các quyết định kiến trúc và cập nhật tài liệu tương ứng.
+  2. Xuất **Walkthrough Report** minh bạch: Ghi nhận bằng chứng kiểm thử thực tế và kế hoạch tiếp theo.
 
 ---
 

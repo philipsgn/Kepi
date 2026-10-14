@@ -68,9 +68,6 @@ export const ThemeSettingsCard: React.FC = () => {
         </View>
         <View style={styles.titleCol}>
           <Text style={[styles.title, { color: tokens.text }]}>Chế Độ Giao Diện</Text>
-          <Text style={[styles.subtitle, { color: tokens.textMuted }]}>
-            Sáng (Vàng Kim) · Tối (Xám Titan) · Mát (Mint Aqua)
-          </Text>
         </View>
       </View>
 

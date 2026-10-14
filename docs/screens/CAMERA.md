@@ -23,6 +23,7 @@
   2. **Kính Mờ Thích Ứng (Adaptive Frosted Glass):** Toàn bộ nút bấm (Upload, Flip, Ghi nhanh, Flash, Coach Minh, Giỏ chờ) sử dụng chất liệu kính mờ bán trong suốt với viền phản chiếu ánh sáng siêu mảnh (`rgba(255, 255, 255, 0.22)`), màu icon tự động tương phản rõ nét trên nền gradient.
   3. **Tương tác trực giác một chạm (1-Tap Recovery):** Chạm nút Camera ở giữa Floating Tab Bar khi đang lướt ảnh cũ sẽ cuộn mượt về đỉnh camera (y: 0).
   4. **Khung nhập ghi nhanh vừa vặn (Zero-Scroll Confirmation):** Giao diện xác nhận / ghi nhanh vừa khít 1 khung hình điện thoại, chữ và input thanh mảnh, không cuộn màn hình.
+  5. **Cổng tiếp nhận trực tiếp từ 'Vào ngay' (Zero-Friction Instant Entry):** Người dùng bấm "Vào ngay" từ màn hình đăng nhập được đưa thẳng tới Khung ngắm Camera (Tab 2) trong $< 0.5$s, bắt đầu từ con số 0đ trung thực (0 giao dịch demo, 0 ép ngân sách), sẵn sàng bấm Shutter ghi nhận khoảnh khắc đầu tiên.
 
 ---
 
@@ -79,7 +80,8 @@
 └────────────────────────────────────────────────────────┘
 ```
 
-### 2.2. Trạng Thái Vuốt Xuống: Dòng Khoảnh Khắc Locket (Immersive Feed)
+### 2.2. Trạng Thái Vuốt Xuống: Dòng Khoảnh Khắc Locket (Vertical Paging Snap — Khóa Trang 100vh)
+*Camera và Lịch sử được tách biệt hoàn toàn qua cơ chế Vertical Paging Snap (`pagingEnabled`, `snapToInterval={SCREEN_HEIGHT}`). Khi ở Camera, vuốt lên dứt khoát để lật sang trang Lịch sử; khi chạm vào tab Camera ở thanh điều hướng, màn hình luôn luôn reset mượt về trang đầu (y = 0):*
 ```text
 ┌────────────────────────────────────────────────────────┐
 │ ┌ Thẻ Khoảnh Khắc Locket #1 (Ảnh Mới Nhất) ───────────┐│ (Nền Kem Ngà #FAF6EC liền mạch)
@@ -227,3 +229,19 @@
 3. [x] **Quay về Camera 1 chạm:** Chạm vào nút Camera ở thanh điều hướng đáy khi đang xem ảnh cũ sẽ cuộn mượt về đỉnh camera.
 4. [x] **Phong cách Kính Mờ Thích Ứng:** Nút Upload, Flip, Ghi nhanh có nền kính mờ phản chiếu ánh sáng và icon sắc nét trên nền gradient.
 5. [x] **Không lỗi TypeScript:** Chạy `npx tsc --noEmit` đạt 0 error, 0 warning.
+
+---
+
+## 8. TAM GIÁC 3 CƠ CHẾ GHI CHÉP TỐI THƯỢNG (3-IN-1 UNIFIED QUICK HUB)
+
+Nhằm tối ưu hóa trải nghiệm trên Android và mở rộng trong tương lai, Màn hình Camera là điểm chạm hợp nhất cả 3 phương thức chi tiêu linh hoạt:
+
+1. **Cơ Chế 1 (Chụp Món Đồ Thực Tế / Upload Thư Viện):**
+   - Bấm nút Shutter cơ vàng để chụp ảnh món đồ trực tiếp.
+   - Bấm nút `ImagePlus` bên trái để tải ảnh hóa đơn / biên lai từ thư viện máy.
+2. **Cơ Chế 2 (Quét Mã VietQR / Ví Điện Tử Tự Động):**
+   - Khung ngắm máy ảnh tích hợp Barcode Scanner nền tảng offline.
+   - Khi lướt qua mã VietQR, app tự động bung `VietQRDetectedCard` hỗ trợ mở app ngân hàng chuyển khoản hoặc ghi nhanh.
+3. **Cơ Chế 3 (Bắt Biến Động Số Dư & Tự Động Gắn Ảnh):**
+   - Khi nhận thông báo biến động từ app ngân hàng (TPBank, VCB, MB...), app hiển thị **Smart Floating Bank Pill** trên khung ngắm (`⚡ TPBank: Đã tự động ghi -48.000đ (Highlands)`).
+   - Nếu người dùng bấm chụp ảnh món đồ lúc Pill đang hiển thị, ảnh chụp thực tế lập tức gắn đè vào giao dịch ngân hàng đó, hoàn tất bức tranh chi tiêu bằng ảnh chân thực $\le 3$s.

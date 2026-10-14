@@ -176,24 +176,22 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
         const cached = await AsyncStorage.getItem(STORAGE_KEY);
         if (cached) {
           const parsed: Transaction[] = JSON.parse(cached);
-          // Nếu là người dùng thật, loại bỏ toàn bộ dữ liệu seed nếu còn sót
-          const finalTxs = isRealUser
-            ? parsed.filter((t) => !t.id.startsWith('tx-seed-') && t.user_id !== 'seed-user')
-            : parsed;
+          // Loại bỏ toàn bộ dữ liệu seed mẫu cũ nếu còn sót lại trong cache
+          const finalTxs = parsed.filter(
+            (t) => !t.id.startsWith('tx-seed-') && t.user_id !== 'seed-user'
+          );
           set({ transactions: finalTxs, isLoading: false });
+          // Tự động tính toán lại ngân sách từ lịch sử giao dịch và kết chuyển ngày nếu sang ngày mới
+          useBudgetStore.getState().recalculateFromTransactions(finalTxs);
+          useBudgetStore.getState().checkAndApplyDailyRollover(finalTxs).catch(() => {});
         } else {
-          if (isRealUser) {
-            // Người dùng thật: Bắt đầu từ 0
-            set({ transactions: [], isLoading: false });
-          } else {
-            // Khởi tạo seed data cho khách mới trải nghiệm
-            const seedWithUser = SEED_TRANSACTIONS.map((tx) => ({ ...tx, user_id: userId }));
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(seedWithUser));
-            set({ transactions: seedWithUser, isLoading: false });
-          }
+          // Bắt đầu từ số 0: 0 giao dịch giả, 0 hardcore numbers
+          set({ transactions: [], isLoading: false });
+          useBudgetStore.getState().recalculateFromTransactions([]);
+          useBudgetStore.getState().checkAndApplyDailyRollover([]).catch(() => {});
         }
       } catch (err) {
-        set({ transactions: isRealUser ? [] : SEED_TRANSACTIONS, isLoading: false });
+        set({ transactions: [], isLoading: false });
       }
 
       // GUEST GUARD: Chỉ đồng bộ với Supabase khi là người dùng thật
@@ -208,6 +206,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
                 const merged = [...newFromRemote, ...local];
                 set({ transactions: merged });
                 await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+                useBudgetStore.getState().recalculateFromTransactions(merged);
               }
             }
           })
@@ -287,15 +286,10 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
         flushSyncQueue().catch(() => {});
       }
 
-      // QUY TẮC CÁCH LY PHÉP TÍNH BẤT DI BẤT DỊCH:
-      // Chỉ khi giao dịch đã CONFIRMED mới được phép trừ hạn mức và tính vào budget!
+      // QUY TẮC CÁCH LY PHÉP TÍNH BẤT DI BẤT DỊCH (SINGLE SOURCE OF TRUTH):
+      // Tự động tính toán lại ngân sách trực tiếp từ mảng giao dịch
       if (txStatus === 'CONFIRMED') {
-        const budgetStore = useBudgetStore.getState();
-        if (data.type === 'EXPENSE') {
-          budgetStore.recordExpense(data.amount);
-        } else if (data.type === 'INCOME') {
-          budgetStore.recordIncome(data.amount);
-        }
+        useBudgetStore.getState().recalculateFromTransactions(updated);
         syncBudgetToLockScreen().catch(() => {});
       }
 
@@ -321,13 +315,8 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       await enqueueMutation('UPDATE_TRANSACTION', { id, ...updates });
       flushSyncQueue().catch(() => {});
 
-      // Bây giờ mới chính thức cộng vào ngân sách
-      const budgetStore = useBudgetStore.getState();
-      if (tx.type === 'EXPENSE') {
-        budgetStore.recordExpense(finalAmount);
-      } else if (tx.type === 'INCOME') {
-        budgetStore.recordIncome(finalAmount);
-      }
+      // SINGLE SOURCE OF TRUTH: Tự động đồng bộ toàn bộ ngân sách và số dư
+      useBudgetStore.getState().recalculateFromTransactions(updated);
       syncBudgetToLockScreen().catch(() => {});
     },
 
@@ -343,16 +332,35 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
 
       await enqueueMutation('UPDATE_TRANSACTION', { id, ...updates });
       flushSyncQueue().catch(() => {});
+
+      useBudgetStore.getState().recalculateFromTransactions(updated);
     },
 
     getPendingTransactions: () => {
       const now = Date.now();
-      return get().transactions.filter((t) => {
-        if (t.status !== 'PENDING') return false;
-        // Kiểm tra quá 24h
-        const createdTime = new Date(t.created_at).getTime();
-        return now - createdTime < 24 * 3600 * 1000;
+      const SEVEN_DAYS_MS = 7 * 24 * 3600 * 1000;
+      const currentList = get().transactions;
+
+      // Tự động dọn dẹp: Các khoản PENDING quá 7 ngày tự động chuyển sang CANCELLED
+      let hasExpired = false;
+      const cleanedList = currentList.map((t) => {
+        if (t.status === 'PENDING') {
+          const createdTime = new Date(t.created_at).getTime();
+          if (now - createdTime > SEVEN_DAYS_MS) {
+            hasExpired = true;
+            return { ...t, status: 'CANCELLED' as const };
+          }
+        }
+        return t;
       });
+
+      if (hasExpired) {
+        set({ transactions: cleanedList });
+        AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedList)).catch(() => {});
+      }
+
+      // Giữ lại 100% các khoản PENDING (kể cả >24h) để người dùng chủ động xử lý
+      return cleanedList.filter((t) => t.status === 'PENDING');
     },
 
     updateTransaction: async (id: string, updates: Partial<Transaction>) => {
@@ -360,6 +368,10 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       const updated = get().transactions.map((t) => (t.id === id ? { ...t, ...updates } : t));
       set({ transactions: updated });
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+      // SINGLE SOURCE OF TRUTH: Cập nhật lại toàn bộ ngân sách khi sửa số tiền / ngày
+      useBudgetStore.getState().recalculateFromTransactions(updated);
+      syncBudgetToLockScreen().catch(() => {});
 
       const isGuestOrDemo =
         !existing?.user_id ||
@@ -379,6 +391,10 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       set({ transactions: updated });
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
+      // SINGLE SOURCE OF TRUTH: Hoàn lại tiền vào ngân sách và số dư khi xóa khoản chi
+      useBudgetStore.getState().recalculateFromTransactions(updated);
+      syncBudgetToLockScreen().catch(() => {});
+
       const isGuestOrDemo =
         !existing?.user_id ||
         existing.user_id.startsWith('guest') ||
@@ -390,8 +406,6 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
         await enqueueMutation('DELETE_TRANSACTION', { id });
         flushSyncQueue().catch(() => {});
       }
-
-      syncBudgetToLockScreen().catch(() => {});
     },
 
     setSelectedDate: (dateStr: string) => {
