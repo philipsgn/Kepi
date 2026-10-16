@@ -34,7 +34,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
   onEditName,
   onPressLogin,
 }) => {
-  const { tokens } = useTheme();
+  const { tokens, isDark } = useTheme();
 
   const handleEditName = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -45,76 +45,65 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
+      {/* NÚT BÚT CHÌ ĐỔI TÊN NẰM SÁT GÓC TRÊN BÊN PHẢI */}
+      {onEditName && (
+        <TouchableOpacity
+          onPress={handleEditName}
+          style={styles.editIconBtnTopRight}
+          activeOpacity={0.65}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityLabel="Đổi tên người dùng"
+        >
+          <Edit2 size={15} color={tokens.textMuted} strokeWidth={2.2} />
+        </TouchableOpacity>
+      )}
+
       {/* 1. HÀNG THÔNG TIN TÀI KHOẢN */}
       <View style={styles.topRow}>
-        <View style={[styles.avatarBox, { backgroundColor: tokens.primary, borderColor: tokens.border }]}>
+        <View style={[styles.avatarBox, { backgroundColor: tokens.primary }]}>
           <Text style={styles.avatarLetter}>{initialLetter}</Text>
         </View>
 
         <View style={styles.nameCol}>
-          <View style={styles.nameRow}>
-            <Text style={[styles.nameText, { color: tokens.text }]} numberOfLines={1}>
-              {name || (isGuest ? 'Khách Ghé Phố' : 'Người dùng Ví')}
-            </Text>
-            {onEditName && (
-              <TouchableOpacity
-                onPress={handleEditName}
-                style={[styles.editIconBtn, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}
-                activeOpacity={0.7}
-              >
-                <Edit2 size={12} color={tokens.textSub} />
-              </TouchableOpacity>
-            )}
-          </View>
-          <View style={styles.statusRow}>
-            {isGuest && <View style={styles.guestDot} />}
-            <Text style={[styles.emailText, { color: isGuest ? tokens.accent : tokens.textMuted }]} numberOfLines={1}>
-              {isGuest ? 'Lưu trên máy này' : (email || 'Tài khoản đám mây')}
-            </Text>
-          </View>
-        </View>
+          <Text style={[styles.nameText, { color: tokens.text }]} numberOfLines={1}>
+            {name || 'Người dùng Ví'}
+          </Text>
 
-        {isGuest && onPressLogin && (
-          <TouchableOpacity
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              onPressLogin();
-            }}
-            style={styles.loginCloudBtn}
-            activeOpacity={0.8}
-          >
-            <Cloud size={13} color="#FFFFFF" style={{ marginRight: 4 }} />
-            <Text style={styles.loginCloudText}>Liên kết Google</Text>
-          </TouchableOpacity>
-        )}
+          {isGuest && onPressLogin ? (
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onPressLogin();
+              }}
+              style={[
+                styles.googlePillBtn,
+                {
+                  backgroundColor: isDark ? 'rgba(229, 152, 68, 0.15)' : 'rgba(229, 152, 68, 0.1)',
+                },
+              ]}
+              activeOpacity={0.75}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+              accessibilityLabel="Liên kết tài khoản Google"
+            >
+              <Cloud size={11} color="#E59844" strokeWidth={2.4} />
+              <Text style={[styles.googlePillText, { color: tokens.primary }]}>
+                Liên kết Google
+              </Text>
+            </TouchableOpacity>
+          ) : Boolean(email) ? (
+            <Text style={[styles.emailText, { color: tokens.textMuted }]} numberOfLines={1}>
+              {email}
+            </Text>
+          ) : null}
+        </View>
       </View>
 
-      {/* 1.1. NHẮC KHÉO TẾ NHỊ KHI LƯU TRÊN MÁY */}
-      {isGuest && onPressLogin && (
-        <TouchableOpacity
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onPressLogin();
-          }}
-          style={styles.nudgeBanner}
-          activeOpacity={0.85}
-        >
-          <View style={styles.nudgeLeft}>
-            <Cloud size={13} color="#E59844" />
-            <Text style={[styles.nudgeText, { color: tokens.text }]} numberOfLines={1}>
-              Sao lưu đám mây để không mất ảnh & số tiền khi xóa app
-            </Text>
-          </View>
-          <Text style={styles.nudgeCta}>Sao lưu →</Text>
-        </TouchableOpacity>
-      )}
-
       {/* 2. DẢI 3 CHỈ SỐ TÓM TẮT */}
-      <View style={[styles.statsRow, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
+      <View style={[styles.statsRow, { backgroundColor: tokens.surfaceAlt }]}>
         {/* Chỉ số 1: Chuỗi ngày */}
         <View style={styles.statCell}>
-          <View style={[styles.statIconBadge, { backgroundColor: tokens.surface }]}>
-            <Flame size={13} color={tokens.primary} />
+          <View style={styles.statIconBadge}>
+            <Flame size={16} color={tokens.primary} strokeWidth={2.4} />
           </View>
           <Text style={[styles.statValue, { color: tokens.text }]}>{streakDays} ngày</Text>
           <Text style={[styles.statLabel, { color: tokens.textMuted }]}>Chuỗi ghi</Text>
@@ -124,8 +113,8 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
 
         {/* Chỉ số 2: Đã giữ lại */}
         <View style={styles.statCell}>
-          <View style={[styles.statIconBadge, { backgroundColor: tokens.surface }]}>
-            <ShieldCheck size={13} color={tokens.success} />
+          <View style={styles.statIconBadge}>
+            <ShieldCheck size={16} color={tokens.success} strokeWidth={2.4} />
           </View>
           <Text style={[styles.statValue, { color: tokens.text }]}>
             {formatMaskedCurrency(savedMoney, isMasked, false)}
@@ -137,8 +126,8 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
 
         {/* Chỉ số 3: Món đã ghi */}
         <View style={styles.statCell}>
-          <View style={[styles.statIconBadge, { backgroundColor: tokens.surface }]}>
-            <ShoppingBag size={13} color={tokens.accent} />
+          <View style={styles.statIconBadge}>
+            <ShoppingBag size={16} color={tokens.accent} strokeWidth={2.4} />
           </View>
           <Text style={[styles.statValue, { color: tokens.text }]}>{entriesCount} món</Text>
           <Text style={[styles.statLabel, { color: tokens.textMuted }]}>Đã lưu</Text>
@@ -153,7 +142,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     borderWidth: 1,
     padding: 16,
-    marginBottom: 14,
+    marginBottom: 16,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -169,7 +158,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -182,22 +170,31 @@ const styles = StyleSheet.create({
   nameCol: {
     flex: 1,
   },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   nameText: {
     fontSize: 16,
     fontWeight: '700',
   },
-  editIconBtn: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1,
+  editIconBtnTopRight: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    padding: 6,
+    zIndex: 2,
+  },
+  googlePillBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    alignSelf: 'flex-start',
+    gap: 4.5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    marginTop: 4,
+  },
+  googlePillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: -0.1,
   },
   emailText: {
     fontSize: 12,
@@ -208,7 +205,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: radii.md,
-    borderWidth: 1,
     paddingVertical: 10,
     paddingHorizontal: 8,
   },
@@ -217,9 +213,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statIconBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
@@ -237,60 +230,5 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 28,
-  },
-  loginCloudBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E59844',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: radii.md,
-    marginLeft: 8,
-  },
-  loginCloudText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 2,
-  },
-  guestDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#E59844',
-  },
-  nudgeBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(229, 152, 68, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(229, 152, 68, 0.22)',
-    borderRadius: radii.md,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
-  },
-  nudgeLeft: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginRight: 8,
-  },
-  nudgeText: {
-    fontSize: 11.5,
-    fontWeight: '500',
-    flex: 1,
-  },
-  nudgeCta: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#E59844',
   },
 });

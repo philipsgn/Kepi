@@ -30,9 +30,9 @@ export const ThemeSettingsCard: React.FC = () => {
       label: 'Sáng',
       icon: (active) => (
         <Sun
-          size={15}
+          size={16}
           color={active ? tokens.textOnPrimary : tokens.textMuted}
-          strokeWidth={2.3}
+          strokeWidth={2.5}
         />
       ),
     },
@@ -41,9 +41,9 @@ export const ThemeSettingsCard: React.FC = () => {
       label: 'Tối',
       icon: (active) => (
         <Moon
-          size={15}
+          size={16}
           color={active ? tokens.textOnPrimary : tokens.textMuted}
-          strokeWidth={2.3}
+          strokeWidth={2.5}
         />
       ),
     },
@@ -52,9 +52,9 @@ export const ThemeSettingsCard: React.FC = () => {
       label: 'Mát',
       icon: (active) => (
         <Wind
-          size={15}
+          size={16}
           color={active ? tokens.textOnPrimary : tokens.textMuted}
-          strokeWidth={2.3}
+          strokeWidth={2.5}
         />
       ),
     },
@@ -63,9 +63,7 @@ export const ThemeSettingsCard: React.FC = () => {
   return (
     <View style={[styles.container, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
       <View style={styles.headerRow}>
-        <View style={[styles.iconBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Palette size={15} color={tokens.primary} strokeWidth={2.4} />
-        </View>
+        <Palette size={20} color={tokens.primary} strokeWidth={2.6} />
         <View style={styles.titleCol}>
           <Text style={[styles.title, { color: tokens.text }]}>Chế Độ Giao Diện</Text>
         </View>
@@ -124,14 +122,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
     gap: 10,
-  },
-  iconBox: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   titleCol: {
     flex: 1,

@@ -37,9 +37,7 @@ export const LockScreenSettingsCard: React.FC = () => {
     <View style={[styles.container, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
       {/* 1. TIÊU ĐỀ KHỐI */}
       <View style={styles.headerRow}>
-        <View style={[styles.iconBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Smartphone size={16} color={tokens.primary} strokeWidth={2.4} />
-        </View>
+        <Smartphone size={20} color={tokens.primary} strokeWidth={2.6} />
         <View style={styles.headerTextCol}>
           <Text style={[styles.sectionTitle, { color: tokens.text }]}>Tiện Ích Màn Hình Khóa</Text>
           <Text style={[styles.sectionSub, { color: tokens.textMuted }]}>
@@ -52,7 +50,7 @@ export const LockScreenSettingsCard: React.FC = () => {
       <View style={[styles.switchRow, { borderBottomColor: tokens.border }]}>
         <View style={styles.labelCol}>
           <View style={styles.inlineTitleRow}>
-            <BellRing size={15} color={isEnabled ? tokens.primary : tokens.textMuted} strokeWidth={2.2} />
+            <BellRing size={16} color={isEnabled ? tokens.primary : tokens.textMuted} strokeWidth={2.4} />
             <Text style={[styles.rowTitle, { color: tokens.text }]}>Ghim số dư hôm nay</Text>
             <View
               style={[
@@ -84,18 +82,18 @@ export const LockScreenSettingsCard: React.FC = () => {
 
       {/* 3. TÍNH NĂNG TÍCH HỢP TRÊN MÀN HÌNH KHÓA */}
       <View style={styles.featureGrid}>
-        <View style={[styles.featurePill, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Zap size={13} color={tokens.primary} strokeWidth={2.5} />
+        <View style={[styles.featurePill, { backgroundColor: tokens.surfaceAlt }]}>
+          <Zap size={14} color={tokens.primary} strokeWidth={2.6} />
           <Text style={[styles.featureText, { color: tokens.textSub }]}>Trừ ngầm -30k / -50k</Text>
         </View>
 
-        <View style={[styles.featurePill, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <RotateCcw size={13} color="#7E9F80" strokeWidth={2.5} />
+        <View style={[styles.featurePill, { backgroundColor: tokens.surfaceAlt }]}>
+          <RotateCcw size={14} color="#7E9F80" strokeWidth={2.6} />
           <Text style={[styles.featureText, { color: tokens.textSub }]}>Hoàn tác 1 chạm</Text>
         </View>
 
-        <View style={[styles.featurePill, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Camera size={13} color={tokens.primary} strokeWidth={2.5} />
+        <View style={[styles.featurePill, { backgroundColor: tokens.surfaceAlt }]}>
+          <Camera size={14} color={tokens.primary} strokeWidth={2.6} />
           <Text style={[styles.featureText, { color: tokens.textSub }]}>Mở camera &lt; 0.5s</Text>
         </View>
       </View>
@@ -115,14 +113,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     marginBottom: 14,
-  },
-  iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   headerTextCol: {
     flex: 1,
@@ -189,7 +179,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: radii.full,
-    borderWidth: 1,
   },
   featureText: {
     fontSize: 11,

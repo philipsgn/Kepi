@@ -10,7 +10,6 @@ import {
   View,
 } from 'react-native';
 import {
-  Clock,
   Coffee,
   ShieldCheck,
   Target,
@@ -69,13 +68,11 @@ export const ActualPriceSheet: React.FC<ActualPriceSheetProps> = ({
   const [stepVisible, setStepVisible] = useState(0);
 
   const displayItemName = itemName || description || 'Món đồ cân nhắc';
-  const effectiveHourlyRate = hourlyRate || hourlyWage || 35000;
   const handleBuy = onConfirmBuy || onBuyAnyway || onClose;
   const handleWait = onSaveLater || onAddToWaitBasket || onClose;
   const handleSkip = onSkipSave || onSkipAndSaveMoney || onClose;
 
   // Tính các chỉ số quy đổi thực tế
-  const hoursOfWork = effectiveHourlyRate > 0 ? (amount / effectiveHourlyRate).toFixed(1) : '1.5';
   const daysOfBudget = dailyBudget > 0 ? (amount / dailyBudget).toFixed(1) : '1.0';
   const coffeeCups = Math.round(amount / 35_000);
 
@@ -89,19 +86,13 @@ export const ActualPriceSheet: React.FC<ActualPriceSheetProps> = ({
       }, 150);
 
       const timer2 = setTimeout(() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         setStepVisible(2);
       }, 350);
-
-      const timer3 = setTimeout(() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        setStepVisible(3);
-      }, 550);
 
       return () => {
         clearTimeout(timer1);
         clearTimeout(timer2);
-        clearTimeout(timer3);
       };
     } else {
       setStepVisible(0);
@@ -151,15 +142,6 @@ export const ActualPriceSheet: React.FC<ActualPriceSheetProps> = ({
                 <View style={styles.metricsList}>
                   {stepVisible >= 1 && (
                     <View style={styles.metricRow}>
-                      <Clock size={16} color={Colors.primaryYellow} />
-                      <Text style={styles.metricText}>
-                        {Strings.actualPrice.hourlyConversion(Number(hoursOfWork))}
-                      </Text>
-                    </View>
-                  )}
-
-                  {stepVisible >= 2 && (
-                    <View style={styles.metricRow}>
                       <Target size={16} color={Colors.greenSafe} />
                       <Text style={styles.metricText}>
                         {Strings.actualPrice.dailyConversion(Number(daysOfBudget))}
@@ -167,7 +149,7 @@ export const ActualPriceSheet: React.FC<ActualPriceSheetProps> = ({
                     </View>
                   )}
 
-                  {stepVisible >= 3 && (
+                  {stepVisible >= 2 && (
                     <View style={styles.metricRow}>
                       <Coffee size={16} color={Colors.blueInfo} />
                       <Text style={styles.metricText}>

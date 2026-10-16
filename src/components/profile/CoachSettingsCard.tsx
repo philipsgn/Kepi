@@ -47,9 +47,7 @@ export const CoachSettingsCard: React.FC<CoachSettingsCardProps> = ({
     <View style={[styles.container, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
       {/* 1. TIÊU ĐỀ KHỐI */}
       <View style={styles.headerRow}>
-        <View style={[styles.iconBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Sparkles size={15} color={tokens.primary} strokeWidth={2.4} />
-        </View>
+        <Sparkles size={20} color={tokens.primary} strokeWidth={2.6} />
         <Text style={[styles.sectionTitle, { color: tokens.text }]}>{Strings.profile.coachSectionTitle}</Text>
       </View>
 
@@ -191,19 +189,11 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     marginBottom: 14,
   },
-  iconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '700',
   },
   group: {},

@@ -70,7 +70,11 @@ Ví Locket v3.1 kết hợp giữa **Nhật ký ảnh Locket chân thực**, **P
 | **Chữ Chính (`#1E231E`) trên Nền Kem Sáng (`#FAF6F0`)** | **14.2 : 1** | $\ge 7.0:1$ (AAA) | ✅ PASS AAA |
 | **Chữ Trắng Kem (`#FAF6EC`) trên Nền Tối (`#0E1620`)** | **15.8 : 1** | $\ge 7.0:1$ (AAA) | ✅ PASS AAA |
 
-> **Quy chuẩn Icon:** Sử dụng 100% Vector Icons từ `lucide-react-native`, kích thước chạm tối thiểu $\ge 44 \times 44$px, strokeWidth đồng nhất 2.0–2.4px. Tuyệt đối không dùng emoji làm biểu tượng chính trên nút bấm điều hướng.
+> **Quy chuẩn Icon Toàn Ứng Dụng (App-Wide Pure Floating Bold Icons):**
+> - **100% Vector Icons** từ `lucide-react-native`, tuyệt đối không dùng emoji làm biểu tượng chính.
+> - **Bỏ 100% viền bo ngoài & không bọc hộp nền màu (Zero Border & Boxless):** Mọi icon xuất hiện trong toàn bộ ứng dụng (Tabs, Header, Cards, Modals, Detail Sheets) BẮT BUỘC là dạng vector nổi trần tự nhiên (`borderWidth: 0, backgroundColor: 'transparent'`), tuyệt đối không bọc trong các khối bo tròn/vuông màu (`iconBadge`, `iconBox`, `iconCircle`).
+> - **In đậm nét & nổi bật sắc sảo (Bold Stroke):** Sử dụng `strokeWidth: 2.4 - 2.8` (thay vì 1.5 - 2.0), kích thước 18-22px để icon có sức sống, tạo độ tương phản thị giác cao cấp và hút mắt trên mọi bề mặt nền (Sáng / Tối / Mát).
+> - **Công thái học chạm:** Kích thước vùng chạm tối thiểu luôn $\ge 44 \times 44$px thông qua `hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}`.
 
 ---
 

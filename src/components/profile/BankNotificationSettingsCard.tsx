@@ -35,9 +35,7 @@ export const BankNotificationSettingsCard: React.FC = () => {
     <View style={[styles.container, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
       {/* 1. TIÊU ĐỀ KHỐI */}
       <View style={styles.headerRow}>
-        <View style={[styles.iconBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Bell size={16} color={tokens.primary} strokeWidth={2.4} />
-        </View>
+        <Bell size={20} color={tokens.primary} strokeWidth={2.6} style={{ marginRight: 10 }} />
         <View style={styles.headerTextCol}>
           <Text style={[styles.sectionTitle, { color: tokens.text }]}>
             Tự Động Ghi Sổ Thông Báo
@@ -52,7 +50,7 @@ export const BankNotificationSettingsCard: React.FC = () => {
       <View style={[styles.switchRow, { borderBottomColor: tokens.border }]}>
         <View style={styles.labelCol}>
           <View style={styles.inlineTitleRow}>
-            <ShieldCheck size={15} color={isEnabled ? tokens.primary : tokens.textMuted} strokeWidth={2.2} />
+            <ShieldCheck size={16} color={isEnabled ? tokens.primary : tokens.textMuted} strokeWidth={2.4} />
             <Text style={[styles.rowTitle, { color: tokens.text }]}>Tự động nhận diện biến động số dư</Text>
           </View>
           <Text style={[styles.rowDesc, { color: tokens.textMuted }]}>
@@ -77,7 +75,7 @@ export const BankNotificationSettingsCard: React.FC = () => {
         activeOpacity={0.7}
       >
         <View style={styles.actionLeft}>
-          <Sparkles size={14} color={tokens.primary} />
+          <Sparkles size={16} color={tokens.primary} strokeWidth={2.4} />
           <Text style={[styles.actionText, { color: tokens.text }]}>
             Danh sách ngân hàng & Khu vực thử nghiệm
           </Text>
@@ -108,15 +106,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-  },
-  iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: radii.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    marginRight: 10,
   },
   headerTextCol: {
     flex: 1,

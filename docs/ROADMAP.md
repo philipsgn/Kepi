@@ -50,7 +50,37 @@
 
 ---
 
+### 📌 Lộ Trình Thương Mại Hóa Production (Production & Market Launch)
+- [x] **Phase P0: Hiện Thực Hóa Tính Năng Chuẩn Production (Đã hoàn tất):**
+  - [x] Gỡ bỏ hoàn toàn HLV Anh Minh khỏi Tab Cài Đặt (tập trung duy nhất ở Tab 3 Chat).
+  - [x] Bỏ hoàn toàn Khóa Face ID để tối ưu dữ liệu và hiệu năng ứng dụng.
+  - [x] Kích hoạt Nhận diện biến động số dư qua Sao chép (Clipboard Auto-Detection) cho 8+ ngân hàng.
+  - [x] Kích hoạt Thanh Tiện ích Khóa Sticky tương tác 1-chạm (`[-30k]`, `[-50k]`, `[Chụp]`, `[Hoàn tác]`) trên Android.
+  - [x] Xây dựng Hệ thống Sao lưu & Khôi phục dữ liệu tự chủ (Export/Import JSON) bảo mật 100%.
+  - [x] Chuyển đổi 100% các huy hiệu sang trạng thái "Khả dụng" (#10B981) trên Tab Cài Đặt.
+  - [x] Xóa bỏ 100% hardcode username, fallback tiền ngầm và 7 giao dịch mẫu demo.
+- [x] **Phase P0.5: Trải Nghiệm Ghi Chép Biến Động Số Dư Vượt Bậc (Locket Bank Snapshot & Full-Category Fast Log — Hoàn tất):**
+  - [x] Nâng cấp thanh `BankClipboardToast` với 2 nút hành động: `[📸 Chụp Locket]` và `[⚡ Ghi Nhanh]`.
+  - [x] Kích hoạt luồng Locket Snapshot: Mở Camera 4:5 ghim sẵn số tiền/ngân hàng, bấm Shutter chụp món đồ $\rightarrow$ lưu kèm ảnh.
+  - [x] Xây dựng Fast Category Sheet: Hiển thị ĐẦY ĐỦ danh mục (hệ thống & tùy biến) để gán 1-chạm không cần gõ chữ.
+  - [x] Chuẩn hóa tên giao dịch: Tự động dùng tên Danh mục + tag ngân hàng, loại bỏ rác chữ nội dung chuyển khoản thô.
+  - [x] Tích hợp Push Notification tương tác ngoài màn hình khóa (`LOCK_SCREEN_CATEGORY_BANK_ALERT`) với 2 nút `[📸 Chụp Locket]` và `[⚡ Ghi Nhanh]`.
+- [ ] **Phase P1: Hạ Tầng Supabase Cloud & Google OAuth Thực Tế:**
+  - [ ] Khởi tạo dự án Supabase Production, chạy SQL schema chính thức.
+  - [ ] Cấu hình `.env` cho `EXPO_PUBLIC_SUPABASE_URL` và `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
+  - [ ] Cấu hình Google Cloud Console OAuth Client ID cho iOS/Android.
+  - [ ] Đồng bộ dữ liệu đa thiết bị 2 chiều cho người dùng đăng nhập Google thật.
+- [ ] **Phase P2: Đóng Gói Native Build EAS (Widget Màn Hình Khóa & Background Listener):**
+  - [ ] Xây dựng Android Config Plugin cho `NotificationListenerService` đọc biến động số dư tự động trong file build APK.
+  - [ ] Xây dựng Swift WidgetKit Extension cho iOS và AppWidget cho Android ghim số dư ra màn hình khóa OS.
+- [ ] **Phase P3: Kiểm Toán Bảo Mật E2E & Phát Hành Store (App Store & CH Play):**
+  - [ ] Tối ưu FPS 60fps mượt mà, kiểm toán 0 rò rỉ STK theo Apple Guideline 5.1.1.
+  - [ ] Đóng gói và phát hành ứng dụng lên App Store và Google Play.
+
+---
+
 ### 📌 Giai đoạn M3: Bạn Bè & Chia Sẻ (Social & Friends)
 - [ ] Ngăn Bạn bè trong Chat: Cùng bạn bè theo dõi ngân sách tuần.
 - [ ] Hỏi ý kiến bạn bè trước khi bấm mua một món đồ đắt tiền ("Nên mua không?").
 - [ ] Locket Feed: Xem album chi tiêu của nhóm bạn thân thiết.
+

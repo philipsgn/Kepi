@@ -42,14 +42,7 @@ export const GroupedRow: React.FC<GroupedRowProps> = ({
   const content = (
     <View style={[styles.container, style]}>
       {icon && (
-        <View
-          style={[
-            styles.iconWrapper,
-            {
-              backgroundColor: iconBg || tokens.surfaceAlt,
-            },
-          ]}
-        >
+        <View style={styles.iconWrapper}>
           {icon}
         </View>
       )}
@@ -130,9 +123,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
   },
   iconWrapper: {
-    width: 32,
-    height: 32,
-    borderRadius: radii.md,
+    width: 28,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.sm + 4,

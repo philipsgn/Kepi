@@ -144,7 +144,9 @@ export interface ScreenDataModel {
 - **VoiceOver / TalkBack:** Mọi phần tử tương tác đều có `accessibilityLabel` và `accessibilityRole`.
 - **Hỗ trợ Cỡ Chữ Lớn (Dynamic Type):** Bố cục co giãn, không bị cắt chữ khi người dùng bật chữ to.
 - **Độ Tương Phản Màu:** Đạt chuẩn WCAG AA (tối thiểu 4.5:1 cho văn bản thường, 3:1 cho đồ họa). Chữ trên nền vàng `#FFC800` luôn là đen tuyền `#000000` (đạt 13.5:1).
-- **Vùng Chạm (Touch Target):** Tối thiểu `44px x 44px`.
+- **Quy Chuẩn Icon Toàn App:** 100% Vector Icons nổi trần không viền bo (`borderWidth: 0, backgroundColor: 'transparent'`), cấm dùng khung bo tròn/vuông bọc ngoài, in đậm nét `strokeWidth: 2.4 - 2.8` để nổi bật sắc nét.
+- **Vùng Chạm (Touch Target):** Tối thiểu `44px x 44px` thông qua `hitSlop`.
+
 
 ---
 

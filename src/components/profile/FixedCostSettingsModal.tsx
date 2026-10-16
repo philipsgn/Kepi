@@ -197,7 +197,7 @@ export const FixedCostSettingsModal: React.FC<FixedCostSettingsModalProps> = ({
                 >
                   <View style={styles.itemHeader}>
                     <View style={[styles.iconBox, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
-                      {getCategoryIcon(item.category)}
+                      {getCategoryIcon(item.category || 'other')}
                     </View>
                     <View style={styles.itemTitleCol}>
                       <Text style={[styles.itemName, { color: tokens.text }]}>{item.name}</Text>

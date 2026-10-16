@@ -65,7 +65,7 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
   settings: null,
   monthlyIncome: 0,
   monthlyFixedCosts: 0,
-  goalName: 'Chuyến đi Hà Nội',
+  goalName: '',
   goalTargetAmount: 0,
   favUnit: 'tra_sua',
   baseDailyBudget: 0,
@@ -175,7 +175,7 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
         const parsed = JSON.parse(cached);
         const savedMonth = parsed.lastActiveMonth || currentMonthKey;
         const savedDate = parsed.lastActiveDate || currentDayKey;
-        const initialDaily = parsed.todayBudget || 100_000;
+        const initialDaily = parsed.todayBudget ?? (parsed.newSettings?.base_daily_budget || 0);
         const initialWeekly = parsed.weeklyBudget || initialDaily * 7;
 
         set({
@@ -208,7 +208,7 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
         .single();
 
       if (data) {
-        const baseDaily = data.base_daily_budget || 100_000;
+        const baseDaily = data.base_daily_budget || 0;
         set({
           settings: data,
           monthlyIncome: data.monthly_income,

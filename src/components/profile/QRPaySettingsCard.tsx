@@ -64,9 +64,7 @@ export const QRPaySettingsCard: React.FC = () => {
   return (
     <Card style={styles.container}>
       <View style={styles.headerRow}>
-        <View style={[styles.iconCircle, { backgroundColor: isDark ? '#262217' : '#FAF2E4' }]}>
-          <QrCode size={18} color={tokens.primary} strokeWidth={2.4} />
-        </View>
+        <QrCode size={22} color={tokens.primary} strokeWidth={2.6} style={{ marginRight: 10 }} />
         <View style={styles.headerTextCol}>
           <Text style={[styles.title, { color: tokens.text }]}>Thanh toán VietQR</Text>
           <Text style={[styles.subtitle, { color: tokens.textMuted }]}>
@@ -78,7 +76,7 @@ export const QRPaySettingsCard: React.FC = () => {
       <GroupedList>
         {/* 1. Ngân hàng mặc định */}
         <GroupedRow
-          icon={<Landmark size={18} color={tokens.primary} strokeWidth={2.2} />}
+          icon={<Landmark size={20} color={tokens.primary} strokeWidth={2.6} />}
           title="Ngân hàng mặc định"
           subtitle="Ưu tiên mở khi quét mã QR"
           showDivider
@@ -91,7 +89,7 @@ export const QRPaySettingsCard: React.FC = () => {
 
         {/* 2. Tự mở app ngân hàng sau khi quét */}
         <GroupedRow
-          icon={<ShieldCheck size={18} color={Colors.greenSafe} strokeWidth={2.2} />}
+          icon={<ShieldCheck size={20} color={Colors.greenSafe} strokeWidth={2.6} />}
           title="Tự mở app khi có số tiền"
           subtitle="Tự mở ngân hàng với mã động hợp lệ"
           showDivider
@@ -107,7 +105,7 @@ export const QRPaySettingsCard: React.FC = () => {
 
         {/* 3. Giá thật trước khi trả */}
         <GroupedRow
-          icon={<DollarSign size={18} color={tokens.primary} strokeWidth={2.2} />}
+          icon={<DollarSign size={20} color={tokens.primary} strokeWidth={2.6} />}
           title="Hiện Giá thật từ 200.000 đ"
           subtitle="Quy đổi giờ làm ở chế độ Định mua"
           showDivider
@@ -123,7 +121,7 @@ export const QRPaySettingsCard: React.FC = () => {
 
         {/* 4. Nhắc nhở khoản chờ */}
         <GroupedRow
-          icon={<Bell size={18} color={tokens.primary} strokeWidth={2.2} />}
+          icon={<Bell size={20} color={tokens.primary} strokeWidth={2.6} />}
           title="Nhắc xác nhận khoản chờ"
           subtitle="Gửi thông báo nhẹ nếu chưa bấm xác nhận"
           showDivider
@@ -149,15 +147,7 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
     marginBottom: 14,
-  },
-  iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   headerTextCol: {
     flex: 1,

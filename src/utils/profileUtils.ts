@@ -139,11 +139,13 @@ export type FixedCostCategory =
   | 'education'   // Học phí, khóa học
   | 'other';      // Chi phí định kỳ khác
 
+export const STORAGE_KEY_FIXED_COST_ITEMS = 'vi_locket_fixed_cost_items';
+
 export interface FixedCostItem {
   id: string;
   name: string;
   amount: number;
-  category: FixedCostCategory;
+  category?: FixedCostCategory;
 }
 
 /**
@@ -187,5 +189,203 @@ export const convertAmountToWorkHours = (
       : `${minutes} phút`;
 
   return { hours, minutes, formatted };
+};
+
+export interface MonthlySavingsParams {
+  monthlySavingsGoal: number;
+  daysInMonth?: number;
+  dailyBudget: number;
+  todayBudget?: number;
+  todaySpent?: number;
+  transactions?: Array<{
+    amount: number;
+    type?: string;
+    occurred_at?: string;
+    created_at?: string;
+    status?: string;
+  }>;
+  currentMonthKey?: string; // 'YYYY-MM'
+  additionalSavedMoney?: number;
+}
+
+export interface MonthlySavingsResult {
+  monthlySavingsGoal: number;
+  actualSavedThisMonth: number;
+  percentage: number;
+  isAchieved: boolean;
+  daysDisciplined: number;
+  daysEvaluated: number;
+}
+
+/**
+ * Tính tiến độ tích lũy tháng theo cơ chế bảo toàn hạn mức ngày (Daily Allowance Lock-in):
+ * - Mỗi ngày trong tháng chi tiêu <= "Hôm nay tiêu được":
+ *   + Bảo toàn phần định mức ngày cam kết (monthlySavingsGoal / daysInMonth).
+ *   + Cộng dồn số tiền dôi dư nếu chi tiêu thấp hơn hạn mức ngày.
+ * - Ngày nào chi tiêu vượt hạn mức: phần vượt trừ vào định mức ngày (không âm quá 0).
+ */
+export const calculateMonthlyLockedSavings = (
+  params: MonthlySavingsParams
+): MonthlySavingsResult => {
+  const {
+    monthlySavingsGoal,
+    daysInMonth = 30,
+    dailyBudget,
+    todayBudget = dailyBudget,
+    todaySpent = 0,
+    transactions = [],
+    currentMonthKey,
+    additionalSavedMoney = 0,
+  } = params;
+
+  if (monthlySavingsGoal <= 0) {
+    return {
+      monthlySavingsGoal: 0,
+      actualSavedThisMonth: 0,
+      percentage: 100,
+      isAchieved: true,
+      daysDisciplined: 0,
+      daysEvaluated: 0,
+    };
+  }
+
+  const now = new Date();
+  const monthKey =
+    currentMonthKey ||
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const dailyPlannedQuota = Math.round(monthlySavingsGoal / Math.max(1, daysInMonth));
+
+  // Gom nhóm chi tiêu theo từng ngày trong tháng hiện tại
+  const dailySpentMap: Record<string, number> = {};
+  transactions.forEach((t) => {
+    if (t.status === 'CANCELLED' || t.status === 'PENDING') return;
+    if (t.type !== 'EXPENSE') return;
+    const dateStr = (t.occurred_at || t.created_at || '').substring(0, 10);
+    if (dateStr.startsWith(monthKey)) {
+      dailySpentMap[dateStr] = (dailySpentMap[dateStr] || 0) + Math.abs(t.amount || 0);
+    }
+  });
+
+  // Tìm ngày sớm nhất có phát sinh giao dịch trong tháng (hoặc ngày hôm nay)
+  const recordedDates = Object.keys(dailySpentMap).sort();
+  const earliestDateStr = recordedDates.length > 0 && recordedDates[0] < todayDateStr
+    ? recordedDates[0]
+    : todayDateStr;
+
+  const currentDayNum = now.getDate();
+  const startDayNum = Math.min(
+    currentDayNum,
+    parseInt(earliestDateStr.substring(8, 10), 10) || currentDayNum
+  );
+
+  let accumulatedSaved = Math.max(0, additionalSavedMoney);
+  let daysDisciplined = 0;
+  let daysEvaluated = 0;
+
+  for (let d = startDayNum; d <= currentDayNum; d++) {
+    daysEvaluated++;
+    const dayStr = `${monthKey}-${String(d).padStart(2, '0')}`;
+    const isToday = dayStr === todayDateStr;
+    const effectiveDailyBudget = isToday ? todayBudget : dailyBudget;
+    const daySpent = isToday ? todaySpent : (dailySpentMap[dayStr] || 0);
+
+    if (effectiveDailyBudget > 0) {
+      if (daySpent <= effectiveDailyBudget) {
+        daysDisciplined++;
+        // Khóa định mức ngày + cộng tiền dôi dư nếu tiêu thấp hơn
+        const unspentLeftover = Math.max(0, effectiveDailyBudget - daySpent);
+        accumulatedSaved += dailyPlannedQuota + unspentLeftover;
+      } else {
+        // Vượt hạn mức: bị trừ hao hụt
+        const overspent = daySpent - effectiveDailyBudget;
+        accumulatedSaved += Math.max(0, dailyPlannedQuota - overspent);
+      }
+    } else {
+      // Trường hợp không có dailyBudget (chưa set)
+      if (daySpent === 0) {
+        accumulatedSaved += dailyPlannedQuota;
+        daysDisciplined++;
+      }
+    }
+  }
+
+  const roundedActualSaved = Math.round(accumulatedSaved);
+  const percentage = Math.min(
+    100,
+    Math.max(0, Math.round((roundedActualSaved / monthlySavingsGoal) * 100))
+  );
+  const isAchieved = roundedActualSaved >= monthlySavingsGoal;
+
+  return {
+    monthlySavingsGoal,
+    actualSavedThisMonth: roundedActualSaved,
+    percentage,
+    isAchieved,
+    daysDisciplined,
+    daysEvaluated,
+  };
+};
+
+export interface GoalItem {
+  id: string;
+  name: string;
+  targetAmount: number;
+  deadline?: string | null;
+  reason?: string | null;
+  createdAt?: string;
+}
+
+export const STORAGE_KEY_GOALS_LIST = 'vi_locket_goals_list';
+
+export interface GoalWaterfallProgress {
+  goal: GoalItem;
+  allocatedSavedMoney: number;
+  percentage: number;
+  isAchieved: boolean;
+  remainingAmount: number;
+}
+
+/**
+ * Phân bổ số tiền tích lũy theo cơ chế tuần tự (Waterfall Allocation):
+ * Tiền tích lũy (totalSavedMoney) dồn 100% cho mục tiêu 1 trước;
+ * Khi mục tiêu 1 đạt 100%, số tiền dôi dư tự động tràn sang mục tiêu 2, 3...
+ */
+export const calculateWaterfallGoals = (
+  goals: GoalItem[],
+  totalSavedMoney: number
+): GoalWaterfallProgress[] => {
+  if (!goals || goals.length === 0) return [];
+
+  let remainingSavings = Math.max(0, totalSavedMoney);
+
+  return goals.map((goal) => {
+    const target = Math.max(0, goal.targetAmount || 0);
+    if (target === 0) {
+      return {
+        goal,
+        allocatedSavedMoney: 0,
+        percentage: 0,
+        isAchieved: false,
+        remainingAmount: 0,
+      };
+    }
+
+    const allocated = Math.min(target, remainingSavings);
+    remainingSavings = Math.max(0, remainingSavings - allocated);
+
+    const percentage = Math.min(100, Math.round((allocated / target) * 100));
+    const isAchieved = allocated >= target;
+    const remainingAmount = Math.max(0, target - allocated);
+
+    return {
+      goal,
+      allocatedSavedMoney: allocated,
+      percentage,
+      isAchieved,
+      remainingAmount,
+    };
+  });
 };
 

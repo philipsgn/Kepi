@@ -129,7 +129,7 @@ async function ensureUserProfile(user: UserSession): Promise<Profile | null> {
     const newProfile: Partial<Profile> = {
       id: user.id,
       email: user.email,
-      full_name: user.full_name || 'Người thương phố cổ',
+      full_name: user.full_name || '',
       fav_unit: 'tra_sua',
       hourly_rate: 0,
       created_at: new Date().toISOString(),
@@ -387,7 +387,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         full_name:
           sessionUser.user_metadata?.full_name ||
           email.split('@')[0] ||
-          'Người thương phố cổ',
+          '',
       };
 
       // Lưu cache user thật

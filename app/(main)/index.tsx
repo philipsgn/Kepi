@@ -72,6 +72,9 @@ import { ShutterButton } from '../../src/components/camera/ShutterButton';
 import { ModeSwitchPill, CameraMode } from '../../src/components/camera/ModeSwitchPill';
 import { LocketMomentCard } from '../../src/components/camera/LocketMomentCard';
 import { UndoToastBar } from '../../src/components/common/UndoToastBar';
+import { BankClipboardToast } from '../../src/components/common/BankClipboardToast';
+import { FastCategorySheet } from '../../src/components/cards/FastCategorySheet';
+import { ParsedBankNotification } from '../../src/utils/bankNotificationParser';
 import { groupTransactionsByDay } from '../../src/utils/cameraUtils';
 
 // Views
@@ -189,6 +192,10 @@ export default function MainAppScreen() {
   const [uploadPhotoUri, setUploadPhotoUri] = useState<string | null>(null);
   const [showBankSettingsFromCamera, setShowBankSettingsFromCamera] = useState<boolean>(false);
 
+  // Locket Bank Snapshot & Fast Log State (Decision 69)
+  const [activeBankSnapshotEvent, setActiveBankSnapshotEvent] = useState<ParsedBankNotification | null>(null);
+  const [fastLogBankEvent, setFastLogBankEvent] = useState<ParsedBankNotification | null>(null);
+
   // CHỈ lấy các giao dịch đã CONFIRMED cho feed và ảnh mới nhất
   const confirmedTransactions = transactions.filter((t) => t.status === 'CONFIRMED' || (!t.status as any));
 
@@ -234,6 +241,18 @@ export default function MainAppScreen() {
 
     const subscription = Notifications.addNotificationResponseReceivedListener(async (response) => {
       const actionId = response.actionIdentifier;
+      const data = response.notification.request.content.data;
+
+      // Xử lý tương tác từ thông báo biến động số dư ngân hàng
+      if (actionId === 'ACTION_BANK_SNAPSHOT' && data?.bankEvent) {
+        handleBankSnapshot(data.bankEvent as unknown as ParsedBankNotification);
+        return;
+      }
+      if (actionId === 'ACTION_BANK_FAST_LOG' && data?.bankEvent) {
+        handleBankFastLog(data.bankEvent as unknown as ParsedBankNotification);
+        return;
+      }
+
       if (actionId && actionId !== Notifications.DEFAULT_ACTION_IDENTIFIER) {
         const res = await handleLockScreenAction(actionId);
         if (res.navigateTo === 'CAMERA') {
@@ -242,8 +261,10 @@ export default function MainAppScreen() {
         return;
       }
 
-      const data = response.notification.request.content.data;
-      if (data?.type === 'LOCK_SCREEN_BUDGET') {
+      if (data?.type === 'BANK_DETECTED' && data?.bankEvent) {
+        // Chạm trực tiếp vào banner thông báo ngân hàng -> Mở bảng chọn danh mục FastCategorySheet ngay
+        handleBankFastLog(data.bankEvent as unknown as ParsedBankNotification);
+      } else if (data?.type === 'LOCK_SCREEN_BUDGET') {
         handleTabPress(2);
       } else if (data?.itemId) {
         router.push('/(main)/wait-basket');
@@ -408,11 +429,21 @@ export default function MainAppScreen() {
           const optimized = await optimizeExpensePhoto(photo.uri);
           setCapturedPhotoUri(optimized.fullUri);
           setCapturedThumbUri(optimized.thumbnailUri);
-          setInFrameAmount(0);
-          setInFrameType('EXPENSE');
-          setInFrameCategory('');
-          setShowInFrameCategoryPicker(false);
-          setInFrameDescription('');
+          if (activeBankSnapshotEvent) {
+            setInFrameAmount(activeBankSnapshotEvent.amount);
+            setInFrameType(activeBankSnapshotEvent.type);
+            setInFrameCategory(activeBankSnapshotEvent.categoryId || '');
+            setInFrameDescription(
+              activeBankSnapshotEvent.isGenericContent ? '' : (activeBankSnapshotEvent.content || '')
+            );
+            setShowInFrameCategoryPicker(true);
+          } else {
+            setInFrameAmount(0);
+            setInFrameType('EXPENSE');
+            setInFrameCategory('');
+            setShowInFrameCategoryPicker(false);
+            setInFrameDescription('');
+          }
           return;
         }
       }
@@ -423,11 +454,36 @@ export default function MainAppScreen() {
     const fallback = 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80';
     setCapturedPhotoUri(fallback);
     setCapturedThumbUri(fallback);
-    setInFrameAmount(0);
-    setInFrameType('EXPENSE');
-    setInFrameCategory('');
-    setShowInFrameCategoryPicker(false);
-    setInFrameDescription('');
+    if (activeBankSnapshotEvent) {
+      setInFrameAmount(activeBankSnapshotEvent.amount);
+      setInFrameType(activeBankSnapshotEvent.type);
+      setInFrameCategory(activeBankSnapshotEvent.categoryId || '');
+      setInFrameDescription(
+        activeBankSnapshotEvent.isGenericContent ? '' : (activeBankSnapshotEvent.content || '')
+      );
+      setShowInFrameCategoryPicker(true);
+    } else {
+      setInFrameAmount(0);
+      setInFrameType('EXPENSE');
+      setInFrameCategory('');
+      setShowInFrameCategoryPicker(false);
+      setInFrameDescription('');
+    }
+  };
+
+  // Handlers for Locket Bank Snapshot & Fast Log (Decision 69)
+  const handleBankSnapshot = (detected: ParsedBankNotification) => {
+    setActiveBankSnapshotEvent(detected);
+    setInFrameAmount(detected.amount);
+    setInFrameType(detected.type);
+    setInFrameCategory(detected.categoryId || '');
+    setInFrameDescription(detected.isGenericContent ? '' : (detected.content || ''));
+    handleTabPress(2);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  const handleBankFastLog = (detected: ParsedBankNotification) => {
+    setFastLogBankEvent(detected);
   };
 
   const handleSaveInFramePhoto = async () => {
@@ -451,15 +507,25 @@ export default function MainAppScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const userId = user?.id || 'demo-user';
     const finalAmount = inFrameAmount;
+    const isBank = Boolean(activeBankSnapshotEvent);
+    const bankTag = activeBankSnapshotEvent?.bankCode && activeBankSnapshotEvent.bankCode !== 'OTHER'
+      ? `[${activeBankSnapshotEvent.bankCode}]`
+      : activeBankSnapshotEvent ? `[${activeBankSnapshotEvent.bankName}]` : '';
+
+    const fallbackDesc = inFrameCategory
+      ? `${inFrameCategory} ${bankTag}`.trim()
+      : (inFrameType === 'EXPENSE' ? 'Chi tiêu bằng ảnh' : 'Thu nhập');
+    const finalDesc = inFrameDescription.trim() || fallbackDesc;
+
     const tx = await addTransaction({
       userId,
       amount: finalAmount,
       type: inFrameType,
       category: inFrameCategory,
-      description: inFrameDescription.trim() || (inFrameType === 'EXPENSE' ? 'Chi tiêu bằng ảnh' : 'Thu nhập'),
+      description: finalDesc,
       photo_url: capturedPhotoUri,
       thumbnail_url: capturedThumbUri || capturedPhotoUri,
-      payment_method: 'CASH',
+      payment_method: isBank ? 'BANK' : 'CASH',
       source: 'PHOTO',
       status: 'CONFIRMED',
     });
@@ -476,6 +542,7 @@ export default function MainAppScreen() {
       bankNotificationService.attachPhotoToLatestTransaction(capturedPhotoUri).catch(() => {});
     }
 
+    setActiveBankSnapshotEvent(null);
     setLastSavedOrDeletedTx({ action: 'ADD', tx });
     setUndoToastMessage(`Đã lưu khoảnh khắc: ${formatVND(finalAmount)}`);
     setUndoToastVisible(true);
@@ -734,6 +801,20 @@ export default function MainAppScreen() {
 
   return (
     <View style={[styles.rootContainer, { backgroundColor: isDark ? '#0E1620' : '#FAF6EC' }]}>
+      <BankClipboardToast
+        onSnapshot={handleBankSnapshot}
+        onFastLog={handleBankFastLog}
+      />
+      <FastCategorySheet
+        visible={fastLogBankEvent !== null}
+        bankEvent={fastLogBankEvent}
+        onClose={() => setFastLogBankEvent(null)}
+        onSuccess={() => {
+          setFastLogBankEvent(null);
+          setUndoToastMessage('Đã lưu giao dịch vào Sổ thành công');
+          setUndoToastVisible(true);
+        }}
+      />
       <AutumnCelebration
         visible={showCelebration}
         savedAmount={celebrationAmount}
@@ -853,6 +934,29 @@ export default function MainAppScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
+
+              {/* BANNER NỔI LOCKET BANK SNAPSHOT */}
+              {activeBankSnapshotEvent && (
+                <View style={styles.activeBankBanner}>
+                  <View style={[styles.bankSmallBadge, { backgroundColor: activeBankSnapshotEvent.brandColor }]}>
+                    <Text style={styles.bankSmallBadgeText}>{activeBankSnapshotEvent.bankCode}</Text>
+                  </View>
+                  <Text style={styles.activeBankBannerText} numberOfLines={1}>
+                    Ghim số tiền:{' '}
+                    <Text style={{ fontWeight: '800', color: '#E59844' }}>
+                      {formatVND(activeBankSnapshotEvent.amount)}
+                    </Text>
+                    {' '}• Bấm Shutter để chụp món đồ
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setActiveBankSnapshotEvent(null)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    style={{ padding: 4 }}
+                  >
+                    <X size={15} color="#FFFFFF" strokeWidth={2.4} />
+                  </TouchableOpacity>
+                </View>
+              )}
 
               {/* BANNER NỔI THÔNG BÁO NGÂN HÀNG (3-IN-1 QUICK HUB) */}
               <BankNotificationFloatingPill />
@@ -1706,5 +1810,39 @@ const styles = StyleSheet.create({
     color: '#666666',
     fontSize: 14,
     fontWeight: '700',
+  },
+  activeBankBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(14, 22, 32, 0.92)',
+    borderRadius: radii.full,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderWidth: 1.2,
+    borderColor: '#E59844',
+    gap: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  bankSmallBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  bankSmallBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10.5,
+    fontWeight: '800',
+  },
+  activeBankBannerText: {
+    flex: 1,
+    color: '#FAF6EC',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

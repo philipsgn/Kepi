@@ -96,9 +96,11 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
 2. **Kiểu chữ có hồn & Con số chuẩn xác (Typography):**
    - Tiêu đề & Cảm xúc: **Be Vietnam Pro** mang chất thơ Hà Nội.
    - Con số tài chính: Bắt buộc dùng `fontVariant: ['tabular-nums']` để số không bị giật khi đếm.
-3. **Chuẩn Vector Icons & Kích thước chạm:**
+3. **Chuẩn Vector Icons Nổi Trần & In Đậm (Pure Floating Bold Icons):**
    - **100% Vector Icons** từ thư viện `lucide-react-native`. Tuyệt đối không dùng emoji làm icon chính trên nút bấm điều hướng.
-   - Kích thước vùng chạm (Touch area) tối thiểu $\ge 44 \times 44$px.
+   - **Bỏ 100% viền bo & hộp nền màu (Zero Border & Boxless):** Mọi icon xuất hiện trong toàn App (Tabs, Header, Cards, Modals, Detail Sheets) bắt buộc hiển thị dạng vector nổi trần tự nhiên (`borderWidth: 0, backgroundColor: 'transparent'`), cấm dùng khối bo tròn/vuông màu bọc icon.
+   - **Tô đậm nét (Bold Stroke):** Luôn dùng `strokeWidth: 2.4 - 2.8` với kích thước 18-22px để icon nổi bật, sắc nét và có độ tương phản cao.
+   - Kích thước vùng chạm (Touch area) tối thiểu $\ge 44 \times 44$px thông qua `hitSlop`.
 4. **Tương tác Xúc giác & Chuyển động (Haptics & Spring Animations):**
    - Mọi thao tác quan trọng (Bấm Shutter, Nhập chip giá, Chọn Cứu Ví, Lưu Sổ, Tải Ảnh) đều phải có Haptic Feedback tương ứng (`expo-haptics`).
    - Dùng `react-native-reanimated` với Spring easing tự nhiên cho Bottom Sheet và Card.

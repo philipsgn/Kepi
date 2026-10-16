@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
+import { Settings } from 'lucide-react-native';
 import { Strings } from '../../constants/strings';
 import { Spacing } from '../../constants/layout';
 import { useAuthStore } from '../../store/authStore';
@@ -16,22 +18,19 @@ import { useBudgetStore } from '../../store/budgetStore';
 import { useTransactionStore } from '../../store/transactionStore';
 import { ProfileIdentityCard } from '../profile/ProfileIdentityCard';
 import { GoalSectionCard } from '../profile/GoalSectionCard';
-import { BudgetSettingsCard } from '../profile/BudgetSettingsCard';
-import { HourlyWageSettingsCard } from '../profile/HourlyWageSettingsCard';
-import { HourlyWageModal } from '../profile/HourlyWageModal';
-import { CoachAddress, CoachSettingsCard, CoachTone } from '../profile/CoachSettingsCard';
-import { QRPaySettingsCard } from '../profile/QRPaySettingsCard';
-import { LockScreenSettingsCard } from '../profile/LockScreenSettingsCard';
-import { BankNotificationSettingsCard } from '../profile/BankNotificationSettingsCard';
-import { PrivacySecurityCard } from '../profile/PrivacySecurityCard';
-import { DataManagementCard } from '../profile/DataManagementCard';
-import { ThemeSettingsCard } from '../profile/ThemeSettingsCard';
+import { GoalDetailModal } from '../profile/GoalDetailModal';
+import { BudgetSettingsCard, STORAGE_KEY_SAVINGS_RATIO } from '../profile/BudgetSettingsCard';
 import { CategorySettingsCard } from '../profile/CategorySettingsCard';
 import { FixedCostSettingsModal } from '../profile/FixedCostSettingsModal';
 import { GoalEditModal } from '../profile/GoalEditModal';
 import { NameEditModal } from '../profile/NameEditModal';
 import { FavoriteUnit } from '../../types/database';
-import { calculateBaseDailyBudgetFloor, calculateStreakDays } from '../../utils/profileUtils';
+import {
+  calculateStreakDays,
+  calculateMonthlyLockedSavings,
+  GoalItem,
+  STORAGE_KEY_GOALS_LIST,
+} from '../../utils/profileUtils';
 import { useTheme } from '../../theme/ThemeContext';
 import { useBottomInset } from '../../hooks/useBottomInset';
 
@@ -41,28 +40,26 @@ export interface ProfileViewProps {
 }
 
 const STORAGE_KEY_MASK_MONEY = 'vi_locket_mask_money';
-const STORAGE_KEY_COACH_TONE = 'vi_locket_coach_tone';
-const STORAGE_KEY_COACH_ADDRESS = 'vi_locket_coach_address';
 const STORAGE_KEY_GOAL_DEADLINE = 'vi_locket_goal_deadline';
 const STORAGE_KEY_GOAL_REASON = 'vi_locket_goal_reason';
-const STORAGE_KEY_HOURLY_RATE = 'vi_locket_hourly_rate';
 
 /**
- * Trang 4: Hồ sơ & Cài đặt (ProfileView) — Phong cách "Ấm, tĩnh, sang"
- * Tuân thủ mục 7 của PROMPT và docs/screens/PROFILE.md:
- * - Hỗ trợ Sáng / Tối toàn diện qua useTheme().
- * - Bộ chọn theme Sáng / Tối / Hệ thống tích hợp trực tiếp.
- * - Modal cấu hình chi phí cố định (FixedCostSettingsModal) chi tiết theo hạng mục.
- * - Đệm đáy chuẩn xác với useBottomInset() tránh bị tab bar nổi che khuất.
+ * Trang 4: Hồ sơ Cá Nhân (ProfileView) — Phong cách Tối Giản, Độc Đáo
+ * Tập trung thuần túy vào Danh tính cá nhân & Kế hoạch tài chính:
+ * - Nút icon răng cưa (Settings) kính mờ 40px ở Header mở màn hình Cài Đặt riêng
+ * - Thẻ Người đồng hành (Avatar, Tên, 3-Stat: Streak, Đã giữ lại, Đã ghi)
+ * - Mục tiêu tích lũy tháng (GoalSectionCard)
+ * - Định mức & Thu chi xúc giác (BudgetSettingsCard: Thu nhập, Cố định, Cân bằng số 0)
+ * - Quản lý Danh mục Thu & Chi (CategorySettingsCard)
  */
-export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLessons }) => {
+export const ProfileView: React.FC<ProfileViewProps> = () => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { tokens } = useTheme();
+  const { tokens, isDark } = useTheme();
   const { contentBottomPadding } = useBottomInset();
 
   // Stores
-  const { user, profile, isGuest, updateProfile, signOut } = useAuthStore();
+  const { user, profile, isGuest, updateProfile } = useAuthStore();
   const {
     goalName,
     goalTargetAmount,
@@ -70,121 +67,247 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
     monthlyIncome,
     monthlyFixedCosts,
     baseDailyBudget,
+    todayBudget,
+    todaySpent,
     favUnit,
     updateGoalSettings,
     setupBudget,
   } = useBudgetStore();
-  const { transactions, loadTransactions } = useTransactionStore();
+  const { transactions } = useTransactionStore();
 
   // Local Settings State
   const [isMasked, setIsMasked] = useState(false);
-  const [coachTone, setCoachTone] = useState<CoachTone>('BALANCED');
-  const [coachAddress, setCoachAddress] = useState<CoachAddress>('BRO_FRIEND');
-  const [goalDeadline, setGoalDeadline] = useState('31/12/2026');
-  const [goalReason, setGoalReason] = useState('Tự thưởng sau một năm nỗ lực cày cuốc');
-  const [hourlyRate, setHourlyRate] = useState<number>(profile?.hourly_rate || 0);
+  const [goalDeadline, setGoalDeadline] = useState('');
+  const [goalReason, setGoalReason] = useState('');
+  const [savingsRatio, setSavingsRatio] = useState<number>(0.2);
+
+  // Tính tổng chi tiêu thực tế trong tháng hiện tại
+  const currentMonthKey = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }, []);
+
+  const currentMonthSpent = useMemo(() => {
+    return transactions
+      .filter((t) => t.type === 'EXPENSE' && t.occurred_at.startsWith(currentMonthKey))
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
+  }, [transactions, currentMonthKey]);
 
   // Modals State
   const [showGoalModal, setShowGoalModal] = useState(false);
+  const [showGoalDetailModal, setShowGoalDetailModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showFixedCostsModal, setShowFixedCostsModal] = useState(false);
-  const [showHourlyWageModal, setShowHourlyWageModal] = useState(false);
+
+  // Multi-Goals List State
+  const [goals, setGoals] = useState<GoalItem[]>([]);
+  const [selectedGoalToEdit, setSelectedGoalToEdit] = useState<GoalItem | null>(null);
+
+  // Tính tổng số tiền cần tích lũy của các mục tiêu xếp trước mục tiêu đang chỉnh sửa
+  const existingUnfinishedAmount = useMemo(() => {
+    const goalIdToEdit = selectedGoalToEdit?.id;
+    let sum = 0;
+    for (const g of goals) {
+      if (goalIdToEdit && g.id === goalIdToEdit) {
+        break;
+      }
+      sum += g.targetAmount || 0;
+    }
+    return sum;
+  }, [goals, selectedGoalToEdit]);
 
   // Load preferences from AsyncStorage on mount
   useEffect(() => {
     (async () => {
       try {
-        const [savedMask, savedTone, savedAddress, savedDeadline, savedReason, savedHourlyRate] =
+        const [savedMask, savedDeadline, savedReason, savedRatio] =
           await Promise.all([
             AsyncStorage.getItem(STORAGE_KEY_MASK_MONEY),
-            AsyncStorage.getItem(STORAGE_KEY_COACH_TONE),
-            AsyncStorage.getItem(STORAGE_KEY_COACH_ADDRESS),
             AsyncStorage.getItem(STORAGE_KEY_GOAL_DEADLINE),
             AsyncStorage.getItem(STORAGE_KEY_GOAL_REASON),
-            AsyncStorage.getItem(STORAGE_KEY_HOURLY_RATE),
+            AsyncStorage.getItem(STORAGE_KEY_SAVINGS_RATIO),
           ]);
 
         if (savedMask !== null) setIsMasked(savedMask === 'true');
-        if (savedTone) setCoachTone(savedTone as CoachTone);
-        if (savedAddress) setCoachAddress(savedAddress as CoachAddress);
-        if (savedDeadline) setGoalDeadline(savedDeadline);
-        if (savedReason) setGoalReason(savedReason);
-        if (savedHourlyRate !== null) {
-          setHourlyRate(Number(savedHourlyRate));
-        } else if (profile?.hourly_rate) {
-          setHourlyRate(profile.hourly_rate);
+
+        // Dọn sạch mock/hardcode cũ để bảo đảm "trang giấy trắng tinh" theo yêu cầu
+        if (savedDeadline === '31/12/2026') {
+          await AsyncStorage.removeItem(STORAGE_KEY_GOAL_DEADLINE);
+          setGoalDeadline('');
+        } else if (savedDeadline) {
+          setGoalDeadline(savedDeadline);
+        }
+
+        if (savedReason === 'Tự thưởng sau một năm nỗ lực cày cuốc') {
+          await AsyncStorage.removeItem(STORAGE_KEY_GOAL_REASON);
+          setGoalReason('');
+        } else if (savedReason) {
+          setGoalReason(savedReason);
+        }
+
+        if (goalName === 'Toyota') {
+          updateGoalSettings('', 0);
+        }
+
+        // Tải danh sách đa mục tiêu (Multi-goals list)
+        const savedGoalsStr = await AsyncStorage.getItem(STORAGE_KEY_GOALS_LIST);
+        if (savedGoalsStr) {
+          try {
+            const parsed = JSON.parse(savedGoalsStr);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setGoals(parsed);
+              if (parsed[0].name !== goalName || parsed[0].targetAmount !== goalTargetAmount) {
+                updateGoalSettings(parsed[0].name, parsed[0].targetAmount);
+              }
+            } else {
+              setGoals([]);
+            }
+          } catch {
+            setGoals([]);
+          }
+        } else if (goalName && goalTargetAmount > 0) {
+          const initialList: GoalItem[] = [
+            {
+              id: 'goal-1',
+              name: goalName,
+              targetAmount: goalTargetAmount,
+              deadline: savedDeadline || '',
+              reason: savedReason || '',
+              createdAt: new Date().toISOString(),
+            },
+          ];
+          setGoals(initialList);
+          await AsyncStorage.setItem(STORAGE_KEY_GOALS_LIST, JSON.stringify(initialList));
+        }
+
+        if (savedRatio !== null) {
+          const r = parseFloat(savedRatio);
+          if (!isNaN(r) && r >= 0 && r <= 1) setSavingsRatio(r);
         }
       } catch (err) {
         console.warn('Failed to load profile preferences:', err);
       }
     })();
-  }, [profile?.hourly_rate]);
+  }, [goalName]);
 
-  // Handler: Save Hourly Rate
-  const handleSaveHourlyRate = async (newRate: number) => {
-    setHourlyRate(newRate);
+  // Tự động đồng bộ lại trạng thái Ẩn tiền khi quay lại từ màn Cài Đặt
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem(STORAGE_KEY_MASK_MONEY).then((saved) => {
+        if (saved !== null) setIsMasked(saved === 'true');
+      });
+    }, [])
+  );
+
+  // Handler: Save Goal (Tạo mới hoặc chỉnh sửa mục tiêu trong danh sách)
+  const handleSaveGoal = async (goal: {
+    id?: string;
+    name: string;
+    targetAmount: number;
+    deadline?: string;
+    reason?: string;
+  }) => {
+    let updatedGoals: GoalItem[];
+
+    if (goal.id) {
+      updatedGoals = goals.map((g) =>
+        g.id === goal.id
+          ? {
+              ...g,
+              name: goal.name,
+              targetAmount: goal.targetAmount,
+              deadline: goal.deadline || '',
+              reason: goal.reason || '',
+            }
+          : g
+      );
+    } else {
+      const newGoal: GoalItem = {
+        id: `goal-${Date.now()}`,
+        name: goal.name,
+        targetAmount: goal.targetAmount,
+        deadline: goal.deadline || '',
+        reason: goal.reason || '',
+        createdAt: new Date().toISOString(),
+      };
+      updatedGoals = [...goals, newGoal];
+    }
+
+    setGoals(updatedGoals);
+
+    // Đồng bộ Mục tiêu số 1 với budgetStore
+    if (updatedGoals.length > 0) {
+      const g1 = updatedGoals[0];
+      updateGoalSettings(g1.name, g1.targetAmount);
+      setGoalDeadline(g1.deadline || '');
+      setGoalReason(g1.reason || '');
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY_GOAL_DEADLINE, g1.deadline || '');
+        await AsyncStorage.setItem(STORAGE_KEY_GOAL_REASON, g1.reason || '');
+      } catch {}
+    } else {
+      updateGoalSettings('', 0);
+      setGoalDeadline('');
+      setGoalReason('');
+    }
+
     try {
-      await AsyncStorage.setItem(STORAGE_KEY_HOURLY_RATE, String(newRate));
-      await updateProfile({ hourly_rate: newRate });
+      await AsyncStorage.setItem(STORAGE_KEY_GOALS_LIST, JSON.stringify(updatedGoals));
     } catch (err) {
-      console.warn('Failed to save hourly rate:', err);
+      console.warn('Failed to save goals list:', err);
     }
   };
 
-  // Handler: Toggle Mask Money
-  const handleToggleMask = async (val: boolean) => {
-    setIsMasked(val);
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY_MASK_MONEY, String(val));
-      await updateProfile({ privacy_mode: val });
-    } catch {}
-  };
+  // Handler: Delete Goal
+  const handleDeleteGoal = async (goalId: string) => {
+    const updatedGoals = goals.filter((g) => g.id !== goalId);
+    setGoals(updatedGoals);
 
-  // Handler: Change Coach Tone
-  const handleChangeTone = async (tone: CoachTone) => {
-    setCoachTone(tone);
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY_COACH_TONE, tone);
-    } catch {}
-  };
-
-  // Handler: Change Coach Address
-  const handleChangeAddress = async (address: CoachAddress) => {
-    setCoachAddress(address);
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY_COACH_ADDRESS, address);
-    } catch {}
-  };
-
-  // Handler: Save Goal
-  const handleSaveGoal = async (goal: {
-    name: string;
-    targetAmount: number;
-    deadline: string;
-    reason: string;
-  }) => {
-    updateGoalSettings(goal.name, goal.targetAmount);
-    setGoalDeadline(goal.deadline);
-    setGoalReason(goal.reason);
+    if (updatedGoals.length > 0) {
+      const g1 = updatedGoals[0];
+      updateGoalSettings(g1.name, g1.targetAmount);
+      setGoalDeadline(g1.deadline || '');
+      setGoalReason(g1.reason || '');
+    } else {
+      updateGoalSettings('', 0);
+      setGoalDeadline('');
+      setGoalReason('');
+    }
 
     try {
-      await AsyncStorage.setItem(STORAGE_KEY_GOAL_DEADLINE, goal.deadline);
-      await AsyncStorage.setItem(STORAGE_KEY_GOAL_REASON, goal.reason);
-    } catch {}
+      await AsyncStorage.setItem(STORAGE_KEY_GOALS_LIST, JSON.stringify(updatedGoals));
+    } catch (err) {
+      console.warn('Failed to delete goal:', err);
+    }
   };
 
-  // Handler: Save Budget Settings (Income, Fav Unit)
+  const handleOpenAddGoal = () => {
+    setSelectedGoalToEdit(null);
+    setShowGoalModal(true);
+  };
+
+  const handleOpenEditGoal = (goalToEdit?: GoalItem) => {
+    setSelectedGoalToEdit(goalToEdit || (goals.length > 0 ? goals[0] : null));
+    setShowGoalModal(true);
+  };
+
+  // Handler: Save Budget Settings
   const handleSaveBudgetSettings = async (params: {
     monthlyIncome: number;
     monthlyFixedCosts: number;
     favUnit: FavoriteUnit;
+    savingsRatio?: number;
+    savingsGoalAmount?: number;
   }) => {
+    if (params.savingsRatio !== undefined) {
+      setSavingsRatio(params.savingsRatio);
+    }
     await setupBudget({
-      userId: user?.id || 'demo-user',
+      userId: user?.id || 'guest-user',
       monthlyIncome: params.monthlyIncome,
       monthlyFixedCosts: params.monthlyFixedCosts,
       goalName,
-      goalTargetAmount,
+      goalTargetAmount: params.savingsGoalAmount !== undefined ? params.savingsGoalAmount : goalTargetAmount,
       favUnit: params.favUnit,
     });
   };
@@ -192,7 +315,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
   // Handler: Save Fixed Costs from Modal
   const handleSaveFixedCosts = async (newTotalFixedCosts: number) => {
     await setupBudget({
-      userId: user?.id || 'demo-user',
+      userId: user?.id || 'guest-user',
       monthlyIncome,
       monthlyFixedCosts: newTotalFixedCosts,
       goalName,
@@ -210,55 +333,69 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
     }
   };
 
-  // Handler: Reset All Data
-  const handleResetAllData = async () => {
-    try {
-      await AsyncStorage.multiRemove([
-        'vi_locket_transactions_data',
-        'vi_locket_budget_setup',
-        'vi_locket_cached_user',
-        STORAGE_KEY_MASK_MONEY,
-        STORAGE_KEY_GOAL_DEADLINE,
-        STORAGE_KEY_GOAL_REASON,
-      ]);
-
-      if (user?.id) {
-        await loadTransactions(user.id);
-      }
-
-      Alert.alert(
-        'Đã dọn sạch dữ liệu',
-        'Toàn bộ nhật ký chi tiêu và dữ liệu trên máy đã được đặt lại thành công.'
-      );
-    } catch (err) {
-      Alert.alert('Lỗi', 'Không thể xóa dữ liệu cục bộ lúc này.');
-    }
-  };
-
-  // Handler: Delete Account
-  const handleDeleteAccount = async () => {
-    try {
-      await AsyncStorage.clear();
-      if (onSignOut) {
-        onSignOut();
-      } else {
-        await signOut();
-      }
-    } catch (err) {
-      console.warn('Failed to delete account:', err);
-    }
-  };
-
   // Calculate Streak
   const occurredDates = transactions.map((t) => t.occurred_at.split('T')[0]);
   const streakDays = calculateStreakDays(occurredDates);
-  const displayName = profile?.full_name || user?.full_name || 'Người dùng Ví';
+  const displayName = profile?.full_name || user?.full_name || 'Bạn';
+
+  // Dòng tiền & Định mức tích lũy cam kết mỗi tháng
+  const disposableIncome = Math.max(0, monthlyIncome - monthlyFixedCosts);
+  const monthlySavingsGoal =
+    disposableIncome > 0
+      ? Math.round((disposableIncome * savingsRatio) / 100000) * 100000
+      : 0;
+
+  // Tiến độ tích lũy tháng theo hạn mức ngày (Daily Allowance Lock-in)
+  const effectiveDaily =
+    baseDailyBudget > 0
+      ? baseDailyBudget
+      : disposableIncome > 0
+      ? Math.max(20000, Math.round((disposableIncome * (1 - savingsRatio)) / 30 / 1000) * 1000)
+      : 0;
+
+  const monthlyLocked = useMemo(() => {
+    return calculateMonthlyLockedSavings({
+      monthlySavingsGoal,
+      dailyBudget: effectiveDaily,
+      todayBudget: todayBudget > 0 ? todayBudget : effectiveDaily,
+      todaySpent,
+      transactions,
+      currentMonthKey,
+      additionalSavedMoney: 0,
+    });
+  }, [
+    monthlySavingsGoal,
+    effectiveDaily,
+    todayBudget,
+    todaySpent,
+    transactions,
+    currentMonthKey,
+  ]);
+
+  const actualSavedThisMonth = monthlyLocked.actualSavedThisMonth;
+
+  // Số tháng còn lại (monthsRemaining)
+  const remainingTotal = Math.max(0, goalTargetAmount - savedMoney);
+  const monthsRemaining =
+    monthlySavingsGoal > 0 ? Math.ceil(remainingTotal / monthlySavingsGoal) : null;
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top + Spacing.sm }]}>
-      {/* 1. TIÊU ĐỀ TRANG HỒ SƠ */}
+      {/* 1. TIÊU ĐỀ TRANG HỒ SƠ & NÚT RĂNG CƯA CÀI ĐẶT */}
       <View style={styles.header}>
         <Text style={[styles.screenTitle, { color: tokens.text }]}>{Strings.profile.title}</Text>
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(main)/settings');
+          }}
+          activeOpacity={0.7}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityLabel="Cài đặt hệ thống"
+        >
+          <Settings size={22} color={tokens.text} strokeWidth={2.2} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -281,25 +418,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
           onPressLogin={() => router.push('/(auth)/login')}
         />
 
-        {/* ================= NHÓM 1: MỤC TIÊU & KẾ HOẠCH TÀI CHÍNH ================= */}
+        {/* ================= MỤC TIÊU & KẾ HOẠCH TÀI CHÍNH ================= */}
         <View style={styles.sectionHeaderRow}>
           <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
             Mục tiêu & Kế hoạch
           </Text>
         </View>
 
-        {/* 1.1: MỤC TIÊU 4 TRƯỜNG */}
-        <GoalSectionCard
-          goalName={goalName}
-          goalTargetAmount={goalTargetAmount}
-          savedMoney={savedMoney}
-          goalDeadline={goalDeadline}
-          goalReason={goalReason}
-          isMasked={isMasked}
-          onPressEdit={() => setShowGoalModal(true)}
-        />
-
-        {/* 1.2: ĐỊNH MỨC & THU CHI ĐỊNH KỲ */}
+        {/* 1.1: ĐỊNH MỨC & THU CHI ĐỊNH KỲ (CÂN BẰNG NGÂN SÁCH - XÁC ĐỊNH THU NHẬP TRƯỚC) */}
         <BudgetSettingsCard
           monthlyIncome={monthlyIncome}
           monthlyFixedCosts={monthlyFixedCosts}
@@ -307,66 +433,34 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
           favUnit={favUnit}
           isMasked={isMasked}
           onSaveBudgetSettings={handleSaveBudgetSettings}
-          onOpenFixedCostsModal={() => setShowFixedCostsModal(true)}
         />
 
-        {/* 1.3: QUY ĐỔI GIỜ CÔNG LAO ĐỘNG */}
-        <HourlyWageSettingsCard
-          hourlyRate={hourlyRate}
+        {/* 1.2: MỤC TIÊU CỦA BẠN (MỤC TIÊU TÍCH LŨY THÁNG) */}
+        <GoalSectionCard
+          goalName={goalName}
+          goalTargetAmount={goalTargetAmount}
+          savedMoney={savedMoney}
+          goals={goals}
+          goalDeadline={goalDeadline}
+          goalReason={goalReason}
           isMasked={isMasked}
-          onOpenEditModal={() => setShowHourlyWageModal(true)}
+          onPressCard={() => setShowGoalDetailModal(true)}
+          onPressAddGoal={handleOpenAddGoal}
+          onPressEdit={handleOpenAddGoal}
+          monthlyIncome={monthlyIncome}
+          monthlyFixedCosts={monthlyFixedCosts}
+          savingsRatio={savingsRatio}
+          currentMonthSpent={currentMonthSpent}
+          favUnit={favUnit}
+          baseDailyBudget={baseDailyBudget}
+          todayBudget={todayBudget}
+          todaySpent={todaySpent}
+          transactions={transactions}
+          currentMonthKey={currentMonthKey}
         />
 
-        {/* 1.4: QUẢN LÝ DANH MỤC THU & CHI */}
+        {/* 1.3: QUẢN LÝ DANH MỤC THU & CHI */}
         <CategorySettingsCard />
-
-        {/* ================= NHÓM 2: TRỢ LÝ & CÁ NHÂN HÓA ================= */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
-            Trợ lý & Cá nhân hóa
-          </Text>
-        </View>
-
-        {/* 2.1: HUẤN LUYỆN VIÊN ANH MINH */}
-        <CoachSettingsCard
-          currentTone={coachTone}
-          currentAddress={coachAddress}
-          onChangeTone={handleChangeTone}
-          onChangeAddress={handleChangeAddress}
-        />
-
-        {/* 2.2: CHỌN GIAO DIỆN SÁNG / TỐI / MÁT */}
-        <ThemeSettingsCard />
-
-        {/* ================= NHÓM 3: BẢO MẬT & HỆ THỐNG ================= */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
-            Bảo mật & Dữ liệu
-          </Text>
-        </View>
-
-        {/* 3.1: QUYỀN RIÊNG TƯ & BẢO MẬT */}
-        <PrivacySecurityCard
-          isMasked={isMasked}
-          onToggleMask={handleToggleMask}
-        />
-
-        {/* 3.2: TIỆN ÍCH MÀN HÌNH KHÓA */}
-        <LockScreenSettingsCard />
-
-        {/* 3.3: TỰ ĐỘNG GHI SỔ THÔNG BÁO NGÂN HÀNG (ANDORID) */}
-        <BankNotificationSettingsCard />
-
-        {/* 3.4: THANH TOÁN VIETQR */}
-        <QRPaySettingsCard />
-
-        {/* 3.4: DỮ LIỆU & QUẢN TRỊ TÀI KHOẢN */}
-        <DataManagementCard
-          onResetAllData={handleResetAllData}
-          onDeleteAccount={handleDeleteAccount}
-          onSignOut={onSignOut || signOut}
-          appVersion="1.0.0 (M0)"
-        />
       </ScrollView>
 
       {/* MODAL CẤU HÌNH CHI PHÍ CỐ ĐỊNH CHI TIẾT */}
@@ -377,15 +471,40 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
         onSaveTotal={handleSaveFixedCosts}
       />
 
-      {/* MODAL SỬA MỤC TIÊU 4 TRƯỜNG */}
+      {/* MODAL THÊM / SỬA MỤC TIÊU */}
       <GoalEditModal
         visible={showGoalModal}
-        initialGoalName={goalName}
-        initialTargetAmount={goalTargetAmount}
-        initialDeadline={goalDeadline}
-        initialReason={goalReason}
-        onClose={() => setShowGoalModal(false)}
+        goalId={selectedGoalToEdit?.id}
+        initialGoalName={selectedGoalToEdit ? selectedGoalToEdit.name : ''}
+        initialTargetAmount={selectedGoalToEdit ? selectedGoalToEdit.targetAmount : 0}
+        initialDeadline={selectedGoalToEdit ? selectedGoalToEdit.deadline : ''}
+        initialReason={selectedGoalToEdit ? selectedGoalToEdit.reason : ''}
+        monthlySavingsGoal={monthlySavingsGoal}
+        existingUnfinishedAmount={existingUnfinishedAmount}
+        onClose={() => {
+          setShowGoalModal(false);
+          setSelectedGoalToEdit(null);
+        }}
         onSave={handleSaveGoal}
+      />
+
+      {/* MODAL CHI TIẾT MỤC TIÊU (MỤC ĐÍCH, NGÀY ĐẠT ĐƯỢC DỰ KIẾN, TIẾN ĐỘ) */}
+      <GoalDetailModal
+        visible={showGoalDetailModal}
+        onClose={() => setShowGoalDetailModal(false)}
+        onOpenEdit={(goal) => handleOpenEditGoal(goal)}
+        onAddNewGoal={handleOpenAddGoal}
+        onDeleteGoal={handleDeleteGoal}
+        goals={goals}
+        goalName={goalName}
+        goalTargetAmount={goalTargetAmount}
+        savedMoney={savedMoney}
+        monthlySavingsGoal={monthlySavingsGoal}
+        monthsRemaining={monthsRemaining}
+        actualSavedThisMonth={actualSavedThisMonth}
+        goalDeadline={goalDeadline}
+        goalReason={goalReason}
+        isMasked={isMasked}
       />
 
       {/* MODAL ĐỔI BIỆT DANH */}
@@ -394,15 +513,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onSignOut, onOpenLesso
         currentName={displayName}
         onClose={() => setShowNameModal(false)}
         onSave={handleSaveName}
-      />
-
-      {/* MODAL CẤU HÌNH LƯƠNG GIỜ */}
-      <HourlyWageModal
-        visible={showHourlyWageModal}
-        currentHourlyRate={hourlyRate}
-        monthlyIncome={monthlyIncome}
-        onClose={() => setShowHourlyWageModal(false)}
-        onSave={handleSaveHourlyRate}
       />
     </View>
   );
@@ -414,6 +524,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: Spacing.sm,
   },
   screenTitle: {
@@ -421,13 +534,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.5,
   },
+  settingsButton: {
+    padding: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   scrollContent: {
     paddingTop: 6,
   },
   sectionHeaderRow: {
     paddingHorizontal: 2,
     marginTop: 8,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   sectionHeaderText: {
     fontSize: 11.5,

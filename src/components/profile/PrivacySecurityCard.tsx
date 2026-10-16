@@ -5,7 +5,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Eye, EyeOff, Lock, Shield } from 'lucide-react-native';
+import { Eye, EyeOff, Shield } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Strings } from '../../constants/strings';
 import { useTheme } from '../../theme/ThemeContext';
@@ -31,20 +31,18 @@ export const PrivacySecurityCard: React.FC<PrivacySecurityCardProps> = ({
     <View style={[styles.container, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
       {/* 1. TIÊU ĐỀ KHỐI */}
       <View style={styles.headerRow}>
-        <View style={[styles.iconBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Shield size={15} color={tokens.primary} strokeWidth={2.4} />
-        </View>
+        <Shield size={20} color={tokens.primary} strokeWidth={2.6} />
         <Text style={[styles.sectionTitle, { color: tokens.text }]}>{Strings.profile.privacySectionTitle}</Text>
       </View>
 
       {/* 2. CÔNG TẮC ẨN TIỀN TOÀN APP */}
-      <View style={[styles.switchRow, { borderBottomColor: tokens.border }]}>
+      <View style={styles.switchRow}>
         <View style={styles.labelCol}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             {isMasked ? (
-              <EyeOff size={15} color={tokens.primary} />
+              <EyeOff size={16} color={tokens.primary} strokeWidth={2.4} />
             ) : (
-              <Eye size={15} color={tokens.textMuted} />
+              <Eye size={16} color={tokens.textMuted} strokeWidth={2.4} />
             )}
             <Text style={[styles.rowTitle, { color: tokens.text }]}>{Strings.profile.maskMoney}</Text>
           </View>
@@ -59,18 +57,6 @@ export const PrivacySecurityCard: React.FC<PrivacySecurityCardProps> = ({
           trackColor={{ false: tokens.surfaceAlt, true: tokens.primary }}
           thumbColor={isMasked ? '#1B2733' : tokens.textMuted}
         />
-      </View>
-
-      {/* 3. KHÓA FACE ID / PIN (M1 SẮP RA MẮT) */}
-      <View style={styles.lockedRow}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Lock size={15} color={tokens.textMuted} />
-          <Text style={[styles.lockedTitle, { color: tokens.textSub }]}>{Strings.profile.faceIdPin}</Text>
-        </View>
-
-        <View style={[styles.comingSoonBadge, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Text style={[styles.comingSoonText, { color: tokens.textMuted }]}>{Strings.profile.comingSoonM1}</Text>
-        </View>
       </View>
     </View>
   );
@@ -91,27 +77,18 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     marginBottom: 14,
   },
-  iconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '700',
   },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
+    paddingVertical: 4,
   },
   labelCol: {
     flex: 1,
@@ -126,24 +103,5 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     marginTop: 2,
   },
-  lockedRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 12,
-  },
-  lockedTitle: {
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  comingSoonBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: radii.full,
-    borderWidth: 1,
-  },
-  comingSoonText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
 });
+

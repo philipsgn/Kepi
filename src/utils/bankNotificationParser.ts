@@ -96,6 +96,7 @@ export interface ParsedBankNotification {
   content: string;
   categoryName: string;
   categoryId: string;
+  isGenericContent?: boolean;
   accountNumberMasked?: string;
   balanceRemaining?: number;
   rawText: string;
@@ -303,6 +304,9 @@ export function parseBankNotification(
     extractedContent = title && title.length > 2 ? title : `Giao dịch ${brandInfo.bankName}`;
   }
 
+  // Kiểm tra xem nội dung có phải là chuỗi mặc định vô nghĩa (tên người chuyển, CK, v.v.)
+  const isGenericContent = isGenericBankContent(extractedContent);
+
   // Tự động phân loại danh mục thông minh từ nội dung
   const { categoryId, categoryName } = classifyCategoryFromContent(extractedContent, type);
 
@@ -317,9 +321,32 @@ export function parseBankNotification(
     content: extractedContent,
     categoryName,
     categoryId,
+    isGenericContent,
     accountNumberMasked,
     balanceRemaining,
     rawText: text,
     timestamp: Date.now(),
   };
 }
+
+/**
+ * Kiểm tra xem nội dung giao dịch ngân hàng có phải là chuỗi mặc định vô nghĩa
+ * (Ví dụ: "NGUYEN VAN A chuyen tien", "Chuyen tien", "CK", "123", v.v.)
+ */
+export function isGenericBankContent(content: string): boolean {
+  if (!content || content.trim().length === 0) return true;
+  const normalized = content.toLowerCase().trim();
+  const genericPatterns = [
+    /^chuyen\s*(tien|khoan)?$/i,
+    /^ck\b/i,
+    /^thanh\s*toan$/i,
+    /^gd\s*:/i,
+    /^ref\s*:/i,
+    /chuyen\s*tien/i,
+    /chuyen\s*khoan/i,
+    /thanh\s*toan\s*qr/i,
+    /giao\s*dich/i,
+  ];
+  return genericPatterns.some((pattern) => pattern.test(normalized));
+}
+

@@ -10,9 +10,11 @@ import {
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, Tag } from 'lucide-react-native';
+import { X, Tag, Sparkles } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { EXPENSE_CATEGORIES, getCategoryConfig } from '../../constants/categories';
+import { useCategoryStore } from '../../store/categoryStore';
+import { CATEGORY_ICON_MAP } from '../../constants/categoryDefaults';
 
 interface OnCameraPhotoOverlayProps {
   photoUri: string;
@@ -59,6 +61,10 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
   const [thousandsInput, setThousandsInput] = useState(initialThousands);
 
   const activeCategory = hasSelectedCategory ? getCategoryConfig(category) : null;
+  const { getExpenseCategories, getCategoryById } = useCategoryStore();
+  const allExpenseCategories = getExpenseCategories();
+  const customCat = hasSelectedCategory ? getCategoryById(category) : null;
+  const activeLabel = customCat?.name || (activeCategory ? activeCategory.shortLabel : 'Chọn danh mục');
 
   useEffect(() => {
     if (amount > 0) {
@@ -141,11 +147,21 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
           onPress={toggleCategoryPicker}
           activeOpacity={0.8}
         >
-          {hasSelectedCategory && activeCategory ? (
+          {hasSelectedCategory ? (
             <>
-              <activeCategory.Icon size={13} color="#FFFFFF" strokeWidth={2.2} />
+              {customCat && customCat.icon && CATEGORY_ICON_MAP[customCat.icon] ? (
+                React.createElement(CATEGORY_ICON_MAP[customCat.icon], {
+                  size: 13,
+                  color: '#FFFFFF',
+                  strokeWidth: 2.2,
+                })
+              ) : activeCategory ? (
+                <activeCategory.Icon size={13} color="#FFFFFF" strokeWidth={2.2} />
+              ) : (
+                <Tag size={13} color="#FFFFFF" strokeWidth={2.2} />
+              )}
               <Text style={styles.tagButtonText}>
-                {activeCategory.shortLabel} ▾
+                {activeLabel} ▾
               </Text>
             </>
           ) : (
@@ -162,7 +178,7 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
         <View style={styles.rightSpacer} />
       </View>
 
-      {/* DẢI CHỌN DANH MỤC NHANH KHI BẤM NÚT TAG */}
+      {/* DẢI CHỌN ĐẦY ĐỦ 100% DANH MỤC KHI BẤM NÚT TAG */}
       {isPickerOpen && (
         <View style={styles.categoryPickerContainer}>
           <ScrollView
@@ -170,9 +186,9 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoryPickerList}
           >
-            {EXPENSE_CATEGORIES.map((cat) => {
+            {allExpenseCategories.map((cat) => {
               const isSelected = hasSelectedCategory && cat.id === category;
-              const IconComp = cat.Icon;
+              const IconComp = CATEGORY_ICON_MAP[cat.icon] || Sparkles;
               return (
                 <TouchableOpacity
                   key={cat.id}
@@ -202,7 +218,7 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
                       isSelected && styles.categoryPickerChipTextActive,
                     ]}
                   >
-                    {cat.shortLabel}
+                    {cat.name}
                   </Text>
                 </TouchableOpacity>
               );

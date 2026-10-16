@@ -33,18 +33,13 @@ export const CategorySettingsCard: React.FC = () => {
         onPress={handleOpen}
         activeOpacity={0.85}
       >
-        <View
-          style={[
-            styles.iconBox,
-            { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
-          ]}
-        >
-          <FolderTree size={16} color={tokens.primary} strokeWidth={2.4} />
+        <View style={styles.iconBox}>
+          <FolderTree size={21} color={tokens.primary} strokeWidth={2.4} />
         </View>
 
         <View style={styles.contentCol}>
           <Text style={[styles.title, { color: tokens.text }]}>
-            Danh Mục Thu & Chi
+            DANH MỤC THU & CHI
           </Text>
           <Text style={[styles.subtitle, { color: tokens.textMuted }]}>
             {activeExpense} mục Chi · {activeIncome} mục Thu đang hoạt động
@@ -69,7 +64,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     borderWidth: 1,
     padding: 16,
-    marginBottom: 14,
+    marginBottom: 16,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -78,10 +73,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -89,8 +80,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '700',
+    letterSpacing: -0.2,
   },
   subtitle: {
     fontSize: 11.5,
