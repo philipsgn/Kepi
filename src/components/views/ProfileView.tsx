@@ -389,7 +389,7 @@ export const ProfileView: React.FC<ProfileViewProps> = () => {
           style={styles.settingsButton}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(main)/settings');
+            router.push('/(main)/settings' as any);
           }}
           activeOpacity={0.7}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
