@@ -38,15 +38,8 @@ export const MonthRolloverBanner: React.FC<MonthRolloverBannerProps> = ({
         },
       ]}
     >
-      <View
-        style={[
-          styles.iconBox,
-          {
-            backgroundColor: tokens.primary + '20',
-          },
-        ]}
-      >
-        <Sparkles size={16} color={tokens.primary} strokeWidth={2.2} />
+      <View style={styles.iconBox}>
+        <Sparkles size={20} color={tokens.primary} strokeWidth={2.6} />
       </View>
 
       <View style={styles.textCol}>
@@ -63,11 +56,12 @@ export const MonthRolloverBanner: React.FC<MonthRolloverBannerProps> = ({
       </View>
 
       <TouchableOpacity
-        style={[styles.closeBtn, { borderColor: tokens.border }]}
+        style={styles.closeBtn}
         onPress={handleDismiss}
         activeOpacity={0.7}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
       >
-        <X size={14} color={tokens.textMuted} strokeWidth={2} />
+        <X size={18} color={tokens.textMuted} strokeWidth={2.6} />
       </TouchableOpacity>
     </View>
   );
@@ -86,11 +80,12 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: radii.full,
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   textCol: {
     flex: 1,

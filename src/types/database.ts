@@ -38,7 +38,7 @@ export interface Transaction {
   description: string | null;
   photo_url: string | null;
   thumbnail_url?: string | null;
-  payment_method: PaymentMethod;
+  payment_method?: PaymentMethod;
   source: TransactionSource;
   status?: TransactionStatus;
   payee_name?: string | null;

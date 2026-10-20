@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ChevronLeft, ChevronRight, Leaf } from 'lucide-react-native';
+import { Calendar, ChevronLeft, ChevronRight, Leaf } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 import { useTheme } from '../../theme/ThemeContext';
@@ -95,21 +95,20 @@ export const PhotoCalendarGrid: React.FC<PhotoCalendarGridProps> = ({
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             onPrevMonth();
           }}
-          style={[
-            styles.navArrowBtn,
-            { backgroundColor: tokens.surfaceAlt },
-          ]}
+          style={styles.navArrowBtn}
           activeOpacity={0.75}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <ChevronLeft size={18} color={tokens.text} strokeWidth={2.2} />
+          <ChevronLeft size={20} color={tokens.text} strokeWidth={2.6} />
         </TouchableOpacity>
 
         <View
           style={[
             styles.monthTitleBlock,
-            { backgroundColor: tokens.surfaceAlt },
+            { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border, borderWidth: 1 },
           ]}
         >
+          <Calendar size={14} color={tokens.primary} strokeWidth={2.4} />
           <Text style={[styles.monthTitleText, { color: tokens.text }]}>
             Tháng {month}, {year}
           </Text>
@@ -120,13 +119,11 @@ export const PhotoCalendarGrid: React.FC<PhotoCalendarGridProps> = ({
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             onNextMonth();
           }}
-          style={[
-            styles.navArrowBtn,
-            { backgroundColor: tokens.surfaceAlt },
-          ]}
+          style={styles.navArrowBtn}
           activeOpacity={0.75}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <ChevronRight size={18} color={tokens.text} strokeWidth={2.2} />
+          <ChevronRight size={20} color={tokens.text} strokeWidth={2.6} />
         </TouchableOpacity>
       </View>
 
@@ -181,11 +178,15 @@ const styles = StyleSheet.create({
   navArrowBtn: {
     width: 36,
     height: 36,
-    borderRadius: radii.full,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   monthTitleBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: radii.full,

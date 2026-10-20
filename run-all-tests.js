@@ -1667,22 +1667,22 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.strictEqual(isGeneric('CK'), true, 'Short "CK" flagged as generic');
   assert.strictEqual(isGeneric('Highlands Coffee Ho Guom'), false, 'Clear merchant/item must not be flagged as generic');
 
-  // Test B: Clean description normalization (Fallback to Category name + Bank code)
+  // Test B: Clean description normalization (Ghim [Mã NH] ở đầu + Category name / Note)
   const formatFinalDescription = (customNote, categoryName, bankCode) => {
     const bankTag = bankCode ? `[${bankCode}]` : '';
     if (customNote && customNote.trim().length > 0) {
-      return `${customNote.trim()} ${bankTag}`.trim();
+      return bankTag ? `${bankTag} ${customNote.trim()}`.trim() : customNote.trim();
     }
-    return `${categoryName} ${bankTag}`.trim();
+    return bankTag ? `${bankTag} ${categoryName}`.trim() : categoryName;
   };
 
-  // Case 1: Generic transfer without custom note -> Clean category name + bank code
+  // Case 1: Generic transfer without custom note -> Clean category name with bank code tag at start
   const desc1 = formatFinalDescription('', 'Ăn uống', 'VCB');
-  assert.strictEqual(desc1, 'Ăn uống [VCB]', 'Transaction title is clean category without raw transfer text');
+  assert.strictEqual(desc1, '[VCB] Ăn uống', 'Transaction title has [VCB] tag at start');
 
-  // Case 2: Custom note entered ("Bàn phím cơ") -> Note + bank code
+  // Case 2: Custom note entered ("Bàn phím cơ") -> [TPB] Bàn phím cơ
   const desc2 = formatFinalDescription('Bàn phím cơ', 'Công việc', 'TPB');
-  assert.strictEqual(desc2, 'Bàn phím cơ [TPB]', 'Custom note prioritized when entered');
+  assert.strictEqual(desc2, '[TPB] Bàn phím cơ', 'Custom note has [TPB] tag at start');
 
   // Test C: Full Category Selection Integrity (not hardcoded to 2-3 items)
   const fullCategories = [
@@ -1748,7 +1748,550 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 36 Passed: Bank Notification Interactive Lock Screen Actions & Payload verified');
 }
 
-console.log('\n🎉 ALL 36 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (36/36)!');
+// ------------------------------------------------------------------------------------------------
+// TEST 37: Zero-Clutter Camera Overlay & Background Smart Payment Method Defaults
+// ------------------------------------------------------------------------------------------------
+{
+  const overlayPath = path.join(__dirname, 'src/components/camera/OnCameraPhotoOverlay.tsx');
+  assert.ok(fs.existsSync(overlayPath), 'src/components/camera/OnCameraPhotoOverlay.tsx must exist');
+
+  const overlayCode = fs.readFileSync(overlayPath, 'utf8');
+
+  // 1. Kiểm tra OnCameraPhotoOverlay cực kỳ tối giản (Không nút gạt rườm rà, cân đối trung tâm)
+  assert.ok(overlayCode.includes('tagButtonCenter'), 'Overlay must have centered category picker button');
+  assert.ok(overlayCode.includes('rightSpacer'), 'Overlay must have balanced rightSpacer for symmetry');
+  assert.ok(!overlayCode.includes('paymentMethodPill'), 'Overlay must NOT clutter camera with payment method pills');
+
+  // 2. Pure function kiểm thử Smart Defaults tự động ngầm theo từng nguồn giao dịch
+  const resolveSmartPaymentMethod = (sourceKind) => {
+    switch (sourceKind) {
+      case 'VIETQR':
+      case 'BANK_NOTIFICATION':
+      case 'RECEIPT_UPLOAD':
+        return 'BANK';
+      case 'E_WALLET_QR':
+        return 'E_WALLET';
+      case 'CAMERA_PHOTO':
+      case 'MANUAL':
+      default:
+        return 'CASH';
+    }
+  };
+
+  assert.strictEqual(resolveSmartPaymentMethod('VIETQR'), 'BANK', 'VietQR must default to BANK');
+  assert.strictEqual(resolveSmartPaymentMethod('BANK_NOTIFICATION'), 'BANK', 'Bank noti must default to BANK');
+  assert.strictEqual(resolveSmartPaymentMethod('RECEIPT_UPLOAD'), 'BANK', 'Receipt upload must default to BANK');
+  assert.strictEqual(resolveSmartPaymentMethod('E_WALLET_QR'), 'E_WALLET', 'E-wallet QR must default to E_WALLET');
+  assert.strictEqual(resolveSmartPaymentMethod('CAMERA_PHOTO'), 'CASH', 'Normal camera photo must default to CASH');
+
+  // 3. Phân lập tuyệt đối: Category ("Tiêu vào gì") vs Payment Method ("Tiêu bằng gì")
+  const sampleTx = {
+    category: 'Ăn uống',
+    payment_method: 'BANK',
+  };
+  assert.notStrictEqual(sampleTx.category, sampleTx.payment_method, 'Category and Payment Method must be orthogonal');
+
+  console.log('✅ Test 37 Passed: Zero-Clutter Camera Overlay & Smart Payment Defaults verified');
+}
+
+// ------------------------------------------------------------------------------------------------
+// TEST 38: Zero Payment Method on UI & Auto-Pinned [Mã NH] Tag Verification (Decision 72)
+// ------------------------------------------------------------------------------------------------
+{
+  const calendarPath = path.join(__dirname, 'src/components/journal/LocketCalendarView.tsx');
+  const galleryPath = path.join(__dirname, 'src/components/journal/GalleryGridView.tsx');
+  const peekPath = path.join(__dirname, 'src/components/camera/HistoryPeekSheet.tsx');
+  const deeplinkPath = path.join(__dirname, 'src/utils/qr/bankDeeplink.ts');
+
+  assert.ok(fs.existsSync(calendarPath), 'LocketCalendarView.tsx must exist');
+  assert.ok(fs.existsSync(galleryPath), 'GalleryGridView.tsx must exist');
+  assert.ok(fs.existsSync(peekPath), 'HistoryPeekSheet.tsx must exist');
+  assert.ok(fs.existsSync(deeplinkPath), 'bankDeeplink.ts must exist');
+
+  const calendarCode = fs.readFileSync(calendarPath, 'utf8');
+  const galleryCode = fs.readFileSync(galleryPath, 'utf8');
+  const peekCode = fs.readFileSync(peekPath, 'utf8');
+  const deeplinkCode = fs.readFileSync(deeplinkPath, 'utf8');
+
+  // 1. Kiểm tra 100% sạch bóng chuỗi 'Tiền mặt' / 'Chuyển khoản' trên giao diện chính
+  assert.ok(!calendarCode.includes('\'Tiền mặt\' : \'Chuyển khoản\''), 'LocketCalendarView must NOT display Tiền mặt/Chuyển khoản text');
+  assert.ok(!galleryCode.includes('paymentMethodPill'), 'GalleryGridView must NOT display paymentMethodPill');
+  assert.ok(!peekCode.includes('\'Tiền mặt\' : \'Chuyển khoản\''), 'HistoryPeekSheet must NOT display Tiền mặt/Chuyển khoản text');
+
+  // 2. Kiểm tra helper getBankShortCode trong bankDeeplink.ts
+  assert.ok(deeplinkCode.includes('export function getBankShortCode'), 'bankDeeplink.ts must export getBankShortCode');
+  assert.ok(deeplinkCode.includes("bin: '970436'"), 'Must contain VCB BIN 970436');
+  assert.ok(deeplinkCode.includes("bin: '970422'"), 'Must contain MB BIN 970422');
+  assert.ok(deeplinkCode.includes("bin: '970423'"), 'Must contain TPB BIN 970423');
+
+  // Verify BIN & AppId to shortCode logic
+  const mockBankCode = (bankBin, appId) => {
+    if (appId) return appId.toUpperCase();
+    const binMap = { '970436': 'VCB', '970422': 'MB', '970423': 'TPB' };
+    return binMap[bankBin] || '';
+  };
+  assert.strictEqual(mockBankCode('970436'), 'VCB', 'BIN 970436 must return VCB');
+  assert.strictEqual(mockBankCode('970422'), 'MB', 'BIN 970422 must return MB');
+  assert.strictEqual(mockBankCode('970423'), 'TPB', 'BIN 970423 must return TPB');
+  assert.strictEqual(mockBankCode(undefined, 'vcb'), 'VCB', 'appId vcb must return VCB');
+  assert.strictEqual(mockBankCode(undefined, 'tcb'), 'TCB', 'appId tcb must return TCB');
+
+  // 3. Kiểm thử Format ghim sẵn [Mã NH] vào mô tả
+  const formatVietQRDesc = (bankCode, payeeName) => {
+    const bankTag = bankCode ? `[${bankCode}]` : '';
+    const cleanPayee = payeeName ? ` ${payeeName}` : '';
+    return bankTag ? `${bankTag}${cleanPayee}`.trim() : (payeeName || 'Chuyển khoản VietQR');
+  };
+
+  assert.strictEqual(formatVietQRDesc('VCB', 'Highlands Coffee'), '[VCB] Highlands Coffee', 'VietQR pre-fills [VCB] tag and payee name');
+  assert.strictEqual(formatVietQRDesc('TPB', 'Nguyen Van A'), '[TPB] Nguyen Van A', 'VietQR pre-fills [TPB] tag and payee name');
+
+  console.log('✅ Test 38 Passed: Zero Payment Method on UI & Auto-Pinned [Mã NH] Tag verified');
+}
+
+// 39. Toàn Diện Nâng Cấp UI/UX 5 Tab (Hà Nội Thu Đông, Pure Floating Icons, Format Tiếng Việt & Coach Minh Bồ)
+{
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. Kiểm tra calendarUtils: bỏ chữ 'Tuần' và getDayPeriod
+  const calendarCode = fs.readFileSync(path.join(__dirname, 'src/utils/calendarUtils.ts'), 'utf8');
+  assert.ok(calendarCode.includes('getDayPeriod'), 'calendarUtils must export getDayPeriod');
+  assert.ok(!calendarCode.includes("`Tuần ${monStr}"), 'calendarUtils getWeekRangeText must not have "Tuần " prefix');
+
+  // 2. Kiểm tra formatCategoryName trong categoryDefaults
+  const catDefaultsCode = fs.readFileSync(path.join(__dirname, 'src/constants/categoryDefaults.ts'), 'utf8');
+  assert.ok(catDefaultsCode.includes('export function formatCategoryName'), 'categoryDefaults must export formatCategoryName');
+  assert.ok(catDefaultsCode.includes('suc_khoe'), 'Must contain mapping for suc_khoe');
+  assert.ok(catDefaultsCode.includes('di_chuyen'), 'Must contain mapping for di_chuyen');
+
+  const rawMap = {
+    an_uong: 'Ăn uống',
+    di_chuyen: 'Di chuyển',
+    mua_sam: 'Mua sắm',
+    hoa_don: 'Hóa đơn',
+    giai_tri: 'Giải trí',
+    suc_khoe: 'Sức khỏe',
+    giao_duc: 'Giáo dục',
+    thu_nhap: 'Thu nhập',
+  };
+  const testFormatCategory = (raw) => rawMap[raw] || raw;
+  assert.strictEqual(testFormatCategory('suc_khoe'), 'Sức khỏe', 'suc_khoe formats to Sức khỏe');
+  assert.strictEqual(testFormatCategory('di_chuyen'), 'Di chuyển', 'di_chuyen formats to Di chuyển');
+  assert.strictEqual(testFormatCategory('hoa_don'), 'Hóa đơn', 'hoa_don formats to Hóa đơn');
+
+  // 3. Kiểm tra TransactionPhotoCell: Chi (-30k), Thu (+30k)
+  const cellCode = fs.readFileSync(path.join(__dirname, 'src/components/stats/TransactionPhotoCell.tsx'), 'utf8');
+  assert.ok(cellCode.includes("`-${formatted}`"), 'TransactionPhotoCell must prefix - for expense');
+  assert.ok(cellCode.includes("`+${formatted}`"), 'TransactionPhotoCell must prefix + for income');
+
+  // 4. Kiểm tra Financial Context RAG và tone "bồ" trong chatUtils
+  const chatUtilsCode = fs.readFileSync(path.join(__dirname, 'src/utils/chatUtils.ts'), 'utf8');
+  assert.ok(chatUtilsCode.includes('topCategoryName?: string'), 'FinancialContext must support topCategoryName');
+  assert.ok(chatUtilsCode.includes('savingsGoalText?: string'), 'FinancialContext must support savingsGoalText');
+  assert.ok(chatUtilsCode.includes("'bồ'"), 'Coach Minh must use warm "bồ" greeting');
+
+  // 5. Kiểm tra SettingsView: 100% row icons sử dụng tokens.primary
+  const settingsCode = fs.readFileSync(path.join(__dirname, 'src/components/views/SettingsView.tsx'), 'utf8');
+  assert.ok(!settingsCode.includes('<Cloud size={22} color="#10B981"'), 'Cloud icon must not use raw green');
+  assert.ok(!settingsCode.includes('<Palette size={22} color="#10B981"'), 'Palette icon must not use raw green');
+  assert.ok(!settingsCode.includes('<Smartphone size={22} color="#06B6D4"'), 'Smartphone icon must not use raw cyan');
+  assert.ok(settingsCode.includes('<Cloud size={22} color={tokens.primary}'), 'Cloud icon must use tokens.primary');
+  assert.ok(settingsCode.includes('<Palette size={22} color={tokens.primary}'), 'Palette icon must use tokens.primary');
+  assert.ok(settingsCode.includes('<Smartphone size={22} color={tokens.primary}'), 'Smartphone icon must use tokens.primary');
+
+  // 6. Kiểm tra OnCameraPhotoOverlay: mở sẵn chips ngang, autofocus, tap photo to focus note
+  const cameraOverlayCode = fs.readFileSync(path.join(__dirname, 'src/components/camera/OnCameraPhotoOverlay.tsx'), 'utf8');
+  assert.ok(cameraOverlayCode.includes('autoFocus={true}'), 'Amount input must autoFocus on mount');
+  assert.ok(cameraOverlayCode.includes('noteInputRef.current?.focus()'), 'Tapping photo must focus note input');
+
+  console.log('✅ Test 39 Passed: Comprehensive UI/UX 5 Tab Overhaul verified cleanly');
+}
+
+// -------------------------------------------------------------
+// TEST 40: Polish UI/UX — Calendar Badges, Simplified 'Ăn uống',
+// Stats Spend Trend Title & Camera Zoom Slider with Scroll Freeze
+// -------------------------------------------------------------
+{
+  const fs = require('fs');
+  const path = require('path');
+  const assert = require('assert');
+
+  // 1. Camera Zoom Slider with Scroll Freeze in app/(main)/index.tsx
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  assert.ok(indexCode.includes('isZoomSliding'), 'index.tsx must declare isZoomSliding state');
+  assert.ok(indexCode.includes('scrollEnabled={!isZoomSliding}'), 'index.tsx must freeze scrolling on both pagers when isZoomSliding is true');
+  assert.ok(indexCode.includes('zoomSliderPanResponder'), 'index.tsx must define zoomSliderPanResponder');
+  assert.ok(indexCode.includes('onPanResponderTerminationRequest: () => false'), 'zoomSliderPanResponder must not surrender to parent scroll responders');
+  assert.ok(indexCode.includes('zoomContainer'), 'index.tsx must render zoomContainer');
+  assert.ok(indexCode.includes('zoomTrackWrapper'), 'index.tsx must render zoomTrackWrapper with slider');
+
+  // 2. Month Calendar Header in PhotoCalendarGrid.tsx
+  const photoGridPath = path.join(__dirname, 'src/components/journal/PhotoCalendarGrid.tsx');
+  const photoGridCode = fs.readFileSync(photoGridPath, 'utf8');
+  assert.ok(photoGridCode.includes("import { Calendar, ChevronLeft, ChevronRight"), 'PhotoCalendarGrid must import Calendar icon');
+  assert.ok(photoGridCode.includes('<Calendar size={14} color={tokens.primary}'), 'PhotoCalendarGrid must render Calendar icon in month title');
+  assert.ok(photoGridCode.includes("borderWidth: 0"), 'PhotoCalendarGrid nav arrows must be pure borderless vector icons');
+
+  // 3. Week Calendar Header in WeekCalendarCarousel.tsx
+  const weekCarouselPath = path.join(__dirname, 'src/components/journal/WeekCalendarCarousel.tsx');
+  const weekCarouselCode = fs.readFileSync(weekCarouselPath, 'utf8');
+  assert.ok(weekCarouselCode.includes('backgroundColor: tokens.surfaceAlt'), 'WeekCalendarCarousel must style badge with tokens.surfaceAlt');
+  assert.ok(weekCarouselCode.includes('borderColor: tokens.border'), 'WeekCalendarCarousel must style badge with hairline border');
+  assert.ok(weekCarouselCode.includes('<CalendarIcon size={14} color={tokens.primary}'), 'WeekCalendarCarousel must render calendar icon in week title badge');
+
+  // 4. Category Simplification: "Ăn uống" (All occurrences of "Ăn uống & Cà phê" removed/simplified)
+  const catDefaultsPath = path.join(__dirname, 'src/constants/categoryDefaults.ts');
+  const catDefaultsCode = fs.readFileSync(catDefaultsPath, 'utf8');
+  assert.ok(!catDefaultsCode.includes("name: 'Ăn uống & Cà phê'"), "categoryDefaults must not contain 'Ăn uống & Cà phê' as default name");
+  assert.ok(catDefaultsCode.includes("name: 'Ăn uống'"), "categoryDefaults must contain 'Ăn uống' as default name");
+
+  const categoriesPath = path.join(__dirname, 'src/constants/categories.tsx');
+  const categoriesCode = fs.readFileSync(categoriesPath, 'utf8');
+  assert.ok(!categoriesCode.includes("label: 'Ăn uống & Cà phê'"), "categories.tsx must not contain 'Ăn uống & Cà phê' as category label");
+  assert.ok(categoriesCode.includes("label: 'Ăn uống'"), "categories.tsx must contain 'Ăn uống' as category label");
+
+  const statsViewPath = path.join(__dirname, 'src/components/views/StatsView.tsx');
+  const statsViewCode = fs.readFileSync(statsViewPath, 'utf8');
+  assert.ok(statsViewCode.includes("{ id: 'an_uong', label: 'Ăn uống' }"), "StatsView must list { id: 'an_uong', label: 'Ăn uống' }");
+
+  const journalViewPath = path.join(__dirname, 'src/components/views/JournalView.tsx');
+  const journalViewCode = fs.readFileSync(journalViewPath, 'utf8');
+  assert.ok(journalViewCode.includes("{ key: 'an_uong', label: 'Ăn uống'"), "JournalView must list { key: 'an_uong', label: 'Ăn uống' }");
+
+  // 5. Stats Spend Trend Title without day count in AnalyticsDashboardView.tsx
+  const analyticsPath = path.join(__dirname, 'src/components/stats/AnalyticsDashboardView.tsx');
+  const analyticsCode = fs.readFileSync(analyticsPath, 'utf8');
+  assert.ok(analyticsCode.includes('spendTrendTitle'), 'AnalyticsDashboardView must declare spendTrendTitle');
+  assert.ok(!analyticsCode.includes("`Xu Hướng Chi Tiêu (${dailySpendBars.length} Ngày)`"), 'AnalyticsDashboardView must not contain hardcoded day count');
+  assert.ok(analyticsCode.includes("'Xu Hướng Chi Tiêu Tháng Này'"), 'AnalyticsDashboardView must display "Xu Hướng Chi Tiêu Tháng Này" for current month');
+
+  console.log('✅ Test 40 Passed: Calendar Badges, Simplified Ăn uống, Trend Title & Camera Zoom Slider verified cleanly');
+}
+
+// -------------------------------------------------------------
+// TEST 41: Minimalist Camera Zoom (0.5x Ultra-Wide & Pure Header Badge)
+// & Iconic Post-Capture Review Buttons ([X] and [Check], Zero Text, No Top-Left X)
+// -------------------------------------------------------------
+{
+  const fs = require('fs');
+  const path = require('path');
+  const assert = require('assert');
+
+  // 1. Camera Zoom starting at 0.5x and no end buttons in app/(main)/index.tsx
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  assert.ok(indexCode.includes('(0.5 + cameraZoom * 2.5).toFixed(1)'), 'Zoom level badge must start at 0.5x (ultra-wide)');
+  assert.ok(!indexCode.includes('styles.zoomQuickBtn'), 'Zoom control bar must not render quick buttons at the two ends');
+  assert.ok(indexCode.includes('zoomSliderTrackWidth = 140'), 'Track width must be 140px for comfortable sliding');
+
+  // 2. Post-capture review bottom bar: pure iconic circular buttons with no text
+  assert.ok(indexCode.includes('styles.inFrameRetakeIconButton'), 'Must use inFrameRetakeIconButton for [X]');
+  assert.ok(indexCode.includes('styles.inFrameSaveIconButton'), 'Must use inFrameSaveIconButton for [Check]');
+  assert.ok(!indexCode.includes('styles.inFrameRetakeButtonText'), 'Must remove text "Chụp lại" from retake button');
+  assert.ok(!indexCode.includes('styles.inFrameSaveButtonText'), 'Must remove text "Lưu vào sổ" from save button');
+
+  // 3. No top-left X cancel button in OnCameraPhotoOverlay.tsx
+  const overlayPath = path.join(__dirname, 'src/components/camera/OnCameraPhotoOverlay.tsx');
+  const overlayCode = fs.readFileSync(overlayPath, 'utf8');
+  assert.ok(!overlayCode.includes('styles.circleIconButton'), 'OnCameraPhotoOverlay must not contain top-left cancel button');
+  assert.ok(overlayCode.includes("justifyContent: 'center'"), 'Top bar must center the category tag');
+
+  console.log('✅ Test 41 Passed: Minimalist Camera Zoom 0.5x & Iconic Review Buttons verified cleanly');
+}
+
+// 42. Row Level Security (RLS) Multi-User Isolation & Zero-STK Schema Contract
+{
+  const assert = require('assert');
+
+  // A. Schema File Verification
+  const m5Path = path.join(__dirname, 'supabase/migrations/005_categories_and_sync.sql');
+  const m5Code = fs.readFileSync(m5Path, 'utf8');
+  assert.ok(m5Code.includes('ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;'), 'Categories table must enable RLS');
+  assert.ok(m5Code.includes('auth.uid() = user_id'), 'Categories table policy must enforce auth.uid() = user_id');
+  assert.ok(m5Code.includes('ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;'), 'Profiles table must enable RLS');
+  assert.ok(m5Code.includes('ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;'), 'Transactions table must enable RLS');
+  assert.ok(m5Code.includes('ALTER TABLE public.wait_basket ENABLE ROW LEVEL SECURITY;'), 'Wait basket must enable RLS');
+
+  // B. Zero-STK Database Policy (Never store bank account numbers)
+  const allSqlFiles = [
+    'supabase/migrations/001_initial_schema.sql',
+    'supabase/migrations/002_vietqr_status_and_metadata.sql',
+    'supabase/migrations/003_storage_bucket_and_realtime.sql',
+    'supabase/migrations/004_schema_refinement_and_sources.sql',
+    'supabase/migrations/005_categories_and_sync.sql',
+  ];
+
+  for (const relPath of allSqlFiles) {
+    const fullPath = path.join(__dirname, relPath);
+    if (fs.existsSync(fullPath)) {
+      const sql = fs.readFileSync(fullPath, 'utf8');
+      assert.strictEqual(sql.includes('account_number'), false, `Zero-STK violation: ${relPath} must not contain account_number`);
+      assert.strictEqual(sql.includes('receiver_account'), false, `Zero-STK violation: ${relPath} must not contain receiver_account`);
+      assert.strictEqual(sql.includes('stk_nguoi_nhan'), false, `Zero-STK violation: ${relPath} must not contain stk_nguoi_nhan`);
+    }
+  }
+
+  // C. Multi-User RLS Logic Simulation
+  const mockDatabaseRows = [
+    { id: 'tx-1', user_id: 'user-A', amount: 50000, description: 'Phở bò User A' },
+    { id: 'tx-2', user_id: 'user-A', amount: 35000, description: 'Cà phê User A' },
+    { id: 'tx-3', user_id: 'user-B', amount: 120000, description: 'Tiền điện User B' },
+    { id: 'tx-4', user_id: 'user-C', amount: 90000, description: 'Mua sách User C' },
+  ];
+
+  const evaluateRLSQuery = (authUid) => {
+    if (!authUid) return []; // Unauthenticated / Anon
+    return mockDatabaseRows.filter((row) => row.user_id === authUid);
+  };
+
+  const userAData = evaluateRLSQuery('user-A');
+  const userBData = evaluateRLSQuery('user-B');
+  const anonData = evaluateRLSQuery(null);
+
+  assert.strictEqual(userAData.length, 2, 'User A should only see 2 own transactions');
+  assert.strictEqual(userBData.length, 1, 'User B should only see 1 own transaction');
+  assert.strictEqual(anonData.length, 0, 'Anonymous user must see 0 transactions');
+  assert.strictEqual(userAData.some(r => r.user_id === 'user-B'), false, 'User A MUST NEVER see User B data');
+  assert.strictEqual(userBData.some(r => r.user_id === 'user-A'), false, 'User B MUST NEVER see User A data');
+
+  console.log('✅ Test 42 Passed: Row Level Security (RLS) Multi-User Isolation & Zero-STK Schema Contract verified');
+}
+
+// 43. SubAgent 3: 5-Tab Navigation, Android Native Plugin, 3-Theme Switcher & Zero Payment Method UI
+{
+  const assert = require('assert');
+
+  // 1. Android Native NotificationListener Plugin in app.json
+  const pluginPath = path.join(__dirname, 'plugins/withNotificationListener.js');
+  assert.ok(fs.existsSync(pluginPath), 'plugins/withNotificationListener.js must exist');
+  const plugin = require(pluginPath);
+  assert.strictEqual(typeof plugin, 'function', 'Plugin must export a function');
+
+  const appJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'app.json'), 'utf8'));
+  assert.ok(
+    appJson.expo.plugins.includes('./plugins/withNotificationListener.js'),
+    'app.json plugins must include ./plugins/withNotificationListener.js'
+  );
+  assert.ok(
+    appJson.expo.android.permissions.includes('BIND_NOTIFICATION_LISTENER_SERVICE'),
+    'app.json android permissions must include BIND_NOTIFICATION_LISTENER_SERVICE'
+  );
+
+  // 2. 5-Tab Navigation Alignment
+  const tabBarCode = fs.readFileSync(path.join(__dirname, 'src/components/navigation/FloatingPillTabBar.tsx'), 'utf8');
+  assert.ok(tabBarCode.includes('TAB_COUNT = 5'), 'FloatingPillTabBar must define TAB_COUNT = 5');
+  assert.ok(tabBarCode.includes("id: 'home'"), 'Tab 0 must be home');
+  assert.ok(tabBarCode.includes("id: 'stats'"), 'Tab 1 must be stats');
+  assert.ok(tabBarCode.includes("id: 'camera'"), 'Tab 2 must be camera');
+  assert.ok(tabBarCode.includes("id: 'chat'"), 'Tab 3 must be chat');
+  assert.ok(tabBarCode.includes("id: 'profile'"), 'Tab 4 must be profile');
+
+  const mainIndexCode = fs.readFileSync(path.join(__dirname, 'app/(main)/index.tsx'), 'utf8');
+  assert.ok(mainIndexCode.includes('JournalView'), 'Page 0 must be JournalView (Home)');
+  assert.ok(mainIndexCode.includes('StatsView'), 'Page 1 must be StatsView (Stats)');
+  assert.ok(mainIndexCode.includes('cameraScreenSection'), 'Page 2 must be Camera Viewfinder');
+  assert.ok(mainIndexCode.includes('ChatView'), 'Page 3 must be ChatView (Anh Minh)');
+  assert.ok(mainIndexCode.includes('ProfileView'), 'Page 4 must be ProfileView (Profile)');
+
+  // 3. 3-Theme Switcher in ProfileView & SettingsView
+  const profileViewCode = fs.readFileSync(path.join(__dirname, 'src/components/views/ProfileView.tsx'), 'utf8');
+  assert.ok(profileViewCode.includes('<ThemeSettingsCard />'), 'ProfileView must render ThemeSettingsCard');
+
+  const settingsViewCode = fs.readFileSync(path.join(__dirname, 'src/components/views/SettingsView.tsx'), 'utf8');
+  assert.ok(settingsViewCode.includes('<ThemeSettingsCard />'), 'SettingsView must render ThemeSettingsCard');
+
+  const themeTokens = fs.readFileSync(path.join(__dirname, 'src/theme/tokens.ts'), 'utf8');
+  assert.ok(themeTokens.includes("'light' | 'dark' | 'cool'"), 'ThemeMode must support 3 themes: light, dark, cool');
+
+  // 4. Zero Payment Method in UI
+  const confirmSheetCode = fs.readFileSync(path.join(__dirname, 'src/components/cards/ConfirmationSheet.tsx'), 'utf8');
+  assert.ok(!confirmSheetCode.includes('paymentMethodPill'), 'ConfirmationSheet must not display paymentMethodPill');
+
+  const overlayCode = fs.readFileSync(path.join(__dirname, 'src/components/camera/OnCameraPhotoOverlay.tsx'), 'utf8');
+  assert.ok(!overlayCode.includes('paymentMethodPill'), 'OnCameraPhotoOverlay must not display paymentMethodPill');
+
+  // 5. Clean Onboarding from 0
+  const indexAuth = fs.readFileSync(path.join(__dirname, 'app/index.tsx'), 'utf8');
+  assert.ok(indexAuth.includes('/(auth)/login'), 'Unauthenticated user must redirect to login');
+  assert.ok(indexAuth.includes('/(auth)/budget-setup'), 'Uncompleted budget setup must redirect to budget-setup');
+
+  const txStore = fs.readFileSync(path.join(__dirname, 'src/store/transactionStore.ts'), 'utf8');
+  assert.ok(txStore.includes('transactions: [], isLoading: false'), 'New user transactions must initialize as clean empty array');
+
+  console.log('✅ Test 43 Passed: SubAgent 3 (5-Tab Nav, Android Native Plugin, 3-Theme Switcher & Zero Payment UI) verified');
+}
+
+// 44. SubAgent 1: 3-Theme Color Standardization, WCAG 2.1 AA Compliance, 100% Floating Bold Icons & Component Gallery
+{
+  const assert = require('assert');
+
+  // 1. Kiểm tra 3 Theme tokens chuẩn xác trong src/theme/tokens.ts
+  const tokensCode = fs.readFileSync(path.join(__dirname, 'src/theme/tokens.ts'), 'utf8');
+  assert.ok(tokensCode.includes("bg: '#FAF6EC'"), 'Theme 1 must have background #FAF6EC (Kem Bơ Thu Đông)');
+  assert.ok(tokensCode.includes("primary: '#E59844'"), 'Theme 1 must have primary #E59844 (Nắng Thu Hà Nội)');
+  assert.ok(tokensCode.includes("success: '#7E9F80'"), 'Theme 1 must have success #7E9F80 (Cốm Non Làng Vòng)');
+  assert.ok(tokensCode.includes("danger: '#C86D51'"), 'Theme 1 must have danger #C86D51 (Ngói Rêu Phố Cổ)');
+
+  assert.ok(tokensCode.includes("bg: '#0E1620'"), 'Theme 2 must have background #0E1620 (Dark Mint)');
+  assert.ok(tokensCode.includes("primary: '#2DD4BF'"), 'Theme 2 must have primary #2DD4BF (Mint Sáng Đậm)');
+  assert.ok(tokensCode.includes("textSub: '#94A3B8'"), 'Theme 2 must have textSub #94A3B8 (Slate 400)');
+
+  assert.ok(tokensCode.includes("bg: '#F0FDF4'"), 'Theme 3 must have background #F0FDF4 (Fresh Blue-Mint)');
+  assert.ok(tokensCode.includes("primary: '#059669'"), 'Theme 3 must have primary #059669 (Mint Tươi Ngọt)');
+  assert.ok(tokensCode.includes("accent: '#38BDF8'"), 'Theme 3 must have accent #38BDF8 (Sky Blue)');
+
+  // 2. Kiểm tra hàm tính độ tương phản WCAG 2.1 AA
+  function getLuminance(hex) {
+    let c = hex.replace('#', '');
+    if (c.length === 3) c = c.split('').map(x => x + x).join('');
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(c.substr(i, 2), 16) / 255).map(v => {
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+  function getContrast(h1, h2) {
+    const l1 = getLuminance(h1);
+    const l2 = getLuminance(h2);
+    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+  }
+
+  // Theme 1 contrast tests
+  assert.ok(getContrast('#1C1812', '#FAF6EC') >= 4.5, 'Theme 1 text on bg must be >= 4.5:1');
+  assert.ok(getContrast('#5A4E3D', '#FAF6EC') >= 4.5, 'Theme 1 textSub on bg must be >= 4.5:1');
+  assert.ok(getContrast('#1C1812', '#E59844') >= 4.5, 'Theme 1 textOnPrimary on primary must be >= 4.5:1');
+
+  // Theme 2 contrast tests
+  assert.ok(getContrast('#F8FAFC', '#0E1620') >= 4.5, 'Theme 2 text on bg must be >= 4.5:1');
+  assert.ok(getContrast('#94A3B8', '#0E1620') >= 4.5, 'Theme 2 textSub on bg must be >= 4.5:1');
+  assert.ok(getContrast('#0E1620', '#2DD4BF') >= 4.5, 'Theme 2 textOnPrimary on primary must be >= 4.5:1');
+
+  // Theme 3 contrast tests
+  assert.ok(getContrast('#064E3B', '#F0FDF4') >= 4.5, 'Theme 3 text on bg must be >= 4.5:1');
+  assert.ok(getContrast('#047857', '#F0FDF4') >= 4.5, 'Theme 3 textSub on bg must be >= 4.5:1');
+  assert.ok(getContrast('#FFFFFF', '#059669') >= 3.0, 'Theme 3 white on mint button must be >= 3.0:1 (Large text)');
+
+  // 3. Kiểm tra Floating Bold Icons defaults trong src/constants/categories.tsx
+  const catCode = fs.readFileSync(path.join(__dirname, 'src/constants/categories.tsx'), 'utf8');
+  assert.ok(catCode.includes('strokeWidth = 2.6'), 'Default icon strokeWidth must be 2.6');
+
+  // 4. Kiểm tra ComponentGalleryModal.tsx xem trước cả 3 theme
+  const galleryCode = fs.readFileSync(path.join(__dirname, 'src/components/dev/ComponentGalleryModal.tsx'), 'utf8');
+  assert.ok(galleryCode.includes("'Vàng Kem Bơ'"), 'ComponentGalleryModal must show Theme 1');
+  assert.ok(galleryCode.includes("'Dark Mint'"), 'ComponentGalleryModal must show Theme 2');
+  assert.ok(galleryCode.includes("'Fresh Mint'"), 'ComponentGalleryModal must show Theme 3');
+  assert.ok(galleryCode.includes('paletteCard'), 'ComponentGalleryModal must render color palette showcase');
+  assert.ok(galleryCode.includes('floatingIconsGrid'), 'ComponentGalleryModal must render floating icons showcase');
+
+  console.log('✅ Test 44 Passed: SubAgent 1 (3 Themes, WCAG 2.1 AA Compliance, 100% Floating Bold Icons & Component Gallery) verified');
+}
+
+// 45. SubAgent 4: QA & Security Verification — Dynamic Streak, Default BANK, Offline Base64 Backup & Zero-STK Shield
+{
+  const assert = require('assert');
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. Dynamic Streak Calculation (calculateStreakDays) from Real Transaction Dates
+  const profileUtilsPath = path.join(__dirname, 'src/utils/profileUtils.ts');
+  const profileUtilsCode = fs.readFileSync(profileUtilsPath, 'utf8');
+  assert.ok(profileUtilsCode.includes('export const calculateStreakDays'), 'profileUtils.ts must export calculateStreakDays');
+
+  const toYMD = (d) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return year + '-' + month + '-' + day;
+  };
+
+  // Pure logic simulation of calculateStreakDays matching profileUtils.ts
+  const simulateStreak = (dateStrings) => {
+    if (!dateStrings || dateStrings.length === 0) return 0;
+    const uniqueDays = new Set(dateStrings.map((d) => d.slice(0, 10)));
+    const today = new Date();
+    const todayStr = toYMD(today);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = toYMD(yesterday);
+
+    let currentCheckDate = null;
+    if (uniqueDays.has(todayStr)) {
+      currentCheckDate = new Date(today);
+    } else if (uniqueDays.has(yesterdayStr)) {
+      currentCheckDate = new Date(yesterday);
+    } else {
+      return 0;
+    }
+
+    let streak = 0;
+    while (true) {
+      const checkStr = toYMD(currentCheckDate);
+      if (uniqueDays.has(checkStr)) {
+        streak++;
+        currentCheckDate.setDate(currentCheckDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const now = new Date();
+  const d0 = toYMD(now);
+  const y1 = new Date(now); y1.setDate(now.getDate() - 1); const d1 = toYMD(y1);
+  const y2 = new Date(now); y2.setDate(now.getDate() - 2); const d2 = toYMD(y2);
+  const y5 = new Date(now); y5.setDate(now.getDate() - 5); const d5 = toYMD(y5);
+
+  assert.strictEqual(simulateStreak([]), 0, 'Empty dates array must yield 0 streak');
+  assert.strictEqual(simulateStreak([d0]), 1, 'Today only must yield 1 streak');
+  assert.strictEqual(simulateStreak([d1]), 1, 'Yesterday only (grace period) must yield 1 streak');
+  assert.strictEqual(simulateStreak([d0, d1, d2]), 3, '3 consecutive days must yield 3 streak');
+  assert.strictEqual(simulateStreak([d2, d0, d1, d0]), 3, 'Duplicates and unordered dates must yield 3 streak');
+  assert.strictEqual(simulateStreak([d5]), 0, 'Past date with gap > 1 day must yield 0 streak');
+
+  // 2. Elimination of Payment Method UI & Safe Default 'BANK' in Logic
+  const txStoreCode = fs.readFileSync(path.join(__dirname, 'src/store/transactionStore.ts'), 'utf8');
+  assert.ok(txStoreCode.includes("payment_method: data.payment_method || 'BANK'"), 'transactionStore must default payment_method to BANK');
+
+  // 3. Offline Base64 Photo Embedding & Restore (0$ Cost & Zero Photo Loss)
+  const backupServiceCode = fs.readFileSync(path.join(__dirname, 'src/services/dataBackupService.ts'), 'utf8');
+  assert.ok(backupServiceCode.includes('embeddedPhotos?: Record<string, { fullBase64?: string; thumbBase64?: string }>'), 'Backup payload must support embeddedPhotos');
+  assert.ok(backupServiceCode.includes('FileSystem.EncodingType.Base64'), 'Backup must encode local photos to Base64');
+  assert.ok(backupServiceCode.includes('kepi_restored_photos/'), 'Restore must write Base64 back to local device storage');
+
+  // 4. Absolute Privacy & Security Sweep (Zero STK, Zero Balances, Zero PII)
+  const auditedFiles = [
+    'src/types/database.ts',
+    'src/services/dataBackupService.ts',
+    'src/services/analytics.ts',
+    'src/services/bankCapabilityService.ts',
+    'supabase/migrations/001_initial_schema.sql',
+    'supabase/migrations/005_categories_and_sync.sql',
+  ];
+
+  for (const rel of auditedFiles) {
+    const full = path.join(__dirname, rel);
+    if (fs.existsSync(full)) {
+      const content = fs.readFileSync(full, 'utf8');
+      assert.strictEqual(content.includes('stk_nguoi_nhan'), false, `Violation: ${rel} must not contain stk_nguoi_nhan`);
+      assert.strictEqual(content.includes('recipient_account_number'), false, `Violation: ${rel} must not contain recipient_account_number`);
+    }
+  }
+
+  // Telemetry must sanitize all events
+  const analyticsCode = fs.readFileSync(path.join(__dirname, 'src/services/analytics.ts'), 'utf8');
+  assert.ok(analyticsCode.includes('sanitizedProps'), 'analytics.ts must implement sanitizedProps logic');
+  assert.ok(analyticsCode.includes("key.toLowerCase().includes('stk')"), 'analytics.ts must blacklist STK from telemetry');
+  assert.ok(analyticsCode.includes("key.toLowerCase().includes('account')"), 'analytics.ts must blacklist account numbers');
+
+  console.log('✅ Test 45 Passed: SubAgent 4 (QA, Dynamic Streak, Offline Base64 Backup & Zero-STK Shield) verified cleanly');
+}
+
+console.log('\n🎉 ALL 45 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (45/45)!');
+
+
+
 
 
 

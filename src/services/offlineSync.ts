@@ -35,14 +35,9 @@ export async function enqueueMutation(
     attempts: 0,
   };
 
-  // GUEST SYNC GUARD: Tuyệt đối không lưu mutation của Guest / Demo để không tốn CSDL Supabase
+  // GUEST SYNC GUARD: Tuyệt đối không lưu mutation của Guest để không tốn CSDL Supabase
   const targetUserId = payload?.user_id;
-  if (
-    targetUserId &&
-    (targetUserId.startsWith('guest') ||
-      targetUserId.startsWith('demo') ||
-      targetUserId === 'seed-user')
-  ) {
+  if (targetUserId && targetUserId.startsWith('guest')) {
     return mutation;
   }
 
@@ -205,13 +200,8 @@ export async function flushSyncQueue(): Promise<{
 export async function syncDownTransactions(
   userId: string
 ): Promise<Transaction[] | null> {
-  // GUEST SYNC GUARD: Tài khoản Khách / Demo không query từ Supabase về
-  if (
-    !userId ||
-    userId.startsWith('guest') ||
-    userId.startsWith('demo') ||
-    userId === 'seed-user'
-  ) {
+  // GUEST SYNC GUARD: Tài khoản Khách (Guest) không query từ Supabase về
+  if (!userId || userId.startsWith('guest')) {
     return null;
   }
 

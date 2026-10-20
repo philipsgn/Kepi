@@ -154,7 +154,80 @@ export default function MainAppScreen() {
   const [cameraFacing, setCameraFacing] = useState<'back' | 'front'>('back');
   const [flashMode, setFlashMode] = useState<'off' | 'on' | 'auto'>('off');
   const [isCameraActive, setIsCameraActive] = useState<boolean>(true);
+  const [cameraZoom, setCameraZoom] = useState<number>(0);
+  const [isZoomSliding, setIsZoomSliding] = useState<boolean>(false);
+  const zoomSliderTrackWidth = 140;
+  const zoomDragStartX = useRef<number>(0);
+  const zoomDragStartVal = useRef<number>(0);
+
+  const zoomSliderPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: (evt, gestureState) => {
+        setIsZoomSliding(true);
+        zoomDragStartX.current = gestureState.x0;
+        const locationX = evt.nativeEvent.locationX;
+        if (typeof locationX === 'number' && locationX >= 0 && locationX <= zoomSliderTrackWidth) {
+          const tapZoom = Math.max(0, Math.min(1.0, locationX / zoomSliderTrackWidth));
+          setCameraZoom(tapZoom);
+          zoomDragStartVal.current = tapZoom;
+        } else {
+          zoomDragStartVal.current = cameraZoom;
+        }
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        const dx = gestureState.moveX - zoomDragStartX.current;
+        const deltaZoom = dx / zoomSliderTrackWidth;
+        const nextZoom = Math.max(0, Math.min(1.0, zoomDragStartVal.current + deltaZoom));
+        setCameraZoom(nextZoom);
+      },
+      onPanResponderRelease: () => {
+        setIsZoomSliding(false);
+      },
+      onPanResponderTerminate: () => {
+        setIsZoomSliding(false);
+      },
+    })
+  ).current;
+
+  const baseZoom = useRef<number>(0);
+  const initialPinchDist = useRef<number | null>(null);
   const lastTapRef = useRef<number>(0);
+
+  const pinchPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
+      onMoveShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
+      onPanResponderGrant: (evt) => {
+        const touches = evt.nativeEvent.touches;
+        if (touches.length === 2) {
+          const dx = touches[0].pageX - touches[1].pageX;
+          const dy = touches[0].pageY - touches[1].pageY;
+          initialPinchDist.current = Math.sqrt(dx * dx + dy * dy);
+          baseZoom.current = cameraZoom;
+        }
+      },
+      onPanResponderMove: (evt) => {
+        const touches = evt.nativeEvent.touches;
+        if (touches.length === 2 && initialPinchDist.current) {
+          const dx = touches[0].pageX - touches[1].pageX;
+          const dy = touches[0].pageY - touches[1].pageY;
+          const currentDist = Math.sqrt(dx * dx + dy * dy);
+          const factor = (currentDist - initialPinchDist.current) / 300;
+          const newZoom = Math.max(0, Math.min(1, baseZoom.current + factor));
+          setCameraZoom(newZoom);
+        }
+      },
+      onPanResponderRelease: () => {
+        initialPinchDist.current = null;
+      },
+    })
+  ).current;
 
   // Modals & Sheets
   const [capturedPhotoUri, setCapturedPhotoUri] = useState<string | null>(null);
@@ -164,6 +237,7 @@ export default function MainAppScreen() {
   const [inFrameCategory, setInFrameCategory] = useState<string>('');
   const [showInFrameCategoryPicker, setShowInFrameCategoryPicker] = useState<boolean>(false);
   const [inFrameDescription, setInFrameDescription] = useState<string>('');
+  const [inFramePaymentMethod, setInFramePaymentMethod] = useState<PaymentMethod>('CASH');
   const [parsedData, setParsedData] = useState<ParsedExpenseData | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showActualPrice, setShowActualPrice] = useState(false);
@@ -433,9 +507,12 @@ export default function MainAppScreen() {
             setInFrameAmount(activeBankSnapshotEvent.amount);
             setInFrameType(activeBankSnapshotEvent.type);
             setInFrameCategory(activeBankSnapshotEvent.categoryId || '');
-            setInFrameDescription(
-              activeBankSnapshotEvent.isGenericContent ? '' : (activeBankSnapshotEvent.content || '')
-            );
+            const cleanContent = activeBankSnapshotEvent.isGenericContent ? '' : (activeBankSnapshotEvent.content || '');
+            const bankTag = activeBankSnapshotEvent.bankCode && activeBankSnapshotEvent.bankCode !== 'OTHER'
+              ? `[${activeBankSnapshotEvent.bankCode}]`
+              : `[${activeBankSnapshotEvent.bankName}]`;
+            setInFrameDescription(cleanContent ? `${bankTag} ${cleanContent}` : bankTag);
+            setInFramePaymentMethod('BANK');
             setShowInFrameCategoryPicker(true);
           } else {
             setInFrameAmount(0);
@@ -443,6 +520,7 @@ export default function MainAppScreen() {
             setInFrameCategory('');
             setShowInFrameCategoryPicker(false);
             setInFrameDescription('');
+            setInFramePaymentMethod('CASH');
           }
           return;
         }
@@ -458,9 +536,12 @@ export default function MainAppScreen() {
       setInFrameAmount(activeBankSnapshotEvent.amount);
       setInFrameType(activeBankSnapshotEvent.type);
       setInFrameCategory(activeBankSnapshotEvent.categoryId || '');
-      setInFrameDescription(
-        activeBankSnapshotEvent.isGenericContent ? '' : (activeBankSnapshotEvent.content || '')
-      );
+      const cleanContent = activeBankSnapshotEvent.isGenericContent ? '' : (activeBankSnapshotEvent.content || '');
+      const bankTag = activeBankSnapshotEvent.bankCode && activeBankSnapshotEvent.bankCode !== 'OTHER'
+        ? `[${activeBankSnapshotEvent.bankCode}]`
+        : `[${activeBankSnapshotEvent.bankName}]`;
+      setInFrameDescription(cleanContent ? `${bankTag} ${cleanContent}` : bankTag);
+      setInFramePaymentMethod('BANK');
       setShowInFrameCategoryPicker(true);
     } else {
       setInFrameAmount(0);
@@ -468,6 +549,7 @@ export default function MainAppScreen() {
       setInFrameCategory('');
       setShowInFrameCategoryPicker(false);
       setInFrameDescription('');
+      setInFramePaymentMethod('CASH');
     }
   };
 
@@ -477,7 +559,12 @@ export default function MainAppScreen() {
     setInFrameAmount(detected.amount);
     setInFrameType(detected.type);
     setInFrameCategory(detected.categoryId || '');
-    setInFrameDescription(detected.isGenericContent ? '' : (detected.content || ''));
+    const cleanContent = detected.isGenericContent ? '' : (detected.content || '');
+    const bankTag = detected.bankCode && detected.bankCode !== 'OTHER'
+      ? `[${detected.bankCode}]`
+      : `[${detected.bankName}]`;
+    setInFrameDescription(cleanContent ? `${bankTag} ${cleanContent}` : bankTag);
+    setInFramePaymentMethod('BANK');
     handleTabPress(2);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
@@ -512,10 +599,12 @@ export default function MainAppScreen() {
       ? `[${activeBankSnapshotEvent.bankCode}]`
       : activeBankSnapshotEvent ? `[${activeBankSnapshotEvent.bankName}]` : '';
 
-    const fallbackDesc = inFrameCategory
-      ? `${inFrameCategory} ${bankTag}`.trim()
-      : (inFrameType === 'EXPENSE' ? 'Chi tiêu bằng ảnh' : 'Thu nhập');
-    const finalDesc = inFrameDescription.trim() || fallbackDesc;
+    let finalDesc = inFrameDescription.trim();
+    if (!finalDesc || finalDesc === bankTag) {
+      finalDesc = inFrameCategory
+        ? (bankTag ? `${bankTag} ${inFrameCategory}` : inFrameCategory)
+        : (inFrameType === 'EXPENSE' ? `${bankTag} Chi tiêu bằng ảnh`.trim() : `${bankTag} Thu nhập`.trim());
+    }
 
     const tx = await addTransaction({
       userId,
@@ -525,7 +614,7 @@ export default function MainAppScreen() {
       description: finalDesc,
       photo_url: capturedPhotoUri,
       thumbnail_url: capturedThumbUri || capturedPhotoUri,
-      payment_method: isBank ? 'BANK' : 'CASH',
+      payment_method: inFramePaymentMethod,
       source: 'PHOTO',
       status: 'CONFIRMED',
     });
@@ -821,13 +910,14 @@ export default function MainAppScreen() {
         onFinish={() => setShowCelebration(false)}
       />
 
-      {/* 4-PAGE HORIZONTAL PAGER */}
+      {/* 5-PAGE HORIZONTAL PAGER */}
       <ScrollView
         ref={horizontalPagerRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleHorizontalScrollEnd}
+        scrollEnabled={!isZoomSliding}
         style={styles.pager}
       >
         {/* ================= PAGE 0: HOME ================= */}
@@ -858,6 +948,7 @@ export default function MainAppScreen() {
             showsVerticalScrollIndicator={false}
             onScroll={handleVerticalScroll}
             scrollEventThrottle={16}
+            scrollEnabled={!isZoomSliding}
             style={[styles.verticalScroll, { backgroundColor: isDark ? '#0E1620' : '#FAF6EC' }]}
           >
             {/* --- TOP 100vh: CAMERA VIEWFINDER WITH CINEMATIC GRADIENT --- */}
@@ -872,16 +963,17 @@ export default function MainAppScreen() {
             >
               {/* TOP HEADER CONTROLS OVER CAMERA */}
               <View style={[styles.cameraTopHeader, { paddingTop: insets.top + Spacing.sm }]}>
-                {/* FLASH TOGGLE */}
+                {/* FLASH TOGGLE (BORDERLESS) */}
                 <TouchableOpacity
                   style={styles.headerIconButton}
                   onPress={toggleFlash}
                   activeOpacity={0.8}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   {flashMode === 'off' ? (
-                    <ZapOff size={18} color="#FFFFFF" strokeWidth={2.5} />
+                    <ZapOff size={20} color="#FFFFFF" strokeWidth={2.6} />
                   ) : (
-                    <Zap size={18} color={Colors.primaryYellow} strokeWidth={2.8} />
+                    <Zap size={20} color={tokens.primary} strokeWidth={2.8} />
                   )}
                 </TouchableOpacity>
 
@@ -902,35 +994,15 @@ export default function MainAppScreen() {
                   />
                 </TouchableOpacity>
 
-                {/* COACH MINH & WAIT BASKET SHORTCUTS */}
+                {/* NOTIFICATION HUB SHORTCUT (BORDERLESS) */}
                 <View style={styles.topRightControls}>
-                  <TouchableOpacity
-                    style={styles.minhCoachBadge}
-                    onPress={() => setShowMinhCoach(true)}
-                    activeOpacity={0.8}
-                  >
-                    <MinhAvatar size="sm" />
-                  </TouchableOpacity>
-
                   <TouchableOpacity
                     style={styles.headerIconButton}
                     onPress={() => setShowBankSettingsFromCamera(true)}
                     activeOpacity={0.8}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Bell size={18} color={Colors.accentOrange} strokeWidth={2.4} />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.headerIconButton}
-                    onPress={() => router.push('/(main)/wait-basket')}
-                    activeOpacity={0.8}
-                  >
-                    <Hourglass size={18} color={Colors.primaryYellow} strokeWidth={2.5} />
-                    {pendingWaitCount > 0 && (
-                      <View style={styles.badgeNumber}>
-                        <Text style={styles.badgeNumberText}>{pendingWaitCount}</Text>
-                      </View>
-                    )}
+                    <Bell size={20} color={tokens.primary} strokeWidth={2.6} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -992,39 +1064,83 @@ export default function MainAppScreen() {
                       setInFrameAmount(0);
                       setInFrameCategory('');
                       setShowInFrameCategoryPicker(false);
+                      setInFramePaymentMethod('CASH');
                     }}
                   />
                 ) : (
-                  <Pressable
+                  <View
                     style={styles.viewfinder}
-                    onPress={handleDoubleTapViewfinder}
+                    {...pinchPanResponder.panHandlers}
                   >
-                    {cameraGranted && isCameraActive ? (
-                      <CameraView
-                        ref={cameraRef}
-                        style={StyleSheet.absoluteFill}
-                        facing={cameraFacing}
-                        enableTorch={flashMode === 'on'}
-                        barcodeScannerSettings={{
-                          barcodeTypes: ['qr'],
-                        }}
-                        onBarcodeScanned={handleBarcodeScanned}
-                      />
-                    ) : (
-                      <View style={styles.permissionFallback}>
-                        <Camera size={44} color="#666666" strokeWidth={2} />
-                        <Text style={styles.permissionText}>
-                          Chạm đúp để kiểm tra hoặc cấp quyền Camera
-                        </Text>
-                        <BlockButton
-                          title="Mở Cài Đặt"
-                          onPress={openAppSettings}
-                          variant="secondary"
-                          size="sm"
+                    <Pressable
+                      style={StyleSheet.absoluteFill}
+                      onPress={handleDoubleTapViewfinder}
+                    >
+                      {cameraGranted && isCameraActive ? (
+                        <CameraView
+                          ref={cameraRef}
+                          style={StyleSheet.absoluteFill}
+                          facing={cameraFacing}
+                          enableTorch={flashMode === 'on'}
+                          zoom={cameraZoom}
+                          barcodeScannerSettings={{
+                            barcodeTypes: ['qr'],
+                          }}
+                          onBarcodeScanned={handleBarcodeScanned}
                         />
+                      ) : (
+                        <View style={styles.permissionFallback}>
+                          <Camera size={44} color="#666666" strokeWidth={2} />
+                          <Text style={styles.permissionText}>
+                            Chạm đúp để kiểm tra hoặc cấp quyền Camera
+                          </Text>
+                          <BlockButton
+                            title="Mở Cài Đặt"
+                            onPress={openAppSettings}
+                            variant="secondary"
+                            size="sm"
+                          />
+                        </View>
+                      )}
+                    </Pressable>
+
+                    {/* THANH TRƯỢT ZOOM CAMERA TỰ NHIÊN (TÍCH HỢP KHÓA CHUYỂN TRANG HOÀN TOÀN) */}
+                    {cameraGranted && isCameraActive && (
+                      <View style={styles.zoomContainer}>
+                        {/* BADGE HIỂN THỊ HỆ SỐ ZOOM HIỆN TẠI (VD: 0.5x, 1.0x, 2.0x, 3.0x) */}
+                        <View style={styles.zoomLevelBadge}>
+                          <Text style={styles.zoomLevelBadgeText}>
+                            {(0.5 + cameraZoom * 2.5).toFixed(1)}x
+                          </Text>
+                        </View>
+
+                        {/* THANH ĐIỀU KHIỂN ZOOM SLIDER (TỐI GIẢN - KHÔNG SỐ 2 ĐẦU) */}
+                        <View style={styles.zoomControlBar}>
+                          {/* RÃNH TRƯỢT ZOOM (PANRESPONDER CHỐNG RUNG / KHÓA PAGER) */}
+                          <View
+                            style={styles.zoomTrackWrapper}
+                            {...zoomSliderPanResponder.panHandlers}
+                          >
+                            <View style={styles.zoomTrackBg}>
+                              <View
+                                style={[
+                                  styles.zoomTrackFill,
+                                  { width: `${(cameraZoom / 1.0) * 100}%` },
+                                ]}
+                              />
+                            </View>
+                            {/* NÚM GẠT THUMB */}
+                            <View
+                              style={[
+                                styles.zoomThumb,
+                                { left: Math.max(0, Math.min(zoomSliderTrackWidth - 14, (cameraZoom / 1.0) * (zoomSliderTrackWidth - 14))) },
+                              ]}
+                            />
+                          </View>
+                        </View>
                       </View>
                     )}
-                  </Pressable>
+                  </View>
                 )}
               </View>
 
@@ -1146,26 +1262,47 @@ export default function MainAppScreen() {
                 </View>
               )}
 
-              {/* KHI ĐANG REVIEW TRÊN KHUNG CAMERA: NÚT LƯU TO BẢN ĐỒNG BỘ THEME HÀ NỘI THU ĐÔNG */}
+              {/* KHI ĐANG REVIEW TRÊN KHUNG CAMERA: CẶP NÚT SONG HÀNH [✕] & [✓] */}
               {capturedPhotoUri ? (
-                <View style={[styles.cameraBottomBar, { paddingBottom: insets.bottom + 80, justifyContent: 'center' }]}>
+                <View style={[styles.cameraBottomBar, { paddingBottom: insets.bottom + 80, paddingHorizontal: 40, justifyContent: 'center', gap: 48, flexDirection: 'row', alignItems: 'center' }]}>
+                  {/* Nút Tròn Retake / Hủy [✕] */}
+                  <TouchableOpacity
+                    style={styles.inFrameRetakeIconButton}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setCapturedPhotoUri(null);
+                      setCapturedThumbUri(null);
+                      setInFrameAmount(0);
+                      setInFrameCategory('');
+                      setShowInFrameCategoryPicker(false);
+                      setInFramePaymentMethod('CASH');
+                    }}
+                    activeOpacity={0.8}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    accessibilityLabel="Chụp lại"
+                  >
+                    <X size={24} color="#FFFFFF" strokeWidth={2.6} />
+                  </TouchableOpacity>
+
+                  {/* Nút Tròn Lưu vào sổ [✓] */}
                   {(() => {
                     const isSaveReady = Boolean(inFrameCategory) && inFrameAmount > 0;
                     return (
                       <TouchableOpacity
                         style={[
-                          styles.inFrameSaveButton,
+                          styles.inFrameSaveIconButton,
                           {
                             backgroundColor: inFrameType === 'INCOME' ? '#7E9F80' : '#E59844',
-                            shadowColor: inFrameType === 'INCOME' ? '#7E9F80' : '#E59844',
-                            opacity: isSaveReady ? 1 : 0.55,
+                            opacity: isSaveReady ? 1 : 0.45,
                           },
                         ]}
+                        disabled={!isSaveReady}
                         onPress={handleSaveInFramePhoto}
                         activeOpacity={0.85}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        accessibilityLabel="Lưu vào sổ"
                       >
-                        <Check size={20} color="#0E1620" strokeWidth={2.8} />
-                        <Text style={styles.inFrameSaveButtonText}>Lưu vào sổ</Text>
+                        <Check size={26} color="#0E1620" strokeWidth={2.8} />
                       </TouchableOpacity>
                     );
                   })()}
@@ -1271,10 +1408,6 @@ export default function MainAppScreen() {
                   key={tx.id}
                   item={tx}
                   isMasked={false}
-                  onPress={(item) => {
-                    setSelectedTxForDetail(item);
-                    setShowActualPrice(true);
-                  }}
                 />
               ))}
 
@@ -1313,7 +1446,7 @@ export default function MainAppScreen() {
         </View>
       </ScrollView>
 
-      {/* FLOATING PILL TAB BAR ACROSS ALL 4 PAGES */}
+      {/* FLOATING PILL TAB BAR ACROSS ALL 5 PAGES */}
       <FloatingPillTabBar
         activeIndex={activeTabIndex}
         onSelectTab={handleTabPress}
@@ -1462,18 +1595,13 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   headerIconButton: {
-    width: 38,
-    height: 38,
-    borderRadius: radii.full,
-    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    width: 44,
+    height: 44,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 2,
   },
   todayBudgetChipWrapper: {
     alignItems: 'center',
@@ -1623,27 +1751,118 @@ const styles = StyleSheet.create({
   },
   outsideTypeSegmentWrapper: {
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 8,
+    marginTop: 4,
+    marginBottom: 4,
   },
   outsideTypeSegmentContainer: {
     flexDirection: 'row',
-    borderRadius: 22,
-    padding: 3,
-    gap: 4,
+    borderRadius: 24,
+    padding: 4,
+    gap: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   outsideTypeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 22,
-    paddingVertical: 7,
-    borderRadius: 19,
-    gap: 5,
+    paddingHorizontal: 26,
+    paddingVertical: 9,
+    borderRadius: 20,
+    gap: 6,
   },
   outsideTypeText: {
-    fontSize: 13,
+    fontSize: 14.5,
+  },
+  zoomContainer: {
+    position: 'absolute',
+    bottom: 12,
+    alignSelf: 'center',
+    alignItems: 'center',
+    zIndex: 30,
+    gap: 4,
+  },
+  zoomLevelBadge: {
+    backgroundColor: 'rgba(0, 0, 0, 0.72)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: radii.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  zoomLevelBadgeText: {
+    color: '#FAF6EC',
+    fontSize: 10.5,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  zoomControlBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.60)',
+    borderRadius: radii.full,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  zoomTrackWrapper: {
+    width: 140,
+    height: 28,
+    justifyContent: 'center',
+  },
+  zoomTrackBg: {
+    width: '100%',
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    overflow: 'hidden',
+  },
+  zoomTrackFill: {
+    height: '100%',
+    backgroundColor: '#E59844',
+    borderRadius: 2,
+  },
+  zoomThumb: {
+    position: 'absolute',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#FAF6EC',
+    borderWidth: 1.5,
+    borderColor: '#E59844',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+    elevation: 3,
+    top: 7,
+  },
+  inFrameRetakeIconButton: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    borderWidth: 1.2,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  inFrameSaveIconButton: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#E59844',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
+    elevation: 6,
   },
   inFrameSaveButton: {
     flexDirection: 'row',

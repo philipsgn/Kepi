@@ -120,16 +120,12 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
 
                 <TouchableOpacity
                   onPress={onClose}
-                  style={[
-                    styles.closeBtn,
-                    {
-                      backgroundColor: tokens.surfaceAlt,
-                      borderColor: tokens.border,
-                    },
-                  ]}
-                  activeOpacity={0.8}
+                  style={styles.closeBtnBorderless}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  accessibilityLabel="Đóng"
                 >
-                  <X size={16} color={tokens.text} strokeWidth={2.2} />
+                  <X size={20} color={tokens.text} strokeWidth={2.6} />
                 </TouchableOpacity>
               </View>
 
@@ -397,13 +393,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginTop: 3,
   },
-  closeBtn: {
+  closeBtnBorderless: {
     width: 32,
     height: 32,
-    borderRadius: 16,
-    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   carouselSection: {
     paddingVertical: 14,

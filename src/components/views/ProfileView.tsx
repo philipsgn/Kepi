@@ -21,6 +21,7 @@ import { GoalSectionCard } from '../profile/GoalSectionCard';
 import { GoalDetailModal } from '../profile/GoalDetailModal';
 import { BudgetSettingsCard, STORAGE_KEY_SAVINGS_RATIO } from '../profile/BudgetSettingsCard';
 import { CategorySettingsCard } from '../profile/CategorySettingsCard';
+import { ThemeSettingsCard } from '../profile/ThemeSettingsCard';
 import { FixedCostSettingsModal } from '../profile/FixedCostSettingsModal';
 import { GoalEditModal } from '../profile/GoalEditModal';
 import { NameEditModal } from '../profile/NameEditModal';
@@ -461,6 +462,9 @@ export const ProfileView: React.FC<ProfileViewProps> = () => {
 
         {/* 1.3: QUẢN LÝ DANH MỤC THU & CHI */}
         <CategorySettingsCard />
+
+        {/* 1.4: CHẾ ĐỘ GIAO DIỆN (3 THEME: SÁNG, TỐI, MÁT) */}
+        <ThemeSettingsCard />
       </ScrollView>
 
       {/* MODAL CẤU HÌNH CHI PHÍ CỐ ĐỊNH CHI TIẾT */}

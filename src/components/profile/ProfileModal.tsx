@@ -150,7 +150,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <View style={styles.tierCard}>
                   <View style={styles.tierHeader}>
                     <View style={styles.tierIconBadge}>
-                      <Sparkles size={18} color={Colors.accentGold} />
+                      <Sparkles size={20} color={Colors.accentGold} strokeWidth={2.6} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.tierLabel}>Cấp Độ Nhận Thức Tài Chính</Text>
@@ -313,13 +313,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       activeOpacity={0.7}
                     >
                       <View style={styles.menuIconCircle}>
-                        <Calendar size={18} color={Colors.accentGold} />
+                        <Calendar size={20} color={Colors.accentGold} strokeWidth={2.6} />
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.menuTitle}>Sổ Chi Tiêu & Lịch Ảnh</Text>
                         <Text style={styles.menuSub}>Xem dòng thời gian và album ảnh tháng</Text>
                       </View>
-                      <ChevronRight size={18} color={Colors.textMuted} />
+                      <ChevronRight size={18} color={Colors.textMuted} strokeWidth={2.6} />
                     </TouchableOpacity>
                   )}
 
@@ -328,8 +328,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     onPress={handleSignOut}
                     activeOpacity={0.7}
                   >
-                    <View style={[styles.menuIconCircle, { backgroundColor: 'rgba(200, 109, 81, 0.12)' }]}>
-                      <LogOut size={18} color={Colors.expenseCoral} />
+                    <View style={styles.menuIconCircle}>
+                      <LogOut size={20} color={Colors.expenseCoral} strokeWidth={2.6} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.menuTitle, { color: Colors.expenseCoral }]}>
@@ -445,10 +445,10 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   tierIconBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(229, 152, 68, 0.15)',
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -668,10 +668,10 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(74, 92, 70, 0.08)',
   },
   menuIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(229, 152, 68, 0.12)',
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

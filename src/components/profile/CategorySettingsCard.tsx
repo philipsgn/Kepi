@@ -34,7 +34,7 @@ export const CategorySettingsCard: React.FC = () => {
         activeOpacity={0.85}
       >
         <View style={styles.iconBox}>
-          <FolderTree size={21} color={tokens.primary} strokeWidth={2.4} />
+          <FolderTree size={20} color={tokens.primary} strokeWidth={2.6} />
         </View>
 
         <View style={styles.contentCol}>
@@ -46,7 +46,7 @@ export const CategorySettingsCard: React.FC = () => {
           </Text>
         </View>
 
-        <ChevronRight size={18} color={tokens.textMuted} />
+        <ChevronRight size={18} color={tokens.textMuted} strokeWidth={2.6} />
       </TouchableOpacity>
 
       <CategoryManagementSheet

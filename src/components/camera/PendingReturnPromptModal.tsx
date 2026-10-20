@@ -255,8 +255,8 @@ export const PendingReturnPromptModal: React.FC<PendingReturnPromptModalProps> =
               ) : reportedStep ? (
                 /* Step 3: Reported No Autofill Feedback */
                 <View style={styles.photoPromptContainer}>
-                  <View style={[styles.photoIconCircle, { backgroundColor: isDark ? '#2D281E' : '#FAF0DE' }]}>
-                    <Sparkles size={32} color={tokens.primary} strokeWidth={2.2} />
+                  <View style={styles.photoIconCircle}>
+                    <Sparkles size={28} color={tokens.primary} strokeWidth={2.6} />
                   </View>
                   <Text style={[styles.titleText, { color: isDark ? '#FAF6EC' : '#141D26' }]}>
                     Đã ghi nhận phản hồi!
@@ -314,8 +314,8 @@ export const PendingReturnPromptModal: React.FC<PendingReturnPromptModalProps> =
               ) : (
                 /* Step 2: Post-confirmation Photo Prompt */
                 <View style={styles.photoPromptContainer}>
-                  <View style={[styles.photoIconCircle, { backgroundColor: isDark ? '#243347' : '#F1E9DA' }]}>
-                    <Camera size={32} color={tokens.primary} strokeWidth={2.2} />
+                  <View style={styles.photoIconCircle}>
+                    <Camera size={28} color={tokens.primary} strokeWidth={2.6} />
                   </View>
                   <Text style={[styles.titleText, { color: isDark ? '#FAF6EC' : '#141D26' }]}>
                     Đã ghi nhận vào sổ!
@@ -478,12 +478,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   photoIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   reportNoAutofillBtn: {
     height: 42,

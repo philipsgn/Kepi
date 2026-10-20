@@ -180,13 +180,6 @@ export const GalleryGridView: React.FC<GalleryGridViewProps> = ({
                   <Text style={styles.polaroidTime}>
                     {formatDateTime(selectedTx.occurred_at)}
                   </Text>
-                  <View style={styles.paymentMethodPill}>
-                    <Text style={styles.paymentMethodText}>
-                      {selectedTx.payment_method === 'CASH'
-                        ? 'Tiền mặt'
-                        : 'Chuyển khoản'}
-                    </Text>
-                  </View>
                 </View>
 
                 {/* Close Button */}
@@ -379,17 +372,6 @@ const styles = StyleSheet.create({
   polaroidTime: {
     fontSize: 12,
     color: Colors.textMuted,
-  },
-  paymentMethodPill: {
-    backgroundColor: '#ECE3D4',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  paymentMethodText: {
-    fontSize: 11,
-    color: Colors.textDark,
-    fontWeight: '600',
   },
   closeButton: {
     backgroundColor: Colors.accentAutumn,

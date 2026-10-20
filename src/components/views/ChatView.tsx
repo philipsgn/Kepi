@@ -23,6 +23,8 @@ import { useTransactionStore } from '../../store/transactionStore';
 import { useBudgetStore } from '../../store/budgetStore';
 import { useAuthStore } from '../../store/authStore';
 import { generateLocalCoachResponse, parseQuickRecordCommand } from '../../utils/chatUtils';
+import * as ImagePicker from 'expo-image-picker';
+import { formatCategoryName } from '../../constants/categoryDefaults';
 import { formatVND } from '../../utils/currency';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
@@ -129,7 +131,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
         return;
       }
 
-      // 2. Phản hồi thông minh theo số liệu thực tế (CHỈ tính khoản đã CONFIRMED)
+      // 2. Phản hồi thông minh theo số liệu thực tế RAG (CHỈ tính khoản đã CONFIRMED)
       const confirmedExpenses = transactions.filter(
         (t) => t.type === 'EXPENSE' && (t.status === 'CONFIRMED' || !t.status)
       );
@@ -143,11 +145,29 @@ export const ChatView: React.FC<ChatViewProps> = ({
         )
         .reduce((sum, t) => sum + t.amount, 0);
 
+      // Tính danh mục chi nhiều nhất tháng này
+      const catSpendMap: { [key: string]: number } = {};
+      confirmedExpenses.forEach((t) => {
+        catSpendMap[t.category] = (catSpendMap[t.category] || 0) + t.amount;
+      });
+      let topCategoryName = '';
+      let topCategoryAmount = 0;
+      Object.entries(catSpendMap).forEach(([cat, amt]) => {
+        if (amt > topCategoryAmount) {
+          topCategoryAmount = amt;
+          topCategoryName = formatCategoryName(cat);
+        }
+      });
+
       const response = generateLocalCoachResponse(text, {
+        todaySpent,
         remainingToday: Math.max(0, todayBudget - todaySpent),
         totalSpentThisMonth,
+        topCategoryName: topCategoryName || undefined,
+        topCategoryAmount: topCategoryAmount || undefined,
         coffeeSpentThisMonth: coffeeSpentThisMonth || 45000,
         transactionsCount: transactions.length,
+        savingsGoalText: 'Tích lũy ngân sách an toàn cho quỹ dự phòng',
         nickname: profile?.full_name || undefined,
       });
 
@@ -169,6 +189,67 @@ export const ChatView: React.FC<ChatViewProps> = ({
     }, 500);
   };
 
+  const handlePickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') return;
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const photoUri = result.assets[0].uri;
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+        // Tin nhắn từ người dùng kèm ảnh
+        const userMsg: ChatMessage = {
+          id: `user-${Date.now()}`,
+          sender: 'USER',
+          text: 'Gửi anh Minh xem món này',
+          photoUrl: photoUri,
+          createdAt: new Date().toISOString(),
+        };
+
+        setMessages((prev) => [...prev, userMsg]);
+        setIsThinking(true);
+
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+
+        // Phản hồi từ anh Minh bồ kèm thẻ xác nhận 1 chạm
+        setTimeout(() => {
+          const coachMsg: ChatMessage = {
+            id: `coach-${Date.now()}`,
+            sender: 'COACH',
+            text: 'Ảnh nét lắm bồ ơi! Anh chuẩn bị sẵn thẻ ghi chi tiêu cho món này, bồ bấm Lưu vào sổ là xong ngay nhé!',
+            cardType: 'CONFIRMATION',
+            cardData: {
+              amount: 50000,
+              description: 'Khoản chi bằng ảnh',
+              category: 'an_uong',
+              photoUrl: photoUri,
+              isSaved: false,
+            },
+            createdAt: new Date().toISOString(),
+          };
+
+          setMessages((prev) => [...prev, coachMsg]);
+          setIsThinking(false);
+
+          setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: true });
+          }, 100);
+        }, 800);
+      }
+    } catch (err) {
+      console.warn('Lỗi chọn ảnh trong chat:', err);
+    }
+  };
+
   const handleConfirmRecord = async (cardData: any) => {
     if (cardData.isSaved) return;
 
@@ -181,9 +262,9 @@ export const ChatView: React.FC<ChatViewProps> = ({
         amount: cardData.amount,
         category: cardData.category,
         description: cardData.description,
-        photo_url: null,
+        photo_url: cardData.photoUrl || null,
         payment_method: 'CASH',
-        source: 'MANUAL',
+        source: cardData.photoUrl ? 'PHOTO' : 'MANUAL',
       });
 
       recordExpense(cardData.amount);
@@ -310,6 +391,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           {/* THANH NHẬP LIỆU CHAT */}
           <ChatInputBar
             onSendMessage={handleSendMessage}
+            onPickImage={handlePickImage}
             isThinking={isThinking}
           />
 

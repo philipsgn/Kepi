@@ -51,7 +51,7 @@ interface RowData {
  * - Hỗ trợ Sáng / Tối toàn diện qua useTheme().
  * - Album cuộn dọc tách theo từng tháng, mỗi tháng một khối lưới 3 cột.
  * - Tiêu đề tháng dính đầu khi cuộn.
- * - Danh mục gộp: "Ăn uống & Cà phê".
+ * - Danh mục gộp: "Ăn uống".
  * - Khoảng đệm đáy chuẩn xác với useBottomInset().
  */
 export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
@@ -150,7 +150,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
             (it) => (it as any).is_unpriced || (it.type === 'EXPENSE' && (it.amount === 0 || isNaN(it.amount)))
           );
         } else if (selectedFilter === 'an_uong') {
-          // Gộp: Ăn uống & Cà phê
+          // Gộp: Ăn uống
           filteredItems = filteredItems.filter(
             (it) =>
               it.category === 'Ăn uống' ||
@@ -301,7 +301,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
     { id: 'INCOME', label: Strings.stats.filterIncome },
     { id: 'SKIPPED', label: Strings.stats.filterSkipped },
     { id: 'UNPRICED', label: Strings.stats.filterUnpriced },
-    { id: 'an_uong', label: 'Ăn uống & Cà phê' },
+    { id: 'an_uong', label: 'Ăn uống' },
     { id: 'Mua sắm', label: 'Mua sắm' },
     { id: 'Di chuyển', label: 'Di chuyển' },
   ];
@@ -314,14 +314,16 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
 
         <View style={styles.headerActions}>
           <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={0.7}
             onPress={toggleMaskMoney}
-            style={[styles.iconBtn, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}
+            style={styles.iconBtnBorderless}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel="Ẩn số tiền"
           >
             {isMasked ? (
-              <EyeOff size={16} color={tokens.primary} strokeWidth={2.2} />
+              <EyeOff size={20} color={tokens.primary} strokeWidth={2.6} />
             ) : (
-              <Eye size={16} color={tokens.textMuted} strokeWidth={2.2} />
+              <Eye size={20} color={tokens.text} strokeWidth={2.6} />
             )}
           </TouchableOpacity>
         </View>
@@ -451,8 +453,8 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
           {transactions.length === 0 ? (
             // Trạng thái trống toàn app
             <View style={styles.emptyContainer}>
-              <View style={[styles.emptyIconBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-                <Camera size={34} color={tokens.primary} strokeWidth={2.2} />
+              <View style={styles.emptyIconBox}>
+                <Camera size={36} color={tokens.primary} strokeWidth={2.6} />
               </View>
               <Text style={[styles.emptyTitle, { color: tokens.text }]}>{Strings.stats.emptyTitle}</Text>
               <Text style={[styles.emptyDesc, { color: tokens.textMuted }]}>{Strings.stats.emptyDesc}</Text>
@@ -700,10 +702,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  iconBtn: {
-    padding: 8,
-    borderRadius: radii.full,
-    borderWidth: 1,
+  iconBtnBorderless: {
+    padding: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     marginLeft: 8,
   },
   segmentContainer: {
@@ -780,10 +784,10 @@ const styles = StyleSheet.create({
     marginTop: 60,
   },
   emptyIconBox: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 1,
+    width: 44,
+    height: 44,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,

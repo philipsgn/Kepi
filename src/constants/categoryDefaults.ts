@@ -136,7 +136,7 @@ export const DEFAULT_CATEGORIES: CategoryItem[] = [
     id: 'an_uong',
     userId: null,
     type: 'EXPENSE',
-    name: 'Ăn uống & Cà phê',
+    name: 'Ăn uống',
     icon: 'Utensils',
     color: '#E59844',
     isDefault: true,
@@ -303,4 +303,42 @@ export const DEFAULT_CATEGORIES: CategoryItem[] = [
 
 export const DEFAULT_EXPENSE_CATEGORIES = DEFAULT_CATEGORIES.filter((c) => c.type === 'EXPENSE');
 export const DEFAULT_INCOME_CATEGORIES = DEFAULT_CATEGORIES.filter((c) => c.type === 'INCOME');
+
+/**
+ * Tra cứu và định dạng tên danh mục sang tiếng Việt chuẩn mực, không bao giờ để lọt raw ID (suc_khoe, di_chuyen...)
+ */
+export function formatCategoryName(rawCat?: string, customCats?: CategoryItem[]): string {
+  if (!rawCat) return 'Chi tiêu khác';
+  if (customCats && customCats.length > 0) {
+    const customMatch = customCats.find((c) => c.id === rawCat || c.name.toLowerCase() === rawCat.toLowerCase());
+    if (customMatch) return customMatch.name;
+  }
+  const defaultMatch = DEFAULT_CATEGORIES.find(
+    (c) => c.id === rawCat || c.name.toLowerCase() === rawCat.toLowerCase()
+  );
+  if (defaultMatch) return defaultMatch.name;
+
+  // Fallback map cho các ID đặc thù
+  const fallbackMap: Record<string, string> = {
+    an_uong: 'Ăn uống',
+    cafe: 'Cà phê & Trà',
+    di_chuyen: 'Đi lại & Xe cộ',
+    nha_cua: 'Nhà cửa & Hóa đơn',
+    mua_sam: 'Mua sắm & Quần áo',
+    suc_khoe: 'Thuốc men & Sức khỏe',
+    gia_dinh: 'Gia đình & Cho mẹ',
+    giai_tri: 'Giải trí & Phim ảnh',
+    hoc_tap: 'Học tập & Sách vở',
+    chi_tieu_khac: 'Chi tiêu khác',
+    luong: 'Tiền lương',
+    thuong: 'Thưởng & Tip',
+    phu_cap: 'Phụ cấp công việc',
+    dau_tu: 'Lợi nhuận đầu tư',
+    ban_do: 'Thanh lý / Bán đồ cũ',
+    thu_khac: 'Thu nhập khác',
+    cuu_vi: 'Cứu ví',
+  };
+
+  return fallbackMap[rawCat] || rawCat;
+}
 

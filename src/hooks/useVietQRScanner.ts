@@ -12,6 +12,7 @@ import {
   openBankAppByTier,
   SUPPORTED_BANKS,
   getBankByBin,
+  getBankShortCode,
 } from '../utils/qr/bankDeeplink';
 import { useTransactionStore } from '../store/transactionStore';
 import { Transaction } from '../types/database';
@@ -158,13 +159,17 @@ export function useVietQRScanner({
       if (!detectedPayload) return;
 
       const executeLaunch = async () => {
-        // Create PENDING transaction
+        const bankCode = getBankShortCode(detectedPayload.bankBin, bankAppId);
+        const bankTag = bankCode ? `[${bankCode}]` : '';
+        const cleanPayee = detectedPayload.payeeName ? ` ${detectedPayload.payeeName}` : '';
+        const finalDesc = bankTag ? `${bankTag}${cleanPayee}`.trim() : (detectedPayload.payeeName || 'Chuyển khoản VietQR');
+
         const pendingTx = await addTransaction({
           userId: 'current-user',
           type: 'EXPENSE',
           amount,
           category: detectedPayload.suggestedCategory || 'Ăn uống',
-          description: detectedPayload.payeeName || 'Chuyển khoản VietQR',
+          description: finalDesc,
           photo_url: null,
           thumbnail_url: null,
           payment_method: 'BANK',
@@ -266,9 +271,11 @@ export function useVietQRScanner({
           amount,
           category: 'Ăn uống',
           description:
-            note ||
-            currentWallet.payeeName ||
-            `Thanh toán ${currentWallet.walletName}`,
+            note
+              ? `[${currentWallet.walletName}] ${note}`
+              : currentWallet.payeeName
+              ? `[${currentWallet.walletName}] ${currentWallet.payeeName}`
+              : `[${currentWallet.walletName}] Thanh toán`,
           photo_url: null,
           thumbnail_url: null,
           payment_method: 'E_WALLET',

@@ -67,9 +67,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Xác định theme thực tế (resolved)
-  // 'light' => Sáng (Vàng Hoàng Gia & Kem Bơ)
-  // 'dark'  => Tối (Space Gray Titanium)
-  // 'cool'  => Mát (Cool Mint & Aqua Jade Gradient)
+  // 'light' => Sáng: Vàng Kem Bơ Hà Nội Thu Đông
+  // 'dark'  => Tối: Xám Than Phối Xanh Mint Đậm (Dark Mint)
+  // 'cool'  => Mát: Fresh Blue-Mint (Bạc Hà Sương Mai)
   const activeTheme: ResolvedTheme =
     mode === 'dark'
       ? 'dark'

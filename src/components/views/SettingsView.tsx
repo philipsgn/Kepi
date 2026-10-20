@@ -217,7 +217,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
           >
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
-                <Cloud size={22} color="#10B981" strokeWidth={2.8} />
+                <Cloud size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
               <Text style={[styles.rowTitle, { color: tokens.text }]}>
                 Sao lưu & Khôi phục
@@ -277,7 +277,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
           >
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
-                <Palette size={22} color="#10B981" strokeWidth={2.8} />
+                <Palette size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
               <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
                 Giao diện
@@ -367,7 +367,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
           >
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
-                <Smartphone size={22} color="#06B6D4" strokeWidth={2.8} />
+                <Smartphone size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
               <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
                 Widget màn hình khóa
@@ -403,7 +403,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
           >
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
-                <Bell size={22} color="#7E9F80" strokeWidth={2.8} />
+                <Bell size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
               <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
                 Thông báo ngân hàng
@@ -439,7 +439,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
           >
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
-                <QrCode size={22} color="#E59844" strokeWidth={2.8} />
+                <QrCode size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
               <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
                 Quét mã VietQR
@@ -487,7 +487,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
           >
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
-                <Trash2 size={22} color="#C86D51" strokeWidth={2.8} />
+                <Trash2 size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
               <Text style={[styles.rowTitle, { color: '#C86D51' }]}>
                 Đặt lại dữ liệu
@@ -507,7 +507,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
           >
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
-                <UserX size={22} color="#C86D51" strokeWidth={2.8} />
+                <UserX size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
               <Text style={[styles.rowTitle, { color: '#C86D51' }]}>
                 Xóa tài khoản
@@ -534,7 +534,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
           >
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
-                <LogOut size={22} color={tokens.textMuted} strokeWidth={2.8} />
+                <LogOut size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
               <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
                 Đăng xuất

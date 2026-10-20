@@ -46,7 +46,7 @@ export interface CategoryItem {
 #### A. Nhóm Chi Tiêu (EXPENSE):
 | ID | Tên Danh Mục | Icon Lucide | Màu Đại Diện |
 | :--- | :--- | :--- | :--- |
-| `an_uong` | Ăn uống & Cà phê | `Utensils` | `#E59844` (Vàng Thu) |
+| `an_uong` | Ăn uống | `Utensils` | `#E59844` (Vàng Thu) |
 | `di_chuyen` | Di chuyển & Xăng xe | `Car` | `#7E9F80` (Cốm Non) |
 | `nha_cua` | Nhà cửa & Điện nước | `Home` | `#9B59B6` (Tím Tây Hồ) |
 | `mua_sam` | Mua sắm & Quần áo | `ShoppingBag` | `#C86D51` (Ngói Rêu) |

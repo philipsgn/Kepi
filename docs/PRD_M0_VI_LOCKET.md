@@ -102,7 +102,7 @@ Xuất phát từ việc phân tích sâu các bức xúc và rào cản lớn n
   - Trực quan hóa số dư còn lại của tháng dưới dạng thanh sinh lực phong cách game hóa nhẹ nhàng.
   - Chuyển màu động: Cốm Non (`#7E9F80` an toàn) $\rightarrow$ Nắng Thu (`#E59844` cảnh báo) $\rightarrow$ Ngói Rêu (`#C86D51` nguy hiểm).
 - **Phân Tích Cơ Cấu Chi Tiêu:**
-  - Biểu đồ phân bổ chi tiêu theo các nhóm chính: Ăn uống & Cà phê, Mua sắm, Đi lại, Hóa đơn, Giải trí, Học tập, Sức khỏe.
+  - Biểu đồ phân bổ chi tiêu theo các nhóm chính: Ăn uống, Mua sắm, Đi lại, Hóa đơn, Giải trí, Học tập, Sức khỏe.
   - Tự động lọc ra món đồ đắt đỏ nhất trong tháng để tự nhìn nhận và điều chỉnh.
 
 ---

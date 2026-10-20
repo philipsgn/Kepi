@@ -273,3 +273,9 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
 - Bóc tách từ khóa nội dung: `Highlands / Phuc Long / Com / Bun` $\rightarrow$ `Ăn uống`; `Grab / Be / Xanh SM / Xang` $\rightarrow$ `Đi lại`; `Shopee / Lazada / WinMart` $\rightarrow$ `Mua sắm`.
 - Khởi tạo Card đồ họa nhận diện ngân hàng đặc trưng (TPBank tím cam, VCB xanh ngọc, MB xanh dương đậm, TCB đỏ trắng).
 - Ghi thẳng vào `transactionStore` với trạng thái `CONFIRMED`, tự động gọi `recalculateFromTransactions` để cập nhật hạn mức ngày và số dư khả dụng ngay lập tức (Single Source of Truth).
+
+### 8.5. Cấu Hình Android Native Plugin Trong app.json (`withNotificationListener.js`)
+- Cấu hình Expo Config Plugin `./plugins/withNotificationListener.js` tự động bổ sung quyền `android.permission.BIND_NOTIFICATION_LISTENER_SERVICE` vào `AndroidManifest.xml`.
+- Khai báo `<service android:name=".services.KepiNotificationListenerService" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:exported="true">` với `<intent-filter>` chứa action `android.service.notification.NotificationListenerService`.
+- Đảm bảo dịch vụ chạy ngầm opt-in, bóc tách chuỗi 100% trên thiết bị cục bộ (On-Device), an toàn tuyệt đối và không gửi bất kỳ byte dữ liệu thông báo nào ra bên ngoài.
+

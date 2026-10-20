@@ -57,10 +57,10 @@ export const FastCategorySheet: React.FC<FastCategorySheetProps> = ({
       ? `[${bankEvent.bankCode}]`
       : `[${bankEvent.bankName}]`;
 
-    // Chuẩn hóa tên giao dịch: Nếu có ghi chú riêng thì lấy ghi chú, nếu không lấy Tên Danh Mục
+    // Chuẩn hóa tên giao dịch: Ghim [Mã NH] ở đầu phần mô tả
     const finalDescription = noteText.trim().length > 0
-      ? `${noteText.trim()} ${bankTag}`
-      : `${cat.name} ${bankTag}`;
+      ? `${bankTag} ${noteText.trim()}`
+      : `${bankTag} ${cat.name}`;
 
     await useTransactionStore.getState().addTransaction({
       userId,

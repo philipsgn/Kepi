@@ -70,7 +70,7 @@ export const TransactionPhotoCell: React.FC<TransactionPhotoCellProps> = ({
     if (isIncome) {
       return `+${formatted}`;
     }
-    return formatted;
+    return `-${formatted}`;
   };
 
   return (

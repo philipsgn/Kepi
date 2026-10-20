@@ -71,12 +71,12 @@ export const GamifiedStatsModal: React.FC<GamifiedStatsModalProps> = ({
 
   const hpStatus = getHpStatus();
 
-  // 2. Phân loại 5 nhóm chi tiêu từ danh sách transactions (gộp Ăn uống & Cà phê)
+  // 2. Phân loại 5 nhóm chi tiêu từ danh sách transactions (danh mục Ăn uống)
   const expenseTransactions = transactions.filter((t) => t.type === 'EXPENSE');
   const totalSpent = expenseTransactions.reduce((acc, t) => acc + t.amount, 0);
 
   const categoriesMap: Record<string, { label: string; color: string; amount: number }> = {
-    an_uong: { label: 'Ăn uống & Cà phê', color: tokens.primary, amount: 0 },
+    an_uong: { label: 'Ăn uống', color: tokens.primary, amount: 0 },
     di_chuyen: { label: 'Di Chuyển', color: tokens.accent, amount: 0 },
     mua_sam: { label: 'Mua Sắm', color: tokens.textSub, amount: 0 },
     giai_tri: { label: 'Giải Trí & Chill', color: tokens.accent, amount: 0 },

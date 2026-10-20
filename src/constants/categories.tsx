@@ -19,7 +19,7 @@ export interface ExpenseCategoryItem {
 }
 
 export const EXPENSE_CATEGORIES: ExpenseCategoryItem[] = [
-  { id: 'an_uong', label: 'Ăn uống & Cà phê', shortLabel: 'Ăn uống', Icon: Utensils },
+  { id: 'an_uong', label: 'Ăn uống', shortLabel: 'Ăn uống', Icon: Utensils },
   { id: 'mua_sam', label: 'Mua sắm', shortLabel: 'Mua sắm', Icon: ShoppingBag },
   { id: 'di_chuyen', label: 'Đi lại & Xe cộ', shortLabel: 'Đi lại', Icon: Car },
   { id: 'hoa_don', label: 'Hóa đơn & Cố định', shortLabel: 'Hóa đơn', Icon: Receipt },
@@ -117,9 +117,9 @@ export function getCategoryConfig(categoryIdOrName?: string | null): ExpenseCate
 export function renderCategoryMonochromeIcon({
   categoryId,
   isIncome,
-  size = 24,
+  size = 20,
   color = '#E59844',
-  strokeWidth = 1.8,
+  strokeWidth = 2.6,
 }: {
   categoryId?: string | null;
   isIncome?: boolean;
@@ -155,7 +155,7 @@ export function renderDynamicCategoryIcon({
   iconName,
   size = 20,
   color = '#E59844',
-  strokeWidth = 2,
+  strokeWidth = 2.6,
 }: {
   iconName: string;
   size?: number;

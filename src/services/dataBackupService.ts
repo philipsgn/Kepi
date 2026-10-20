@@ -29,10 +29,12 @@ export interface BackupPayload {
   fixedCostItems: unknown[];
   goals: unknown[];
   transactions: unknown[];
+  embeddedPhotos?: Record<string, { fullBase64?: string; thumbBase64?: string }>;
 }
 
 /**
- * Xuất toàn bộ dữ liệu ứng dụng thành file JSON và kích hoạt hộp thoại chia sẻ / lưu file
+ * Xuất toàn bộ dữ liệu ứng dụng thành file JSON (kèm toàn bộ ảnh thực tế được nhúng)
+ * Đảm bảo khi người dùng gỡ app cài lại vẫn phục hồi 100% ảnh mà không tốn chi phí đám mây.
  */
 export async function exportAppDataAsync(): Promise<{ success: boolean; filePath?: string; error?: string }> {
   try {
@@ -45,8 +47,43 @@ export async function exportAppDataAsync(): Promise<{ success: boolean; filePath
       AsyncStorage.getItem('vi_locket_fixed_cost_items'),
     ]);
 
+    // Nhúng toàn bộ file ảnh cục bộ vào bản sao lưu
+    const embeddedPhotos: Record<string, { fullBase64?: string; thumbBase64?: string }> = {};
+
+    for (const tx of txStore.transactions) {
+      if (tx.photo_url && tx.photo_url.startsWith('file://')) {
+        try {
+          const info = await FileSystem.getInfoAsync(tx.photo_url);
+          if (info.exists) {
+            const b64 = await FileSystem.readAsStringAsync(tx.photo_url, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            embeddedPhotos[tx.id] = { fullBase64: b64 };
+          }
+        } catch (e) {
+          console.warn(`[DataBackup] Skip reading photo for ${tx.id}:`, e);
+        }
+      }
+      if (tx.thumbnail_url && tx.thumbnail_url.startsWith('file://')) {
+        try {
+          const info = await FileSystem.getInfoAsync(tx.thumbnail_url);
+          if (info.exists) {
+            const b64 = await FileSystem.readAsStringAsync(tx.thumbnail_url, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            embeddedPhotos[tx.id] = {
+              ...(embeddedPhotos[tx.id] || {}),
+              thumbBase64: b64,
+            };
+          }
+        } catch (e) {
+          console.warn(`[DataBackup] Skip reading thumb for ${tx.id}:`, e);
+        }
+      }
+    }
+
     const backupData: BackupPayload = {
-      version: 1,
+      version: 2,
       appName: 'Kepi (Ví Locket)',
       createdAt: new Date().toISOString(),
       user: {
@@ -63,11 +100,12 @@ export async function exportAppDataAsync(): Promise<{ success: boolean; filePath
       fixedCostItems: cachedFixedCosts ? JSON.parse(cachedFixedCosts) : [],
       goals: cachedGoals ? JSON.parse(cachedGoals) : [],
       transactions: txStore.transactions,
+      embeddedPhotos,
     };
 
     const jsonString = JSON.stringify(backupData, null, 2);
     const dateStr = new Date().toISOString().slice(0, 10);
-    const fileName = `Kepi_Backup_${dateStr}.json`;
+    const fileName = `Kepi_Full_Backup_${dateStr}.json`;
     const baseDir = FileSystem.documentDirectory || FileSystem.cacheDirectory || '';
     const fileUri = `${baseDir}${fileName}`;
 
@@ -79,7 +117,7 @@ export async function exportAppDataAsync(): Promise<{ success: boolean; filePath
     if (isAvailable) {
       await Sharing.shareAsync(fileUri, {
         mimeType: 'application/json',
-        dialogTitle: 'Sao lưu dữ liệu Kepi',
+        dialogTitle: 'Sao lưu dữ liệu Kepi (Kèm toàn bộ ảnh)',
         UTI: 'public.json',
       });
     }
@@ -93,7 +131,7 @@ export async function exportAppDataAsync(): Promise<{ success: boolean; filePath
 }
 
 /**
- * Khôi phục dữ liệu từ chuỗi JSON sao lưu
+ * Khôi phục dữ liệu và phục hồi toàn bộ ảnh chụp từ file sao lưu
  */
 export async function restoreAppDataAsync(jsonString: string): Promise<{ success: boolean; error?: string; count?: number }> {
   try {
@@ -103,13 +141,61 @@ export async function restoreAppDataAsync(jsonString: string): Promise<{ success
       return { success: false, error: 'File sao lưu không đúng định dạng của Kepi.' };
     }
 
-    // 1. Phục hồi Transactions
+    // Đảm bảo thư mục lưu ảnh phục hồi tồn tại
+    const baseDocDir = FileSystem.documentDirectory || FileSystem.cacheDirectory || '';
+    const photosDir = `${baseDocDir}kepi_restored_photos/`;
+    try {
+      const dirInfo = await FileSystem.getInfoAsync(photosDir);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(photosDir, { intermediates: true });
+      }
+    } catch {
+      // Ignore directory check error
+    }
+
+    // 1. Phục hồi Transactions & ghi lại các file ảnh
     if (Array.isArray(parsed.transactions)) {
-      await AsyncStorage.setItem('vi_locket_transactions_data', JSON.stringify(parsed.transactions));
+      const restoredTransactions: any[] = [];
+
+      for (const rawTx of parsed.transactions as any[]) {
+        const tx = { ...rawTx };
+        const embedded = parsed.embeddedPhotos?.[tx.id];
+
+        if (embedded?.fullBase64) {
+          const targetUri = `${photosDir}${tx.id}.webp`;
+          try {
+            await FileSystem.writeAsStringAsync(targetUri, embedded.fullBase64, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            tx.photo_url = targetUri;
+          } catch (e) {
+            console.warn(`[DataBackup] Could not restore photo for tx ${tx.id}:`, e);
+          }
+        }
+
+        if (embedded?.thumbBase64) {
+          const targetThumbUri = `${photosDir}${tx.id}_thumb.webp`;
+          try {
+            await FileSystem.writeAsStringAsync(targetThumbUri, embedded.thumbBase64, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            tx.thumbnail_url = targetThumbUri;
+          } catch (e) {
+            console.warn(`[DataBackup] Could not restore thumb for tx ${tx.id}:`, e);
+          }
+        }
+
+        restoredTransactions.push(tx);
+      }
+
+      await AsyncStorage.setItem('vi_locket_transactions_data', JSON.stringify(restoredTransactions));
       const authUser = useAuthStore.getState().user;
       if (authUser?.id) {
         await useTransactionStore.getState().loadTransactions(authUser.id);
+      } else {
+        useTransactionStore.setState({ transactions: restoredTransactions });
       }
+      useBudgetStore.getState().recalculateFromTransactions(restoredTransactions);
     }
 
     // 2. Phục hồi Budget Settings

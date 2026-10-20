@@ -15,8 +15,12 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
+  Moon,
   Settings,
   Sparkles,
+  Sun,
+  Sunrise,
+  Sunset,
   TrendingDown,
   TrendingUp,
   User,
@@ -52,10 +56,12 @@ import { useTransactionStore } from '../../store/transactionStore';
 import { formatCompactVND, formatVND, maskMoney } from '../../utils/currency';
 import {
   DayCalendarCell,
+  getDayPeriod,
   getDaysRemainingInMonth,
   getGreetingByHour,
   getVietnamDateString,
 } from '../../utils/calendarUtils';
+import { calculateStreakDays } from '../../utils/profileUtils';
 import { Transaction } from '../../types/database';
 
 const STORAGE_PREFS_KEY = '@vi_locket_home_preferences';
@@ -215,10 +221,18 @@ export const JournalView: React.FC<JournalViewProps> = ({
   const greeting = getGreetingByHour();
   const userName = profile?.full_name || user?.full_name || user?.email?.split('@')[0] || 'Bạn';
 
-  // Định nghĩa danh mục: GỘP "Ăn uống" và "Cà Phê & Chill" thành "Ăn uống & Cà phê"
+  // Tính chuỗi ngày liên tiếp ghi chép thực tế từ lịch sử giao dịch
+  const currentStreak = useMemo(() => {
+    const dates = transactions
+      .filter((tx) => tx.status === 'CONFIRMED' || !tx.status)
+      .map((tx) => tx.occurred_at.slice(0, 10));
+    return calculateStreakDays(dates);
+  }, [transactions]);
+
+  // Định nghĩa danh mục: GỘP "Ăn uống" và "Cà Phê & Chill" thành "Ăn uống"
   const CATEGORIES = useMemo(() => [
     { key: 'all', label: 'Tất cả' },
-    { key: 'an_uong', label: 'Ăn uống & Cà phê', matchKeys: ['an_uong', 'giai_tri', 'ca_phe'] },
+    { key: 'an_uong', label: 'Ăn uống', matchKeys: ['an_uong', 'giai_tri', 'ca_phe'] },
     { key: 'di_chuyen', label: 'Di chuyển', matchKeys: ['di_chuyen'] },
     { key: 'mua_sam', label: 'Mua sắm', matchKeys: ['mua_sam'] },
     { key: 'co_dinh', label: 'Cố định', matchKeys: ['co_dinh'] },
@@ -308,6 +322,22 @@ export const JournalView: React.FC<JournalViewProps> = ({
     });
   }, [transactions, selectedDayCell]);
 
+  // Đồng hồ chạy thời gian thực (Real-time Clock & Icon buổi)
+  const [realTime, setRealTime] = useState<Date>(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRealTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const weekdaysVi = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  const dayOfWeekStr = weekdaysVi[realTime.getDay()];
+  const padDigits = (n: number) => String(n).padStart(2, '0');
+  const dateStrFormatted = `${dayOfWeekStr}, ${padDigits(realTime.getDate())}/${padDigits(realTime.getMonth() + 1)}/${realTime.getFullYear()}`;
+  const timeStrFormatted = `${padDigits(realTime.getHours())}:${padDigits(realTime.getMinutes())}:${padDigits(realTime.getSeconds())}`;
+  const currentPeriod = getDayPeriod(realTime);
+
   return (
     <View
       style={[
@@ -318,17 +348,26 @@ export const JournalView: React.FC<JournalViewProps> = ({
         },
       ]}
     >
-      {/* 1. HEADER (LỜI CHÀO, TÊN, STREAK MINI & SỐ DƯ VÍ KHẢ DỤNG) */}
+      {/* 1. HEADER (ICON BUỔI, ĐỒNG HỒ REAL-TIME, TÊN, STREAK MINI & SỐ DƯ VÍ KHẢ DỤNG) */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={[styles.greetingText, { color: tokens.textMuted }]}>
-            {greeting}
-          </Text>
+          {/* DÒNG THỜI GIAN THỰC KÈM ICON BUỔI ĐẶC TRƯNG */}
+          <View style={styles.realtimeHeaderRow}>
+            {currentPeriod === 'MORNING' && <Sunrise size={14} color="#E59844" strokeWidth={2.6} />}
+            {currentPeriod === 'NOON' && <Sun size={14} color="#E59844" strokeWidth={2.6} />}
+            {currentPeriod === 'AFTERNOON' && <Sunset size={14} color="#C86D51" strokeWidth={2.6} />}
+            {(currentPeriod === 'EVENING' || currentPeriod === 'NIGHT') && (
+              <Moon size={14} color="#7E9F80" strokeWidth={2.6} />
+            )}
+            <Text style={[styles.realtimeDateText, { color: tokens.textMuted }]}>
+              {dateStrFormatted} • {timeStrFormatted}
+            </Text>
+          </View>
           <View style={styles.userNameRow}>
             <Text style={[styles.userNameText, { color: tokens.text }]}>
               {userName}
             </Text>
-            {/* STREAK MINI: CHỈ ICON & SỐ "✨ 14" (SOFT TONAL) */}
+            {/* STREAK MINI: CHỈ ICON & SỐ CHUỖI THỰC TẾ (SOFT TONAL) */}
             <TouchableOpacity
               style={[
                 styles.streakMiniBadge,
@@ -336,14 +375,16 @@ export const JournalView: React.FC<JournalViewProps> = ({
               ]}
               onPress={() => {
                 Alert.alert(
-                  '14 Ngày Liên Tiếp',
-                  'Bạn đã ghi chép chi tiêu 14 ngày liên tiếp. Giữ nhịp tĩnh tâm này mỗi ngày nhé!'
+                  currentStreak > 0 ? `${currentStreak} Ngày Liên Tiếp` : 'Chuỗi Ghi Chép',
+                  currentStreak > 0
+                    ? `Bạn đã ghi chép chi tiêu ${currentStreak} ngày liên tiếp. Giữ nhịp tĩnh tâm này mỗi ngày nhé!`
+                    : 'Ghi chép chi tiêu hôm nay để bắt đầu chuỗi ngày liên tiếp của bạn!'
                 );
               }}
               activeOpacity={0.7}
             >
               <Sparkles size={12} color={tokens.primary} />
-              <Text style={[styles.streakMiniText, { color: tokens.text }]}>14</Text>
+              <Text style={[styles.streakMiniText, { color: tokens.text }]}>{currentStreak}</Text>
             </TouchableOpacity>
           </View>
 
@@ -360,44 +401,41 @@ export const JournalView: React.FC<JournalViewProps> = ({
         </View>
 
         <View style={styles.headerRight}>
-          {/* NÚT ẨN TIỀN (BẢO MẬT RIÊNG TƯ - SOFT TONAL) */}
+          {/* NÚT ẨN TIỀN (BẢO MẬT RIÊNG TƯ - ZERO BORDER FLOATING) */}
           <TouchableOpacity
-            style={[
-              styles.headerBtn,
-              { backgroundColor: tokens.surfaceAlt },
-            ]}
+            style={styles.headerBtnBorderless}
             onPress={handleTogglePrivacy}
-            activeOpacity={0.75}
+            activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel="Ẩn số tiền"
           >
             {isPrivacyHidden ? (
-              <EyeOff size={16} color={tokens.primary} strokeWidth={2.2} />
+              <EyeOff size={20} color={tokens.primary} strokeWidth={2.6} />
             ) : (
-              <Eye size={16} color={tokens.textMuted} strokeWidth={2.2} />
+              <Eye size={20} color={tokens.textMuted} strokeWidth={2.6} />
             )}
           </TouchableOpacity>
 
-          {/* NÚT CÀI ĐẶT NHANH (SOFT TONAL) */}
+          {/* NÚT CÀI ĐẶT NHANH (ZERO BORDER FLOATING) */}
           <TouchableOpacity
-            style={[
-              styles.headerBtn,
-              { backgroundColor: tokens.surfaceAlt },
-            ]}
+            style={styles.headerBtnBorderless}
             onPress={() => setIsSettingsOpen(true)}
-            activeOpacity={0.75}
+            activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel="Cài đặt"
           >
-            <Settings size={17} color={tokens.text} strokeWidth={2} />
+            <Settings size={20} color={tokens.text} strokeWidth={2.4} />
           </TouchableOpacity>
 
-          {/* AVATAR CHẠM MỞ HỒ SƠ (SOFT TONAL) */}
+          {/* AVATAR CHẠM MỞ HỒ SƠ (ZERO BORDER FLOATING) */}
           <TouchableOpacity
-            style={[
-              styles.headerAvatarBtn,
-              { backgroundColor: tokens.primarySoft },
-            ]}
+            style={styles.headerBtnBorderless}
             onPress={onOpenProfile}
-            activeOpacity={0.75}
+            activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel="Hồ sơ cá nhân"
           >
-            <User size={17} color={tokens.text} strokeWidth={2.2} />
+            <User size={20} color={tokens.text} strokeWidth={2.4} />
           </TouchableOpacity>
         </View>
       </View>
@@ -780,24 +818,30 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
     letterSpacing: -0.2,
   },
+  realtimeHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 2,
+  },
+  realtimeDateText: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    fontVariant: ['tabular-nums'],
+  },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
   },
-  headerBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: radii.full,
+  headerBtnBorderless: {
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerAvatarBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: radii.full,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   scrollContent: {
     gap: spacing.sm + 2,

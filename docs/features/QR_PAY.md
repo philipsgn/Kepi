@@ -62,7 +62,7 @@
 ┌────────────────────────────────────────────────────────┐
 │ ┌── THẺ THÔNG TIN VIETQR (Trượt lên trên nút chụp) ──┐ │
 │ │ 🏦 Techcombank · Cà Phê Trứng Giảng phố Yên Phụ     │ │
-│ │ 🏷️ 45.000 đ                     [☕ Ăn uống & Cà phê]│ │
+│ │ 🏷️ 45.000 đ                            [☕ Ăn uống]│ │
 │ ├────────────────────────────────────────────────────┤ │
 │ │ ⚠️ Techcombank chưa hỗ trợ điền sẵn. Quét lại mã  │ │
 │ │    trong app hoặc chụp màn hình rồi tải lên.        │ │

@@ -45,7 +45,7 @@
 │ 3. BỘ LỊCH THÍCH ỨNG (DYNAMIC CALENDAR BY PERIOD)          │
 │ * Ở chế độ TUẦN: 7 Ngày Thả Nổi (Polaroid Floating Cells)  │
 │   ‹ Tuần 05/10 - 11/10, 2026 ›                             │
-│   [Tất cả] [Ăn uống & Cà phê] [Di chuyển] [Mua sắm] (cuộn) │
+│   [Tất cả] [Ăn uống] [Di chuyển] [Mua sắm] (cuộn)          │
 │    T2    T3    T4    T5    T6    T7    CN                  │ (Không viền hộp bọc ngoài,
 │   [ 5 ] [ 6 ] [ 7*] [ 8 ] [ 9 ] [ 10] [ 11]                │  ô ảnh nổi mềm trên nền)
 │                                                            │

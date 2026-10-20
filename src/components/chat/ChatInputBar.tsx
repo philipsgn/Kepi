@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Send } from 'lucide-react-native';
+import { Send, ImagePlus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Strings } from '../../constants/strings';
 import { useTheme } from '../../theme/ThemeContext';
@@ -16,6 +16,7 @@ import { useBottomInset } from '../../hooks/useBottomInset';
 
 interface ChatInputBarProps {
   onSendMessage: (text: string) => void;
+  onPickImage?: () => void;
   isThinking?: boolean;
 }
 
@@ -27,6 +28,7 @@ interface ChatInputBarProps {
  */
 export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   onSendMessage,
+  onPickImage,
   isThinking = false,
 }) => {
   const { tokens } = useTheme();
@@ -76,6 +78,23 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
       ]}
     >
       <View style={styles.inputRow}>
+        {/* NÚT ĐÍNH KÈM ẢNH HÓA ĐƠN / MÓN ĐỒ */}
+        {onPickImage && (
+          <TouchableOpacity
+            style={styles.attachButton}
+            onPress={onPickImage}
+            activeOpacity={0.75}
+            disabled={isThinking}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <ImagePlus
+              size={22}
+              color={tokens.primary}
+              strokeWidth={2.4}
+            />
+          </TouchableOpacity>
+        )}
+
         {/* TEXT INPUT FIELD VIÊN THUỐC */}
         <TextInput
           style={[
@@ -131,6 +150,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  attachButton: {
+    width: 36,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   textInput: {
     flex: 1,

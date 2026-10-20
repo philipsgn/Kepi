@@ -9,9 +9,10 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { BarChart2, PieChart, Share2, X } from 'lucide-react-native';
+import { BarChart2, PieChart, Share2, ShieldCheck, TrendingDown, TrendingUp, Wallet, X } from 'lucide-react-native';
 import { Strings } from '../../constants/strings';
 import { MonthSummary, calculateCategoryBreakdown, calculateDailySpend } from '../../utils/statsUtils';
+import { formatCategoryName } from '../../constants/categoryDefaults';
 import { formatVND, maskMoney } from '../../utils/currency';
 import { Transaction } from '../../types/database';
 import { useTheme } from '../../theme/ThemeContext';
@@ -85,11 +86,13 @@ export const MonthDetailBottomSheet: React.FC<MonthDetailBottomSheetProps> = ({
           {/* 1. THANH TIÊU ĐỀ SHEET */}
           <View style={[styles.headerRow, { borderBottomColor: tokens.border }]}>
             <TouchableOpacity
-              activeOpacity={0.8}
+              activeOpacity={0.7}
               onPress={handleClose}
-              style={[styles.closeBtn, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}
+              style={styles.headerBtnBorderless}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityLabel="Đóng chi tiết tháng"
             >
-              <X size={16} color={tokens.text} strokeWidth={2.2} />
+              <X size={20} color={tokens.text} strokeWidth={2.6} />
             </TouchableOpacity>
 
             <View style={styles.titleBox}>
@@ -98,11 +101,13 @@ export const MonthDetailBottomSheet: React.FC<MonthDetailBottomSheetProps> = ({
             </View>
 
             <TouchableOpacity
-              activeOpacity={0.8}
+              activeOpacity={0.7}
               onPress={handleShare}
-              style={[styles.shareBtn, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}
+              style={styles.headerBtnBorderless}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityLabel="Chia sẻ tháng"
             >
-              <Share2 size={15} color={tokens.text} strokeWidth={2} />
+              <Share2 size={19} color={tokens.text} strokeWidth={2.6} />
             </TouchableOpacity>
           </View>
 
@@ -110,14 +115,17 @@ export const MonthDetailBottomSheet: React.FC<MonthDetailBottomSheetProps> = ({
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
           >
-            {/* 2. KHỐI TỔNG QUAN THÁNG */}
+            {/* 2. KHỐI TỔNG QUAN THÁNG (CÓ ICON TRỰC QUAN PHÍA TRƯỚC) */}
             <View style={[styles.blockCard, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
               <Text style={[styles.cardSectionTitle, { color: tokens.text }]}>{Strings.stats.overview}</Text>
 
               <View style={styles.statsGrid}>
                 {/* Đã chi */}
                 <View style={styles.statBox}>
-                  <Text style={[styles.statLabel, { color: tokens.textMuted }]}>{Strings.stats.spentPrefix}</Text>
+                  <View style={styles.statLabelRow}>
+                    <TrendingDown size={13} color={tokens.danger} strokeWidth={2.4} />
+                    <Text style={[styles.statLabel, { color: tokens.textMuted }]}>{Strings.stats.spentPrefix}</Text>
+                  </View>
                   <Text style={[styles.statValue, { color: tokens.text }]}>
                     {maskMoney(formatVND(summary.totalSpent), isMasked)}
                   </Text>
@@ -125,7 +133,10 @@ export const MonthDetailBottomSheet: React.FC<MonthDetailBottomSheetProps> = ({
 
                 {/* Thu nhập */}
                 <View style={styles.statBox}>
-                  <Text style={[styles.statLabel, { color: tokens.textMuted }]}>{Strings.stats.incomePrefix}</Text>
+                  <View style={styles.statLabelRow}>
+                    <TrendingUp size={13} color={tokens.success} strokeWidth={2.4} />
+                    <Text style={[styles.statLabel, { color: tokens.textMuted }]}>{Strings.stats.incomePrefix}</Text>
+                  </View>
                   <Text style={[styles.statValue, { color: tokens.success }]}>
                     {maskMoney(formatVND(summary.totalIncome), isMasked)}
                   </Text>
@@ -133,7 +144,10 @@ export const MonthDetailBottomSheet: React.FC<MonthDetailBottomSheetProps> = ({
 
                 {/* Còn lại */}
                 <View style={styles.statBox}>
-                  <Text style={[styles.statLabel, { color: tokens.textMuted }]}>{Strings.stats.remaining}</Text>
+                  <View style={styles.statLabelRow}>
+                    <Wallet size={13} color={netRemaining >= 0 ? tokens.success : tokens.danger} strokeWidth={2.4} />
+                    <Text style={[styles.statLabel, { color: tokens.textMuted }]}>{Strings.stats.remaining}</Text>
+                  </View>
                   <Text style={[styles.statValue, { color: netRemaining >= 0 ? tokens.success : tokens.danger }]}>
                     {maskMoney(formatVND(netRemaining), isMasked)}
                   </Text>
@@ -141,22 +155,18 @@ export const MonthDetailBottomSheet: React.FC<MonthDetailBottomSheetProps> = ({
 
                 {/* Đã giữ lại */}
                 <View style={styles.statBox}>
-                  <Text style={[styles.statLabel, { color: tokens.textMuted }]}>{Strings.stats.savedPrefix}</Text>
+                  <View style={styles.statLabelRow}>
+                    <ShieldCheck size={13} color={tokens.primary} strokeWidth={2.4} />
+                    <Text style={[styles.statLabel, { color: tokens.textMuted }]}>{Strings.stats.savedPrefix}</Text>
+                  </View>
                   <Text style={[styles.statValue, { color: tokens.primary }]}>
                     {maskMoney(formatVND(summary.totalSaved), isMasked)}
                   </Text>
                 </View>
               </View>
-
-              <View style={[styles.avgDivider, { borderTopColor: tokens.border }]}>
-                <Text style={[styles.avgText, { color: tokens.textSub }]}>
-                  {Strings.stats.itemsCount(summary.transactionCount)} ·{' '}
-                  {Strings.stats.averagePerDay(maskMoney(formatVND(averagePerDay), isMasked))}
-                </Text>
-              </View>
             </View>
 
-            {/* 3. CHI TIÊU THEO DANH MỤC */}
+            {/* 3. CHI TIÊU THEO DANH MỤC (ĐỒNG BỘ TÊN TIẾNG VIỆT) */}
             <View style={[styles.blockCard, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
               <View style={styles.sectionHeaderIconRow}>
                 <PieChart size={15} color={tokens.primary} strokeWidth={2.2} />
@@ -171,7 +181,7 @@ export const MonthDetailBottomSheet: React.FC<MonthDetailBottomSheetProps> = ({
                 categories.map((cat) => (
                   <View key={cat.category} style={styles.categoryItem}>
                     <View style={styles.catTextRow}>
-                      <Text style={[styles.catName, { color: tokens.text }]}>{cat.category}</Text>
+                      <Text style={[styles.catName, { color: tokens.text }]}>{formatCategoryName(cat.category)}</Text>
                       <Text style={[styles.catAmount, { color: tokens.textSub }]}>
                         {maskMoney(formatVND(cat.total), isMasked)} ({cat.percentage}%)
                       </Text>
@@ -192,7 +202,7 @@ export const MonthDetailBottomSheet: React.FC<MonthDetailBottomSheetProps> = ({
               )}
             </View>
 
-            {/* 4. CỘT CHI TIÊU TỪNG NGÀY */}
+            {/* 4. CỘT CHI TIÊU TỪNG NGÀY (BỎ ĐỊNH MỨC CỐ ĐỊNH) */}
             <View style={[styles.blockCard, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
               <View style={styles.sectionHeaderIconRow}>
                 <BarChart2 size={15} color={tokens.primary} strokeWidth={2.2} />
@@ -200,10 +210,6 @@ export const MonthDetailBottomSheet: React.FC<MonthDetailBottomSheetProps> = ({
                   {Strings.stats.dailyTrend}
                 </Text>
               </View>
-
-              <Text style={[styles.benchmarkNote, { color: tokens.textMuted }]}>
-                {Strings.stats.dailyTargetLine('100.000 đ')}
-              </Text>
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.chartWrapper}>
@@ -261,13 +267,13 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
   },
-  closeBtn: {
+  headerBtnBorderless: {
     width: 32,
     height: 32,
-    borderRadius: 16,
-    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   titleBox: {
     alignItems: 'center',
@@ -280,14 +286,6 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     fontWeight: '500',
     marginTop: 1,
-  },
-  shareBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   scrollContent: {
     padding: 16,
@@ -315,6 +313,12 @@ const styles = StyleSheet.create({
   statBox: {
     width: '48%',
     paddingVertical: 6,
+  },
+  statLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 3,
   },
   statLabel: {
     fontSize: 11.5,

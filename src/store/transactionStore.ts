@@ -25,7 +25,7 @@ interface TransactionState {
     description: string | null;
     photo_url: string | null;
     thumbnail_url?: string | null;
-    payment_method: PaymentMethod;
+    payment_method?: PaymentMethod;
     source: TransactionSource;
     status?: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
     payee_name?: string | null;
@@ -64,20 +64,13 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
 
     loadTransactions: async (userId: string) => {
       set({ isLoading: true });
-      const isRealUser =
-        Boolean(userId) &&
-        !userId.startsWith('guest') &&
-        !userId.startsWith('demo') &&
-        userId !== 'seed-user';
+      const isRealUser = Boolean(userId) && !userId.startsWith('guest');
 
       try {
         const cached = await AsyncStorage.getItem(STORAGE_KEY);
         if (cached) {
           const parsed: Transaction[] = JSON.parse(cached);
-          // Loại bỏ toàn bộ dữ liệu seed mẫu cũ nếu còn sót lại trong cache
-          const finalTxs = parsed.filter(
-            (t) => !t.id.startsWith('tx-seed-') && t.user_id !== 'seed-user'
-          );
+          const finalTxs = parsed;
           set({ transactions: finalTxs, isLoading: false });
           // Tự động tính toán lại ngân sách từ lịch sử giao dịch và kết chuyển ngày nếu sang ngày mới
           useBudgetStore.getState().recalculateFromTransactions(finalTxs);
@@ -155,7 +148,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
         description: data.description,
         photo_url: data.photo_url,
         thumbnail_url: data.thumbnail_url || data.photo_url,
-        payment_method: data.payment_method,
+        payment_method: data.payment_method || 'BANK',
         source: data.source,
         status: txStatus,
         payee_name: data.payee_name || null,
@@ -173,13 +166,9 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
       // GUEST GUARD: Chỉ đưa vào hàng đợi đồng bộ ngoại tuyến nếu là người dùng thật
-      const isGuestOrDemo =
-        !data.userId ||
-        data.userId.startsWith('guest') ||
-        data.userId.startsWith('demo') ||
-        data.userId === 'seed-user';
+      const isGuest = !data.userId || data.userId.startsWith('guest');
 
-      if (!isGuestOrDemo) {
+      if (!isGuest) {
         await enqueueMutation('ADD_TRANSACTION', newTx);
         flushSyncQueue().catch(() => {});
       }
@@ -271,13 +260,9 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       useBudgetStore.getState().recalculateFromTransactions(updated);
       syncBudgetToLockScreen().catch(() => {});
 
-      const isGuestOrDemo =
-        !existing?.user_id ||
-        existing.user_id.startsWith('guest') ||
-        existing.user_id.startsWith('demo') ||
-        existing.user_id === 'seed-user';
+      const isGuest = !existing?.user_id || existing.user_id.startsWith('guest');
 
-      if (!isGuestOrDemo) {
+      if (!isGuest) {
         await enqueueMutation('UPDATE_TRANSACTION', { id, ...updates });
         flushSyncQueue().catch(() => {});
       }
@@ -293,13 +278,9 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       useBudgetStore.getState().recalculateFromTransactions(updated);
       syncBudgetToLockScreen().catch(() => {});
 
-      const isGuestOrDemo =
-        !existing?.user_id ||
-        existing.user_id.startsWith('guest') ||
-        existing.user_id.startsWith('demo') ||
-        existing.user_id === 'seed-user';
+      const isGuest = !existing?.user_id || existing.user_id.startsWith('guest');
 
-      if (!isGuestOrDemo) {
+      if (!isGuest) {
         // Đưa vào hàng đợi xóa trên Supabase
         await enqueueMutation('DELETE_TRANSACTION', { id });
         flushSyncQueue().catch(() => {});

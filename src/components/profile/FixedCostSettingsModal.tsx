@@ -125,22 +125,22 @@ export const FixedCostSettingsModal: React.FC<FixedCostSettingsModalProps> = ({
   };
 
   const getCategoryIcon = (category: FixedCostCategory) => {
-    const iconSize = 16;
+    const iconSize = 20;
     const iconColor = tokens.primary;
     switch (category) {
       case 'rent':
-        return <Home size={iconSize} color={iconColor} />;
+        return <Home size={iconSize} color={iconColor} strokeWidth={2.6} />;
       case 'utilities':
-        return <Zap size={iconSize} color={iconColor} />;
+        return <Zap size={iconSize} color={iconColor} strokeWidth={2.6} />;
       case 'internet':
-        return <Wifi size={iconSize} color={iconColor} />;
+        return <Wifi size={iconSize} color={iconColor} strokeWidth={2.6} />;
       case 'debt':
-        return <CreditCard size={iconSize} color={iconColor} />;
+        return <CreditCard size={iconSize} color={iconColor} strokeWidth={2.6} />;
       case 'education':
-        return <BookOpen size={iconSize} color={iconColor} />;
+        return <BookOpen size={iconSize} color={iconColor} strokeWidth={2.6} />;
       case 'other':
       default:
-        return <MoreHorizontal size={iconSize} color={iconColor} />;
+        return <MoreHorizontal size={iconSize} color={iconColor} strokeWidth={2.6} />;
     }
   };
 
@@ -196,7 +196,7 @@ export const FixedCostSettingsModal: React.FC<FixedCostSettingsModalProps> = ({
                   style={[styles.itemCard, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}
                 >
                   <View style={styles.itemHeader}>
-                    <View style={[styles.iconBox, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
+                    <View style={styles.iconBox}>
                       {getCategoryIcon(item.category || 'other')}
                     </View>
                     <View style={styles.itemTitleCol}>
@@ -320,10 +320,10 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    borderWidth: 1,
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -158,7 +158,7 @@ export const HistoryPeekSheet: React.FC<HistoryPeekSheetProps> = ({
                         {item.description || item.category}
                       </Text>
                       <Text style={styles.itemMeta}>
-                        {item.category} • {item.payment_method === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}
+                        {item.category}
                       </Text>
                     </View>
 

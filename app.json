@@ -41,7 +41,8 @@
       "versionCode": 1,
       "permissions": [
         "CAMERA",
-        "NOTIFICATIONS"
+        "NOTIFICATIONS",
+        "BIND_NOTIFICATION_LISTENER_SERVICE"
       ]
     },
     "web": {
@@ -62,7 +63,8 @@
         {
           "color": "#E59844"
         }
-      ]
+      ],
+      "./plugins/withNotificationListener.js"
     ],
     "experiments": {
       "typedRoutes": true

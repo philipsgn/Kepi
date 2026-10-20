@@ -8,6 +8,7 @@
  */
 
 import { Transaction } from '../types/database';
+import { formatCategoryName } from '../constants/categoryDefaults';
 
 export interface MonthSummary {
   monthKey: string;           // 'YYYY-MM'
@@ -192,7 +193,7 @@ export const calculateCategoryBreakdown = (transactions: Transaction[]): Categor
     const isUnpriced = (tx as any).is_unpriced || (tx.type === 'EXPENSE' && (tx.amount === 0 || isNaN(tx.amount)));
     const isSkipped = (tx as any).is_skipped || tx.category === 'Cứu ví';
     if (tx.type === 'EXPENSE' && !isUnpriced && !isSkipped) {
-      const cat = tx.category || 'Khác';
+      const cat = formatCategoryName(tx.category || 'chi_tieu_khac');
       const amt = Math.abs(tx.amount);
       if (!catMap[cat]) {
         catMap[cat] = { total: 0, count: 0 };

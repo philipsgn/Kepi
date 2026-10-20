@@ -36,39 +36,55 @@ Ví Locket v3.1 kết hợp giữa **Nhật ký ảnh Locket chân thực**, **P
 ## 2. BẢNG MÀU COZY GAME & 3 CHẾ ĐỘ CHỦ ĐẠO (SÁNG / TỐI / MÁT — "LUXURY TECH WOW")
 
 Ứng dụng hỗ trợ 3 tùy chọn phong cách màu sắc độc lập đạt hiệu ứng "WOW" cao cấp:
-1. **Chế Độ Sáng — Warm Luxury Gold (`light`):**
-   - Sự kết hợp giữa Kem Bơ thượng hạng (`#FAF7F0`), bề mặt ngà ngọc trai (`#FFFDF9`), viền vàng kim tuyến (`rgba(217, 163, 39, 0.18)`), nút CTA Vàng Kim Hoàng Gia Gradient (`#F5B738` ➔ `#E29913`) và bóng phát sáng vàng kim (`rgba(229, 168, 35, 0.35)`).
-2. **Chế Độ Tối — Space Gray Titanium (`dark`):**
-   - Chuẩn phong cách Apple Pro Dark: Nền đen than chì sâu thẳm OLED (`#0E1013`), thẻ Space Gray Titanium (`#181A1F`), viền hairline kim loại bạc (`rgba(255, 255, 255, 0.08)`), nút CTA Titanium Gradient (`#F8FAFC` ➔ `#D1D5DB`) và ánh sáng kim loại bạc.
-3. **Chế Độ Mát — Cool Mint & Aqua Jade Gradient (`cool`):**
-   - Bạc hà sương mai mát lạnh (`#EDF9F5`), thẻ tuyết ngọc trai (`#FFFFFF`), viền ngọc bích sương mai (`rgba(16, 185, 129, 0.18)`), nút CTA Gradient chuyển kép từ **Xanh Mint sương mai sang Xanh Ngọc Bích / Aqua** (`#10B981` ➔ `#06B6D4`) cùng bóng ngọc bích bừng sáng (`rgba(16, 185, 129, 0.35)`).
+1. **Chế Độ Sáng — Vàng Kem Bơ Hà Nội Thu Đông (`light`):**
+   - Nền kem bơ ấm áp (`#FAF6EC`), bề mặt ngà ngọc trai (`#FFFDF9`), điểm nhấn Nắng Thu Hà Nội (`#E59844`), màu an toàn Cốm Non Làng Vòng (`#7E9F80`), màu chi Ngói Rêu Phố Cổ (`#C86D51`).
+2. **Chế Độ Tối — Xám Than Phối Xanh Mint Đậm (`dark`):**
+   - Nền xám than đêm đông OLED (`#0E1620`), thẻ than chì đậm (`#16202C`), điểm nhấn Xanh Mint sáng rực rỡ (`#2DD4BF`), chữ phụ Slate 400 (`#94A3B8`), nút CTA Mint Gradient (`#2DD4BF` ➔ `#0D9488`).
+3. **Chế Độ Mát — Fresh Blue-Mint Bạc Hà Sương Mai (`cool`):**
+   - Nền bạc hà ngọc mai tươi mát (`#F0FDF4`), thẻ tuyết ngọc trai (`#FFFFFF`), bề mặt mềm (`#DCFCE7`), điểm nhấn Xanh Mint tươi ngọt (`#059669`), phối cùng Xanh Da Trời (`#38BDF8`).
 
-| Token Name | Sáng (Warm Luxury Gold) | Tối (Space Gray Titanium) | Mát (Cool Mint & Aqua Jade) | Ứng Dụng |
+| Token Name | Sáng (Vàng Kem Bơ Thu Đông) | Tối (Dark Mint Xám Than) | Mát (Fresh Blue-Mint) | Ứng Dụng |
 |---|---|---|---|---|
-| `background` | `#FAF7F0` (Kem Bơ) | `#0E1013` (Than Chì OLED) | `#EDF9F5` (Bạc Hà Băng) | Nền chính ứng dụng |
-| `surface` | `#FFFDF9` (Ngà Ngọc Trai) | `#181A1F` (Space Gray Titan) | `#FFFFFF` (Tuyết Ngọc Trai) | Nền thẻ card |
-| `surfaceAlt` | `#F5EEDB` (Kem Bơ Ấm) | `#22252C` (Xám Kim Loại) | `#DCF5EB` (Bạc Hà Mềm) | Nền phụ, input, segment |
-| `primary` | `#E5A823` (Vàng Kim) | `#F0F2F5` (Bạc Trắng) | `#10B981` (Ngọc Bích Tươi) | Điểm nhấn chính |
-| `textOnPrimary` | `#1C1812` (Đen Than) | `#0E1013` (Đen Tuyền) | `#FFFFFF` (Trắng Tuyết) | Chữ trên nút chính |
-| `primaryGradient` | `['#F5B738', '#E29913']` | `['#F8FAFC', '#D1D5DB']` | `['#10B981', '#06B6D4']` | Gradient Nút CTA & Highlight |
-| `glowColor` | `rgba(229, 168, 35, 0.35)` | `rgba(240, 242, 245, 0.20)` | `rgba(16, 185, 129, 0.35)` | Hiệu ứng viền & bóng phát sáng |
-| `text` | `#1C1812` | `#F7F8FA` | `#0B3326` | Chữ tiêu đề / số chính |
-| `textMuted` | `#9C8E7B` | `#666C7A` | `#629983` | Chữ phụ, ngày tháng |
-| `border` | `rgba(217, 163, 39, 0.18)` | `rgba(255, 255, 255, 0.08)` | `rgba(16, 185, 129, 0.18)` | Viền thẻ & nút bấm |
+| `background` / `bg` | `#FAF6EC` (Kem Bơ) | `#0E1620` (Xám Than Đêm Đông) | `#F0FDF4` (Bạc Hà Sương Mai) | Nền chính ứng dụng |
+| `surface` | `#FFFDF9` (Ngà Ngọc Trai) | `#16202C` (Than Chì Bề Mặt) | `#FFFFFF` (Tuyết Ngọc Trai) | Nền thẻ card |
+| `surfaceAlt` | `#F5EEDB` (Kem Bơ Ấm) | `#1E2C3D` (Xám Than Phụ) | `#DCFCE7` (Bạc Hà Mềm) | Nền phụ, input, segment |
+| `primary` | `#E59844` (Nắng Thu Hà Nội) | `#2DD4BF` (Mint Sáng Đậm) | `#059669` (Mint Tươi Ngọt) | Điểm nhấn chính |
+| `textOnPrimary` | `#1C1812` (Đen Than Ấm) | `#0E1620` (Xám Than Đậm) | `#FFFFFF` (Trắng Tuyết) | Chữ trên nút chính |
+| `primaryGradient` | `['#E59844', '#D4882B']` | `['#2DD4BF', '#0D9488']` | `['#059669', '#38BDF8']` | Gradient Nút CTA & Highlight |
+| `glowColor` | `rgba(229, 152, 68, 0.35)` | `rgba(45, 212, 191, 0.35)` | `rgba(5, 150, 105, 0.35)` | Hiệu ứng viền & bóng phát sáng |
+| `text` | `#1C1812` (Đen Than) | `#F8FAFC` (Trắng Sáng) | `#064E3B` (Ngọc Rừng Thẫm) | Chữ tiêu đề / số chính |
+| `textSub` | `#5A4E3D` (Nâu Trầm) | `#94A3B8` (Slate 400) | `#047857` (Xanh Ngọc) | Chữ phụ, mục nhóm |
+| `textMuted` | `#665C4E` (Nâu Xám Dịu) | `#7E8E9F` (Slate 350) | `#334155` (Slate Thẫm) | Chú thích mờ, ngày tháng |
+| `border` | `rgba(229, 152, 68, 0.20)` | `rgba(45, 212, 191, 0.16)` | `rgba(5, 150, 105, 0.18)` | Viền thẻ & nút bấm |
+| `success` | `#7E9F80` (Cốm Non) | `#2DD4BF` (Mint Tươi) | `#059669` (Mint An Toàn) | Trạng thái thu nhập, an toàn |
+| `danger` | `#C86D51` (Ngói Rêu) | `#F87171` (San Hô Neon) | `#DC2626` (Đỏ Tươi Rõ) | Cảnh báo, vượt ngân sách |
 
 ---
 
 ### BÁO CÁO ĐỘ TƯƠNG PHẢN WCAG 2.1 AA (ACCESSIBILITY COMPLIANCE)
 
-| Cặp màu sắc (Foreground / Background) | Tỉ lệ tương phản | Tiêu chuẩn WCAG 2.1 | Đánh giá |
-| :--- | :---: | :---: | :---: |
-| **Nút chính Nắng Thu (`#E59844`) trên Nền Tối (`#141D2A`)** | **8.2 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
-| **Chữ Đen Than (`#1B2733`) trên Nút Vàng (`#E59844`)** | **9.5 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
-| **Chữ Trắng (`#FFFFFF`) trên Nút Vàng Đậm (`#D4882B`)** | **4.6 : 1** | $\ge 4.5:1$ (AA) | ✅ PASS AA |
-| **Màu Chi Ngói Rêu (`#C86D51`) trên Nền Sáng (`#FAF6EC`)** | **4.8 : 1** | $\ge 4.5:1$ (AA) | ✅ PASS AA |
-| **Màu Thu Cốm Non (`#7E9F80`) trên Nền Tối (`#0E1620`)** | **6.5 : 1** | $\ge 4.5:1$ (AA) | ✅ PASS AA |
-| **Chữ Chính (`#1E231E`) trên Nền Kem Sáng (`#FAF6F0`)** | **14.2 : 1** | $\ge 7.0:1$ (AAA) | ✅ PASS AAA |
-| **Chữ Trắng Kem (`#FAF6EC`) trên Nền Tối (`#0E1620`)** | **15.8 : 1** | $\ge 7.0:1$ (AAA) | ✅ PASS AAA |
+| Theme | Cặp màu sắc (Foreground / Background) | Tỉ lệ tương phản | Tiêu chuẩn WCAG 2.1 | Đánh giá |
+| :--- | :--- | :---: | :---: | :---: |
+| **Theme 1 (Sáng)** | Chữ chính (`#1C1812`) trên Nền Kem (`#FAF6EC`) | **16.4 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 1 (Sáng)** | Chữ chính (`#1C1812`) trên Thẻ (`#FFFDF9`) | **17.4 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 1 (Sáng)** | Chữ phụ (`#5A4E3D`) trên Nền Kem (`#FAF6EC`) | **7.5 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 1 (Sáng)** | Chú thích mờ (`#665C4E`) trên Nền Kem (`#FAF6EC`) | **6.1 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 1 (Sáng)** | Chữ trên nút (`#1C1812`) trên Nút Vàng (`#E59844`) | **7.5 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 1 (Sáng)** | Cốm Non (`#7E9F80`) trên Nền Camera Đêm (`#0E1620`) | **6.2 : 1** | $\ge 4.5:1$ (AA) | ✅ PASS AA |
+| **Theme 1 (Sáng)** | Ngói Rêu (`#C86D51`) trên Nền Kem (`#FAF6EC`) | **3.4 : 1** | $\ge 3.0:1$ (Large/UI) | ✅ PASS AA (UI) |
+| **Theme 2 (Tối)** | Chữ chính (`#F8FAFC`) trên Nền Xám Than (`#0E1620`) | **17.4 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 2 (Tối)** | Chữ chính (`#F8FAFC`) trên Thẻ Than Chì (`#16202C`) | **15.3 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 2 (Tối)** | Chữ phụ Slate (`#94A3B8`) trên Nền Xám Than (`#0E1620`) | **7.1 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 2 (Tối)** | Chú thích Slate (`#7E8E9F`) trên Nền Xám Than (`#0E1620`) | **5.4 : 1** | $\ge 4.5:1$ (AA) | ✅ PASS AA |
+| **Theme 2 (Tối)** | Chữ xám than (`#0E1620`) trên Nút Mint (`#2DD4BF`) | **9.8 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 2 (Tối)** | Báo động đỏ (`#F87171`) trên Nền Xám Than (`#0E1620`) | **6.6 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 2 (Tối)** | Mint an toàn (`#2DD4BF`) trên Nền Xám Than (`#0E1620`) | **9.8 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 3 (Mát)** | Chữ chính (`#064E3B`) trên Nền Bạc Hà (`#F0FDF4`) | **9.3 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 3 (Mát)** | Chữ phụ (`#047857`) trên Nền Bạc Hà (`#F0FDF4`) | **5.2 : 1** | $\ge 4.5:1$ (AA) | ✅ PASS AA |
+| **Theme 3 (Mát)** | Chú thích mờ (`#334155`) trên Nền Bạc Hà (`#F0FDF4`) | **8.6 : 1** | $\ge 4.5:1$ (AA / AAA) | ✅ PASS AAA |
+| **Theme 3 (Mát)** | Chữ trắng (`#FFFFFF`) trên Nút Mint Đậm (`#047857`) | **5.5 : 1** | $\ge 4.5:1$ (AA) | ✅ PASS AA |
+| **Theme 3 (Mát)** | Chữ trắng (`#FFFFFF`) trên Nút Mint Tươi (`#059669`) | **3.8 : 1** | $\ge 3.0:1$ (Large text) | ✅ PASS AA (Button) |
+| **Theme 3 (Mát)** | Báo động đỏ (`#DC2626`) trên Nền Bạc Hà (`#F0FDF4`) | **4.6 : 1** | $\ge 4.5:1$ (AA) | ✅ PASS AA |
 
 > **Quy chuẩn Icon Toàn Ứng Dụng (App-Wide Pure Floating Bold Icons):**
 > - **100% Vector Icons** từ `lucide-react-native`, tuyệt đối không dùng emoji làm biểu tượng chính.

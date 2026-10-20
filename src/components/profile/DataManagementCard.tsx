@@ -82,8 +82,8 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
     <View style={[styles.container, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
       {/* 1. TIÊU ĐỀ KHỐI */}
       <View style={styles.headerRow}>
-        <View style={[styles.iconBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-          <Database size={15} color={tokens.primary} strokeWidth={2.4} />
+        <View style={styles.iconBox}>
+          <Database size={18} color={tokens.primary} strokeWidth={2.6} />
         </View>
         <Text style={[styles.sectionTitle, { color: tokens.text }]}>{Strings.profile.dataSectionTitle}</Text>
       </View>
@@ -95,8 +95,8 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
           onPress={handleOpenResetModal}
           activeOpacity={0.7}
         >
-          <View style={[styles.actionIconBox, { backgroundColor: tokens.surfaceAlt }]}>
-            <Trash2 size={15} color={tokens.warning} />
+          <View style={styles.actionIconBox}>
+            <Trash2 size={18} color={tokens.warning} strokeWidth={2.6} />
           </View>
           <View style={styles.actionTextCol}>
             <Text style={[styles.actionTitle, { color: tokens.text }]}>{Strings.profile.resetAllData}</Text>
@@ -112,8 +112,8 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
           onPress={handleDeleteAccountPress}
           activeOpacity={0.7}
         >
-          <View style={[styles.actionIconBox, { backgroundColor: tokens.surfaceAlt }]}>
-            <UserX size={15} color={tokens.danger} />
+          <View style={styles.actionIconBox}>
+            <UserX size={18} color={tokens.danger} strokeWidth={2.6} />
           </View>
           <View style={styles.actionTextCol}>
             <Text style={[styles.actionTitle, { color: tokens.danger }]}>
@@ -131,8 +131,8 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
           onPress={handleSignOutPress}
           activeOpacity={0.7}
         >
-          <View style={[styles.actionIconBox, { backgroundColor: tokens.surfaceAlt }]}>
-            <LogOut size={15} color={tokens.textMuted} />
+          <View style={styles.actionIconBox}>
+            <LogOut size={18} color={tokens.textMuted} strokeWidth={2.6} />
           </View>
           <View style={styles.actionTextCol}>
             <Text style={[styles.actionTitle, { color: tokens.text }]}>{Strings.profile.signOut}</Text>
@@ -157,8 +157,8 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
         <View style={styles.modalOverlay}>
           <View style={[styles.modalCard, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
             <View style={styles.modalHeader}>
-              <View style={[styles.warnIconBox, { backgroundColor: tokens.surfaceAlt }]}>
-                <AlertTriangle size={20} color={tokens.danger} />
+              <View style={styles.warnIconBox}>
+                <AlertTriangle size={20} color={tokens.danger} strokeWidth={2.6} />
               </View>
               <Text style={[styles.modalTitle, { color: tokens.text }]}>Xác Nhận Đặt Lại</Text>
             </View>
@@ -228,10 +228,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   iconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    borderWidth: 1,
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -250,9 +250,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   actionIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -293,9 +294,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   warnIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

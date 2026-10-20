@@ -44,9 +44,9 @@ export const FriendsComingSoonView: React.FC<FriendsComingSoonViewProps> = ({
       contentContainerStyle={[styles.container, { paddingBottom: contentBottomPadding + 20 }]}
       showsVerticalScrollIndicator={false}
     >
-      {/* 1. KHỐI ICON TRÒN VÀNG ẤM */}
-      <View style={[styles.iconBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-        <Users size={34} color={tokens.primary} strokeWidth={2.2} />
+      {/* 1. KHỐI ICON NỔI TRẦN */}
+      <View style={styles.iconBox}>
+        <Users size={36} color={tokens.primary} strokeWidth={2.6} />
       </View>
 
       <Text style={[styles.title, { color: tokens.text }]}>{Strings.chat.friendsComingSoonTitle}</Text>
@@ -55,8 +55,8 @@ export const FriendsComingSoonView: React.FC<FriendsComingSoonViewProps> = ({
       {/* 2. CÁC ĐẶC ĐIỂM NỔI BẬT */}
       <View style={[styles.featuresList, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
         <View style={styles.featureItem}>
-          <View style={[styles.featureIconSmall, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
-            <ShieldCheck size={16} color={tokens.primary} strokeWidth={2.2} />
+          <View style={styles.featureIconSmall}>
+            <ShieldCheck size={18} color={tokens.primary} strokeWidth={2.6} />
           </View>
           <View style={styles.featureTextCol}>
             <Text style={[styles.featureItemTitle, { color: tokens.text }]}>Hỏi bạn trước khi mua</Text>
@@ -67,8 +67,8 @@ export const FriendsComingSoonView: React.FC<FriendsComingSoonViewProps> = ({
         </View>
 
         <View style={styles.featureItem}>
-          <View style={[styles.featureIconSmall, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
-            <Target size={16} color={tokens.primary} strokeWidth={2.2} />
+          <View style={styles.featureIconSmall}>
+            <Target size={18} color={tokens.primary} strokeWidth={2.6} />
           </View>
           <View style={styles.featureTextCol}>
             <Text style={[styles.featureItemTitle, { color: tokens.text }]}>Mục tiêu tuần cùng nhau</Text>
@@ -79,8 +79,8 @@ export const FriendsComingSoonView: React.FC<FriendsComingSoonViewProps> = ({
         </View>
 
         <View style={styles.featureItem}>
-          <View style={[styles.featureIconSmall, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
-            <Lock size={16} color={tokens.primary} strokeWidth={2.2} />
+          <View style={styles.featureIconSmall}>
+            <Lock size={18} color={tokens.primary} strokeWidth={2.6} />
           </View>
           <View style={styles.featureTextCol}>
             <Text style={[styles.featureItemTitle, { color: tokens.text }]}>Bảo mật & Ẩn tiền mặc định</Text>
@@ -124,10 +124,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconBox: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 1,
+    width: 44,
+    height: 44,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -160,10 +160,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   featureIconSmall: {
-    padding: 8,
-    borderRadius: 8,
-    borderWidth: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     marginRight: 12,
+    marginTop: 2,
   },
   featureTextCol: {
     flex: 1,

@@ -357,53 +357,6 @@ export const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
                 />
               </View>
 
-              {/* CHỌN NGUỒN TIỀN (NGÂN HÀNG / TIỀN MẶT / VÍ) */}
-              <View style={styles.sectionBlock}>
-                <Text style={[styles.sectionLabel, { color: tokens.textMuted }]}>
-                  NGUỒN TIỀN:
-                </Text>
-                <View style={styles.paymentPillsRow}>
-                  {[
-                    { key: 'BANK', label: 'Ngân hàng', icon: CreditCard },
-                    { key: 'CASH', label: 'Tiền mặt', icon: Banknote },
-                    { key: 'E_WALLET', label: 'Ví điện tử', icon: Smartphone },
-                  ].map((item) => {
-                    const isSelected = paymentMethod === item.key;
-                    const IconComp = item.icon;
-                    return (
-                      <TouchableOpacity
-                        key={item.key}
-                        style={[
-                          styles.paymentPill,
-                          {
-                            backgroundColor: isSelected ? tokens.primary : tokens.surfaceAlt,
-                            borderColor: isSelected ? tokens.primary : tokens.border,
-                          },
-                        ]}
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          setPaymentMethod(item.key as PaymentMethod);
-                        }}
-                        activeOpacity={0.8}
-                      >
-                        <IconComp
-                          size={13}
-                          strokeWidth={1.8}
-                          color={isSelected ? '#1B2733' : tokens.textMuted}
-                        />
-                        <Text
-                          style={[
-                            styles.paymentPillText,
-                            { color: isSelected ? '#1B2733' : tokens.text },
-                          ]}
-                        >
-                          {item.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
 
               {/* NÚT THAO TÁC Ở ĐÁY (ZERO-SCROLL) */}
               <View style={styles.bottomActionsCol}>

@@ -178,6 +178,15 @@ Toàn bộ các thiết lập hệ thống được trình bày dưới dạng c
 - **Phân tách 2 luồng:**
   - Tab 1: **Danh mục Chi Tiêu** (Ăn uống, Nhà cửa, Xe cộ, Thuốc men, Cho mẹ, Nuôi pet, Quần áo, Học tập...).
   - Tab 2: **Danh mục Thu Nhập** (Tiền lương, Tiền thưởng, Được cho/biếu, Đầu tư, Bán đồ cũ...).
+
+### 3.8. Khối Chuyển Đổi 3 Theme Giao Diện (`ThemeSettingsCard.tsx`)
+- **Tích hợp kép:** Có mặt trực tiếp trên cả Tab Hồ Sơ (`ProfileView.tsx`) và Màn hình Cài Đặt (`SettingsView.tsx`).
+- **3 Chế độ giao diện chuẩn Hà Nội:**
+  1. **Sáng (`light`):** Nền kem ngà bơ Hà Nội Thu Đông (`#FAF6EC`).
+  2. **Tối (`dark`):** Nền xám than khói trầm đêm đông (`#0E1620`).
+  3. **Mát (`cool`):** Nền sương mai thanh mát Fresh Blue-Mint (`#F0F8FF` / `#0F2420`).
+- **Tương tác chuyển đổi:** Nút segmented pill 3 lựa chọn với icon Vector nổi trần (`Sun`, `Moon`, `Wind`), phản hồi rung xúc giác `selectionAsync()`, lưu tự động vào `AsyncStorage` (`vi_locket_theme_mode`).
+
 - **Chức năng tương tác:**
   - *Thêm mới:* Nút `+ Thêm danh mục mới` mở Bottom Sheet cho phép nhập Tên danh mục, chọn Icon từ danh mục Vector Icons `lucide-react-native`, và chọn mã màu đại diện.
   - *Chỉnh sửa:* Bấm vào danh mục để đổi tên hoặc thay icon.

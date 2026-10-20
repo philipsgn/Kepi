@@ -31,6 +31,7 @@ import { Transaction } from '../../types/database';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { Strings } from '../../constants/strings';
+import { useBottomInset } from '../../hooks/useBottomInset';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -80,10 +81,17 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
   periodMode = 'MONTH',
 }) => {
   const { tokens, isDark } = useTheme();
+  const { contentBottomPadding } = useBottomInset();
 
   const [yearStr, monthStr] = summary.monthKey.split('-');
   const year = parseInt(yearStr, 10);
   const month = parseInt(monthStr, 10);
+
+  const now = new Date();
+  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
+  const spendTrendTitle = isCurrentMonth
+    ? 'Xu Hướng Chi Tiêu Tháng Này'
+    : `Xu Hướng Chi Tiêu Tháng ${month}`;
 
   const remainingBudget = summary.totalIncome - summary.totalSpent;
 
@@ -284,7 +292,7 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[styles.scrollContent, { paddingBottom: contentBottomPadding + 48 }]}
     >
       {periodMode === 'WEEK' ? (
         /* ====================================================================== */
@@ -747,11 +755,8 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
                 { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
               ]}
             >
-              <Text style={[styles.analystQuoteHeader, { color: tokens.primary }]}>
-                💡 NHẬN ĐỊNH TÀI CHÍNH:
-              </Text>
               <Text style={[styles.analystQuoteText, { color: tokens.text }]}>
-                {analystInsight}
+                {analystInsight.replace(/^Chú ý dòng tiền:\s*/i, '')}
               </Text>
             </View>
           </View>
@@ -769,9 +774,6 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
                 Dòng Tiền Ra - Vào
               </Text>
             </View>
-            <Text style={[styles.sectionSubtitle, { color: tokens.textMuted }]}>
-              Sơ đồ phân nhánh dòng chảy tài chính trong tháng:
-            </Text>
 
             <View style={styles.flowContainer}>
               <View
@@ -979,13 +981,9 @@ export const AnalyticsDashboardView: React.FC<AnalyticsDashboardViewProps> = ({
             <View style={styles.sectionHeaderRow}>
               <BarChart2 size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.sectionTitle, { color: tokens.text }]}>
-                Xu Hướng Chi Tiêu 30 Ngày
+                {spendTrendTitle}
               </Text>
             </View>
-
-            <Text style={[styles.benchmarkLabel, { color: tokens.textMuted }]}>
-              {Strings.stats.dailyTargetLine(formatVND(burnRate.safeDailyFloor))}
-            </Text>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.chartWrapper}>

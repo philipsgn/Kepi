@@ -272,6 +272,25 @@ export const generateWeekDays = (
   return cells;
 };
 
+export type DayPeriodType = 'MORNING' | 'NOON' | 'AFTERNOON' | 'EVENING' | 'NIGHT';
+
+/**
+ * Xác định buổi trong ngày theo giờ Việt Nam
+ */
+export const getDayPeriod = (date: Date = new Date()): DayPeriodType => {
+  const vnHourStr = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    hour12: false,
+    timeZone: 'Asia/Ho_Chi_Minh',
+  }).format(date);
+  const hour = parseInt(vnHourStr, 10);
+  if (hour >= 5 && hour < 11) return 'MORNING';
+  if (hour >= 11 && hour < 14) return 'NOON';
+  if (hour >= 14 && hour < 18) return 'AFTERNOON';
+  if (hour >= 18 && hour < 22) return 'EVENING';
+  return 'NIGHT';
+};
+
 /**
  * Lấy chuỗi mô tả dải ngày trong tuần (Ví dụ: "05/10 - 11/10, 2026")
  */
@@ -286,5 +305,6 @@ export const getWeekRangeText = (referenceDate: Date = new Date()): string => {
   const pad = (n: number) => String(n).padStart(2, '0');
   const monStr = `${pad(monday.getDate())}/${pad(monday.getMonth() + 1)}`;
   const sunStr = `${pad(sunday.getDate())}/${pad(sunday.getMonth() + 1)}`;
-  return `Tuần ${monStr} - ${sunStr}, ${sunday.getFullYear()}`;
+  return `${monStr} - ${sunStr}, ${sunday.getFullYear()}`;
 };
+

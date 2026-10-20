@@ -222,7 +222,7 @@ export const LocketCalendarView: React.FC<LocketCalendarViewProps> = ({
                     {tx.description || tx.category}
                   </Text>
                   <Text style={styles.txMeta}>
-                    {tx.category} • {tx.payment_method === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}
+                    {tx.category}
                   </Text>
                 </View>
 

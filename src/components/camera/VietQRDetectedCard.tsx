@@ -202,8 +202,8 @@ export const VietQRDetectedCard: React.FC<VietQRDetectedCardProps> = ({
       {/* Header bar: Payee & Dismiss */}
       <View style={styles.cardHeader}>
         <View style={styles.headerLeft}>
-          <View style={[styles.bankIconCircle, { backgroundColor: isDark ? '#222E3F' : '#F0E8D8' }]}>
-            <Store size={16} color={tokens.primary} strokeWidth={2.4} />
+          <View style={styles.bankIconCircle}>
+            <Store size={20} color={tokens.primary} strokeWidth={2.6} />
           </View>
           <View style={styles.headerTitles}>
             <Text
@@ -326,7 +326,7 @@ export const VietQRDetectedCard: React.FC<VietQRDetectedCardProps> = ({
         <View style={[styles.chipCategory, { backgroundColor: isDark ? '#202B3B' : '#ECE5D6' }]}>
           <Tag size={12} color={tokens.primary} strokeWidth={2.2} style={{ marginRight: 4 }} />
           <Text style={[styles.chipCategoryText, { color: isDark ? '#D2DEEC' : '#495768' }]}>
-            {payload.suggestedCategory === 'an_uong' ? 'Ăn uống & Cà phê' : 'Mua sắm'}
+            {payload.suggestedCategory === 'an_uong' ? 'Ăn uống' : 'Mua sắm'}
           </Text>
         </View>
         {payload.note ? (
@@ -600,12 +600,13 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   bankIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 26,
+    height: 26,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   headerTitles: {
     flex: 1,

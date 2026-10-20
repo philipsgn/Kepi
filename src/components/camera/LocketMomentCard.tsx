@@ -20,7 +20,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 interface LocketMomentCardProps {
   item: Transaction;
   isMasked?: boolean;
-  onPress: (item: Transaction) => void;
+  onPress?: (item: Transaction) => void;
 }
 
 /**
@@ -40,8 +40,10 @@ export const LocketMomentCard: React.FC<LocketMomentCardProps> = ({
   const isSkipped = (item as any).is_skipped || item.category === 'Cứu ví';
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onPress(item);
+    if (onPress) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      onPress(item);
+    }
   };
 
   const formatRelativeTime = (isoString?: string) => {

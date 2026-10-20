@@ -81,21 +81,8 @@ export const EWalletDetectedCard: React.FC<EWalletDetectedCardProps> = ({
       {/* 1. Header Bar: E-Wallet Identity & Dismiss Button */}
       <View style={styles.cardHeader}>
         <View style={styles.headerLeft}>
-          <View
-            style={[
-              styles.walletIconCircle,
-              {
-                backgroundColor: isDark
-                  ? isZaloPay
-                    ? 'rgba(0, 104, 255, 0.18)'
-                    : 'rgba(165, 0, 100, 0.18)'
-                  : isZaloPay
-                  ? '#EBF3FF'
-                  : '#FFF0F7',
-              },
-            ]}
-          >
-            <Smartphone size={17} color={brandColor} strokeWidth={2.4} />
+          <View style={styles.walletIconCircle}>
+            <Smartphone size={20} color={brandColor} strokeWidth={2.6} />
           </View>
           <View style={styles.headerTitles}>
             <View style={styles.badgeRow}>
@@ -350,12 +337,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   walletIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 26,
+    height: 26,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   headerTitles: {
     flex: 1,

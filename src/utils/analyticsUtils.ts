@@ -235,7 +235,7 @@ export function computeFinancialAnalyticsKPI(params: {
   } else if (burnRate.isOverburning) {
     analystInsight = `Cảnh báo tốc độ đốt: Bạn đang tiêu trung bình ${burnRate.dailyBurn.toLocaleString('vi-VN')} đ/ngày (vượt ${burnRate.comparisonPercent}% định mức). Hãy tiết chế các khoản mua sắm ngẫu hứng để ${runway.statusText.toLowerCase()}.`;
   } else if (!runway.isSafeToEndOfMonth && runway.exhaustionDay) {
-    analystInsight = `Chú ý dòng tiền: Với nhịp độ hiện tại, ví sẽ chạm đáy vào ngày ${runway.exhaustionDay}. Hãy cắt giảm các khoản chi ngoài định mức ngay từ hôm nay.`;
+    analystInsight = `Với nhịp độ hiện tại, ví sẽ chạm đáy vào ngày ${runway.exhaustionDay}. Hãy cắt giảm các khoản chi ngoài định mức ngay từ hôm nay.`;
   } else {
     analystInsight = `Bạn đang duy trì chi tiêu khá ổn định. Tỷ lệ tích lũy đạt ${savingsRate.rate}% với tốc độ đốt trong tầm kiểm soát an toàn.`;
   }

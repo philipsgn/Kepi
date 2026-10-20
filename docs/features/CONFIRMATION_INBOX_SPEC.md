@@ -74,8 +74,9 @@ Cờ `autofill` phản ánh năng lực của **ỨNG DỤNG NGÂN HÀNG DÙNG �
     - Tên nơi nhận / Mô tả.
     - Thời gian giao dịch.
     - Danh mục gợi ý (có thể chạm đổi nhanh).
+    - **Không hiển thị Nguồn tiền / Hình thức thanh toán (Tiền mặt/Bank):** Đã loại bỏ hoàn toàn để tinh gọn thao tác $\le 3$s theo Quyết định 78.
     - 2 nút hành động lớn: **[Lưu]** (màu nhấn) và **[Bỏ]** (màu mờ).
-  - **Chạm vào thẻ:** Mở bảng sửa nhanh số tiền, danh mục, ghi chú.
+  - **Chạm vào thẻ:** Mở bảng sửa nhanh số tiền, danh mục, ghi chú (không cần chọn hình thức thanh toán).
   - **Cơ chế Hoàn tác (Undo):** Sau khi bấm Lưu hoặc Bỏ, hiển thị thanh Snackbar hoàn tác trong vòng 5 giây phòng trường hợp bấm nhầm.
 
 ### 3.3. Thời Gian Sống & Chống Trùng

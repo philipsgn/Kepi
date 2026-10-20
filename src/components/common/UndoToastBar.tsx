@@ -106,14 +106,9 @@ export const UndoToastBar: React.FC<UndoToastBarProps> = ({
         ]}
       >
         <View style={styles.contentRow}>
-          {/* Icon Checkmark tinh tế */}
-          <View
-            style={[
-              styles.iconBadge,
-              { backgroundColor: isDark ? 'rgba(126, 159, 128, 0.2)' : 'rgba(126, 159, 128, 0.15)' },
-            ]}
-          >
-            <CheckCircle2 size={18} color="#7E9F80" strokeWidth={2.4} />
+          {/* Icon Checkmark tinh tế nổi trần */}
+          <View style={styles.iconBadge}>
+            <CheckCircle2 size={20} color="#7E9F80" strokeWidth={2.6} />
           </View>
 
           {/* Dòng thông báo nổi bật */}
@@ -203,9 +198,10 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   iconBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

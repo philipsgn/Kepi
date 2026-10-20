@@ -45,7 +45,7 @@ export const HistoryStickyHeader: React.FC<HistoryStickyHeaderProps> = ({
     { key: 'all', label: Strings.history.filterAll },
     { key: 'expense', label: 'Khoản chi' },
     { key: 'income', label: 'Thu nhập' },
-    { key: 'an_uong', label: 'Ăn uống & Cà phê' },
+    { key: 'an_uong', label: 'Ăn uống' },
     { key: 'mua_sam', label: 'Mua sắm' },
     { key: 'di_chuyen', label: 'Di chuyển' },
     { key: 'co_dinh', label: 'Cố định' },

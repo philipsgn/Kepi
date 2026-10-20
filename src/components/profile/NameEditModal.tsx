@@ -59,17 +59,18 @@ export const NameEditModal: React.FC<NameEditModalProps> = ({
         <View style={[styles.modalCard, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
           <View style={styles.headerRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <View style={[styles.iconBox, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-                <User size={15} color={tokens.primary} strokeWidth={2.4} />
+              <View style={styles.iconBox}>
+                <User size={20} color={tokens.primary} strokeWidth={2.6} />
               </View>
               <Text style={[styles.modalTitle, { color: tokens.text }]}>{Strings.profile.editNameTitle}</Text>
             </View>
 
             <TouchableOpacity
-              style={[styles.closeBtn, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}
+              style={styles.closeBtn}
               onPress={onClose}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <X size={15} color={tokens.textMuted} />
+              <X size={18} color={tokens.textMuted} strokeWidth={2.6} />
             </TouchableOpacity>
           </View>
 
@@ -144,10 +145,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   iconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    borderWidth: 1,
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -158,8 +159,8 @@ const styles = StyleSheet.create({
   closeBtn: {
     width: 28,
     height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -206,7 +206,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             session.user.user_metadata?.full_name ||
             session.user.user_metadata?.name ||
             session.user.email?.split('@')[0] ||
-            'Người thương phố cổ',
+            'Bạn',
           avatar_url: session.user.user_metadata?.avatar_url,
         };
 

@@ -123,14 +123,12 @@ export const WeekCalendarCarousel: React.FC<WeekCalendarCarouselProps> = ({
       <View style={styles.weekHeaderRow}>
         <TouchableOpacity
           onPress={handlePrevWeek}
-          style={[
-            styles.navArrowBtn,
-            { backgroundColor: tokens.surfaceAlt },
-          ]}
+          style={styles.navArrowBtn}
           activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessibilityLabel="Tuần trước"
         >
-          <ChevronLeft size={18} color={tokens.text} strokeWidth={2.2} />
+          <ChevronLeft size={20} color={tokens.text} strokeWidth={2.6} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -138,8 +136,17 @@ export const WeekCalendarCarousel: React.FC<WeekCalendarCarouselProps> = ({
           activeOpacity={0.7}
           style={styles.weekTitleWrapper}
         >
-          <View style={styles.weekTitleBadge}>
-            <CalendarIcon size={14} color={tokens.primary} strokeWidth={2.2} />
+          <View
+            style={[
+              styles.weekTitleBadge,
+              {
+                backgroundColor: tokens.surfaceAlt,
+                borderColor: tokens.border,
+                borderWidth: 1,
+              },
+            ]}
+          >
+            <CalendarIcon size={14} color={tokens.primary} strokeWidth={2.4} />
             <Text style={[styles.weekTitleText, { color: tokens.text }]}>
               {weekRangeTitle}
             </Text>
@@ -153,14 +160,12 @@ export const WeekCalendarCarousel: React.FC<WeekCalendarCarouselProps> = ({
 
         <TouchableOpacity
           onPress={handleNextWeek}
-          style={[
-            styles.navArrowBtn,
-            { backgroundColor: tokens.surfaceAlt },
-          ]}
+          style={styles.navArrowBtn}
           activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessibilityLabel="Tuần sau"
         >
-          <ChevronRight size={18} color={tokens.text} strokeWidth={2.2} />
+          <ChevronRight size={20} color={tokens.text} strokeWidth={2.6} />
         </TouchableOpacity>
       </View>
 
@@ -225,6 +230,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: radii.full,
   },
   weekTitleText: {
     fontSize: 15,
@@ -240,9 +248,10 @@ const styles = StyleSheet.create({
   navArrowBtn: {
     width: 34,
     height: 34,
-    borderRadius: radii.full,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   headerExtraWrapper: {
     marginBottom: spacing.xs,

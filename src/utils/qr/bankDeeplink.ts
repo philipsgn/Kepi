@@ -622,3 +622,24 @@ export async function openBankAppByTier(
   return openDeeplink(minimalUrl);
 }
 
+/**
+ * Lấy mã viết tắt in hoa của ngân hàng từ BIN hoặc appId (VD: '970436' -> 'VCB', 'mb' -> 'MB')
+ */
+export function getBankShortCode(bankBin?: string, appId?: string): string {
+  if (appId) {
+    const lower = appId.toLowerCase();
+    if (SUPPORTED_BANKS[lower]) {
+      return lower.toUpperCase();
+    }
+  }
+  if (bankBin) {
+    for (const [code, meta] of Object.entries(SUPPORTED_BANKS)) {
+      if (meta.bin === bankBin) {
+        return code.toUpperCase();
+      }
+    }
+  }
+  return '';
+}
+
+

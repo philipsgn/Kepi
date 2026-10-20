@@ -105,8 +105,8 @@ Khi quét được tag `52` (MCC), hệ thống tự động gợi ý danh mục
 
 | Dải MCC | Ngành nghề kinh doanh thực tế | Danh mục chuẩn Ví Locket | Ghi chú & Icon |
 | :--- | :--- | :--- | :--- |
-| **`5811 - 5814`** | Quán ăn, nhà hàng, quán cà phê, tiệm bánh, thức ăn nhanh | **Ăn uống & Cà phê** (`an_uong`) | ☕ Phổ biến nhất tại phố phường HN |
-| **`5411, 5422, 5499`** | Siêu thị mini, tạp hóa, chợ thực phẩm tươi sống | **Ăn uống & Cà phê** / **Mua sắm** | 🛒 Tạp hóa gia đình |
+| **`5811 - 5814`** | Quán ăn, nhà hàng, quán cà phê, tiệm bánh, thức ăn nhanh | **Ăn uống** (`an_uong`) | ☕ Phổ biến nhất tại phố phường HN |
+| **`5411, 5422, 5499`** | Siêu thị mini, tạp hóa, chợ thực phẩm tươi sống | **Ăn uống** / **Mua sắm** | 🛒 Tạp hóa gia đình |
 | **`5541 - 5542, 4121`** | Cây xăng, dịch vụ taxi, xe ôm công nghệ (Grab, Be, XanhSM) | **Di chuyển** (`di_chuyen`) | 🛵 Xăng xe, gọi xe di chuyển |
 | **`5311, 5651, 5999`** | Cửa hàng thời trang, bách hóa, phụ kiện, sách báo | **Mua sắm** (`mua_sam`) | 🛍️ Mua đồ cá nhân |
 | **`7832, 7999`** | Rạp chiếu phim, khu vui chơi giải trí, sân thể thao | **Giải trí** (`giai_tri`) | 🎟️ Vé xem phim, cafe boardgame |
@@ -124,7 +124,7 @@ Khi quét được tag `52` (MCC), hệ thống tự động gợi ý danh mục
 ```text
 00020101021238570010A00000072701270006970407011319036789123450208QRIBFTTA5204581253037045405450005802VN5912CA PHE GIANG6005HANOI62150811CA PHE SANG6304...
 ```
-- Phân tích: Động (`01`=`12`), Techcombank (`970407`), Số tiền: `45.000` đ, Nơi nhận: `CA PHE GIANG`, MCC: `5812` $\rightarrow$ Gợi ý `Ăn uống & Cà phê`.
+- Phân tích: Động (`01`=`12`), Techcombank (`970407`), Số tiền: `45.000` đ, Nơi nhận: `CA PHE GIANG`, MCC: `5812` $\rightarrow$ Gợi ý `Ăn uống`.
 
 ### Mẫu 2: Mã tĩnh hợp lệ (Chưa có số tiền)
 ```text

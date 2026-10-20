@@ -59,7 +59,7 @@
 ├────────────────────────────────────────────────────────┤
 │                                                        │
 │ ┌ Khung Ngắm Squircle (Ảnh Vừa Chụp 4:5 - Thoáng 90%) ┐│
-│ │  (✕) Hủy              [ Danh mục ▾ ]                 ││ (Nút danh mục đặt chính giữa đỉnh ảnh)
+│ │                 [ Danh mục ▾ ]                     ││ (Nút danh mục đặt chính giữa đỉnh ảnh)
 │ │                                                    ││
 │ │                                                    ││
 │ │                 [ Ảnh Món Đồ ]                     ││ (Ảnh rõ nét, hoàn toàn không bị che)
@@ -73,9 +73,8 @@
 │                                                        │
 │             [ ↗ Chi  |  ↘ Thu ]                        │ (Gạt Chi/Thu sát mép DƯỚI NGOÀI khung)
 │                                                        │
-│     ┌────────────────────────────────────────────┐     │
-│     │               Lưu vào sổ ✔                 │     │ (Màu Nắng Thu #E59844 / Cốm Non #7E9F80)
-│     └────────────────────────────────────────────┘     │
+│          ( ✕ )                     (( ✔ ))             │ (Cặp nút tròn thuần biểu tượng [✕] & [✔], bỏ chữ)
+│        Chụp lại                  Lưu vào sổ            │
 │ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  │
 └────────────────────────────────────────────────────────┘
 ```
@@ -127,7 +126,7 @@
   │     │     │
   │     │     ├── <ViewfinderContainer> (Squircle bo cong 38px, tỷ lệ 4:5, viền tối giản)
   │     │     │     ├── <CameraView> (Expo Camera live stream toàn vẹn khi chưa chụp)
-  │     │     │     └── <OnCameraPhotoOverlay> (Ghi chép trực tiếp trên khung ảnh: Tag danh mục bắt buộc, nhập tiền tự tách chấm 000.000 không giới hạn, kích thước số đồng nhất, Note, Chi/Thu)
+  │     │     │     └── <OnCameraPhotoOverlay> (Ghi chép trực tiếp trên khung ảnh: Tag danh mục bắt buộc, nút gạt nhanh Hình thức thanh toán [💵 Tiền mặt | 💳 Ngân hàng], nhập tiền tự tách chấm 000.000 không giới hạn, kích thước số đồng nhất, Note, Chi/Thu)
   │     │     │
   │     │     └── <CameraBottomBar> (Thanh công cụ thích ứng)
   │     │           ├── [Khi đã chụp]: <InFrameSaveButton> (Nút "Lưu vào sổ ✔" to bản 52px bo tròn, mờ khi chưa chọn mục/tiền, cảnh báo rung & mở dải chọn nếu chưa hợp lệ)

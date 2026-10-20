@@ -114,15 +114,8 @@ export const ConfirmationInboxModal: React.FC<ConfirmationInboxModalProps> = ({
           ]}
         >
           <View style={styles.headerLeft}>
-            <View
-              style={[
-                styles.iconBadge,
-                {
-                  backgroundColor: isDark ? 'rgba(229, 152, 68, 0.15)' : 'rgba(229, 152, 68, 0.12)',
-                },
-              ]}
-            >
-              <Inbox size={20} color={Colors.primaryYellow} strokeWidth={2.4} />
+            <View style={styles.iconBadge}>
+              <Inbox size={20} color={Colors.primaryYellow} strokeWidth={2.6} />
             </View>
             <View>
               <View style={styles.titleRow}>
@@ -294,15 +287,8 @@ export const ConfirmationInboxModal: React.FC<ConfirmationInboxModalProps> = ({
             />
           ) : (
             <View style={styles.emptyContainer}>
-              <View
-                style={[
-                  styles.emptyIconCircle,
-                  {
-                    backgroundColor: isDark ? 'rgba(126, 159, 128, 0.15)' : 'rgba(126, 159, 128, 0.12)',
-                  },
-                ]}
-              >
-                <Sparkles size={40} color={Colors.greenSafe} strokeWidth={2} />
+              <View style={styles.emptyIconCircle}>
+                <Sparkles size={36} color={Colors.greenSafe} strokeWidth={2.6} />
               </View>
               <Text style={[styles.emptyTitle, { color: isDark ? '#FAF6EC' : '#141D26' }]}>
                 Hộp xác nhận trống trơn
@@ -410,9 +396,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 26,
+    height: 26,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -481,9 +468,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 36,
   },
   emptyIconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 48,
+    height: 48,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,

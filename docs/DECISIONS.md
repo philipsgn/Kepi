@@ -203,4 +203,92 @@
       - Đối với **`[⚡ Ghi Nhanh]`**: Mở App thẳng vào bảng chọn danh mục `FastCategorySheet` ($\le 1$s) để chạm 1 danh mục (Ăn uống, Công việc, Mua sắm, v.v.), đảm bảo dữ liệu chuẩn 100% không bị sai lệch.
     - *Khi ở ngoài màn hình chính/khóa điện thoại:* Kepi gửi thông báo đẩy tương tác (`pushBankDetectedNotification`) qua category `LOCK_SCREEN_CATEGORY_BANK_ALERT` với 2 nút `[📸 Chụp Locket]` và `[⚡ Ghi Nhanh]`.
     - *Khi đang mở ứng dụng Kepi:* Hệ thống hiển thị thanh Toast nổi `BankClipboardToast` ở đỉnh màn hình với 2 nút tương ứng.
+71. **Phân Định Rõ Ràng Danh Mục vs Hình Thức Thanh Toán (Zero-Clutter Camera & Background Smart Defaults):**
+    - *Phân lập logic cốt lõi:*
+      - **Danh mục (Category):** Trả lời câu hỏi *"Tiêu vào VIỆC GÌ?"* (Ăn uống, Cà phê, Mua sắm, Đi lại, Công việc...). "Ngân hàng" TUYỆT ĐỐI KHÔNG phải là một danh mục chi tiêu.
+      - **Hình thức thanh toán (Payment Method):** Trả lời câu hỏi *"Tiêu BẰNG NGUỒN NÀO?"* (`CASH`: Tiền mặt, `BANK`: Chuyển khoản / Ngân hàng, `E_WALLET`: Ví điện tử).
+    - *Cơ chế Smart Defaults (Tự động hóa ngầm 100%):*
+      - Quét mã VietQR $\rightarrow$ Tự động ngầm gán `BANK`.
+      - Nhận diện biến động số dư / Locket Bank Snapshot $\rightarrow$ Tự động ngầm gán `BANK`.
+      - Upload ảnh biên lai chuyển khoản $\rightarrow$ Tự động ngầm gán `BANK`.
+      - Quét mã Ví điện tử (ZaloPay, MoMo) $\rightarrow$ Tự động ngầm gán `E_WALLET`.
+      - Chụp ảnh món đồ thông thường $\rightarrow$ Mặc định gán `CASH`.
+    - *Khung ảnh Camera thuần khiết (Zero-Clutter):*
+      - Ẩn hoàn toàn nút gạt Tiền mặt/Ngân hàng trên giao diện Camera. Người dùng không cần bận tâm tiền từ đâu ra mà chỉ tập trung vào: "Tiêu bao nhiêu tiền & vào việc gì".
+      - Nút chọn Danh mục được đặt ở chính giữa thanh trên (`tagButtonCenter`), cân đối đối xứng với nút Hủy và khoảng đệm phải, đảm bảo thẩm mỹ tối giản chuẩn Locket.
+72. **Bỏ Hoàn Toàn Hiển Thị Payment Method Khỏi Giao Diện & Tự Động Ghim Tag [Mã NH] Kèm Số Tiền Vào Mô Tả:**
+    - *Bối cảnh & Quyết định:* Khái niệm `payment_method` ("Tiền mặt" vs "Chuyển khoản") là tàn dư từ các phần mềm kế toán kép phức tạp, làm rối mắt và dư thừa thông tin trên các màn hình Lịch, Chi tiết ảnh và Thống kê. Toàn bộ chuỗi hiển thị 'Tiền mặt' / 'Chuyển khoản' bị loại bỏ 100% khỏi giao diện người dùng.
+    - *Quy chuẩn Tag Ngân hàng [Mã NH] trong mô tả:*
+      - Khi quét VietQR: Tự động trích xuất mã ngân hàng (ví dụ: `VCB`, `TPB`, `MB`, `TCB`, `ACB`, `BIDV`) và ghim sẵn: `[Mã NH] ${payeeName}`.
+      - Khi nhận Noti ngân hàng / Locket Bank Snapshot: Số tiền tự động điền sẵn 100%; ô mô tả tự động ghim sẵn `[${bankCode}]` (kèm nội dung nếu có), con trỏ sẵn sàng cho người dùng gõ thêm nếu thích.
+      - Khi Ghi nhanh danh mục (`FastCategorySheet`): Giao dịch tự lưu thành `[${bankCode}] ${note || cat.name}` (Ví dụ: `[VCB] Ăn uống`, `[TPB] Công việc`).
+    - *Đảm bảo an toàn CSDL:* Trường `payment_method` được chuyển thành tùy chọn (`payment_method?: PaymentMethod`) để giữ an toàn tuyệt đối cho schema Supabase/SQLite hiện tại mà không gây lỗi runtime.
+
+73. **Nâng Cấp Toàn Diện UI/UX 5 Tab (Home, Thống Kê, Camera, Chat Anh Minh, Cài Đặt) Theo Chuẩn Hà Nội Thu Đông & Zero-Friction:**
+    - *Tab Home (Journal):*
+      - Lời chào: Thay thế text cứng "Chào buổi sáng / tối" bằng Icon buổi (Mặt trời mọc `Sunrise`, Buổi trưa `Sun`, Buổi chiều `Sunset`, Buổi tối `Moon`) kết hợp cùng dòng Ngày tháng năm & Đồng hồ chạy thời gian thực (Real-time Clock HH:mm:ss) sống động.
+      - Nút chức năng góc trên phải: 3 nút Con mắt (Ẩn tiền), Cài đặt (`Settings`) và Avatar Hồ sơ (`User`) chuyển sang chuẩn 100% Vector nổi trần không viền bo (`borderWidth: 0, backgroundColor: 'transparent'`, strokeWidth 2.6).
+      - Dải điều hướng Tuần / Tháng: Lịch hiển thị từ ngày thứ đến chủ nhật bỏ tiền tố "Tuần" ở đầu (Ví dụ: `12/10 - 18/10, 2026` thay vì `Tuần 12/10 - 18/10, 2026`). 2 nút mũi tên chuyển tuần `<` và `>` chuyển sang dạng icon nổi trần hoàn toàn.
+    - *Tab Thống Kê (Analytics & Album):*
+      - Nút Con mắt (Ẩn tiền): Bỏ viền bo hộp, nổi trần và làm nổi bật sắc nét.
+      - Cuộn Album ảnh: Hiển thị rõ số tiền Chi (`-30k`, đỏ ngói) và Thu (`+30k`, cốm non).
+      - Tổng quan tháng: Bổ sung icon trực quan trước từng chỉ số; bỏ hiển thị "trung bình chi tiêu 1 ngày" ở Tổng quan tháng để tránh nhiễu thông tin.
+      - Chuẩn hóa Danh mục toàn diện: Triệt tiêu 100% các ID nội bộ (`suc_khoe`, `di_chuyen`, `an_uong`...) trên các biểu đồ Pareto, Cơ cấu danh mục, thay bằng tên tiếng Việt chuẩn mực có dấu đồng bộ với hệ thống `categoryStore`.
+      - Chi tiêu từng ngày: Bỏ vạch "Định mức ngày" vì mỗi ngày có hạn mức linh hoạt khác nhau; các nút Đóng `[X]` và Chia sẻ bỏ viền bo hộp.
+      - Phân tích Tuần này & Tháng này: Bỏ các tiêu đề rườm rà như "Nhận định tài chính", "Chú ý dòng tiền", bỏ mô tả thừa bên dưới dòng tiền.
+      - Xu hướng chi tiêu tháng: Tính toán chính xác theo số ngày thực tế của tháng đang chọn (28, 29, 30 hoặc 31 ngày) real-time, không cố định 30 ngày.
+      - Khoảng đệm đáy (Bottom Padding): Mở rộng khoảng đệm cuộn thêm một đoạn bằng chiều cao thanh Floating Tab Bar + SafeArea để không bị che khuất bất kỳ chỉ số nào ở cuối trang.
+    - *Tab Camera (Photobooth & Khoảnh Khắc Locket):*
+      - Làm sạch Viewfinder: Xóa bỏ viền bo tròn của nút Flash; bỏ icon Anh Minh khỏi Camera; xóa bỏ hoàn toàn tính năng "Để sau" (Wait Basket) để màn hình tối giản tuyệt đối.
+      - Tính năng Zoom: Tích hợp cử chỉ chụm 2 ngón (Pinch-to-zoom) kết hợp bộ nút chuyển mức phóng to nhanh `[1x]` / `[2x]` nổi trần tinh tế.
+      - Tương tác sau khi chụp (Post-Capture Flow):
+        - Dải danh mục (Horizontal Category Chips) hiển thị sẵn ngay trên ảnh, không cần bấm "Chọn danh mục" để mở.
+        - Tự động kích hoạt bàn phím (auto-focus) vào ô nhập tiền ngay khi chụp xong.
+        - Khi người dùng chạm vào thân ảnh Camera $\rightarrow$ Tự động focus chuyển sang gõ ô Mô tả.
+        - Phóng to khung Chi / Thu và đặt sát cạnh dưới khung Camera.
+        - Bộ đôi nút hành động dưới đáy: `[ ✕ Chụp lại / Xóa ]` bên trái và `[ ✓ Lưu vào sổ ]` bên phải.
+        - Nút Lưu mờ (`opacity: 0.45`, `disabled`) khi chưa chọn danh mục hoặc tiền bằng 0, không hiện pop-up cảnh báo khó chịu.
+        - Lược bỏ hoàn toàn tính năng bấm xem ảnh chi tiết ở dòng lịch sử cũ bên dưới Camera.
+        - Nền trang Camera sử dụng hiệu ứng Gradient matching liền mạch với tông màu giao diện đặc trưng (Hà Nội Thu Đông).
+    - *Tab Chat (Anh Minh AI - Cố Vấn Tài Chính Bạn Thân):*
+      - Tích hợp động cơ phân tích ngữ cảnh (Financial Context RAG): Anh Minh truy cập trực tiếp số liệu ngày, tuần, tháng (số dư, danh mục chi nhiều nhất, tỷ lệ hoàn thành mục tiêu) để trò chuyện gần gũi, xưng hô "anh Minh - bồ", tư vấn chân thực như một người bạn thân thiết.
+      - Bổ sung nút gửi ảnh trên `ChatInputBar`: Cho phép chụp hoặc chọn ảnh biên lai/món đồ gửi vào chat $\rightarrow$ Anh Minh tự động trích xuất và hiển thị thẻ xác nhận ghi sổ `CONFIRMATION` 1-chạm ngay trong cuộc trò chuyện.
+    - *Tab Cài Đặt (Settings):*
+  - **Quyết định 74 (17/10/2026): Tinh Chỉnh Hoàn Thiện UI/UX: Lịch Tuần/Tháng, Thu Gọn 'Ăn Uống', Tiêu Đề Xu Hướng & Thanh Trượt Zoom Camera Khóa Chuyển Trang:**
+    - *Camera Zoom Slider & Gesture Locking:* Bổ sung thanh trượt thu phóng (Zoom Slider) mượt mà đặt trên cụm Shutter. Khi chạm và kéo thanh trượt, hệ thống tự động khóa cuộn trang (`isZoomSliding = true`, `scrollEnabled = false` trên cả Horizontal Pager và Vertical History Scroll, kèm `onPanResponderTerminationRequest: () => false`) để màn hình đứng yên 100%, không rung giật hay trượt nhầm trang.
+    - *Lịch Tab Home (Tháng):* Bỏ hoàn toàn hộp nền viền bo của 2 nút mũi tên `<` và `>` điều hướng tháng trong `PhotoCalendarGrid.tsx` (`backgroundColor: 'transparent', borderWidth: 0, strokeWidth: 2.6`). Thêm icon `Calendar` phía trước text tháng kèm viền hairline `borderColor: tokens.border`.
+    - *Lịch Tab Home (Tuần):* Đồng bộ viên thuốc (pill badge) dải ngày trong `WeekCalendarCarousel.tsx` với viền hairline `borderColor: tokens.border`, nền mờ `tokens.surfaceAlt` và icon `Calendar` phía trước.
+    - *Thu gọn danh mục "Ăn uống":* Đổi toàn bộ "Ăn uống & Cà phê" thành "Ăn uống" trên toàn bộ ứng dụng (vì Ăn uống đã bao hàm Cà phê), bao gồm danh mục gốc, format mapping, chip lọc, camera feed, gợi ý VietQR và biểu đồ thống kê.
+    - *Tiêu đề Biểu đồ Chi Tiêu (Analytics):* Hiển thị chuẩn xác "Xu Hướng Chi Tiêu Tháng Này" (hoặc "Xu Hướng Chi Tiêu Tháng [X]" khi xem tháng khác), loại bỏ hoàn toàn số ngày trong ngoặc đơn như `(31 ngày)`.
+  - **Quyết định 75 (17/10/2026): Tối Giản Trải Nghiệm Zoom Camera & Tinh Gọn Giao Diện Sau Khi Chụp (Iconic Minimalist Review):**
+    - *Mở Rộng Góc Rộng Zoom Camera (0.5x Ultra-Wide & Pure Header Badge):* Cho phép zoom xa hết cỡ xuống mức góc rộng 0.5x (tương ứng zoom level 0 của phần cứng camera). Lược bỏ hoàn toàn 2 nút số `[1x]` và `[2x]` ở hai đầu thanh trượt; chỉ hiển thị duy nhất badge hệ số zoom (`0.5x` - `3.0x`) trôi phía trên thanh trượt, giữ thanh gạt mảnh mai, tối giản chuẩn Locket/iOS.
+    - *Giao Diện Tinh Gọn Sau Khi Chụp (Zero-Clutter Post-Capture Action Bar):*
+      - Lược bỏ hoàn toàn nút dấu `[✕]` ở góc trên bên trái khung ảnh (`OnCameraPhotoOverlay.tsx`), đưa nhãn danh mục về vị trí trung tâm thoáng đãng.
+      - Ở thanh công cụ dưới đáy sau khi chụp: Lược bỏ toàn bộ text chữ dài dòng ("Chụp lại" và "Lưu vào sổ"). Thay thế bằng cặp nút tròn biểu tượng thuần túy (Pure Iconic Action Buttons): nút tròn `[✕]` bên trái để chụp lại và nút tròn `[✓]` màu Nắng Thu bên phải để lưu vào sổ.
+  - **Quyết định 76 (17/10/2026): Tối Ưu Chi Phí Về 0$ & Bảo Vệ Riêng Tư Khách Hàng Tuyệt Đối (Zero Cloud Cost & Total Privacy):**
+    - Hệ thống vận hành theo triết lý Local-First: Toàn bộ ảnh gốc và dữ liệu nhạy cảm lưu trữ an toàn trong sandbox của thiết bị người dùng.
+    - Không lưu trữ số tài khoản nhận, số dư ngân hàng, hay thông tin định danh cá nhân (PII) ở bất kỳ đâu (CSDL, log, telemetry, analytics).
+    - Tận dụng gói miễn phí (Free Tier) của Supabase cho xác thực và đồng bộ dữ liệu giao dịch số nhẹ, chi phí máy chủ hàng tháng là 0$.
+  - **Quyết định 77 (17/10/2026): Duy Trì 5 Tab Điều Hướng (Giữ Tab Chat Anh Minh Trên Thanh Bar):**
+    - Đính chính kiến trúc: Giữ nguyên cấu trúc thanh điều hướng 5 Tab (`Home`, `Stats`, `Camera`, `Chat`, `Profile`).
+    - Tab Chat (Anh Minh) là tính năng cốt lõi tạo nên sự gần gũi và khác biệt cho Kepi, hỗ trợ tư vấn tài chính và thẻ xác nhận giao dịch 1-chạm.
+  - **Quyết định 78 (17/10/2026): Loại Bỏ Hoàn Toàn Tính Năng "Hình Thức Thanh Toán" (Tiền mặt / Bank / Ví):**
+    - Nhằm tối ưu hóa tốc độ ghi sổ $\le 3$ giây và giảm tải nhận thức cho người dùng, loại bỏ hoàn toàn việc phân loại hình thức thanh toán (Tiền mặt, Ngân hàng, Ví điện tử).
+    - Gỡ bỏ bộ chọn hình thức thanh toán khỏi tất cả màn hình: `ConfirmationSheet`, `LocketReviewModal`, `OnPhotoNoteOverlay`, `FastCategorySheet`.
+    - Dữ liệu giao dịch tập trung duy nhất vào 4 yếu tố cốt lõi: Số tiền, Danh mục, Ghi chú và Ảnh minh chứng.
+  - **Quyết định 79 (17/10/2026): Tích Hợp Android Native NotificationListenerService (Opt-in & 100% On-Device):**
+    - Tích hợp Android Native Plugin cho dịch vụ `NotificationListenerService`.
+    - Tính năng hoàn toàn tùy chọn (Opt-in) với công tắc bật/tắt minh bạch trong Cài đặt; người dùng lo ngại bảo mật có thể chọn không bật.
+    - Toàn bộ quá trình bóc tách thông báo thực thi 100% cục bộ trên thiết bị bằng `notificationBankParser.ts`, làm sạch STK và số dư ngay tại chỗ, không bao giờ gửi nội dung thông báo lên mạng.
+  - **Quyết định 80 (17/10/2026): Sao Lưu & Khôi Phục Toàn Diện Bằng Tệp Nén ZIP Chứa Ảnh (Zero-Loss Offline Backup):**
+    - Đóng gói dữ liệu JSON mã hóa cùng toàn bộ tệp ảnh thực tế thành một file `.zip` duy nhất khi người dùng xuất sao lưu.
+    - Khi xóa app cài lại, người dùng nhập file `.zip` để khôi phục toàn bộ giao dịch và ảnh chụp, đảm bảo không mất mát dữ liệu và giữ chi phí đám mây ở mức 0$.
+  - **Quyết định 81 (17/10/2026): Tích Hợp Android Native Plugin NotificationListenerService & Bộ Chuyển Đổi 3 Theme Kép (Profile & Settings):**
+    - Cấu hình Expo Config Plugin `./plugins/withNotificationListener.js` và cấp quyền `BIND_NOTIFICATION_LISTENER_SERVICE` trong `app.json` để Android Native Manifest liên kết dịch vụ lắng nghe thông báo ngân hàng 100% on-device.
+    - Tích hợp `ThemeSettingsCard` trực tiếp trên cả Tab Hồ Sơ (`ProfileView.tsx`) và Màn hình Cài Đặt (`SettingsView.tsx`), cho phép người dùng chuyển đổi tức thì giữa 3 Theme: Sáng (`light`), Tối (`dark`), và Mát (`cool`).
+
+
+
+
+
 

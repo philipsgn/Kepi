@@ -23,10 +23,14 @@ export interface CoachReplyResult {
 }
 
 export interface FinancialContext {
+  todaySpent?: number;
   remainingToday: number;
   totalSpentThisMonth: number;
   coffeeSpentThisMonth: number;
   transactionsCount: number;
+  topCategoryName?: string;
+  topCategoryAmount?: number;
+  savingsGoalText?: string;
   nickname?: string;
 }
 
@@ -154,13 +158,13 @@ export const generateLocalCoachResponse = (
   context: FinancialContext
 ): CoachReplyResult => {
   const query = userQuery.toLowerCase().trim();
-  const userGreeting = context.nickname ? `${context.nickname}` : 'bạn';
+  const userGreeting = context.nickname ? `${context.nickname}` : 'bồ';
 
   // 1. Kiểm tra lệnh ghi chép
   const parsed = parseQuickRecordCommand(userQuery);
   if (parsed.isRecordCommand && parsed.amount > 0) {
     return {
-      text: `Anh đã chuẩn bị thẻ ghi ${formatVND(parsed.amount)} cho món "${parsed.description}". Kiểm tra rồi bấm Lưu vào sổ nhé!`,
+      text: `Anh Minh đã chuẩn bị thẻ ghi ${formatVND(parsed.amount)} cho món "${parsed.description}". Bồ kiểm tra rồi bấm Lưu vào sổ nhé!`,
       cardType: 'CONFIRMATION',
       cardData: parsed,
     };
@@ -175,23 +179,54 @@ export const generateLocalCoachResponse = (
   ) {
     if (context.remainingToday > 30000) {
       return {
-        text: `Hôm nay ${userGreeting} còn ${formatVND(context.remainingToday)} để tiêu thoải mái. Giữ phong độ này đến tối là quá ổn áp!`,
+        text: `Hôm nay ${userGreeting} còn ${formatVND(context.remainingToday)} để tiêu thoải mái nhé. Cứ thong dong giữ nhịp độ này là bồ đỉnh chóp!`,
         cardType: 'NONE',
       };
     } else if (context.remainingToday > 0) {
       return {
-        text: `Hôm nay ví chỉ còn ${formatVND(context.remainingToday)} thôi nhé. Nếu thèm trà sữa thì để mai dàn đều ngân sách rồi uống!`,
+        text: `Hôm nay ví chỉ còn ${formatVND(context.remainingToday)} thôi nhé bồ. Nếu thèm cà phê hay trà sữa thì để mai dàn đều ngân sách rồi tự thưởng nhé!`,
         cardType: 'NONE',
       };
     } else {
       return {
-        text: `Hôm nay ${userGreeting} đã vượt ngân sách rồi đó. Đừng lo, ngày mai mình cân đối nhẹ lại là về mức an toàn ngay!`,
+        text: `Hôm nay ${userGreeting} đã vượt nhẹ định mức ngày rồi đó. Nhưng không sao cả bồ ơi, ngày mai mình cân đối lại một chút là về vùng an toàn ngay!`,
         cardType: 'NONE',
       };
     }
   }
 
-  // 3. Hỏi về cà phê / ăn uống trong tháng
+  // 3. Hỏi về danh mục tốn nhất / nhiều nhất
+  if (
+    query.includes('nhiều nhất') ||
+    query.includes('tốn nhất') ||
+    query.includes('danh mục') ||
+    query.includes('chi vào đâu')
+  ) {
+    if (context.topCategoryName && context.topCategoryAmount) {
+      return {
+        text: `Tháng này bồ chi nhiều nhất vào mục "${context.topCategoryName}" với tổng ${formatVND(context.topCategoryAmount)}. Bồ muốn anh Minh phân tích kỹ thêm khoản nào không?`,
+        cardType: 'METRIC',
+        cardData: {
+          title: context.topCategoryName,
+          amount: context.topCategoryAmount,
+          percentage: context.totalSpentThisMonth > 0 ? Math.round((context.topCategoryAmount / context.totalSpentThisMonth) * 100) : 0,
+          category: context.topCategoryName,
+        },
+      };
+    }
+  }
+
+  // 4. Hỏi về mục tiêu / tiết kiệm / tích lũy
+  if (query.includes('mục tiêu') || query.includes('tiết kiệm') || query.includes('tích lũy') || query.includes('đạt được')) {
+    if (context.savingsGoalText) {
+      return {
+        text: `Về mục tiêu tài chính của bồ: ${context.savingsGoalText}. Anh Minh luôn ở đây đồng hành cùng bồ từng bước nhé!`,
+        cardType: 'NONE',
+      };
+    }
+  }
+
+  // 5. Hỏi về cà phê / ăn uống trong tháng
   if (query.includes('cà phê') || query.includes('coffee') || query.includes('trà sữa')) {
     const pct =
       context.totalSpentThisMonth > 0
@@ -199,7 +234,7 @@ export const generateLocalCoachResponse = (
         : 0;
 
     return {
-      text: `Từ đầu tháng đến giờ, ${userGreeting} đã chi ${formatVND(context.coffeeSpentThisMonth)} cho cà phê (chiếm khoảng ${pct}% tổng chi tiêu). Anh có chuẩn bị bảng số liệu đây:`,
+      text: `Từ đầu tháng đến giờ, ${userGreeting} đã chi ${formatVND(context.coffeeSpentThisMonth)} cho cà phê (khoảng ${pct}% tổng chi tiêu). Anh chuẩn bị thẻ tóm tắt cho bồ xem đây:`,
       cardType: 'METRIC',
       cardData: {
         title: 'Cà phê & Đồ uống',
@@ -210,17 +245,17 @@ export const generateLocalCoachResponse = (
     };
   }
 
-  // 4. Hỏi xem có nên mua hay không
+  // 6. Hỏi xem có nên mua hay không
   if (query.includes('có nên mua') || query.includes('nên mua') || query.includes('định mua')) {
     return {
-      text: `Món đó có thực sự cần thiết trong 24 giờ tới không ${userGreeting}? Nếu thích quá mà chưa gấp, bấm chụp ảnh rồi chọn "Để sau" vào giỏ 24h để nghĩ thêm một đêm nhé!`,
+      text: `Món đó có thực sự cần thiết trong 24 giờ tới không ${userGreeting}? Nếu thích quá mà chưa gấp, bồ gửi ảnh vào đây hoặc chọn "Để sau" vào giỏ 24h để nghĩ thêm một đêm nhé!`,
       cardType: 'NONE',
     };
   }
 
-  // 5. Câu trả lời mặc định thân thiện
+  // 7. Câu trả lời mặc định ấm áp từ anh Minh - bồ
   return {
-    text: `Anh Minh nghe đây ${userGreeting}! Em cần hỏi số liệu ngân sách hôm nay, hay muốn nhờ anh ghi nhanh khoản nào?`,
+    text: `Anh Minh nghe đây bồ ơi! Bồ cần kiểm tra ngân sách hôm nay, hay muốn gửi ảnh biên lai/món đồ nhờ anh ghi nhanh vào sổ?`,
     cardType: 'NONE',
   };
 };

@@ -192,13 +192,8 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
           {/* HEADER */}
           <View style={[styles.headerRow, { borderBottomColor: tokens.border }]}>
             <View style={styles.headerTitleGroup}>
-              <View
-                style={[
-                  styles.iconBox,
-                  { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
-                ]}
-              >
-                <Target size={16} color={tokens.primary} strokeWidth={2.4} />
+              <View style={styles.iconBox}>
+                <Target size={20} color={tokens.primary} strokeWidth={2.6} />
               </View>
               <Text style={[styles.sheetTitle, { color: tokens.text }]}>
                 Chi Tiết Kế Hoạch Mục Tiêu
@@ -206,14 +201,12 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
             </View>
 
             <TouchableOpacity
-              style={[
-                styles.closeBtn,
-                { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
-              ]}
+              style={styles.closeBtn}
               onPress={onClose}
               activeOpacity={0.75}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <X size={15} color={tokens.textMuted} />
+              <X size={18} color={tokens.textMuted} strokeWidth={2.6} />
             </TouchableOpacity>
           </View>
 
@@ -505,10 +498,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   iconBox: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    borderWidth: 1,
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -520,8 +513,8 @@ const styles = StyleSheet.create({
   closeBtn: {
     width: 28,
     height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

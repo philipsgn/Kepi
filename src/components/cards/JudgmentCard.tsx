@@ -227,7 +227,7 @@ export const JudgmentCard: React.FC<JudgmentCardProps> = ({
                     <View style={styles.metricsGrid}>
                       <View style={styles.metricCard}>
                         <View style={styles.iconCircle}>
-                          <UtensilsCrossed size={16} strokeWidth={1.3} color={Colors.expenseCoral} />
+                          <UtensilsCrossed size={20} strokeWidth={2.6} color={Colors.expenseCoral} />
                         </View>
                         <Text style={[Typography.heading3, styles.metricVal]}>
                           {metrics.budgetDays} ngày
@@ -239,7 +239,7 @@ export const JudgmentCard: React.FC<JudgmentCardProps> = ({
 
                       <View style={styles.metricCard}>
                         <View style={styles.iconCircle}>
-                          <Coffee size={16} strokeWidth={1.3} color={Colors.accentGold} />
+                          <Coffee size={20} strokeWidth={2.6} color={Colors.accentGold} />
                         </View>
                         <Text style={[Typography.heading3, styles.metricVal]}>
                           {metrics.favUnitCount} ly
@@ -252,7 +252,7 @@ export const JudgmentCard: React.FC<JudgmentCardProps> = ({
                       {metrics.workHours !== null && (
                         <View style={styles.metricCard}>
                           <View style={styles.iconCircle}>
-                            <Clock size={16} strokeWidth={1.3} color={Colors.textCharcoal} />
+                            <Clock size={20} strokeWidth={2.6} color={Colors.textCharcoal} />
                           </View>
                           <Text style={[Typography.heading3, styles.metricVal]}>
                             {metrics.workHours} giờ
@@ -265,7 +265,7 @@ export const JudgmentCard: React.FC<JudgmentCardProps> = ({
 
                       <View style={styles.metricCard}>
                         <View style={styles.iconCircle}>
-                          <Target size={16} strokeWidth={1.3} color={Colors.incomeMint} />
+                          <Target size={20} strokeWidth={2.6} color={Colors.incomeMint} />
                         </View>
                         <Text style={[Typography.heading3, styles.metricVal]}>
                           +{metrics.delayedDays} ngày
@@ -503,13 +503,11 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 28,
     height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.bgPrimary,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 6,
-    borderWidth: 1,
-    borderColor: Colors.borderSoft,
   },
   metricVal: {
     color: Colors.textCharcoal,

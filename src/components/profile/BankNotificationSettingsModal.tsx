@@ -150,7 +150,7 @@ export const BankNotificationSettingsModal: React.FC<Props> = ({ visible, onClos
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
               <View style={styles.headerIconWrap}>
-                <Bell size={20} color={COLORS.warmAmber} />
+                <Bell size={20} color={COLORS.warmAmber} strokeWidth={2.6} />
               </View>
               <View>
                 <Text style={styles.headerTitle}>Tự Động Ghi Sổ Qua Thông Báo</Text>
@@ -158,7 +158,7 @@ export const BankNotificationSettingsModal: React.FC<Props> = ({ visible, onClos
               </View>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <X size={20} color={COLORS.inkMuted} />
+              <X size={20} color={COLORS.inkMuted} strokeWidth={2.6} />
             </TouchableOpacity>
           </View>
 
@@ -356,10 +356,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: 'rgba(229, 152, 68, 0.15)',
+    width: 26,
+    height: 26,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,

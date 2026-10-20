@@ -335,15 +335,8 @@ export const UploadReceiptModal: React.FC<UploadReceiptModalProps> = ({
           {/* HEADER */}
           <View style={styles.sheetHeader}>
             <View style={styles.headerTitleRow}>
-              <View
-                style={[
-                  styles.headerIconCircle,
-                  {
-                    backgroundColor: isDark ? 'rgba(229, 152, 68, 0.15)' : 'rgba(229, 152, 68, 0.12)',
-                  },
-                ]}
-              >
-                <Receipt size={18} color={Colors.primaryYellow} strokeWidth={2.4} />
+              <View style={styles.headerIconCircle}>
+                <Receipt size={20} color={Colors.primaryYellow} strokeWidth={2.6} />
               </View>
               <Text style={[styles.headerTitle, { color: isDark ? '#FAF6EC' : '#141D26' }]}>
                 Ghi chi tiêu từ biên lai
@@ -742,9 +735,10 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   headerIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 26,
+    height: 26,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

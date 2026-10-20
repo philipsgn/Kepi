@@ -40,8 +40,8 @@ export const FriendsView: React.FC = () => {
       >
         {/* KHỐI 1: HỎI BẠN TRƯỚC KHI MUA */}
         <Card variant="surface" style={styles.blockItem}>
-          <View style={[styles.iconCircle, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-            <MessageSquare size={18} color={tokens.primary} />
+          <View style={styles.iconCircle}>
+            <MessageSquare size={20} color={tokens.primary} strokeWidth={2.6} />
           </View>
           <Text style={[styles.cardTitle, { color: tokens.text }]}>{Strings.budget.askFriend}</Text>
           <Text style={[styles.cardDesc, { color: tokens.textMuted }]}>
@@ -58,8 +58,8 @@ export const FriendsView: React.FC = () => {
 
         {/* KHỐI 2: MỤC TIÊU TUẦN CÙNG NHAU */}
         <Card variant="surface" style={styles.blockItem}>
-          <View style={[styles.iconCircle, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-            <Target size={18} color={tokens.primary} />
+          <View style={styles.iconCircle}>
+            <Target size={20} color={tokens.primary} strokeWidth={2.6} />
           </View>
           <Text style={[styles.cardTitle, { color: tokens.text }]}>
             {Strings.budget.weeklyGoal}
@@ -117,10 +117,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
