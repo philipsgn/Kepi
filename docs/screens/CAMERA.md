@@ -244,3 +244,38 @@ Nhằm tối ưu hóa trải nghiệm trên Android và mở rộng trong tươn
 3. **Cơ Chế 3 (Bắt Biến Động Số Dư & Tự Động Gắn Ảnh):**
    - Khi nhận thông báo biến động từ app ngân hàng (TPBank, VCB, MB...), app hiển thị **Smart Floating Bank Pill** trên khung ngắm (`⚡ TPBank: Đã tự động ghi -48.000đ (Highlands)`).
    - Nếu người dùng bấm chụp ảnh món đồ lúc Pill đang hiển thị, ảnh chụp thực tế lập tức gắn đè vào giao dịch ngân hàng đó, hoàn tất bức tranh chi tiêu bằng ảnh chân thực $\le 3$s.
+
+
+---
+
+## 4. Đặc Tả Nâng Cấp v5.0: Động Cơ Quay Clip 3 Giây & Công Tắc Riêng Tư Hội Bạn
+
+### 4.1. Tương Tác Nút Shutter Đa Năng (Hybrid Shutter):
+- **Chạm 1 lần (`onPress`):** Chụp ảnh tĩnh tiêu chuẩn.
+- **Nhấn giữ (`onLongPress`):** Bắt đầu quay video micro 3 giây (`cameraRef.current.recordAsync({ maxDuration: 3, quality: '480p', mute: true })`).
+- **Hiệu ứng vòng tròn tiến độ SVG:** Một vòng tròn mảnh màu Vàng Hổ Phách (`#E59844`) chạy quanh nút Shutter từ 0 đến 360 độ trong đúng 3.0 giây. Khi thả tay trước 3s hoặc khi hết 3s, camera tự dừng quay và chuyển sang màn hình xem lại.
+- **Tiêu chuẩn file video:** Video không có âm thanh (mute), dung lượng nhẹ $\le 400$KB.
+
+### 4.2. Màn Hình Xem Lại Sau Khi Quay/Chụp:
+- **Ảnh tĩnh hoặc Video:** Hiển thị khung ảnh/clip tĩnh. Với video 3s, hiển thị ảnh bìa tĩnh kèm icon Play để người dùng chạm vào mới phát lặp lại nhằm tiết kiệm pin.
+- **Công tắc Riêng tư:** Nằm tinh tế phía trên các nút hành động: `[🔒 Riêng tư: Chỉ mình tôi]`. Khi bật công tắc này, giao dịch được đánh dấu `is_squad_private = true` và không được chia sẻ lên Hội bạn.
+- **Tốc độ ghi sổ:** Giữ nguyên form tinh giản (Số tiền + Danh mục + Ghi chú), không có trường cảm xúc rườm rà, đảm bảo tốc độ hoàn tất $\le 3$ giây.
+
+
+---
+
+## 9. Đặc Tả Nâng Cấp v6.0 (PigBo): Tinh Gọn Camera, Khóa Rung Lắc Cử Chỉ & Chuẩn Hóa Pinch Zoom
+
+### 9.1. Khóa Cố Định Cử Chỉ Vuốt Thân Màn Hình (Zero-Shake Navigation):
+- Thay vì cho phép vuốt ngang tự do trên thân màn hình giữa các tab (gây rung giật hoặc chuyển nhầm tab khi người dùng thao tác camera), màn hình chính khóa cố định `scrollEnabled={false}`.
+- 100% việc chuyển tab thực hiện thông qua chạm/lướt trên thanh điều hướng nổi `FloatingPillTabBar` dưới đáy.
+
+### 9.2. Loại Bỏ Nút "Lịch Sử" Dưới Nút Shutter:
+- Khu vực bên dưới cụm điều khiển chụp ảnh được dọn dẹp sạch sẽ, loại bỏ hoàn toàn nút swipe indicator "Lịch sử" để camera luôn thoáng đãng, tập trung tối đa vào ống kính.
+
+### 9.3. Xóa Thanh Trượt Zoom Slider & Chuẩn Hóa Pinch-To-Zoom 2 Ngón Tay:
+- Loại bỏ thanh trượt zoom phức tạp và nhãn hiển thị 0.5x hardcode (do cảm biến camera chính của Expo Camera mặc định hoạt động từ góc tiêu chuẩn 1.0x).
+- Người dùng sử dụng cử chỉ chụm mở 2 ngón tay tự nhiên (Pinch-to-zoom) để phóng to thu nhỏ từ 1.0x đến 3.0x thực tế, không có bất kỳ thành phần đồ họa nào che khuất khung hình.
+
+### 9.4. Tinh Gọn Màn Hình Ghi Chép Trực Tiếp (Zero-Clutter In-Frame Overlay):
+- Loại bỏ nhãn văn bản "Chọn 1 danh mục", chỉ hiển thị icon vector nổi trần tự nhiên khi chưa chọn và khi đã chọn danh mục.

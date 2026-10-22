@@ -4,6 +4,7 @@ export type TransactionSource = 'PHOTO' | 'MANUAL' | 'SCREENSHOT' | 'QR';
 export type PaymentMethod = 'CASH' | 'BANK' | 'E_WALLET';
 export type WaitBasketStatus = 'WAITING' | 'BOUGHT' | 'SKIPPED';
 export type FavoriteUnit = 'tra_sua' | 'ca_phe' | 'to_pho';
+export type MediaType = 'PHOTO' | 'VIDEO_3S';
 
 export interface Profile {
   id: string;
@@ -39,6 +40,8 @@ export interface Transaction {
   photo_url: string | null;
   thumbnail_url?: string | null;
   payment_method?: PaymentMethod;
+  media_type?: MediaType;
+  is_squad_private?: boolean;
   source: TransactionSource;
   status?: TransactionStatus;
   payee_name?: string | null;

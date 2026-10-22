@@ -29,7 +29,7 @@
 ├────────────────────────────────────────────────────────┤
 │ ┌ THẺ ĐẦU TRANG: NGƯỜI ĐỒNG HÀNH ─────────────── [✏️] ─┐ │ (Icon đổi tên sát góc trên phải)
 │ │  ┌────┐                                            │ │
-│ │  │ 👤 │  Hoàng Long                                │ │
+│ │  │ 🐷 │  Hoàng Long (Avatar PigBo Chibi)                                │ │
 │ │  └────┘  [ ☁️ Liên kết Google ] (khi ở Vào Ngay)   │ │
 │ │          hoanglong@gmail.com   (khi đã đăng nhập)  │ │
 │ │  ┌──────────────┬──────────────┬────────────────┐  │ │

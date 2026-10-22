@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { supabase } from '../../src/services/supabase';
@@ -18,7 +18,10 @@ export default function AuthCallbackScreen() {
   useEffect(() => {
     async function handleAuthCallback() {
       try {
-        const url = await Linking.getInitialURL();
+        let url = await Linking.getInitialURL();
+        if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location.href) {
+          url = window.location.href;
+        }
         if (url) {
           await processUrl(url);
         } else {

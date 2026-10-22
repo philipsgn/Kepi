@@ -292,3 +292,148 @@
 
 
 
+
+  - **Quyết định 82 (21/10/2026): Nâng Cấp Luồng Google OAuth Từ Số 0, UX Streak Điểm Danh Hằng Ngày & Tinh Chỉnh Tab Hồ Sơ / Cài Đặt:**
+    - *Chuẩn Hóa Đăng Nhập Google OAuth (Web & Mobile):*
+      - Hỗ trợ luồng xác thực Google OAuth qua Supabase (`supabase.auth.signInWithOAuth({ provider: 'google' })`).
+      - Tự động nhận diện môi trường: Trên Web sử dụng chuyển hướng `window.location.origin` tránh chặn pop-up; trên Mobile sử dụng Deep Linking `/(auth)/callback`.
+      - Người dùng đầu tiên đăng nhập bằng Google được ghi nhận là User #1 chính chủ, bắt đầu từ số 0 sạch sẽ (0 transactions, ngân sách thiết lập mới).
+    - *Rút Gọn Cụm Từ Ghi Nhanh Tab Home & Hồ Sơ:*
+      - Thay thế hoàn toàn cụm từ dài dòng `"Chưa có ghi chép hôm nay — Chụp hoặc ghi nhanh"` thành `"Chưa ghi hôm nay — Chạm để ghi"` ngắn gọn, xúc tích, khuyến khích thao tác 1-chạm mở camera.
+    - *Nâng Cấp UX Điểm Danh & Chuỗi Streak:*
+      - Biến huy hiệu Streak trên Home (`JournalView`) và Profile (`ProfileIdentityCard`) thành thành phần tương tác: Chạm vào sẽ mở `StreakCheckinModal` hiển thị chi tiết số ngày liên tiếp, trạng thái điểm danh hôm nay và lời động viên.
+      - Tự động kích hoạt hiệu ứng pháo hoa / chúc mừng (`StreakCelebrationToast`) ngay khi người dùng hoàn thành giao dịch đầu tiên trong ngày.
+    - *Đồng Bộ Hiển Thị Tài Khoản Gmail Đã Liên Kết:*
+      - Đối với tài khoản đã liên kết Google: Hiển thị địa chỉ Gmail rõ ràng ngay dưới Tên người dùng trong Thẻ Hồ Sơ (`ProfileIdentityCard`) và bổ sung dòng thông tin tài khoản chuyên biệt trong Cài Đặt (`SettingsView`).
+      - Đối với tài khoản Khách (Guest): Nút "Liên kết Google" kích hoạt trực tiếp luồng OAuth 1-chạm, tự động bảo toàn và sáp nhập các giao dịch đã ghi trên máy sang tài khoản Google mới.
+    - *Làm Sạch Tab Cài Đặt (Dọn Dẹp Chỉ Báo Root/Debug):*
+      - Loại bỏ 100% đèn tròn xanh (`statusDot`) và các nhãn "Khả dụng", "Tự động" khỏi các dòng cấu hình (Sao lưu, Widget, Thông báo ngân hàng, VietQR).
+      - Thiết kế lại các dòng theo phong cách Apple / Android Settings tối giản: Chỉ hiển thị Tên tính năng và Mũi tên điều hướng `ChevronRight` (riêng dòng Giao diện hiển thị tên Theme hiện tại).
+
+  - **Quyết định 83 (22/10/2026): Kiến Trúc Kepi v5.0 — Gỡ Bỏ 100% Google Auth Chuyển Sang 1-Chạm Local-First, Động Cơ Quay Clip 3 Giây Locket & Công Tắc Riêng Tư Hội Bạn:**
+    - *Gỡ Bỏ Hoàn Toàn Google OAuth:*
+      - Loại bỏ 100% phụ thuộc vào Google Cloud Console và các cổng xác thực đám mây trả phí/phức tạp.
+      - Chuyển sang mô hình 1-chạm thuần túy (Clean 1-Tap Entry): Người dùng chỉ cần nhập Tên / Biệt danh là vào ngay app trong $< 300$ms.
+      - Mỗi thiết bị được gán một `device_id` (UUID tạo ngẫu nhiên lưu trong `AsyncStorage`). Toàn bộ dữ liệu cá nhân lưu trữ 100% Local-First trên máy.
+    - *Động Cơ Quay Clip 3 Giây (3s Looping Micro-Video):*
+      - Nút Shutter đĩa tròn vàng hỗ trợ 2 thao tác:
+        - `onPress`: Chụp 1 bức ảnh tĩnh chất lượng cao như hiện tại.
+        - `onLongPress`: Kích hoạt quay video ngắn 3 giây không tiếng (`quality: '480p'`, mute âm thanh, dung lượng $\le 400$KB).
+      - Quanh nút Shutter có vòng tròn tiến độ SVG lấp đầy 360 độ trong đúng 3.0 giây kèm nhịp rung haptic.
+      - Tại màn hình xem lại (Review Overlay): Hiển thị ảnh bìa tĩnh kèm icon Play, chạm vào mới phát lặp lại nhằm tiết kiệm pin tối đa.
+    - *Lược Bỏ Dải 5 Cảm Xúc (Zero Clutter):*
+      - Chủ dự án quyết định loại bỏ hoàn toàn dải chọn cảm xúc (Mood tags) để giữ cho giao diện ghi chép luôn tối giản, bảo toàn tốc độ ghi sổ thần tốc $\le 3$s.
+    - *Công Tắc Riêng Tư Hội Bạn (Squad Privacy Toggle):*
+      - Bổ sung công tắc `[🔒 Riêng tư: Chỉ mình tôi]` trên màn hình xem lại sau khi chụp/quay. Khi bật công tắc này, khoản chi chỉ lưu trên máy cá nhân và không đồng bộ lên Locket Feed của Hội bạn 2-4 người.
+
+
+  - **Quyết định 84 (22/10/2026): Tái Cấu Trúc Thương Hiệu PigBo (Nuôi Heo Lớn), Khóa Vuốt 0 Rung Lắc & Tinh Gọn Camera:**
+    - *Đổi Tên Thương Hiệu Thành PigBo:*
+      - Tên chính thức: **PigBo** (Slogan: *"Nuôi Heo Lớn Mỗi Ngày — Raise Pig to Big"*).
+      - Tone màu chủ đạo chuyển sang **Hệ màu Xanh Mint từ nhạt tới đậm** (Sky Blue & Mint Cloud cho Light mode, Fresh Mint & Tropical Leaf cho Cool mode, Dark Mint & Cyber Emerald cho Dark mode).
+      - Mascot: **Chú Heo Béo PigBo Trắng Sứ / Tai Mũi Má Hồng Phấn (3D Clay Chibi)**, ảnh tĩnh nét cao $\le 30$KB kèm hiệu ứng nhún xúc giác, gồm 4 dáng điệu (Vẫy chào, Nằm gác cằm trên Camera, Cuộn tròn góc Card, Đeo kính Chat AI).
+    - *Khóa Cố Định Vuốt Body Giữa Màn Hình (Zero Shaking Navigation):*
+      - Cố định ScrollView ngang `horizontalPagerRef` (`scrollEnabled={false}`), loại bỏ hoàn toàn hiện tượng rung lắc/lướt nhầm tab ở giữa màn hình. Chuyển tab 100% qua thanh điều hướng `FloatingPillTabBar` dưới đáy.
+    - *Tinh Gọn Khung Ngắm Camera:*
+      - Xóa bỏ nút pill "Lịch sử" sát dưới nút Shutter để khu vực camera hoàn toàn thoáng đạt.
+      - Xóa thanh trượt zoom slider và số 0.5x hardcode, chuyển sang thao tác Pinch-to-zoom 2 ngón tay tự nhiên (1.0x – 3.0x thực tế).
+      - Xóa bỏ text "Chọn 1 danh mục" trên Camera Overlay, chỉ để lại icon danh mục nổi trần thanh thoát.
+    - *Ẩn Thuật Ngữ Kỹ Thuật (Zero Tech Clutter):*
+      - Xóa bỏ toàn bộ các badge "0$ Cloud", "Cục bộ (0$ Cloud)" trên màn hình Hồ sơ và Cài đặt, bảo đảm giao diện sạch sẽ, cao cấp như sản phẩm thương mại quốc tế.
+    - *Tab 3: Heo Béo & Bạn Thân:*
+      - Bố trí 2 ngăn chuyển đổi mượt mà ở đỉnh: `[🐷 Heo Béo]` (Chat AI Thông Thái & Ấm Áp) và `[👥 Bạn thân]` (Locket Feed & Chatroom 2-4 bạn).
+
+
+  - **Quyết định 85 (22/10/2026): Tinh Chỉnh Màn Hình Mở Đầu — Bottom Thành Ngữ In Nghiêng, Unique Nickname Realtime & Khảo Sát Năm Sinh:**
+    - *Bố Cục Châm Ngôn & Slogan:*
+      - Di chuyển câu thành ngữ dân gian Việt Nam: *"Tích tiểu thành đại"* xuống đáy màn hình (Bottom), hiển thị dạng **chữ in nghiêng (italic)** mộc mạc, trang trọng.
+      - Nổi bật dòng thông điệp *"Quản lý chi tiêu ngay hôm nay"* ngay dưới tiêu đề PigBo với sắc xanh ngọc mint sắc nét.
+    - *Khảo Sát Năm Sinh & Độ Tuổi Người Dùng:*
+      - Bổ sung thanh chọn Năm Sinh nhẹ nhàng (Year Picker Modal/Sheet) tích hợp cạnh ô nhập Tên.
+      - Hệ thống tự động tính ra độ tuổi tương ứng (ví dụ: `2004 — 22 tuổi`) và lưu trữ vào trường `birthdate` / `birth_year` trong CSDL `Profile` phục vụ nghiên cứu nhân khẩu học người dùng.
+    - *Cơ Chế Kiểm Tra Tên Không Trùng Lặp (Unique Nickname Realtime):*
+      - Hệ thống tra cứu realtime trong CSDL `profiles` (kèm debounce và offline fallback).
+      - Nếu tên khả dụng: Hiển thị icon tích xanh `Check` an tâm.
+      - Nếu tên đã có người khác đăng ký: Báo nhẹ *"Tên này đã có bạn dùng"* và hiển thị ngay 3 chip gợi ý 1-chạm (ví dụ: `Tên 02`, `Tên #99`, `Tên_pig`).
+    - *Bảo Toàn Trải Nghiệm Nút Nguồn 1-Chạm:*
+      - Tiếp tục duy trì Nút Nguồn cảm ứng tròn 80px (`Power Button`) kích hoạt hiệu ứng đèn LED Xanh Mint (Power ON) và đưa người dùng vào ứng dụng sau 1 nhịp rung xúc giác `Heavy Haptic`.
+
+  - **Quyết định 86 (22/10/2026): Tái Thiết Kế Màn Hình Login Chuẩn Mockup PigBo — Đổi Theme Trực Tiếp, 1 Phương Thức Nhanh & Ca Dao Lục Bát:**
+    - *Đổi Theme 1-Chạm Trực Tiếp (Icon Palette Top-Left):*
+      - Đặt nút icon `Palette` ở góc trên bên trái màn hình mở đầu. Bấm 1-chạm xoay vòng trực tiếp giữa 3 Theme: Xanh Mint (`cool`) ⇄ Hồng Phấn / Kem Bơ (`light`) ⇄ Đêm Tối (`dark`) kèm rung nhẹ `Light Haptic`.
+      - Ẩn nút Cài đặt (Bánh răng) ở màn hình Login để giao diện đạt độ tập trung tuyệt đối.
+    - *Loại Bỏ Thanh Phân Luồng Đăng Nhập (Zero Segment Tabs):*
+      - Loại bỏ 100% thanh tab segment *"⚡ Bắt đầu nhanh | 👤 Tài khoản"*, chuyển đổi hoàn toàn sang luồng 1 phương thức duy nhất: Nhập Biệt danh & Chọn Năm sinh $\to$ Vào ngay $\le 0.5$s.
+    - *Tối Giản Hóa Form (Single Clean Card):*
+      - Loại bỏ các card lồng nhau viền dày; loại bỏ tùy chọn checkbox *"Khóa PIN bảo mật"* và badge *"25 tuổi"* lặp lại.
+      - Duy trì 1 khung thẻ nền trắng sứ đổ bóng siêu mềm chứa 2 trường: Biệt danh (có icon User, kiểm tra tên trùng Realtime với tick `Check` xanh, nút xúc xắc `Dices` cam đất) và Năm sinh/Tuổi (dropdown lịch `Calendar` chọn từ 1970–2016).
+    - *Thiết Kế Nút Đăng Nhập 'BẮT ĐẦU NGAY →' Theo Mockup:*
+      - Nút dài bo tròn mềm mại 56px với gradient/màu chủ đạo của theme, bên trong tích hợp icon Nút Nguồn `Power` trong vòng tròn trắng mờ + chữ in hoa đậm `BẮT ĐẦU NGAY` + mũi tên `ArrowRight` (`→`). Kích hoạt `Heavy Haptic` khi bấm.
+    - *Cập Nhật Câu Ca Dao Đáy Màn Hình:*
+      - Thay câu *"Tích tiểu thành đại"* bằng 2 câu ca dao lục bát nghệ thuật:
+        *“ Heo kia chẳng vỗ thời to*
+        *Từng xu góp lại thành kho lúc nào ”*
+        (Định dạng chữ in nghiêng `italic`, màu chữ muted trang nhã, kèm chú thích bản quyền `PigBo © 2026 – Chi tiêu có kế hoạch`).
+
+  - **Quyết định 87 (22/10/2026): Tối Giản Tuyệt Đối Màn Hình Login — Chuẩn Pure Floating Bold Icons (Zero Border & Boxless), Icon Nguồn Trơn & Dải Tuổi 10-60:**
+    - *Triệt Tiêu Hoàn Toàn Khung Viền & Hộp Nền Màu Bọc Icon (Zero Border & Boxless):*
+      - Nút đổi Theme (`Palette`): Hiển thị vector nổi trần góc trên bên trái (`borderWidth: 0, backgroundColor: 'transparent'`), không hộp nền, không viền, `hitSlop: 14`.
+      - Nút Xúc xắc (`Dices`): Bỏ hộp nền màu vàng `#FEF3C7`, hiển thị vector nổi trần tự nhiên.
+      - Dấu kiểm (`Check`): Bỏ vòng tròn nền xanh `#DCFCE7`, hiển thị vector tick xanh sắc nét.
+      - Linh vật chú Heo PigBo: Bỏ khung tròn hộp viền đè nặng bên ngoài và bỏ huy hiệu vàng bọc coin rườm rà; chỉ để chú heo PigBo hiển thị tự nhiên, nổi trần, vui tươi.
+    - *Nút Nguồn Trơn Nổi Trần (Zero Text & Zero Button Box):*
+      - Bỏ chữ "BẮT ĐẦU NGAY", bỏ dải gradient dài bo viền bọc nút.
+      - Nút đăng nhập chỉ còn đúng 1 Icon Nguồn `Power` trơn nổi trần (kích thước lớn 42px, `strokeWidth: 2.8`). Khi chạm vào bừng sáng màu Xanh Mint `#10B981` kèm rung `Heavy Haptic` đưa người dùng vào app.
+    - *Tục Ngữ Lục Bát Không Dấu Ngoặc Kép:*
+      - Bỏ cặp dấu ngoặc kép `“` và `”`, hiển thị 2 dòng thơ lục bát tự nhiên, mộc mạc:
+        *Heo kia chẳng vỗ thời to*
+        *Từng xu góp lại thành kho lúc nào*
+    - *Khảo Sát Độ Tuổi Chuẩn 10 Đến 60 Tuổi:*
+      - Mở rộng dải năm sinh từ năm 1966 đến năm 2016 (tương ứng độ tuổi chính xác từ 10 tuổi đến 60 tuổi).
+
+  - **Quyết định 88 (22/10/2026): Màn Hình Mở Đầu Trống Hoàn Toàn (Zero Pre-Filled Data) & Placeholder Tối Giản:**
+    - *Triệt Tiêu Hoàn Toàn Dữ Liệu Hardcode Ban Đầu (Zero Pre-filled):*
+      - Biệt danh ban đầu để trống tuyệt đối `""` (không tự điền 'Cốm Non' hay 'Bé Bơ'), hiển thị dòng placeholder mờ: *"Nhập biệt danh của bạn"*. Nút Xúc xắc `Dices` vẫn sẵn sàng hỗ trợ nếu người dùng muốn tạo tên nhanh 1-chạm.
+      - Năm sinh ban đầu để trống `null` (không tự điền '2001' hay '25 tuổi'), hiển thị dòng placeholder mờ: *"Chọn năm sinh của bạn"*. Khi người dùng chọn từ Modal thì mới hiển thị rõ năm và số tuổi tương ứng.
+    - *Trải Nghiệm Khi Bấm Nút Nguồn:*
+      - Nếu người dùng bấm nút Nguồn khi chưa điền tên: Rung nhẹ `Warning Haptic` và hiển thị cảnh báo đỏ ngắn gọn *"Vui lòng nhập biệt danh"*.
+      - Nếu chưa chọn năm sinh: Tự động kích hoạt mở Modal chọn năm sinh mượt mà để người dùng chọn nhanh trước khi vào ví.
+
+  - **Quyết định 89 (22/10/2026): Thiết Kế App Icon & Splash Icon Chính Thức Cho PigBo (3D Clay Chibi Trên Nền Xanh Mint):**
+    - *Chuẩn Hóa Bộ Nhận Diện Launcher Icon (`assets/`):*
+      - Thay thế toàn bộ icon Monogram K cũ của Kepi bằng bộ Icon chú Heo PigBo chính thức:
+        - `assets/icon.png` (1024x1024): App Icon chính thức cho iOS và App Store.
+        - `assets/adaptive-icon.png` (1024x1024): Foreground icon cho Android thích ứng.
+        - `assets/splash-icon.png` & `assets/favicon.png`: Icon khởi động splash và web tab.
+      - *Thiết Kế Đồ Họa:* Chú Heo Béo PigBo 3D Clay Chibi trắng sứ bóng mịn phong cách Pixar, tai và má hồng phấn pastel dễ thương, mắt cười long lanh, đỉnh đầu có khe nhét tiền heo đất kèm 1 đồng xu vàng may mắn. Nền icon là sắc Xanh Mint tươi mát sang trọng (`#10B981` đến `#059669`).
+
+  - **Quyết định 90 (22/10/2026): Đồng Bộ Linh Vật Chú Heo PigBo Vào Thẻ Ngân Sách Tab 0 & Thẻ Danh Tính Tab 4:**
+    - *Thẻ Ngân Sách Hôm Nay (Tab 0 — `JournalView.tsx`):*
+      - Đặt linh vật chú Heo PigBo dáng ngủ say / cuộn tròn (`PigBoMascot pose="card"` hoặc `happy`, kích thước 46px) ngay trên Thẻ Hạn Mức Hôm Nay. Chú Heo nằm bên cạnh số tiền tiêu được để truyền tải thông điệp nuôi heo đất ấm áp, chạm vào có hiệu ứng nhún xúc giác đàn hồi.
+    - *Thẻ Danh Tính Cá Nhân (Tab 4 — `ProfileIdentityCard.tsx`):*
+      - Thay thế avatar chữ cái viết tắt đơn điệu bằng Avatar Chú Heo PigBo Chibi vẫy chào (`PigBoMascot pose="welcome"`, kích thước 48px), đồng bộ nhận diện thương hiệu vui nhộn và thân thiện cho toàn bộ ứng dụng.
+
+  - **Quyết định 91 (22/10/2026): Tái Định Vị Thương Hiệu "Pigpo" (Slogan: "Fatten your savings - Keep it - Watch it grow") & Triển Khai Tab 3 Hội Bạn Thân 2-4 Người:**
+    - *Đổi Tên Thương Hiệu Sang Pigpo:*
+      - Tên chính thức: **Pigpo** (viết hoa chữ đầu: `Pigpo`).
+      - Tagline / Slogan quốc tế: *"Fatten your savings - Keep it - Watch it grow"* (Nuôi lớn khoản tiết kiệm - Giữ chặt - Ngắm nhìn heo lớn dần).
+      - Đồng bộ toàn diện trên `app.json`, `strings.ts`, màn hình Login, Persona AI và các tài liệu đặc tả.
+    - *Kiến Trúc Hai Ngăn Tab 3 (Pigpo AI & Hội Bạn 2-4 Người):*
+      - Đỉnh Tab 3 tích hợp thanh Segment chuyển đổi tức thì: `[🐷 Heo Béo]` | `[👥 Bạn thân]`.
+      - **Ngăn 1 [🐷 Heo Béo]:** Chú heo Pigpo AI đồng hành thông thái, uốn nắn thói quen tiết kiệm, phân tích chi tiêu ngày hôm nay và trả lời 3 câu hỏi phản biện trước khi mua sắm.
+      - **Ngăn 2 [👥 Bạn thân]:** Hội bạn Locket nhỏ 2–4 người kết nối bằng Mã phòng 6 ký tự (Anonymous Room Code) vận hành 0$ Cloud trên Supabase Realtime. Hiển thị Locket Feed ảnh/clip chi tiêu của bạn bè trong phòng (tự động lọc bỏ các giao dịch gắn cờ `[🔒 Riêng tư: Chỉ mình tôi]`), kèm các nút tương tác 1-chạm `[👉 Nhắc Heo Đói]` và `[🎉 Vỗ Béo Heo Bạn]`.
+
+  - **Quyết định 92 (22/10/2026): Tinh Chỉnh Cuối Cùng Trang Login & Hoàn Tất Chính Thức Phase 2:**
+    - *Việt Hóa Slogan Thương Hiệu:*
+      - Chuyển đổi khẩu hiệu sang tiếng Việt: *"Tiết kiệm - Duy trì - Sinh lời bền vững"*.
+    - *Chuẩn Hóa Ô Mô Tả Key-Value Chữ Mảnh, Mờ, Nhỏ:*
+      - Tiêu đề nhãn: `TÊN BIỆT DANH CỦA BẠN:` và `NĂM SINH & TUỔI:` (font nhỏ 10.5px, chữ mảnh `fontWeight: '400'`, màu mờ `textMuted`).
+      - Placeholder hướng dẫn: `Nhập biệt danh` và `Chọn năm sinh` (font mờ nhạt siêu mảnh `rgba(..., 0.22)`, không chiếm dụng sự chú ý).
+    - *Modal Năm Sinh Pop-up Tối Giản Ở Giữa (Không Giới Hạn Năm):*
+      - Loại bỏ dòng tiêu đề "Chọn Năm Sinh Của Bạn (10 - 60 tuổi)".
+      - Dải năm sinh mở rộng không giới hạn (từ 1920 đến năm hiện tại 2026).
+      - Thiết kế khung pop-up nhỏ gọn đặt ở giữa màn hình (`center dialog`), bo góc 24px thanh thoát.
+    - *Đồng Bộ Icon Chú Heo 3D Cho Trang Login:*
+      - Sử dụng trực tiếp hình ảnh App Icon chú Heo Pigpo 3D Clay Chibi chính thức (`assets/icon.png`) làm avatar đại diện trên trang Login, bo tròn 100px đổ bóng mềm, đồng bộ 100% với biểu tượng ứng dụng trên màn hình chính điện thoại.
+    - *Chính Thức Kết Thúc Phase 2:*
+      - Nghiệm thu trọn vẹn toàn bộ các mục tiêu nhận diện thương hiệu, bộ icon và màn hình đăng nhập của Phase 2.

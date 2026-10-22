@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  Alert,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
   Platform,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -11,164 +18,566 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import Svg, { Path, Rect, Line, Circle } from 'react-native-svg';
+import {
+  Palette,
+  User,
+  Check,
+  Dices,
+  Calendar,
+  ChevronDown,
+  Power,
+  AlertCircle,
+  X,
+} from 'lucide-react-native';
 import { useAuthStore } from '../../src/store/authStore';
+import { useTheme } from '../../src/theme/ThemeContext';
 
-/**
- * BIỂU TƯỢNG MONOGRAM KEPI CHỮ 'K' ĐỒNG BỘ NỀN XANH MINT BAN MAI
- * Kết hợp giữa ống kính máy ảnh Xanh Rừng Đậm Phố Cổ và ngàm Vàng Nắng Thu
- */
-function KepiMonogram({ size = 72 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 56 56">
-      {/* Vòng hào quang sáng mờ nền */}
-      <Circle cx="28" cy="28" r="26" fill="rgba(16, 185, 129, 0.15)" />
+const CUTE_NICKNAMES = [
+  'Cốm Non',
+  'Bé Bơ',
+  'Heo Mập',
+  'Bé Gạo',
+  'Mây Mây',
+  'Cà Phê',
+  'Trà Xanh',
+  'Đậu Đậu',
+  'Hạt Dẻ',
+  'Bánh Bao',
+];
 
-      {/* Cột dọc ống kính camera (Xanh Rừng Đậm Phố Cổ) */}
-      <Rect x="15" y="12" width="6.5" height="32" rx="3.25" fill="#0F2F24" />
-
-      {/* Nét chéo trên hướng ống kính (Vàng Hổ Phách Nắng Thu) */}
-      <Line
-        x1="22"
-        y1="27"
-        x2="39"
-        y2="13"
-        stroke="#E59844"
-        strokeWidth="6.5"
-        strokeLinecap="round"
-      />
-
-      {/* Nét chéo dưới tạo chân chữ K (Xanh Ngọc Bích Đậm) */}
-      <Line
-        x1="23.5"
-        y1="27"
-        x2="39"
-        y2="43"
-        stroke="#1B4D3E"
-        strokeWidth="6.5"
-        strokeLinecap="round"
-      />
-
-      {/* Điểm sáng ngàm vàng hổ phách */}
-      <Circle cx="40" cy="12" r="3.5" fill="#E59844" />
-    </Svg>
-  );
-}
-
-/**
- * ICON GOOGLE ĐƠN SẮC MÀU HỔ PHÁCH
- */
-function MonochromeGoogleIcon({
-  size = 20,
-  color = '#E59844',
-}: {
-  size?: number;
-  color?: string;
-}) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-        fill={color}
-      />
-      <Path
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-        fill={color}
-      />
-      <Path
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-        fill={color}
-      />
-      <Path
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-        fill={color}
-      />
-    </Svg>
-  );
-}
+const CURRENT_YEAR = new Date().getFullYear();
+// Dải năm sinh mở rộng không giới hạn (từ năm hiện tại lùi về 1920)
+const BIRTH_YEARS = Array.from(
+  { length: CURRENT_YEAR - 1920 + 1 },
+  (_, i) => CURRENT_YEAR - i
+);
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signInWithGoogle, continueAsGuest, isLoading } = useAuthStore();
+  const { signInWithNickname, checkNicknameAvailable, isLoading } = useAuthStore();
+  const { mode, setMode, activeTheme, tokens, isDark } = useTheme();
 
-  // Đăng nhập Google (Tự động đồng bộ Supabase Cloud vĩnh viễn)
-  const handleGoogleSignIn = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const res = await signInWithGoogle();
-    if (!res.success) {
-      Alert.alert('Google Sign-In', res.error || 'Đang mở phiên đăng nhập Google...');
-    }
-  };
+  // Khởi tạo biệt danh: Để trống hoàn toàn từ đầu theo yêu cầu
+  const [nickname, setNickname] = useState<string>('');
 
-  // Vào ngay (Nếu lần đầu -> mở Tab thiết lập Tên & Chi tiêu nhanh; nếu đã có -> mở thẳng Camera)
-  const handleInstantEntry = async () => {
+  // Khảo sát Năm Sinh: Để trống null từ đầu theo yêu cầu
+  const [selectedBirthYear, setSelectedBirthYear] = useState<number | null>(null);
+  const [showYearPickerModal, setShowYearPickerModal] = useState<boolean>(false);
+
+  // Trạng thái kiểm tra tên duy nhất
+  const [isCheckingName, setIsCheckingName] = useState<boolean>(false);
+  const [isNameDuplicate, setIsNameDuplicate] = useState<boolean>(false);
+  const [suggestedNames, setSuggestedNames] = useState<string[]>([]);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const debounceTimerRef = useRef<any>(null);
+
+  // Đổi Theme xoay vòng 1-chạm: Cool Mint 🌿 ⇄ Light Pink/Cream 🌸 ⇄ Dark Mint 🌙
+  const handleCycleTheme = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await continueAsGuest();
-    const isSetup = useAuthStore.getState().hasCompletedBudgetSetup;
-    if (!isSetup) {
-      router.replace('/(auth)/budget-setup');
-    } else {
-      router.replace('/(main)');
-    }
+    const nextMode = mode === 'cool' ? 'light' : mode === 'light' ? 'dark' : 'cool';
+    setMode(nextMode);
   };
+
+  // Sinh 3 gợi ý tên khi bị trùng
+  const generateSuggestions = (base: string) => {
+    const clean = base.trim();
+    const num1 = Math.floor(Math.random() * 89) + 10;
+    const num2 = Math.floor(Math.random() * 900) + 100;
+    return [`${clean} ${num1}`, `${clean} #${num2}`, `${clean}_pig`];
+  };
+
+  // Kiểm tra tên realtime khi người dùng dừng gõ 350ms
+  useEffect(() => {
+    const trimmed = nickname.trim();
+    if (!trimmed) {
+      setIsNameDuplicate(false);
+      setSuggestedNames([]);
+      setValidationError(null);
+      return;
+    }
+
+    setValidationError(null);
+
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+
+    setIsCheckingName(true);
+    debounceTimerRef.current = setTimeout(async () => {
+      const isAvailable = await checkNicknameAvailable(trimmed);
+      setIsCheckingName(false);
+      if (!isAvailable) {
+        setIsNameDuplicate(true);
+        setSuggestedNames(generateSuggestions(trimmed));
+      } else {
+        setIsNameDuplicate(false);
+        setSuggestedNames([]);
+      }
+    }, 350);
+
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [nickname]);
+
+  // Đổi ngẫu nhiên một biệt danh dễ thương khi người dùng chủ động bấm xúc xắc
+  const handleShuffleName = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const filtered = CUTE_NICKNAMES.filter((n) => n !== nickname);
+    const nextName = filtered[Math.floor(Math.random() * filtered.length)] || 'Cốm Non';
+    setNickname(nextName);
+    setValidationError(null);
+  };
+
+  // KÍCH HOẠT NÚT NGUỒN TRƠN
+  const handleStartPress = async () => {
+    if (isLoading || isSubmitting) return;
+
+    const trimmedName = nickname.trim();
+
+    // 1. Kiểm tra nếu chưa nhập tên
+    if (!trimmedName) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setValidationError('Vui lòng nhập biệt danh của bạn');
+      return;
+    }
+
+    // 2. Kiểm tra nếu tên đang bị trùng
+    if (isNameDuplicate) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setValidationError('Tên này đã có bạn dùng, vui lòng đổi tên khác');
+      return;
+    }
+
+    // 3. Kiểm tra nếu chưa chọn năm sinh
+    if (selectedBirthYear === null) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setValidationError('Vui lòng chọn năm sinh của bạn');
+      setShowYearPickerModal(true);
+      return;
+    }
+
+    // Hợp lệ: Kích hoạt nút nguồn
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    setIsSubmitting(true);
+    setValidationError(null);
+
+    setTimeout(async () => {
+      const res = await signInWithNickname(trimmedName, selectedBirthYear);
+      if (res.success) {
+        router.replace('/(main)');
+      } else {
+        setIsSubmitting(false);
+      }
+    }, 120);
+  };
+
+  const calculatedAge = selectedBirthYear ? CURRENT_YEAR - selectedBirthYear : null;
+
+  // Màu gradient nền động theo từng Theme
+  const bgGradientColors: [string, string, ...string[]] =
+    mode === 'dark'
+      ? ['#0E1620', '#16202C', '#0B131D']
+      : mode === 'light'
+      ? ['#FEE2E2', '#FDF2F8', '#FFF1F2'] // Hồng phấn ngọt ngào
+      : ['#EAF7F2', '#D5F2E6', '#F0FDF4']; // Xanh Mint tươi mát
 
   return (
     <LinearGradient
-      colors={['#E0F2FE', '#D1F4E0', '#F4FBF7']}
+      colors={bgGradientColors}
       locations={[0, 0.5, 1]}
       style={styles.gradientContainer}
     >
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.mainContainer}>
-          {/* ================= HERO BRANDING ================= */}
-          <View style={styles.heroSection}>
-            <View style={styles.monogramWrapper}>
-              <KepiMonogram size={72} />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* ================= TOP HEADER: NÚT ĐỔI THEME TRƠN NỔI TRẦN ================= */}
+            <View style={styles.topHeaderRow}>
+              <TouchableOpacity
+                onPress={handleCycleTheme}
+                style={styles.themeButtonBare}
+                activeOpacity={0.7}
+                hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+                accessibilityLabel="Đổi Theme giao diện"
+              >
+                <Palette
+                  size={22}
+                  color={mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#E11D48' : '#059669'}
+                  strokeWidth={2.6}
+                />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.brandTitle}>Kepi</Text>
-            <Text style={styles.tagline}>KEEP WHAT MATTERS</Text>
 
-            {/* QUOTE NGHỆ THUẬT IN NGHIÊNG NHẸ */}
-            <View style={styles.quoteWrapper}>
-              <Text style={styles.quoteHighlight}>
-                “Góp chút nhỏ, dựng tương lai to”
+            {/* ================= HERO BRANDING & MASCOT 3D ĐỒNG BỘ APP ICON ================= */}
+            <View style={styles.heroSection}>
+              {/* Icon Chú Heo Pigpo 3D Clay Chibi chính thức */}
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+                style={styles.mascot3DWrapper}
+              >
+                <Image
+                  source={require('../../assets/icon.png')}
+                  style={styles.mascot3DImage}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+
+              <Text style={[styles.brandTitle, { color: tokens.text }]}>Pigpo</Text>
+
+              {/* Tag Con Nhộng: Tiết kiệm • Duy trì • Sinh lời bền vững */}
+              <View
+                style={[
+                  styles.subQuoteContainer,
+                  {
+                    backgroundColor:
+                      mode === 'dark'
+                        ? 'rgba(45, 212, 191, 0.08)'
+                        : mode === 'light'
+                        ? 'rgba(244, 63, 94, 0.06)'
+                        : 'rgba(5, 150, 105, 0.06)',
+                    borderColor:
+                      mode === 'dark'
+                        ? 'rgba(45, 212, 191, 0.15)'
+                        : mode === 'light'
+                        ? 'rgba(244, 63, 94, 0.12)'
+                        : 'rgba(5, 150, 105, 0.12)',
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.subQuoteText,
+                    {
+                      color:
+                        mode === 'dark'
+                          ? 'rgba(45, 212, 191, 0.75)'
+                          : mode === 'light'
+                          ? 'rgba(190, 24, 93, 0.7)'
+                          : 'rgba(5, 150, 105, 0.7)',
+                    },
+                  ]}
+                >
+                  Tiết kiệm • Duy trì • Sinh lời bền vững
+                </Text>
+              </View>
+            </View>
+
+            {/* ================= KHUNG CARD FORM TỐI GIẢN (SINGLE CLEAN CARD) ================= */}
+            <View style={styles.formContainer}>
+              <View
+                style={[
+                  styles.formCard,
+                  {
+                    backgroundColor: isDark ? '#16202C' : '#FFFFFF',
+                    shadowColor: tokens.shadowColor,
+                    borderColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.03)',
+                  },
+                ]}
+              >
+                {/* 1. TÊN BIỆT DANH CỦA BẠN: */}
+                <View style={styles.formFieldBlock}>
+                  <Text style={[styles.fieldLabel, { color: tokens.textMuted }]}>
+                    TÊN BIỆT DANH CỦA BẠN:
+                  </Text>
+
+                  <View
+                    style={[
+                      styles.inputBox,
+                      {
+                        backgroundColor: isDark ? '#1E2C3D' : '#F8FAF9',
+                        borderColor: isNameDuplicate
+                          ? '#EF4444'
+                          : isDark
+                          ? 'rgba(255, 255, 255, 0.08)'
+                          : '#E2E8F0',
+                      },
+                    ]}
+                  >
+                    <User
+                      size={18}
+                      color={mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#FB7185' : '#059669'}
+                      strokeWidth={2.4}
+                      style={{ marginRight: 10 }}
+                    />
+
+                    <TextInput
+                      style={[styles.nameInput, { color: tokens.text }]}
+                      placeholder="Nhập biệt danh"
+                      placeholderTextColor={
+                        isDark ? 'rgba(255, 255, 255, 0.22)' : 'rgba(15, 47, 36, 0.22)'
+                      }
+                      value={nickname}
+                      onChangeText={(t) => {
+                        setNickname(t);
+                        if (validationError) setValidationError(null);
+                      }}
+                      maxLength={25}
+                      autoCapitalize="words"
+                      returnKeyType="done"
+                    />
+
+                    {isCheckingName ? (
+                      <ActivityIndicator
+                        size="small"
+                        color={tokens.primary}
+                        style={{ marginRight: 6 }}
+                      />
+                    ) : isNameDuplicate ? (
+                      <AlertCircle size={18} color="#EF4444" style={{ marginRight: 6 }} />
+                    ) : nickname.trim().length > 0 ? (
+                      <Check
+                        size={18}
+                        color="#10B981"
+                        strokeWidth={2.8}
+                        style={{ marginRight: 8 }}
+                      />
+                    ) : null}
+
+                    {/* Nút Xúc Xắc Trơn Nổi Trần */}
+                    <TouchableOpacity
+                      onPress={handleShuffleName}
+                      style={styles.shuffleButtonBare}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      accessibilityLabel="Đổi tên ngẫu nhiên"
+                    >
+                      <Dices
+                        size={18}
+                        color={
+                          mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#FB7185' : '#D97706'
+                        }
+                        strokeWidth={2.6}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* GỢI Ý KHI TRÙNG TÊN */}
+                  {isNameDuplicate && (
+                    <View style={styles.duplicateWarningBox}>
+                      <Text style={styles.duplicateWarningText}>
+                        Tên này đã có bạn dùng, thử chọn nhanh gợi ý:
+                      </Text>
+                      <View style={styles.suggestionRow}>
+                        {suggestedNames.map((sug) => (
+                          <TouchableOpacity
+                            key={sug}
+                            style={styles.suggestionChip}
+                            onPress={() => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              setNickname(sug);
+                            }}
+                          >
+                            <Text style={styles.suggestionChipText}>{sug}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+                </View>
+
+                {/* 2. NĂM SINH & TUỔI: */}
+                <View style={[styles.formFieldBlock, { marginTop: 14 }]}>
+                  <Text style={[styles.fieldLabel, { color: tokens.textMuted }]}>
+                    NĂM SINH & TUỔI:
+                  </Text>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.inputBox,
+                      {
+                        backgroundColor: isDark ? '#1E2C3D' : '#F8FAF9',
+                        borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#E2E8F0',
+                      },
+                    ]}
+                    activeOpacity={0.75}
+                    onPress={() => {
+                      if (validationError) setValidationError(null);
+                      setShowYearPickerModal(true);
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                      <Calendar
+                        size={18}
+                        color={
+                          mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#FB7185' : '#059669'
+                        }
+                        strokeWidth={2.4}
+                        style={{ marginRight: 10 }}
+                      />
+                      {selectedBirthYear ? (
+                        <Text style={[styles.birthYearText, { color: tokens.text }]}>
+                          Năm sinh: {selectedBirthYear} ({calculatedAge} tuổi)
+                        </Text>
+                      ) : (
+                        <Text
+                          style={[
+                            styles.birthYearPlaceholder,
+                            {
+                              color: isDark
+                                ? 'rgba(255, 255, 255, 0.22)'
+                                : 'rgba(15, 47, 36, 0.22)',
+                            },
+                          ]}
+                        >
+                          Chọn năm sinh
+                        </Text>
+                      )}
+                    </View>
+
+                    <ChevronDown size={18} color={tokens.textSub} strokeWidth={2.4} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* CẢNH BÁO XÁC THỰC RÕ RÀNG */}
+                {validationError && (
+                  <View style={styles.validationErrorBox}>
+                    <AlertCircle size={15} color="#EF4444" style={{ marginRight: 6 }} />
+                    <Text style={styles.validationErrorText}>{validationError}</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* 3. NÚT NGUỒN TRƠN NỔI TRẦN (PURE FLOATING POWER BUTTON) */}
+              <View style={styles.powerSection}>
+                <TouchableOpacity
+                  onPress={handleStartPress}
+                  disabled={isLoading || isSubmitting}
+                  activeOpacity={0.75}
+                  style={styles.powerButtonBare}
+                  hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+                  accessibilityLabel="Bật ví bắt đầu trải nghiệm"
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator size="large" color="#10B981" />
+                  ) : (
+                    <Power
+                      size={44}
+                      color={
+                        mode === 'dark'
+                          ? '#2DD4BF'
+                          : mode === 'light'
+                          ? '#FB7185'
+                          : '#059669'
+                      }
+                      strokeWidth={2.8}
+                    />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* ================= CHÂN TRANG: CA DAO LỤC BÁT THUẦN VIỆT (KHÔNG NGOẶC KÉP) ================= */}
+            <View style={styles.footerSection}>
+              <View style={styles.verseBox}>
+                <Text style={[styles.verseLine, { color: tokens.textSub }]}>
+                  Heo kia chẳng vỗ thời to
+                </Text>
+                <Text style={[styles.verseLine, { color: tokens.textSub }]}>
+                  Từng xu góp lại thành kho lúc nào
+                </Text>
+              </View>
+
+              <Text style={[styles.copyrightText, { color: tokens.textMuted }]}>
+                Pigpo © 2026 – Tiết kiệm, duy trì, sinh lời bền vững
               </Text>
             </View>
-          </View>
 
-          {/* ================= KHUNG HÀNH ĐỘNG 2 CỔNG ================= */}
-          <View style={styles.actionContainer}>
-            {/* 1. NÚT CHÍNH: TIẾP TỤC VỚI GOOGLE (TRẮNG SỨ ĐỔ BÓNG MỀM) */}
-            <TouchableOpacity
-              style={styles.googleButton}
-              activeOpacity={0.85}
-              onPress={handleGoogleSignIn}
-              disabled={isLoading}
+            {/* ================= MODAL CHỌN NĂM SINH DẠNG POP-UP NHỎ GỌN Ở GIỮA ================= */}
+            <Modal
+              visible={showYearPickerModal}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setShowYearPickerModal(false)}
             >
-              <View style={styles.googleIconCircle}>
-                <MonochromeGoogleIcon size={18} color="#E59844" />
-              </View>
-              <Text style={styles.googleButtonText}>Tiếp tục với Google</Text>
-            </TouchableOpacity>
-
-            {/* 2. NÚT PHỤ: VÀO NGAY (XANH NGỌC ĐẬM CHỮ TRẮNG KEM CĂN GIỮA) */}
-            <TouchableOpacity
-              style={styles.instantButton}
-              activeOpacity={0.85}
-              onPress={handleInstantEntry}
-              disabled={isLoading}
-            >
-              <Text style={styles.instantButtonText}>Vào ngay</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* ================= CHÂN TRANG ================= */}
-          <View style={styles.footerSection}>
-            <Text style={styles.footerBrandText}>
-              Kepi · Giữ gìn từng khoảnh khắc
-            </Text>
-          </View>
-        </View>
+              <Pressable
+                style={styles.modalCenterOverlay}
+                onPress={() => setShowYearPickerModal(false)}
+              >
+                <Pressable
+                  style={[
+                    styles.modalPopupCard,
+                    {
+                      backgroundColor: isDark ? '#16202C' : '#FFFFFF',
+                      shadowColor: tokens.shadowColor,
+                    },
+                  ]}
+                  onPress={(e) => e.stopPropagation()}
+                >
+                  <FlatList
+                    data={BIRTH_YEARS}
+                    keyExtractor={(item) => String(item)}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingVertical: 4 }}
+                    renderItem={({ item }) => {
+                      const isSelected = item === selectedBirthYear;
+                      const age = CURRENT_YEAR - item;
+                      return (
+                        <TouchableOpacity
+                          style={[
+                            styles.yearItemPopup,
+                            isSelected && {
+                              backgroundColor:
+                                mode === 'dark'
+                                  ? 'rgba(45, 212, 191, 0.16)'
+                                  : mode === 'light'
+                                  ? 'rgba(244, 63, 94, 0.12)'
+                                  : 'rgba(5, 150, 105, 0.12)',
+                            },
+                          ]}
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            setSelectedBirthYear(item);
+                            setValidationError(null);
+                            setShowYearPickerModal(false);
+                          }}
+                        >
+                          <Text
+                            style={[
+                              styles.yearTextPopup,
+                              { color: tokens.text },
+                              isSelected && {
+                                color:
+                                  mode === 'dark'
+                                    ? '#2DD4BF'
+                                    : mode === 'light'
+                                    ? '#E11D48'
+                                    : '#059669',
+                                fontWeight: '700',
+                              },
+                            ]}
+                          >
+                            Năm {item} ({age} tuổi)
+                          </Text>
+                          {isSelected && (
+                            <Check
+                              size={16}
+                              color={
+                                mode === 'dark'
+                                  ? '#2DD4BF'
+                                  : mode === 'light'
+                                  ? '#E11D48'
+                                  : '#059669'
+                              }
+                              strokeWidth={2.8}
+                            />
+                          )}
+                        </TouchableOpacity>
+                      );
+                    }}
+                  />
+                </Pressable>
+              </Pressable>
+            </Modal>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -181,121 +590,228 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  mainContainer: {
-    flex: 1,
-    paddingHorizontal: 28,
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 20,
     justifyContent: 'space-between',
-    paddingVertical: 24,
   },
 
-  /* HERO BRANDING */
+  /* TOP HEADER ROW: NÚT THEME TRƠN NỔI TRẦN */
+  topHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingVertical: 2,
+  },
+  themeButtonBare: {
+    backgroundColor: 'transparent',
+    padding: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /* HERO BRANDING: MASCOT 3D ĐỒNG BỘ APP ICON */
   heroSection: {
     alignItems: 'center',
-    paddingTop: 48,
+    paddingTop: 4,
+    paddingBottom: 12,
   },
-  monogramWrapper: {
-    marginBottom: 16,
+  mascot3DWrapper: {
+    marginBottom: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mascot3DImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 4,
   },
   brandTitle: {
-    fontSize: 44,
+    fontSize: 40,
     fontWeight: '800',
-    color: '#0F2F24',
-    letterSpacing: -1.2,
-    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif-medium',
-    marginBottom: 4,
+    letterSpacing: -1,
+    marginBottom: 6,
   },
-  tagline: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#0D9488',
-    letterSpacing: 3,
-    marginBottom: 24,
+  subQuoteContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
   },
-
-  /* QUOTE TRUYỀN CẢM HỨNG */
-  quoteWrapper: {
-    alignItems: 'center',
-    paddingHorizontal: 12,
-  },
-  quoteHighlight: {
-    fontSize: 18,
-    fontWeight: '600',
-    fontStyle: 'italic',
-    color: '#0F2F24',
-    textAlign: 'center',
+  subQuoteText: {
+    fontSize: 12.5,
+    fontWeight: '500',
     letterSpacing: 0.2,
   },
 
-  /* KHUNG HÀNH ĐỘNG */
-  actionContainer: {
+  /* KHUNG FORM CARD TỐI GIẢN */
+  formContainer: {
     width: '100%',
-    gap: 14,
-    paddingBottom: 28,
+    paddingVertical: 6,
   },
-
-  /* NÚT GOOGLE (TRẮNG SỨ CAO CẤP) */
-  googleButton: {
+  formCard: {
+    borderRadius: 26,
+    padding: 18,
+    borderWidth: 1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.07,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  formFieldBlock: {
+    width: '100%',
+  },
+  fieldLabel: {
+    fontSize: 10.5,
+    fontWeight: '400',
+    letterSpacing: 0.4,
+    marginBottom: 4,
+    opacity: 0.75,
+  },
+  inputBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    height: 52,
     borderWidth: 1.5,
-    borderColor: 'rgba(15, 47, 36, 0.08)',
-    height: 56,
-    gap: 12,
-    shadowColor: '#0F2F24',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 14,
-    elevation: 4,
   },
-  googleIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(229, 152, 68, 0.1)',
+  nameInput: {
+    flex: 1,
+    fontSize: 14.5,
+    fontWeight: '600',
+    padding: 0,
+  },
+  shuffleButtonBare: {
+    backgroundColor: 'transparent',
+    padding: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  googleButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0F2F24',
-    letterSpacing: 0.2,
+  birthYearText: {
+    fontSize: 14.5,
+    fontWeight: '600',
+  },
+  birthYearPlaceholder: {
+    fontSize: 14,
+    fontWeight: '400',
   },
 
-  /* NÚT VÀO NGAY (XANH NGỌC ĐẬM) */
-  instantButton: {
+  /* THÔNG BÁO LỖI XÁC THỰC */
+  validationErrorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 4,
+  },
+  validationErrorText: {
+    fontSize: 12,
+    color: '#EF4444',
+    fontWeight: '600',
+  },
+
+  /* GỢI Ý KHI TRÙNG TÊN */
+  duplicateWarningBox: {
+    marginTop: 8,
+    paddingHorizontal: 4,
+    gap: 6,
+  },
+  duplicateWarningText: {
+    fontSize: 11.5,
+    color: '#EF4444',
+    fontWeight: '600',
+  },
+  suggestionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  suggestionChip: {
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+  },
+  suggestionChipText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#EF4444',
+  },
+
+  /* NÚT NGUỒN TRƠN NỔI TRẦN */
+  powerSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0F2F24',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#0F2F24',
-    height: 56,
-    shadowColor: '#0F2F24',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-    elevation: 4,
+    marginTop: 24,
+    marginBottom: 6,
   },
-  instantButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FAF6EC',
-    letterSpacing: 0.2,
+  powerButtonBare: {
+    backgroundColor: 'transparent',
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  /* CHÂN TRANG */
+  /* CHÂN TRANG: CA DAO (KHÔNG NGOẶC KÉP) */
   footerSection: {
     alignItems: 'center',
-    paddingBottom: 8,
+    paddingTop: 12,
+    paddingBottom: 4,
   },
-  footerBrandText: {
-    fontSize: 12,
-    color: '#5A7A6E',
+  verseBox: {
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  verseLine: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    fontStyle: 'italic',
+    lineHeight: 20,
+    letterSpacing: 0.2,
+  },
+  copyrightText: {
+    fontSize: 11,
     fontWeight: '500',
-    letterSpacing: 0.5,
+  },
+
+  /* MODAL POPUP NHỎ GỌN Ở GIỮA */
+  modalCenterOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalPopupCard: {
+    width: '82%',
+    maxHeight: 340,
+    borderRadius: 24,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  yearItemPopup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+  },
+  yearTextPopup: {
+    fontSize: 14.5,
+    fontWeight: '500',
   },
 });

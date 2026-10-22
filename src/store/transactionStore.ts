@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Transaction, CalendarDaySummary, TransactionType, PaymentMethod, TransactionSource } from '../types/database';
+import { Transaction, CalendarDaySummary, TransactionType, PaymentMethod, TransactionSource, MediaType } from '../types/database';
 import { useBudgetStore } from './budgetStore';
 import { enqueueMutation, flushSyncQueue, syncDownTransactions } from '../services/offlineSync';
 import { initRealtimeTransactionSync, teardownRealtimeTransactionSync } from '../services/realtimeSync';
@@ -32,6 +32,8 @@ interface TransactionState {
     bank_bin?: string | null;
     qr_kind?: 'STATIC' | 'DYNAMIC' | null;
     pending_expires_at?: string | null;
+    media_type?: MediaType;
+    is_squad_private?: boolean;
   }) => Promise<Transaction>;
   confirmPendingTransaction: (id: string, updatedAmount?: number) => Promise<void>;
   cancelPendingTransaction: (id: string) => Promise<void>;
@@ -155,6 +157,8 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
         bank_bin: data.bank_bin || null,
         qr_kind: data.qr_kind || null,
         pending_expires_at: data.pending_expires_at || null,
+        media_type: data.media_type || 'PHOTO',
+        is_squad_private: Boolean(data.is_squad_private),
         occurred_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
       };

@@ -10,6 +10,7 @@ import * as Haptics from 'expo-haptics';
 import { formatMaskedCurrency } from '../../utils/profileUtils';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
+import { PigBoMascot } from '../mascot/PigBoMascot';
 
 interface ProfileIdentityCardProps {
   name: string;
@@ -21,6 +22,7 @@ interface ProfileIdentityCardProps {
   isGuest?: boolean;
   onEditName?: () => void;
   onPressLogin?: () => void;
+  onPressStreak?: () => void;
 }
 
 export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
@@ -33,6 +35,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
   isGuest = false,
   onEditName,
   onPressLogin,
+  onPressStreak,
 }) => {
   const { tokens, isDark } = useTheme();
 
@@ -58,10 +61,10 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
         </TouchableOpacity>
       )}
 
-      {/* 1. HÀNG THÔNG TIN TÀI KHOẢN */}
+      {/* 1. HÀNG THÔNG TIN TÀI KHOẢN: AVATAR CHÚ HEO PIGBO CHIBI */}
       <View style={styles.topRow}>
-        <View style={[styles.avatarBox, { backgroundColor: tokens.primary }]}>
-          <Text style={styles.avatarLetter}>{initialLetter}</Text>
+        <View style={styles.mascotAvatarWrapper}>
+          <PigBoMascot pose="welcome" size={48} />
         </View>
 
         <View style={styles.nameCol}>
@@ -69,45 +72,28 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
             {name || 'Người dùng Ví'}
           </Text>
 
-          {isGuest && onPressLogin ? (
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                onPressLogin();
-              }}
-              style={[
-                styles.googlePillBtn,
-                {
-                  backgroundColor: isDark ? 'rgba(229, 152, 68, 0.15)' : 'rgba(229, 152, 68, 0.1)',
-                },
-              ]}
-              activeOpacity={0.75}
-              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-              accessibilityLabel="Liên kết tài khoản Google"
-            >
-              <Cloud size={11} color="#E59844" strokeWidth={2.4} />
-              <Text style={[styles.googlePillText, { color: tokens.primary }]}>
-                Liên kết Google
-              </Text>
-            </TouchableOpacity>
-          ) : Boolean(email) ? (
-            <Text style={[styles.emailText, { color: tokens.textMuted }]} numberOfLines={1}>
-              {email}
-            </Text>
-          ) : null}
+          
         </View>
       </View>
 
       {/* 2. DẢI 3 CHỈ SỐ TÓM TẮT */}
       <View style={[styles.statsRow, { backgroundColor: tokens.surfaceAlt }]}>
-        {/* Chỉ số 1: Chuỗi ngày */}
-        <View style={styles.statCell}>
+        {/* Chỉ số 1: Chuỗi ngày (Bấm mở Modal Điểm Danh) */}
+        <TouchableOpacity
+          style={styles.statCell}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            if (onPressStreak) onPressStreak();
+          }}
+          activeOpacity={0.7}
+          accessibilityLabel="Xem chi tiết điểm danh chuỗi ngày"
+        >
           <View style={styles.statIconBadge}>
             <Flame size={16} color={tokens.primary} strokeWidth={2.4} />
           </View>
           <Text style={[styles.statValue, { color: tokens.text }]}>{streakDays} ngày</Text>
           <Text style={[styles.statLabel, { color: tokens.textMuted }]}>Chuỗi ghi</Text>
-        </View>
+        </TouchableOpacity>
 
         <View style={[styles.statDivider, { backgroundColor: tokens.border }]} />
 
@@ -154,6 +140,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
   },
+  mascotAvatarWrapper: {
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   avatarBox: {
     width: 48,
     height: 48,
@@ -180,6 +171,21 @@ const styles = StyleSheet.create({
     right: 14,
     padding: 6,
     zIndex: 2,
+  },
+  localBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4.5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    marginTop: 4,
+  },
+  localBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: -0.1,
   },
   googlePillBtn: {
     flexDirection: 'row',

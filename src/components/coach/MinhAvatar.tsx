@@ -1,13 +1,8 @@
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 import { Colors } from '../../constants/colors';
-import { BorderRadius, Shadows } from '../../constants/layout';
 import { MinhExpression } from '../../store/minhCoachStore';
+import { PigBoMascot } from '../mascot/PigBoMascot';
 
 interface MinhAvatarProps {
   size?: 'sm' | 'md' | 'lg' | 'hero';
@@ -15,6 +10,9 @@ interface MinhAvatarProps {
   style?: ViewStyle;
 }
 
+/**
+ * AVATAR CỐ VẤN CHÚ HEO PIGBO (3D Clay Chibi Trắng Sứ / Kính Vàng Thông Thái)
+ */
 export const MinhAvatar: React.FC<MinhAvatarProps> = ({
   size = 'md',
   expression = 'NEUTRAL',
@@ -46,7 +44,7 @@ export const MinhAvatar: React.FC<MinhAvatarProps> = ({
         return Colors.expenseCoral;
       case 'NEUTRAL':
       default:
-        return Colors.accentGold;
+        return '#0D9488';
     }
   };
 
@@ -63,35 +61,17 @@ export const MinhAvatar: React.FC<MinhAvatarProps> = ({
         style,
       ]}
     >
-      <Image
-        source={require('../../../assets/coach_minh_signature.png')}
-        style={[
-          styles.avatarImage,
-          {
-            width: dim - 4,
-            height: dim - 4,
-            borderRadius: (dim - 4) / 2,
-          },
-        ]}
-        resizeMode="cover"
-      />
+      <PigBoMascot pose="wise" size={dim * 0.92} />
     </View>
   );
 };
 
-// Alias tương thích ngược cho các component gọi MinhAvatar3D
-export const MinhAvatar3D = MinhAvatar;
-
 const styles = StyleSheet.create({
   avatarContainer: {
-    borderWidth: 2,
-    backgroundColor: '#FDBB76',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    backgroundColor: '#FFFFFF',
     overflow: 'hidden',
-    ...Shadows.chunky3D,
-  },
-  avatarImage: {
-    backgroundColor: '#F89B77',
   },
 });

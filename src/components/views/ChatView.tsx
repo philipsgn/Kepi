@@ -14,7 +14,7 @@ import * as Haptics from 'expo-haptics';
 import { Strings } from '../../constants/strings';
 import { ChatMessage } from '../../types/chat';
 import { ChatTopSegmentHeader } from '../chat/ChatTopSegmentHeader';
-import { FriendsComingSoonView } from '../chat/FriendsComingSoonView';
+import { SquadLocketView } from '../chat/SquadLocketView';
 import { CoachMessageBubble } from '../chat/CoachMessageBubble';
 import { UserMessageBubble } from '../chat/UserMessageBubble';
 import { ChatInputBar } from '../chat/ChatInputBar';
@@ -39,7 +39,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-welcome',
     sender: 'COACH',
-    text: 'Chào bạn, anh là Minh — Cố vấn tĩnh tâm của bạn. Hôm nay bạn muốn kiểm tra ngân sách hay nhờ anh ghi nhanh khoản chi nào?',
+    text: 'Chào bạn! Pigpo — Chú Heo Béo thông thái đã sẵn sàng đồng hành cùng bạn. Hôm nay bạn muốn kiểm tra ngân sách hay tâm sự chi tiêu gì với Pigpo nè?',
     createdAt: new Date().toISOString(),
   },
 ];
@@ -321,7 +321,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
       {activeTab === 'FRIENDS' ? (
         /* 2. NGĂN BẠN BÈ: SẮP RA MẮT */
-        <FriendsComingSoonView />
+        <SquadLocketView />
       ) : (
         /* 3. NGĂN ANH MINH: TRÒ CHUYỆN VỚI CỐ VẤN TĨNH TÂM */
         <KeyboardAvoidingView

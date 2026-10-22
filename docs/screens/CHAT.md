@@ -1,7 +1,7 @@
 # 📋 ĐẶC TẢ MÀN HÌNH: CHAT (CHAT.MD)
 
 > **Mã màn hình:** `CHAT` (Tab 4, Index 3 trong thanh điều hướng 5 trang)  
-> **Tên màn hình:** Chat (Trò Chuyện Cùng Anh Minh AI & Vòng Bạn Bè)  
+> **Tên màn hình:** Chat (Trò Chuyện Cùng Heo Béo Pigpo AI & Hội Bạn Thân 2-4 Người)  
 > **Trạng thái:** Chờ Chủ Dự Án Duyệt (Stage A)  
 > **Phiên bản:** 1.0  
 > **Lần cập nhật cuối:** 2026-10-02  
@@ -25,7 +25,7 @@
 ### 2.1. Ngăn Chính: Trò Chuyện Cùng Anh Minh AI (Default Tab)
 ```text
 ┌────────────────────────────────────────────────────────┐
-│        [  Anh Minh  ]      ·      [ Bạn bè (M2) ]      │ (Hai ngăn đầu trang)
+│        [  🐷 Heo Béo  ]      ·      [  👥 Bạn thân  ]      │ (Hai ngăn đầu trang)
 ├────────────────────────────────────────────────────────┤
 │ ┌ Lời Chào & Thẻ Trạng Thái ─────────────────────────┐ │
 │ │ [ M ]  Anh Minh: "Hôm nay em còn 65.000 đ.         │ │

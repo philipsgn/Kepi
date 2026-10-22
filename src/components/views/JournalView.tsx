@@ -43,8 +43,11 @@ import { PhotoCalendarGrid } from '../journal/PhotoCalendarGrid';
 import { WeekCalendarCarousel } from '../journal/WeekCalendarCarousel';
 import { DayDetailBottomSheet } from '../journal/DayDetailBottomSheet';
 import { QuickSettingsSheet } from '../profile/QuickSettingsSheet';
+import { StreakCheckinModal } from '../streak/StreakCheckinModal';
+import { StreakCelebrationToast } from '../streak/StreakCelebrationToast';
 import { ConfirmationPillBanner, ConfirmationInboxModal } from '../inbox';
 import { MonthRolloverBanner } from '../budget/MonthRolloverBanner';
+import { PigBoMascot } from '../mascot/PigBoMascot';
 
 
 // Hooks & Stores
@@ -120,6 +123,8 @@ export const JournalView: React.FC<JournalViewProps> = ({
   const [isDaySheetOpen, setIsDaySheetOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isInboxOpen, setIsInboxOpen] = useState<boolean>(false);
+  const [showStreakModal, setShowStreakModal] = useState<boolean>(false);
+  const [showStreakCelebration, setShowStreakCelebration] = useState<boolean>(false);
 
   // Confirmation Inbox
   const { totalCount: inboxCount } = useConfirmationInbox();
@@ -222,6 +227,8 @@ export const JournalView: React.FC<JournalViewProps> = ({
   const userName = profile?.full_name || user?.full_name || user?.email?.split('@')[0] || 'Bạn';
 
   // Tính chuỗi ngày liên tiếp ghi chép thực tế từ lịch sử giao dịch
+
+
   const currentStreak = useMemo(() => {
     const dates = transactions
       .filter((tx) => tx.status === 'CONFIRMED' || !tx.status)
@@ -374,14 +381,11 @@ export const JournalView: React.FC<JournalViewProps> = ({
                 { backgroundColor: tokens.surfaceAlt },
               ]}
               onPress={() => {
-                Alert.alert(
-                  currentStreak > 0 ? `${currentStreak} Ngày Liên Tiếp` : 'Chuỗi Ghi Chép',
-                  currentStreak > 0
-                    ? `Bạn đã ghi chép chi tiêu ${currentStreak} ngày liên tiếp. Giữ nhịp tĩnh tâm này mỗi ngày nhé!`
-                    : 'Ghi chép chi tiêu hôm nay để bắt đầu chuỗi ngày liên tiếp của bạn!'
-                );
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowStreakModal(true);
               }}
               activeOpacity={0.7}
+              accessibilityLabel="Xem chi tiết điểm danh chuỗi ngày"
             >
               <Sparkles size={12} color={tokens.primary} />
               <Text style={[styles.streakMiniText, { color: tokens.text }]}>{currentStreak}</Text>
@@ -468,6 +472,11 @@ export const JournalView: React.FC<JournalViewProps> = ({
 
         {/* 1. SECTION HERO: HẠN MỨC HÔM NAY TINH GỌN (TẬP TRUNG HÔM NAY TIÊU ĐƯỢC & ĐÃ CHI) */}
         <Card style={styles.allowanceCard} glow>
+          {/* CHÚ HEO PIGBO NẰM GÁC MÉP THẺ NGÂN SÁCH */}
+          <View style={styles.allowanceMascotWrapper}>
+            <PigBoMascot pose="card" size={44} />
+          </View>
+
           <View style={styles.todayAllowanceRow}>
             <View style={styles.todayAllowanceCol}>
               <Text style={[styles.todaySubTitle, { color: tokens.textMuted }]}>
@@ -718,9 +727,9 @@ export const JournalView: React.FC<JournalViewProps> = ({
             <View style={styles.todayMiniPillContent}>
               <Sparkles size={14} color={tokens.primary} strokeWidth={2.2} />
               <Text style={[styles.todayMiniPillText, { color: tokens.textMuted }]}>
-                Chưa có ghi chép hôm nay —{' '}
+                Chưa ghi hôm nay —{' '}
                 <Text style={{ color: tokens.primary, fontWeight: '600' }}>
-                  Chụp hoặc ghi nhanh
+                  Chạm để ghi
                 </Text>
               </Text>
             </View>
@@ -730,6 +739,22 @@ export const JournalView: React.FC<JournalViewProps> = ({
       </ScrollView>
 
       {/* 8. SHEET ĐÁY CHI TIẾT KHOẢNH KHẮC NGÀY */}
+      {/* 9. MODAL ĐIỂM DANH STREAK */}
+      <StreakCheckinModal
+        visible={showStreakModal}
+        streakDays={currentStreak}
+        hasCheckedInToday={todayTransactions.length > 0}
+        onClose={() => setShowStreakModal(false)}
+        onPressAction={onOpenCamera}
+      />
+
+      {/* 10. TOAST PHÁO HOA CHÚC MỪNG ĐIỂM DANH */}
+      <StreakCelebrationToast
+        visible={showStreakCelebration}
+        streakCount={currentStreak}
+        onDismiss={() => setShowStreakCelebration(false)}
+      />
+
       <DayDetailBottomSheet
         visible={isDaySheetOpen}
         dateStr={selectedDayCell?.dateStr || ''}
@@ -851,6 +876,14 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: spacing.md,
     gap: 6,
+    position: 'relative',
+    overflow: 'visible',
+  },
+  allowanceMascotWrapper: {
+    position: 'absolute',
+    top: -16,
+    right: 14,
+    zIndex: 10,
   },
   todayAllowanceRow: {
     flexDirection: 'row',

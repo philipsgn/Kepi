@@ -22,8 +22,10 @@ import {
   Cloud,
   EyeOff,
   LogOut,
+  Mail,
   Palette,
   QrCode,
+  ShieldCheck,
   Smartphone,
   Sparkles,
   Trash2,
@@ -224,27 +226,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               </Text>
             </View>
             <View style={styles.rowRight}>
-              <View
-                style={[
-                  styles.valueBadge,
-                  { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#FAF6EC' },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.statusDot,
-                    { backgroundColor: '#10B981' },
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.valueBadgeText,
-                    { color: tokens.success },
-                  ]}
-                >
-                  Khả dụng
-                </Text>
-              </View>
               <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
             </View>
           </TouchableOpacity>
@@ -285,17 +266,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
             </View>
 
             <View style={styles.rowRight}>
-              <View
-                style={[
-                  styles.valueBadge,
-                  { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#FAF6EC' },
-                ]}
-              >
-                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-                <Text style={[styles.valueBadgeText, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
-                  {themeLabel}
-                </Text>
-              </View>
+              <Text style={[styles.valueBadgeText, { color: tokens.textMuted, marginRight: 6 }]}>
+                {themeLabel}
+              </Text>
               <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
             </View>
           </TouchableOpacity>
@@ -375,17 +348,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
             </View>
 
             <View style={styles.rowRight}>
-              <View
-                style={[
-                  styles.valueBadge,
-                  { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#FAF6EC' },
-                ]}
-              >
-                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-                <Text style={[styles.valueBadgeText, { color: tokens.success }]}>
-                  Khả dụng
-                </Text>
-              </View>
               <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
             </View>
           </TouchableOpacity>
@@ -411,17 +373,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
             </View>
 
             <View style={styles.rowRight}>
-              <View
-                style={[
-                  styles.valueBadge,
-                  { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#FAF6EC' },
-                ]}
-              >
-                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-                <Text style={[styles.valueBadgeText, { color: tokens.success }]}>
-                  Khả dụng
-                </Text>
-              </View>
               <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
             </View>
           </TouchableOpacity>
@@ -447,17 +398,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
             </View>
 
             <View style={styles.rowRight}>
-              <View
-                style={[
-                  styles.valueBadge,
-                  { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#FAF6EC' },
-                ]}
-              >
-                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-                <Text style={[styles.valueBadgeText, { color: tokens.success }]}>
-                  Khả dụng
-                </Text>
-              </View>
               <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
             </View>
           </TouchableOpacity>
@@ -479,6 +419,45 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
             },
           ]}
         >
+          {/* Định danh thiết bị & Lưu trữ */}
+          <View style={styles.settingRow}>
+            <View style={styles.rowLeft}>
+              <View style={styles.iconContainerFloating}>
+                <ShieldCheck size={22} color={tokens.primary} strokeWidth={2.8} />
+              </View>
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <Text style={[styles.rowTitle, { color: tokens.text }]}>
+                  Định danh thiết bị
+                </Text>
+                <Text style={{ fontSize: 12, color: tokens.textMuted, marginTop: 1 }} numberOfLines={1}>
+                  {user?.full_name ? `Tên: ${user.full_name}` : 'Lưu trữ cục bộ trên máy'}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.rowRight}>
+              <View
+                style={[
+                  styles.valueBadge,
+                  {
+                    backgroundColor: isDark ? 'rgba(45, 212, 191, 0.12)' : 'rgba(126, 159, 128, 0.15)',
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.valueBadgeText,
+                    { color: tokens.success },
+                  ]}
+                >
+                  Bảo mật
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={[styles.rowDivider, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' }]} />
+
           {/* Action 1: Reset Data */}
           <TouchableOpacity
             style={styles.settingRow}
@@ -737,11 +716,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 8,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
   },
   valueBadgeText: {
     fontSize: 11.5,

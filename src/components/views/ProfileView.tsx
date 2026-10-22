@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,6 +18,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useBudgetStore } from '../../store/budgetStore';
 import { useTransactionStore } from '../../store/transactionStore';
 import { ProfileIdentityCard } from '../profile/ProfileIdentityCard';
+import { StreakCheckinModal } from '../streak/StreakCheckinModal';
 import { GoalSectionCard } from '../profile/GoalSectionCard';
 import { GoalDetailModal } from '../profile/GoalDetailModal';
 import { BudgetSettingsCard, STORAGE_KEY_SAVINGS_RATIO } from '../profile/BudgetSettingsCard';
@@ -78,6 +80,7 @@ export const ProfileView: React.FC<ProfileViewProps> = () => {
 
   // Local Settings State
   const [isMasked, setIsMasked] = useState(false);
+  const [showStreakModal, setShowStreakModal] = useState(false);
   const [goalDeadline, setGoalDeadline] = useState('');
   const [goalReason, setGoalReason] = useState('');
   const [savingsRatio, setSavingsRatio] = useState<number>(0.2);
@@ -293,6 +296,15 @@ export const ProfileView: React.FC<ProfileViewProps> = () => {
   };
 
   // Handler: Save Budget Settings
+  const handleDirectLinkGoogle = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const { signInWithGoogle } = useAuthStore.getState();
+    const res = await signInWithGoogle();
+    if (!res.success && res.error) {
+      Alert.alert('Liên kết Google', res.error);
+    }
+  };
+
   const handleSaveBudgetSettings = async (params: {
     monthlyIncome: number;
     monthlyFixedCosts: number;
@@ -416,7 +428,8 @@ export const ProfileView: React.FC<ProfileViewProps> = () => {
           isMasked={isMasked}
           isGuest={isGuest}
           onEditName={() => setShowNameModal(true)}
-          onPressLogin={() => router.push('/(auth)/login')}
+          onPressLogin={handleDirectLinkGoogle}
+          onPressStreak={() => setShowStreakModal(true)}
         />
 
         {/* ================= MỤC TIÊU & KẾ HOẠCH TÀI CHÍNH ================= */}

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Linking from 'expo-linking';
 import { supabase } from '../services/supabase';
@@ -173,6 +173,8 @@ interface AuthState {
   verifyEmailOtp: (token: string) => Promise<{ success: boolean; error?: string }>;
   resetOtpState: () => void;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  signInWithNickname: (nickname: string, birthYear?: number) => Promise<{ success: boolean; error?: string }>;
+  checkNicknameAvailable: (nickname: string) => Promise<boolean>;
   continueAsGuest: () => Promise<void>;
   signOut: () => Promise<void>;
   setHasCompletedBudgetSetup: (completed: boolean) => void;
@@ -429,7 +431,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      const redirectUrl = Linking.createURL('/(auth)/callback');
+      let redirectUrl = Linking.createURL('/(auth)/callback');
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        redirectUrl = `${window.location.origin}/(auth)/callback`;
+      }
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -445,7 +450,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       if (data?.url) {
-        await Linking.openURL(data.url);
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          window.location.href = data.url;
+        } else {
+          await Linking.openURL(data.url);
+        }
       }
 
       set({ isLoading: false });
@@ -465,6 +474,71 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * CHẾ ĐỘ KHÁCH (GUEST MODE) - 100% OFFLINE LOCAL
    * Tuyệt đối không lưu dữ liệu lên Supabase Database / Storage
    */
+  checkNicknameAvailable: async (nickname: string): Promise<boolean> => {
+    const clean = (nickname || '').trim().toLowerCase();
+    if (!clean) return true;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('full_name', clean)
+        .limit(1);
+      if (error || !data) return true;
+      return data.length === 0;
+    } catch {
+      return true;
+    }
+  },
+
+  signInWithNickname: async (nickname: string, birthYear?: number) => {
+    try {
+      const cleanName = (nickname || '').trim() || 'Bạn Mới';
+      const storedDeviceId = (await AsyncStorage.getItem('@vi_locket_device_id')) || 
+        ('dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7));
+      await AsyncStorage.setItem('@vi_locket_device_id', storedDeviceId);
+
+      const user: UserSession = {
+        id: `user-${storedDeviceId}`,
+        email: '',
+        full_name: cleanName,
+      };
+
+      const birthdateStr = birthYear ? `${birthYear}-01-01` : null;
+
+      const profile: Profile = {
+        id: user.id,
+        full_name: cleanName,
+        email: null,
+        fav_unit: 'tra_sua',
+        hourly_rate: 0,
+        birthdate: birthdateStr,
+        privacy_mode: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      await AsyncStorage.setItem(STORAGE_USER_KEY, JSON.stringify(user));
+      await AsyncStorage.setItem('@vi_locket_guest_profile', JSON.stringify(profile));
+      await AsyncStorage.setItem(STORAGE_IS_GUEST_KEY, 'false');
+      await AsyncStorage.setItem(STORAGE_BUDGET_SETUP_KEY, 'true');
+
+      set({
+        user,
+        profile,
+        isAuthenticated: true,
+        isGuest: false,
+        hasCompletedBudgetSetup: true,
+        isLoading: false,
+        error: null,
+      });
+
+      return { success: true };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tạo định danh cục bộ.';
+      return { success: false, error: msg };
+    }
+  },
+
   continueAsGuest: async () => {
     const cachedSetup = await AsyncStorage.getItem(STORAGE_BUDGET_SETUP_KEY);
     const cachedProfileStr = await AsyncStorage.getItem('@vi_locket_guest_profile');

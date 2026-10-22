@@ -1917,15 +1917,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const path = require('path');
   const assert = require('assert');
 
-  // 1. Camera Zoom Slider with Scroll Freeze in app/(main)/index.tsx
+  // 1. Locked Horizontal Pager (scrollEnabled={false}) & Natural Pinch Zoom (Decision 84)
   const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
   const indexCode = fs.readFileSync(indexPath, 'utf8');
-  assert.ok(indexCode.includes('isZoomSliding'), 'index.tsx must declare isZoomSliding state');
-  assert.ok(indexCode.includes('scrollEnabled={!isZoomSliding}'), 'index.tsx must freeze scrolling on both pagers when isZoomSliding is true');
-  assert.ok(indexCode.includes('zoomSliderPanResponder'), 'index.tsx must define zoomSliderPanResponder');
-  assert.ok(indexCode.includes('onPanResponderTerminationRequest: () => false'), 'zoomSliderPanResponder must not surrender to parent scroll responders');
-  assert.ok(indexCode.includes('zoomContainer'), 'index.tsx must render zoomContainer');
-  assert.ok(indexCode.includes('zoomTrackWrapper'), 'index.tsx must render zoomTrackWrapper with slider');
+  assert.ok(indexCode.includes('scrollEnabled={false}'), 'index.tsx must freeze horizontal pager body scrolling');
+  assert.ok(indexCode.includes('pinchPanResponder'), 'index.tsx must support natural 2-finger pinch zoom');
 
   // 2. Month Calendar Header in PhotoCalendarGrid.tsx
   const photoGridPath = path.join(__dirname, 'src/components/journal/PhotoCalendarGrid.tsx');
@@ -1979,12 +1975,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const path = require('path');
   const assert = require('assert');
 
-  // 1. Camera Zoom starting at 0.5x and no end buttons in app/(main)/index.tsx
+  // 1. Camera Zoom: Clean 2-finger pinch without fake 0.5x slider overlay (Decision 84)
   const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
   const indexCode = fs.readFileSync(indexPath, 'utf8');
-  assert.ok(indexCode.includes('(0.5 + cameraZoom * 2.5).toFixed(1)'), 'Zoom level badge must start at 0.5x (ultra-wide)');
-  assert.ok(!indexCode.includes('styles.zoomQuickBtn'), 'Zoom control bar must not render quick buttons at the two ends');
-  assert.ok(indexCode.includes('zoomSliderTrackWidth = 140'), 'Track width must be 140px for comfortable sliding');
+  assert.ok(!indexCode.includes('styles.zoomContainer'), 'Zoom slider container must be eliminated for clean camera view');
+  assert.ok(indexCode.includes('pinchPanResponder'), 'Must support natural 2-finger pinch-to-zoom');
 
   // 2. Post-capture review bottom bar: pure iconic circular buttons with no text
   assert.ok(indexCode.includes('styles.inFrameRetakeIconButton'), 'Must use inFrameRetakeIconButton for [X]');
@@ -2288,7 +2283,174 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 45 Passed: SubAgent 4 (QA, Dynamic Streak, Offline Base64 Backup & Zero-STK Shield) verified cleanly');
 }
 
-console.log('\n🎉 ALL 45 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (45/45)!');
+// 46. Phase 6 Polish: Shortened Phrase, Clean Settings (Zero Green Dots/Kha dung) & Streak Check-in UX
+{
+  const assert = require('assert');
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. Kiểm tra cụm từ ngắn gọn trong JournalView.tsx
+  const journalCode = fs.readFileSync(path.join(__dirname, 'src/components/views/JournalView.tsx'), 'utf8');
+  assert.ok(journalCode.includes('Chưa ghi hôm nay —'), 'JournalView must use shortened phrase "Chưa ghi hôm nay —"');
+  assert.ok(journalCode.includes('Chạm để ghi'), 'JournalView must use action phrase "Chạm để ghi"');
+  assert.ok(!journalCode.includes('Chưa có ghi chép hôm nay — Chụp hoặc ghi nhanh'), 'Old lengthy phrase must be eliminated');
+
+  // 2. Kiểm tra Cài đặt (SettingsView.tsx) đã dọn sạch đèn xanh và "Khả dụng"
+  const settingsCode = fs.readFileSync(path.join(__dirname, 'src/components/views/SettingsView.tsx'), 'utf8');
+  assert.ok(!settingsCode.includes('Khả dụng'), 'SettingsView must not show internal "Khả dụng" label');
+  assert.ok(!settingsCode.includes('statusDot'), 'SettingsView must not render statusDot in rows');
+  assert.ok(settingsCode.includes('Định danh thiết bị'), 'SettingsView must display local device identity row');
+  assert.ok(settingsCode.includes('Bảo mật'), 'SettingsView must display Bảo mật status without tech jargon');
+
+  // 3. Kiểm tra StreakCheckinModal và StreakCelebrationToast
+  const modalPath = path.join(__dirname, 'src/components/streak/StreakCheckinModal.tsx');
+  assert.ok(fs.existsSync(modalPath), 'StreakCheckinModal component must exist');
+  const modalCode = fs.readFileSync(modalPath, 'utf8');
+  assert.ok(modalCode.includes('Chuỗi ngày ghi chép liên tiếp'), 'StreakCheckinModal must display streak subtitle');
+  assert.ok(modalCode.includes('Đã điểm danh hôm nay'), 'StreakCheckinModal must handle checked-in state');
+
+  const toastPath = path.join(__dirname, 'src/components/streak/StreakCelebrationToast.tsx');
+  assert.ok(fs.existsSync(toastPath), 'StreakCelebrationToast component must exist');
+  const toastCode = fs.readFileSync(toastPath, 'utf8');
+  assert.ok(toastCode.includes('Điểm Danh Thành Công!'), 'StreakCelebrationToast must congratulate user');
+
+  // 4. Kiểm tra ProfileIdentityCard hỗ trợ tương tác Streak
+  const profileCardCode = fs.readFileSync(path.join(__dirname, 'src/components/profile/ProfileIdentityCard.tsx'), 'utf8');
+  assert.ok(profileCardCode.includes('onPressStreak?: () => void;'), 'ProfileIdentityCard must support onPressStreak');
+  assert.ok(profileCardCode.includes('onEditName'), 'ProfileIdentityCard must keep name edit intact');
+
+  console.log('✅ Test 46 Passed: Shortened Phrase, Clean Settings (Zero Khả dụng) & Streak Check-in UX verified');
+}
+
+// 47. Phase 1 (v5.0): Local-First 1-Tap Auth, Shutter 3s Video Recording & Squad Privacy Switch
+{
+  const assert = require('assert');
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. Kiểm tra authStore hỗ trợ signInWithNickname và định danh thiết bị cục bộ 0$ Cloud
+  const authStoreCode = fs.readFileSync(path.join(__dirname, 'src/store/authStore.ts'), 'utf8');
+  assert.ok(authStoreCode.includes('signInWithNickname'), 'authStore must provide signInWithNickname');
+  assert.ok(authStoreCode.includes('@vi_locket_device_id'), 'authStore must store persistent device_id');
+
+  // 2. Kiểm tra màn hình Đăng nhập 1-chạm (login.tsx) không còn dính dáng Google Auth
+  const loginCode = fs.readFileSync(path.join(__dirname, 'app/(auth)/login.tsx'), 'utf8');
+  assert.ok(loginCode.includes('signInWithNickname'), 'login.tsx must use signInWithNickname');
+  assert.ok(!loginCode.includes('Tiếp tục với Google'), 'login.tsx must not contain Google Sign-In button');
+  assert.ok(!loginCode.includes('MonochromeGoogleIcon'), 'login.tsx must remove Google icon');
+
+  // 3. Kiểm tra ShutterButton hỗ trợ quay video 3s và OnCameraPhotoOverlay hỗ trợ công tắc riêng tư & video 3s
+  const shutterCode = fs.readFileSync(path.join(__dirname, 'src/components/camera/ShutterButton.tsx'), 'utf8');
+  assert.ok(shutterCode.includes('onStartRecordingVideo'), 'ShutterButton must support onStartRecordingVideo');
+  assert.ok(shutterCode.includes('onStopRecordingVideo'), 'ShutterButton must support onStopRecordingVideo');
+  assert.ok(shutterCode.includes('duration: 3000'), 'ShutterButton must animate 3000ms SVG progress ring');
+
+  const overlayCode = fs.readFileSync(path.join(__dirname, 'src/components/camera/OnCameraPhotoOverlay.tsx'), 'utf8');
+  assert.ok(overlayCode.includes('isSquadPrivate'), 'OnCameraPhotoOverlay must support isSquadPrivate toggle');
+  assert.ok(overlayCode.includes('VIDEO_3S'), 'OnCameraPhotoOverlay must support VIDEO_3S preview');
+
+  // 4. Kiểm tra transactionStore hỗ trợ media_type và is_squad_private
+  const txStoreCode = fs.readFileSync(path.join(__dirname, 'src/store/transactionStore.ts'), 'utf8');
+  assert.ok(txStoreCode.includes('media_type?: MediaType;'), 'transactionStore must type media_type');
+  assert.ok(txStoreCode.includes('is_squad_private: Boolean(data.is_squad_private)'), 'transactionStore must persist is_squad_private');
+
+  console.log('✅ Test 47 Passed: Kepi v5.0 (Local-First 1-Tap Auth, Shutter 3s Video & Squad Privacy Switch) verified cleanly');
+}
+
+
+// 48. Phase 1 (PigBo Refinement): Zero-Shake Locked Body, Clean Camera, Pinch-to-Zoom & Zero Tech Clutter
+{
+  const assert = require('assert');
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. Kiểm tra khóa cố định vuốt body giữa màn hình (scrollEnabled={false})
+  const mainCode = fs.readFileSync(path.join(__dirname, 'app/(main)/index.tsx'), 'utf8');
+  assert.ok(mainCode.includes('scrollEnabled={false}'), 'Main screen horizontal pager must be locked (scrollEnabled={false})');
+  assert.ok(!mainCode.includes('historySwipeIndicator'), 'Camera must remove historySwipeIndicator button');
+  assert.ok(!mainCode.includes('zoomContainer'), 'Camera must remove zoomContainer slider');
+
+  // 2. Kiểm tra Camera Overlay không còn chữ "Chọn 1 danh mục"
+  const overlayCode = fs.readFileSync(path.join(__dirname, 'src/components/camera/OnCameraPhotoOverlay.tsx'), 'utf8');
+  assert.ok(!overlayCode.includes('Chọn 1 danh mục'), 'OnCameraPhotoOverlay must eliminate "Chọn 1 danh mục" text');
+
+  // 3. Kiểm tra ProfileIdentityCard không còn chữ "0$ Cloud"
+  const profileCardCode = fs.readFileSync(path.join(__dirname, 'src/components/profile/ProfileIdentityCard.tsx'), 'utf8');
+  assert.ok(!profileCardCode.includes('0$ Cloud'), 'ProfileIdentityCard must hide 0$ Cloud badge');
+
+  // 4. Kiểm tra SettingsView hiển thị nhãn "Bảo mật" thay vì "0$ Cloud"
+  const settingsCode = fs.readFileSync(path.join(__dirname, 'src/components/views/SettingsView.tsx'), 'utf8');
+  assert.ok(!settingsCode.includes('0$ Cloud'), 'SettingsView must not show 0$ Cloud jargon');
+  assert.ok(settingsCode.includes('Bảo mật'), 'SettingsView must show clean status "Bảo mật"');
+
+  console.log('✅ Test 48 Passed: Phase 1 Refinement (Zero-Shake, Clean Camera & Zero Tech Clutter) verified cleanly');
+}
+
+
+// 49. Pigpo Brand Identity & Slogan (Fatten your savings - Keep it - Watch it grow)
+{
+  const assert = require('assert');
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. Kiểm tra app.json có name và slug là Pigpo
+  const appJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'app.json'), 'utf8'));
+  assert.strictEqual(appJson.expo.name, 'Pigpo', 'app.json expo.name must be Pigpo');
+  assert.strictEqual(appJson.expo.slug, 'pigpo', 'app.json expo.slug must be pigpo');
+
+  // 2. Kiểm tra strings.ts có appName và tagline
+  const stringsCode = fs.readFileSync(path.join(__dirname, 'src/constants/strings.ts'), 'utf8');
+  assert.ok(stringsCode.includes("appName: 'Pigpo'"), 'strings.ts must define appName as Pigpo');
+  assert.ok(stringsCode.includes('Tiết kiệm - Duy trì - Sinh lời bền vững'), 'strings.ts must include new slogan');
+
+  // 3. Kiểm tra login.tsx có Pigpo và slogan
+  const loginCode = fs.readFileSync(path.join(__dirname, 'app/(auth)/login.tsx'), 'utf8');
+  assert.ok(loginCode.includes('Pigpo'), 'login.tsx must display Pigpo');
+  assert.ok(loginCode.includes('Tiết kiệm • Duy trì • Sinh lời bền vững'), 'login.tsx must display new slogan');
+  assert.ok(loginCode.includes('assets/icon.png'), 'login.tsx must use App Icon mascot');
+
+  // 4. Kiểm tra App Launcher Icon và Adaptive Icon
+  const iconPath = path.join(__dirname, 'assets/icon.png');
+  const adaptivePath = path.join(__dirname, 'assets/adaptive-icon.png');
+  assert.ok(fs.existsSync(iconPath), 'assets/icon.png must exist');
+  assert.ok(fs.existsSync(adaptivePath), 'assets/adaptive-icon.png must exist');
+  assert.ok(fs.statSync(iconPath).size > 50000, 'icon.png must be high-res mascot icon (>50KB)');
+
+  console.log('✅ Test 49 Passed: Pigpo Brand Identity & Slogan verified cleanly');
+}
+
+// 50. Squad Room & Locket Feed Privacy Engine (Hội Bạn Thân 2-4 Người)
+{
+  const assert = require('assert');
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. Kiểm tra squadStore.ts tồn tại và hỗ trợ các tính năng cốt lõi
+  const squadStoreCode = fs.readFileSync(path.join(__dirname, 'src/store/squadStore.ts'), 'utf8');
+  assert.ok(squadStoreCode.includes('createSquad'), 'squadStore must support createSquad');
+  assert.ok(squadStoreCode.includes('joinSquad'), 'squadStore must support joinSquad');
+  assert.ok(squadStoreCode.includes('leaveSquad'), 'squadStore must support leaveSquad');
+  assert.ok(squadStoreCode.includes('sendNudge'), 'squadStore must support sendNudge');
+  assert.ok(squadStoreCode.includes('syncTransactionsToFeed'), 'squadStore must support syncTransactionsToFeed');
+
+  // 2. Kiểm tra bộ lọc bảo mật Quyền riêng tư (is_squad_private)
+  assert.ok(squadStoreCode.includes('is_squad_private !== true'), 'squadStore must filter out private transactions');
+
+  // 3. Kiểm tra SquadLocketView component
+  const squadViewCode = fs.readFileSync(path.join(__dirname, 'src/components/chat/SquadLocketView.tsx'), 'utf8');
+  assert.ok(squadViewCode.includes('squad.code'), 'SquadLocketView must display squad code');
+  assert.ok(squadViewCode.includes('Nhắc Heo Đói') || squadViewCode.includes('FEED_PIG'), 'SquadLocketView must support feed pig nudge');
+
+  // 4. Kiểm tra ChatView tích hợp SquadLocketView
+  const chatViewCode = fs.readFileSync(path.join(__dirname, 'src/components/views/ChatView.tsx'), 'utf8');
+  assert.ok(chatViewCode.includes('SquadLocketView'), 'ChatView must integrate SquadLocketView');
+
+  console.log('✅ Test 50 Passed: Squad Room & Locket Feed Privacy Engine verified cleanly');
+}
+
+console.log('\n🎉 ALL 50 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (50/50)!');
+
+
 
 
 

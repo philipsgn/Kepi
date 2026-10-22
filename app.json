@@ -1,18 +1,21 @@
 {
   "expo": {
-    "name": "Kepi",
-    "slug": "kepi",
+    "name": "Pigpo",
+    "slug": "pigpo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": ["kepi", "vilocket"],
+    "scheme": [
+      "kepi",
+      "vilocket"
+    ],
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.kepi.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Kepi sử dụng Camera để bạn chụp lại ảnh món đồ chi tiêu và quét nhanh mã VietQR chuyển khoản.",
-        "NSPhotoLibraryUsageDescription": "Kepi cần quyền truy cập thư viện ảnh để bạn tải ảnh hóa đơn, biên lai hoặc món đồ lên sổ chi tiêu.",
+        "NSCameraUsageDescription": "Pigpo sử dụng Camera để bạn chụp lại ảnh khoảnh khắc chi tiêu và nuôi chú heo lớn mỗi ngày.",
+        "NSPhotoLibraryUsageDescription": "PigBo cần quyền truy cập ảnh để bạn tải ảnh hóa đơn chi tiêu lên sổ.",
         "LSApplicationQueriesSchemes": [
           "zalopay",
           "zalopay.api.v2",
@@ -35,7 +38,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0E1620"
+        "backgroundColor": "#059669"
       },
       "package": "com.kepi.app",
       "versionCode": 1,
@@ -55,13 +58,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Ví Locket cần quyền truy cập camera để bạn chụp ảnh món đồ trước khi mua."
+          "cameraPermission": "Pigpo cần quyền truy cập camera để bạn chụp lại ảnh khoảnh khắc chi tiêu và nuôi chú heo lớn mỗi ngày."
         }
       ],
       [
         "expo-notifications",
         {
-          "color": "#E59844"
+          "color": "#10B981"
         }
       ],
       "./plugins/withNotificationListener.js"

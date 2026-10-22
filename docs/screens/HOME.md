@@ -33,7 +33,7 @@
 ├────────────────────────────────────────────────────────────┤
 │                                                            │
 │ 1. SECTION HERO (DUY NHẤT CÓ VIỀN ANCHOR — FOCUS CARD)     │
-│ ┌ HÔM NAY TIÊU ĐƯỢC                       ĐÃ CHI HÔM NAY ─┐│ (Card nổi duy nhất)
+│ ┌ HÔM NAY TIÊU ĐƯỢC          [🐷 PigBo]    ĐÃ CHI HÔM NAY ─┐│ (Card nổi duy nhất)
 │ │ 180.000 đ                               0 đ             ││
 │ │ ▮▮▮▮▮▮▮▮▯▯ (Thanh tiến độ Dynamic Smoothing mỏng 6px)    ││
 │ │ Ngân sách tháng còn: 5.200.000 đ                        ││
@@ -52,7 +52,7 @@
 │ * Ở chế độ THÁNG: Lưới 31 Ngày Cả Tháng (Photo Grid)       │
 │                                                            │
 │ 4. MINI PILL GỢI Ý CHỤP (~36PX, KHÔNG VIỀN CỨNG)           │
-│   [✨ Chưa có ghi chép hôm nay — Chụp hoặc ghi nhanh       ›]│ (Nền mềm surfaceAlt)
+│   [✨ Chưa ghi hôm nay — Chạm để ghi       ›]│ (Nền mềm surfaceAlt)
 └────────────────────────────────────────────────────────────┘
 ```
 

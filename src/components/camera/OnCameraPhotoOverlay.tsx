@@ -11,11 +11,12 @@ import {
   Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, Tag, Sparkles } from 'lucide-react-native';
+import { X, Tag, Sparkles, Lock, Unlock, Play, Film } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { getCategoryConfig } from '../../constants/categories';
 import { useCategoryStore } from '../../store/categoryStore';
 import { CATEGORY_ICON_MAP } from '../../constants/categoryDefaults';
+import { MediaType } from '../../types/database';
 
 interface OnCameraPhotoOverlayProps {
   photoUri: string;
@@ -28,6 +29,9 @@ interface OnCameraPhotoOverlayProps {
   onCancel: () => void;
   showCategoryPicker?: boolean;
   onToggleCategoryPicker?: () => void;
+  mediaType?: MediaType;
+  isSquadPrivate?: boolean;
+  onToggleSquadPrivate?: (val: boolean) => void;
 }
 
 /**
@@ -48,6 +52,9 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
   description,
   onDescriptionChange,
   onCancel,
+  mediaType = 'PHOTO',
+  isSquadPrivate = false,
+  onToggleSquadPrivate,
 }) => {
   const hasSelectedCategory = Boolean(category && category.trim().length > 0);
 
@@ -114,6 +121,19 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
         }}
       >
         <Image source={{ uri: photoUri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+
+        {/* BIỂU TƯỢNG VIDEO 3S & NÚT PHÁT LẠI */}
+        {mediaType === 'VIDEO_3S' && (
+          <View style={styles.videoIndicatorOverlay} pointerEvents="none">
+            <View style={styles.videoPlayCircle}>
+              <Play size={24} color="#FAF6EC" strokeWidth={2.6} style={{ marginLeft: 3 }} />
+            </View>
+            <View style={styles.videoBadge}>
+              <Film size={11} color="#E59844" strokeWidth={2.4} />
+              <Text style={styles.videoBadgeText}>Clip 3 Giây</Text>
+            </View>
+          </View>
+        )}
       </Pressable>
 
       {/* Lớp phủ chuyển mờ siêu nhẹ ở đỉnh (80px) để đọc rõ icon và dải chip */}
@@ -132,6 +152,31 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
 
       {/* ================= TOP CONTROLS ================= */}
       <View style={styles.topBar}>
+        {/* CÔNG TẮC RIÊNG TƯ HỘI BẠN [🔒 Chỉ mình tôi] */}
+        <TouchableOpacity
+          style={[
+            styles.privacyToggleButton,
+            isSquadPrivate && styles.privacyToggleButtonActive,
+          ]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            if (onToggleSquadPrivate) onToggleSquadPrivate(!isSquadPrivate);
+          }}
+          activeOpacity={0.8}
+        >
+          {isSquadPrivate ? (
+            <>
+              <Lock size={12} color="#E59844" strokeWidth={2.6} />
+              <Text style={styles.privacyToggleTextActive}>Riêng tư</Text>
+            </>
+          ) : (
+            <>
+              <Unlock size={12} color="rgba(255, 255, 255, 0.7)" strokeWidth={2.2} />
+              <Text style={styles.privacyToggleText}>Hội bạn</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
         {/* Nhãn trạng thái danh mục ở giữa */}
         <View style={styles.tagButtonCenter}>
           {hasSelectedCategory ? (
@@ -151,8 +196,7 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
             </>
           ) : (
             <>
-              <Tag size={13} color="#E59844" strokeWidth={2.4} />
-              <Text style={[styles.tagStatusText, { color: '#E59844' }]}>Chọn 1 danh mục</Text>
+              <Tag size={14} color="#E59844" strokeWidth={2.4} />
             </>
           )}
         </View>
@@ -269,6 +313,63 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 130,
+  },
+  privacyToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4.5,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    marginRight: 8,
+  },
+  privacyToggleButtonActive: {
+    backgroundColor: 'rgba(229, 152, 68, 0.22)',
+    borderColor: '#E59844',
+  },
+  privacyToggleText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  privacyToggleTextActive: {
+    color: '#E59844',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  videoIndicatorOverlay: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+  },
+  videoPlayCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(14, 22, 32, 0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    marginBottom: 8,
+  },
+  videoBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  videoBadgeText: {
+    color: '#FAF6EC',
+    fontSize: 11,
+    fontWeight: '700',
   },
   topBar: {
     flexDirection: 'row',

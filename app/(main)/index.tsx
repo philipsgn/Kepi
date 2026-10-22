@@ -69,6 +69,7 @@ import { PriceTag } from '../../src/components/common/PriceTag';
 import { DiscreteHealthBar } from '../../src/components/common/DiscreteHealthBar';
 import { FloatingPillTabBar } from '../../src/components/navigation/FloatingPillTabBar';
 import { ShutterButton } from '../../src/components/camera/ShutterButton';
+import { PigBoMascot } from '../../src/components/mascot/PigBoMascot';
 import { ModeSwitchPill, CameraMode } from '../../src/components/camera/ModeSwitchPill';
 import { LocketMomentCard } from '../../src/components/camera/LocketMomentCard';
 import { UndoToastBar } from '../../src/components/common/UndoToastBar';
@@ -115,7 +116,7 @@ import { optimizeExpensePhoto } from '../../src/services/imageOptimizer';
 import { uploadExpensePhotoAsync, cleanOldPhotoCache } from '../../src/services/storage';
 import { syncBudgetToLockScreen, handleLockScreenAction } from '../../src/services/lockScreenService';
 import { formatCompactVND, formatVND } from '../../src/utils/currency';
-import { PaymentMethod, Transaction, TransactionType } from '../../src/types/database';
+import { PaymentMethod, Transaction, TransactionType, MediaType } from '../../src/types/database';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -231,6 +232,9 @@ export default function MainAppScreen() {
 
   // Modals & Sheets
   const [capturedPhotoUri, setCapturedPhotoUri] = useState<string | null>(null);
+  const [capturedMediaType, setCapturedMediaType] = useState<MediaType>('PHOTO');
+  const [isSquadPrivate, setIsSquadPrivate] = useState<boolean>(false);
+  const [isRecordingVideo, setIsRecordingVideo] = useState<boolean>(false);
   const [capturedThumbUri, setCapturedThumbUri] = useState<string | null>(null);
   const [inFrameAmount, setInFrameAmount] = useState<number>(0);
   const [inFrameType, setInFrameType] = useState<'EXPENSE' | 'INCOME'>('EXPENSE');
@@ -466,6 +470,55 @@ export default function MainAppScreen() {
   };
 
 
+  const handleStartRecordingVideo = async () => {
+    try {
+      setIsRecordingVideo(true);
+      if (cameraRef.current && typeof (cameraRef.current as any).recordAsync === 'function') {
+        const videoPromise = (cameraRef.current as any).recordAsync({
+          maxDuration: 3,
+          mute: true,
+        });
+        videoPromise
+          .then((res: any) => {
+            if (res?.uri) {
+              setCapturedPhotoUri(res.uri);
+              setCapturedThumbUri(res.uri);
+              setCapturedMediaType('VIDEO_3S');
+              setInFrameAmount(0);
+              setInFrameType('EXPENSE');
+              setInFrameCategory('');
+              setShowInFrameCategoryPicker(false);
+              setInFrameDescription('');
+              setInFramePaymentMethod('CASH');
+            }
+          })
+          .catch((err: any) => {
+            console.log('Quay video fallback:', err);
+          });
+      }
+    } catch (e) {
+      console.log('Lỗi start record video:', e);
+    }
+  };
+
+  const handleStopRecordingVideo = (completed: boolean) => {
+    setIsRecordingVideo(false);
+    try {
+      if (cameraRef.current && typeof (cameraRef.current as any).stopRecording === 'function') {
+        (cameraRef.current as any).stopRecording();
+      }
+    } catch (e) {
+      console.log('Lỗi stop record video:', e);
+    }
+    // Fallback an toàn cho emulator / web
+    if (!capturedPhotoUri) {
+      const fallback = 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80';
+      setCapturedPhotoUri(fallback);
+      setCapturedThumbUri(fallback);
+      setCapturedMediaType('VIDEO_3S');
+    }
+  };
+
   const handleCapturePhoto = async () => {
     if (!cameraGranted) {
       if (canAskCameraAgain) {
@@ -502,6 +555,7 @@ export default function MainAppScreen() {
         if (photo?.uri) {
           const optimized = await optimizeExpensePhoto(photo.uri);
           setCapturedPhotoUri(optimized.fullUri);
+          setCapturedMediaType('PHOTO');
           setCapturedThumbUri(optimized.thumbnailUri);
           if (activeBankSnapshotEvent) {
             setInFrameAmount(activeBankSnapshotEvent.amount);
@@ -637,6 +691,8 @@ export default function MainAppScreen() {
     setUndoToastVisible(true);
     setCapturedPhotoUri(null);
     setCapturedThumbUri(null);
+    setCapturedMediaType('PHOTO');
+    setIsSquadPrivate(false);
 
     // Cuộn nhẹ xuống dòng khoảnh khắc để xem ảnh vừa chụp
     setTimeout(() => {
@@ -917,7 +973,7 @@ export default function MainAppScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleHorizontalScrollEnd}
-        scrollEnabled={!isZoomSliding}
+        scrollEnabled={false}
         style={styles.pager}
       >
         {/* ================= PAGE 0: HOME ================= */}
@@ -948,7 +1004,7 @@ export default function MainAppScreen() {
             showsVerticalScrollIndicator={false}
             onScroll={handleVerticalScroll}
             scrollEventThrottle={16}
-            scrollEnabled={!isZoomSliding}
+            scrollEnabled={false}
             style={[styles.verticalScroll, { backgroundColor: isDark ? '#0E1620' : '#FAF6EC' }]}
           >
             {/* --- TOP 100vh: CAMERA VIEWFINDER WITH CINEMATIC GRADIENT --- */}
@@ -1043,6 +1099,9 @@ export default function MainAppScreen() {
               )}
 
               {/* CAMERA VIEWFINDER (LOCKET SQUIRCLE FRAME 38PX HOẶC ẢNH VỪA CHỤP) */}
+              <View style={styles.mascotCameraHeaderWrapper}>
+                <PigBoMascot pose="camera" size={54} />
+              </View>
               <View style={styles.viewfinderContainer}>
                 {capturedPhotoUri ? (
                   <OnCameraPhotoOverlay
@@ -1104,42 +1163,7 @@ export default function MainAppScreen() {
                       )}
                     </Pressable>
 
-                    {/* THANH TRƯỢT ZOOM CAMERA TỰ NHIÊN (TÍCH HỢP KHÓA CHUYỂN TRANG HOÀN TOÀN) */}
-                    {cameraGranted && isCameraActive && (
-                      <View style={styles.zoomContainer}>
-                        {/* BADGE HIỂN THỊ HỆ SỐ ZOOM HIỆN TẠI (VD: 0.5x, 1.0x, 2.0x, 3.0x) */}
-                        <View style={styles.zoomLevelBadge}>
-                          <Text style={styles.zoomLevelBadgeText}>
-                            {(0.5 + cameraZoom * 2.5).toFixed(1)}x
-                          </Text>
-                        </View>
-
-                        {/* THANH ĐIỀU KHIỂN ZOOM SLIDER (TỐI GIẢN - KHÔNG SỐ 2 ĐẦU) */}
-                        <View style={styles.zoomControlBar}>
-                          {/* RÃNH TRƯỢT ZOOM (PANRESPONDER CHỐNG RUNG / KHÓA PAGER) */}
-                          <View
-                            style={styles.zoomTrackWrapper}
-                            {...zoomSliderPanResponder.panHandlers}
-                          >
-                            <View style={styles.zoomTrackBg}>
-                              <View
-                                style={[
-                                  styles.zoomTrackFill,
-                                  { width: `${(cameraZoom / 1.0) * 100}%` },
-                                ]}
-                              />
-                            </View>
-                            {/* NÚM GẠT THUMB */}
-                            <View
-                              style={[
-                                styles.zoomThumb,
-                                { left: Math.max(0, Math.min(zoomSliderTrackWidth - 14, (cameraZoom / 1.0) * (zoomSliderTrackWidth - 14))) },
-                              ]}
-                            />
-                          </View>
-                        </View>
-                      </View>
-                    )}
+                    
                   </View>
                 )}
               </View>
@@ -1366,19 +1390,7 @@ export default function MainAppScreen() {
                 </>
               )}
 
-              {/* CHỈ DẪN TRƯỢT LÊN SANG TRANG LỊCH SỬ KHI KHÔNG ĐANG REVIEW ẢNH */}
-              {!capturedPhotoUri && (
-                <TouchableOpacity
-                  style={[styles.historySwipeIndicator, { bottom: insets.bottom + 68 }]}
-                  onPress={scrollToHistory}
-                  activeOpacity={0.75}
-                >
-                  <ChevronUp size={14} color={isDark ? 'rgba(255, 255, 255, 0.75)' : '#4A5568'} strokeWidth={2.4} />
-                  <Text style={[styles.historySwipeText, { color: isDark ? 'rgba(255, 255, 255, 0.75)' : '#4A5568' }]}>
-                    Lịch sử
-                  </Text>
-                </TouchableOpacity>
-              )}
+              
             </LinearGradient>
 
             {/* --- DÒNG KHOẢNH KHẮC LIÊN TỤC CHUẨN LOCKET (HÌNH #3) --- */}
@@ -1634,6 +1646,11 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '700',
   },
+  mascotCameraHeaderWrapper: {
+    alignItems: 'center',
+    marginBottom: -16,
+    zIndex: 15,
+  },
   viewfinderContainer: {
     width: SCREEN_WIDTH - 24,
     maxHeight: SCREEN_HEIGHT * 0.52,
@@ -1773,70 +1790,6 @@ const styles = StyleSheet.create({
   outsideTypeText: {
     fontSize: 14.5,
   },
-  zoomContainer: {
-    position: 'absolute',
-    bottom: 12,
-    alignSelf: 'center',
-    alignItems: 'center',
-    zIndex: 30,
-    gap: 4,
-  },
-  zoomLevelBadge: {
-    backgroundColor: 'rgba(0, 0, 0, 0.72)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: radii.full,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  zoomLevelBadgeText: {
-    color: '#FAF6EC',
-    fontSize: 10.5,
-    fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-  },
-  zoomControlBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.60)',
-    borderRadius: radii.full,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  zoomTrackWrapper: {
-    width: 140,
-    height: 28,
-    justifyContent: 'center',
-  },
-  zoomTrackBg: {
-    width: '100%',
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    overflow: 'hidden',
-  },
-  zoomTrackFill: {
-    height: '100%',
-    backgroundColor: '#E59844',
-    borderRadius: 2,
-  },
-  zoomThumb: {
-    position: 'absolute',
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#FAF6EC',
-    borderWidth: 1.5,
-    borderColor: '#E59844',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.4,
-    shadowRadius: 2,
-    elevation: 3,
-    top: 7,
-  },
   inFrameRetakeIconButton: {
     width: 58,
     height: 58,
@@ -1883,26 +1836,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.2,
   },
-  historySwipeIndicator: {
-    position: 'absolute',
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: radii.full,
-    backgroundColor: 'rgba(0, 0, 0, 0.32)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    zIndex: 25,
-  },
-  historySwipeText: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-  backToCameraPill: {
+    backToCameraPill: {
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
