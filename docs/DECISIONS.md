@@ -437,3 +437,15 @@
       - Sử dụng trực tiếp hình ảnh App Icon chú Heo Pigpo 3D Clay Chibi chính thức (`assets/icon.png`) làm avatar đại diện trên trang Login, bo tròn 100px đổ bóng mềm, đồng bộ 100% với biểu tượng ứng dụng trên màn hình chính điện thoại.
     - *Chính Thức Kết Thúc Phase 2:*
       - Nghiệm thu trọn vẹn toàn bộ các mục tiêu nhận diện thương hiệu, bộ icon và màn hình đăng nhập của Phase 2.
+
+
+  - **Quyết định 93 (22/10/2026): Đồng Bộ Toàn Diện Logic Backend, Khảo Sát Độ Tuổi & Khôi Phục Phiên Đăng Nhập Cục Bộ (Backend & Database Architecture):**
+    - *Khắc Phục Lỗi Thoát Phiên Khởi Động (Persistent Nickname Session Restore):*
+      - `initializeAuth` sửa logic kiểm tra: Khi không có Supabase Cloud session, nếu tìm thấy `cachedUserStr` thì khôi phục ngay trạng thái đăng nhập cho cả phiên Khách (`isGuest: true`) và phiên Biệt danh (`isGuest: false`), chấm dứt triệt để tình trạng người dùng dùng Nickname bị văng ra màn hình Login mỗi khi mở lại app.
+    - *Kiểm Tra Biệt Danh Fail-Open & Tránh Treo UI (Fail-Open Debounce Engine):*
+      - `checkNicknameAvailable` áp dụng cơ chế đua timeout 2000ms (`Promise.race`), tra cứu đồng thời RPC `check_nickname_available` và bảng `profiles`/`user_surveys`. Nếu mất mạng, mạng chậm hoặc lỗi RLS, hàm lập tức trả về `true` (fail-open an toàn), ngăn chặn việc hiển thị vòng quay loading vô tận và không bao giờ treo giao diện.
+    - *Khảo Sát Độ Tuổi Đa Tầng Không Chặn (Non-Blocking Multi-Layer Age Demographics Survey):*
+      - Tạo bảng `public.user_surveys` (Migration 006) kèm RPC `submit_age_survey` chạy `SECURITY DEFINER` để ghi nhận nhân khẩu học người dùng ẩn danh theo `device_id`.
+      - Luồng `signInWithNickname(nickname, birthYear)` thực thi lưu trữ cục bộ tức thì ($\le 100$ms), tự động dọn dẹp seed demo và di chuyển giao dịch của khách qua `cleanSeedDataAndMigrate`, sau đó đẩy khảo sát lên Supabase trong tác vụ nền bọc try-catch an toàn tuyệt đối, không gây gián đoạn luồng người dùng kể cả khi thiết bị offline hoặc Supabase từ chối RLS.
+    - *Bảo Toàn Năm Sinh Khi Nâng Cấp Tài Khoản (Survey Data Preservation):*
+      - Khi người dùng nâng cấp từ tài khoản Biệt danh lên Email OTP / Google, `ensureUserProfile` tự động trích xuất `birthdate` từ `@vi_locket_guest_profile` để ghi vào `public.profiles.birthdate`, bảo toàn 100% dữ liệu khảo sát độ tuổi lên đám mây.

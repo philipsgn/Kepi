@@ -110,7 +110,54 @@ export async function cleanSeedDataAndMigrate(
 }
 
 /**
+ * ĐỒNG BỘ KHẢO SÁT ĐỘ TUỔI LÊN SUPABASE CLOUD (NON-BLOCKING BACKGROUND TASK)
+ * Chạy bất đồng bộ, bọc try-catch và timeout 2500ms
+ * Đảm bảo tuyệt đối không làm gián đoạn hoặc chặn luồng đăng nhập cục bộ
+ */
+export async function syncAgeSurveyToCloud(
+  deviceId: string,
+  nickname: string,
+  birthYear?: number | null,
+  birthdateStr?: string | null
+): Promise<void> {
+  const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+    return;
+  }
+
+  try {
+    const rpcPromise = supabase.rpc('submit_age_survey', {
+      p_device_id: deviceId,
+      p_nickname: nickname,
+      p_birth_year: birthYear || null,
+    });
+
+    const tablePromise = (async () => {
+      const { error } = await supabase.from('user_surveys').upsert(
+        {
+          device_id: deviceId,
+          nickname,
+          birth_year: birthYear || null,
+          birthdate: birthdateStr || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'device_id' }
+      );
+      return !error;
+    })();
+
+    await Promise.race([
+      Promise.any([rpcPromise, tablePromise]),
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+    ]);
+  } catch (err) {
+    console.warn('[AuthStore] syncAgeSurveyToCloud non-blocking catch:', err);
+  }
+}
+
+/**
  * Đảm bảo người dùng luôn có 1 bản ghi hồ sơ trong bảng public.profiles
+ * Tự động kế thừa ngày sinh / khảo sát độ tuổi từ bộ nhớ cục bộ nếu có
  */
 async function ensureUserProfile(user: UserSession): Promise<Profile | null> {
   try {
@@ -125,11 +172,26 @@ async function ensureUserProfile(user: UserSession): Promise<Profile | null> {
       return existing as Profile;
     }
 
-    // 2. Nếu chưa có, tạo mới
+    // 2. Kế thừa ngày sinh / biệt danh từ hồ sơ cục bộ (nếu có)
+    let cachedBirthdate: string | null = null;
+    let cachedFullName = user.full_name || '';
+    try {
+      const cachedProfileStr = await AsyncStorage.getItem('@vi_locket_guest_profile');
+      if (cachedProfileStr) {
+        const cachedP = JSON.parse(cachedProfileStr);
+        if (cachedP?.birthdate) cachedBirthdate = cachedP.birthdate;
+        if (!cachedFullName && cachedP?.full_name) cachedFullName = cachedP.full_name;
+      }
+    } catch {
+      // Bỏ qua lỗi đọc cache
+    }
+
+    // 3. Nếu chưa có, tạo mới
     const newProfile: Partial<Profile> = {
       id: user.id,
       email: user.email,
-      full_name: user.full_name || '',
+      full_name: cachedFullName,
+      birthdate: cachedBirthdate,
       fav_unit: 'tra_sua',
       hourly_rate: 0,
       created_at: new Date().toISOString(),
@@ -173,7 +235,7 @@ interface AuthState {
   verifyEmailOtp: (token: string) => Promise<{ success: boolean; error?: string }>;
   resetOtpState: () => void;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  signInWithNickname: (nickname: string, birthYear?: number) => Promise<{ success: boolean; error?: string }>;
+  signInWithNickname: (nickname: string, birthYear?: number | null) => Promise<{ success: boolean; error?: string }>;
   checkNicknameAvailable: (nickname: string) => Promise<boolean>;
   continueAsGuest: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -266,21 +328,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      // 2. Không có session thật trên Supabase -> Kiểm tra xem có phiên 'Vào ngay' hợp lệ không
+      // 2. Không có session thật trên Supabase -> Kiểm tra xem có tài khoản cục bộ (Nickname hoặc Khách) không
       const cachedIsGuest = await AsyncStorage.getItem(STORAGE_IS_GUEST_KEY);
       const cachedUserStr = await AsyncStorage.getItem(STORAGE_USER_KEY);
       const cachedSetup = await AsyncStorage.getItem(STORAGE_BUDGET_SETUP_KEY);
       const cachedGuestProfileStr = await AsyncStorage.getItem('@vi_locket_guest_profile');
-      if (cachedIsGuest === 'true' && cachedUserStr) {
+      if (cachedUserStr) {
         try {
-          const cachedGuestUser: UserSession = JSON.parse(cachedUserStr);
-          const cachedGuestProfile: Profile | null = cachedGuestProfileStr ? JSON.parse(cachedGuestProfileStr) : null;
-          const isSetupDone = cachedSetup === 'true' && Boolean(cachedGuestProfile?.full_name);
+          const cachedUser: UserSession = JSON.parse(cachedUserStr);
+          const cachedProfile: Profile | null = cachedGuestProfileStr ? JSON.parse(cachedGuestProfileStr) : null;
+          const isGuest = cachedIsGuest === 'true';
+          const isSetupDone = cachedSetup === 'true' && Boolean(cachedProfile?.full_name || cachedUser.full_name);
           set({
-            user: cachedGuestUser,
-            profile: cachedGuestProfile,
+            user: cachedUser,
+            profile: cachedProfile,
             isAuthenticated: true,
-            isGuest: true,
+            isGuest,
             hasCompletedBudgetSetup: isSetupDone,
             isLoading: false,
             error: null,
@@ -467,32 +530,102 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   /**
-   * CHẾ ĐỘ KHÁCH (GUEST MODE) - 100% OFFLINE LOCAL
-   * Tuyệt đối không lưu dữ liệu lên Supabase Database / Storage
-   */
-  /**
-   * CHẾ ĐỘ KHÁCH (GUEST MODE) - 100% OFFLINE LOCAL
-   * Tuyệt đối không lưu dữ liệu lên Supabase Database / Storage
+   * KIỂM TRA BIỆT DANH KHẢ DỤNG (REALTIME DEBOUNCE & FAIL-OPEN ENGINE)
+   * Tuyệt đối không treo UI: Đua timeout 2000ms, nếu lỗi mạng/RLS thì fail-open an toàn
    */
   checkNicknameAvailable: async (nickname: string): Promise<boolean> => {
     const clean = (nickname || '').trim().toLowerCase();
     if (!clean) return true;
+
+    // Fail-open nhanh nếu Supabase chưa cấu hình
+    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+      return true;
+    }
+
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .ilike('full_name', clean)
-        .limit(1);
-      if (error || !data) return true;
-      return data.length === 0;
+      // Đua timeout 2000ms đảm bảo UI không bao giờ bị đứng spinner
+      const checkPromise = (async () => {
+        // 1. Thử gọi RPC check_nickname_available (chạy SECURITY DEFINER)
+        try {
+          const { data: rpcAvailable, error: rpcErr } = await supabase.rpc(
+            'check_nickname_available',
+            { p_nickname: clean }
+          );
+          if (!rpcErr && typeof rpcAvailable === 'boolean') {
+            return rpcAvailable;
+          }
+        } catch {
+          // Bỏ qua nếu RPC chưa khởi tạo
+        }
+
+        // 2. Tra cứu trong bảng profiles
+        try {
+          const { data: profilesData, error: profileErr } = await supabase
+            .from('profiles')
+            .select('id')
+            .ilike('full_name', clean)
+            .limit(1);
+
+          if (!profileErr && profilesData && profilesData.length > 0) {
+            return false;
+          }
+        } catch {
+          // Bỏ qua nếu RLS từ chối
+        }
+
+        // 3. Tra cứu trong bảng user_surveys
+        try {
+          const { data: surveyData, error: surveyErr } = await supabase
+            .from('user_surveys')
+            .select('id')
+            .ilike('nickname', clean)
+            .limit(1);
+
+          if (!surveyErr && surveyData && surveyData.length > 0) {
+            return false;
+          }
+        } catch {
+          // Bỏ qua nếu bảng user_surveys chưa khởi tạo
+        }
+
+        return true;
+      })();
+
+      const timeoutPromise = new Promise<boolean>((resolve) => {
+        setTimeout(() => resolve(true), 2000);
+      });
+
+      return await Promise.race([checkPromise, timeoutPromise]);
     } catch {
+      // Mọi ngoại lệ mạng đều fail-open an toàn (trả về true)
       return true;
     }
   },
 
-  signInWithNickname: async (nickname: string, birthYear?: number) => {
+  /**
+   * ĐĂNG NHẬP 1-CHẠM BẰNG BIỆT DANH & KHẢO SÁT ĐỘ TUỔI (LOCAL-FIRST)
+   * 1. Kiểm tra tính hợp lệ của Biệt danh và Năm sinh
+   * 2. Lưu trữ định danh thiết bị và hồ sơ bền vững trong AsyncStorage
+   * 3. Di chuyển giao dịch từ phiên Khách cũ sang tài khoản mới
+   * 4. Đẩy khảo sát độ tuổi lên Cloud Supabase trong nền (non-blocking)
+   */
+  signInWithNickname: async (nickname: string, birthYear?: number | null) => {
     try {
-      const cleanName = (nickname || '').trim() || 'Bạn Mới';
+      const cleanName = (nickname || '').trim();
+      if (!cleanName) {
+        return { success: false, error: 'Vui lòng nhập biệt danh của bạn.' };
+      }
+
+      // Xác thực và chuẩn hóa năm sinh hợp lệ (nếu có truyền vào)
+      const currentYear = new Date().getFullYear();
+      let validBirthYear: number | undefined = undefined;
+      if (typeof birthYear === 'number' && !isNaN(birthYear)) {
+        if (birthYear >= 1900 && birthYear <= currentYear) {
+          validBirthYear = birthYear;
+        }
+      }
+
       const storedDeviceId = (await AsyncStorage.getItem('@vi_locket_device_id')) || 
         ('dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7));
       await AsyncStorage.setItem('@vi_locket_device_id', storedDeviceId);
@@ -503,7 +636,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         full_name: cleanName,
       };
 
-      const birthdateStr = birthYear ? `${birthYear}-01-01` : null;
+      const birthdateStr = validBirthYear ? `${validBirthYear}-01-01` : null;
 
       const profile: Profile = {
         id: user.id,
@@ -517,11 +650,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         updated_at: new Date().toISOString(),
       };
 
+      // 1. Lưu bền vững vào AsyncStorage
       await AsyncStorage.setItem(STORAGE_USER_KEY, JSON.stringify(user));
       await AsyncStorage.setItem('@vi_locket_guest_profile', JSON.stringify(profile));
       await AsyncStorage.setItem(STORAGE_IS_GUEST_KEY, 'false');
       await AsyncStorage.setItem(STORAGE_BUDGET_SETUP_KEY, 'true');
 
+      // 2. Tự động dọn dẹp seed demo và chuyển giao dịch cũ của khách sang tài khoản mới
+      cleanSeedDataAndMigrate(user.id, 'MERGE').catch(() => {});
+
+      // 3. Cập nhật state store tức thì
       set({
         user,
         profile,
@@ -531,6 +669,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
         error: null,
       });
+
+      // 4. Đồng bộ khảo sát độ tuổi lên Cloud Supabase trong nền (không chặn UI)
+      syncAgeSurveyToCloud(storedDeviceId, cleanName, validBirthYear, birthdateStr).catch(() => {});
 
       return { success: true };
     } catch (err: unknown) {

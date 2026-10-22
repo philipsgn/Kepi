@@ -168,6 +168,7 @@ export default function LoginScreen() {
         router.replace('/(main)');
       } else {
         setIsSubmitting(false);
+        if (res.error) setValidationError(res.error);
       }
     }, 120);
   };
@@ -352,9 +353,9 @@ export default function LoginScreen() {
                       <Dices
                         size={18}
                         color={
-                          mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#FB7185' : '#D97706'
+                          mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#FB7185' : '#059669'
                         }
-                        strokeWidth={2.6}
+                        strokeWidth={2.4}
                       />
                     </TouchableOpacity>
                   </View>
@@ -403,7 +404,7 @@ export default function LoginScreen() {
                       setShowYearPickerModal(true);
                     }}
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <View style={styles.birthYearInnerRow}>
                       <Calendar
                         size={18}
                         color={
@@ -456,7 +457,16 @@ export default function LoginScreen() {
                   accessibilityLabel="Bật ví bắt đầu trải nghiệm"
                 >
                   {isSubmitting ? (
-                    <ActivityIndicator size="large" color="#10B981" />
+                    <ActivityIndicator
+                      size="large"
+                      color={
+                        mode === 'dark'
+                          ? '#2DD4BF'
+                          : mode === 'light'
+                          ? '#FB7185'
+                          : '#059669'
+                      }
+                    />
                   ) : (
                     <Power
                       size={44}
@@ -506,6 +516,7 @@ export default function LoginScreen() {
                     styles.modalPopupCard,
                     {
                       backgroundColor: isDark ? '#16202C' : '#FFFFFF',
+                      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
                       shadowColor: tokens.shadowColor,
                     },
                   ]}
@@ -550,7 +561,7 @@ export default function LoginScreen() {
                                     : mode === 'light'
                                     ? '#E11D48'
                                     : '#059669',
-                                fontWeight: '700',
+                                fontWeight: '500',
                               },
                             ]}
                           >
@@ -685,9 +696,13 @@ const styles = StyleSheet.create({
   },
   nameInput: {
     flex: 1,
-    fontSize: 14.5,
-    fontWeight: '600',
-    padding: 0,
+    fontSize: 13.5,
+    fontWeight: '400',
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    margin: 0,
+    textAlignVertical: 'center',
+    height: '100%',
   },
   shuffleButtonBare: {
     backgroundColor: 'transparent',
@@ -695,12 +710,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  birthYearInnerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
   birthYearText: {
-    fontSize: 14.5,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '400',
   },
   birthYearPlaceholder: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '400',
   },
 
@@ -773,7 +793,7 @@ const styles = StyleSheet.create({
   },
   verseLine: {
     fontSize: 13.5,
-    fontWeight: '600',
+    fontWeight: '500',
     fontStyle: 'italic',
     lineHeight: 20,
     letterSpacing: 0.2,
@@ -792,11 +812,12 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalPopupCard: {
-    width: '82%',
+    width: '80%',
     maxHeight: 340,
-    borderRadius: 24,
-    paddingVertical: 8,
+    borderRadius: 22,
+    paddingVertical: 6,
     paddingHorizontal: 6,
+    borderWidth: 1,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
     shadowRadius: 20,
@@ -806,12 +827,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    paddingVertical: 9,
     paddingHorizontal: 14,
     borderRadius: 12,
   },
   yearTextPopup: {
-    fontSize: 14.5,
-    fontWeight: '500',
+    fontSize: 13.5,
+    fontWeight: '400',
   },
 });

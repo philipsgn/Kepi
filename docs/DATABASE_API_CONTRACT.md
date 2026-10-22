@@ -166,9 +166,66 @@ Bảng hỗ trợ người dùng phân tách Thu / Chi và tạo danh mục mang
 
 ---
 
+### 2.7. Bảng `public.user_surveys` (Khảo Sát Độ Tuổi & Định Danh Thiết Bị — Migration 006)
+Bảng ghi nhận số liệu nhân khẩu học (Biệt danh, Năm sinh, Độ tuổi) độc lập với Supabase Auth JWT, cho phép chủ ứng dụng phân tích cơ cấu độ tuổi người dùng ẩn danh / cục bộ.
+
+| Tên Cột | Kiểu Dữ Liệu | Ràng Buộc (Constraints) | Mô Tả & Ý Nghĩa Nghiệp Vụ |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | `PRIMARY KEY DEFAULT uuid_generate_v4()` | Khóa chính bản ghi khảo sát |
+| `device_id` | `TEXT` | `NOT NULL UNIQUE` | Định danh thiết bị cố định (`@vi_locket_device_id`) |
+| `nickname` | `TEXT` | `NOT NULL` | Biệt danh người dùng đã chọn khi kích hoạt |
+| `birth_year` | `INT` | | Năm sinh khảo sát (ví dụ: `2002`) |
+| `birthdate` | `DATE` | | Ngày sinh chuẩn hóa (`YYYY-01-01`) |
+| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Thời điểm hoàn thành khảo sát |
+| `updated_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Thời điểm cập nhật khảo sát gần nhất |
+
+**Chỉ mục tối ưu:**
+- `idx_user_surveys_device`: `(device_id)`
+- `idx_user_surveys_nickname`: `(lower(nickname))`
+- `idx_user_surveys_birth_year`: `(birth_year)`
+
+**RLS Policies:**
+- `Anyone can insert or update own device survey`: `FOR ALL USING (true) WITH CHECK (true)` (Cho phép client không có Supabase JWT gửi khảo sát).
+
+---
+
 ## 3. STORED FUNCTIONS & RPC CONTRACT
 
-### Hàm RPC: `public.get_monthly_spending_summary`
+### 3.1. Hàm RPC: `public.check_nickname_available`
+Kiểm tra tính khả dụng của biệt danh (không trùng với `profiles` và `user_surveys`), chạy dưới quyền `SECURITY DEFINER` để client ẩn danh không bị chặn bởi RLS.
+
+```sql
+CREATE OR REPLACE FUNCTION public.check_nickname_available(
+    p_nickname TEXT
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+```
+
+**Tham số đầu vào:**
+- `p_nickname`: Chuỗi biệt danh cần kiểm tra (ví dụ: `'Cốm Non'`).
+
+**Quy tắc nghiệp vụ:**
+- Trả về `TRUE` nếu biệt danh chưa được đăng ký trong cả `profiles.full_name` và `user_surveys.nickname`.
+- So khớp không phân biệt hoa thường (`lower(trim(...))`).
+- Cấp quyền thực thi (`GRANT EXECUTE`) cho `anon` và `authenticated`.
+
+### 3.2. Hàm RPC: `public.submit_age_survey`
+Ghi nhận kết quả khảo sát độ tuổi và biệt danh an toàn từ thiết bị di động, tự động upsert theo `device_id`.
+
+```sql
+CREATE OR REPLACE FUNCTION public.submit_age_survey(
+    p_device_id TEXT,
+    p_nickname TEXT,
+    p_birth_year INT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+```
+
+### 3.3. Hàm RPC: `public.get_monthly_spending_summary`
 Tính toán tổng chi tiêu, tổng thu nhập và số lượng giao dịch của người dùng trong một tháng nhất định, chuẩn hóa múi giờ Việt Nam (`Asia/Ho_Chi_Minh` — UTC+7).
 
 ```sql
