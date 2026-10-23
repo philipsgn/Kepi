@@ -2387,36 +2387,40 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 }
 
 
-// 49. Pigpo Brand Identity & Slogan (Fatten your savings - Keep it - Watch it grow)
+// 49. PigFly Brand Identity & Slogan (PigFly: Tiết kiệm – Duy trì – Sinh lời bền vững)
 {
   const assert = require('assert');
   const fs = require('fs');
   const path = require('path');
 
-  // 1. Kiểm tra app.json có name và slug là Pigpo
+  // 1. Kiểm tra app.json có name và slug là PigFly
   const appJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'app.json'), 'utf8'));
-  assert.strictEqual(appJson.expo.name, 'Pigpo', 'app.json expo.name must be Pigpo');
-  assert.strictEqual(appJson.expo.slug, 'pigpo', 'app.json expo.slug must be pigpo');
+  assert.strictEqual(appJson.expo.name, 'PigFly', 'app.json expo.name must be PigFly');
+  assert.strictEqual(appJson.expo.slug, 'pigfly', 'app.json expo.slug must be pigfly');
 
-  // 2. Kiểm tra strings.ts có appName và tagline
+  // 2. Kiểm tra strings.ts có appName và tagline / slogan
   const stringsCode = fs.readFileSync(path.join(__dirname, 'src/constants/strings.ts'), 'utf8');
-  assert.ok(stringsCode.includes("appName: 'Pigpo'"), 'strings.ts must define appName as Pigpo');
-  assert.ok(stringsCode.includes('Tiết kiệm - Duy trì - Sinh lời bền vững'), 'strings.ts must include new slogan');
+  assert.ok(stringsCode.includes("appName: 'PigFly'"), 'strings.ts must define appName as PigFly');
+  assert.ok(stringsCode.includes('Tiết kiệm – Duy trì – Sinh lời bền vững'), 'strings.ts must include new slogan');
 
-  // 3. Kiểm tra login.tsx có Pigpo và slogan
+  // 3. Kiểm tra login.tsx có PigFly và slogan
   const loginCode = fs.readFileSync(path.join(__dirname, 'app/(auth)/login.tsx'), 'utf8');
-  assert.ok(loginCode.includes('Pigpo'), 'login.tsx must display Pigpo');
+  assert.ok(loginCode.includes('PigFly'), 'login.tsx must display PigFly');
   assert.ok(loginCode.includes('Tiết kiệm • Duy trì • Sinh lời bền vững'), 'login.tsx must display new slogan');
   assert.ok(loginCode.includes('assets/icon.png'), 'login.tsx must use App Icon mascot');
 
-  // 4. Kiểm tra App Launcher Icon và Adaptive Icon
+  // 4. Kiểm tra squadStore.ts có "Squad Nuôi Heo PigFly"
+  const squadStoreCode = fs.readFileSync(path.join(__dirname, 'src/store/squadStore.ts'), 'utf8');
+  assert.ok(squadStoreCode.includes('Squad Nuôi Heo PigFly'), 'squadStore must have default name Squad Nuôi Heo PigFly');
+
+  // 5. Kiểm tra App Launcher Icon và Adaptive Icon
   const iconPath = path.join(__dirname, 'assets/icon.png');
   const adaptivePath = path.join(__dirname, 'assets/adaptive-icon.png');
   assert.ok(fs.existsSync(iconPath), 'assets/icon.png must exist');
   assert.ok(fs.existsSync(adaptivePath), 'assets/adaptive-icon.png must exist');
   assert.ok(fs.statSync(iconPath).size > 50000, 'icon.png must be high-res mascot icon (>50KB)');
 
-  console.log('✅ Test 49 Passed: Pigpo Brand Identity & Slogan verified cleanly');
+  console.log('✅ Test 49 Passed: PigFly Brand Identity & Slogan verified cleanly');
 }
 
 // 50. Squad Room & Locket Feed Privacy Engine (Hội Bạn Thân 2-4 Người)
@@ -2448,22 +2452,14 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 50 Passed: Squad Room & Locket Feed Privacy Engine verified cleanly');
 }
 
-console.log('\n🎉 ALL 50 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (50/50)!');
+// ==========================================
+// 51. PigFly Brand Identity, Anti-Overlap Layout & Settings Zero-STK Audit (F1-F14)
+// ==========================================
+{
+  const { runTest51 } = require('./tests/test_51_brand_sync_layout_anti_overlap_e2e');
+  runTest51({ projectRoot: __dirname });
+  console.log('✅ Test 51 Passed: PigFly Brand Identity, Anti-Overlap Layout & Settings Zero-STK Audit verified cleanly');
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+console.log('\n🎉 ALL 51 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (51/51)!');
 

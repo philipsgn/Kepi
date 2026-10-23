@@ -11,7 +11,7 @@ interface MinhAvatarProps {
 }
 
 /**
- * AVATAR CỐ VẤN CHÚ HEO PIGBO (3D Clay Chibi Trắng Sứ / Kính Vàng Thông Thái)
+ * AVATAR CỐ VẤN CHÚ HEO PIGFLY (3D Clay Chibi Trắng Sứ / Kính Vàng Thông Thái)
  */
 export const MinhAvatar: React.FC<MinhAvatarProps> = ({
   size = 'md',

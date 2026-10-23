@@ -20,3 +20,5 @@ npm-debug.*
 .env
 .env.local
 .env.*.local
+# Subagent runtime directories
+.agents/

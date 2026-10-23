@@ -14,7 +14,7 @@ import { bankNotificationService } from '../../services/bankNotificationService'
 import { BankNotificationSettingsModal } from './BankNotificationSettingsModal';
 
 export const BankNotificationSettingsCard: React.FC = () => {
-  const { tokens } = useTheme();
+  const { tokens, isDark } = useTheme();
   const [isEnabled, setIsEnabled] = useState<boolean>(true);
   const [showModal, setShowModal] = useState<boolean>(false);
 
@@ -83,6 +83,29 @@ export const BankNotificationSettingsCard: React.FC = () => {
         <ChevronRight size={16} color={tokens.textMuted} />
       </TouchableOpacity>
 
+      {/* 4. KHỐI CAM KẾT ZERO-STK & CHẶN 100% OTP */}
+      <View
+        style={[
+          styles.securityCard,
+          {
+            backgroundColor: isDark ? 'rgba(126, 159, 128, 0.08)' : 'rgba(126, 159, 128, 0.12)',
+            borderColor: 'rgba(126, 159, 128, 0.25)',
+          },
+        ]}
+      >
+        <View style={styles.securityHeader}>
+          <ShieldCheck size={16} color="#7E9F80" strokeWidth={2.6} />
+          <Text style={[styles.securityTitle, { color: isDark ? '#7E9F80' : '#0F2F24' }]}>
+            Tuyên Ngôn Bảo Mật Zero-STK & Chặn 100% OTP
+          </Text>
+        </View>
+        <Text style={[styles.securityDesc, { color: isDark ? '#C5D6C6' : '#2A4034' }]}>
+          • 100% Local Processing & Offline Regex: Thuật toán bóc tách chạy nội bộ trong RAM, không truyền dữ liệu ra ngoài.{'\n'}
+          • Chặn 100% mã OTP: Loại bỏ tức thì mọi mã xác thực giao dịch, Smart OTP và tin nhắn nhạy cảm.{'\n'}
+          • Không lưu số tài khoản: Tuyệt đối không bao giờ đọc, lưu trữ STK hay số dư tài khoản ngân hàng (Zero-STK Shield).
+        </Text>
+      </View>
+
       {/* MODAL CẤU HÌNH CHI TIẾT */}
       <BankNotificationSettingsModal
         visible={showModal}
@@ -112,11 +135,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
+    fontFamily: 'BeVietnamPro-Bold',
     fontWeight: '700',
     letterSpacing: 0.2,
   },
   sectionSub: {
     fontSize: 11,
+    fontFamily: 'BeVietnamPro-Regular',
     marginTop: 2,
     lineHeight: 15,
   },
@@ -138,10 +163,12 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     fontSize: 13,
+    fontFamily: 'BeVietnamPro-SemiBold',
     fontWeight: '600',
   },
   rowDesc: {
     fontSize: 11,
+    fontFamily: 'BeVietnamPro-Regular',
     marginTop: 2,
     lineHeight: 15,
   },
@@ -150,7 +177,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: 12,
-    paddingBottom: 2,
+    paddingBottom: 4,
   },
   actionLeft: {
     flexDirection: 'row',
@@ -159,6 +186,30 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 12,
+    fontFamily: 'BeVietnamPro-SemiBold',
     fontWeight: '600',
+  },
+  securityCard: {
+    marginTop: 14,
+    padding: 12,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+  },
+  securityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  securityTitle: {
+    fontSize: 12.5,
+    fontFamily: 'BeVietnamPro-SemiBold',
+    fontWeight: '600',
+    letterSpacing: -0.1,
+  },
+  securityDesc: {
+    fontSize: 11.5,
+    fontFamily: 'BeVietnamPro-Regular',
+    lineHeight: 17,
   },
 });

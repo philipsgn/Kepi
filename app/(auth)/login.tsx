@@ -218,7 +218,7 @@ export default function LoginScreen() {
 
             {/* ================= HERO BRANDING & MASCOT 3D ĐỒNG BỘ APP ICON ================= */}
             <View style={styles.heroSection}>
-              {/* Icon Chú Heo Pigpo 3D Clay Chibi chính thức */}
+              {/* Icon Chú Heo PigFly 3D Clay Chibi chính thức */}
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
@@ -231,7 +231,7 @@ export default function LoginScreen() {
                 />
               </TouchableOpacity>
 
-              <Text style={[styles.brandTitle, { color: tokens.text }]}>Pigpo</Text>
+              <Text style={[styles.brandTitle, { color: tokens.text }]}>PigFly</Text>
 
               {/* Tag Con Nhộng: Tiết kiệm • Duy trì • Sinh lời bền vững */}
               <View
@@ -496,7 +496,7 @@ export default function LoginScreen() {
               </View>
 
               <Text style={[styles.copyrightText, { color: tokens.textMuted }]}>
-                Pigpo © 2026 – Tiết kiệm, duy trì, sinh lời bền vững
+                PigFly © 2026 – Tiết kiệm, duy trì, sinh lời bền vững
               </Text>
             </View>
 

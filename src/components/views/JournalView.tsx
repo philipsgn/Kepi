@@ -47,7 +47,7 @@ import { StreakCheckinModal } from '../streak/StreakCheckinModal';
 import { StreakCelebrationToast } from '../streak/StreakCelebrationToast';
 import { ConfirmationPillBanner, ConfirmationInboxModal } from '../inbox';
 import { MonthRolloverBanner } from '../budget/MonthRolloverBanner';
-import { PigBoMascot } from '../mascot/PigBoMascot';
+import { PigBoMascot, PigFlyMascot } from '../mascot/PigBoMascot';
 
 
 // Hooks & Stores
@@ -374,6 +374,8 @@ export const JournalView: React.FC<JournalViewProps> = ({
             <Text style={[styles.userNameText, { color: tokens.text }]}>
               {userName}
             </Text>
+            {/* LINH VẬT PIGFLY LƠ LỬNG NHẸ NHÀNG TRONG GREETING HEADER */}
+            <PigFlyMascot pose="welcome" size={28} />
             {/* STREAK MINI: CHỈ ICON & SỐ CHUỖI THỰC TẾ (SOFT TONAL) */}
             <TouchableOpacity
               style={[
@@ -472,11 +474,6 @@ export const JournalView: React.FC<JournalViewProps> = ({
 
         {/* 1. SECTION HERO: HẠN MỨC HÔM NAY TINH GỌN (TẬP TRUNG HÔM NAY TIÊU ĐƯỢC & ĐÃ CHI) */}
         <Card style={styles.allowanceCard} glow>
-          {/* CHÚ HEO PIGBO NẰM GÁC MÉP THẺ NGÂN SÁCH */}
-          <View style={styles.allowanceMascotWrapper}>
-            <PigBoMascot pose="card" size={44} />
-          </View>
-
           <View style={styles.todayAllowanceRow}>
             <View style={styles.todayAllowanceCol}>
               <Text style={[styles.todaySubTitle, { color: tokens.textMuted }]}>
@@ -876,14 +873,6 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: spacing.md,
     gap: 6,
-    position: 'relative',
-    overflow: 'visible',
-  },
-  allowanceMascotWrapper: {
-    position: 'absolute',
-    top: -16,
-    right: 14,
-    zIndex: 10,
   },
   todayAllowanceRow: {
     flexDirection: 'row',

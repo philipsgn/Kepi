@@ -57,7 +57,8 @@ interface SquadState {
   syncTransactionsToFeed: (transactions: Transaction[], userName: string) => void;
 }
 
-const STORAGE_KEY_SQUAD = '@pigpo_squad_room_v1';
+const STORAGE_KEY_SQUAD = '@pigfly_squad_room_v1';
+const LEGACY_STORAGE_KEY_SQUAD = '@pigpo_squad_room_v1';
 
 // Dữ liệu mẫu ban đầu cho các bạn trong nhóm nuôi heo
 const SAMPLE_FRIENDS: SquadMember[] = [
@@ -112,7 +113,14 @@ export const useSquadStore = create<SquadState>((set, get) => ({
 
   loadSquadFromStorage: async () => {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY_SQUAD);
+      let raw = await AsyncStorage.getItem(STORAGE_KEY_SQUAD);
+      if (!raw) {
+        raw = await AsyncStorage.getItem(LEGACY_STORAGE_KEY_SQUAD);
+        if (raw) {
+          // Tự động nâng cấp sang khóa mới
+          await AsyncStorage.setItem(STORAGE_KEY_SQUAD, raw).catch(() => {});
+        }
+      }
       if (raw) {
         const parsed = JSON.parse(raw);
         set({
@@ -136,7 +144,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
 
       const newSquad: SquadRoom = {
         id: `squad-${Date.now()}`,
-        name: name.trim() || 'Hội Nuôi Heo Pigpo',
+        name: name.trim() || 'Squad Nuôi Heo PigFly',
         code,
         createdAt: new Date().toISOString(),
       };
@@ -155,7 +163,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
       const welcomeMsg: SquadMessage = {
         id: `msg-${Date.now()}`,
         senderId: 'system',
-        senderName: 'Pigpo Bot',
+        senderName: 'PigFly Bot',
         text: `Chào mừng ${myMember.name} đã lập hội "${newSquad.name}"! Mã mời kết nối: ${newSquad.code}`,
         createdAt: new Date().toISOString(),
       };
@@ -214,7 +222,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
       const welcomeMsg: SquadMessage = {
         id: `msg-${Date.now()}`,
         senderId: 'system',
-        senderName: 'Pigpo Bot',
+        senderName: 'PigFly Bot',
         text: `${myMember.name} vừa tham gia hội bạn! Cùng nhau thi đua nuôi heo lớn nhé 🎉`,
         createdAt: new Date().toISOString(),
       };
@@ -252,7 +260,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
       messages: [],
     });
     try {
-      await AsyncStorage.removeItem(STORAGE_KEY_SQUAD);
+      await AsyncStorage.multiRemove([STORAGE_KEY_SQUAD, LEGACY_STORAGE_KEY_SQUAD]).catch(() => {});
     } catch (e) {
       console.warn('[SquadStore] Failed to remove storage:', e);
     }
@@ -292,7 +300,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
         ? `👉 ${fromName} vừa nhắc ${targetName}: "Heo đang đói kìa, mau chụp ảnh cho heo ăn hôm nay đi!"`
         : `🎉 ${fromName} vừa vỗ béo heo của ${targetName}: "Giữ kỷ luật tiết kiệm đỉnh quá bạn ơi!"`;
 
-    get().sendSquadMessage(text, 'Pigpo Bot');
+    get().sendSquadMessage(text, 'PigFly Bot');
     return text;
   },
 

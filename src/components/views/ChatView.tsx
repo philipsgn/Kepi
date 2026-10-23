@@ -39,7 +39,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-welcome',
     sender: 'COACH',
-    text: 'Chào bạn! Pigpo — Chú Heo Béo thông thái đã sẵn sàng đồng hành cùng bạn. Hôm nay bạn muốn kiểm tra ngân sách hay tâm sự chi tiêu gì với Pigpo nè?',
+    text: 'Chào bạn! PigFly — Chú Heo Béo thông thái đã sẵn sàng đồng hành cùng bạn. Hôm nay bạn muốn kiểm tra ngân sách hay tâm sự chi tiêu gì với PigFly nè?',
     createdAt: new Date().toISOString(),
   },
 ];

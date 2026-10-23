@@ -264,7 +264,7 @@ Nhằm tối ưu hóa trải nghiệm trên Android và mở rộng trong tươn
 
 ---
 
-## 9. Đặc Tả Nâng Cấp v6.0 (PigBo): Tinh Gọn Camera, Khóa Rung Lắc Cử Chỉ & Chuẩn Hóa Pinch Zoom
+## 9. Đặc Tả Nâng Cấp v6.0 (PigFly): Tinh Gọn Camera, Khóa Rung Lắc Cử Chỉ & Chuẩn Hóa Pinch Zoom
 
 ### 9.1. Khóa Cố Định Cử Chỉ Vuốt Thân Màn Hình (Zero-Shake Navigation):
 - Thay vì cho phép vuốt ngang tự do trên thân màn hình giữa các tab (gây rung giật hoặc chuyển nhầm tab khi người dùng thao tác camera), màn hình chính khóa cố định `scrollEnabled={false}`.

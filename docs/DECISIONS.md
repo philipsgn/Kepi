@@ -449,3 +449,29 @@
       - Luồng `signInWithNickname(nickname, birthYear)` thực thi lưu trữ cục bộ tức thì ($\le 100$ms), tự động dọn dẹp seed demo và di chuyển giao dịch của khách qua `cleanSeedDataAndMigrate`, sau đó đẩy khảo sát lên Supabase trong tác vụ nền bọc try-catch an toàn tuyệt đối, không gây gián đoạn luồng người dùng kể cả khi thiết bị offline hoặc Supabase từ chối RLS.
     - *Bảo Toàn Năm Sinh Khi Nâng Cấp Tài Khoản (Survey Data Preservation):*
       - Khi người dùng nâng cấp từ tài khoản Biệt danh lên Email OTP / Google, `ensureUserProfile` tự động trích xuất `birthdate` từ `@vi_locket_guest_profile` để ghi vào `public.profiles.birthdate`, bảo toàn 100% dữ liệu khảo sát độ tuổi lên đám mây.
+
+  - **Quyết định 94 (23/10/2026): Đồng Bộ Nhận Diện Thương Hiệu Toàn Hệ Thống Sang "PigFly" & Slogan "PigFly: Tiết kiệm – Duy trì – Sinh lời bền vững":**
+    - *Đồng Bộ Thương Hiệu Toàn Diện Sang PigFly:*
+      - Tên chính thức thương hiệu: **PigFly** (viết hoa hai chữ P và F).
+      - Slogan chính thức: *"PigFly: Tiết kiệm – Duy trì – Sinh lời bền vững"*.
+      - Thẻ tóm tắt / tagline: *"Tiết kiệm • Duy trì • Sinh lời bền vững"*.
+    - *Cấu Hình Hệ Thống & Ứng Dụng (`app.json`):*
+      - Cập nhật `name: "PigFly"`, `slug: "pigfly"`.
+      - Quyền iOS & Android Camera / Photo Library: Thay thế toàn bộ tiền tố Pigpo/PigBo bằng `PigFly`.
+    - *Chuẩn Hóa Từ Điển Chuỗi Hiển Thị (`src/constants/strings.ts`):*
+      - `appName: 'PigFly'`
+      - `tagline: 'Tiết kiệm – Duy trì – Sinh lời bền vững'`
+      - Bổ sung `slogan: 'PigFly: Tiết kiệm – Duy trì – Sinh lời bền vững'`
+      - Cố vấn Heo AI: `coachSectionTitle: 'CỐ VẤN CHÚ HEO PIGFLY'`, `promptShouldIBuy: 'Có nên mua món này không PigFly?'`, `thinking: 'PigFly đang suy nghĩ...'`, `emptyConversation: 'Chào bạn! PigFly ở đây rồi nè. Hôm nay chú heo béo có thể giúp bạn kiểm tra ngân sách hay ghi chép gì không?'`.
+    - *Chuẩn Hóa Phòng Nuôi Heo Tab 3 (`src/store/squadStore.ts`):*
+      - Tên phòng mặc định: `"Squad Nuôi Heo PigFly"`.
+      - Tên Bot hệ thống tương tác: `"PigFly Bot"`.
+      - Khóa lưu trữ cục bộ: `@pigfly_squad_room_v1` kèm cơ chế Seamless Fallback đọc di trú dữ liệu tự động từ khóa cũ `@pigpo_squad_room_v1`.
+    - *Màn Hình Đăng Nhập & Bản Quyền Chân Trang (`app/(auth)/login.tsx`):*
+      - Tên thương hiệu hiển thị Hero: `"PigFly"`.
+      - Chân trang bản quyền: `"PigFly © 2026 – Tiết kiệm, duy trì, sinh lời bền vững"`.
+    - *Linh Vật Đồ Họa Đa Năng (`PigFlyMascot.tsx` / `PigBoMascot.tsx`):*
+      - Xuất khẩu component chính `PigFlyMascot` cùng alias tương thích ngược `PigBoMascot = PigFlyMascot`.
+      - Xuất khẩu kiểu dữ liệu `type PigFlyPose` cùng alias `type PigBoPose = PigFlyPose`.
+    - *Kiểm Thử Hồi Quy Tuyệt Đối (`run-all-tests.js`):*
+      - Cập nhật Test 49 xác thực tự động toàn bộ thuộc tính `PigFly` trên `app.json`, `strings.ts`, `squadStore.ts` và `login.tsx`.

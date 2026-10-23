@@ -5,8 +5,9 @@
 
 export const Strings = {
   common: {
-    appName: 'Pigpo',
-    tagline: 'Tiết kiệm - Duy trì - Sinh lời bền vững',
+    appName: 'PigFly',
+    tagline: 'Tiết kiệm – Duy trì – Sinh lời bền vững',
+    slogan: 'PigFly: Tiết kiệm – Duy trì – Sinh lời bền vững',
     confirm: 'Xác nhận',
     save: 'Lưu',
     cancel: 'Hủy',
@@ -141,7 +142,7 @@ export const Strings = {
     inputPlaceholder: 'Tâm sự với Heo Béo hoặc nhờ ghi sổ...',
     promptTodayRemaining: 'Hôm nay còn tiêu được bao nhiêu?',
     promptCoffeeTotal: 'Tháng này tiêu bao nhiêu tiền cà phê?',
-    promptShouldIBuy: 'Có nên mua món này không PigBo?',
+    promptShouldIBuy: 'Có nên mua món này không PigFly?',
     promptSetGoal: 'Giúp mình đặt mục tiêu tháng này',
     saveConfirmPrompt: 'Đã chuẩn bị thẻ ghi, kiểm tra rồi bấm Lưu nhé:',
     disclaimer: 'Dựa trên số liệu bạn cung cấp, không phải lời khuyên đầu tư tài chính chuyên nghiệp.',
@@ -150,8 +151,8 @@ export const Strings = {
     friendsNotifyBtn: 'Báo khi có tính năng',
     friendsNotified: 'Đã đăng ký nhận thông báo!',
     viewInStats: 'Xem chi tiết trong Thống kê ➔',
-    thinking: 'PigBo đang suy nghĩ...',
-    emptyConversation: 'Chào bạn! PigBo ở đây rồi nè. Hôm nay chú heo béo có thể giúp bạn kiểm tra ngân sách hay ghi chép gì không?',
+    thinking: 'PigFly đang suy nghĩ...',
+    emptyConversation: 'Chào bạn! PigFly ở đây rồi nè. Hôm nay chú heo béo có thể giúp bạn kiểm tra ngân sách hay ghi chép gì không?',
   },
 
   home: {
@@ -221,7 +222,7 @@ export const Strings = {
     unitCoffee: 'Ly cà phê (40k)',
     unitBoba: 'Ly trà sữa (35k)',
     unitPho: 'Bát phở (50k)',
-    coachSectionTitle: 'CỐ VẤN CHÚ HEO PIGBO',
+    coachSectionTitle: 'CỐ VẤN CHÚ HEO PIGFLY',
     coachTone: 'Mức độ thẳng thắn',
     toneGentle: 'Nhẹ nhàng',
     toneBalanced: 'Vừa phải',

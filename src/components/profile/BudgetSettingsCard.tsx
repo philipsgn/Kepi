@@ -751,10 +751,6 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
   // Modal Bottom Sheet state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const currentUnitObj = useMemo(() => {
-    return UNITS.find((u) => u.id === selectedUnit) || UNITS[0];
-  }, [selectedUnit]);
-
   // Load fixed costs and savings ratio from AsyncStorage on mount
   useEffect(() => {
     (async () => {
@@ -997,18 +993,6 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             <Text style={[styles.spotlightLabel, { color: tokens.textMuted }]}>
               Hôm nay tiêu được
             </Text>
-            <View
-              style={[
-                styles.unitBadgePill,
-                {
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#FFFFFF',
-                },
-              ]}
-            >
-              <Text style={styles.unitBadgeText}>
-                {`~ ${Math.max(1, Math.round((autoCalculatedDaily || baseDailyBudget) / (currentUnitObj.price || 35000)))} ${currentUnitObj.label}`}
-              </Text>
-            </View>
           </View>
 
           <Text style={[styles.spotlightAmount, { color: tokens.primary }]}>
@@ -2094,16 +2078,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.4,
-  },
-  unitBadgePill: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  unitBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#8A6834',
   },
   spotlightAmount: {
     fontSize: 20,

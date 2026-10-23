@@ -5,7 +5,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { BellRing, Camera, Check, RotateCcw, Smartphone, Zap } from 'lucide-react-native';
+import { BellRing, Camera, RotateCcw, ShieldCheck, Smartphone, Zap } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
@@ -15,7 +15,7 @@ import {
 } from '../../services/lockScreenService';
 
 export const LockScreenSettingsCard: React.FC = () => {
-  const { tokens } = useTheme();
+  const { tokens, isDark } = useTheme();
   const [isEnabled, setIsEnabled] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -52,22 +52,9 @@ export const LockScreenSettingsCard: React.FC = () => {
           <View style={styles.inlineTitleRow}>
             <BellRing size={16} color={isEnabled ? tokens.primary : tokens.textMuted} strokeWidth={2.4} />
             <Text style={[styles.rowTitle, { color: tokens.text }]}>Ghim số dư hôm nay</Text>
-            <View
-              style={[
-                styles.statusBadge,
-                {
-                  backgroundColor: isEnabled ? 'rgba(126, 159, 128, 0.16)' : tokens.surfaceAlt,
-                  borderColor: isEnabled ? '#7E9F80' : tokens.border,
-                },
-              ]}
-            >
-              <Text style={[styles.statusBadgeText, { color: isEnabled ? '#7E9F80' : tokens.textMuted }]}>
-                {isEnabled ? 'Đang ghim' : 'Đang tắt'}
-              </Text>
-            </View>
           </View>
           <Text style={[styles.rowSub, { color: tokens.textMuted }]}>
-            Luôn hiện "Hôm nay còn [xx]k" kèm nút trừ nhanh 30k, 50k trên thanh thông báo
+            Hiển thị "Hôm nay còn [xx]k" kèm phím tắt ghi nhanh 30k, 50k trên thanh thông báo
           </Text>
         </View>
 
@@ -80,22 +67,49 @@ export const LockScreenSettingsCard: React.FC = () => {
         />
       </View>
 
-      {/* 3. TÍNH NĂNG TÍCH HỢP TRÊN MÀN HÌNH KHÓA */}
-      <View style={styles.featureGrid}>
-        <View style={[styles.featurePill, { backgroundColor: tokens.surfaceAlt }]}>
-          <Zap size={14} color={tokens.primary} strokeWidth={2.6} />
-          <Text style={[styles.featureText, { color: tokens.textSub }]}>Trừ ngầm -30k / -50k</Text>
+      {/* 3. TÍNH NĂNG TIỆN ÍCH MINH BẠCH */}
+      <View style={styles.utilitySection}>
+        <Text style={[styles.subSectionTitle, { color: tokens.textSub }]}>Tính năng hỗ trợ:</Text>
+        <View style={styles.utilityRow}>
+          <Zap size={15} color={tokens.primary} strokeWidth={2.6} />
+          <Text style={[styles.utilityText, { color: tokens.text }]}>
+            Ghi chép tức thì: Phím tắt ghi nhận -30k, -50k trực tiếp từ thanh thông báo
+          </Text>
         </View>
+        <View style={styles.utilityRow}>
+          <RotateCcw size={15} color="#7E9F80" strokeWidth={2.6} />
+          <Text style={[styles.utilityText, { color: tokens.text }]}>
+            Hoàn tác an toàn 5s: Khôi phục số dư trong 5 giây nếu lỡ chạm nhầm
+          </Text>
+        </View>
+        <View style={styles.utilityRow}>
+          <Camera size={15} color={tokens.primary} strokeWidth={2.6} />
+          <Text style={[styles.utilityText, { color: tokens.text }]}>
+            Lối tắt Camera: Mở thẳng khung ngắm chụp ảnh món đồ & quét mã
+          </Text>
+        </View>
+      </View>
 
-        <View style={[styles.featurePill, { backgroundColor: tokens.surfaceAlt }]}>
-          <RotateCcw size={14} color="#7E9F80" strokeWidth={2.6} />
-          <Text style={[styles.featureText, { color: tokens.textSub }]}>Hoàn tác 1 chạm</Text>
+      {/* 4. CAM KẾT BẢO MẬT & QUYỀN RIÊNG TƯ */}
+      <View
+        style={[
+          styles.securityCard,
+          {
+            backgroundColor: isDark ? 'rgba(126, 159, 128, 0.08)' : 'rgba(126, 159, 128, 0.12)',
+            borderColor: 'rgba(126, 159, 128, 0.25)',
+          },
+        ]}
+      >
+        <View style={styles.securityHeader}>
+          <ShieldCheck size={16} color="#7E9F80" strokeWidth={2.6} />
+          <Text style={[styles.securityTitle, { color: isDark ? '#7E9F80' : '#0F2F24' }]}>
+            100% Local Processing & Không Can Thiệp Tiền Thật
+          </Text>
         </View>
-
-        <View style={[styles.featurePill, { backgroundColor: tokens.surfaceAlt }]}>
-          <Camera size={14} color={tokens.primary} strokeWidth={2.6} />
-          <Text style={[styles.featureText, { color: tokens.textSub }]}>Mở camera &lt; 0.5s</Text>
-        </View>
+        <Text style={[styles.securityDesc, { color: isDark ? '#C5D6C6' : '#2A4034' }]}>
+          • Tiện ích hoạt động hoàn toàn cục bộ trên thiết bị, không gửi dữ liệu ra máy chủ bên ngoài.{'\n'}
+          • Kepi không liên kết tài khoản ngân hàng và không có quyền thực hiện giao dịch trừ tiền thật.
+        </Text>
       </View>
     </View>
   );
@@ -150,38 +164,53 @@ const styles = StyleSheet.create({
     fontFamily: 'BeVietnamPro-Medium',
     fontWeight: '500',
   },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: radii.full,
-    borderWidth: 1,
-  },
-  statusBadgeText: {
-    fontSize: 10,
-    fontFamily: 'BeVietnamPro-SemiBold',
-    fontWeight: '600',
-  },
   rowSub: {
     fontSize: 12,
     fontFamily: 'BeVietnamPro-Regular',
     lineHeight: 17,
   },
-  featureGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+  utilitySection: {
     marginTop: 12,
+    gap: 8,
   },
-  featurePill: {
+  subSectionTitle: {
+    fontSize: 12,
+    fontFamily: 'BeVietnamPro-SemiBold',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  utilityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: radii.full,
+    gap: 8,
   },
-  featureText: {
-    fontSize: 11,
-    fontFamily: 'BeVietnamPro-Medium',
+  utilityText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: 'BeVietnamPro-Regular',
+    lineHeight: 17,
+  },
+  securityCard: {
+    marginTop: 14,
+    padding: 12,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+  },
+  securityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  securityTitle: {
+    fontSize: 12.5,
+    fontFamily: 'BeVietnamPro-SemiBold',
+    fontWeight: '600',
+    letterSpacing: -0.1,
+  },
+  securityDesc: {
+    fontSize: 11.5,
+    fontFamily: 'BeVietnamPro-Regular',
+    lineHeight: 17,
   },
 });

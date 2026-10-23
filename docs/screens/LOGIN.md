@@ -1,10 +1,10 @@
 # 📋 ĐẶC TẢ MÀN HÌNH ĐĂNG NHẬP & KHẢO SÁT ĐỘ TUỔI (LOGIN & ONBOARDING SPEC)
 
 > **Mã màn hình:** `LOGIN` (`app/(auth)/login.tsx`)  
-> **Tên màn hình:** Màn hình Đăng Nhập 1-Chạm, Khảo Sát Năm Sinh & Định Danh Pigpo  
+> **Tên màn hình:** Màn hình Đăng Nhập 1-Chạm, Khảo Sát Năm Sinh & Định Danh PigFly  
 > **Trạng thái:** Approved & Implementing  
-> **Phiên bản:** 2.0 (Khảo sát độ tuổi, Nickname debounce fail-open, Local-First 0$ Cloud)  
-> **Lần cập nhật cuối:** 2026-10-22  
+> **Phiên bản:** 2.1 (Đồng bộ thương hiệu PigFly, Khảo sát độ tuổi, Nickname debounce fail-open)  
+> **Lần cập nhật cuối:** 2026-10-23  
 
 ---
 
@@ -22,7 +22,7 @@
 
 ```mermaid
 flowchart TD
-    A[Mở App Pigpo] --> B{Kiểm tra Session Supabase?}
+    A[Mở App PigFly] --> B{Kiểm tra Session Supabase?}
     B -- Có Session Cloud --> C[Đăng nhập Cloud -> Vào Main]
     B -- Không có Session --> D{Có cachedUserStr cục bộ?}
     D -- Có User/Profile --> E[Phục hồi Session cục bộ -> Vào Main]
@@ -59,8 +59,8 @@ flowchart TD
       <ScrollView>
         ├── <TopHeaderRow>: Nút Palette đổi Theme 1-chạm trơn nổi trần
         ├── <HeroSection>:
-        │     ├── <Mascot3DImage>: App Icon Chú Heo Pigpo 3D Clay Chibi
-        │     ├── <BrandTitle>: "Pigpo"
+        │     ├── <Mascot3DImage>: App Icon Chú Heo PigFly 3D Clay Chibi
+        │     ├── <BrandTitle>: "PigFly"
         │     └── <SubQuoteTag>: "Tiết kiệm • Duy trì • Sinh lời bền vững"
         ├── <FormCard>:
         │     ├── <NicknameFieldBlock>:
@@ -73,7 +73,7 @@ flowchart TD
         ├── <PowerSection>: Nút Nguồn trơn nổi trần (Power icon lớn 44px, stroke 2.8)
         └── <FooterSection>:
               ├── Ca dao lục bát: "Heo kia chẳng vỗ thời to / Từng xu góp lại thành kho lúc nào"
-              └── Copyright: "Pigpo © 2026 – Tiết kiệm, duy trì, sinh lời bền vững"
+              └── Copyright: "PigFly © 2026 – Tiết kiệm, duy trì, sinh lời bền vững"
 ```
 
 ---

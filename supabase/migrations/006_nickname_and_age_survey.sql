@@ -1,5 +1,5 @@
 -- ==============================================================================
--- KEPI (VÍ LOCKET / PIGPO) — MIGRATION 006: NICKNAME & AGE SURVEY SYSTEM
+-- KEPI (VÍ LOCKET / PIGFLY) — MIGRATION 006: NICKNAME & AGE SURVEY SYSTEM
 -- Phiên bản: 6.0 (Zero-Friction Demographics Analytics & Secure RPC)
 -- Mục tiêu:
 --   1. Tạo bảng khảo sát nhân khẩu học người dùng ẩn danh (public.user_surveys)

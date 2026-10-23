@@ -7,6 +7,7 @@ import { Card } from '../common/Card';
 import { GroupedList } from '../common/GroupedList';
 import { GroupedRow } from '../common/GroupedRow';
 import { useTheme } from '../../theme/ThemeContext';
+import { radii } from '../../theme/tokens';
 import { Colors } from '../../constants/colors';
 import { SUPPORTED_BANKS } from '../../utils/qr/bankDeeplink';
 
@@ -135,6 +136,29 @@ export const QRPaySettingsCard: React.FC = () => {
           }
         />
       </GroupedList>
+
+      {/* 5. KHỐI CAM KẾT CHUẨN VIETQR & KHÔNG GIỮ TIỀN */}
+      <View
+        style={[
+          styles.securityCard,
+          {
+            backgroundColor: isDark ? 'rgba(229, 152, 68, 0.08)' : 'rgba(229, 152, 68, 0.12)',
+            borderColor: 'rgba(229, 152, 68, 0.25)',
+          },
+        ]}
+      >
+        <View style={styles.securityHeader}>
+          <ShieldCheck size={16} color={tokens.primary} strokeWidth={2.6} />
+          <Text style={[styles.securityTitle, { color: tokens.primary }]}>
+            VietQR Chuẩn NAPAS / EMVCo • Kepi Không Giữ Tiền
+          </Text>
+        </View>
+        <Text style={[styles.securityDesc, { color: isDark ? '#D9D0C1' : '#4A3E31' }]}>
+          • Tuân thủ nghiêm ngặt đặc tả kỹ thuật VietQR của NAPAS và EMVCo (Tag 38 NAPAS GUID A000000727). Bộ giải mã chạy 100% Offline trên máy.{'\n'}
+          • Kepi không phải là ví điện tử hay cổng thanh toán, hoàn toàn không giữ tiền của bạn.{'\n'}
+          • Zero-STK Shield: STK thụ hưởng chỉ đọc tạm trong RAM để mở app ngân hàng chính chủ, tuyệt đối không lưu vào CSDL.
+        </Text>
+      </View>
     </Card>
   );
 };
@@ -154,10 +178,35 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 15,
+    fontFamily: 'BeVietnamPro-Bold',
     fontWeight: '700',
   },
   subtitle: {
     fontSize: 12,
+    fontFamily: 'BeVietnamPro-Regular',
     marginTop: 2,
+  },
+  securityCard: {
+    marginTop: 16,
+    padding: 12,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+  },
+  securityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  securityTitle: {
+    fontSize: 12.5,
+    fontFamily: 'BeVietnamPro-SemiBold',
+    fontWeight: '600',
+    letterSpacing: -0.1,
+  },
+  securityDesc: {
+    fontSize: 11.5,
+    fontFamily: 'BeVietnamPro-Regular',
+    lineHeight: 17,
   },
 });

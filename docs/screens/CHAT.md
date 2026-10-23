@@ -1,10 +1,10 @@
 # 📋 ĐẶC TẢ MÀN HÌNH: CHAT (CHAT.MD)
 
 > **Mã màn hình:** `CHAT` (Tab 4, Index 3 trong thanh điều hướng 5 trang)  
-> **Tên màn hình:** Chat (Trò Chuyện Cùng Heo Béo Pigpo AI & Hội Bạn Thân 2-4 Người)  
+> **Tên màn hình:** Chat (Trò Chuyện Cùng Heo Béo PigFly AI & Squad Nuôi Heo PigFly 2-4 Người)  
 > **Trạng thái:** Chờ Chủ Dự Án Duyệt (Stage A)  
-> **Phiên bản:** 1.0  
-> **Lần cập nhật cuối:** 2026-10-02  
+> **Phiên bản:** 1.1 (Đồng bộ thương hiệu PigFly)  
+> **Lần cập nhật cuối:** 2026-10-23  
 
 ---
 

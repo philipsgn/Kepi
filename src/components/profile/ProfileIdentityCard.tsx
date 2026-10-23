@@ -61,7 +61,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
         </TouchableOpacity>
       )}
 
-      {/* 1. HÀNG THÔNG TIN TÀI KHOẢN: AVATAR CHÚ HEO PIGBO CHIBI */}
+      {/* 1. HÀNG THÔNG TIN TÀI KHOẢN: AVATAR CHÚ HEO PIGFLY CHIBI */}
       <View style={styles.topRow}>
         <View style={styles.mascotAvatarWrapper}>
           <PigBoMascot pose="welcome" size={48} />

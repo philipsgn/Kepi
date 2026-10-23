@@ -69,7 +69,7 @@ import { PriceTag } from '../../src/components/common/PriceTag';
 import { DiscreteHealthBar } from '../../src/components/common/DiscreteHealthBar';
 import { FloatingPillTabBar } from '../../src/components/navigation/FloatingPillTabBar';
 import { ShutterButton } from '../../src/components/camera/ShutterButton';
-import { PigBoMascot } from '../../src/components/mascot/PigBoMascot';
+import { PigBoMascot, PigFlyMascot } from '../../src/components/mascot/PigBoMascot';
 import { ModeSwitchPill, CameraMode } from '../../src/components/camera/ModeSwitchPill';
 import { LocketMomentCard } from '../../src/components/camera/LocketMomentCard';
 import { UndoToastBar } from '../../src/components/common/UndoToastBar';
@@ -1099,9 +1099,11 @@ export default function MainAppScreen() {
               )}
 
               {/* CAMERA VIEWFINDER (LOCKET SQUIRCLE FRAME 38PX HOẶC ẢNH VỪA CHỤP) */}
-              <View style={styles.mascotCameraHeaderWrapper}>
-                <PigBoMascot pose="camera" size={54} />
-              </View>
+              {capturedPhotoUri ? (
+                <View style={styles.capturedPhotoMascotWrapper}>
+                  <PigFlyMascot pose="happy" size={38} />
+                </View>
+              ) : null}
               <View style={styles.viewfinderContainer}>
                 {capturedPhotoUri ? (
                   <OnCameraPhotoOverlay
@@ -1646,10 +1648,9 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '700',
   },
-  mascotCameraHeaderWrapper: {
+  capturedPhotoMascotWrapper: {
     alignItems: 'center',
-    marginBottom: -16,
-    zIndex: 15,
+    marginBottom: 8,
   },
   viewfinderContainer: {
     width: SCREEN_WIDTH - 24,

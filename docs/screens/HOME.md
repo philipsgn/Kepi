@@ -33,7 +33,7 @@
 ├────────────────────────────────────────────────────────────┤
 │                                                            │
 │ 1. SECTION HERO (DUY NHẤT CÓ VIỀN ANCHOR — FOCUS CARD)     │
-│ ┌ HÔM NAY TIÊU ĐƯỢC          [🐷 PigBo]    ĐÃ CHI HÔM NAY ─┐│ (Card nổi duy nhất)
+│ ┌ HÔM NAY TIÊU ĐƯỢC          [🐷 PigFly]   ĐÃ CHI HÔM NAY ─┐│ (Card nổi duy nhất)
 │ │ 180.000 đ                               0 đ             ││
 │ │ ▮▮▮▮▮▮▮▮▯▯ (Thanh tiến độ Dynamic Smoothing mỏng 6px)    ││
 │ │ Ngân sách tháng còn: 5.200.000 đ                        ││

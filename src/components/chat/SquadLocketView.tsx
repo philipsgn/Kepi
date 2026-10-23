@@ -152,7 +152,7 @@ export const SquadLocketView: React.FC = () => {
       >
         <View style={styles.emptyHero}>
           <PigBoMascot pose="happy" size={96} />
-          <Text style={[styles.emptyTitle, { color: tokens.text }]}>Hội Bạn Thân Pigpo (2–4 Bạn)</Text>
+          <Text style={[styles.emptyTitle, { color: tokens.text }]}>Squad Nuôi Heo PigFly (2–4 Bạn)</Text>
           <Text style={[styles.emptyDesc, { color: tokens.textMuted }]}>
             Cùng nhau nuôi heo, xem Locket Feed khoảnh khắc chi tiêu của bạn bè, nhắc nhở tiết kiệm mỗi ngày mà không sợ lộ khoản chi riêng tư.
           </Text>

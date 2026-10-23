@@ -3,22 +3,25 @@ import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Ellipse, Path, Rect, G } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 
-export type PigBoPose = 'welcome' | 'camera' | 'card' | 'wise' | 'happy';
+export type PigFlyPose = 'welcome' | 'camera' | 'card' | 'wise' | 'happy';
+export type PigBoPose = PigFlyPose;
 
-interface PigBoMascotProps {
-  pose?: PigBoPose;
+export interface PigFlyMascotProps {
+  pose?: PigFlyPose;
   size?: number;
   onPress?: () => void;
   style?: any;
 }
+export type PigBoMascotProps = PigFlyMascotProps;
 
 /**
- * LINH VẬT CHÚ HEO PIGBO (3D Clay Chibi Trắng Sứ / Tai Má Hồng Phấn)
+ * LINH VẬT CHÚ HEO PIGFLY (3D Clay Chibi Trắng Sứ / Tai Má Hồng Phấn)
+ * - Tên thương hiệu: PigFly (alias tương thích ngược PigBo)
  * - Phong cách: 3D Clay Chibi đất nặn mịn màng Pixar (Porcelain White & Pastel Pink)
  * - Hiệu ứng: Chạm vào nhún tưng tưng đàn hồi (Spring Animation) kèm Heavy Haptic
  * - Cực kỳ nhẹ (~15KB vector), 60fps mượt mà, không nóng máy, không hao pin
  */
-export const PigBoMascot: React.FC<PigBoMascotProps> = ({
+export const PigFlyMascot: React.FC<PigFlyMascotProps> = ({
   pose = 'welcome',
   size = 64,
   onPress,
@@ -128,6 +131,9 @@ export const PigBoMascot: React.FC<PigBoMascotProps> = ({
     </TouchableOpacity>
   );
 };
+
+// Alias tương thích ngược cho các component hiện hữu
+export const PigBoMascot = PigFlyMascot;
 
 const styles = StyleSheet.create({
   container: {
