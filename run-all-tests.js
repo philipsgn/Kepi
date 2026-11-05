@@ -2496,5 +2496,37 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 52 Passed: 100% Local-First Production Engine & Zero Cloud Network Overhead verified cleanly');
 }
 
-console.log('\n🎉 ALL 52 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (52/52)!');
+// ==========================================
+// 53. Mand Mobile Style Cashier Keyboard & Quick Amount Logging
+// ==========================================
+{
+  const assert = require('assert');
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. Kiểm tra component MandCashierKeyboard tồn tại và xuất khẩu đúng chuẩn
+  const keyboardPath = path.join(__dirname, 'src/components/common/MandCashierKeyboard.tsx');
+  assert.ok(fs.existsSync(keyboardPath), 'MandCashierKeyboard.tsx must exist');
+
+  const keyboardCode = fs.readFileSync(keyboardPath, 'utf8');
+  assert.ok(keyboardCode.includes('handlePressTripleZero'), 'MandCashierKeyboard must handle 000 key');
+  assert.ok(keyboardCode.includes('handleBackspace'), 'MandCashierKeyboard must handle backspace');
+  assert.ok(keyboardCode.includes('tabular-nums'), 'MandCashierKeyboard must use tabular-nums');
+  assert.ok(keyboardCode.includes('currentCategories'), 'MandCashierKeyboard must render micro category strip');
+
+  // 2. Kiểm tra xuất khẩu trong common/index.ts
+  const commonIndexPath = path.join(__dirname, 'src/components/common/index.ts');
+  const commonIndexCode = fs.readFileSync(commonIndexPath, 'utf8');
+  assert.ok(commonIndexCode.includes('MandCashierKeyboard'), 'common/index.ts must export MandCashierKeyboard');
+
+  // 3. Kiểm tra LocketReviewModal tích hợp MandCashierKeyboard
+  const reviewModalPath = path.join(__dirname, 'src/components/camera/LocketReviewModal.tsx');
+  const reviewModalCode = fs.readFileSync(reviewModalPath, 'utf8');
+  assert.ok(reviewModalCode.includes('MandCashierKeyboard'), 'LocketReviewModal must embed MandCashierKeyboard');
+  assert.ok(!reviewModalCode.includes('keyboardType="numeric"'), 'LocketReviewModal must remove OS numeric textinput');
+
+  console.log('✅ Test 53 Passed: Mand Mobile Style Cashier Keyboard & Quick Amount Logging verified cleanly');
+}
+
+console.log('\n🎉 ALL 53 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (53/53)!');
 

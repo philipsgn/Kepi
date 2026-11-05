@@ -483,3 +483,10 @@
     - *Tối Ưu Hóa Xác Thực (`src/store/authStore.ts`):* Tối ưu `checkNicknameAvailable` kiểm tra định dạng và độ dài cục bộ tức thì 0ms, không chờ timeout mạng; dọn sạch các hàm tàn dư `signInWithGoogle`, `signInWithEmail`, `verifyEmailOtp`.
     - *Dọn Dẹp Giao Diện:* Gỡ bỏ hàm `handleDirectLinkGoogle` khỏi `ProfileView.tsx`, gỡ bỏ prop và style chết liên quan đến Google trong `ProfileIdentityCard.tsx`, làm sạch route `app/(auth)/callback.tsx`.
     - *Bảo Toàn & Khôi Phục Dữ Liệu Ngoại Tuyến:* Khẳng định cơ chế sao lưu & khôi phục dữ liệu qua tệp JSON mã hóa nhúng ảnh Base64 (`exportAppDataAsync` / `importAppDataAsync`) và xuất CSV chuẩn UTF-8 BOM (`\uFEFF`) qua khay chia sẻ hệ thống (100% Offline, bảo mật tối đa).
+
+
+  - **Quyết định 96 (05/11/2026): Tích Hợp Bàn Phím Số Tài Chính MandCashierKeyboard (Phong Cách DiDi Mand Mobile):**
+    - *Triệt Tiêu Bàn Phím Hệ Điều Hành (Zero OS Keyboard Jitter):* Thay thế hoàn toàn bàn phím số mặc định của iOS/Android bằng bàn phím số tài chính chuyên dụng tích hợp sẵn trong màn hình Review sau khi chụp và các luồng nhập tiền. Triệt tiêu 100% tình trạng giật viewport và che khuất ảnh chụp 4:5.
+    - *Vũ Khí Nhập Tiền Siêu Tốc `000`:* Bố trí phím `000` ở hàng cuối cùng, hỗ trợ gõ nhanh mệnh giá nghìn/trăm nghìn VND (`3` + `5` + `000` = `35.000 đ`) chỉ trong 3 chạm nhẹ ($\le 1.5$s).
+    - *Cột Hành Động Tích Hợp (Giant Action Button):* Cột thứ 4 tích hợp phím Xóa lùi `⌫` và nút Primary Action `LƯU SỔ ✔` to bản (chiếm 3 hàng), bố trí đúng tầm với của ngón cái bên phải với màu sắc theo Theme và phản hồi xúc giác Haptics.
+    - *Dải Danh Mục 1-Chạm (Micro Category Strip):* Tích hợp dải danh mục cuộn ngang thu nhỏ ngay trên con số tiền với 100% icon vector nổi trần (`lucide-react-native`), cho phép chuyển đổi danh mục tức thì mà không cần mở modal chọn phụ.

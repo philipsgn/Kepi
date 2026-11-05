@@ -279,3 +279,11 @@ Nhằm tối ưu hóa trải nghiệm trên Android và mở rộng trong tươn
 
 ### 9.4. Tinh Gọn Màn Hình Ghi Chép Trực Tiếp (Zero-Clutter In-Frame Overlay):
 - Loại bỏ nhãn văn bản "Chọn 1 danh mục", chỉ hiển thị icon vector nổi trần tự nhiên khi chưa chọn và khi đã chọn danh mục.
+
+
+### 9.5. Tích Hợp Bàn Phím Số Tài Chính MandCashierKeyboard (Phong Cách DiDi Mand Mobile):
+- **Tự động mở sẵn (Zero-Touch to Type):** Khi người dùng chụp ảnh xong và màn hình `LocketReviewModal` xuất hiện, bàn phím số tài chính chuyên dụng `MandCashierKeyboard` lập tức trượt sẵn ở nửa dưới màn hình.
+- **Triệt tiêu bàn phím mềm hệ điều hành:** Loại bỏ hoàn toàn `TextInput numeric` và `KeyboardAvoidingView` của iOS/Android. Khung ảnh Squircle 4:5 hiển thị sắc nét ở nửa trên mà không bị gián đoạn hay che khuất.
+- **Dải danh mục thu nhỏ (Micro Category Strip):** Nằm ngay phía trên con số tiền, gồm các icon vector nổi trần (`Ăn uống`, `Cà phê`, `Mua sắm`, `Đi lại`...) cho phép chuyển đổi 1-chạm cực nhanh.
+- **Con số to bản (Mand Amount Display):** Hiển thị số tiền kích thước 36px, `fontVariant: ['tabular-nums']`, đơn vị `đ` thanh mảnh và con trỏ nhấp nháy êm ái.
+- **Phím `000` siêu tốc & Nút Lưu 3 hàng:** Phím `000` giúp gõ nhanh tiền nghìn/trăm nghìn VND; cột ngoài cùng bên phải tích hợp phím `⌫` và nút `LƯU ✔` to bản (chiếm 3 hàng), hoàn tất ghi chép chỉ trong $\le 2$ giây.
