@@ -21,7 +21,6 @@ interface ProfileIdentityCardProps {
   isMasked?: boolean;
   isGuest?: boolean;
   onEditName?: () => void;
-  onPressLogin?: () => void;
   onPressStreak?: () => void;
 }
 
@@ -34,7 +33,6 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
   isMasked = false,
   isGuest = false,
   onEditName,
-  onPressLogin,
   onPressStreak,
 }) => {
   const { tokens, isDark } = useTheme();
@@ -183,21 +181,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   localBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: -0.1,
-  },
-  googlePillBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 4.5,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    marginTop: 4,
-  },
-  googlePillText: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: -0.1,

@@ -2461,5 +2461,40 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 51 Passed: PigFly Brand Identity, Anti-Overlap Layout & Settings Zero-STK Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 51 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (51/51)!');
+// ==========================================
+// 52. 100% Local-First Production Engine & Zero Cloud Network Overhead
+// ==========================================
+{
+  const assert = require('assert');
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. transactionStore.ts không còn phụ thuộc Supabase / syncDownTransactions / enqueueMutation
+  const txStoreCode = fs.readFileSync(path.join(__dirname, 'src/store/transactionStore.ts'), 'utf8');
+  assert.ok(!txStoreCode.includes('syncDownTransactions'), 'transactionStore must not call syncDownTransactions');
+  assert.ok(!txStoreCode.includes('enqueueMutation'), 'transactionStore must not call enqueueMutation');
+  assert.ok(!txStoreCode.includes('initRealtimeTransactionSync'), 'transactionStore must not start realtime sync');
+
+  // 2. authStore.ts không gọi supabase RPC hoặc uploadExpensePhotoAsync trong background
+  const authStoreCode = fs.readFileSync(path.join(__dirname, 'src/store/authStore.ts'), 'utf8');
+  assert.ok(!authStoreCode.includes('uploadExpensePhotoAsync'), 'authStore must not upload photos to cloud');
+  assert.ok(!authStoreCode.includes("from('profiles')"), 'authStore must not query cloud profiles');
+
+  // 3. ProfileView và ProfileIdentityCard sạch 100% tàn dư Google Sign-in
+  const profileViewCode = fs.readFileSync(path.join(__dirname, 'src/components/views/ProfileView.tsx'), 'utf8');
+  assert.ok(!profileViewCode.includes('handleDirectLinkGoogle'), 'ProfileView must not contain handleDirectLinkGoogle');
+  assert.ok(!profileViewCode.includes('signInWithGoogle'), 'ProfileView must not reference signInWithGoogle');
+
+  const profileCardCode = fs.readFileSync(path.join(__dirname, 'src/components/profile/ProfileIdentityCard.tsx'), 'utf8');
+  assert.ok(!profileCardCode.includes('googlePillBtn'), 'ProfileIdentityCard must not contain googlePillBtn');
+  assert.ok(!profileCardCode.includes('onPressLogin'), 'ProfileIdentityCard must not contain onPressLogin');
+
+  // 4. Auth callback route sạch sẽ, không gọi exchangeCodeForSession
+  const callbackCode = fs.readFileSync(path.join(__dirname, 'app/(auth)/callback.tsx'), 'utf8');
+  assert.ok(!callbackCode.includes('exchangeCodeForSession'), 'callback route must not call exchangeCodeForSession');
+
+  console.log('✅ Test 52 Passed: 100% Local-First Production Engine & Zero Cloud Network Overhead verified cleanly');
+}
+
+console.log('\n🎉 ALL 52 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (52/52)!');
 

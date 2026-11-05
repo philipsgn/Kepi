@@ -2,10 +2,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Transaction, CalendarDaySummary, TransactionType, PaymentMethod, TransactionSource, MediaType } from '../types/database';
 import { useBudgetStore } from './budgetStore';
-import { enqueueMutation, flushSyncQueue, syncDownTransactions } from '../services/offlineSync';
-import { initRealtimeTransactionSync, teardownRealtimeTransactionSync } from '../services/realtimeSync';
 import { syncBudgetToLockScreen } from '../services/lockScreenService';
-
 
 const STORAGE_KEY = 'vi_locket_transactions_data';
 
@@ -64,9 +61,8 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
     selectedDate: getTodayDateStr(),
     selectedMonth: { year: now.getFullYear(), month: now.getMonth() + 1 },
 
-    loadTransactions: async (userId: string) => {
+    loadTransactions: async (_userId: string) => {
       set({ isLoading: true });
-      const isRealUser = Boolean(userId) && !userId.startsWith('guest');
 
       try {
         const cached = await AsyncStorage.getItem(STORAGE_KEY);
@@ -85,57 +81,6 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
         }
       } catch (err) {
         set({ transactions: [], isLoading: false });
-      }
-
-      // GUEST GUARD: Chỉ đồng bộ với Supabase khi là người dùng thật
-      if (isRealUser) {
-        syncDownTransactions(userId)
-          .then(async (remoteTxs) => {
-            if (remoteTxs && remoteTxs.length > 0) {
-              const local = get().transactions;
-              const existingIds = new Set(local.map((t) => t.id));
-              const newFromRemote = remoteTxs.filter((t) => !existingIds.has(t.id));
-              if (newFromRemote.length > 0) {
-                const merged = [...newFromRemote, ...local];
-                set({ transactions: merged });
-                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-                useBudgetStore.getState().recalculateFromTransactions(merged);
-              }
-            }
-          })
-          .catch(() => {});
-
-        // Đẩy các mutation hợp lệ còn tồn đọng
-        flushSyncQueue().catch(() => {});
-
-        // KHỞI ĐỘNG KÊNH REALTIME WEBSOCKET 2 CHIỀU:
-        initRealtimeTransactionSync(userId, {
-          onInsert: (newTx) => {
-            const current = get().transactions;
-            if (!current.some((t) => t.id === newTx.id)) {
-              const updated = [newTx, ...current];
-              set({ transactions: updated });
-              AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated)).catch(() => {});
-              if (newTx.status === 'CONFIRMED') {
-                const budgetStore = useBudgetStore.getState();
-                if (newTx.type === 'EXPENSE') budgetStore.recordExpense(newTx.amount);
-                else if (newTx.type === 'INCOME') budgetStore.recordIncome(newTx.amount);
-              }
-            }
-          },
-          onUpdate: (updatedTx) => {
-            const current = get().transactions;
-            const updated = current.map((t) => (t.id === updatedTx.id ? updatedTx : t));
-            set({ transactions: updated });
-            AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated)).catch(() => {});
-          },
-          onDelete: (deletedId) => {
-            const current = get().transactions;
-            const updated = current.filter((t) => t.id !== deletedId);
-            set({ transactions: updated });
-            AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated)).catch(() => {});
-          },
-        });
       }
     },
 
@@ -166,16 +111,8 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       const updated = [newTx, ...get().transactions];
       set({ transactions: updated });
 
-      // Lưu offline tức thì (0ms UI lag)
+      // Lưu 100% offline cục bộ (0ms UI lag)
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-
-      // GUEST GUARD: Chỉ đưa vào hàng đợi đồng bộ ngoại tuyến nếu là người dùng thật
-      const isGuest = !data.userId || data.userId.startsWith('guest');
-
-      if (!isGuest) {
-        await enqueueMutation('ADD_TRANSACTION', newTx);
-        flushSyncQueue().catch(() => {});
-      }
 
       // QUY TẮC CÁCH LY PHÉP TÍNH BẤT DI BẤT DỊCH (SINGLE SOURCE OF TRUTH):
       // Tự động tính toán lại ngân sách trực tiếp từ mảng giao dịch
@@ -203,9 +140,6 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       set({ transactions: updated });
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
-      await enqueueMutation('UPDATE_TRANSACTION', { id, ...updates });
-      flushSyncQueue().catch(() => {});
-
       // SINGLE SOURCE OF TRUTH: Tự động đồng bộ toàn bộ ngân sách và số dư
       useBudgetStore.getState().recalculateFromTransactions(updated);
       syncBudgetToLockScreen().catch(() => {});
@@ -220,9 +154,6 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       );
       set({ transactions: updated });
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-
-      await enqueueMutation('UPDATE_TRANSACTION', { id, ...updates });
-      flushSyncQueue().catch(() => {});
 
       useBudgetStore.getState().recalculateFromTransactions(updated);
     },
@@ -255,7 +186,6 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
     },
 
     updateTransaction: async (id: string, updates: Partial<Transaction>) => {
-      const existing = get().transactions.find((t) => t.id === id);
       const updated = get().transactions.map((t) => (t.id === id ? { ...t, ...updates } : t));
       set({ transactions: updated });
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -263,17 +193,9 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       // SINGLE SOURCE OF TRUTH: Cập nhật lại toàn bộ ngân sách khi sửa số tiền / ngày
       useBudgetStore.getState().recalculateFromTransactions(updated);
       syncBudgetToLockScreen().catch(() => {});
-
-      const isGuest = !existing?.user_id || existing.user_id.startsWith('guest');
-
-      if (!isGuest) {
-        await enqueueMutation('UPDATE_TRANSACTION', { id, ...updates });
-        flushSyncQueue().catch(() => {});
-      }
     },
 
     deleteTransaction: async (id: string) => {
-      const existing = get().transactions.find((t) => t.id === id);
       const updated = get().transactions.filter((t) => t.id !== id);
       set({ transactions: updated });
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -281,14 +203,6 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       // SINGLE SOURCE OF TRUTH: Hoàn lại tiền vào ngân sách và số dư khi xóa khoản chi
       useBudgetStore.getState().recalculateFromTransactions(updated);
       syncBudgetToLockScreen().catch(() => {});
-
-      const isGuest = !existing?.user_id || existing.user_id.startsWith('guest');
-
-      if (!isGuest) {
-        // Đưa vào hàng đợi xóa trên Supabase
-        await enqueueMutation('DELETE_TRANSACTION', { id });
-        flushSyncQueue().catch(() => {});
-      }
     },
 
     setSelectedDate: (dateStr: string) => {
@@ -357,7 +271,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
     },
 
     stopRealtimeSync: () => {
-      teardownRealtimeTransactionSync();
+      // 100% Local-First Engine: No cloud WebSocket connection required
     },
   };
 });

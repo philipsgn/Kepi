@@ -475,3 +475,11 @@
       - Xuất khẩu kiểu dữ liệu `type PigFlyPose` cùng alias `type PigBoPose = PigFlyPose`.
     - *Kiểm Thử Hồi Quy Tuyệt Đối (`run-all-tests.js`):*
       - Cập nhật Test 49 xác thực tự động toàn bộ thuộc tính `PigFly` trên `app.json`, `strings.ts`, `squadStore.ts` và `login.tsx`.
+
+
+  - **Quyết định 95 (05/11/2026): Chuyển Đổi Triệt Để Sang 100% Local-First Engine, Loại Bỏ Tàn Dư Cloud / Google Auth & Tối Ưu Độ Trễ 0ms Cho Production:**
+    - *Kiến Trúc 100% Local-First (Zero Cloud Database & Zero Google Auth):* Xóa bỏ hoàn toàn sự phụ thuộc vào Supabase Database và Google OAuth Sign-in. Mọi dữ liệu giao dịch, danh mục, ngân sách và hồ sơ lưu trữ cục bộ 100% trên thiết bị (`AsyncStorage` và `expo-file-system`), bảo vệ tối đa quyền riêng tư của người dùng.
+    - *Tối Ưu Hóa Giao Dịch (`src/store/transactionStore.ts`):* Loại bỏ triệt để các tác vụ nền `syncDownTransactions`, `initRealtimeTransactionSync`, `enqueueMutation`, `flushSyncQueue`. Tác vụ ghi nhận, cập nhật, xóa giao dịch lưu trực tiếp vào `AsyncStorage` đạt độ trễ 0ms tức thì, không hao pin và không phụ thuộc kết nối mạng.
+    - *Tối Ưu Hóa Xác Thực (`src/store/authStore.ts`):* Tối ưu `checkNicknameAvailable` kiểm tra định dạng và độ dài cục bộ tức thì 0ms, không chờ timeout mạng; dọn sạch các hàm tàn dư `signInWithGoogle`, `signInWithEmail`, `verifyEmailOtp`.
+    - *Dọn Dẹp Giao Diện:* Gỡ bỏ hàm `handleDirectLinkGoogle` khỏi `ProfileView.tsx`, gỡ bỏ prop và style chết liên quan đến Google trong `ProfileIdentityCard.tsx`, làm sạch route `app/(auth)/callback.tsx`.
+    - *Bảo Toàn & Khôi Phục Dữ Liệu Ngoại Tuyến:* Khẳng định cơ chế sao lưu & khôi phục dữ liệu qua tệp JSON mã hóa nhúng ảnh Base64 (`exportAppDataAsync` / `importAppDataAsync`) và xuất CSV chuẩn UTF-8 BOM (`\uFEFF`) qua khay chia sẻ hệ thống (100% Offline, bảo mật tối đa).

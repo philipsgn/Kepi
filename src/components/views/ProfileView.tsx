@@ -295,15 +295,6 @@ export const ProfileView: React.FC<ProfileViewProps> = () => {
     setShowGoalModal(true);
   };
 
-  // Handler: Save Budget Settings
-  const handleDirectLinkGoogle = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const { signInWithGoogle } = useAuthStore.getState();
-    const res = await signInWithGoogle();
-    if (!res.success && res.error) {
-      Alert.alert('Liên kết Google', res.error);
-    }
-  };
 
   const handleSaveBudgetSettings = async (params: {
     monthlyIncome: number;
@@ -428,7 +419,6 @@ export const ProfileView: React.FC<ProfileViewProps> = () => {
           isMasked={isMasked}
           isGuest={isGuest}
           onEditName={() => setShowNameModal(true)}
-          onPressLogin={handleDirectLinkGoogle}
           onPressStreak={() => setShowStreakModal(true)}
         />
 
