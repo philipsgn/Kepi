@@ -514,3 +514,18 @@
       - 3. Thiết lập script tự động vá `scripts/patch-ws-tunnel.js` và đăng ký vào lifecycle `postinstall` của `package.json` để bản vá tồn tại bền vững sau mọi lần `npm install`.
     - *Tiêu Chuẩn Nghiệm Thu:*
       - Lệnh `npx expo start --tunnel` khởi động thành công đường hầm Metro tunnel, xuất ra URL `exp://...exp.direct` và mã QR mà không phát sinh lỗi sập `TypeError: s.WebSocket is not a constructor`.
+
+  - **Quyết định 99 (07/11/2026): Bản Vá Triệt Tiêu Lỗi Văng Metro "Unexpected server response: 409" và Unhandled WebSocket Error Trên Node 24:**
+    - *Bối Cảnh & Nguyên Nhân:*
+      - Khi iPhone / Expo Go kết nối vào Metro thông qua đường hầm (`--tunnel`), sau khi bundle (`iOS Bundled 264ms index.js (1 module)`), nếu có sự cố gián đoạn mạng hoặc socket đóng mở nhanh, module đường hầm gọi tái kết nối trong `setTimeout`. Máy chủ đường hầm từ xa (`boltexpo.dev` / `exp.direct`) trả về mã HTTP `409 Conflict` do phiên subdomain cũ chưa kịp giải phóng hết trên relay server.
+      - Trong `@expo/ws-tunnel`, hàm tái kết nối `this.start(c)` bên trong `setTimeout` không có `.catch()`. Đồng thời `createWebSocket` chỉ dùng `.once('error')` tạm thời, khiến các sự kiện lỗi thứ cấp từ socket stream không còn listener, làm lỗi `Unexpected server response: 409` bắn thẳng vào `process.on('uncaughtException')` tại `@expo/cli/build/src/utils/errors.js:154`, làm tắt ngấm tiến trình Metro và Node.js v24.
+    - *Giải Pháp Kỹ Thuật:*
+      - 1. Module 363 (`createWebSocket`): Bổ sung listener bắt `unexpected-response` để hủy handshake sạch sẽ và đăng ký listener an toàn vĩnh cửu `t.on('error', () => {})` đảm bảo mọi instance WebSocket tạo bởi đường hầm không bao giờ phát tán unhandled error ra Node EventEmitter.
+      - 2. Module 450 (`createTunnel`): Bọc `this.start(c).catch(...)` bên trong `onSocketClose` `setTimeout` để nếu tái kết nối gặp 409 thì tự động kích hoạt retry backoff thay vì ném unhandled rejection làm sập tiến trình Node. Đồng thời bổ sung logic tự động retry 3 lần cho lần kết nối ban đầu nếu gặp 409.
+      - 3. `@expo/cli/build/src/utils/errors.js`: Thêm cơ chế phòng vệ tại `handleTooManyOpenFileErrors` bỏ qua lỗi transient 409 (`Ignored transient tunnel conflict error (409)`) thay vì gọi `throw error; process.exit(1)`.
+      - 4. `ManifestMiddleware.js`: Chuẩn hóa bóc tách base URL cho cả hai giao thức `exp://` và `https?://` (`(bundleUrl.match(/^(?:https?|exp):\/\/.*?\//)?.[0] || 'http://' + bundleUrl.split('/')[0] + '/')`).
+      - 5. Toàn bộ được tự động hóa 100% trong `scripts/patch-ws-tunnel.js` và kích hoạt tự động qua `postinstall` của `package.json`.
+    - *Tiêu Chuẩn Nghiệm Thu:*
+      - `tsc --noEmit` đạt 0 lỗi.
+      - `node run-all-tests.js` đạt 100% (53/53 tests).
+      - Kiểm thử mô phỏng lỗi 409 xác nhận Metro duy trì hoạt động bền vững, không sập tiến trình Node.
