@@ -40,7 +40,6 @@ export default function RootLayout() {
       <ThemeProvider>
         <StatusBar style="auto" />
         <Stack
-          initialRouteName="index"
           screenOptions={{
             headerShown: false,
             animation: 'fade',

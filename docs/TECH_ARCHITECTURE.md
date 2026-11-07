@@ -279,3 +279,22 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
 - Khai báo `<service android:name=".services.KepiNotificationListenerService" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:exported="true">` với `<intent-filter>` chứa action `android.service.notification.NotificationListenerService`.
 - Đảm bảo dịch vụ chạy ngầm opt-in, bóc tách chuỗi 100% trên thiết bị cục bộ (On-Device), an toàn tuyệt đối và không gửi bất kỳ byte dữ liệu thông báo nào ra bên ngoài.
 
+
+
+---
+
+## 9. HỆ SINH THÁI EXPO SDK 58 & KHẢ NĂNG TƯƠNG THÍCH ĐA THIẾT BỊ (EXPO SDK 58 ECOSYSTEM)
+
+### 9.1. Nâng Cấp Tương Thích iOS Expo Go v58.0.0
+- **Đồng bộ SDK:** Chuyển đổi toàn diện core Expo sang SDK 58 (`expo: ~58.0.7`, `react-native: 0.88.0-rc.4`, `react: 19.3.0`).
+- **Tương thích bắt buộc trên iOS:** Thiết bị iPhone chạy Expo Go phiên bản v58.0.0 từ Apple App Store đòi hỏi ứng dụng client phải khởi chạy từ cấu trúc SDK 58 để load bundle thành công mà không bị chặn.
+- **Hệ sinh thái thư viện SDK 58:** Đồng bộ hóa toàn bộ các gói `expo-*` (`expo-camera`, `expo-image`, `expo-router`, `expo-haptics`, `expo-notifications`, `expo-file-system`, `expo-sharing`, `expo-print`...) theo bảng chuẩn `bundledNativeModules` của Expo 58.
+
+### 9.2. Duy Trì Tối Ưu Hóa & Phòng Vệ Metro
+- **Entry Point Resilience:** Giữ vững `index.js` nạp `nativeSafetyPolyfill.ts` trước `expo-router/entry`.
+- **Manifest Middleware Safe Routing:** Metro bundler hỗ trợ cả giao thức `exp://`, `http://`, `https://` an toàn, ngăn chặn lỗi đọc `match[0]` trên đối tượng null khi chạy tunnel ngrok.
+
+
+### 9.3. Phòng Vệ Đường Hầm WS-Tunnel (--tunnel Mode)
+- **Tương thích WebSocket Dual-Interface:** Tự động tiêm `WebSocket.WebSocket = WebSocket` cho `node_modules/ws` và fallback `new (s.WebSocket || s)` trong `@expo/ws-tunnel`.
+- **Đảm bảo tính sẵn sàng:** Cho phép nhà phát triển chạy `npx expo start --tunnel -c` từ mọi mạng ngoài (quán cafe, 4G/5G, văn phòng) mà không phụ thuộc vào cùng mạng LAN Wi-Fi.

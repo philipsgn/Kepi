@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Keyboard,
+import { Keyboard,
   Modal,
   PanResponder,
   Pressable,
@@ -9,8 +8,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-} from 'react-native';
+  View, ViewInstance } from 'react-native';
 import {
   Check,
   Coins,
@@ -21,8 +19,7 @@ import {
   Sparkles,
   Trash2,
   Wallet,
-  X,
-} from 'lucide-react-native';
+  X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Strings } from '../../constants/strings';
@@ -30,8 +27,7 @@ import { FavoriteUnit } from '../../types/database';
 import {
   FixedCostItem,
   STORAGE_KEY_FIXED_COST_ITEMS,
-  formatMaskedCurrency,
-} from '../../utils/profileUtils';
+  formatMaskedCurrency } from '../../utils/profileUtils';
 import { formatVND } from '../../utils/currency';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
@@ -137,10 +133,9 @@ function IncomeSlider({
   primaryColor,
   isDark,
   textColorMuted,
-  onDragEnd,
-}: IncomeSliderProps) {
+  onDragEnd }: IncomeSliderProps) {
   const [trackWidth, setTrackWidth] = useState(0);
-  const trackRef = useRef<View>(null);
+  const trackRef = useRef<ViewInstance>(null);
   const trackWidthRef = useRef(0);
   const trackPageXRef = useRef(0);
 
@@ -194,8 +189,7 @@ function IncomeSlider({
       },
       onPanResponderTerminate: () => {
         onDragEndRef.current?.();
-      },
-    })
+      } })
   ).current;
 
   const ratio = incomeToRatio(value);
@@ -212,7 +206,7 @@ function IncomeSlider({
           const w = e.nativeEvent.layout.width;
           trackWidthRef.current = w;
           setTrackWidth(w);
-          trackRef.current?.measure((_x, _y, _w, _h, pageX) => {
+          trackRef.current?.measure((_x: number, _y: number, _w: number, _h: number, pageX?: number) => {
             if (pageX !== undefined) {
               trackPageXRef.current = pageX;
             }
@@ -227,8 +221,7 @@ function IncomeSlider({
             {
               backgroundColor: isDark
                 ? 'rgba(255, 255, 255, 0.08)'
-                : 'rgba(0, 0, 0, 0.06)',
-            },
+                : 'rgba(0, 0, 0, 0.06)' },
           ]}
         >
           <View
@@ -236,8 +229,7 @@ function IncomeSlider({
               styles.sliderTrackActive,
               {
                 width: `${Math.round(ratio * 100)}%`,
-                backgroundColor: primaryColor,
-              },
+                backgroundColor: primaryColor },
             ]}
           />
         </View>
@@ -249,8 +241,7 @@ function IncomeSlider({
               styles.sliderThumb,
               {
                 left: thumbLeft,
-                backgroundColor: primaryColor,
-              },
+                backgroundColor: primaryColor },
             ]}
           />
         )}
@@ -377,10 +368,9 @@ function FixedCostSlider({
   isDark,
   textColorMuted,
   onDragStart,
-  onDragEnd,
-}: FixedCostSliderProps) {
+  onDragEnd }: FixedCostSliderProps) {
   const [trackWidth, setTrackWidth] = useState(0);
-  const trackRef = useRef<View>(null);
+  const trackRef = useRef<ViewInstance>(null);
   const trackWidthRef = useRef(0);
   const trackPageXRef = useRef(0);
 
@@ -438,8 +428,7 @@ function FixedCostSlider({
       },
       onPanResponderTerminate: () => {
         onDragEndRef.current?.();
-      },
-    })
+      } })
   ).current;
 
   const ratio = fixedCostToRatio(value);
@@ -455,7 +444,7 @@ function FixedCostSlider({
           const w = e.nativeEvent.layout.width;
           trackWidthRef.current = w;
           setTrackWidth(w);
-          trackRef.current?.measure((_x, _y, _w, _h, pageX) => {
+          trackRef.current?.measure((_x: number, _y: number, _w: number, _h: number, pageX?: number) => {
             if (pageX !== undefined) {
               trackPageXRef.current = pageX;
             }
@@ -471,8 +460,7 @@ function FixedCostSlider({
             {
               backgroundColor: isDark
                 ? 'rgba(255, 255, 255, 0.08)'
-                : 'rgba(0, 0, 0, 0.06)',
-            },
+                : 'rgba(0, 0, 0, 0.06)' },
           ]}
         >
           {/* DẢI MÀU HOẠT ĐỘNG */}
@@ -481,8 +469,7 @@ function FixedCostSlider({
               styles.fixedSliderTrackActive,
               {
                 width: `${Math.round(ratio * 100)}%`,
-                backgroundColor: sliderColor,
-              },
+                backgroundColor: sliderColor },
             ]}
           />
         </View>
@@ -495,8 +482,7 @@ function FixedCostSlider({
               styles.fixedSliderThumb,
               {
                 left: thumbLeft,
-                backgroundColor: sliderColor,
-              },
+                backgroundColor: sliderColor },
             ]}
           />
         )}
@@ -572,10 +558,9 @@ function ZeroBasedSplitter({
   ratio,
   onChangeRatio,
   onDragEnd,
-  isDark,
-}: ZeroBasedSplitterProps) {
+  isDark }: ZeroBasedSplitterProps) {
   const [trackWidth, setTrackWidth] = useState(0);
-  const trackRef = useRef<View>(null);
+  const trackRef = useRef<ViewInstance>(null);
   const trackWidthRef = useRef(0);
   const trackPageXRef = useRef(0);
 
@@ -632,8 +617,7 @@ function ZeroBasedSplitter({
       },
       onPanResponderTerminate: () => {
         onDragEndRef.current?.();
-      },
-    })
+      } })
   ).current;
 
   const thumbWidth = 28;
@@ -649,7 +633,7 @@ function ZeroBasedSplitter({
           const w = e.nativeEvent.layout.width;
           trackWidthRef.current = w;
           setTrackWidth(w);
-          trackRef.current?.measure((_x, _y, _w, _h, pageX) => {
+          trackRef.current?.measure((_x: number, _y: number, _w: number, _h: number, pageX?: number) => {
             if (pageX !== undefined) {
               trackPageXRef.current = pageX;
             }
@@ -662,8 +646,7 @@ function ZeroBasedSplitter({
           style={[
             styles.splitterTrackBackground,
             {
-              backgroundColor: isDark ? 'rgba(229, 152, 68, 0.4)' : 'rgba(229, 152, 68, 0.25)',
-            },
+              backgroundColor: isDark ? 'rgba(229, 152, 68, 0.4)' : 'rgba(229, 152, 68, 0.25)' },
           ]}
         >
           <View
@@ -671,8 +654,7 @@ function ZeroBasedSplitter({
               styles.splitterSavingsSegment,
               {
                 width: `${Math.round(ratio * 100)}%`,
-                backgroundColor: '#7E9F80',
-              },
+                backgroundColor: '#7E9F80' },
             ]}
           />
         </View>
@@ -685,8 +667,7 @@ function ZeroBasedSplitter({
               {
                 left: thumbLeft,
                 backgroundColor: '#FFFFFF',
-                borderColor: ratio > 0 ? '#7E9F80' : '#E59844',
-              },
+                borderColor: ratio > 0 ? '#7E9F80' : '#E59844' },
             ]}
           >
             <View style={styles.splitterGripLines}>
@@ -715,8 +696,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
   baseDailyBudget = 0,
   favUnit,
   isMasked = false,
-  onSaveBudgetSettings,
-}) => {
+  onSaveBudgetSettings }) => {
   const { tokens, isDark } = useTheme();
 
   // Local state for income
@@ -860,8 +840,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           monthlyFixedCosts: totalFixed,
           favUnit: newUnit,
           savingsRatio: newRatio,
-          savingsGoalAmount: savingsGoal,
-        });
+          savingsGoalAmount: savingsGoal });
       }, 400);
     },
     [onSaveBudgetSettings]
@@ -893,8 +872,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
       const newItem: FixedCostItem = {
         id: newId,
         name: suggestedName,
-        amount: 0,
-      };
+        amount: 0 };
       const updated = [...fixedCosts, newItem];
       setFixedCosts(updated);
       setActiveFixedId(newId);
@@ -908,8 +886,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
     const newItem: FixedCostItem = {
       id: newId,
       name: '',
-      amount: 0,
-    };
+      amount: 0 };
     const updated = [...fixedCosts, newItem];
     setFixedCosts(updated);
     setActiveFixedId(newId);
@@ -953,8 +930,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           styles.summaryCard,
           {
             backgroundColor: isDark ? '#162231' : '#FFFFFF',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-          },
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
         ]}
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -985,8 +961,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             styles.summarySpotlightBox,
             {
               backgroundColor: isDark ? 'rgba(229, 152, 68, 0.08)' : 'rgba(229, 152, 68, 0.06)',
-              borderColor: isDark ? 'rgba(229, 152, 68, 0.2)' : 'rgba(229, 152, 68, 0.15)',
-            },
+              borderColor: isDark ? 'rgba(229, 152, 68, 0.2)' : 'rgba(229, 152, 68, 0.15)' },
           ]}
         >
           <View style={styles.spotlightTopRow}>
@@ -1070,8 +1045,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
               styles.modalSheetContainer,
               {
                 backgroundColor: isDark ? '#0E1620' : '#FAF6F0',
-                borderTopColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
-              },
+                borderTopColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' },
             ]}
           >
             {/* DRAG HANDLE */}
@@ -1099,8 +1073,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 style={[
                   styles.sheetCloseButton,
                   {
-                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
-                  },
+                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)' },
                 ]}
                 onPress={() => setIsEditModalOpen(false)}
                 activeOpacity={0.7}
@@ -1122,8 +1095,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           styles.cardSection,
           {
             backgroundColor: isDark ? '#162231' : '#FFFFFF',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-          },
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
         ]}
       >
         <View style={styles.sectionHeaderBetween}>
@@ -1141,8 +1113,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             styles.inputRow,
             {
               backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-            },
+              borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
           ]}
         >
           {isMasked ? (
@@ -1189,8 +1160,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           styles.cardSection,
           {
             backgroundColor: isDark ? '#162231' : '#FFFFFF',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-          },
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
         ]}
       >
         <View style={styles.sectionHeaderBetween}>
@@ -1249,8 +1219,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                       ? tokens.primary
                       : hasAmount
                       ? 'rgba(229, 152, 68, 0.5)'
-                      : 'transparent',
-                  },
+                      : 'transparent' },
                 ]}
                 onPress={() => handleSelectSuggestedFixedCost(name)}
                 activeOpacity={0.8}
@@ -1264,8 +1233,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                         : isDark
                         ? '#FAF6EC'
                         : '#55606D',
-                      fontWeight: isSelected || hasAmount ? '700' : '500',
-                    },
+                      fontWeight: isSelected || hasAmount ? '700' : '500' },
                   ]}
                 >
                   {chipLabel}
@@ -1307,8 +1275,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                       ? tokens.primary
                       : hasAmount
                       ? 'rgba(229, 152, 68, 0.5)'
-                      : 'transparent',
-                  },
+                      : 'transparent' },
                 ]}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1325,8 +1292,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                         : isDark
                         ? '#FAF6EC'
                         : '#55606D',
-                      fontWeight: isSelected || hasAmount ? '700' : '500',
-                    },
+                      fontWeight: isSelected || hasAmount ? '700' : '500' },
                   ]}
                 >
                   {chipLabel}
@@ -1343,8 +1309,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
               styles.activeEditorBox,
               {
                 backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : '#FAF6EC',
-                borderColor: isDark ? 'rgba(229, 152, 68, 0.3)' : 'rgba(229, 152, 68, 0.25)',
-              },
+                borderColor: isDark ? 'rgba(229, 152, 68, 0.3)' : 'rgba(229, 152, 68, 0.25)' },
             ]}
           >
             <View style={styles.activeEditorHeader}>
@@ -1380,8 +1345,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 {
                   backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
                   borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                  marginBottom: 0,
-                },
+                  marginBottom: 0 },
               ]}
             >
               {isMasked ? (
@@ -1438,8 +1402,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             {
               backgroundColor: isDark ? '#162231' : '#FFFFFF',
               borderColor: tokens.primary,
-              shadowColor: '#E59844',
-            },
+              shadowColor: '#E59844' },
           ]}
         >
           {/* TIÊU ĐỀ CARD & DÒNG PHỤ KHẢ DỤNG XUỐNG DÒNG */}
@@ -1509,8 +1472,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
               {
                 backgroundColor: isDark
                   ? 'rgba(229, 152, 68, 0.12)'
-                  : 'rgba(229, 152, 68, 0.15)',
-              },
+                  : 'rgba(229, 152, 68, 0.15)' },
             ]}
           >
             <Text
@@ -1533,8 +1495,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             styles.placeholderCard,
             {
               backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : '#FFFFFF',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)',
-            },
+              borderColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' },
           ]}
         >
           <View style={styles.sectionLabelRow}>
@@ -1557,8 +1518,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           styles.cardSection,
           {
             backgroundColor: isDark ? '#162231' : '#FFFFFF',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-          },
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
         ]}
       >
         <Text style={[styles.sectionTitle, { color: isDark ? '#FAF6EC' : '#1B2733', marginBottom: 4 }]}>
@@ -1584,8 +1544,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                       : isDark
                       ? 'rgba(255, 255, 255, 0.04)'
                       : '#FAF6EC',
-                    borderColor: isSelected ? tokens.primary : 'transparent',
-                  },
+                    borderColor: isSelected ? tokens.primary : 'transparent' },
                 ]}
                 onPress={() => handleSelectUnit(u.id)}
                 activeOpacity={0.8}
@@ -1596,8 +1555,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                     styles.unitLabel,
                     {
                       color: isSelected ? tokens.primary : isDark ? '#FAF6EC' : '#1B2733',
-                      fontWeight: isSelected ? '700' : '500',
-                    },
+                      fontWeight: isSelected ? '700' : '500' },
                   ]}
                 >
                   {u.label}
@@ -1618,8 +1576,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 styles.sheetBottomBar,
                 {
                   backgroundColor: isDark ? '#0E1620' : '#FAF6F0',
-                  borderTopColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                },
+                  borderTopColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
               ]}
             >
               <TouchableOpacity
@@ -1644,8 +1601,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
 
 const styles = StyleSheet.create({
   wrapper: {
-    gap: 12,
-  },
+    gap: 12 },
   cardSection: {
     padding: 14,
     borderRadius: radii.xl,
@@ -1654,31 +1610,26 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 6,
-    elevation: 2,
-  },
+    elevation: 2 },
   sectionHeaderBetween: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
-  },
+    marginBottom: 8 },
   sectionLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-  },
+    gap: 7 },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    letterSpacing: -0.2,
-  },
+    letterSpacing: -0.2 },
   addInlineButton: {
     width: 26,
     height: 26,
     borderRadius: 13,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center' },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1686,45 +1637,37 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     paddingHorizontal: 12,
     marginBottom: 4,
-    minHeight: 46,
-  },
+    minHeight: 46 },
   currencyInput: {
     flex: 1,
     fontSize: 20,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
     letterSpacing: -0.3,
-    paddingVertical: 6,
-  },
+    paddingVertical: 6 },
   maskedAmountText: {
     fontSize: 18,
     fontWeight: '800',
     letterSpacing: 2,
-    paddingVertical: 10,
-  },
+    paddingVertical: 10 },
   currencySuffix: {
     fontSize: 18,
     fontWeight: '800',
-    marginLeft: 6,
-  },
+    marginLeft: 6 },
   sliderContainer: {
     marginTop: 4,
-    marginBottom: 4,
-  },
+    marginBottom: 4 },
   sliderTrackTouchArea: {
     height: 44,
     justifyContent: 'center',
-    position: 'relative',
-  },
+    position: 'relative' },
   sliderTrackBackground: {
     height: 8,
     borderRadius: 4,
-    overflow: 'hidden',
-  },
+    overflow: 'hidden' },
   sliderTrackActive: {
     height: '100%',
-    borderRadius: 4,
-  },
+    borderRadius: 4 },
   sliderThumb: {
     position: 'absolute',
     width: 26,
@@ -1737,96 +1680,79 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
-    elevation: 4,
-  },
+    elevation: 4 },
   milestoneRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 2,
-    marginTop: -2,
-  },
+    marginTop: -2 },
   milestoneText: {
     fontSize: 11,
     fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   suggestionChipsScroll: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginBottom: 10,
-  },
+    marginBottom: 10 },
   suggestionChip: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: radii.full,
-    borderWidth: 1,
-  },
+    borderWidth: 1 },
   suggestionChipText: {
-    fontSize: 11.5,
-  },
+    fontSize: 11.5 },
   activeEditorBox: {
     padding: 12,
     borderRadius: radii.lg,
     borderWidth: 1,
     gap: 8,
     marginTop: 6,
-    marginBottom: 8,
-  },
+    marginBottom: 8 },
   activeEditorHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+    alignItems: 'center' },
   activeEditorTitle: {
     fontSize: 13.5,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   activeCustomNameInput: {
     flex: 1,
     fontSize: 13.5,
     fontWeight: '700',
-    paddingVertical: 2,
-  },
+    paddingVertical: 2 },
   fixedListContainer: {
     gap: 8,
-    marginTop: 2,
-  },
+    marginTop: 2 },
   fixedCostRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     borderRadius: radii.md,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
+    paddingVertical: 4 },
   fixedNameInput: {
     flex: 1.2,
     fontSize: 13,
     fontWeight: '600',
-    paddingVertical: 6,
-  },
+    paddingVertical: 6 },
   fixedAmountContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
+    justifyContent: 'flex-end' },
   fixedAmountInput: {
     fontSize: 14,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
     textAlign: 'right',
-    paddingVertical: 6,
-  },
+    paddingVertical: 6 },
   fixedAmountSuffix: {
     fontSize: 13,
     fontWeight: '800',
-    marginLeft: 3,
-  },
+    marginLeft: 3 },
   trashBtn: {
-    padding: 6,
-  },
+    padding: 6 },
   fixedTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1834,35 +1760,28 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     marginTop: 4,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0, 0, 0, 0.08)',
-  },
+    borderTopColor: 'rgba(0, 0, 0, 0.08)' },
   fixedTotalLabel: {
     fontSize: 12,
-    fontWeight: '600',
-  },
+    fontWeight: '600' },
   fixedTotalAmount: {
     fontSize: 15,
     fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   fixedSliderContainer: {
     marginTop: 8,
-    marginBottom: 2,
-  },
+    marginBottom: 2 },
   fixedSliderTrackTouchArea: {
     height: 34,
     justifyContent: 'center',
-    position: 'relative',
-  },
+    position: 'relative' },
   fixedSliderTrackBackground: {
     height: 6,
     borderRadius: 3,
-    overflow: 'hidden',
-  },
+    overflow: 'hidden' },
   fixedSliderTrackActive: {
     height: '100%',
-    borderRadius: 3,
-  },
+    borderRadius: 3 },
   fixedSliderThumb: {
     position: 'absolute',
     width: 22,
@@ -1875,24 +1794,20 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1.5 },
     shadowOpacity: 0.22,
     shadowRadius: 2.5,
-    elevation: 3,
-  },
+    elevation: 3 },
   fixedMilestoneRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 2,
-    marginTop: -2,
-  },
+    marginTop: -2 },
   fixedMilestoneText: {
     fontSize: 10.5,
     fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   emptyFixedHint: {
     fontSize: 12,
     fontStyle: 'italic',
-    lineHeight: 17,
-  },
+    lineHeight: 17 },
   heroZeroCard: {
     padding: 16,
     borderRadius: radii.xl,
@@ -1900,59 +1815,47 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 10,
-    elevation: 4,
-  },
+    elevation: 4 },
   heroZeroHeaderCol: {
     gap: 2,
-    marginBottom: 12,
-  },
+    marginBottom: 12 },
   heroZeroTitle: {
     fontSize: 15,
     fontWeight: '800',
-    letterSpacing: -0.2,
-  },
+    letterSpacing: -0.2 },
   disposableSubtext: {
     fontSize: 12,
     fontWeight: '500',
-    marginLeft: 24,
-  },
+    marginLeft: 24 },
   pillarsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 6,
-  },
+    marginBottom: 6 },
   borderlessCol: {
-    flex: 1,
-  },
+    flex: 1 },
   borderlessLabel: {
     fontSize: 11.5,
     fontWeight: '700',
-    marginBottom: 2,
-  },
+    marginBottom: 2 },
   borderlessAmount: {
     fontSize: 15,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.2,
-  },
+    letterSpacing: -0.2 },
   splitterOuterWrapper: {
     marginTop: 2,
-    marginBottom: 10,
-  },
+    marginBottom: 10 },
   splitterTouchArea: {
     height: 48,
     justifyContent: 'center',
-    position: 'relative',
-  },
+    position: 'relative' },
   splitterTrackBackground: {
     height: 12,
     borderRadius: 6,
-    overflow: 'hidden',
-  },
+    overflow: 'hidden' },
   splitterSavingsSegment: {
     height: '100%',
-    borderRadius: 6,
-  },
+    borderRadius: 6 },
   splitterThumb: {
     position: 'absolute',
     width: 28,
@@ -1966,70 +1869,56 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
-    elevation: 4,
-  },
+    elevation: 4 },
   splitterGripLines: {
     flexDirection: 'row',
-    gap: 2.5,
-  },
+    gap: 2.5 },
   splitterGripBar: {
     width: 2,
     height: 10,
-    borderRadius: 1,
-  },
+    borderRadius: 1 },
   dailySpotlightBox: {
     borderRadius: radii.md,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    alignItems: 'center',
-  },
+    alignItems: 'center' },
   dailySpotlightTitle: {
     fontSize: 13,
-    fontWeight: '600',
-  },
+    fontWeight: '600' },
   placeholderCard: {
     padding: 14,
     borderRadius: radii.xl,
     borderWidth: 1,
-    borderStyle: 'dashed',
-  },
+    borderStyle: 'dashed' },
   placeholderTitle: {
     fontSize: 13,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   placeholderSub: {
     fontSize: 12,
     lineHeight: 17,
-    marginTop: 4,
-  },
+    marginTop: 4 },
   unitSub: {
-    fontSize: 12,
-  },
+    fontSize: 12 },
   unitsRow: {
     flexDirection: 'row',
-    gap: 8,
-  },
+    gap: 8 },
   unitCard: {
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 6,
     borderRadius: radii.lg,
     borderWidth: 1.5,
-    alignItems: 'center',
-  },
+    alignItems: 'center' },
   unitIcon: {
     fontSize: 22,
-    marginBottom: 4,
-  },
+    marginBottom: 4 },
   unitLabel: {
     fontSize: 11.5,
     marginBottom: 2,
-    textAlign: 'center',
-  },
+    textAlign: 'center' },
   unitPrice: {
     fontSize: 10.5,
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   // ================= SUMMARY CARD STYLES =================
   summaryCard: {
     padding: 16,
@@ -2041,145 +1930,117 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
-    gap: 12,
-  },
+    gap: 12 },
   summaryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
+    justifyContent: 'space-between' },
   summaryIconBadge: {
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center' },
   summaryTitle: {
     fontSize: 14.5,
     fontWeight: '700',
-    letterSpacing: -0.2,
-  },
+    letterSpacing: -0.2 },
   summaryEditButton: {
     padding: 6,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center' },
   summarySpotlightBox: {
     padding: 12,
     borderRadius: radii.lg,
     borderWidth: 1,
-    gap: 4,
-  },
+    gap: 4 },
   spotlightTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
+    justifyContent: 'space-between' },
   spotlightLabel: {
     fontSize: 11.5,
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
+    letterSpacing: 0.4 },
   spotlightAmount: {
     fontSize: 20,
     fontWeight: '800',
     letterSpacing: -0.4,
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   miniBarContainer: {
     height: 6,
     borderRadius: 3,
     flexDirection: 'row',
     overflow: 'hidden',
-    backgroundColor: 'rgba(0, 0, 0, 0.06)',
-  },
+    backgroundColor: 'rgba(0, 0, 0, 0.06)' },
   miniBarSavings: {
-    height: '100%',
-  },
+    height: '100%' },
   miniBarSpend: {
-    height: '100%',
-  },
+    height: '100%' },
   summaryMetricsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 4,
-  },
+    paddingTop: 4 },
   summaryMetricItem: {
     flex: 1,
-    alignItems: 'center',
-  },
+    alignItems: 'center' },
   metricLabel: {
     fontSize: 11,
-    marginBottom: 2,
-  },
+    marginBottom: 2 },
   metricValue: {
     fontSize: 13,
     fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   metricDivider: {
     width: 1,
-    height: 22,
-  },
+    height: 22 },
 
   // ================= MODAL & BOTTOM SHEET STYLES =================
   modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
-  },
+    justifyContent: 'flex-end' },
   modalBackdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
-  },
+    backgroundColor: 'rgba(0, 0, 0, 0.55)' },
   modalSheetContainer: {
     height: '88%',
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
     borderTopWidth: 1,
-    overflow: 'hidden',
-  },
+    overflow: 'hidden' },
   dragHandleWrapper: {
     alignItems: 'center',
-    paddingVertical: 10,
-  },
+    paddingVertical: 10 },
   dragHandle: {
     width: 40,
     height: 4.5,
-    borderRadius: 3,
-  },
+    borderRadius: 3 },
   sheetHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
+    paddingBottom: 12 },
   sheetTitle: {
     fontSize: 18,
     fontWeight: '800',
-    letterSpacing: -0.3,
-  },
+    letterSpacing: -0.3 },
   sheetSubtitle: {
     fontSize: 12,
-    marginTop: 2,
-  },
+    marginTop: 2 },
   sheetCloseButton: {
     width: 34,
     height: 34,
     borderRadius: 17,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center' },
   sheetScrollContent: {
     paddingHorizontal: 16,
     paddingBottom: 24,
-    gap: 12,
-  },
+    gap: 12 },
   sheetBottomBar: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderTopWidth: 1,
-  },
+    borderTopWidth: 1 },
   sheetSaveButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -2191,12 +2052,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 4,
-  },
+    elevation: 4 },
   sheetSaveButtonText: {
     color: '#0E1620',
     fontSize: 15,
     fontWeight: '800',
-    letterSpacing: 0.2,
-  },
-});
+    letterSpacing: 0.2 } });

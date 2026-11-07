@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
+import { ActivityIndicator,
   Alert,
   Dimensions,
   Image,
@@ -15,8 +14,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Linking,
-} from 'react-native';
+  Linking, ScrollViewInstance } from 'react-native';
 import { useRouter, Redirect } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraView } from 'expo-camera';
@@ -51,8 +49,7 @@ import {
   Users,
   X,
   Zap,
-  ZapOff,
-} from 'lucide-react-native';
+  ZapOff } from 'lucide-react-native';
 import { Colors } from '../../src/constants/colors';
 import { BlockLayout, Spacing } from '../../src/constants/layout';
 import { Typography } from '../../src/constants/typography';
@@ -138,8 +135,7 @@ export default function MainAppScreen() {
     savedMoney,
     recordExpense,
     recordIncome,
-    recordSavedMoney,
-  } = useBudgetStore();
+    recordSavedMoney } = useBudgetStore();
   const { items: waitItems, addItem: addToWaitBasket } = useWaitBasketStore();
   const { transactions, addTransaction } = useTransactionStore();
 
@@ -148,8 +144,8 @@ export default function MainAppScreen() {
 
   // Tab & Scroll State
   const [activeTabIndex, setActiveTabIndex] = useState<number>(2); // Default to Camera (Index 2 - Trang trung tâm)
-  const horizontalPagerRef = useRef<ScrollView | null>(null);
-  const verticalHistoryScrollRef = useRef<ScrollView | null>(null);
+  const horizontalPagerRef = useRef<ScrollViewInstance | null>(null);
+  const verticalHistoryScrollRef = useRef<ScrollViewInstance | null>(null);
 
   // Camera Settings
   const [cameraFacing, setCameraFacing] = useState<'back' | 'front'>('back');
@@ -192,8 +188,7 @@ export default function MainAppScreen() {
       },
       onPanResponderTerminate: () => {
         setIsZoomSliding(false);
-      },
-    })
+      } })
   ).current;
 
   const baseZoom = useRef<number>(0);
@@ -226,8 +221,7 @@ export default function MainAppScreen() {
       },
       onPanResponderRelease: () => {
         initialPinchDist.current = null;
-      },
-    })
+      } })
   ).current;
 
   // Modals & Sheets
@@ -294,8 +288,7 @@ export default function MainAppScreen() {
     handleConfirmPending,
     handleCancelPending,
     handleReportNoAutofill,
-    activatePendingById,
-  } = useVietQRScanner({
+    activatePendingById } = useVietQRScanner({
     isCameraActive,
     cameraMode,
     onTriggerActualPrice: (amount, payeeName) => {
@@ -304,12 +297,10 @@ export default function MainAppScreen() {
         description: payeeName || 'Khoản chi VietQR',
         category: 'an_uong',
         type: 'EXPENSE',
-        confidence: 1.0,
-      });
+        confidence: 1.0 });
       setShowActualPrice(true);
     },
-    actualPriceThreshold: 200000,
-  });
+    actualPriceThreshold: 200000 });
 
   useEffect(() => {
     setupNotificationChannels();
@@ -351,7 +342,7 @@ export default function MainAppScreen() {
       }
     });
 
-    const handleUrl = (url: string | null) => {
+    const handleUrl = (url: string | null | undefined) => {
       if (!url) return;
       if (url.includes('camera') || url.includes('scan-qr')) {
         handleTabPress(2);
@@ -385,8 +376,7 @@ export default function MainAppScreen() {
       horizontalPagerRef.current?.scrollTo({
         x: SCREEN_WIDTH * 2,
         y: 0,
-        animated: false,
-      });
+        animated: false });
     }, 50);
   }, []);
 
@@ -400,8 +390,7 @@ export default function MainAppScreen() {
       // Luôn luôn quay về mặt kính Camera ở trang đầu (y = 0)
       verticalHistoryScrollRef.current?.scrollTo({
         y: 0,
-        animated: true,
-      });
+        animated: true });
       if (activeTabIndex === 2 && currentOffsetYRef.current > 5) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
         return;
@@ -411,8 +400,7 @@ export default function MainAppScreen() {
     horizontalPagerRef.current?.scrollTo({
       x: SCREEN_WIDTH * index,
       y: 0,
-      animated: true,
-    });
+      animated: true });
   };
 
   const handleHorizontalScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -439,16 +427,14 @@ export default function MainAppScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     verticalHistoryScrollRef.current?.scrollTo({
       y: SCREEN_HEIGHT,
-      animated: true,
-    });
+      animated: true });
   };
 
   const scrollToCamera = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     verticalHistoryScrollRef.current?.scrollTo({
       y: 0,
-      animated: true,
-    });
+      animated: true });
   };
 
   const toggleCameraFacing = () => {
@@ -476,8 +462,7 @@ export default function MainAppScreen() {
       if (cameraRef.current && typeof (cameraRef.current as any).recordAsync === 'function') {
         const videoPromise = (cameraRef.current as any).recordAsync({
           maxDuration: 3,
-          mute: true,
-        });
+          mute: true });
         videoPromise
           .then((res: any) => {
             if (res?.uri) {
@@ -550,8 +535,7 @@ export default function MainAppScreen() {
       if (cameraRef.current) {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.85,
-          skipProcessing: false,
-        });
+          skipProcessing: false });
         if (photo?.uri) {
           const optimized = await optimizeExpensePhoto(photo.uri);
           setCapturedPhotoUri(optimized.fullUri);
@@ -670,16 +654,14 @@ export default function MainAppScreen() {
       thumbnail_url: capturedThumbUri || capturedPhotoUri,
       payment_method: inFramePaymentMethod,
       source: 'PHOTO',
-      status: 'CONFIRMED',
-    });
+      status: 'CONFIRMED' });
 
     if (capturedPhotoUri) {
       uploadExpensePhotoAsync({
         userId,
         transactionId: tx.id,
         fullPhotoUri: capturedPhotoUri,
-        thumbnailUri: capturedThumbUri || undefined,
-      }).catch(() => {});
+        thumbnailUri: capturedThumbUri || undefined }).catch(() => {});
 
       // Nếu có sự kiện thông báo ngân hàng vừa đến, tự động gắn ảnh vào giao dịch ngân hàng đó
       bankNotificationService.attachPhotoToLatestTransaction(capturedPhotoUri).catch(() => {});
@@ -718,8 +700,7 @@ export default function MainAppScreen() {
         mediaTypes: ['images'],
         allowsMultipleSelection: true,
         selectionLimit: 10,
-        quality: 0.85,
-      });
+        quality: 0.85 });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         trackEvent('upload_images_selected', { count: result.assets.length });
@@ -734,8 +715,7 @@ export default function MainAppScreen() {
               photoUri: asset.uri,
               amount: 0,
               category: 'an_uong',
-              description: 'Ảnh giao dịch tải lên',
-            }))
+              description: 'Ảnh giao dịch tải lên' }))
           );
           Alert.alert(
             'Đã tải nhiều ảnh',
@@ -758,8 +738,7 @@ export default function MainAppScreen() {
       description: '',
       category: cameraMode === 'INCOME' ? 'thu_nhap' : 'an_uong',
       confidence: 1,
-      type: cameraMode === 'INCOME' ? 'INCOME' : 'EXPENSE',
-    });
+      type: cameraMode === 'INCOME' ? 'INCOME' : 'EXPENSE' });
     setShowConfirmation(true);
   };
 
@@ -781,16 +760,14 @@ export default function MainAppScreen() {
       photo_url: capturedPhotoUri,
       thumbnail_url: capturedThumbUri || capturedPhotoUri,
       payment_method: data.paymentMethod,
-      source: 'MANUAL',
-    });
+      source: 'MANUAL' });
 
     if (capturedPhotoUri) {
       uploadExpensePhotoAsync({
         userId,
         transactionId: tx.id,
         fullPhotoUri: capturedPhotoUri,
-        thumbnailUri: capturedThumbUri || undefined,
-      }).catch(() => {});
+        thumbnailUri: capturedThumbUri || undefined }).catch(() => {});
     }
 
     if (data.type === 'INCOME') {
@@ -823,8 +800,7 @@ export default function MainAppScreen() {
         photo_url: lastSavedOrDeletedTx.tx.photo_url,
         thumbnail_url: lastSavedOrDeletedTx.tx.thumbnail_url,
         payment_method: lastSavedOrDeletedTx.tx.payment_method,
-        source: lastSavedOrDeletedTx.tx.source,
-      });
+        source: lastSavedOrDeletedTx.tx.source });
     }
     setUndoToastVisible(false);
     setLastSavedOrDeletedTx(null);
@@ -851,16 +827,14 @@ export default function MainAppScreen() {
       photo_url: capturedPhotoUri,
       thumbnail_url: capturedThumbUri || capturedPhotoUri,
       payment_method: 'BANK',
-      source: 'MANUAL',
-    });
+      source: 'MANUAL' });
 
     if (capturedPhotoUri) {
       uploadExpensePhotoAsync({
         userId,
         transactionId: tx.id,
         fullPhotoUri: capturedPhotoUri,
-        thumbnailUri: capturedThumbUri || undefined,
-      }).catch(() => {});
+        thumbnailUri: capturedThumbUri || undefined }).catch(() => {});
     }
 
     setShowActualPrice(false);
@@ -883,14 +857,12 @@ export default function MainAppScreen() {
       photo_url: capturedPhotoUri,
       remind_interval_hours: 2,
       next_remind_at: new Date(Date.now() + 2 * 3600 * 1000).toISOString(),
-      decided_at: null,
-    });
+      decided_at: null });
 
     await scheduleAggressiveReminders({
       itemId: addedItem.id,
       itemName: addedItem.item_name,
-      amount: addedItem.amount,
-    });
+      amount: addedItem.amount });
 
     setShowActualPrice(false);
     setCapturedPhotoUri(null);
@@ -932,8 +904,7 @@ export default function MainAppScreen() {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: isDark ? '#0E1620' : '#FAF6EC',
-        }}
+          backgroundColor: isDark ? '#0E1620' : '#FAF6EC' }}
       >
         <ActivityIndicator size="large" color={Colors.accentGold} />
       </View>
@@ -1045,8 +1016,7 @@ export default function MainAppScreen() {
                     size="sm"
                     style={{
                       borderWidth: 0,
-                      backgroundColor: isDark ? 'rgba(20, 26, 36, 0.72)' : 'rgba(255, 255, 255, 0.85)',
-                    }}
+                      backgroundColor: isDark ? 'rgba(20, 26, 36, 0.72)' : 'rgba(255, 255, 255, 0.85)' }}
                   />
                 </TouchableOpacity>
 
@@ -1145,8 +1115,7 @@ export default function MainAppScreen() {
                           enableTorch={flashMode === 'on'}
                           zoom={cameraZoom}
                           barcodeScannerSettings={{
-                            barcodeTypes: ['qr'],
-                          }}
+                            barcodeTypes: ['qr'] }}
                           onBarcodeScanned={handleBarcodeScanned}
                         />
                       ) : (
@@ -1177,8 +1146,7 @@ export default function MainAppScreen() {
                     style={[
                       styles.outsideTypeSegmentContainer,
                       {
-                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                      },
+                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
                     ]}
                   >
                     <TouchableOpacity
@@ -1189,8 +1157,7 @@ export default function MainAppScreen() {
                           shadowColor: '#C86D51',
                           shadowOpacity: 0.3,
                           shadowRadius: 6,
-                          elevation: 3,
-                        },
+                          elevation: 3 },
                       ]}
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1208,8 +1175,7 @@ export default function MainAppScreen() {
                           styles.outsideTypeText,
                           {
                             color: inFrameType === 'EXPENSE' ? '#FFFFFF' : isDark ? 'rgba(255, 255, 255, 0.7)' : '#555555',
-                            fontWeight: inFrameType === 'EXPENSE' ? '700' : '500',
-                          },
+                            fontWeight: inFrameType === 'EXPENSE' ? '700' : '500' },
                         ]}
                       >
                         Chi
@@ -1224,8 +1190,7 @@ export default function MainAppScreen() {
                           shadowColor: '#7E9F80',
                           shadowOpacity: 0.3,
                           shadowRadius: 6,
-                          elevation: 3,
-                        },
+                          elevation: 3 },
                       ]}
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1243,8 +1208,7 @@ export default function MainAppScreen() {
                           styles.outsideTypeText,
                           {
                             color: inFrameType === 'INCOME' ? '#FFFFFF' : isDark ? 'rgba(255, 255, 255, 0.7)' : '#555555',
-                            fontWeight: inFrameType === 'INCOME' ? '700' : '500',
-                          },
+                            fontWeight: inFrameType === 'INCOME' ? '700' : '500' },
                         ]}
                       >
                         Thu
@@ -1319,8 +1283,7 @@ export default function MainAppScreen() {
                           styles.inFrameSaveIconButton,
                           {
                             backgroundColor: inFrameType === 'INCOME' ? '#7E9F80' : '#E59844',
-                            opacity: isSaveReady ? 1 : 0.45,
-                          },
+                            opacity: isSaveReady ? 1 : 0.45 },
                         ]}
                         disabled={!isSaveReady}
                         onPress={handleSaveInFramePhoto}
@@ -1341,8 +1304,7 @@ export default function MainAppScreen() {
                       style={[
                         styles.quickRecordFloatingPill,
                         {
-                          backgroundColor: isDark ? 'rgba(20, 26, 36, 0.72)' : 'rgba(255, 255, 255, 0.85)',
-                        },
+                          backgroundColor: isDark ? 'rgba(20, 26, 36, 0.72)' : 'rgba(255, 255, 255, 0.85)' },
                       ]}
                       onPress={handleOpenTextQuickRecord}
                       activeOpacity={0.8}
@@ -1361,8 +1323,7 @@ export default function MainAppScreen() {
                       style={[
                         styles.bottomToolButton,
                         {
-                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.45)',
-                        },
+                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.45)' },
                       ]}
                       onPress={handlePickImageFromLibrary}
                       activeOpacity={0.8}
@@ -1380,8 +1341,7 @@ export default function MainAppScreen() {
                       style={[
                         styles.bottomToolButton,
                         {
-                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.45)',
-                        },
+                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.45)' },
                       ]}
                       onPress={toggleCameraFacing}
                       activeOpacity={0.8}
@@ -1402,8 +1362,7 @@ export default function MainAppScreen() {
                 {
                   minHeight: SCREEN_HEIGHT,
                   paddingTop: insets.top + spacing.sm,
-                  backgroundColor: isDark ? '#0E1620' : '#FAF6EC',
-                },
+                  backgroundColor: isDark ? '#0E1620' : '#FAF6EC' },
               ]}
             >
               {/* NÚT TRỞ LẠI CAMERA Ở ĐỈNH LỊCH SỬ */}
@@ -1581,33 +1540,27 @@ export default function MainAppScreen() {
 
 const styles = StyleSheet.create({
   rootContainer: {
-    flex: 1,
-  },
+    flex: 1 },
   vietQRCardWrapper: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 140,
-    zIndex: 99,
-  },
+    zIndex: 99 },
   pager: {
-    flex: 1,
-  },
+    flex: 1 },
   verticalScroll: {
-    flex: 1,
-  },
+    flex: 1 },
   cameraScreenSection: {
     width: SCREEN_WIDTH,
     position: 'relative',
-    justifyContent: 'space-between',
-  },
+    justifyContent: 'space-between' },
   cameraTopHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
-    zIndex: 20,
-  },
+    zIndex: 20 },
   headerIconButton: {
     width: 44,
     height: 44,
@@ -1615,22 +1568,18 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
-  },
+    position: 'relative' },
   todayBudgetChipWrapper: {
-    alignItems: 'center',
-  },
+    alignItems: 'center' },
   topRightControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
-  },
+    gap: spacing.xs },
   minhCoachBadge: {
     width: 38,
     height: 38,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
+    alignItems: 'center' },
   badgeNumber: {
     position: 'absolute',
     top: -3,
@@ -1641,17 +1590,14 @@ const styles = StyleSheet.create({
     height: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 3,
-  },
+    paddingHorizontal: 3 },
   badgeNumberText: {
     color: '#FFFFFF',
     fontSize: 9,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   capturedPhotoMascotWrapper: {
     alignItems: 'center',
-    marginBottom: 8,
-  },
+    marginBottom: 8 },
   viewfinderContainer: {
     width: SCREEN_WIDTH - 24,
     maxHeight: SCREEN_HEIGHT * 0.52,
@@ -1667,69 +1613,59 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 16,
-    elevation: 6,
-  },
+    elevation: 6 },
   viewfinder: {
     flex: 1,
-    position: 'relative',
-  },
+    position: 'relative' },
   permissionFallback: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.xl,
     backgroundColor: '#162231',
-    gap: spacing.md,
-  },
+    gap: spacing.md },
   permissionText: {
     color: '#A3B0BF',
     fontSize: 13,
     fontWeight: '500',
-    textAlign: 'center',
-  },
+    textAlign: 'center' },
   // 4 Corner Brackets (18x18, 1.5px delicate gold hairline guides)
   cornerBracket: {
     position: 'absolute',
     width: 18,
     height: 18,
     borderColor: 'rgba(246, 184, 0, 0.65)',
-    zIndex: 10,
-  },
+    zIndex: 10 },
   bracketTL: {
     top: 14,
     left: 14,
     borderTopWidth: 1.5,
     borderLeftWidth: 1.5,
-    borderTopLeftRadius: 4,
-  },
+    borderTopLeftRadius: 4 },
   bracketTR: {
     top: 14,
     right: 14,
     borderTopWidth: 1.5,
     borderRightWidth: 1.5,
-    borderTopRightRadius: 4,
-  },
+    borderTopRightRadius: 4 },
   bracketBL: {
     bottom: 14,
     left: 14,
     borderBottomWidth: 1.5,
     borderLeftWidth: 1.5,
-    borderBottomLeftRadius: 4,
-  },
+    borderBottomLeftRadius: 4 },
   bracketBR: {
     bottom: 14,
     right: 14,
     borderBottomWidth: 1.5,
     borderRightWidth: 1.5,
-    borderBottomRightRadius: 4,
-  },
+    borderBottomRightRadius: 4 },
   quickRecordPillWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: spacing.xs,
     marginBottom: spacing.xs,
-    zIndex: 15,
-  },
+    zIndex: 15 },
   quickRecordFloatingPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1741,20 +1677,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
-    elevation: 3,
-  },
+    elevation: 3 },
   quickRecordFloatingText: {
     fontSize: 12,
     fontWeight: '700',
-    letterSpacing: -0.2,
-  },
+    letterSpacing: -0.2 },
   cameraBottomBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: spacing.xl,
-    zIndex: 20,
-  },
+    zIndex: 20 },
   bottomToolButton: {
     width: 48,
     height: 48,
@@ -1765,32 +1698,27 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.18,
     shadowRadius: 8,
-    elevation: 3,
-  },
+    elevation: 3 },
   outsideTypeSegmentWrapper: {
     alignItems: 'center',
     marginTop: 4,
-    marginBottom: 4,
-  },
+    marginBottom: 4 },
   outsideTypeSegmentContainer: {
     flexDirection: 'row',
     borderRadius: 24,
     padding: 4,
     gap: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-  },
+    borderColor: 'rgba(255, 255, 255, 0.12)' },
   outsideTypeButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 26,
     paddingVertical: 9,
     borderRadius: 20,
-    gap: 6,
-  },
+    gap: 6 },
   outsideTypeText: {
-    fontSize: 14.5,
-  },
+    fontSize: 14.5 },
   inFrameRetakeIconButton: {
     width: 58,
     height: 58,
@@ -1804,8 +1732,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
-    elevation: 4,
-  },
+    elevation: 4 },
   inFrameSaveIconButton: {
     width: 62,
     height: 62,
@@ -1816,8 +1743,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
     shadowRadius: 10,
-    elevation: 6,
-  },
+    elevation: 6 },
   inFrameSaveButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1829,14 +1755,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,
-    elevation: 5,
-  },
+    elevation: 5 },
   inFrameSaveButtonText: {
     color: '#0E1620',
     fontSize: 16,
     fontWeight: '800',
-    letterSpacing: 0.2,
-  },
+    letterSpacing: 0.2 },
     backToCameraPill: {
     alignSelf: 'center',
     flexDirection: 'row',
@@ -1846,17 +1770,14 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: radii.full,
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    marginBottom: spacing.sm,
-  },
+    marginBottom: spacing.sm },
   backToCameraText: {
     fontSize: 12,
-    fontWeight: '600',
-  },
+    fontWeight: '600' },
   historyPeekTab: {
     position: 'absolute',
     alignSelf: 'center',
-    zIndex: 25,
-  },
+    zIndex: 25 },
   peekTabInner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1866,33 +1787,28 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.18)',
     paddingHorizontal: 16,
     paddingVertical: 6,
-    borderRadius: radii.full,
-  },
+    borderRadius: radii.full },
   peekTabText: {
     color: '#FAF6EC',
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
+    letterSpacing: 0.5 },
 
   // HISTORY SECTION
   historyContainer: {
-    backgroundColor: '#0E1620',
-  },
+    backgroundColor: '#0E1620' },
   historyStickyHeader: {
     backgroundColor: Colors.bgDark,
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.sm,
     borderBottomWidth: 3,
-    borderBottomColor: '#000000',
-  },
+    borderBottomColor: '#000000' },
   historyTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
-  },
+    marginBottom: Spacing.sm },
   backToCamBtn: {
     width: 36,
     height: 36,
@@ -1901,26 +1817,21 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#000000',
     justifyContent: 'center',
-    alignItems: 'center',
-  },
+    alignItems: 'center' },
   historyTitleText: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '900',
-    textTransform: 'uppercase',
-  },
+    textTransform: 'uppercase' },
   historyCountText: {
     color: Colors.primaryYellow,
     fontSize: 13,
-    fontWeight: '800',
-  },
+    fontWeight: '800' },
   historyListPadding: {
     paddingTop: 8,
-    paddingBottom: 20,
-  },
+    paddingBottom: 20 },
   dayGroupWrapper: {
-    marginBottom: 16,
-  },
+    marginBottom: 16 },
   dayGroupHeader: {
     flexDirection: 'row',
     alignItems: 'baseline',
@@ -1930,41 +1841,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#162231',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: 4,
-  },
+    marginBottom: 4 },
   dayGroupDateText: {
     color: '#FAF6EC',
     fontSize: 12,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
+    letterSpacing: 0.5 },
   dayGroupStatsText: {
     color: '#FFC93C',
     fontSize: 11,
     fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   dayGridRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 13,
-  },
+    paddingHorizontal: 13 },
   cellColumn: {
     width: '33.333%',
-    padding: 0,
-  },
+    padding: 0 },
   emptyGridContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Spacing.xxl * 2,
-    gap: Spacing.sm,
-  },
+    gap: Spacing.sm },
   emptyGridText: {
     color: '#666666',
     fontSize: 14,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   activeBankBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1981,22 +1885,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 8,
-  },
+    elevation: 8 },
   bankSmallBadge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
-  },
+    borderRadius: 4 },
   bankSmallBadgeText: {
     color: '#FFFFFF',
     fontSize: 10.5,
-    fontWeight: '800',
-  },
+    fontWeight: '800' },
   activeBankBannerText: {
     flex: 1,
     color: '#FAF6EC',
     fontSize: 12,
-    fontWeight: '600',
-  },
-});
+    fontWeight: '600' } });

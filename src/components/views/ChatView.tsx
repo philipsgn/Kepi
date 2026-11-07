@@ -384,7 +384,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                   <View style={[styles.thinkingDot, { backgroundColor: tokens.primary, opacity: 0.4 }]} />
                   <Text style={[styles.thinkingText, { color: tokens.textMuted }]}>Anh Minh đang tính toán...</Text>
                 </View>
-              ) : null
+              ) : undefined
             }
           />
 

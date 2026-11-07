@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
+import { View,
   Text,
   StyleSheet,
   Image,
@@ -8,8 +7,7 @@ import {
   TextInput,
   ScrollView,
   Platform,
-  Pressable,
-} from 'react-native';
+  Pressable, TextInputInstance } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { X, Tag, Sparkles, Lock, Unlock, Play, Film } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -54,8 +52,7 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
   onCancel,
   mediaType = 'PHOTO',
   isSquadPrivate = false,
-  onToggleSquadPrivate,
-}) => {
+  onToggleSquadPrivate }) => {
   const hasSelectedCategory = Boolean(category && category.trim().length > 0);
 
   // Logic nhập nghìn: không hardcore số 56 hay 50k, mặc định trống nếu amount <= 0
@@ -63,8 +60,8 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
     amount > 0 ? formatThousandsString(String(Math.floor(amount / 1000))) : '';
   const [thousandsInput, setThousandsInput] = useState(initialThousands);
 
-  const amountInputRef = useRef<TextInput>(null);
-  const noteInputRef = useRef<TextInput>(null);
+  const amountInputRef = useRef<TextInputInstance>(null);
+  const noteInputRef = useRef<TextInputInstance>(null);
 
   const activeCategory = hasSelectedCategory ? getCategoryConfig(category) : null;
   const { getExpenseCategories, getCategoryById } = useCategoryStore();
@@ -185,8 +182,7 @@ export const OnCameraPhotoOverlay: React.FC<OnCameraPhotoOverlayProps> = ({
                 React.createElement(CATEGORY_ICON_MAP[customCat.icon], {
                   size: 13,
                   color: '#FAF6EC',
-                  strokeWidth: 2.4,
-                })
+                  strokeWidth: 2.4 })
               ) : activeCategory ? (
                 <activeCategory.Icon size={13} color="#FAF6EC" strokeWidth={2.4} />
               ) : (
@@ -298,22 +294,19 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 38,
     overflow: 'hidden',
-    justifyContent: 'space-between',
-  },
+    justifyContent: 'space-between' },
   topGradient: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: 100,
-  },
+    height: 100 },
   bottomGradient: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 130,
-  },
+    height: 130 },
   privacyToggleButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -324,28 +317,23 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
-    marginRight: 8,
-  },
+    marginRight: 8 },
   privacyToggleButtonActive: {
     backgroundColor: 'rgba(229, 152, 68, 0.22)',
-    borderColor: '#E59844',
-  },
+    borderColor: '#E59844' },
   privacyToggleText: {
     color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 11,
-    fontWeight: '600',
-  },
+    fontWeight: '600' },
   privacyToggleTextActive: {
     color: '#E59844',
     fontSize: 11,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   videoIndicatorOverlay: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-  },
+    backgroundColor: 'rgba(0, 0, 0, 0.15)' },
   videoPlayCircle: {
     width: 56,
     height: 56,
@@ -355,8 +343,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.3)',
-    marginBottom: 8,
-  },
+    marginBottom: 8 },
   videoBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -364,29 +351,25 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
-  },
+    borderRadius: 12 },
   videoBadgeText: {
     color: '#FAF6EC',
     fontSize: 11,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 14,
     paddingTop: 14,
-    zIndex: 10,
-  },
+    zIndex: 10 },
   circleIconButton: {
     width: 34,
     height: 34,
     borderRadius: 17,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center' },
   tagButtonCenter: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -396,28 +379,23 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     gap: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-  },
+    borderColor: 'rgba(255, 255, 255, 0.15)' },
   tagStatusText: {
     color: '#FAF6EC',
     fontSize: 12,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   rightSpacer: {
-    width: 34,
-  },
+    width: 34 },
   categoryPickerContainer: {
     position: 'absolute',
     top: 54,
     left: 0,
     right: 0,
     zIndex: 20,
-    paddingVertical: 4,
-  },
+    paddingVertical: 4 },
   categoryPickerList: {
     gap: 8,
-    paddingHorizontal: 14,
-  },
+    paddingHorizontal: 14 },
   categoryPickerChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -427,33 +405,27 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.16)',
-  },
+    borderColor: 'rgba(255, 255, 255, 0.16)' },
   categoryPickerChipActive: {
     backgroundColor: '#FAF6EC',
-    borderColor: '#FAF6EC',
-  },
+    borderColor: '#FAF6EC' },
   categoryPickerChipText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '600',
-  },
+    fontWeight: '600' },
   categoryPickerChipTextActive: {
     color: '#0E1620',
-    fontWeight: '800',
-  },
+    fontWeight: '800' },
   bottomOverlayContent: {
     paddingHorizontal: 16,
     paddingBottom: 14,
     gap: 8,
-    zIndex: 10,
-  },
+    zIndex: 10 },
   amountDisplayRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-  },
+    gap: 6 },
   amountInputGroup: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -462,8 +434,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.16)',
-  },
+    borderColor: 'rgba(255, 255, 255, 0.16)' },
   thousandsInput: {
     color: '#FFFFFF',
     fontSize: 26,
@@ -472,36 +443,30 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     minWidth: 20,
     padding: 0,
-    includeFontPadding: false,
-  },
+    includeFontPadding: false },
   fixedSuffix: {
     color: '#FFFFFF',
     fontSize: 26,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
     marginLeft: 2,
-    includeFontPadding: false,
-  },
+    includeFontPadding: false },
   clearIconButton: {
     width: 24,
     height: 24,
     borderRadius: 12,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center' },
   noteInputContainer: {
     backgroundColor: 'rgba(0, 0, 0, 0.32)',
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: Platform.OS === 'ios' ? 7 : 4,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
+    borderColor: 'rgba(255, 255, 255, 0.1)' },
   noteTextInput: {
     color: '#FFFFFF',
     fontSize: 12.5,
     fontWeight: '500',
-    textAlign: 'center',
-  },
-});
+    textAlign: 'center' } });

@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Alert,
+import { Alert,
   KeyboardAvoidingView,
   PanResponder,
   Platform,
@@ -9,8 +8,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-} from 'react-native';
+  View, ViewInstance } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,8 +25,7 @@ import {
   Trash2,
   User,
   Utensils,
-  Wallet,
-} from 'lucide-react-native';
+  Wallet } from 'lucide-react-native';
 import { FavoriteUnit } from '../../src/types/database';
 import { useAuthStore } from '../../src/store/authStore';
 import { useBudgetStore } from '../../src/store/budgetStore';
@@ -156,10 +153,9 @@ function IncomeSlider({
   isDark,
   textColorMuted,
   onDragStart,
-  onDragEnd,
-}: IncomeSliderProps) {
+  onDragEnd }: IncomeSliderProps) {
   const [trackWidth, setTrackWidth] = useState(0);
-  const trackRef = useRef<View>(null);
+  const trackRef = useRef<ViewInstance>(null);
   const trackWidthRef = useRef(0);
   const trackPageXRef = useRef(0);
 
@@ -218,8 +214,7 @@ function IncomeSlider({
       },
       onPanResponderTerminate: () => {
         onDragEndRef.current?.();
-      },
-    })
+      } })
   ).current;
 
   const ratio = incomeToRatio(value);
@@ -235,7 +230,7 @@ function IncomeSlider({
           const w = e.nativeEvent.layout.width;
           trackWidthRef.current = w;
           setTrackWidth(w);
-          trackRef.current?.measure((_x, _y, _w, _h, pageX) => {
+          trackRef.current?.measure((_x: number, _y: number, _w: number, _h: number, pageX?: number) => {
             if (pageX !== undefined) {
               trackPageXRef.current = pageX;
             }
@@ -251,8 +246,7 @@ function IncomeSlider({
             {
               backgroundColor: isDark
                 ? 'rgba(255, 255, 255, 0.08)'
-                : 'rgba(0, 0, 0, 0.06)',
-            },
+                : 'rgba(0, 0, 0, 0.06)' },
           ]}
         >
           {/* DẢI MÀU HOẠT ĐỘNG */}
@@ -261,8 +255,7 @@ function IncomeSlider({
               styles.sliderTrackActive,
               {
                 width: `${Math.round(ratio * 100)}%`,
-                backgroundColor: primaryColor,
-              },
+                backgroundColor: primaryColor },
             ]}
           />
         </View>
@@ -275,8 +268,7 @@ function IncomeSlider({
               styles.sliderThumb,
               {
                 left: thumbLeft,
-                backgroundColor: primaryColor,
-              },
+                backgroundColor: primaryColor },
             ]}
           />
         )}
@@ -399,10 +391,9 @@ function FixedCostSlider({
   isDark,
   textColorMuted,
   onDragStart,
-  onDragEnd,
-}: FixedCostSliderProps) {
+  onDragEnd }: FixedCostSliderProps) {
   const [trackWidth, setTrackWidth] = useState(0);
-  const trackRef = useRef<View>(null);
+  const trackRef = useRef<ViewInstance>(null);
   const trackWidthRef = useRef(0);
   const trackPageXRef = useRef(0);
 
@@ -460,8 +451,7 @@ function FixedCostSlider({
       },
       onPanResponderTerminate: () => {
         onDragEndRef.current?.();
-      },
-    })
+      } })
   ).current;
 
   const ratio = fixedCostToRatio(value);
@@ -477,7 +467,7 @@ function FixedCostSlider({
           const w = e.nativeEvent.layout.width;
           trackWidthRef.current = w;
           setTrackWidth(w);
-          trackRef.current?.measure((_x, _y, _w, _h, pageX) => {
+          trackRef.current?.measure((_x: number, _y: number, _w: number, _h: number, pageX?: number) => {
             if (pageX !== undefined) {
               trackPageXRef.current = pageX;
             }
@@ -493,8 +483,7 @@ function FixedCostSlider({
             {
               backgroundColor: isDark
                 ? 'rgba(255, 255, 255, 0.08)'
-                : 'rgba(0, 0, 0, 0.06)',
-            },
+                : 'rgba(0, 0, 0, 0.06)' },
           ]}
         >
           {/* DẢI MÀU HOẠT ĐỘNG */}
@@ -503,8 +492,7 @@ function FixedCostSlider({
               styles.fixedSliderTrackActive,
               {
                 width: `${Math.round(ratio * 100)}%`,
-                backgroundColor: sliderColor,
-              },
+                backgroundColor: sliderColor },
             ]}
           />
         </View>
@@ -517,8 +505,7 @@ function FixedCostSlider({
               styles.fixedSliderThumb,
               {
                 left: thumbLeft,
-                backgroundColor: sliderColor,
-              },
+                backgroundColor: sliderColor },
             ]}
           />
         )}
@@ -605,10 +592,9 @@ function ZeroBasedSplitter({
   onDragStart,
   onDragEnd,
   isDark,
-  textColorMuted,
-}: ZeroBasedSplitterProps) {
+  textColorMuted }: ZeroBasedSplitterProps) {
   const [trackWidth, setTrackWidth] = useState(0);
-  const trackRef = useRef<View>(null);
+  const trackRef = useRef<ViewInstance>(null);
   const trackWidthRef = useRef(0);
   const trackPageXRef = useRef(0);
 
@@ -671,8 +657,7 @@ function ZeroBasedSplitter({
       },
       onPanResponderTerminate: () => {
         onDragEndRef.current?.();
-      },
-    })
+      } })
   ).current;
 
   // Tính vị trí nút thumb trên thanh trượt
@@ -694,7 +679,7 @@ function ZeroBasedSplitter({
           const w = e.nativeEvent.layout.width;
           trackWidthRef.current = w;
           setTrackWidth(w);
-          trackRef.current?.measure((_x, _y, _w, _h, pageX) => {
+          trackRef.current?.measure((_x: number, _y: number, _w: number, _h: number, pageX?: number) => {
             if (pageX !== undefined) {
               trackPageXRef.current = pageX;
             }
@@ -708,8 +693,7 @@ function ZeroBasedSplitter({
           style={[
             styles.splitterTrackBackground,
             {
-              backgroundColor: isDark ? 'rgba(229, 152, 68, 0.4)' : 'rgba(229, 152, 68, 0.25)',
-            },
+              backgroundColor: isDark ? 'rgba(229, 152, 68, 0.4)' : 'rgba(229, 152, 68, 0.25)' },
           ]}
         >
           {/* PHẦN TRÁI: DẢI TÍCH LŨY (#7E9F80) */}
@@ -718,8 +702,7 @@ function ZeroBasedSplitter({
               styles.splitterSavingsSegment,
               {
                 width: `${Math.round(ratio * 100)}%`,
-                backgroundColor: '#7E9F80',
-              },
+                backgroundColor: '#7E9F80' },
             ]}
           />
         </View>
@@ -733,8 +716,7 @@ function ZeroBasedSplitter({
               {
                 left: thumbLeft,
                 backgroundColor: '#FFFFFF',
-                borderColor: ratio > 0 ? '#7E9F80' : '#E59844',
-              },
+                borderColor: ratio > 0 ? '#7E9F80' : '#E59844' },
             ]}
           >
             {/* Vạch grip ở giữa nút */}
@@ -841,8 +823,7 @@ export default function BudgetSetupScreen() {
       const newItem: FixedCostItem = {
         id: newId,
         name: suggestedName,
-        amount: 0,
-      };
+        amount: 0 };
       setFixedCosts((prev) => [...prev, newItem]);
       setActiveFixedId(newId);
     }
@@ -855,8 +836,7 @@ export default function BudgetSetupScreen() {
     const newItem: FixedCostItem = {
       id: newId,
       name: '',
-      amount: 0,
-    };
+      amount: 0 };
     setFixedCosts((prev) => [...prev, newItem]);
     setActiveFixedId(newId);
   };
@@ -909,8 +889,7 @@ export default function BudgetSetupScreen() {
     const targetUserId = user?.id || `guest-${Date.now()}`;
     await updateProfile({
       full_name: trimmedName,
-      fav_unit: favUnit,
-    });
+      fav_unit: favUnit });
 
     try {
       await AsyncStorage.setItem('vi_locket_fixed_cost_items', JSON.stringify(fixedCosts));
@@ -925,8 +904,7 @@ export default function BudgetSetupScreen() {
       monthlyFixedCosts: totalFixedCosts,
       goalName: 'Mục tiêu tích lũy tháng',
       goalTargetAmount: savingsGoalAmount,
-      favUnit,
-    });
+      favUnit });
 
     setHasCompletedBudgetSetup(true);
     router.replace('/(main)');
@@ -940,8 +918,7 @@ export default function BudgetSetupScreen() {
     const targetUserId = user?.id || `guest-${Date.now()}`;
     await updateProfile({
       full_name: trimmedName,
-      fav_unit: favUnit,
-    });
+      fav_unit: favUnit });
 
     // Thu nhập 3.000.000đ, Cố định 0đ => Hạn mức 100.000đ/ngày
     await setupBudget({
@@ -950,8 +927,7 @@ export default function BudgetSetupScreen() {
       monthlyFixedCosts: 0,
       goalName: '',
       goalTargetAmount: 0,
-      favUnit,
-    });
+      favUnit });
 
     setHasCompletedBudgetSetup(true);
     router.replace('/(main)');
@@ -993,8 +969,7 @@ export default function BudgetSetupScreen() {
               styles.cardSection,
               {
                 backgroundColor: isDark ? '#162231' : '#FFFFFF',
-                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-              },
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
             ]}
           >
             <View style={styles.sectionLabelRow}>
@@ -1009,8 +984,7 @@ export default function BudgetSetupScreen() {
                 {
                   backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
                   color: isDark ? '#FFFFFF' : '#1B2733',
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                },
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
               ]}
               placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
               value={name}
@@ -1025,8 +999,7 @@ export default function BudgetSetupScreen() {
               styles.cardSection,
               {
                 backgroundColor: isDark ? '#162231' : '#FFFFFF',
-                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-              },
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
             ]}
           >
             <View style={styles.sectionLabelRow}>
@@ -1042,16 +1015,14 @@ export default function BudgetSetupScreen() {
                 styles.currencyInputContainer,
                 {
                   backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                },
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
               ]}
             >
               <TextInput
                 style={[
                   styles.currencyTextInput,
                   {
-                    color: isDark ? '#FFFFFF' : '#1B2733',
-                  },
+                    color: isDark ? '#FFFFFF' : '#1B2733' },
                 ]}
                 placeholder="0"
                 placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
@@ -1071,8 +1042,7 @@ export default function BudgetSetupScreen() {
                         ? tokens.primary
                         : isDark
                         ? 'rgba(255, 255, 255, 0.35)'
-                        : '#99A1AF',
-                  },
+                        : '#99A1AF' },
                 ]}
               >
                 đ
@@ -1099,8 +1069,7 @@ export default function BudgetSetupScreen() {
               styles.cardSection,
               {
                 backgroundColor: isDark ? '#162231' : '#FFFFFF',
-                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-              },
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
             ]}
           >
             <View style={styles.sectionHeaderBetween}>
@@ -1159,8 +1128,7 @@ export default function BudgetSetupScreen() {
                           ? tokens.primary
                           : hasAmount
                           ? 'rgba(229, 152, 68, 0.5)'
-                          : 'transparent',
-                      },
+                          : 'transparent' },
                     ]}
                     onPress={() => handleSelectSuggestedFixedCost(name)}
                     activeOpacity={0.8}
@@ -1174,8 +1142,7 @@ export default function BudgetSetupScreen() {
                             : isDark
                             ? '#FAF6EC'
                             : '#55606D',
-                          fontWeight: isSelected || hasAmount ? '700' : '500',
-                        },
+                          fontWeight: isSelected || hasAmount ? '700' : '500' },
                       ]}
                     >
                       {chipLabel}
@@ -1217,8 +1184,7 @@ export default function BudgetSetupScreen() {
                           ? tokens.primary
                           : hasAmount
                           ? 'rgba(229, 152, 68, 0.5)'
-                          : 'transparent',
-                      },
+                          : 'transparent' },
                     ]}
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1235,8 +1201,7 @@ export default function BudgetSetupScreen() {
                             : isDark
                             ? '#FAF6EC'
                             : '#55606D',
-                          fontWeight: isSelected || hasAmount ? '700' : '500',
-                        },
+                          fontWeight: isSelected || hasAmount ? '700' : '500' },
                       ]}
                     >
                       {chipLabel}
@@ -1253,8 +1218,7 @@ export default function BudgetSetupScreen() {
                   styles.activeEditorBox,
                   {
                     backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : '#FAF6EC',
-                    borderColor: isDark ? 'rgba(229, 152, 68, 0.3)' : 'rgba(229, 152, 68, 0.25)',
-                  },
+                    borderColor: isDark ? 'rgba(229, 152, 68, 0.3)' : 'rgba(229, 152, 68, 0.25)' },
                 ]}
               >
                 <View style={styles.activeEditorHeader}>
@@ -1290,8 +1254,7 @@ export default function BudgetSetupScreen() {
                     {
                       backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
                       borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                      marginBottom: 0,
-                    },
+                      marginBottom: 0 },
                   ]}
                 >
                   <TextInput
@@ -1341,8 +1304,7 @@ export default function BudgetSetupScreen() {
                 {
                   backgroundColor: isDark ? '#162231' : '#FFFFFF',
                   borderColor: tokens.primary,
-                  shadowColor: '#E59844',
-                },
+                  shadowColor: '#E59844' },
               ]}
             >
               {/* TIÊU ĐỀ CARD & DÒNG PHỤ KHẢ DỤNG XUỐNG DÒNG (KHÔNG CHẠM NHAU) */}
@@ -1423,8 +1385,7 @@ export default function BudgetSetupScreen() {
                       : 'rgba(229, 152, 68, 0.08)',
                     borderColor: isDark
                       ? 'rgba(229, 152, 68, 0.25)'
-                      : 'rgba(229, 152, 68, 0.2)',
-                  },
+                      : 'rgba(229, 152, 68, 0.2)' },
                 ]}
               >
                 <Text style={[styles.dailyResultLabel, { color: isDark ? '#FAF6EC' : '#55606D' }]}>
@@ -1449,8 +1410,7 @@ export default function BudgetSetupScreen() {
                     ? tokens.danger
                     : isDark
                     ? 'rgba(255, 255, 255, 0.14)'
-                    : 'rgba(0, 0, 0, 0.12)',
-                },
+                    : 'rgba(0, 0, 0, 0.12)' },
               ]}
             >
               <View style={styles.heroCalHeader}>
@@ -1465,8 +1425,7 @@ export default function BudgetSetupScreen() {
                     {
                       color: isFixedExceedIncome
                         ? tokens.danger
-                        : tokens.textMuted,
-                    },
+                        : tokens.textMuted },
                   ]}
                 >
                   {isFixedExceedIncome
@@ -1490,8 +1449,7 @@ export default function BudgetSetupScreen() {
                       : '#FAF6EC',
                     borderColor: 'transparent',
                     alignSelf: 'stretch',
-                    marginTop: 2,
-                  },
+                    marginTop: 2 },
                 ]}
               >
                 <Text style={[styles.dailyResultLabel, { color: tokens.textMuted }]}>
@@ -1513,8 +1471,7 @@ export default function BudgetSetupScreen() {
                   styles.heroCalHint,
                   {
                     color: isFixedExceedIncome ? tokens.danger : tokens.textMuted,
-                    fontStyle: isFixedExceedIncome ? 'normal' : 'italic',
-                  },
+                    fontStyle: isFixedExceedIncome ? 'normal' : 'italic' },
                 ]}
               >
                 {isFixedExceedIncome
@@ -1531,8 +1488,7 @@ export default function BudgetSetupScreen() {
                 styles.cardSection,
                 {
                   backgroundColor: isDark ? '#162231' : '#FFFFFF',
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                },
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
               ]}
             >
               <View style={styles.sectionLabelRow}>
@@ -1559,8 +1515,7 @@ export default function BudgetSetupScreen() {
                             ? tokens.primary
                             : isDark
                             ? 'rgba(255, 255, 255, 0.06)'
-                            : '#FAF6EC',
-                        },
+                            : '#FAF6EC' },
                       ]}
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1573,8 +1528,7 @@ export default function BudgetSetupScreen() {
                           styles.favUnitText,
                           {
                             color: isSelected ? '#0E1620' : isDark ? '#FAF6EC' : '#1B2733',
-                            fontWeight: isSelected ? '700' : '500',
-                          },
+                            fontWeight: isSelected ? '700' : '500' },
                         ]}
                       >
                         {unit.label} ({unit.price})
@@ -1623,34 +1577,27 @@ export default function BudgetSetupScreen() {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
-  },
+    flex: 1 },
   keyboardView: {
-    flex: 1,
-  },
+    flex: 1 },
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 36,
-    gap: 12,
-  },
+    gap: 12 },
   header: {
     alignItems: 'center',
-    marginBottom: 4,
-  },
+    marginBottom: 4 },
   monogramBox: {
-    marginBottom: 8,
-  },
+    marginBottom: 8 },
   welcomeTitle: {
     fontSize: 20,
     fontWeight: '800',
     letterSpacing: -0.3,
-    marginBottom: 3,
-  },
+    marginBottom: 3 },
   welcomeSubtitle: {
     fontSize: 13,
-    fontWeight: '500',
-  },
+    fontWeight: '500' },
   cardSection: {
     borderRadius: radii.xl,
     borderWidth: 1,
@@ -1660,77 +1607,63 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
-    elevation: 1,
-  },
+    elevation: 1 },
   sectionLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-  },
+    gap: 7 },
   sectionHeaderBetween: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
+    justifyContent: 'space-between' },
   sectionTitle: {
     fontSize: 14.5,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   requiredStar: {
-    color: '#C86D51',
-  },
+    color: '#C86D51' },
   textInput: {
     borderRadius: radii.md,
     borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 14.5,
-  },
+    fontSize: 14.5 },
   amountInput: {
     fontSize: 20,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.3,
-  },
+    letterSpacing: -0.3 },
   currencyInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: radii.md,
     borderWidth: 1,
     paddingHorizontal: 14,
-    paddingVertical: 4,
-  },
+    paddingVertical: 4 },
   currencyTextInput: {
     flex: 1,
     fontSize: 20,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
     letterSpacing: -0.3,
-    paddingVertical: 6,
-  },
+    paddingVertical: 6 },
   currencySuffix: {
     fontSize: 18,
     fontWeight: '800',
-    marginLeft: 6,
-  },
+    marginLeft: 6 },
   sliderContainer: {
     marginTop: 4,
-    marginBottom: 4,
-  },
+    marginBottom: 4 },
   sliderTrackTouchArea: {
     height: 44,
     justifyContent: 'center',
-    position: 'relative',
-  },
+    position: 'relative' },
   sliderTrackBackground: {
     height: 8,
     borderRadius: 4,
-    overflow: 'hidden',
-  },
+    overflow: 'hidden' },
   sliderTrackActive: {
     height: '100%',
-    borderRadius: 4,
-  },
+    borderRadius: 4 },
   sliderThumb: {
     position: 'absolute',
     width: 26,
@@ -1743,139 +1676,114 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
-    elevation: 4,
-  },
+    elevation: 4 },
   milestoneRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 2,
-    marginTop: -2,
-  },
+    marginTop: -2 },
   milestoneText: {
     fontSize: 11,
     fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   fixedAmountContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
+    justifyContent: 'flex-end' },
   fixedAmountSuffix: {
     fontSize: 13,
     fontWeight: '800',
-    marginLeft: 3,
-  },
+    marginLeft: 3 },
   addInlineButton: {
     width: 26,
     height: 26,
     borderRadius: 13,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center' },
   suggestionChipsScroll: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-  },
+    gap: 6 },
   suggestionChip: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: radii.full,
-    borderWidth: 1,
-  },
+    borderWidth: 1 },
   suggestionChipText: {
-    fontSize: 11.5,
-  },
+    fontSize: 11.5 },
   activeEditorBox: {
     padding: 12,
     borderRadius: radii.lg,
     borderWidth: 1,
     gap: 8,
     marginTop: 6,
-    marginBottom: 8,
-  },
+    marginBottom: 8 },
   activeEditorHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+    alignItems: 'center' },
   activeEditorTitle: {
     fontSize: 13.5,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   activeCustomNameInput: {
     flex: 1,
     fontSize: 13.5,
     fontWeight: '700',
-    paddingVertical: 2,
-  },
+    paddingVertical: 2 },
   fixedListContainer: {
     gap: 8,
-    marginTop: 2,
-  },
+    marginTop: 2 },
   fixedCostRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     borderRadius: radii.md,
     paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
+    paddingVertical: 6 },
   fixedNameInput: {
     flex: 1.2,
     fontSize: 13.5,
     fontWeight: '600',
-    paddingVertical: 4,
-  },
+    paddingVertical: 4 },
   fixedAmountInput: {
     flex: 1,
     fontSize: 14,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
     textAlign: 'right',
-    paddingVertical: 4,
-  },
+    paddingVertical: 4 },
   trashBtn: {
     padding: 4,
-    marginLeft: 4,
-  },
+    marginLeft: 4 },
   fixedTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 6,
     marginTop: 4,
-    paddingHorizontal: 4,
-  },
+    paddingHorizontal: 4 },
   fixedTotalLabel: {
     fontSize: 12,
-    fontWeight: '600',
-  },
+    fontWeight: '600' },
   fixedTotalAmount: {
     fontSize: 13.5,
     fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   fixedSliderContainer: {
     marginTop: 8,
-    marginBottom: 2,
-  },
+    marginBottom: 2 },
   fixedSliderTrackTouchArea: {
     height: 34,
     justifyContent: 'center',
-    position: 'relative',
-  },
+    position: 'relative' },
   fixedSliderTrackBackground: {
     height: 6,
     borderRadius: 3,
-    overflow: 'hidden',
-  },
+    overflow: 'hidden' },
   fixedSliderTrackActive: {
     height: '100%',
-    borderRadius: 3,
-  },
+    borderRadius: 3 },
   fixedSliderThumb: {
     position: 'absolute',
     width: 22,
@@ -1888,24 +1796,20 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1.5 },
     shadowOpacity: 0.22,
     shadowRadius: 2.5,
-    elevation: 3,
-  },
+    elevation: 3 },
   fixedMilestoneRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 2,
-    marginTop: -2,
-  },
+    marginTop: -2 },
   fixedMilestoneText: {
     fontSize: 10.5,
     fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   emptyFixedHint: {
     fontSize: 12,
     lineHeight: 16.5,
-    paddingVertical: 2,
-  },
+    paddingVertical: 2 },
   heroCalculationCard: {
     borderRadius: radii.xl,
     borderWidth: 1.5,
@@ -1916,50 +1820,40 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
-    elevation: 2,
-  },
+    elevation: 2 },
   heroCalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-  },
+    gap: 6 },
   heroCalTitle: {
     fontSize: 13.5,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   heroCalAmount: {
     fontSize: 26,
     fontWeight: '900',
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.5,
-  },
+    letterSpacing: -0.5 },
   heroCalUnit: {
     fontSize: 14,
-    fontWeight: '600',
-  },
+    fontWeight: '600' },
   heroCalHint: {
     fontSize: 12,
     textAlign: 'center',
-    lineHeight: 16,
-  },
+    lineHeight: 16 },
   favUnitsRow: {
     flexDirection: 'row',
-    gap: 8,
-  },
+    gap: 8 },
   favUnitChip: {
     flex: 1,
     paddingVertical: 8,
     borderRadius: radii.full,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center' },
   favUnitText: {
-    fontSize: 12,
-  },
+    fontSize: 12 },
   actionSection: {
     marginTop: 6,
-    gap: 12,
-  },
+    gap: 12 },
   primaryButton: {
     height: 48,
     borderRadius: radii.full,
@@ -1969,32 +1863,26 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 3,
-  },
+    elevation: 3 },
   primaryButtonText: {
     color: '#0E1620',
     fontSize: 14.5,
     fontWeight: '800',
-    letterSpacing: 0.4,
-  },
+    letterSpacing: 0.4 },
   quickSkipButton: {
     alignItems: 'center',
-    paddingVertical: 4,
-  },
+    paddingVertical: 4 },
   quickSkipText: {
     fontSize: 12.5,
-    textAlign: 'center',
-  },
+    textAlign: 'center' },
   optionalBadge: {
     fontSize: 11.5,
-    fontWeight: '500',
-  },
+    fontWeight: '500' },
   sectionSubtitle: {
     fontSize: 12,
     lineHeight: 16.5,
     marginTop: -2,
-    marginBottom: 2,
-  },
+    marginBottom: 2 },
   heroZeroCard: {
     borderRadius: radii.xl,
     borderWidth: 1.5,
@@ -2003,8 +1891,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
-    elevation: 3,
-  },
+    elevation: 3 },
   heroZeroCardPlaceholder: {
     borderRadius: radii.xl,
     borderWidth: 1.5,
@@ -2013,60 +1900,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     shadowOpacity: 0,
-    elevation: 0,
-  },
+    elevation: 0 },
   heroZeroHeaderCol: {
-    gap: 3,
-  },
+    gap: 3 },
   heroZeroTitle: {
     fontSize: 14.5,
     fontWeight: '800',
-    letterSpacing: -0.2,
-  },
+    letterSpacing: -0.2 },
   disposableSubtext: {
     fontSize: 12.5,
     fontVariant: ['tabular-nums'],
-    marginLeft: 24,
-  },
+    marginLeft: 24 },
   pillarsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 2,
-    paddingTop: 2,
-  },
+    paddingTop: 2 },
   borderlessCol: {
     flex: 1,
-    gap: 3,
-  },
+    gap: 3 },
   borderlessLabel: {
     fontSize: 12,
     fontWeight: '700',
-    letterSpacing: -0.2,
-  },
+    letterSpacing: -0.2 },
   borderlessAmount: {
     fontSize: 18.5,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.4,
-  },
+    letterSpacing: -0.4 },
   splitterOuterWrapper: {
     gap: 8,
-    marginTop: 2,
-  },
+    marginTop: 2 },
   splitterTouchArea: {
     height: 38,
     justifyContent: 'center',
-    position: 'relative',
-  },
+    position: 'relative' },
   splitterTrackBackground: {
     height: 10,
     borderRadius: 5,
-    overflow: 'hidden',
-  },
+    overflow: 'hidden' },
   splitterSavingsSegment: {
     height: '100%',
-    borderRadius: 5,
-  },
+    borderRadius: 5 },
   splitterThumb: {
     position: 'absolute',
     width: 26,
@@ -2080,17 +1955,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.22,
     shadowRadius: 3,
-    elevation: 4,
-  },
+    elevation: 4 },
   splitterGripLines: {
     flexDirection: 'row',
-    gap: 2.5,
-  },
+    gap: 2.5 },
   splitterGripBar: {
     width: 1.5,
     height: 9,
-    borderRadius: 1,
-  },
+    borderRadius: 1 },
   dailyResultBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -2099,20 +1971,15 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: radii.md,
     borderWidth: 1,
-    marginTop: 2,
-  },
+    marginTop: 2 },
   dailyResultLabel: {
     fontSize: 12.5,
-    fontWeight: '600',
-  },
+    fontWeight: '600' },
   dailyResultAmount: {
     fontSize: 16.5,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.3,
-  },
+    letterSpacing: -0.3 },
   dailyResultUnit: {
     fontSize: 12,
-    fontWeight: '600',
-  },
-});
+    fontWeight: '600' } });

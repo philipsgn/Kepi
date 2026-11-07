@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
-import {
-  Dimensions,
+import { Dimensions,
   Modal,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -9,8 +8,7 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+  View, ScrollViewInstance } from 'react-native';
 import { Image } from 'expo-image';
 import { Camera, ChevronRight, Sparkles, X, Clock, Tag } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -47,11 +45,10 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
   isPrivacyHidden = false,
   onClose,
   onSelectTransaction,
-  onTakePhotoForDay,
-}) => {
+  onTakePhotoForDay }) => {
   const { tokens, isDark } = useTheme();
   const [activeIndex, setActiveIndex] = useState(0);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
 
   const dayExpense = transactions
     .filter((t) => t.type === 'EXPENSE')
@@ -68,8 +65,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
       return new Intl.DateTimeFormat('vi-VN', {
         hour: '2-digit',
         minute: '2-digit',
-        timeZone: 'Asia/Ho_Chi_Minh',
-      }).format(d);
+        timeZone: 'Asia/Ho_Chi_Minh' }).format(d);
     } catch {
       return '';
     }
@@ -99,8 +95,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
                 styles.sheetContainer,
                 {
                   backgroundColor: tokens.surface,
-                  borderColor: tokens.border,
-                },
+                  borderColor: tokens.border },
               ]}
             >
               {/* THANH KÉO TRÊN CÙNG */}
@@ -160,8 +155,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
                             {
                               width: CARD_WIDTH,
                               backgroundColor: tokens.surfaceAlt,
-                              borderColor: tokens.border,
-                            },
+                              borderColor: tokens.border },
                           ]}
                         >
                           {/* KHUNG ẢNH LOCKET */}
@@ -170,8 +164,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
                               styles.imageContainer,
                               {
                                 backgroundColor: isDark ? '#141A20' : '#EDE8DC',
-                                borderColor: tokens.border,
-                              },
+                                borderColor: tokens.border },
                             ]}
                           >
                             {photo ? (
@@ -208,8 +201,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
                               style={[
                                 styles.typeBadgeOverlay,
                                 {
-                                  backgroundColor: isIncome ? 'rgba(126, 159, 128, 0.85)' : 'rgba(200, 109, 81, 0.85)',
-                                },
+                                  backgroundColor: isIncome ? 'rgba(126, 159, 128, 0.85)' : 'rgba(200, 109, 81, 0.85)' },
                               ]}
                             >
                               <Text style={styles.typeBadgeText}>
@@ -226,8 +218,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
                                 style={[
                                   styles.amountValue,
                                   {
-                                    color: isIncome ? tokens.success : tokens.text,
-                                  },
+                                    color: isIncome ? tokens.success : tokens.text },
                                 ]}
                               >
                                 {isIncome ? '+' : '-'}{displayAmount}
@@ -241,8 +232,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
                                   styles.catPill,
                                   {
                                     backgroundColor: tokens.surface,
-                                    borderColor: tokens.border,
-                                  },
+                                    borderColor: tokens.border },
                                 ]}
                               >
                                 <CatIcon size={13} color={tokens.primary} strokeWidth={2.2} />
@@ -259,8 +249,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
                                   styles.noteText,
                                   {
                                     color: tx.description ? tokens.text : tokens.textMuted,
-                                    fontStyle: tx.description ? 'normal' : 'italic',
-                                  },
+                                    fontStyle: tx.description ? 'normal' : 'italic' },
                                 ]}
                                 numberOfLines={2}
                               >
@@ -289,8 +278,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
                           styles.pageCounterPill,
                           {
                             backgroundColor: tokens.surfaceAlt,
-                            borderColor: tokens.border,
-                          },
+                            borderColor: tokens.border },
                         ]}
                       >
                         <Text style={[styles.pageCounterText, { color: tokens.text }]}>
@@ -306,8 +294,7 @@ export const DayDetailBottomSheet: React.FC<DayDetailBottomSheetProps> = ({
                               {
                                 backgroundColor:
                                   dotIdx === activeIndex ? tokens.primary : tokens.border,
-                                width: dotIdx === activeIndex ? 14 : 5,
-                              },
+                                width: dotIdx === activeIndex ? 14 : 5 },
                             ]}
                           />
                         ))}
@@ -354,8 +341,7 @@ const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'flex-end',
-  },
+    justifyContent: 'flex-end' },
   sheetContainer: {
     borderTopLeftRadius: radii.xl,
     borderTopRightRadius: radii.xl,
@@ -363,51 +349,42 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     paddingTop: 10,
     paddingBottom: 28,
-    maxHeight: '90%',
-  },
+    maxHeight: '90%' },
   dragPill: {
     width: 38,
     height: 4.5,
     borderRadius: 2.5,
     alignSelf: 'center',
-    marginBottom: 10,
-  },
+    marginBottom: 10 },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingBottom: 14,
-    borderBottomWidth: 1,
-  },
+    borderBottomWidth: 1 },
   headerTitleCol: {
-    flex: 1,
-  },
+    flex: 1 },
   headerTitleText: {
     fontSize: 16.5,
     fontWeight: '800',
-    letterSpacing: -0.2,
-  },
+    letterSpacing: -0.2 },
   headerSubText: {
     fontSize: 12.5,
     fontWeight: '500',
-    marginTop: 3,
-  },
+    marginTop: 3 },
   closeBtnBorderless: {
     width: 32,
     height: 32,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    borderWidth: 0,
-  },
+    borderWidth: 0 },
   carouselSection: {
-    paddingVertical: 14,
-  },
+    paddingVertical: 14 },
   carouselContainer: {
     paddingHorizontal: (SCREEN_WIDTH - CARD_WIDTH) / 2,
-    gap: CARD_SPACING,
-  },
+    gap: CARD_SPACING },
   locketCard: {
     borderRadius: 22,
     borderWidth: 1,
@@ -416,37 +393,31 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
-    elevation: 4,
-  },
+    elevation: 4 },
   imageContainer: {
     width: '100%',
     aspectRatio: 1.15,
     position: 'relative',
     overflow: 'hidden',
-    borderBottomWidth: 1,
-  },
+    borderBottomWidth: 1 },
   photoLarge: {
     width: '100%',
-    height: '100%',
-  },
+    height: '100%' },
   fallbackPhotoBox: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-  },
+    padding: 16 },
   fallbackIconRing: {
     width: 68,
     height: 68,
     borderRadius: 34,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
-  },
+    marginBottom: 8 },
   fallbackCaption: {
     fontSize: 12,
-    fontWeight: '500',
-  },
+    fontWeight: '500' },
   timeBadgeOverlay: {
     position: 'absolute',
     top: 10,
@@ -457,46 +428,38 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
-  },
+    borderRadius: 12 },
   timeBadgeText: {
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   typeBadgeOverlay: {
     position: 'absolute',
     top: 10,
     right: 10,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
-  },
+    borderRadius: 12 },
   typeBadgeText: {
     color: '#FFFFFF',
     fontSize: 10.5,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   cardInfoBody: {
     padding: 14,
-    gap: 8,
-  },
+    gap: 8 },
   amountRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-  },
+    alignItems: 'baseline' },
   amountValue: {
     fontSize: 22,
     fontWeight: '900',
     letterSpacing: -0.5,
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
+    gap: 8 },
   catPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -504,77 +467,61 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 4.5,
     borderRadius: 14,
-    borderWidth: 1,
-  },
+    borderWidth: 1 },
   catPillText: {
     fontSize: 12,
-    fontWeight: '700',
-  },
+    fontWeight: '700' },
   noteBox: {
-    paddingVertical: 2,
-  },
+    paddingVertical: 2 },
   noteText: {
     fontSize: 13.5,
     lineHeight: 18,
-    fontWeight: '500',
-  },
+    fontWeight: '500' },
   tapHintRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: 2,
-    paddingTop: 2,
-  },
+    paddingTop: 2 },
   tapHintText: {
     fontSize: 11,
-    fontWeight: '500',
-  },
+    fontWeight: '500' },
   paginationRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    gap: 12,
-  },
+    gap: 12 },
   pageCounterPill: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
-    borderWidth: 1,
-  },
+    borderWidth: 1 },
   pageCounterText: {
     fontSize: 11,
     fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
+    fontVariant: ['tabular-nums'] },
   dotsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-  },
+    gap: 4 },
   dotItem: {
     height: 5,
-    borderRadius: 2.5,
-  },
+    borderRadius: 2.5 },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 36,
     paddingHorizontal: 24,
-    gap: 8,
-  },
+    gap: 8 },
   emptyTitle: {
     fontSize: 15,
     fontWeight: '700',
-    marginTop: 4,
-  },
+    marginTop: 4 },
   emptyText: {
     fontSize: 13,
     textAlign: 'center',
-    lineHeight: 18,
-  },
+    lineHeight: 18 },
   bottomCtaRow: {
     paddingHorizontal: 20,
-    paddingTop: 6,
-  },
-});
+    paddingTop: 6 } });

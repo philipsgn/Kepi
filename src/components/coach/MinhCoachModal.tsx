@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
-import {
-  ActivityIndicator,
+import { ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -10,8 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+  View, ScrollViewInstance } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import {
   Flame,
@@ -20,8 +18,7 @@ import {
   Sparkles,
   Target,
   Trash2,
-  X,
-} from 'lucide-react-native';
+  X } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Shadows, Spacing } from '../../constants/layout';
 import { Typography } from '../../constants/typography';
@@ -44,8 +41,7 @@ const QUICK_PROMPTS = [
 
 export const MinhCoachModal: React.FC<MinhCoachModalProps> = ({
   visible,
-  onClose,
-}) => {
+  onClose }) => {
   const {
     expression,
     messages,
@@ -53,8 +49,7 @@ export const MinhCoachModal: React.FC<MinhCoachModalProps> = ({
     sendChatMessage,
     clearChatHistory,
     resistedImpulsesCount,
-    totalSavedFromTrend,
-  } = useMinhCoachStore();
+    totalSavedFromTrend } = useMinhCoachStore();
 
   const {
     todayBudget,
@@ -62,11 +57,10 @@ export const MinhCoachModal: React.FC<MinhCoachModalProps> = ({
     realBalance,
     savedMoney,
     goalName,
-    goalTargetAmount,
-  } = useBudgetStore();
+    goalTargetAmount } = useBudgetStore();
 
   const [inputMessage, setInputMessage] = useState('');
-  const chatScrollRef = useRef<ScrollView | null>(null);
+  const chatScrollRef = useRef<ScrollViewInstance | null>(null);
 
   const remainingToday = todayBudget - todaySpent;
   const goalProgress =
@@ -87,8 +81,7 @@ export const MinhCoachModal: React.FC<MinhCoachModalProps> = ({
       remainingToday,
       goalName,
       goalTargetAmount,
-      savedMoney,
-    });
+      savedMoney });
 
     setTimeout(() => {
       chatScrollRef.current?.scrollToEnd({ animated: true });
@@ -301,8 +294,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.lg,
-  },
+    paddingVertical: Spacing.lg },
   modalCard: {
     width: '100%',
     maxHeight: '92%',
@@ -314,8 +306,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(229, 152, 68, 0.3)',
     ...Shadows.floating,
-    position: 'relative',
-  },
+    position: 'relative' },
   closeBtn: {
     position: 'absolute',
     top: Spacing.md,
@@ -326,16 +317,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 10,
-  },
+    zIndex: 10 },
   header: {
     alignItems: 'center',
-    paddingBottom: Spacing.sm,
-  },
+    paddingBottom: Spacing.sm },
   headerInfo: {
     alignItems: 'center',
-    marginTop: 8,
-  },
+    marginTop: 8 },
   nameBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -345,18 +333,15 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
-    borderColor: 'rgba(229, 152, 68, 0.3)',
-  },
+    borderColor: 'rgba(229, 152, 68, 0.3)' },
   nameBadgeText: {
     fontSize: 13,
     fontWeight: '700',
-    color: Colors.accentGold,
-  },
+    color: Colors.accentGold },
   headerTagline: {
     fontSize: 11,
     color: Colors.textSecondary,
-    marginTop: 3,
-  },
+    marginTop: 3 },
   disciplineCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: BorderRadius.md,
@@ -365,51 +350,41 @@ const styles = StyleSheet.create({
     marginVertical: Spacing.xs,
     borderWidth: 1,
     borderColor: 'rgba(74, 92, 70, 0.12)',
-    ...Shadows.soft,
-  },
+    ...Shadows.soft },
   disciplineRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-  },
+    justifyContent: 'space-around' },
   disciplineItem: {
-    alignItems: 'center',
-  },
+    alignItems: 'center' },
   disciplineLabel: {
     fontSize: 10,
     color: Colors.textSecondary,
-    fontWeight: '500',
-  },
+    fontWeight: '500' },
   disciplineValue: {
     fontSize: 13,
     fontWeight: '800',
-    marginTop: 2,
-  },
+    marginTop: 2 },
   disciplineDivider: {
     width: 1,
     height: 24,
-    backgroundColor: 'rgba(74, 92, 70, 0.1)',
-  },
+    backgroundColor: 'rgba(74, 92, 70, 0.1)' },
   quickPromptsWrapper: {
-    marginVertical: 6,
-  },
+    marginVertical: 6 },
   quickPromptsList: {
     gap: 6,
-    paddingHorizontal: 2,
-  },
+    paddingHorizontal: 2 },
   promptPill: {
     backgroundColor: 'rgba(229, 152, 68, 0.12)',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
-    borderColor: 'rgba(229, 152, 68, 0.25)',
-  },
+    borderColor: 'rgba(229, 152, 68, 0.25)' },
   promptPillText: {
     fontSize: 11,
     color: Colors.accentGold,
-    fontWeight: '600',
-  },
+    fontWeight: '600' },
   chatThreadWrapper: {
     flex: 1,
     minHeight: 180,
@@ -418,67 +393,52 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(74, 92, 70, 0.1)',
     marginVertical: 6,
-    overflow: 'hidden',
-  },
+    overflow: 'hidden' },
   chatScrollView: {
-    flex: 1,
-  },
+    flex: 1 },
   chatScrollContent: {
     padding: Spacing.sm,
-    gap: Spacing.sm,
-  },
+    gap: Spacing.sm },
   chatBubbleRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 6,
-    maxWidth: '88%',
-  },
+    maxWidth: '88%' },
   coachRow: {
-    alignSelf: 'flex-start',
-  },
+    alignSelf: 'flex-start' },
   userRow: {
-    alignSelf: 'flex-end',
-  },
+    alignSelf: 'flex-end' },
   chatAvatarMini: {
-    marginBottom: 2,
-  },
+    marginBottom: 2 },
   chatBubble: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: BorderRadius.md,
-  },
+    borderRadius: BorderRadius.md },
   coachBubble: {
     backgroundColor: Colors.bgPrimary,
     borderBottomLeftRadius: 2,
     borderWidth: 1,
-    borderColor: 'rgba(229, 152, 68, 0.2)',
-  },
+    borderColor: 'rgba(229, 152, 68, 0.2)' },
   userBubble: {
     backgroundColor: Colors.accentGold,
-    borderBottomRightRadius: 2,
-  },
+    borderBottomRightRadius: 2 },
   chatMessageText: {
     fontSize: 13,
-    lineHeight: 18,
-  },
+    lineHeight: 18 },
   coachText: {
-    color: Colors.textCharcoal,
-  },
+    color: Colors.textCharcoal },
   userText: {
     color: '#FFFFFF',
-    fontWeight: '500',
-  },
+    fontWeight: '500' },
   thinkingText: {
     fontSize: 12,
     color: Colors.textSecondary,
-    fontStyle: 'italic',
-  },
+    fontStyle: 'italic' },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    marginTop: 4,
-  },
+    marginTop: 4 },
   inputField: {
     flex: 1,
     backgroundColor: '#FFFFFF',
@@ -488,8 +448,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textCharcoal,
     borderWidth: 1,
-    borderColor: 'rgba(74, 92, 70, 0.2)',
-  },
+    borderColor: 'rgba(74, 92, 70, 0.2)' },
   sendBtn: {
     width: 38,
     height: 38,
@@ -497,26 +456,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.accentGold,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.chunky3D,
-  },
+    ...Shadows.chunky3D },
   sendBtnDisabled: {
-    opacity: 0.5,
-  },
+    opacity: 0.5 },
   footerHintRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 6,
-    paddingHorizontal: 4,
-  },
+    paddingHorizontal: 4 },
   tapOutsideHint: {
     fontSize: 10,
     color: Colors.textMuted,
-    fontStyle: 'italic',
-  },
+    fontStyle: 'italic' },
   clearChatText: {
     fontSize: 10,
     color: Colors.textMuted,
-    textDecorationLine: 'underline',
-  },
-});
+    textDecorationLine: 'underline' } });

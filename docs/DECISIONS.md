@@ -484,9 +484,33 @@
     - *Dọn Dẹp Giao Diện:* Gỡ bỏ hàm `handleDirectLinkGoogle` khỏi `ProfileView.tsx`, gỡ bỏ prop và style chết liên quan đến Google trong `ProfileIdentityCard.tsx`, làm sạch route `app/(auth)/callback.tsx`.
     - *Bảo Toàn & Khôi Phục Dữ Liệu Ngoại Tuyến:* Khẳng định cơ chế sao lưu & khôi phục dữ liệu qua tệp JSON mã hóa nhúng ảnh Base64 (`exportAppDataAsync` / `importAppDataAsync`) và xuất CSV chuẩn UTF-8 BOM (`\uFEFF`) qua khay chia sẻ hệ thống (100% Offline, bảo mật tối đa).
 
-
   - **Quyết định 96 (05/11/2026): Tích Hợp Bàn Phím Số Tài Chính MandCashierKeyboard (Phong Cách DiDi Mand Mobile):**
     - *Triệt Tiêu Bàn Phím Hệ Điều Hành (Zero OS Keyboard Jitter):* Thay thế hoàn toàn bàn phím số mặc định của iOS/Android bằng bàn phím số tài chính chuyên dụng tích hợp sẵn trong màn hình Review sau khi chụp và các luồng nhập tiền. Triệt tiêu 100% tình trạng giật viewport và che khuất ảnh chụp 4:5.
-    - *Vũ Khí Nhập Tiền Siêu Tốc `000`:* Bố trí phím `000` ở hàng cuối cùng, hỗ trợ gõ nhanh mệnh giá nghìn/trăm nghìn VND (`3` + `5` + `000` = `35.000 đ`) chỉ trong 3 chạm nhẹ ($\le 1.5$s).
+    - *Vũ Khí Nhập Tiền Siêu Tốc `000`:* Bố trí phím `000` ở hàng cuối cùng, hỗ trợ gõ nhanh mệnh giá nghìn/trăm nghìn VND (`3` + `5` + `000` = `35.000 đ`) chỉ trong 3 chạm nhẹ ($le 1.5$s).
     - *Cột Hành Động Tích Hợp (Giant Action Button):* Cột thứ 4 tích hợp phím Xóa lùi `⌫` và nút Primary Action `LƯU SỔ ✔` to bản (chiếm 3 hàng), bố trí đúng tầm với của ngón cái bên phải với màu sắc theo Theme và phản hồi xúc giác Haptics.
     - *Dải Danh Mục 1-Chạm (Micro Category Strip):* Tích hợp dải danh mục cuộn ngang thu nhỏ ngay trên con số tiền với 100% icon vector nổi trần (`lucide-react-native`), cho phép chuyển đổi danh mục tức thì mà không cần mở modal chọn phụ.
+
+  - **Quyết định 97 (07/11/2026): Nâng Cấp Hệ Thống Lên Expo SDK 58 (Tương Thích iOS Expo Go v58.0.0 & React Native 0.88):**
+    - *Bối Cảnh & Nguyên Nhân:*
+      - Ứng dụng Expo Go trên thiết bị iOS (iPhone) của người dùng đã được Apple App Store tự động cập nhật lên phiên bản **SDK 58.0.0**. Khi quét mã QR từ dự án ở SDK 57, Expo Go trên iOS lập tức chặn và báo lỗi: *"Project is incompatible with this version of Expo Go. The installed version of Expo Go is for SDK 58.0.0. The project you opened uses SDK 57"*. Do chính sách của Apple không cho phép cài đặt các phiên bản cũ của Expo Go trên thiết bị vật lý, dự án bắt buộc phải nâng cấp lên SDK 58.
+    - *Phạm Vi Nâng Cấp Dependencies:*
+      - Cập nhật core framework: `expo: ~58.0.7`, `@expo/metro-runtime: ~58.0.14`, `react: 19.3.0`, `react-dom: 19.3.0`, `react-native: 0.88.0-rc.4`.
+      - Cập nhật toàn bộ hệ sinh thái Expo: `expo-asset: ~58.0.13`, `expo-blur: ~58.0.3`, `expo-camera: ~58.0.9`, `expo-clipboard: ~58.0.3`, `expo-constants: ~58.0.10`, `expo-file-system: ~58.0.8`, `expo-haptics: ~58.0.5`, `expo-image: ~58.0.13`, `expo-image-manipulator: ~58.0.13`, `expo-image-picker: ~58.0.10`, `expo-linear-gradient: ~58.0.3`, `expo-linking: ~58.0.11`, `expo-notifications: ~58.1.2`, `expo-print: ~58.0.5`, `expo-router: ~58.0.17`, `expo-sharing: ~58.0.16`, `expo-status-bar: ~58.0.3`.
+      - Cập nhật UI & Animation: `react-native-reanimated: 4.7.0`, `react-native-safe-area-context: ~5.9.1`, `react-native-screens: ~4.28.0`, `react-native-svg: 15.15.5`, `react-native-web: ~0.21.4`, `react-native-webview: 14.0.1`, `react-native-worklets: 0.13.0`.
+    - *Bảo Toàn Native Resilience & Manifest Middleware:*
+      - Duy trì cơ chế bảo vệ khởi động an toàn `nativeSafetyPolyfill.ts` tại `index.js`.
+      - Áp dụng bản vá an toàn cho ManifestMiddleware của Metro xử lý các scheme URL (`exp://`, `https?://`), ngăn ngừa hoàn toàn cảnh báo `Unable to resolve manifest assets`.
+    - *Tiêu Chuẩn Nghiệm Thu:*
+      - `npx tsc --noEmit` đạt 0 lỗi.
+      - `node run-all-tests.js` vượt qua 100% (53/53 unit tests).
+      - Quét mã QR Expo Go trên iPhone mở trực tiếp app PigFly mượt mà, không gặp thông báo SDK mismatch.
+
+  - **Quyết định 98 (07/11/2026): Bản Vá Tương Thích WS-Tunnel Cho Expo CLI (--tunnel mode) Khắc Phục Lỗi "s.WebSocket is not a constructor":**
+    - *Bối Cảnh & Nguyên Nhân:*
+      - Khi người dùng khởi chạy `npx expo start --tunnel -c`, module đường hầm `@expo/ws-tunnel` của Expo CLI 58 gọi `new s.WebSocket(e, ...)` dựa trên giả định `ws` v8+ xuất khẩu thuộc tính `.WebSocket`. Tuy nhiên, do Metro Bundler (`metro@0.87.1`) và React Native phụ thuộc vào `ws` v7.5.13 được npm hoist lên `node_modules/ws`, `require('ws')` chỉ trả về class `WebSocket` mà không có thuộc tính `ws.WebSocket`, dẫn tới lỗi văng sập runtime `TypeError: s.WebSocket is not a constructor`.
+    - *Giải Pháp Kỹ Thuật:*
+      - 1. Bổ sung `WebSocket.WebSocket = WebSocket;` vào `node_modules/ws/index.js` để tương thích hoàn toàn cả hai cách nạp module (CommonJS constructor và ESM namespace property).
+      - 2. Áp dụng fallback an toàn `new (s.WebSocket || s)(e, ...)` trong `node_modules/@expo/ws-tunnel/build/index.js`.
+      - 3. Thiết lập script tự động vá `scripts/patch-ws-tunnel.js` và đăng ký vào lifecycle `postinstall` của `package.json` để bản vá tồn tại bền vững sau mọi lần `npm install`.
+    - *Tiêu Chuẩn Nghiệm Thu:*
+      - Lệnh `npx expo start --tunnel` khởi động thành công đường hầm Metro tunnel, xuất ra URL `exp://...exp.direct` và mã QR mà không phát sinh lỗi sập `TypeError: s.WebSocket is not a constructor`.
