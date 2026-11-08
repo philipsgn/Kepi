@@ -1,0 +1,79 @@
+import { ScrollViewStyleReset } from 'expo-router/html';
+import React, { type PropsWithChildren } from 'react';
+
+export default function RootHtml({ children }: PropsWithChildren) {
+  return (
+    <html lang="vi">
+      <head>
+        <meta charSet="utf-8" />
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+        />
+
+        <title>PigFly — Ví Locket Chi Tiêu</title>
+        <meta name="description" content="App Chi Tiêu Bằng Ảnh & Quét Mã QR (Phong cách Hà Nội Thu Đông)" />
+
+        {/* PWA / Apple Touch Meta Tags */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="PigFly" />
+        <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+        <link rel="manifest" href="./manifest.json" />
+        <meta name="theme-color" content="#0E1620" />
+
+        <ScrollViewStyleReset />
+
+        <style dangerouslySetInnerHTML={{ __html: responsiveDesktopStyle }} />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
+}
+
+const responsiveDesktopStyle = `
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #0E1620;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #root {
+    display: flex;
+    height: 100%;
+    width: 100%;
+  }
+  @media (min-width: 501px) {
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0E1620 0%, #161816 100%);
+    }
+    #root {
+      max-width: 430px;
+      height: 94vh;
+      max-height: 932px;
+      margin: auto;
+      border-radius: 40px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+  }
+  @media (max-width: 500px) {
+    #root {
+      height: 100%;
+      width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+`;

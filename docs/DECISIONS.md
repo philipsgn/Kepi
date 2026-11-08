@@ -529,3 +529,17 @@
       - `tsc --noEmit` đạt 0 lỗi.
       - `node run-all-tests.js` đạt 100% (53/53 tests).
       - Kiểm thử mô phỏng lỗi 409 xác nhận Metro duy trì hoạt động bền vững, không sập tiến trình Node.
+
+  - **Quyết định 100 (08/11/2026): Kiến Trúc Web PWA (Progressive Web App), Desktop Shell Căn Giữa & CI/CD Pipeline Tự Động Deploy Lên GitHub Pages:**
+    - *Bối Cảnh & Nguyên Nhân:*
+      - Do các rào cản kiểm thử thực tế trên iOS (phí Apple Developer \$99/năm, chính sách không cho cài bản cũ của Expo Go dẫn đến lỗi SDK mismatch), dự án thiết lập thêm kênh kiểm thử và phân phối trực tiếp qua nền tảng Web PWA, cho phép người dùng mở trên Safari iPhone và bấm "Thêm vào MH chính" (Add to Home Screen) để sử dụng như app thật.
+    - *Kiến Trúc & Giải Pháp Kỹ Thuật:*
+      - 1. **Client-Side SPA Output (`app.json`):** Chuyển đổi `web.output` sang `"single"` để xuất bản dạng Client-Side SPA, triệt tiêu hoàn toàn lỗi SSR Node `ReferenceError: window is not defined` của chế độ `"static"`.
+      - 2. **Cấu Hình BaseUrl Linh Hoạt (`app.config.js`):** Tự động nạp `experiments.baseUrl` từ `process.env.EXPO_BASE_URL`. Khi chạy cục bộ để trống `""` (phục vụ tại `/`), khi build CI/CD nạp `"/Kepi"` để tương thích hoàn toàn với đường dẫn hosting `https://philipsgn.github.io/Kepi/`.
+      - 3. **Tùy Biến PWA & Desktop Shell (`public/index.html` & `app/+html.tsx`):** Tích hợp đầy đủ thẻ Apple PWA meta (`apple-mobile-web-app-capable`, `apple-touch-icon.png`, `manifest.json`, `theme-color: #0E1620`). Tích hợp Responsive Desktop Shell CSS: tự động co gọn vào khung điện thoại di động căn giữa màn hình (`max-width: 430px`, bóng đổ mềm mại) khi mở trên máy tính, và tràn 100% toàn màn hình khi mở trên iPhone Safari.
+      - 4. **Trải Nghiệm Camera Đa Năng (`app/(main)/index.tsx`):** Hỗ trợ Web Camera trực tiếp trên khung ngắm squircle 4:5 nếu được cấp quyền, đồng thời cung cấp fallback 1-chạm mở hộp thoại chụp ảnh / thư viện ảnh native của hệ điều hành thông qua ImagePicker (`capture="environment"`).
+      - 5. **Banner Hướng Dẫn Add-to-Home-Screen (`src/components/PWAInstallBanner.tsx`):** Tự động phát hiện khi người dùng mở trên iPhone Safari ở chế độ trình duyệt thường để hiển thị banner hướng dẫn nhẹ nhàng: *"Chạm nút Chia sẻ ⎋ và chọn 'Thêm vào MH chính' ➕"*, hỗ trợ ghi nhớ trạng thái đóng vào `localStorage` và tự ẩn khi ở chế độ standalone.
+      - 6. **GitHub Actions CI/CD Pipeline (`.github/workflows/deploy-web.yml`):** Tự động hóa 100% quy trình: checkout $\to$ Node 22 $\to$ npm install $\to$ verify lint & unit tests $\to$ export web với `EXPO_BASE_URL="/Kepi"` $\to$ tạo `404.html` SPA routing fallback $\to$ deploy lên GitHub Pages mỗi khi push commit lên nhánh `main`.
+    - *Tiêu Chuẩn Nghiệm Thu:*
+      - `npx expo export --platform web` xuất ra thư mục `dist/` hoàn chỉnh với `index.html`, `_expo/`, `manifest.json`.
+      - `tsc --noEmit` đạt 0 lỗi, `node run-all-tests.js` đạt 100% (53/53 tests pass).

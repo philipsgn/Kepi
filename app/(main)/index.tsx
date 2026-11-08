@@ -14,7 +14,7 @@ import { ActivityIndicator,
   TextInput,
   TouchableOpacity,
   View,
-  Linking, ScrollViewInstance } from 'react-native';
+  Linking, Platform, ScrollViewInstance } from 'react-native';
 import { useRouter, Redirect } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraView } from 'expo-camera';
@@ -505,6 +505,32 @@ export default function MainAppScreen() {
   };
 
   const handleCapturePhoto = async () => {
+    if (Platform.OS === 'web') {
+      try {
+        if (cameraRef.current && cameraGranted) {
+          const photo = await cameraRef.current.takePictureAsync({
+            quality: 0.85,
+            skipProcessing: false,
+          });
+          if (photo?.uri) {
+            const optimized = await optimizeExpensePhoto(photo.uri);
+            setCapturedPhotoUri(optimized.fullUri);
+            setCapturedMediaType('PHOTO');
+            setCapturedThumbUri(optimized.thumbnailUri);
+            setInFrameAmount(0);
+            setInFrameType('EXPENSE');
+            setInFrameCategory('');
+            setShowInFrameCategoryPicker(false);
+            setInFrameDescription('');
+            return;
+          }
+        }
+      } catch (err) {
+        console.log('Web camera capture fallback to library:', err);
+      }
+      handlePickImageFromLibrary();
+      return;
+    }
     if (!cameraGranted) {
       if (canAskCameraAgain) {
         const res = await requestCameraPermission();
@@ -1122,11 +1148,13 @@ export default function MainAppScreen() {
                         <View style={styles.permissionFallback}>
                           <Camera size={44} color="#666666" strokeWidth={2} />
                           <Text style={styles.permissionText}>
-                            Chạm đúp để kiểm tra hoặc cấp quyền Camera
+                            {Platform.OS === 'web'
+                              ? 'Chạm nút bên dưới để Chụp hoặc Tải ảnh chi tiêu'
+                              : 'Chạm đúp để kiểm tra hoặc cấp quyền Camera'}
                           </Text>
                           <BlockButton
-                            title="Mở Cài Đặt"
-                            onPress={openAppSettings}
+                            title={Platform.OS === 'web' ? 'Chụp / Tải Ảnh' : 'Mở Cài Đặt'}
+                            onPress={Platform.OS === 'web' ? handlePickImageFromLibrary : openAppSettings}
                             variant="secondary"
                             size="sm"
                           />

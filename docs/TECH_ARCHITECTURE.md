@@ -298,3 +298,32 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
 ### 9.3. Phòng Vệ Đường Hầm WS-Tunnel (--tunnel Mode)
 - **Tương thích WebSocket Dual-Interface:** Tự động tiêm `WebSocket.WebSocket = WebSocket` cho `node_modules/ws` và fallback `new (s.WebSocket || s)` trong `@expo/ws-tunnel`.
 - **Đảm bảo tính sẵn sàng:** Cho phép nhà phát triển chạy `npx expo start --tunnel -c` từ mọi mạng ngoài (quán cafe, 4G/5G, văn phòng) mà không phụ thuộc vào cùng mạng LAN Wi-Fi.
+
+
+---
+
+## 10. KIẾN TRÚC WEB PWA (PROGRESSIVE WEB APP) & CI/CD DEPLOY GITHUB PAGES
+
+### 10.1. Mục Tiêu Đa Nền Tảng (Cross-Platform Deployment)
+- Cung cấp kênh truy cập và thử nghiệm trực tiếp 0-cài đặt cho cả Desktop và Mobile mà không phụ thuộc vào App Store hay Expo Go.
+- Cho phép người dùng iPhone mở trên Safari và bấm **"Thêm vào MH chính" (Add to Home Screen)** để chạy như một Native App độc lập toàn màn hình.
+
+### 10.2. Cấu Hình SPA & BaseUrl Linh Hoạt
+- **Client-Side SPA Output:** `app.json` cấu hình `web.output: "single"` tạo ra một tệp `index.html` duy nhất, triệt tiêu lỗi SSR `window is not defined`.
+- **Dynamic BaseUrl (`app.config.js`):** Tự động nạp `experiments.baseUrl` từ `process.env.EXPO_BASE_URL`. Ở môi trường local giữ `""`, ở môi trường CI/CD GitHub Actions nạp `"/Kepi"` để khớp với GitHub Pages subpath `https://philipsgn.github.io/Kepi/`.
+- **SPA Routing Fallback:** Tự động tạo bản sao `dist/404.html` từ `dist/index.html` trong pipeline CI/CD để đảm bảo khi người dùng tải lại trang (reload) hoặc truy cập trực tiếp route con không bị lỗi 404 Not Found từ máy chủ GitHub Pages.
+
+### 10.3. Tùy Biến PWA & Responsive Desktop Shell
+- **PWA Meta & Manifest (`public/index.html` & `public/manifest.json`):**
+  - Khai báo đầy đủ: `display: standalone`, `apple-mobile-web-app-capable: yes`, `theme-color: #0E1620`, `apple-touch-icon.png`.
+- **Responsive Desktop Shell CSS:**
+  - Trên màn hình lớn (`min-width: 501px`): Giao diện ứng dụng tự động co gọn vào khung điện thoại di động căn giữa (`max-width: 430px`, `height: 94vh`, bo góc `40px`, bóng đổ mềm `box-shadow`) trên nền Khói Trầm, tái hiện chính xác trải nghiệm điện thoại trên màn hình lớn.
+  - Trên thiết bị di động (`max-width: 500px`): Giao diện tự động co giãn 100% toàn màn hình, hỗ trợ `viewport-fit=cover`.
+
+### 10.4. Trải Nghiệm Camera & Banner Add-to-Home-Screen
+- **Web Camera Fallback:** Hỗ trợ Web Camera trực tiếp nếu được cấp quyền, kết hợp nút Chụp / Tải ảnh qua `ImagePicker.launchImageLibraryAsync` (`capture="environment"`), cho phép chụp ảnh biên lai hoặc chọn từ thư viện ảnh iOS/Android một cách tự nhiên.
+- **PWA Install Banner (`src/components/PWAInstallBanner.tsx`):** Tự động phát hiện trình duyệt Safari trên iOS khi chưa chạy ở chế độ standalone để hiển thị thanh hướng dẫn cài đặt thanh lịch: *"Chạm nút Chia sẻ ⎋ và chọn 'Thêm vào MH chính' ➕"*, hỗ trợ ghi nhớ trạng thái đóng vào `localStorage`.
+
+### 10.5. GitHub Actions CI/CD Pipeline (`.github/workflows/deploy-web.yml`)
+- Kích hoạt tự động khi push code lên nhánh `main` hoặc chạy thủ công qua `workflow_dispatch`.
+- Quy trình: Checkout $\to$ Node 22 $\to$ npm install $\to$ Chạy lint & 53 unit tests $\to$ Export Web với `EXPO_BASE_URL="/Kepi"` $\to$ Tạo `404.html` $\to$ Đóng gói và phát hành tự động lên GitHub Pages.

@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuthStore } from '../src/store/authStore';
 import { ThemeProvider } from '../src/theme';
+import { PWAInstallBanner } from '../src/components/PWAInstallBanner';
 
 export default function RootLayout() {
   const router = useRouter();
@@ -39,6 +40,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <StatusBar style="auto" />
+        <PWAInstallBanner />
         <Stack
           screenOptions={{
             headerShown: false,
