@@ -1,14 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import {
   ColorTokens,
   ResolvedTheme,
   ThemeMode,
-  coolTokens,
-  darkTokens,
-  lightTokens,
+  mintTokens,
+  pinkTokens,
 } from './tokens';
 
 const STORAGE_KEY_THEME = 'vi_locket_theme_mode';
@@ -24,30 +22,34 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  mode: 'light',
-  themeMode: 'light',
-  activeTheme: 'light',
-  tokens: lightTokens,
+  mode: 'pink',
+  themeMode: 'pink',
+  activeTheme: 'pink',
+  tokens: pinkTokens,
   isDark: false,
   setMode: async () => {},
   setThemeMode: async () => {},
 });
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setModeState] = useState<ThemeMode>('light');
+  const [mode, setModeState] = useState<ThemeMode>('pink');
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Khôi phục cài đặt Theme từ AsyncStorage khi mở app
+  // Khôi phục và tự động di chuyển cài đặt Theme từ AsyncStorage khi mở app
   useEffect(() => {
     (async () => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY_THEME);
-        if (saved === 'light' || saved === 'dark' || saved === 'cool') {
+        if (saved === 'pink' || saved === 'mint') {
           setModeState(saved as ThemeMode);
-        } else if (saved === 'system') {
-          // Tự động chuyển đổi lưu trữ cũ 'system' sang 'cool' (Mát)
-          setModeState('cool');
-          await AsyncStorage.setItem(STORAGE_KEY_THEME, 'cool');
+        } else if (saved === 'cool') {
+          // Di chuyển theme 'cool' cũ sang 'mint' mới
+          setModeState('mint');
+          await AsyncStorage.setItem(STORAGE_KEY_THEME, 'mint');
+        } else if (saved === 'light' || saved === 'dark' || saved === 'system') {
+          // Di chuyển các theme cũ 'light'/'dark'/'system' sang 'pink' (Hồng Heo Mặc Định)
+          setModeState('pink');
+          await AsyncStorage.setItem(STORAGE_KEY_THEME, 'pink');
         }
       } catch (err) {
         console.warn('[ThemeContext] Failed to load theme mode:', err);
@@ -67,23 +69,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Xác định theme thực tế (resolved)
-  // 'light' => Sáng: Vàng Kem Bơ Hà Nội Thu Đông
-  // 'dark'  => Tối: Xám Than Phối Xanh Mint Đậm (Dark Mint)
-  // 'cool'  => Mát: Fresh Blue-Mint (Bạc Hà Sương Mai)
-  const activeTheme: ResolvedTheme =
-    mode === 'dark'
-      ? 'dark'
-      : mode === 'cool'
-      ? 'cool'
-      : 'light';
-
-  const isDark = activeTheme === 'dark';
-  const tokens =
-    activeTheme === 'dark'
-      ? darkTokens
-      : activeTheme === 'cool'
-      ? coolTokens
-      : lightTokens;
+  // 'pink' => Hồng Heo (Linh vật PigFly)
+  // 'mint' => Xanh Mint Gradient (Mát mẻ đa tầng)
+  const activeTheme: ResolvedTheme = mode === 'mint' ? 'mint' : 'pink';
+  const isDark = false;
+  const tokens = activeTheme === 'mint' ? mintTokens : pinkTokens;
 
   return (
     <ThemeContext.Provider
@@ -97,8 +87,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setThemeMode: setMode,
       }}
     >
-      {/* Tự động cập nhật StatusBar: Chữ sáng trên nền tối, chữ tối trên nền sáng */}
-      <StatusBar style={isDark ? 'light' : 'dark'} animated />
+      <StatusBar style="dark" animated />
       {children}
     </ThemeContext.Provider>
   );

@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Moon, Palette, Sun, Wind } from 'lucide-react-native';
+import { Leaf, Palette, Sparkles } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
 import { ThemeMode, radii } from '../../theme/tokens';
@@ -26,35 +26,24 @@ export const ThemeSettingsCard: React.FC = () => {
     icon: (active: boolean) => React.ReactNode;
   }[] = [
     {
-      mode: 'light',
-      label: 'Sáng',
+      mode: 'pink',
+      label: 'Hồng Heo',
       icon: (active) => (
-        <Sun
+        <Sparkles
           size={16}
           color={active ? tokens.textOnPrimary : tokens.textMuted}
-          strokeWidth={2.5}
+          strokeWidth={2.6}
         />
       ),
     },
     {
-      mode: 'dark',
-      label: 'Tối',
+      mode: 'mint',
+      label: 'Xanh Mint',
       icon: (active) => (
-        <Moon
+        <Leaf
           size={16}
           color={active ? tokens.textOnPrimary : tokens.textMuted}
-          strokeWidth={2.5}
-        />
-      ),
-    },
-    {
-      mode: 'cool',
-      label: 'Mát',
-      icon: (active) => (
-        <Wind
-          size={16}
-          color={active ? tokens.textOnPrimary : tokens.textMuted}
-          strokeWidth={2.5}
+          strokeWidth={2.6}
         />
       ),
     },
@@ -65,7 +54,10 @@ export const ThemeSettingsCard: React.FC = () => {
       <View style={styles.headerRow}>
         <Palette size={20} color={tokens.primary} strokeWidth={2.6} />
         <View style={styles.titleCol}>
-          <Text style={[styles.title, { color: tokens.text }]}>Chế Độ Giao Diện</Text>
+          <Text style={[styles.title, { color: tokens.text }]}>Màu Sắc Giao Diện</Text>
+          <Text style={[styles.subtitle, { color: tokens.textMuted }]}>
+            Bộ đôi giao diện PigFly chuẩn tương phản WCAG AAA
+          </Text>
         </View>
       </View>
 

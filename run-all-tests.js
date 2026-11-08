@@ -2098,7 +2098,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(settingsViewCode.includes('<ThemeSettingsCard />'), 'SettingsView must render ThemeSettingsCard');
 
   const themeTokens = fs.readFileSync(path.join(__dirname, 'src/theme/tokens.ts'), 'utf8');
-  assert.ok(themeTokens.includes("'light' | 'dark' | 'cool'"), 'ThemeMode must support 3 themes: light, dark, cool');
+  assert.ok(themeTokens.includes("'pink' | 'mint'"), 'ThemeMode must support 2 official themes: pink, mint');
 
   // 4. Zero Payment Method in UI
   const confirmSheetCode = fs.readFileSync(path.join(__dirname, 'src/components/cards/ConfirmationSheet.tsx'), 'utf8');
@@ -2118,26 +2118,24 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 43 Passed: SubAgent 3 (5-Tab Nav, Android Native Plugin, 3-Theme Switcher & Zero Payment UI) verified');
 }
 
-// 44. SubAgent 1: 3-Theme Color Standardization, WCAG 2.1 AA Compliance, 100% Floating Bold Icons & Component Gallery
+// 44. PigFly Design System: 2 Official Themes (Hồng Heo & Xanh Mint Gradient), WCAG 2.1 AAA/AA Compliance, 100% Floating Bold Icons & Component Gallery
 {
   const assert = require('assert');
 
-  // 1. Kiểm tra 3 Theme tokens chuẩn xác trong src/theme/tokens.ts
+  // 1. Kiểm tra 2 Theme tokens chuẩn xác trong src/theme/tokens.ts
   const tokensCode = fs.readFileSync(path.join(__dirname, 'src/theme/tokens.ts'), 'utf8');
-  assert.ok(tokensCode.includes("bg: '#FAF6EC'"), 'Theme 1 must have background #FAF6EC (Kem Bơ Thu Đông)');
-  assert.ok(tokensCode.includes("primary: '#E59844'"), 'Theme 1 must have primary #E59844 (Nắng Thu Hà Nội)');
-  assert.ok(tokensCode.includes("success: '#7E9F80'"), 'Theme 1 must have success #7E9F80 (Cốm Non Làng Vòng)');
-  assert.ok(tokensCode.includes("danger: '#C86D51'"), 'Theme 1 must have danger #C86D51 (Ngói Rêu Phố Cổ)');
+  assert.ok(tokensCode.includes("bg: '#FFF5F7'"), 'Theme 1 (Hồng Heo) must have background #FFF5F7 (Kem Dâu Sữa)');
+  assert.ok(tokensCode.includes("primary: '#F43F5E'"), 'Theme 1 (Hồng Heo) must have primary #F43F5E (Hồng Đào Heo Bay)');
+  assert.ok(tokensCode.includes("text: '#3B0713'"), 'Theme 1 (Hồng Heo) must have text #3B0713 (Nâu Socola Dâu AAA)');
+  assert.ok(tokensCode.includes("success: '#059669'"), 'Theme 1 (Hồng Heo) must have success #059669 (Xanh Lộc Non)');
+  assert.ok(tokensCode.includes("danger: '#E11D48'"), 'Theme 1 (Hồng Heo) must have danger #E11D48 (Đỏ San Hô)');
 
-  assert.ok(tokensCode.includes("bg: '#0E1620'"), 'Theme 2 must have background #0E1620 (Dark Mint)');
-  assert.ok(tokensCode.includes("primary: '#2DD4BF'"), 'Theme 2 must have primary #2DD4BF (Mint Sáng Đậm)');
-  assert.ok(tokensCode.includes("textSub: '#94A3B8'"), 'Theme 2 must have textSub #94A3B8 (Slate 400)');
+  assert.ok(tokensCode.includes("bg: '#F0FDF9'"), 'Theme 2 (Xanh Mint) must have background #F0FDF9 (Sương Bạc Hà)');
+  assert.ok(tokensCode.includes("primary: '#059669'"), 'Theme 2 (Xanh Mint) must have primary #059669 (Xanh Mint Tươi)');
+  assert.ok(tokensCode.includes("text: '#022C22'"), 'Theme 2 (Xanh Mint) must have text #022C22 (Ngọc Bích Đậm AAA)');
+  assert.ok(tokensCode.includes("accent: '#06B6D4'"), 'Theme 2 (Xanh Mint) must have accent #06B6D4 (Sky Blue Gradient)');
 
-  assert.ok(tokensCode.includes("bg: '#F0FDF4'"), 'Theme 3 must have background #F0FDF4 (Fresh Blue-Mint)');
-  assert.ok(tokensCode.includes("primary: '#059669'"), 'Theme 3 must have primary #059669 (Mint Tươi Ngọt)');
-  assert.ok(tokensCode.includes("accent: '#38BDF8'"), 'Theme 3 must have accent #38BDF8 (Sky Blue)');
-
-  // 2. Kiểm tra hàm tính độ tương phản WCAG 2.1 AA
+  // 2. Kiểm tra hàm tính độ tương phản WCAG 2.1 AA/AAA
   function getLuminance(hex) {
     let c = hex.replace('#', '');
     if (c.length === 3) c = c.split('').map(x => x + x).join('');
@@ -2152,34 +2150,28 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
   }
 
-  // Theme 1 contrast tests
-  assert.ok(getContrast('#1C1812', '#FAF6EC') >= 4.5, 'Theme 1 text on bg must be >= 4.5:1');
-  assert.ok(getContrast('#5A4E3D', '#FAF6EC') >= 4.5, 'Theme 1 textSub on bg must be >= 4.5:1');
-  assert.ok(getContrast('#1C1812', '#E59844') >= 4.5, 'Theme 1 textOnPrimary on primary must be >= 4.5:1');
+  // Theme 1 (Hồng Heo) contrast tests
+  assert.ok(getContrast('#3B0713', '#FFF5F7') >= 7.0, 'Theme 1 text on bg must be >= 7.0:1 (AAA)');
+  assert.ok(getContrast('#881337', '#FFF5F7') >= 4.5, 'Theme 1 textSub on bg must be >= 4.5:1 (AA)');
+  assert.ok(getContrast('#FFFFFF', '#F43F5E') >= 3.0, 'Theme 1 textOnPrimary on primary must be >= 3.0:1 (Large text / Buttons)');
 
-  // Theme 2 contrast tests
-  assert.ok(getContrast('#F8FAFC', '#0E1620') >= 4.5, 'Theme 2 text on bg must be >= 4.5:1');
-  assert.ok(getContrast('#94A3B8', '#0E1620') >= 4.5, 'Theme 2 textSub on bg must be >= 4.5:1');
-  assert.ok(getContrast('#0E1620', '#2DD4BF') >= 4.5, 'Theme 2 textOnPrimary on primary must be >= 4.5:1');
-
-  // Theme 3 contrast tests
-  assert.ok(getContrast('#064E3B', '#F0FDF4') >= 4.5, 'Theme 3 text on bg must be >= 4.5:1');
-  assert.ok(getContrast('#047857', '#F0FDF4') >= 4.5, 'Theme 3 textSub on bg must be >= 4.5:1');
-  assert.ok(getContrast('#FFFFFF', '#059669') >= 3.0, 'Theme 3 white on mint button must be >= 3.0:1 (Large text)');
+  // Theme 2 (Xanh Mint) contrast tests
+  assert.ok(getContrast('#022C22', '#F0FDF9') >= 7.0, 'Theme 2 text on bg must be >= 7.0:1 (AAA)');
+  assert.ok(getContrast('#065F46', '#F0FDF9') >= 4.5, 'Theme 2 textSub on bg must be >= 4.5:1 (AA)');
+  assert.ok(getContrast('#FFFFFF', '#059669') >= 3.0, 'Theme 2 textOnPrimary on primary must be >= 3.0:1 (Large text / Buttons)');
 
   // 3. Kiểm tra Floating Bold Icons defaults trong src/constants/categories.tsx
   const catCode = fs.readFileSync(path.join(__dirname, 'src/constants/categories.tsx'), 'utf8');
   assert.ok(catCode.includes('strokeWidth = 2.6'), 'Default icon strokeWidth must be 2.6');
 
-  // 4. Kiểm tra ComponentGalleryModal.tsx xem trước cả 3 theme
+  // 4. Kiểm tra ComponentGalleryModal.tsx xem trước cả 2 theme
   const galleryCode = fs.readFileSync(path.join(__dirname, 'src/components/dev/ComponentGalleryModal.tsx'), 'utf8');
-  assert.ok(galleryCode.includes("'Vàng Kem Bơ'"), 'ComponentGalleryModal must show Theme 1');
-  assert.ok(galleryCode.includes("'Dark Mint'"), 'ComponentGalleryModal must show Theme 2');
-  assert.ok(galleryCode.includes("'Fresh Mint'"), 'ComponentGalleryModal must show Theme 3');
+  assert.ok(galleryCode.includes("'Hồng Heo'"), 'ComponentGalleryModal must show Theme 1: Hồng Heo');
+  assert.ok(galleryCode.includes("'Xanh Mint'"), 'ComponentGalleryModal must show Theme 2: Xanh Mint');
   assert.ok(galleryCode.includes('paletteCard'), 'ComponentGalleryModal must render color palette showcase');
   assert.ok(galleryCode.includes('floatingIconsGrid'), 'ComponentGalleryModal must render floating icons showcase');
 
-  console.log('✅ Test 44 Passed: SubAgent 1 (3 Themes, WCAG 2.1 AA Compliance, 100% Floating Bold Icons & Component Gallery) verified');
+  console.log('✅ Test 44 Passed: PigFly Design System (2 Official Themes: Hồng Heo & Xanh Mint, WCAG 2.1 AAA/AA, 100% Floating Bold Icons & Gallery) verified');
 }
 
 // 45. SubAgent 4: QA & Security Verification — Dynamic Streak, Default BANK, Offline Base64 Backup & Zero-STK Shield

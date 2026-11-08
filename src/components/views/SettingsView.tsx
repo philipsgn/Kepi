@@ -165,7 +165,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
 
   // Text helpers
   const themeLabel =
-    themeMode === 'dark' ? 'Tối' : themeMode === 'light' ? 'Sáng' : 'Tự động';
+    themeMode === 'mint' ? 'Xanh Mint' : 'Hồng Heo';
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top + Spacing.sm }]}>

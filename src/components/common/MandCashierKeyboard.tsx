@@ -109,11 +109,10 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
   const formattedAmount = amount.toLocaleString('vi-VN');
 
   // Màu sắc phím bấm theo theme
-  const keypadBg = isDark ? '#141A23' : '#F5EEDB';
-  const keyBg = isDark ? '#1C2430' : '#FFFFFF';
+  const keypadBg = tokens.surfaceAlt;
+  const keyBg = tokens.surface;
   const keyText = tokens.text;
-  const accentColor =
-    mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#E11D48' : '#E59844';
+  const accentColor = tokens.primary;
 
   return (
     <View style={[styles.container, { backgroundColor: keypadBg, borderTopColor: tokens.border }]}>

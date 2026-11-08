@@ -59,40 +59,34 @@ export const ComponentGalleryModal: React.FC<ComponentGalleryModalProps> = ({
   const [toggleState, setToggleState] = useState(true);
 
   const themeSegments = [
-    { key: 'light', label: 'Vàng Kem Bơ', icon: <Sun size={18} strokeWidth={2.6} color={tokens.text} /> },
-    { key: 'dark', label: 'Dark Mint', icon: <Moon size={18} strokeWidth={2.6} color={tokens.text} /> },
-    { key: 'cool', label: 'Fresh Mint', icon: <Wind size={18} strokeWidth={2.6} color={tokens.text} /> },
+    { key: 'pink', label: 'Hồng Heo', icon: <Sparkles size={18} strokeWidth={2.6} color={tokens.text} /> },
+    { key: 'mint', label: 'Xanh Mint', icon: <Wind size={18} strokeWidth={2.6} color={tokens.text} /> },
   ];
 
-  const currentThemeIdx =
-    themeMode === 'light' ? 0 : themeMode === 'dark' ? 1 : 2;
+  const currentThemeIdx = themeMode === 'mint' ? 1 : 0;
 
   const handleThemeChange = (idx: number) => {
-    const modes: ThemeMode[] = ['light', 'dark', 'cool'];
+    const modes: ThemeMode[] = ['pink', 'mint'];
     setThemeMode(modes[idx]);
   };
 
   const getThemeTitle = () => {
     switch (themeMode) {
-      case 'light':
-        return 'Theme 1: Vàng Kem Bơ (Hà Nội Thu Đông)';
-      case 'dark':
-        return 'Theme 2: Dark Mint (Xám Than & Mint Đậm)';
-      case 'cool':
+      case 'mint':
+        return 'Theme 2: Xanh Mint Gradient (Sương Bạc Hà & Ngọc Bích)';
+      case 'pink':
       default:
-        return 'Theme 3: Fresh Blue-Mint (Bạc Hà Sương Mai)';
+        return 'Theme 1: Hồng Heo (Linh vật PigFly 3D)';
     }
   };
 
   const getThemeSubtitle = () => {
     switch (themeMode) {
-      case 'light':
-        return '#FAF6EC · #E59844 · #7E9F80 · #C86D51 (WCAG 2.1 AAA/AA)';
-      case 'dark':
-        return '#0E1620 · #2DD4BF · #94A3B8 · #F8FAFC (WCAG 2.1 AAA/AA)';
-      case 'cool':
+      case 'mint':
+        return '#F0FDF9 · #10B981 · #06B6D4 · #022C22 (WCAG 2.1 AAA/AA)';
+      case 'pink':
       default:
-        return '#F0FDF4 · #059669 · #38BDF8 · #064E3B (WCAG 2.1 AAA/AA)';
+        return '#FFF5F7 · #F43F5E · #FB7185 · #3B0713 (WCAG 2.1 AAA/AA)';
     }
   };
 
@@ -250,11 +244,9 @@ export const ComponentGalleryModal: React.FC<ComponentGalleryModalProps> = ({
                 onPress={() => {}}
                 icon={<CheckCircle2 size={18} color={tokens.textOnPrimary} strokeWidth={2.6} />}
               >
-                {themeMode === 'light'
-                  ? 'Nút Chính Vàng Nắng Thu (Primary)'
-                  : themeMode === 'dark'
-                  ? 'Nút Chính Dark Mint (Primary)'
-                  : 'Nút Chính Fresh Blue-Mint (Primary)'}
+                {themeMode === 'mint'
+                  ? 'Nút Chính Xanh Mint Gradient (Primary)'
+                  : 'Nút Chính Hồng Heo (Primary)'}
               </Button>
 
               <Button

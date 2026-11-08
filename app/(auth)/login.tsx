@@ -76,7 +76,7 @@ export default function LoginScreen() {
   // Đổi Theme xoay vòng 1-chạm: Cool Mint 🌿 ⇄ Light Pink/Cream 🌸 ⇄ Dark Mint 🌙
   const handleCycleTheme = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const nextMode = mode === 'cool' ? 'light' : mode === 'light' ? 'dark' : 'cool';
+    const nextMode = mode === 'pink' ? 'mint' : 'pink';
     setMode(nextMode);
   };
 
@@ -177,11 +177,7 @@ export default function LoginScreen() {
 
   // Màu gradient nền động theo từng Theme
   const bgGradientColors: [string, string, ...string[]] =
-    mode === 'dark'
-      ? ['#0E1620', '#16202C', '#0B131D']
-      : mode === 'light'
-      ? ['#FEE2E2', '#FDF2F8', '#FFF1F2'] // Hồng phấn ngọt ngào
-      : ['#EAF7F2', '#D5F2E6', '#F0FDF4']; // Xanh Mint tươi mát
+    mode === 'mint' ? ['#F0FDF9', '#E6FAF3', '#CCFBF1'] : ['#FFF5F7', '#FDF2F8', '#FCE7F3']
 
   return (
     <LinearGradient
@@ -210,7 +206,7 @@ export default function LoginScreen() {
               >
                 <Palette
                   size={22}
-                  color={mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#E11D48' : '#059669'}
+                  color={tokens.primary}
                   strokeWidth={2.6}
                 />
               </TouchableOpacity>
@@ -238,18 +234,8 @@ export default function LoginScreen() {
                 style={[
                   styles.subQuoteContainer,
                   {
-                    backgroundColor:
-                      mode === 'dark'
-                        ? 'rgba(45, 212, 191, 0.08)'
-                        : mode === 'light'
-                        ? 'rgba(244, 63, 94, 0.06)'
-                        : 'rgba(5, 150, 105, 0.06)',
-                    borderColor:
-                      mode === 'dark'
-                        ? 'rgba(45, 212, 191, 0.15)'
-                        : mode === 'light'
-                        ? 'rgba(244, 63, 94, 0.12)'
-                        : 'rgba(5, 150, 105, 0.12)',
+                    backgroundColor: tokens.primarySoft,
+                    borderColor: tokens.border,
                   },
                 ]}
               >
@@ -257,12 +243,7 @@ export default function LoginScreen() {
                   style={[
                     styles.subQuoteText,
                     {
-                      color:
-                        mode === 'dark'
-                          ? 'rgba(45, 212, 191, 0.75)'
-                          : mode === 'light'
-                          ? 'rgba(190, 24, 93, 0.7)'
-                          : 'rgba(5, 150, 105, 0.7)',
+                      color: tokens.textSub,
                     },
                   ]}
                 >
@@ -304,7 +285,7 @@ export default function LoginScreen() {
                   >
                     <User
                       size={18}
-                      color={mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#FB7185' : '#059669'}
+                      color={tokens.primary}
                       strokeWidth={2.4}
                       style={{ marginRight: 10 }}
                     />
@@ -352,9 +333,7 @@ export default function LoginScreen() {
                     >
                       <Dices
                         size={18}
-                        color={
-                          mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#FB7185' : '#059669'
-                        }
+                        color={tokens.primary}
                         strokeWidth={2.4}
                       />
                     </TouchableOpacity>
@@ -407,9 +386,7 @@ export default function LoginScreen() {
                     <View style={styles.birthYearInnerRow}>
                       <Calendar
                         size={18}
-                        color={
-                          mode === 'dark' ? '#2DD4BF' : mode === 'light' ? '#FB7185' : '#059669'
-                        }
+                        color={tokens.primary}
                         strokeWidth={2.4}
                         style={{ marginRight: 10 }}
                       />
@@ -459,24 +436,12 @@ export default function LoginScreen() {
                   {isSubmitting ? (
                     <ActivityIndicator
                       size="large"
-                      color={
-                        mode === 'dark'
-                          ? '#2DD4BF'
-                          : mode === 'light'
-                          ? '#FB7185'
-                          : '#059669'
-                      }
+                      color={tokens.primary}
                     />
                   ) : (
                     <Power
                       size={44}
-                      color={
-                        mode === 'dark'
-                          ? '#2DD4BF'
-                          : mode === 'light'
-                          ? '#FB7185'
-                          : '#059669'
-                      }
+                      color={tokens.primary}
                       strokeWidth={2.8}
                     />
                   )}
@@ -535,12 +500,7 @@ export default function LoginScreen() {
                           style={[
                             styles.yearItemPopup,
                             isSelected && {
-                              backgroundColor:
-                                mode === 'dark'
-                                  ? 'rgba(45, 212, 191, 0.16)'
-                                  : mode === 'light'
-                                  ? 'rgba(244, 63, 94, 0.12)'
-                                  : 'rgba(5, 150, 105, 0.12)',
+                              backgroundColor: tokens.primarySoft,
                             },
                           ]}
                           onPress={() => {
@@ -555,12 +515,7 @@ export default function LoginScreen() {
                               styles.yearTextPopup,
                               { color: tokens.text },
                               isSelected && {
-                                color:
-                                  mode === 'dark'
-                                    ? '#2DD4BF'
-                                    : mode === 'light'
-                                    ? '#E11D48'
-                                    : '#059669',
+                                color: tokens.primary,
                                 fontWeight: '500',
                               },
                             ]}
@@ -570,13 +525,7 @@ export default function LoginScreen() {
                           {isSelected && (
                             <Check
                               size={16}
-                              color={
-                                mode === 'dark'
-                                  ? '#2DD4BF'
-                                  : mode === 'light'
-                                  ? '#E11D48'
-                                  : '#059669'
-                              }
+                              color={tokens.primary}
                               strokeWidth={2.8}
                             />
                           )}

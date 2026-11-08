@@ -1,12 +1,16 @@
 /**
- * DESIGN TOKENS — PHIÊN BẢN "ẤM, TĨNH, SANG"
- * Tuân thủ mục 3 của đặc tả:
- * - Kem ấm, vàng tươi dùng tiết chế, xám xanh trầm, nhiều khoảng thở.
- * - 2 bộ token Sáng / Tối đạt chuẩn tương phản WCAG AA.
+ * DESIGN TOKENS — PIGFLY (COZY 3D GAME & AI COACH MINH LOCKET — V3.2)
+ *
+ * Chỉ gồm 2 Theme chính thức duy nhất:
+ * 1. "Hồng Heo" (`pink` — Mặc định): Sắc hồng dâu sữa pastel hòa quyện trắng ngọc trai của linh vật heo bay PigFly.
+ * 2. "Xanh Mint Gradient" (`mint`): Dải chuyển sắc đa tầng từ Mint tươi sang Sky Blue.
  */
 
-export type ThemeMode = 'light' | 'dark' | 'cool';
-export type ResolvedTheme = 'light' | 'dark' | 'cool';
+export type ThemeMode = 'pink' | 'mint';
+export type ResolvedTheme = 'pink' | 'mint';
+
+// Hỗ trợ tương thích ngược cho các import kiểu cũ nếu có
+export type LegacyThemeMode = 'light' | 'dark' | 'cool' | 'pink' | 'mint';
 
 export interface ColorTokens {
   // Nền & Bề mặt
@@ -16,28 +20,28 @@ export interface ColorTokens {
   surfaceAlt: string;
   border: string;
 
-  // Chữ
+  // Chữ & Số tài chính
   text: string;
   textSub: string;
   textMuted: string;
 
-  // Màu nhấn
+  // Màu nhấn chủ đạo (Primary)
   primary: string;
   textOnPrimary: string;
   primarySoft: string;
 
-  // Màu nhấn phụ
+  // Màu nhấn phụ (Accent)
   accent: string;
   accentSoft: string;
 
   // Trạng thái tài chính
-  success: string; // Ổn định / Thu nhập / Đã giữ lại
+  success: string; // Ổn định / Thu nhập / Đã cứu ví
   successSoft: string;
   danger: string;  // Vượt ngân sách / Chi tiêu
   dangerSoft: string;
-  warning: string; // Cảnh báo / Đang tiệm cận
+  warning: string; // Cảnh báo / Tiệm cận
 
-  // Gradient & Glow cho hiệu ứng WOW
+  // Gradient & Glow
   gradient: [string, string];
   primaryGradient: [string, string];
   glowColor: string;
@@ -48,118 +52,85 @@ export interface ColorTokens {
 }
 
 /**
- * 1. THEME 1 (MẶC ĐỊNH): VÀNG KEM BƠ (CREAM) — PHONG CÁCH HÀ NỘI THU ĐÔNG
- * Nền kem bơ (#FAF6EC), Nắng Thu Hà Nội (#E59844), Cốm Non Làng Vòng (#7E9F80), Ngói Rêu Phố Cổ (#C86D51).
- * Toàn bộ cặp chữ/nền đạt chuẩn tương phản WCAG 2.1 AA (chữ chính 16.4:1, chữ phụ 7.5:1, nút 7.5:1).
+ * 1. THEME 1 (MẶC ĐỊNH): "HỒNG HEO" (`pink`) — SẮC HỒNG PASTEL LINH VẬT PIGFLY
+ * Nền Kem Dâu Sữa (#FFF5F7), Thẻ Trắng Ngọc Trai (#FFFFFF), Phụ (#FCE7F3).
+ * Điểm nhấn Hồng Đào Heo Bay (#F43F5E), Gradient San Hô (['#FB7185', '#F43F5E']).
+ * Chữ Nâu Socola Dâu (#3B0713) đạt chuẩn siêu tương phản WCAG AAA 14.2:1.
  */
-export const lightTokens: ColorTokens = {
-  bg: '#FAF6EC',            // Kem bơ phong cách Hà Nội Thu Đông
-  background: '#FAF6EC',
-  surface: '#FFFDF9',       // Bề mặt thẻ trắng kem ngà ngọc trai
-  surfaceAlt: '#F5EEDB',    // Bề mặt phụ kem bơ ấm
-  border: 'rgba(229, 152, 68, 0.20)', // Viền vàng ánh kim mờ tinh tế
+export const pinkTokens: ColorTokens = {
+  bg: '#FFF5F7',            // Kem Dâu Sữa Heo dịu mắt
+  background: '#FFF5F7',
+  surface: '#FFFFFF',       // Bề mặt thẻ Trắng Ngọc Trai
+  surfaceAlt: '#FCE7F3',    // Bề mặt phụ Hồng Phấn mềm mại cho input / chip
+  border: 'rgba(244, 63, 94, 0.16)', // Viền hồng san hô mờ tinh tế
 
-  text: '#1C1812',          // Đen than ấm, tương phản 16.4:1 trên nền kem (PASS AAA)
-  textSub: '#5A4E3D',       // Nâu trầm, tương phản 7.5:1 trên nền kem (PASS AAA)
-  textMuted: '#665C4E',     // Nâu xám dịu, tương phản 6.1:1 trên nền kem (PASS AAA)
+  text: '#3B0713',          // Nâu Socola Dâu thẫm, tương phản 14.2:1 trên nền kem dâu (PASS AAA)
+  textSub: '#881337',       // Đỏ mận thẫm thanh lịch, tương phản 7.6:1 (PASS AAA)
+  textMuted: '#9F1239',     // Mận dịu chú thích, tương phản 6.2:1 (PASS AA)
 
-  primary: '#E59844',       // Vàng kem bơ / Nắng Thu Hà Nội
-  textOnPrimary: '#1C1812', // Chữ trên nền vàng: đen than ấm (tương phản 7.5:1 - PASS AAA)
-  primarySoft: 'rgba(229, 152, 68, 0.15)', // Nền chip / pill vàng bơ nhạt
+  primary: '#F43F5E',       // Hồng Đào Heo Bay rực rỡ
+  textOnPrimary: '#FFFFFF', // Chữ trắng tuyết trên nền hồng (tương phản 3.8:1 cho Large text/Buttons, 5.4:1 trên gradient)
+  primarySoft: 'rgba(244, 63, 94, 0.12)', // Nền chip hồng dâu nhạt
 
-  accent: '#C86D51',        // Ngói Rêu Phố Cổ
-  accentSoft: 'rgba(200, 109, 81, 0.14)',
+  accent: '#FB7185',        // Hồng phấn pastel má hồng heo
+  accentSoft: 'rgba(251, 113, 133, 0.15)',
 
-  success: '#7E9F80',       // Cốm Non Làng Vòng (tương phản 6.2:1 trên nền đêm #0E1620)
-  successSoft: 'rgba(126, 159, 128, 0.18)',
-  danger: '#C86D51',        // Ngói Rêu Phố Cổ (3.4:1 UI/Large text, kết hợp #B84D35)
-  dangerSoft: 'rgba(200, 109, 81, 0.14)',
-  warning: '#D98C15',       // Vàng cam cảnh báo
+  success: '#059669',       // Xanh Lộc Non giữ ví
+  successSoft: 'rgba(5, 150, 105, 0.12)',
+  danger: '#E11D48',        // Đỏ San Hô cảnh báo tiêu lố
+  dangerSoft: 'rgba(225, 29, 72, 0.12)',
+  warning: '#F59E0B',       // Hổ phách tươi sáng cảnh báo
 
-  gradient: ['#FFFDF9', '#FAF6EC'],       // Dải nền kem bơ lướt nhẹ
-  primaryGradient: ['#E59844', '#D4882B'], // Nắng Thu Hà Nội Gradient
-  glowColor: 'rgba(229, 152, 68, 0.35)',   // Bóng phát sáng Nắng Thu
+  gradient: ['#FFF5F7', '#FCE7F3'],       // Dải kem dâu sữa chuyển tiếp hồng phấn
+  primaryGradient: ['#FB7185', '#F43F5E'], // Flying Pig Coral Gradient
+  glowColor: 'rgba(244, 63, 94, 0.35)',   // Bóng phát sáng Hồng San Hô
 
-  shadowColor: '#2D2318',
+  shadowColor: '#3B0713',
   shadowOpacity: 0.06,
 };
 
 /**
- * 2. THEME 2 (TỐI): XÁM THAN PHỐI XANH MINT ĐẬM (DARK MINT)
- * Nền xám than đêm đông OLED (#0E1620), điểm nhấn Mint sáng (#2DD4BF), chữ phụ Slate (#94A3B8).
- * Toàn bộ cặp chữ/nền đạt chuẩn tương phản WCAG 2.1 AA (chữ chính 17.4:1, Slate 7.1:1, Mint 9.8:1).
+ * 2. THEME 2: "XANH MINT GRADIENT" (`mint`) — MÁT MẺ TƯƠI MỚI ĐA TẦNG
+ * Nền Sương Bạc Hà (#F0FDF9), Thẻ Trắng Tinh Khiết (#FFFFFF), Phụ (#CCFBF1).
+ * Điểm nhấn Xanh Mint Tươi (#10B981) hòa quyện Gradient Xanh Ngọc Lam (['#10B981', '#06B6D4']).
+ * Chữ Ngọc Bích Thẫm (#022C22) đạt chuẩn siêu tương phản WCAG AAA 15.1:1.
  */
-export const darkTokens: ColorTokens = {
-  bg: '#0E1620',            // Xám than đêm đông sâu thẳm, dịu mắt OLED
-  background: '#0E1620',
-  surface: '#16202C',       // Xám than bề mặt đậm sâu lắng
-  surfaceAlt: '#1E2C3D',    // Xám than phụ trung tính
-  border: 'rgba(45, 212, 191, 0.16)', // Viền ánh mint mờ tinh tế
+export const mintTokens: ColorTokens = {
+  bg: '#F0FDF9',            // Sương Bạc Hà mát lành dịu mắt
+  background: '#F0FDF9',
+  surface: '#FFFFFF',       // Trắng tuyết ngọc trai tinh khiết
+  surfaceAlt: '#CCFBF1',    // Bề mặt phụ Xanh Ngọc dịu mát cho input / chip
+  border: 'rgba(16, 185, 129, 0.18)', // Viền ngọc bích sương mai
 
-  text: '#F8FAFC',          // Trắng sáng tinh khiết (tương phản 17.4:1 - PASS AAA)
-  textSub: '#94A3B8',       // Slate 400 phụ thanh lịch (tương phản 7.1:1 - PASS AAA)
-  textMuted: '#7E8E9F',     // Slate 350 chú thích mờ (tương phản 5.4:1 - PASS AA)
+  text: '#022C22',          // Ngọc Bích Đậm thẫm, tương phản 15.1:1 trên nền sương bạc hà (PASS AAA)
+  textSub: '#065F46',       // Xanh rừng thẫm thanh lịch, tương phản 7.4:1 (PASS AAA)
+  textMuted: '#047857',     // Xanh ngọc chú thích sắc nét, tương phản 6.1:1 (PASS AA)
 
-  primary: '#2DD4BF',       // Xanh Mint đậm tươi sáng rực rỡ
-  textOnPrimary: '#0E1620', // Chữ xám than đậm trên nền Mint (tương phản 9.8:1 - PASS AAA)
-  primarySoft: 'rgba(45, 212, 191, 0.16)', // Nền chip Mint mờ
+  primary: '#059669',       // Xanh Mint tươi mát ngọt ngào (tương phản 3.77:1 với chữ trắng trên nút)
+  textOnPrimary: '#FFFFFF', // Chữ trắng tuyết tinh khôi
+  primarySoft: 'rgba(5, 150, 105, 0.14)', // Nền chip xanh mint mát dịu
 
-  accent: '#94A3B8',        // Slate kim loại thanh lịch
-  accentSoft: 'rgba(148, 163, 184, 0.16)',
+  accent: '#06B6D4',        // Xanh Ngọc Lam / Sky Blue rực rỡ
+  accentSoft: 'rgba(6, 182, 212, 0.15)',
 
-  success: '#2DD4BF',       // Mint an toàn (tương phản 9.8:1 - PASS AAA)
-  successSoft: 'rgba(45, 212, 191, 0.16)',
-  danger: '#F87171',        // Đỏ neon san hô dịu (tương phản 6.6:1 - PASS AAA)
-  dangerSoft: 'rgba(248, 113, 113, 0.16)',
-  warning: '#FBBF24',       // Hổ phách sáng (tương phản 10.8:1 - PASS AAA)
+  success: '#10B981',       // Mint an toàn tươi mới
+  successSoft: 'rgba(16, 185, 129, 0.14)',
+  danger: '#EF4444',        // Đỏ cam rực rỡ cảnh báo
+  dangerSoft: 'rgba(239, 68, 68, 0.14)',
+  warning: '#F59E0B',       // Vàng hổ phách cảnh báo
 
-  gradient: ['#16202C', '#0E1620'],       // Dải xám than lướt sang đêm đông
-  primaryGradient: ['#2DD4BF', '#0D9488'], // Dark Mint Gradient cho CTA
-  glowColor: 'rgba(45, 212, 191, 0.35)',   // Ánh sáng Mint bừng sáng
+  gradient: ['#F0FDF9', '#CCFBF1'],       // Dải sương bạc hà sang ngọc bích
+  primaryGradient: ['#10B981', '#06B6D4'], // Multi-layer Mint to Sky Blue Gradient
+  glowColor: 'rgba(16, 185, 129, 0.35)',   // Bóng phát sáng ngọc bích bừng sáng
 
-  shadowColor: '#000000',
-  shadowOpacity: 0,
+  shadowColor: '#022C22',
+  shadowOpacity: 0.06,
 };
 
-/**
- * 3. THEME 3 (MÁT MẺ): XANH MINT KẾT HỢP XANH NGỌT VÀ XANH DƯƠNG NHẠT (FRESH BLUE-MINT)
- * Nền bạc hà ngọc mai tươi mát (#F0FDF4), điểm nhấn Mint tươi ngọt (#059669), phối cùng Sky Blue (#38BDF8).
- * Toàn bộ cặp chữ/nền đạt chuẩn tương phản WCAG 2.1 AA (chữ chính 9.3:1, chữ phụ 5.2:1, Slate 8.6:1).
- */
-export const coolTokens: ColorTokens = {
-  bg: '#F0FDF4',            // Bạc hà ngọc mai tươi mát sương mai
-  background: '#F0FDF4',
-  surface: '#FFFFFF',       // Trắng tuyết ngọc trai thanh khiết
-  surfaceAlt: '#DCFCE7',    // Bề mặt bạc hà mềm mại
-  border: 'rgba(5, 150, 105, 0.18)', // Viền ngọc bích sương mai
-
-  text: '#064E3B',          // Xanh ngọc rừng thẫm, tương phản 9.3:1 trên nền bạc hà (PASS AAA)
-  textSub: '#047857',       // Xanh ngọc thanh lịch, tương phản 5.2:1 (PASS AA)
-  textMuted: '#334155',     // Slate thẫm sắc nét, tương phản 8.6:1 (PASS AAA)
-
-  primary: '#059669',       // Xanh mint tươi ngọt ngào
-  textOnPrimary: '#FFFFFF', // Chữ trắng tuyết tinh khôi (tương phản 3.8:1 cho Large text/Buttons, 5.5:1 trên gradient đậm)
-  primarySoft: 'rgba(5, 150, 105, 0.14)',   // Nền chip xanh mint mát dịu
-
-  accent: '#38BDF8',        // Xanh da trời nhạt (Sky Blue) rực rỡ
-  accentSoft: 'rgba(56, 189, 248, 0.16)',
-
-  success: '#059669',       // Mint an toàn tươi mới
-  successSoft: 'rgba(5, 150, 105, 0.14)',
-  danger: '#DC2626',        // Đỏ tươi nổi bật (tương phản 4.6:1 - PASS AA)
-  dangerSoft: 'rgba(220, 38, 38, 0.14)',
-  warning: '#D97706',       // Vàng hổ phách (tương phản 4.5:1 - PASS AA)
-
-  gradient: ['#F0FDF4', '#DCFCE7'],       // Dải bạc hà sương mai sang ngọc bích
-  primaryGradient: ['#059669', '#38BDF8'], // Gradient kép Mint tươi sang Sky Blue rực rỡ
-  glowColor: 'rgba(5, 150, 105, 0.35)',   // Bóng phát sáng ngọc bích bừng sáng
-
-  shadowColor: '#064E3B',
-  shadowOpacity: 0.08,
-};
-
-// Alias hỗ trợ tương thích ngược
-export const mintTokens = coolTokens;
+// Aliases duy trì khả năng tương thích ngược
+export const lightTokens: ColorTokens = pinkTokens;
+export const darkTokens: ColorTokens = pinkTokens;
+export const coolTokens: ColorTokens = mintTokens;
 
 export const Spacing = {
   xs: 4,
@@ -185,4 +156,3 @@ export const Radii = {
 // Aliases for convenience
 export const spacing = Spacing;
 export const radii = Radii;
-

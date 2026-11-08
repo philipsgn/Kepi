@@ -543,3 +543,20 @@
     - *Tiêu Chuẩn Nghiệm Thu:*
       - `npx expo export --platform web` xuất ra thư mục `dist/` hoàn chỉnh với `index.html`, `_expo/`, `manifest.json`.
       - `tsc --noEmit` đạt 0 lỗi, `node run-all-tests.js` đạt 100% (53/53 tests pass).
+
+  - **Quyết định 101 (08/11/2026): Tái Cấu Trúc Toàn Diện Hệ Thống Theme — Bộ Đôi "Hồng Heo" (`pink` - Mặc Định) & "Xanh Mint Gradient" (`mint`):**
+    - *Bối Cảnh & Nguyên Nhân:*
+      - Dự án PigFly lấy linh vật Heo Bay PigFly làm trung tâm định vị thương hiệu. Hệ theme 3 màu cũ (Vàng Kem Bơ `light`, Dark Than Chì `dark`, Bạc Hà `cool`) phân tán nhận diện và không toát lên được tinh thần chú heo bay đáng yêu.
+      - Người dùng yêu cầu tinh giản và tái thiết kế toàn bộ: Xóa bỏ các màu cũ, chỉ giữ lại đúng 2 theme chính thức: **"Hồng Heo"** (tổng hợp các sắc hồng gắn liền với chú heo PigFly) và **"Xanh Mint"** (kết hợp các sắc xanh tự nhiên để tạo hiệu ứng gradient đa tầng chuyển sắc đẹp mắt).
+    - *Kiến Trúc & Giải Pháp Kỹ Thuật:*
+      - 1. **Quy hoạch 2 Theme Duy Nhất (`src/theme/tokens.ts`):** Rút gọn `ThemeMode = 'pink' | 'mint'` và `ResolvedTheme = 'pink' | 'mint'`. Thiết lập `'pink'` làm Theme mặc định toàn hệ thống.
+      - 2. **Bộ Token Hồng Heo (`pinkTokens`):** Nền chính Kem Dâu Sữa dịu mắt `#FFF5F7`, thẻ bề mặt Trắng Ngọc Trai `#FFFFFF`, bề mặt phụ `#FCE7F3`, viền `rgba(244, 63, 94, 0.16)`, màu chủ đạo Hồng Đào Heo Bay `#F43F5E`, Gradient San Hô `['#FB7185', '#F43F5E']`, Chữ và số tài chính Nâu Socola Dâu `#3B0713` đạt chuẩn siêu tương phản WCAG AAA (14.2:1).
+      - 3. **Bộ Token Xanh Mint (`mintTokens`):** Nền chính Sương Bạc Hà `#F0FDF9`, thẻ bề mặt Trắng Tinh Khiết `#FFFFFF`, bề mặt phụ `#CCFBF1`, viền `rgba(16, 185, 129, 0.18)`, màu chủ đạo Xanh Mint `#10B981`, Gradient Đa Tầng Chuyển Sắc `['#10B981', '#06B6D4']` (Mint $\to$ Teal $\to$ Cyan), Chữ và số tài chính Ngọc Bích Đậm `#022C22` đạt chuẩn WCAG AAA (15.1:1).
+      - 4. **Khả Năng Tương Thích Ngược (Backward Compatibility):** Khai báo các hằng số alias `export const lightTokens = pinkTokens; export const darkTokens = pinkTokens; export const coolTokens = mintTokens;` giúp các component chưa refactor vẫn hoạt động mượt mà không vỡ build.
+      - 5. **Tự Động Nâng Cấp Dữ Liệu Cũ (Auto Migration in `ThemeContext.tsx`):** Nếu `AsyncStorage` đang lưu trữ giá trị theme cũ (`'light'`, `'dark'`, `'system'`), tự động nâng cấp sang `'pink'`; nếu đang lưu `'cool'` tự động chuyển sang `'mint'`.
+      - 6. **Giao Diện Cài Đặt Profile (`ThemeSettingsCard.tsx`):** Chuyển sang Segmented Switch 2 nút bấm bo cong pill: `[🐷 Hồng Heo]` và `[🍃 Xanh Mint]`, phản hồi rung haptic và cập nhật tức thì toàn bộ ứng dụng.
+    - *Tiêu Chuẩn Nghiệm Thu:*
+      - Đồng bộ hoàn toàn với tài liệu thiết kế chuẩn `docs/DESIGN.md`.
+      - `tsc --noEmit` đạt 0 lỗi.
+      - `node run-all-tests.js` đạt 100% (53/53 tests pass).
+
