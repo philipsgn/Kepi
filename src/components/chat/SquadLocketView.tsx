@@ -17,6 +17,7 @@ import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
 import {
   Copy,
+  Dices,
   Flame,
   Heart,
   LogIn,
@@ -34,6 +35,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useTransactionStore } from '../../store/transactionStore';
 import { useTheme } from '../../theme/ThemeContext';
 import { PigBoMascot } from '../mascot/PigBoMascot';
+import { FinancialMonopolyModal } from '../game/FinancialMonopolyModal';
 import { formatVND } from '../../utils/currency';
 import { useBottomInset } from '../../hooks/useBottomInset';
 
@@ -57,6 +59,8 @@ export const SquadLocketView: React.FC = () => {
     sendNudge,
     reactToFeedItem,
     syncTransactionsToFeed,
+    activeSosAlarm,
+    dismissSosAlarm,
   } = useSquadStore();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -64,6 +68,7 @@ export const SquadLocketView: React.FC = () => {
   const [squadNameInput, setSquadNameInput] = useState('');
   const [squadCodeInput, setSquadCodeInput] = useState('');
   const [chatInput, setChatInput] = useState('');
+  const [showMonopolyModal, setShowMonopolyModal] = useState(false);
 
   const currentUserName = profile?.full_name || 'Tôi';
 
@@ -220,6 +225,8 @@ export const SquadLocketView: React.FC = () => {
           </View>
         </Modal>
 
+        <FinancialMonopolyModal visible={showMonopolyModal} onClose={() => setShowMonopolyModal(false)} />
+
         {/* MODAL NHẬP MÃ PHÒNG */}
         <Modal visible={showJoinModal} transparent animationType="fade">
           <View style={styles.modalOverlay}>
@@ -282,6 +289,43 @@ export const SquadLocketView: React.FC = () => {
             <LogOut size={18} color="#EF4444" strokeWidth={2.2} />
           </TouchableOpacity>
         </View>
+
+        {/* SOS OVERSPENDING ALARM BANNER */}
+        {activeSosAlarm ? (
+          <View style={{ backgroundColor: 'rgba(225, 29, 72, 0.1)', borderColor: tokens.danger, borderWidth: 1.5, borderRadius: 16, padding: 12, marginBottom: 14 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: tokens.danger }}>🚨 BÁO ĐỘNG CỨU VÍ SQUAD!</Text>
+              <TouchableOpacity onPress={dismissSosAlarm} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <X size={16} color={tokens.danger} strokeWidth={2.4} />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ fontSize: 12, color: tokens.text, lineHeight: 16, marginBottom: 8 }}>{activeSosAlarm.message}</Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TouchableOpacity
+                style={{ flex: 1, backgroundColor: tokens.danger, paddingVertical: 6, borderRadius: 8, alignItems: 'center' }}
+                onPress={() => sendSquadMessage(`🛡️ Cố lên ${activeSosAlarm.memberName}, hãy kiềm chế nhé!`, currentUserName)}
+              >
+                <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>🛡️ Thả Meme Khuyên Can</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, backgroundColor: tokens.surfaceAlt, paddingVertical: 6, borderRadius: 8, alignItems: 'center' }}
+                onPress={() => sendSquadMessage(`☕ Đừng lo ${activeSosAlarm.memberName}, mai siết eo lại nhé!`, currentUserName)}
+              >
+                <Text style={{ color: tokens.text, fontSize: 11, fontWeight: '700' }}>☕ Động Viên</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : null}
+
+        {/* NÚT CHƠI CỜ TỶ PHÚ TÀI CHÍNH */}
+        <TouchableOpacity
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: tokens.primary, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 14, marginBottom: 14, gap: 8 }}
+          activeOpacity={0.85}
+          onPress={() => setShowMonopolyModal(true)}
+        >
+          <Dices size={18} color="#FFFFFF" strokeWidth={2.4} />
+          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>Cờ Tỷ Phú Đầu Tư Tài Chính (Nhận FEP) 🎲</Text>
+        </TouchableOpacity>
 
         {/* 2. HÀNG AVATAR HỘI BẠN & TRẠNG THÁI HEO */}
         <View style={styles.membersSection}>

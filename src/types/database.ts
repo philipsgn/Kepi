@@ -1,10 +1,27 @@
 export type TransactionType = 'EXPENSE' | 'INCOME' | 'ADJUST';
 export type TransactionStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED';
-export type TransactionSource = 'PHOTO' | 'MANUAL' | 'SCREENSHOT' | 'QR';
+export type TransactionSource = 'PHOTO' | 'MANUAL' | 'SCREENSHOT' | 'QR' | 'VOICE' | 'OCR';
 export type PaymentMethod = 'CASH' | 'BANK' | 'E_WALLET';
 export type WaitBasketStatus = 'WAITING' | 'BOUGHT' | 'SKIPPED';
 export type FavoriteUnit = 'tra_sua' | 'ca_phe' | 'to_pho';
 export type MediaType = 'PHOTO' | 'VIDEO_3S';
+export type SentimentRating = 'WORTH_IT' | 'REGRET' | 'NORMAL';
+
+export interface ReceiptItem {
+  name: string;
+  price: number;
+  quantity?: number;
+}
+
+export interface ReceiptData {
+  merchantName?: string | null;
+  items?: ReceiptItem[];
+  totalAmount?: number;
+  vatAmount?: number;
+  rawOcrText?: string;
+  detectedAmounts?: number[];
+  confidenceScore?: number;
+}
 
 export interface Profile {
   id: string;
@@ -48,6 +65,8 @@ export interface Transaction {
   bank_bin?: string | null;
   qr_kind?: 'STATIC' | 'DYNAMIC' | null;
   pending_expires_at?: string | null;
+  receipt_data?: ReceiptData | null;
+  sentiment_rating?: SentimentRating | null;
   occurred_at: string;
   created_at: string;
 }

@@ -9,6 +9,8 @@ export interface SquadMember {
   streakDays: number;
   hasFedPigToday: boolean;
   isOwner?: boolean;
+  hasSosActive?: boolean;
+  fepPoints?: number;
 }
 
 export interface SquadFeedItem {
@@ -38,11 +40,20 @@ export interface SquadRoom {
   createdAt: string;
 }
 
+export interface SosAlarmState {
+  memberId: string;
+  memberName: string;
+  overspentAmount: number;
+  message: string;
+  timestamp: string;
+}
+
 interface SquadState {
   squad: SquadRoom | null;
   members: SquadMember[];
   feedItems: SquadFeedItem[];
   messages: SquadMessage[];
+  activeSosAlarm: SosAlarmState | null;
   isLoading: boolean;
   error: string | null;
 
@@ -55,6 +66,14 @@ interface SquadState {
   sendNudge: (toMemberId: string, type: 'FEED_PIG' | 'CHEER', fromName: string) => string;
   reactToFeedItem: (itemId: string, emoji: string) => void;
   syncTransactionsToFeed: (transactions: Transaction[], userName: string) => void;
+  triggerOverspendingSos: (
+    memberId: string,
+    memberName: string,
+    todaySpent: number,
+    todayBudget: number
+  ) => string;
+  dismissSosAlarm: () => void;
+  getSquadLeaderboard: () => SquadMember[];
 }
 
 const STORAGE_KEY_SQUAD = '@pigfly_squad_room_v1';
@@ -68,6 +87,7 @@ const SAMPLE_FRIENDS: SquadMember[] = [
     avatarPose: 'happy',
     streakDays: 8,
     hasFedPigToday: true,
+    fepPoints: 850,
   },
   {
     id: 'friend-heo-map',
@@ -75,6 +95,7 @@ const SAMPLE_FRIENDS: SquadMember[] = [
     avatarPose: 'card',
     streakDays: 5,
     hasFedPigToday: false,
+    fepPoints: 520,
   },
 ];
 
@@ -108,6 +129,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
   members: [],
   feedItems: [],
   messages: [],
+  activeSosAlarm: null,
   isLoading: false,
   error: null,
 
@@ -117,7 +139,6 @@ export const useSquadStore = create<SquadState>((set, get) => ({
       if (!raw) {
         raw = await AsyncStorage.getItem(LEGACY_STORAGE_KEY_SQUAD);
         if (raw) {
-          // Tự động nâng cấp sang khóa mới
           await AsyncStorage.setItem(STORAGE_KEY_SQUAD, raw).catch(() => {});
         }
       }
@@ -128,6 +149,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
           members: parsed.members || [],
           feedItems: parsed.feedItems || INITIAL_FEED_ITEMS,
           messages: parsed.messages || [],
+          activeSosAlarm: parsed.activeSosAlarm || null,
         });
       }
     } catch (e) {
@@ -138,7 +160,6 @@ export const useSquadStore = create<SquadState>((set, get) => ({
   createSquad: async (name: string, userName: string) => {
     set({ isLoading: true, error: null });
     try {
-      // Sinh mã 6 ký tự ngẫu nhiên (ví dụ PIG925)
       const num = Math.floor(Math.random() * 899) + 100;
       const code = `PIG${num}`;
 
@@ -156,6 +177,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
         streakDays: 1,
         hasFedPigToday: true,
         isOwner: true,
+        fepPoints: 100,
       };
 
       const members = [myMember, ...SAMPLE_FRIENDS];
@@ -215,6 +237,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
         avatarPose: 'welcome',
         streakDays: 1,
         hasFedPigToday: true,
+        fepPoints: 100,
       };
 
       const members = [myMember, ...SAMPLE_FRIENDS];
@@ -258,6 +281,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
       members: [],
       feedItems: [],
       messages: [],
+      activeSosAlarm: null,
     });
     try {
       await AsyncStorage.multiRemove([STORAGE_KEY_SQUAD, LEGACY_STORAGE_KEY_SQUAD]).catch(() => {});
@@ -285,6 +309,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
           members: state.members,
           feedItems: state.feedItems,
           messages: updatedMessages,
+          activeSosAlarm: state.activeSosAlarm,
         })
       ).catch(() => {});
       return { messages: updatedMessages };
@@ -322,7 +347,6 @@ export const useSquadStore = create<SquadState>((set, get) => ({
   },
 
   syncTransactionsToFeed: (transactions: Transaction[], userName: string) => {
-    // Chỉ đưa các giao dịch công khai (is_squad_private !== true) vào Locket Feed
     const publicTxs = transactions.filter(
       (tx) =>
         (tx.status === 'CONFIRMED' || !tx.status) &&
@@ -354,6 +378,52 @@ export const useSquadStore = create<SquadState>((set, get) => ({
       return {
         feedItems: [...myNewFeedItems, ...state.feedItems],
       };
+    });
+  },
+
+  // SOS Overspending Alarm Protocol
+  triggerOverspendingSos: (
+    memberId: string,
+    memberName: string,
+    todaySpent: number,
+    todayBudget: number
+  ) => {
+    const overspent = Math.max(0, todaySpent - todayBudget);
+    const text = `🚨 SOS! Heo của ${memberName} phát tín hiệu cầu cứu: Hôm nay đã chi ${todaySpent.toLocaleString('vi-VN')} đ (vượt hạn mức ${overspent.toLocaleString('vi-VN')} đ)! Bạn bè hãy thả meme ngăn cản!`;
+
+    const alarm: SosAlarmState = {
+      memberId,
+      memberName,
+      overspentAmount: overspent,
+      message: text,
+      timestamp: new Date().toISOString(),
+    };
+
+    set((state) => {
+      const updatedMembers = state.members.map((m) =>
+        m.id === memberId ? { ...m, hasSosActive: true } : m
+      );
+      return {
+        members: updatedMembers,
+        activeSosAlarm: alarm,
+      };
+    });
+
+    get().sendSquadMessage(text, 'SOS Bot');
+    return text;
+  },
+
+  dismissSosAlarm: () => {
+    set({ activeSosAlarm: null });
+  },
+
+  getSquadLeaderboard: () => {
+    const { members } = get();
+    // Xếp hạng theo FEP và chuỗi Streak
+    return [...members].sort((a, b) => {
+      const fepA = a.fepPoints ?? a.streakDays * 100;
+      const fepB = b.fepPoints ?? b.streakDays * 100;
+      return fepB - fepA;
     });
   },
 }));

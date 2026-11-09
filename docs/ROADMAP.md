@@ -1,8 +1,8 @@
 # 🚀 LỘ TRÌNH PHÁT TRIỂN CHIẾN LƯỢC: PIGFLY (ROADMAP.MD)
 
 > **Dự án:** PigFly (Ví Locket) — Mobile App Chi Tiêu Bằng Ảnh & Quét Mã QR  
-> **Phiên bản:** NEW v3.0  
-> **Cập nhật:** Tháng 10/2026  
+> **Phiên bản:** NEW v4.0 (AI-First & Pop-Anime Gamification)  
+> **Cập nhật:** Tháng 11/2026  
 > **Quy ước trạng thái:** `[x]` Đã hoàn thành | `[/]` Đang triển khai | `[ ]` Chuẩn bị thực hiện
 
 ---
@@ -16,41 +16,43 @@
 - [x] Quét mã VietQR Offline: Nhận diện chuẩn EMVCo quốc tế và NAPAS, tự động deeplink sang App ngân hàng chính thức với 0 rò rỉ STK.
 - [x] Phân lập tuyệt đối các khoản `PENDING` (không tính vào ngân sách cho đến khi người dùng xác nhận).
 
-### 📌 Milestone M1: Bảo Mật Native & Zero-STK Shield (Hoàn tất 100%)
+### 📌 Milestone M1: Bảo Mật Native, Zero-STK Shield & Web PWA (Hoàn tất 100%)
 - [x] Bóc tách biến động số dư Android Native 100% Offline (chặn 100% tin nhắn chứa OTP, mật khẩu).
 - [x] Tiện ích Màn hình khóa Sticky Lock Screen banner theo dõi số dư và ghi nhanh 1-chạm.
 - [x] Luồng Locket Bank Snapshot: Nhận thông báo ngân hàng $\rightarrow$ Mở camera ghim sẵn số tiền $\rightarrow$ Bấm chụp món đồ lưu kỷ niệm.
 - [x] Xuất dữ liệu sao lưu CSV chuẩn UTF-8 BOM (`\uFEFF`) tương thích Excel và sao lưu JSON mã hóa.
-- [x] Bộ 3 Theme giao diện độc bản: Hà Nội Thu Đông (Mặc định), Không Gian Đêm Titanium (Tối), và Xanh Bạc Hà (Mát).
+- [x] Web PWA & CI/CD GitHub Actions: Tự động deploy lên GitHub Pages (`https://philipsgn.github.io/Kepi/`).
 
-### 📌 Milestone M2: Chuyển Đổi Thương Hiệu PigFly & Tinh Gọn Giao Diện (Hoàn tất 100%)
+### 📌 Milestone M2: Chuyển Đổi Thương Hiệu PigFly & Hệ Thống 2 Theme Chuẩn WCAG (Hoàn tất 100%)
 - [x] Chuyển đổi tên thương hiệu toàn diện sang **PigFly** với slogan: *"PigFly: Tiết kiệm – Duy trì – Sinh lời bền vững"*.
 - [x] Gỡ bỏ triệt để lỗi linh vật đè chữ: Chuyển chú heo PigFly lên Greeting Header (Tab Home), làm sạch 100% khung ngắm 4:5 (Tab Camera).
 - [x] Dọn sạch vĩnh viễn hardcode `~ khoảng 1 ly trà sữa` tại Tab Cá nhân (Profile).
-- [x] Xóa bỏ các card rác (`Đang ghim`, `Trừ ngầm`), nâng cấp 3 Detail Sheet bảo mật Zero-STK minh bạch tại Tab Cài đặt.
-- [x] Bộ kiểm thử tự động 51/51 tests PASSED 100% và TypeScript 0 lỗi.
+- [x] Hệ thống 2 Theme độc bản: "Hồng Heo" (`pink` - Mặc định) và "Xanh Mint" (`mint` - Gradient đa tầng) đạt chuẩn WCAG AAA/AA.
+- [x] Bộ kiểm thử tự động 53/53 tests PASSED 100% và TypeScript 0 lỗi.
 
 ---
 
-## 🎯 CÁC CHẶNG CHIẾN LƯỢC TIẾP THEO (NEW WORKFLOW)
+## 🎯 CÁC CHẶNG CHIẾN LƯỢC TIẾP THEO (v4.0 WORKFLOW)
 
-### 📌 GIAI ĐOẠN 1: PIGFLY GAMIFICATION & SQUAD ROOM (ĐANG TRIỂN KHAI)
-*Trọng tâm: Biến việc quản lý chi tiêu thành một trải nghiệm giải trí nhẹ nhàng, tạo động lực mở app mỗi ngày.*
+### 📌 GIAI ĐOẠN 1: PIGFLY v4.0 — AI-FIRST & GAMIFICATION ENGINE (ĐANG TRIỂN KHAI)
+*Trọng tâm: Song song 2 luồng phát triển AI (OCR, Voice, Vision) và Gamification (ActiDoo Engine, Cờ Tỷ Phú, SOS Alarm).*
 
-- [ ] **1.1. Hệ Thống Năng Lượng Bay (Fly Energy Points - FEP):**
-  - [ ] Tích hợp tính điểm FEP tự động: Ghi chép đúng hạn mức ngày (`+100 FEP`), chụp ảnh món đồ (`+30 FEP`).
-  - [ ] Hệ số nhân chuỗi Streak: Thưởng thêm điểm năng lượng khi duy trì chuỗi 3, 7, 30 ngày.
-  - [ ] Hiển thị thanh năng lượng bay lơ lửng của PigFly tại Header Tab Home.
-- [ ] **1.2. Hệ Thống 5 Tầng Mây Tài Chính:**
-  - [ ] Hiển thị tầng mây hiện tại của người dùng (Mây Non $\rightarrow$ Tự Do Tài Chính).
-  - [ ] Hiệu ứng chuyển tầng mây rực rỡ khi người dùng kết chuyển số dư dương vào cuối ngày.
-- [ ] **1.3. Mini-Game "PigFly: Vỗ Cánh Gom Tiền" (Tap-to-Fly):**
-  - [ ] Xây dựng màn hình Mini-game thư giãn 60 giây với engine vật lý mềm (`react-native-reanimated`).
-  - [ ] Cơ chế Tap-to-Fly gom đồng xu vàng, nhặt búp cốm non và tránh chướng ngại vật "FOMO Sập Sàn".
-  - [ ] Mở khóa Skin trang phục ngộ nghĩnh cho chú heo PigFly (Mũ beret, Kính phi công, Balo chong chóng).
-- [ ] **1.4. Mở Rộng Tính Năng Squad Nuôi Heo PigFly:**
-  - [ ] Chia sẻ mã mời phòng (QR Code & Deep link `pigfly://squad/join?code=...`).
-  - [ ] Hiệu ứng tương tác: Hoạt ảnh "👉 Nhắc đói" và "🎉 Vỗ béo heo bạn bè".
+- [/] **1.1. Luồng AI-First (Dual-Scan, Voice & Vision):**
+  - [ ] AI Receipt OCR Parser: Nhận diện hóa đơn retail Việt Nam, bóc tách đơn vị bán, danh sách món, tổng tiền.
+  - [ ] Carousel Fallback UI: Cho phép chọn nhanh hoặc sửa tay các số tiền ứng viên trong $\le 3$s.
+  - [ ] Voice-to-Expense NLP Parser: Bóc tách tiếng Việt tự nhiên ("Ăn bún bò 50 cành") $\to$ tiền, danh mục, icon.
+  - [ ] On-Device Vision Tagging: Phân loại hình ảnh ngoại tuyến 100% (đồ ăn, mua sắm, di chuyển).
+- [/] **1.2. Luồng Gamification Engine (ActiDoo Inspired):**
+  - [ ] `gamificationStore.ts`: Quản lý FEP, 5 Tầng Mây, Mascot Mood, Kho Skin và Chuỗi Streak.
+  - [ ] `rulesEngine.ts`: Đánh giá điều kiện rules, mở khóa thành tựu đa cấp độ (Bronze/Silver/Gold).
+  - [ ] Mini-Game "Cờ Tỷ Phú Đầu Tư Tài Chính": Bàn cờ 16 ô thử thách tài chính (Né bẫy FOMO, Đầu tư tích lũy, Flashcards).
+  - [ ] Mascot Lottie Animation: 4 trạng thái cảm xúc (`FLYING_HIGH`, `CHILL`, `PANIC`, `STARVING`).
+- [/] **1.3. Luồng Squad 2.0 & Trực Quan Hóa Báo Cáo:**
+  - [ ] Feed nội bộ thời gian thực hiển thị ảnh chi tiêu của nhóm 4 bạn thân.
+  - [ ] SOS Overspending Alarm Protocol: Phát tín hiệu cầu cứu sang bạn bè khi chi tiêu vượt hạn mức ngày.
+  - [ ] Bảng xếp hạng tuần (Squad Leaderboard) thi đua FEP và tỷ lệ tiết kiệm.
+  - [ ] Báo cáo Magazine / Story Anime trong Tab Thống Kê (Runway Score, Impulse Ratio, Savings Velocity).
+  - [ ] Android Native AppWidget ghim số dư và linh vật ra màn hình chính.
 
 ---
 
@@ -73,8 +75,8 @@
 *Trọng tâm: Đưa PigFly lên Google Play Store và Apple App Store.*
 
 - [ ] **3.1. Native Android Plugin & Widget:**
-  - [ ] Xây dựng Expo Config Plugin cho `NotificationListenerService` đọc biến động số dư tự động trong file build APK/AAB.
-  - [ ] Xây dựng AppWidget Android ghim số dư hôm nay ra màn hình chính điện thoại.
+  - [ ] Đóng gói AppWidget Android vào APK/AAB sản xuất.
+  - [ ] Cấu hình `NotificationListenerService` đọc biến động số dư tự động trong file build.
 - [ ] **3.2. Native iOS WidgetKit Extension:**
   - [ ] Xây dựng Swift WidgetKit Extension hiển thị chú heo PigFly và số dư `Hôm nay tiêu được` trên màn hình khóa iOS 16+.
 - [ ] **3.3. Kiểm Toán Bảo Mật & Phát Hành Ứng Dụng:**

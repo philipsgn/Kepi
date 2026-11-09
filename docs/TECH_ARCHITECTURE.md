@@ -327,3 +327,63 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
 ### 10.5. GitHub Actions CI/CD Pipeline (`.github/workflows/deploy-web.yml`)
 - Kích hoạt tự động khi push code lên nhánh `main` hoặc chạy thủ công qua `workflow_dispatch`.
 - Quy trình: Checkout $\to$ Node 22 $\to$ npm install $\to$ Chạy lint & 53 unit tests $\to$ Export Web với `EXPO_BASE_URL="/Kepi"` $\to$ Tạo `404.html` $\to$ Đóng gói và phát hành tự động lên GitHub Pages.
+
+
+---
+
+## 11. KIẾN TRÚC PHÂN HỆ AI-FIRST & GAMIFICATION ENGINE (PIGFLY v4.0)
+
+### 11.1. AI-First Receipt OCR Pipeline & Fallback Carousel
+- **Kiến trúc luồng xử lý:**
+  1. *Tiền xử lý ảnh (Preprocessing):* Khử nhiễu, tăng độ tương phản cục bộ, chuẩn hóa độ phân giải 1080px WebP.
+  2. *Text & Entity Extractor:* Thuật toán nhận diện tên đơn vị bán lẻ (Merchant), danh sách món hàng (Items), thuế GTGT (VAT) và Tổng tiền thanh toán (Total).
+  3. *Auto Category Categorization:* Map tên các món hàng bóc tách được sang danh mục chuẩn (F&B $\to$ `Ăn uống`, Fashion $\to$ `Mua sắm`, Gasoline $\to$ `Đi lại`).
+  4. *Carousel Fallback UI:* Đối với hóa đơn in mờ hoặc có nhiều số tiền (tiền hàng, tiền khách đưa, tiền thừa trả lại), hệ thống xuất ra mảng top 3 số tiền có độ tin cậy cao nhất dưới dạng Carousel Selector, cho phép người dùng chọn hoặc sửa tay trong $\le 3$s.
+- **Tiêu chuẩn bảo mật:** Tuyệt đối không trích xuất hoặc lưu trữ số tài khoản in trên hóa đơn.
+
+### 11.2. Phân Hệ Voice-to-Expense NLP Parser
+- **Mục tiêu:** Nhập liệu bằng giọng nói tiếng Việt tự nhiên siêu tốc.
+- **Quy chuẩn mẫu câu hỗ trợ:**
+  - Tiền tố hành vi: `Ăn`, `Uống`, `Đi`, `Mua`, `Đổ xăng`, `Gửi xe`.
+  - Hậu tố đơn vị tiền: `k`, `nghìn`, `ngàn`, `cành`, `lít`, `củ`, `tr`, `triệu`.
+  - Parser phân tích cú pháp regex thuần (Pure Functions) chạy 100% offline trên thiết bị:
+    `"Ăn bún bò 50 cành"` $\to$ `{ amount: 50000, category: 'Ăn uống', description: 'Ăn bún bò', emoji: '🍜' }`.
+
+### 11.3. Bộ Phân Loại Hình Ảnh On-Device Ngoại Tuyến (Computer Vision)
+- **Kiến trúc:** Model Lightweight Image Classification chạy qua TFLite / CoreML offline.
+- **Mapping danh mục:**
+  - `food_beverage` $\to$ `Ăn uống`
+  - `fashion_clothing` $\to$ `Mua sắm`
+  - `vehicle_transport` $\to$ `Đi lại`
+  - `grocery_supermarket` $\to$ `Chợ / Siêu thị`
+  - `books_education` $\to$ `Học tập`
+- **Tốc độ:** Phân loại $< 150$ms trên CPU điện thoại, 0 byte gửi ra Internet.
+
+### 11.4. Gamification Store & Rules Engine (ActiDoo Inspired)
+- **`gamificationStore.ts`:**
+  - Quản lý FEP (Fly Energy Points), Chuỗi Streak, 5 Tầng Mây Tài Chính, Vị trí Cờ Tỷ Phú, Cảm xúc Mascot và Kho Skin.
+- **`rulesEngine.ts` (Pure Functions):**
+  - Đánh giá các biến ngữ cảnh (`todaySpent`, `todayBudget`, `streakDays`, `photosCount`) sau mỗi giao dịch `CONFIRMED` hoặc sự kiện Rollover 00:00.
+  - Tự động cộng FEP, cập nhật tầng mây, và kích hoạt thành tựu đa cấp độ (Bronze $\to$ Silver $\to$ Gold).
+
+### 11.5. Động Cơ Mini-Game "Cờ Tỷ Phú Đầu Tư Tài Chính"
+- **Kiến trúc bàn cờ 16 ô (`monopolyBoardEngine.ts`):**
+  - Xúc xắc ngẫu nhiên 1..6 bước với hoạt họa xúc xắc Pop-Anime 60fps.
+  - Ô sự kiện: Ô Khởi Hành (`+50 FEP`), Ô Bẫy FOMO (Lựa chọn Cứu Ví), Ô Đầu Tư Tích Lũy, Ô Cơ Hội (Rút thẻ may mắn), Ô Cổ Tức.
+  - Đồng bộ tiến độ bàn cờ vào `AsyncStorage` (`@pigfly_monopoly_v1`).
+
+### 11.6. Giao Thức Squad 2.0 & SOS Overspending Beacon
+- **Ràng buộc quy mô:** $2 \le \text{Members} \le 4$.
+- **Cơ chế SOS:** Khi một thành viên chi tiêu vượt hạn mức ngày:
+  1. Mascot chuyển sang mood `PANIC`.
+  2. Gửi sự kiện SOS Beacon vào kênh chat Squad.
+  3. Màn hình của 3 bạn thân hiển thị cảnh báo nhấp nháy kèm 2 nút tương tác: [🛡️ Thả Meme Khuyên Can] và [☕ Động Viên].
+  4. Bảng xếp hạng tuần (Squad Leaderboard) dựa trên FEP và Tỷ lệ tiết kiệm thực tế.
+
+### 11.7. Hệ Thống Mascot Lottie Animation
+- Quản lý 4 trạng thái cảm xúc: `FLYING_HIGH`, `CHILL`, `PANIC`, `STARVING`.
+- Chuyển đổi trạng thái mượt mà thông qua `lottie-react-native` với asset vector tối ưu $\le 30$KB.
+
+### 11.8. Cấu Hình Android Native AppWidget
+- Plugin Expo `./plugins/withAppWidget.js` tự động cấu hình `AppWidgetProvider` trong `AndroidManifest.xml`.
+- Widget hiển thị: Mascot Chibi PigFly, Hạn mức `Hôm nay tiêu được`, và 2 nút hành động mở Camera hoặc ghi nhanh khoản nhỏ.

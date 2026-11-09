@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
-import { BarChart2, Camera, Eye, EyeOff, Images } from 'lucide-react-native';
+import { BarChart2, Camera, Eye, EyeOff, Images, Sparkles } from 'lucide-react-native';
 import { Strings } from '../../constants/strings';
 import { useTransactionStore } from '../../store/transactionStore';
 import { Transaction } from '../../types/database';
@@ -28,6 +28,7 @@ import { TransactionPhotoCell } from '../stats/TransactionPhotoCell';
 import { MonthDetailBottomSheet } from '../stats/MonthDetailBottomSheet';
 import { DayDetailBottomSheet } from '../journal/DayDetailBottomSheet';
 import { AnalyticsDashboardView } from '../stats/AnalyticsDashboardView';
+import { AnimeMagazineReportSheet } from '../stats/AnimeMagazineReportSheet';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { useBottomInset } from '../../hooks/useBottomInset';
@@ -58,6 +59,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
   const insets = useSafeAreaInsets();
   const { tokens } = useTheme();
   const { contentBottomPadding } = useBottomInset();
+  const [showMagazine, setShowMagazine] = useState(false);
   const { transactions, updateTransaction } = useTransactionStore();
 
   const [isMasked, setIsMasked] = useState<boolean>(false);
@@ -313,6 +315,18 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
         <Text style={[styles.headerTitle, { color: tokens.text }]}>{Strings.stats.title}</Text>
 
         <View style={styles.headerActions}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowMagazine(true);
+            }}
+            style={[styles.iconBtnBorderless, { marginRight: 8 }]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel="Tạp chí Anime"
+          >
+            <Sparkles size={20} color={tokens.primary} strokeWidth={2.6} />
+          </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={toggleMaskMoney}

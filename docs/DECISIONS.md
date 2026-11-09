@@ -560,3 +560,33 @@
       - `tsc --noEmit` đạt 0 lỗi.
       - `node run-all-tests.js` đạt 100% (53/53 tests pass).
 
+
+  - **Quyết định 102 (08/11/2026): Nâng Cấp Tương Tác Pop-Anime / Y2K Arcade Trên Nền 2 Theme Chính Thức "Hồng Heo" & "Xanh Mint":**
+    - *Bối Cảnh & Bản Chất:* Giữ vững 2 theme màu cốt lõi `pink` và `mint` đã được chuẩn hóa WCAG AAA, nhưng nâng cấp toàn diện ngôn ngữ tương tác sang phong cách Pop-Anime / Y2K Arcade: đường nét đậm nét (`borderWidth: 2`), bóng đổ khối đặc (Chunky 2D Drop Shadow), hiệu ứng nảy nhún xúc giác (Squishy UI / Physics-based micro-interactions) mang lại cảm giác đồ chơi game sống động cho người dùng Gen Z.
+
+  - **Quyết định 103 (08/11/2026): Phân Hệ AI-First Receipt OCR Pipeline & Giao Diện Carousel Fallback $\le 3$s:**
+    - *Bối Cảnh & Bản Chất:* Tự xây dựng pipeline bóc tách hóa đơn retail Việt Nam (nhận diện đơn vị bán, danh sách món, VAT, tổng tiền); tự động gắn tag danh mục chi tiêu; cung cấp giao diện Carousel Fallback cho phép người dùng chọn hoặc tinh chỉnh nhanh các ứng viên số tiền phát hiện được trong vòng $\le 3$s trước khi bấm Lưu Sổ.
+
+  - **Quyết định 104 (08/11/2026): Phân Hệ Voice-to-Expense NLP Cho Tiếng Việt Tự Nhiên:**
+    - *Bối Cảnh & Bản Chất:* Hỗ trợ nhập liệu bằng giọng nói với engine bóc tách NLP thuần tiếng Việt ("Ăn bún bò 50 cành", "Đi Grab 32k", "Uống Highlands 45 nghìn"), tự động trích xuất số tiền, phân loại danh mục và đề xuất emoji/icon tương ứng, giúp ghi chép siêu tốc chỉ với 1 chạm xác nhận.
+
+  - **Quyết định 105 (08/11/2026): Phân Loại Danh Mục On-Device Ngoại Tuyến Qua Computer Vision:**
+    - *Bối Cảnh & Bản Chất:* Tích hợp bộ phân loại hình ảnh chạy 100% On-Device (TFLite/CoreML) giúp nhận diện đối tượng chụp (món ăn, trang phục mua sắm, phương tiện di chuyển, sách vở) và tự động gắn category ngay khi chụp ảnh mà không cần kết nối mạng hay gửi ảnh ra ngoài.
+
+  - **Quyết định 106 (08/11/2026): Tự Xây Dựng Gamification Engine Lấy Cảm Hứng Từ Mẫu Thiết Kế ActiDoo:**
+    - *Bối Cảnh & Bản Chất:* Không phụ thuộc hạ tầng Python bên ngoài, PigFly tự xây dựng Gamification Engine thuần TypeScript trên nền Zustand & Supabase, áp dụng các pattern cốt lõi của `ActiDoo/gamification-engine`: Contextual Variables, Rules Engine đánh giá sau sự kiện, Multi-Level Achievements, Time-Aware Goals, Hệ thống FEP (Fly Energy Points) và 5 Tầng Mây Tài Chính.
+
+  - **Quyết định 107 (08/11/2026): Chiến Lược Phát Triển Song Song 2 Luồng Độc Lập (AI Engine & Gamification):**
+    - *Bối Cảnh & Bản Chất:* Tách biệt phát triển thành 2 luồng độc lập: Luồng A (AI OCR, Voice NLP, Vision Classifier) và Luồng B (Gamification Store, Rules Engine, Cờ Tỷ Phú, Mascot Lottie, Squad SOS Alarm) giúp tiến độ thần tốc mà không gây xung đột mã nguồn.
+
+  - **Quyết định 108 (08/11/2026): Nâng Cấp Mini-Game "Cờ Tỷ Phú Đầu Tư Tài Chính" & Giao Thức SOS Overspending Alarm Cho Squad:**
+    - *Bối Cảnh & Bản Chất:* Thay thế mini-game bay đơn giản bằng bàn cờ 16 ô "Cờ Tỷ Phú Đầu Tư Tài Chính" kết hợp giáo dục tài chính (bẫy FOMO, cơ hội đầu tư, cổ tức, flashcards); đồng thời tích hợp giao thức SOS Overspending Alarm cho Squad 4 người: khi một thành viên chi vượt hạn mức ngày, mascot phát tín hiệu cầu cứu sang màn hình 3 bạn thân để nhận meme và lời khuyên kịp thời.
+
+  - **Quyết định 109 (08/11/2026): Hệ Thống Hoạt Họa Linh Vật Heo Bay PigFly Bằng Lottie Với 4 Trạng Thái Cảm Xúc:**
+    - *Bối Cảnh & Bản Chất:* Sử dụng Lottie Animations nhẹ nhàng, sắc nét cho chú heo PigFly phản ánh sức khỏe tài chính thực tế qua 4 trạng thái cảm xúc: `FLYING_HIGH` (tiết kiệm tốt / streak cao), `CHILL` (bình ổn), `PANIC` (tiêu lố hạn mức), `STARVING` (chưa cho ăn/chưa ghi chép), cùng tủ đồ Skin trang phục mở khóa bằng điểm FEP.
+
+  - **Quyết định 110 (08/11/2026): Báo Cáo Định Kỳ Phong Cách Magazine / Story Anime Trong Tab Thống Kê:**
+    - *Bối Cảnh & Bản Chất:* Tab Stats mở rộng mục Báo cáo tuần & tháng theo bố cục cuộn dọc kiểu tạp chí Manga / Story, trực quan hóa 3 chỉ số sức khỏe tài chính mới: Runway Score (số ngày dòng tiền duy trì), Impulse Ratio (tỷ lệ chi bốc đồng), Savings Velocity (tốc độ về đích mục tiêu) cùng lời bình hài hước "cà khịa có tâm" của Anh PT Minh Locket.
+
+  - **Quyết định 111 (08/11/2026): Tiện Ích Màn Hình Android Native AppWidget Ghim Hạn Mức & Chú Heo Bay:**
+    - *Bối Cảnh & Bản Chất:* Ưu tiên xây dựng tiện ích Android AppWidget trên màn hình chính hiển thị trạng thái cảm xúc chú heo PigFly, hạn mức `Hôm nay tiêu được` và lối tắt 1-chạm mở Camera hoặc ghi chép nhanh khoản nhỏ.
