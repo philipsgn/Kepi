@@ -48,6 +48,8 @@ import { StreakCelebrationToast } from '../streak/StreakCelebrationToast';
 import { ConfirmationPillBanner, ConfirmationInboxModal } from '../inbox';
 import { MonthRolloverBanner } from '../budget/MonthRolloverBanner';
 import { PigBoMascot, PigFlyMascot } from '../mascot/PigBoMascot';
+import { PigFlyLottieMascot } from '../mascot/PigFlyLottieMascot';
+import { MascotMood } from '../../utils/gamification/rulesEngine';
 
 
 // Hooks & Stores
@@ -236,6 +238,13 @@ export const JournalView: React.FC<JournalViewProps> = ({
     return calculateStreakDays(dates);
   }, [transactions]);
 
+  const headerMascotMood: MascotMood = useMemo(() => {
+    if (isOverBudget) return 'PANIC';
+    if (todaySpent === 0) return 'STARVING';
+    if (currentStreak >= 3) return 'FLYING_HIGH';
+    return 'CHILL';
+  }, [isOverBudget, todaySpent, currentStreak]);
+
   // Định nghĩa danh mục: GỘP "Ăn uống" và "Cà Phê & Chill" thành "Ăn uống"
   const CATEGORIES = useMemo(() => [
     { key: 'all', label: 'Tất cả' },
@@ -375,7 +384,15 @@ export const JournalView: React.FC<JournalViewProps> = ({
               {userName}
             </Text>
             {/* LINH VẬT PIGFLY LƠ LỬNG NHẸ NHÀNG TRONG GREETING HEADER */}
-            <PigFlyMascot pose="welcome" size={28} />
+            <PigFlyLottieMascot
+              size={32}
+              mood={headerMascotMood}
+              showBadge={false}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowStreakModal(true);
+              }}
+            />
             {/* STREAK MINI: CHỈ ICON & SỐ CHUỖI THỰC TẾ (SOFT TONAL) */}
             <TouchableOpacity
               style={[

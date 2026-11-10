@@ -590,3 +590,6 @@
 
   - **Quyết định 111 (08/11/2026): Tiện Ích Màn Hình Android Native AppWidget Ghim Hạn Mức & Chú Heo Bay:**
     - *Bối Cảnh & Bản Chất:* Ưu tiên xây dựng tiện ích Android AppWidget trên màn hình chính hiển thị trạng thái cảm xúc chú heo PigFly, hạn mức `Hôm nay tiêu được` và lối tắt 1-chạm mở Camera hoặc ghi chép nhanh khoản nhỏ.
+
+  - **Quyết định 112 (09/11/2026): Tối Giản Gamification — Loại Bỏ Điểm FEP Ảo, Tập Trung Vào Chuỗi Streak & Tâm Trạng Chú Heo PigFly Lottie:**
+    - *Bối Cảnh & Bản Chất:* Người dùng đánh giá việc tích lũy điểm năng lượng FEP ảo không mang lại giá trị thiết thực và gây rối mắt. Dự án quyết định khai tử hoàn toàn hệ thống điểm số FEP ảo (Zero Virtual Points Policy). Toàn bộ động lực gắn kết người dùng được quy tụ vào 2 trụ cột trực quan, minh bạch và gần gũi nhất: **Chuỗi ngày kỷ luật (Streak Days)** (tương tự Locket/Duolingo) và **Trạng thái cảm xúc thực tế của chú heo PigFly** (4 mood: `FLYING_HIGH`, `CHILL`, `PANIC`, `STARVING`) cùng các tầng mây chinh phục tính theo chuỗi ngày liên tiếp.

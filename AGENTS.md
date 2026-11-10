@@ -1,7 +1,7 @@
 # QUY TẮC & QUY TRÌNH DÀNH CHO AI AGENT (AGENTS.MD)
 
-> **Dự án:** PigFly (Ví Locket) — Mobile App Chi Tiêu Bằng Ảnh & Quét Mã QR (Phong cách Hà Nội Thu Đông)  
-> **Phiên bản tài liệu:** NEW v3.0 (Đồng bộ thương hiệu PigFly, Gamification Heo Bay, tốc độ ghi chép <= 3s & bảo mật Zero-STK)  
+> **Dự án:** PigFly (Ví Locket) — Mobile App Chi Tiêu Bằng Ảnh, Quét Mã QR & AI-First Gamification  
+> **Phiên bản tài liệu:** NEW v4.1 (AI-First Dual-Scan, Voice NLP, Zero FEP Points & Pop-Anime Gamification)  
 > **Áp dụng cho:** Tất cả các AI Agent tham gia lập trình và phát triển dự án.
 
 ---
@@ -30,18 +30,18 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
 
 | Nhóm Tính Năng / Màn Hình | Tài Liệu Bắt Buộc Phải Đọc Trong `/docs` | Trọng Tâm Nghiệp Vụ Cần Nắm |
 | :--- | :--- | :--- |
-| **Toàn Bộ Dự Án (Core Vision)** | - [docs/PRD_PIGFLY_MASTER.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/PRD_PIGFLY_MASTER.md)<br>- [docs/ROADMAP.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/ROADMAP.md)<br>- [docs/PAGES_FEATURES.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/PAGES_FEATURES.md) | Mục tiêu sản phẩm PigFly, 5 trụ cột điều hướng, lộ trình 3 chặng chiến lược mới. |
-| **Giao Diện, Màu Sắc, Linh Vật** | - [docs/DESIGN.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/DESIGN.md)<br>- [docs/PIGFLY_PROMPT_STUDIO.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/PIGFLY_PROMPT_STUDIO.md)<br>- [docs/screens/_TEMPLATE.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/_TEMPLATE.md) | Vibe Hà Nội Thu Đông, bảng màu WCAG 2.1 AA/AAA, prompt 3D Clay Chibi chú heo bay, 100% Vector icons `lucide-react-native`. |
-| **Game Hóa PigFly & Squad** | - [docs/features/PIGFLY_GAMIFICATION_SPEC.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/features/PIGFLY_GAMIFICATION_SPEC.md) | Luật Heo Bay, Điểm Năng Lượng FEP, 5 Tầng Mây Tài Chính, Mini-Game Tap-to-Fly, Squad Nuôi Heo 2–4 bạn thân. |
-| **Kiến Trúc, CSDL & State Store** | - [docs/TECH_ARCHITECTURE.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/TECH_ARCHITECTURE.md)<br>- [docs/DECISIONS.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/DECISIONS.md)<br>- [docs/DATABASE_API_CONTRACT.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/DATABASE_API_CONTRACT.md) | Cấu trúc Expo + Supabase + Zustand, RLS policies, phân lập Pure Functions và Unit Tests. |
-| **Quyền Riêng Tư & Bảo Mật** | - [docs/PRIVACY.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/PRIVACY.md)<br>- [docs/PRIVACY_POLICY_DRAFT.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/PRIVACY_POLICY_DRAFT.md) | **Không lưu số tài khoản người nhận**, làm sạch EXIF ảnh, chế độ làm mờ "Ẩn tiền", telemetry không chứa PII. |
-| **Tab 0: Sổ Nhật Ký (Home)** | - [docs/screens/HOME.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/HOME.md) | Lịch ảnh 7 cột, Rollover 100% ngân sách ngày, chuỗi Streak, PigFly bay lơ lửng trên Greeting Header (0 đè chữ). |
-| **Tab 1: Thống Kê (Stats)** | - [docs/screens/STATS.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/STATS.md) | Cuộn Album ảnh tháng 3:4, Hộp Cảm Xúc PigFly, 3 chỉ số sức khỏe tài chính KPI. |
-| **Tab 2: Camera & Locket Feed** | - [docs/screens/CAMERA.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/CAMERA.md) | Khung ngắm 4:5 bo góc 24px thoáng đãng 100%, nút Shutter 1 chạm nhún xúc giác, chip giá nhanh $\le 3$s, cuộn Locket Stream. |
-| **Tab 3: AI Coach & Squad (Chat)** | - [docs/screens/CHAT.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/CHAT.md) | Persona Anh PT Giữ Ví, Gemini API 2 chiều, Squad Nuôi Heo PigFly thi đua cho heo ăn và vỗ béo. |
-| **Tab 4: Hồ Sơ & Cài Đặt (Profile)** | - [docs/screens/PROFILE.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/PROFILE.md) | Hạn mức ngày `Hôm nay tiêu được` (0 hardcode ly trà sữa), Mục tiêu Thác nước, Cài đặt bảo mật Zero-STK minh bạch. |
+| **Toàn Bộ Dự Án (Core Vision)** | - [docs/PRD_PIGFLY_MASTER.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PRD_PIGFLY_MASTER.md)<br>- [docs/ROADMAP.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/ROADMAP.md)<br>- [docs/PAGES_FEATURES.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PAGES_FEATURES.md) | Mục tiêu sản phẩm PigFly, slogan "Tiết kiệm – Duy trì – Sinh lời bền vững", 5 trụ cột điều hướng, lộ trình chiến lược v4.1. |
+| **Giao Diện, Màu Sắc, Linh Vật** | - [docs/DESIGN.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/DESIGN.md)<br>- [docs/PIGFLY_PROMPT_STUDIO.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PIGFLY_PROMPT_STUDIO.md)<br>- [docs/screens/_TEMPLATE.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/_TEMPLATE.md) | 2 Theme độc bản: "Hồng Heo" (`pink`) và "Xanh Mint" (`mint`) chuẩn WCAG 2.1 AAA/AA, linh vật PigFly Lottie 4 Moods, 100% Vector icons nổi trần `lucide-react-native`. |
+| **Game Hóa PigFly & Squad** | - [docs/features/PIGFLY_GAMIFICATION_SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/features/PIGFLY_GAMIFICATION_SPEC.md) | **Zero FEP Virtual Points (Quyết định 112)**, Động lực Chuỗi Streak (ngày), 5 Tầng Mây Tài Chính, Bàn cờ Cờ Tỷ Phú 16 ô, Squad Nuôi Heo 2.0 & SOS Overspending Alarm. |
+| **Kiến Trúc, CSDL & State Store** | - [docs/TECH_ARCHITECTURE.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/TECH_ARCHITECTURE.md)<br>- [docs/DECISIONS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/DECISIONS.md)<br>- [docs/DATABASE_API_CONTRACT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/DATABASE_API_CONTRACT.md) | Cấu trúc Expo + Supabase + Zustand, RLS policies, phân lập Pure Functions, AI NLP/OCR Pipeline và Unit Tests. |
+| **Quyền Riêng Tư & Bảo Mật** | - [docs/PRIVACY.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PRIVACY.md)<br>- [docs/PRIVACY_POLICY_DRAFT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PRIVACY_POLICY_DRAFT.md) | **Không lưu số tài khoản người nhận**, làm sạch EXIF ảnh, chế độ làm mờ "Ẩn tiền", telemetry không chứa PII. |
+| **Tab 0: Sổ Nhật Ký (Home)** | - [docs/screens/HOME.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/HOME.md) | Lịch ảnh 7 cột, Rollover 100% ngân sách ngày, chuỗi Streak, PigFly Lottie bay lơ lửng trên Greeting Header với 4 trạng thái cảm xúc thời gian thực. |
+| **Tab 1: Thống Kê (Stats)** | - [docs/screens/STATS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/STATS.md) | Cuộn Album ảnh tháng 3:4, Hộp Cảm Xúc PigFly, Báo cáo Tạp chí Anime Magazine 3 KPI (Runway Score, Impulse Ratio, Savings Velocity). |
+| **Tab 2: Camera Quick Hub** | - [docs/screens/CAMERA.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/CAMERA.md) | Khung ngắm 4:5 bo góc 24px thoáng đãng 100%, nút Shutter 1-chạm nhún xúc giác, **Nút Voice-to-Expense 🎤 $\le 2$s**, **AI Receipt OCR Scanner với Carousel Fallback $\le 3$s**, cuộn Locket Stream. |
+| **Tab 3: AI Coach & Squad (Chat)** | - [docs/screens/CHAT.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/CHAT.md) | Persona Anh PT Giữ Ví, Gemini API 2 chiều, Squad Nuôi Heo 2.0 (tối đa 4 bạn thân), Còi SOS Overspending Beacon và Bàn cờ Cờ Tỷ Phú 16 ô. |
+| **Tab 4: Hồ Sơ & Cài Đặt (Profile)** | - [docs/screens/PROFILE.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/PROFILE.md) | Hạn mức ngày `Hôm nay tiêu được` (0 hardcode), Mục tiêu Thác nước, Cài đặt bảo mật Zero-STK minh bạch. |
 | **Quét Mã VietQR (Luồng 1)** | - [docs/features/QR_PAY.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/features/QR_PAY.md)<br>- [docs/qr/BANK_DEEPLINK_MATRIX.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/qr/BANK_DEEPLINK_MATRIX.md)<br>- [docs/qr/EMV_PARSER_SPEC.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/qr/EMV_PARSER_SPEC.md) | Nhận diện mã VietQR offline, phân luồng Autofill (MB, ICB, BIDV, ACB, OCB), deeplink v2, hỏi "Đã chuyển xong chưa?". |
-| **Hộp Xác Nhận & Tải Ảnh (Luồng 2)** | - [docs/features/CONFIRMATION_INBOX_SPEC.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/features/CONFIRMATION_INBOX_SPEC.md)<br>- [docs/features/RECEIPT_UPLOAD.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/features/RECEIPT_UPLOAD.md) | **0 OCR / 0 AI đọc ảnh**, nhập tay $\le 5$s, chip giá kết hợp, lưu giữ QR $>24$h trong "Chưa xác nhận", Screenshot 7 ngày, hoàn tác 5s. |
+| **AI Receipt OCR & Voice (Luồng 2)** | - [docs/features/RECEIPT_UPLOAD.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/features/RECEIPT_UPLOAD.md)<br>- [docs/features/CONFIRMATION_INBOX_SPEC.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/features/CONFIRMATION_INBOX_SPEC.md) | AI OCR tự động trích xuất hóa đơn sau khi chụp $\le 1$s, xuất Top 3 Carousel Fallback Selector trên bàn phím `MandCashierKeyboard`, nhập giọng nói $\le 2$s qua `voiceExpenseParser`. |
 
 ---
 
@@ -86,14 +86,14 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
 
 ## 🎨 QUY CHUẨN THIẾT KẾ & THẨM MỸ (AESTHETIC RULES)
 
-1. **Bảng màu Hà Nội Thu Đông & Độ tương phản WCAG 2.1:**
+1. **Hệ Thống 2 Theme Độc Bản (Hồng Heo & Xanh Mint) & WCAG 2.1:**
    - CẤM dùng màu mặc định cẩu thả (`#FF0000`, `#00FF00`, `#0000FF`).
-   - Mọi component bắt buộc dùng token màu từ `src/constants/colors.ts`:
-     - Nền sáng: `#FAF6EC` / `#FAF6F0` (Sữa Ngà Bơ)
-     - Nền tối / Camera: `#0E1620` / `#161816` (Khói Trầm Đêm Đông)
-     - Nút hành động / Accent: `#E59844` (Nắng Thu Hà Nội — tương phản 8.2:1 trên nền tối)
-     - Trạng thái An toàn / Thu nhập: `#7E9F80` (Cốm Non Làng Vòng)
-     - Trạng thái Chi / Cảnh báo: `#C86D51` (Ngói Rêu Phố Cổ — tương phản 4.8:1 trên nền sáng)
+   - Mọi component bắt buộc dùng token màu từ `src/theme/tokens.ts`:
+     - **Theme Hồng Heo (`pink` - Mặc định):** Tông hồng pastel ngọt ngào ấm cúng, tương phản WCAG AAA/AA cao.
+     - **Theme Xanh Mint (`mint`):** Tông xanh ngọc bạc hà tươi mát, gradient dịu nhẹ thư thái.
+     - Nút hành động / Accent: Nắng Thu Hà Nội `#E59844` (tương phản 8.2:1 trên nền tối).
+     - Trạng thái An toàn / Thu nhập: Cốm Non Làng Vòng `#7E9F80`.
+     - Trạng thái Chi / Cảnh báo: Ngói Rêu Phố Cổ `#C86D51` (tương phản 4.8:1 trên nền sáng).
 2. **Kiểu chữ có hồn & Con số chuẩn xác (Typography):**
    - Tiêu đề & Cảm xúc: **Be Vietnam Pro** mang chất thơ Hà Nội.
    - Con số tài chính: Bắt buộc dùng `fontVariant: ['tabular-nums']` để số không bị giật khi đếm.
@@ -103,8 +103,8 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
    - **Tô đậm nét (Bold Stroke):** Luôn dùng `strokeWidth: 2.4 - 2.8` với kích thước 18-22px để icon nổi bật, sắc nét và có độ tương phản cao.
    - Kích thước vùng chạm (Touch area) tối thiểu $\ge 44 \times 44$px thông qua `hitSlop`.
 4. **Tương tác Xúc giác & Chuyển động (Haptics & Spring Animations):**
-   - Mọi thao tác quan trọng (Bấm Shutter, Nhập chip giá, Chọn Cứu Ví, Lưu Sổ, Tải Ảnh) đều phải có Haptic Feedback tương ứng (`expo-haptics`).
-   - Dùng `react-native-reanimated` với Spring easing tự nhiên cho Bottom Sheet và Card.
+   - Mọi thao tác quan trọng (Bấm Shutter, Nhập chip giá, Chọn Cứu Ví, Lưu Sổ, Nói Voice) đều phải có Haptic Feedback tương ứng (`expo-haptics`).
+   - Dùng `react-native-reanimated` hoặc React Native Spring physics cho Bottom Sheet, Card và Chú Heo PigFly Lottie.
 
 ---
 
@@ -113,7 +113,7 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
 1. **TypeScript Nghiêm Ngặt:**
    - Bật `strict: true`. Tuyệt đối không dùng `any` tùy tiện; luôn định nghĩa interface/type rõ ràng trong `src/types/`.
 2. **Cấu trúc State (Zustand) & Phân Lập Khoản Chờ:**
-   - Chia tách store mạch lạc: `authStore`, `budgetStore`, `transactionStore`, `waitBasketStore`.
+   - Chia tách store mạch lạc: `authStore`, `budgetStore`, `transactionStore`, `waitBasketStore`, `gamificationStore`, `squadStore`.
    - Các khoản `PENDING` tuyệt đối không được tính vào tổng chi tiêu hay số dư cho đến khi người dùng xác nhận `CONFIRMED`.
 3. **Bảo Mật Quyền Riêng Tư (Không lưu STK):**
    - **Tuyệt đối không lưu số tài khoản người nhận** vào CSDL, SQLite, AsyncStorage hay logs.

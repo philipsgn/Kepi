@@ -359,30 +359,38 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
   - `books_education` $\to$ `Học tập`
 - **Tốc độ:** Phân loại $< 150$ms trên CPU điện thoại, 0 byte gửi ra Internet.
 
-### 11.4. Gamification Store & Rules Engine (ActiDoo Inspired)
-- **`gamificationStore.ts`:**
-  - Quản lý FEP (Fly Energy Points), Chuỗi Streak, 5 Tầng Mây Tài Chính, Vị trí Cờ Tỷ Phú, Cảm xúc Mascot và Kho Skin.
+### 11.4. Gamification Store & Pure Rules Engine (Zero-FEP Policy)
 - **`rulesEngine.ts` (Pure Functions):**
+  - Tuân thủ nghiêm ngặt **Quyết định 112**: Khai tử hoàn toàn điểm FEP ảo (Zero Virtual Points Policy).
+  - Động lực cốt lõi quy tụ vào **Chuỗi ngày kỷ luật (Streak Days)** và **Tâm trạng thực tế của chú heo PigFly Lottie**.
+  - 5 Tầng Mây Tài Chính tính trực tiếp theo chuỗi ngày: Tầng 1 (0 ngày), Tầng 2 (7 ngày), Tầng 3 (21 ngày), Tầng 4 (45 ngày), Tầng 5 (90 ngày).
   - Đánh giá các biến ngữ cảnh (`todaySpent`, `todayBudget`, `streakDays`, `photosCount`) sau mỗi giao dịch `CONFIRMED` hoặc sự kiện Rollover 00:00.
-  - Tự động cộng FEP, cập nhật tầng mây, và kích hoạt thành tựu đa cấp độ (Bronze $\to$ Silver $\to$ Gold).
+- **`gamificationStore.ts`:**
+  - Quản lý Chuỗi Streak, 5 Tầng Mây Tài Chính, Vị trí Cờ Tỷ Phú và Cảm xúc Mascot thời gian thực.
 
 ### 11.5. Động Cơ Mini-Game "Cờ Tỷ Phú Đầu Tư Tài Chính"
-- **Kiến trúc bàn cờ 16 ô (`monopolyBoardEngine.ts`):**
+- **Kiến trúc bàn cờ 16 ô (`monopolyBoardEngine.ts` & `FinancialMonopolyModal.tsx`):**
   - Xúc xắc ngẫu nhiên 1..6 bước với hoạt họa xúc xắc Pop-Anime 60fps.
-  - Ô sự kiện: Ô Khởi Hành (`+50 FEP`), Ô Bẫy FOMO (Lựa chọn Cứu Ví), Ô Đầu Tư Tích Lũy, Ô Cơ Hội (Rút thẻ may mắn), Ô Cổ Tức.
+  - Ô sự kiện: Ô Khởi Hành, Ô Bẫy FOMO (Lựa chọn Cứu Ví), Ô Đầu Tư Tích Lũy, Ô Cơ Hội (Rút thẻ may mắn), Ô Cổ Tức.
+  - Đặt độc quyền trong **Tab 3 (Squad Room)** phục vụ hoạt động sinh hoạt nhóm bạn thân.
   - Đồng bộ tiến độ bàn cờ vào `AsyncStorage` (`@pigfly_monopoly_v1`).
 
 ### 11.6. Giao Thức Squad 2.0 & SOS Overspending Beacon
 - **Ràng buộc quy mô:** $2 \le \text{Members} \le 4$.
-- **Cơ chế SOS:** Khi một thành viên chi tiêu vượt hạn mức ngày:
+- **Cơ chế SOS:** Khi một thành viên chi tiêu vượt hạn mức ngày (`todaySpent > todayBudget && todayBudget > 0`):
   1. Mascot chuyển sang mood `PANIC`.
-  2. Gửi sự kiện SOS Beacon vào kênh chat Squad.
-  3. Màn hình của 3 bạn thân hiển thị cảnh báo nhấp nháy kèm 2 nút tương tác: [🛡️ Thả Meme Khuyên Can] và [☕ Động Viên].
-  4. Bảng xếp hạng tuần (Squad Leaderboard) dựa trên FEP và Tỷ lệ tiết kiệm thực tế.
+  2. Tự động kích hoạt SOS Overspending Beacon vào kênh chat Squad qua `squadStore.triggerOverspendingSos()`.
+  3. Màn hình của bạn thân hiển thị băng rôn báo động nhấp nháy kèm 2 nút tương tác: [🛡️ Thả Meme Khuyên Can] và [☕ Động Viên].
+  4. Bảng xếp hạng tuần (Squad Leaderboard) dựa trên Chuỗi ngày Streak và Tỷ lệ tiết kiệm thực tế.
 
-### 11.7. Hệ Thống Mascot Lottie Animation
-- Quản lý 4 trạng thái cảm xúc: `FLYING_HIGH`, `CHILL`, `PANIC`, `STARVING`.
-- Chuyển đổi trạng thái mượt mà thông qua `lottie-react-native` với asset vector tối ưu $\le 30$KB.
+### 11.7. Hệ Thống Mascot Lottie Animation & Anime Magazine Report
+- **`PigFlyLottieMascot.tsx`:** Quản lý 4 trạng thái cảm xúc (`FLYING_HIGH`, `CHILL`, `PANIC`, `STARVING`) với spring physics nhún nảy khi chạm.
+- **`AnimeMagazineReportSheet.tsx` (Tab 1 Stats):**
+  - Trực quan hóa tài chính dạng tạp chí truyện tranh Anime Pop-Art.
+  - Bộ 3 chỉ số KPI mới:
+    1. *Runway Score:* Số ngày dòng tiền trụ được với tốc độ chi tiêu hiện tại.
+    2. *Impulse Ratio:* Tỷ lệ chi tiêu bốc đồng.
+    3. *Savings Velocity:* Tốc độ tích lũy thực tế hàng ngày.
 
 ### 11.8. Cấu Hình Android Native AppWidget
 - Plugin Expo `./plugins/withAppWidget.js` tự động cấu hình `AppWidgetProvider` trong `AndroidManifest.xml`.

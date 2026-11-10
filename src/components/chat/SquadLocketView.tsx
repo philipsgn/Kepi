@@ -324,7 +324,7 @@ export const SquadLocketView: React.FC = () => {
           onPress={() => setShowMonopolyModal(true)}
         >
           <Dices size={18} color="#FFFFFF" strokeWidth={2.4} />
-          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>Cờ Tỷ Phú Đầu Tư Tài Chính (Nhận FEP) 🎲</Text>
+          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>Cờ Tỷ Phú Đầu Tư Tài Chính 🎲</Text>
         </TouchableOpacity>
 
         {/* 2. HÀNG AVATAR HỘI BẠN & TRẠNG THÁI HEO */}

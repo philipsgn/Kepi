@@ -29,6 +29,7 @@ import { MonthDetailBottomSheet } from '../stats/MonthDetailBottomSheet';
 import { DayDetailBottomSheet } from '../journal/DayDetailBottomSheet';
 import { AnalyticsDashboardView } from '../stats/AnalyticsDashboardView';
 import { AnimeMagazineReportSheet } from '../stats/AnimeMagazineReportSheet';
+import { getDaysRemainingInMonth } from '../../utils/calendarUtils';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { useBottomInset } from '../../hooks/useBottomInset';
@@ -690,6 +691,26 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
           </View>
         </View>
       </Modal>
+      {/* 8. BÁO CÁO TẠP CHÍ ANIME MAGAZINE (3 KPI THẾ HỆ MỚI) */}
+      <AnimeMagazineReportSheet
+        visible={showMagazine}
+        onClose={() => setShowMagazine(false)}
+        monthlyIncome={displayAnalyticsSummary?.totalIncome || 15000000}
+        monthlySpent={displayAnalyticsSummary?.totalSpent || 0}
+        remainingDays={getDaysRemainingInMonth()}
+        savingsRate={
+          displayAnalyticsSummary && displayAnalyticsSummary.totalIncome > 0
+            ? Math.max(
+                0,
+                Math.round(
+                  ((displayAnalyticsSummary.totalIncome - displayAnalyticsSummary.totalSpent) /
+                    displayAnalyticsSummary.totalIncome) *
+                    100
+                )
+              )
+            : 0
+        }
+      />
     </View>
   );
 };

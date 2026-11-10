@@ -105,7 +105,7 @@ export const FinancialMonopolyModal: React.FC<FinancialMonopolyModalProps> = ({
             <View style={styles.titleGroup}>
               <Text style={[styles.gameTitle, { color: tokens.text }]}>CỜ TỶ PHÚ TÀI CHÍNH</Text>
               <Text style={[styles.gameSubtitle, { color: tokens.textMuted }]}>
-                Né bẫy FOMO • Tích lũy FEP bay cao
+                Né bẫy FOMO • Rèn luyện kỷ luật
               </Text>
             </View>
             <TouchableOpacity
@@ -122,7 +122,7 @@ export const FinancialMonopolyModal: React.FC<FinancialMonopolyModalProps> = ({
             <View style={styles.statItem}>
               <Sparkles size={16} color={tokens.primary} strokeWidth={2.4} />
               <Text style={[styles.statText, { color: tokens.text }]}>
-                {fepPoints.toLocaleString('vi-VN')} FEP
+                Ô {monopolyPosition + 1}/16
               </Text>
             </View>
             <View style={styles.statItem}>

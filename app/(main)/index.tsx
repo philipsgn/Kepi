@@ -22,6 +22,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import {
+  Mic,
   Bell,
   BookOpen,
   Calendar,
@@ -95,6 +96,8 @@ import { ConfirmationPillBanner, ConfirmationInboxModal, UploadReceiptModal } fr
 import { OnCameraPhotoOverlay } from '../../src/components/camera/OnCameraPhotoOverlay';
 import { BankNotificationFloatingPill } from '../../src/components/camera/BankNotificationFloatingPill';
 import { BankNotificationSettingsModal } from '../../src/components/profile/BankNotificationSettingsModal';
+import { CompactVoiceWaveSheet } from '../../src/components/camera/CompactVoiceWaveSheet';
+import { ParsedVoiceExpense } from '../../src/utils/ai/voiceExpenseParser';
 import { bankNotificationService } from '../../src/services/bankNotificationService';
 import { useVietQRScanner } from '../../src/hooks/useVietQRScanner';
 import { useConfirmationInbox } from '../../src/hooks/useConfirmationInbox';
@@ -104,6 +107,7 @@ import { useAuthStore } from '../../src/store/authStore';
 import { useBudgetStore } from '../../src/store/budgetStore';
 import { useWaitBasketStore } from '../../src/store/waitBasketStore';
 import { useTransactionStore } from '../../src/store/transactionStore';
+import { useSquadStore } from '../../src/store/squadStore';
 import { useAppPermissions } from '../../src/hooks/useCameraPermissions';
 import { ParsedExpenseData } from '../../src/services/gemini';
 import { scheduleAggressiveReminders, setupNotificationChannels, scheduleDailyExpenseReminder } from '../../src/services/notifications';
@@ -263,6 +267,7 @@ export default function MainAppScreen() {
   const [showUploadReceiptModal, setShowUploadReceiptModal] = useState<boolean>(false);
   const [uploadPhotoUri, setUploadPhotoUri] = useState<string | null>(null);
   const [showBankSettingsFromCamera, setShowBankSettingsFromCamera] = useState<boolean>(false);
+  const [showVoiceSheet, setShowVoiceSheet] = useState<boolean>(false);
 
   // Locket Bank Snapshot & Fast Log State (Decision 69)
   const [activeBankSnapshotEvent, setActiveBankSnapshotEvent] = useState<ParsedBankNotification | null>(null);
@@ -637,6 +642,52 @@ export default function MainAppScreen() {
     setFastLogBankEvent(detected);
   };
 
+  
+  
+  const checkAndTriggerOverspendingSos = (additionalSpent: number) => {
+    try {
+      const budgetState = useBudgetStore.getState();
+      const currentSpent = budgetState.todaySpent + additionalSpent;
+      const currentBudget = budgetState.todayBudget;
+      if (currentBudget > 0 && currentSpent > currentBudget) {
+        const squadState = useSquadStore.getState();
+        if (squadState.squad) {
+          const memberName = profile?.full_name || user?.full_name || 'Tôi';
+          const memberId = user?.id || 'my-user';
+          squadState.triggerOverspendingSos(memberId, memberName, currentSpent, currentBudget);
+        }
+      }
+    } catch (e) {
+      console.log('[SquadSOS] Auto trigger checked:', e);
+    }
+  };
+
+  const handleVoiceConfirmExpense = async (parsed: ParsedVoiceExpense) => {
+    try {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      const userId = user?.id || 'demo-user';
+      const tx = await addTransaction({
+        userId,
+        amount: parsed.amount,
+        type: 'EXPENSE',
+        category: parsed.category,
+        description: parsed.description || parsed.category,
+        payment_method: 'CASH',
+        source: 'VOICE',
+        photo_url: null,
+        status: 'CONFIRMED',
+      });
+      setLastSavedOrDeletedTx({ action: 'ADD', tx });
+      checkAndTriggerOverspendingSos(parsed.amount);
+      setUndoToastMessage(`Đã ghi giọng nói: ${formatVND(parsed.amount)} (${parsed.category})`);
+      setUndoToastVisible(true);
+      setShowVoiceSheet(false);
+      handleTabPress(0);
+    } catch (e) {
+      console.warn('Voice save failed:', e);
+    }
+  };
+
   const handleSaveInFramePhoto = async () => {
     // 1. Bắt buộc người dùng phải chọn danh mục
     if (!inFrameCategory) {
@@ -693,6 +744,9 @@ export default function MainAppScreen() {
       bankNotificationService.attachPhotoToLatestTransaction(capturedPhotoUri).catch(() => {});
     }
 
+    if (inFrameType === 'EXPENSE') {
+      checkAndTriggerOverspendingSos(finalAmount);
+    }
     setActiveBankSnapshotEvent(null);
     setLastSavedOrDeletedTx({ action: 'ADD', tx });
     setUndoToastMessage(`Đã lưu khoảnh khắc: ${formatVND(finalAmount)}`);
@@ -1364,6 +1418,24 @@ export default function MainAppScreen() {
                       onCapturePhoto={handleCapturePhoto}
                     />
 
+                    {/* Satellite Voice-to-Expense Button 🎤 */}
+                    <TouchableOpacity
+                      style={[
+                        styles.bottomToolButton,
+                        {
+                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.45)' },
+                      ]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        setShowVoiceSheet(true);
+                      }}
+                      activeOpacity={0.8}
+                      accessibilityLabel="Nhập liệu bằng giọng nói"
+                    >
+                      <Mic size={20} color="#E59844" strokeWidth={2.4} />
+                    </TouchableOpacity>
+
+
                     {/* Right: Flip Camera Button */}
                     <TouchableOpacity
                       style={[
@@ -1560,6 +1632,13 @@ export default function MainAppScreen() {
       <BankNotificationSettingsModal
         visible={showBankSettingsFromCamera}
         onClose={() => setShowBankSettingsFromCamera(false)}
+      />
+
+      {/* MODAL NHẬP LIỆU GIỌNG NÓI POP-ANIME */}
+      <CompactVoiceWaveSheet
+        visible={showVoiceSheet}
+        onClose={() => setShowVoiceSheet(false)}
+        onConfirmExpense={handleVoiceConfirmExpense}
       />
 
     </View>

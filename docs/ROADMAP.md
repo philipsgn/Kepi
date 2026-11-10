@@ -32,37 +32,37 @@
 
 ---
 
-## 🎯 CÁC CHẶNG CHIẾN LƯỢC TIẾP THEO (v4.0 WORKFLOW)
+## 🎯 CÁC CHẶNG CHIẾN LƯỢC TIẾP THEO (v4.1 WORKFLOW)
 
-### 📌 GIAI ĐOẠN 1: PIGFLY v4.0 — AI-FIRST & GAMIFICATION ENGINE (ĐANG TRIỂN KHAI)
-*Trọng tâm: Song song 2 luồng phát triển AI (OCR, Voice, Vision) và Gamification (ActiDoo Engine, Cờ Tỷ Phú, SOS Alarm).*
+### 📌 GIAI ĐOẠN 1: PIGFLY v4.1 — AI-FIRST & GAMIFICATION ENGINE (HOÀN TẤT 100%)
+*Trọng tâm: Song song 2 luồng phát triển AI (OCR, Voice, Vision) và Gamification (ActiDoo Pure Rules, Cờ Tỷ Phú, Mascot Lottie Moods).*
 
-- [/] **1.1. Luồng AI-First (Dual-Scan, Voice & Vision):**
-  - [ ] AI Receipt OCR Parser: Nhận diện hóa đơn retail Việt Nam, bóc tách đơn vị bán, danh sách món, tổng tiền.
-  - [ ] Carousel Fallback UI: Cho phép chọn nhanh hoặc sửa tay các số tiền ứng viên trong $\le 3$s.
-  - [ ] Voice-to-Expense NLP Parser: Bóc tách tiếng Việt tự nhiên ("Ăn bún bò 50 cành") $\to$ tiền, danh mục, icon.
-  - [ ] On-Device Vision Tagging: Phân loại hình ảnh ngoại tuyến 100% (đồ ăn, mua sắm, di chuyển).
-- [/] **1.2. Luồng Gamification Engine (ActiDoo Inspired):**
-  - [ ] `gamificationStore.ts`: Quản lý FEP, 5 Tầng Mây, Mascot Mood, Kho Skin và Chuỗi Streak.
-  - [ ] `rulesEngine.ts`: Đánh giá điều kiện rules, mở khóa thành tựu đa cấp độ (Bronze/Silver/Gold).
-  - [ ] Mini-Game "Cờ Tỷ Phú Đầu Tư Tài Chính": Bàn cờ 16 ô thử thách tài chính (Né bẫy FOMO, Đầu tư tích lũy, Flashcards).
-  - [ ] Mascot Lottie Animation: 4 trạng thái cảm xúc (`FLYING_HIGH`, `CHILL`, `PANIC`, `STARVING`).
-- [/] **1.3. Luồng Squad 2.0 & Trực Quan Hóa Báo Cáo:**
-  - [ ] Feed nội bộ thời gian thực hiển thị ảnh chi tiêu của nhóm 4 bạn thân.
-  - [ ] SOS Overspending Alarm Protocol: Phát tín hiệu cầu cứu sang bạn bè khi chi tiêu vượt hạn mức ngày.
-  - [ ] Bảng xếp hạng tuần (Squad Leaderboard) thi đua FEP và tỷ lệ tiết kiệm.
-  - [ ] Báo cáo Magazine / Story Anime trong Tab Thống Kê (Runway Score, Impulse Ratio, Savings Velocity).
-  - [ ] Android Native AppWidget ghim số dư và linh vật ra màn hình chính.
+- [x] **1.1. Luồng AI-First (Dual-Scan, Voice & Vision) — Hoàn tất 100%:**
+  - [x] AI Receipt OCR Parser: Nhận diện hóa đơn retail Việt Nam, bóc tách đơn vị bán, danh sách món, tổng tiền (`src/utils/ai/receiptOcrParser.ts`).
+  - [x] Carousel Fallback UI: Cho phép chọn nhanh hoặc sửa tay các số tiền ứng viên trong $\le 3$s trên `LocketReviewModal.tsx`.
+  - [x] Voice-to-Expense NLP Parser: Bóc tách tiếng Việt tự nhiên ("Ăn bún bò 50 cành") $\to$ tiền, danh mục, icon (`src/utils/ai/voiceExpenseParser.ts` & `CompactVoiceWaveSheet.tsx`).
+  - [x] On-Device Vision Tagging: Phân loại hình ảnh ngoại tuyến 100% (`src/utils/ai/visionClassifier.ts`).
+- [x] **1.2. Luồng Gamification Engine (Chuỗi Streak & Mascot Loop — Zero Virtual Points) — Hoàn tất 100%:**
+  - [x] `gamificationStore.ts` & `rulesEngine.ts`: Quản lý 5 Tầng Mây theo Streak, Mascot Mood, Quyết định 112 (Bỏ hoàn toàn FEP ảo).
+  - [x] Mini-Game "Cờ Tỷ Phú Đầu Tư Tài Chính": Bàn cờ 16 ô thử thách tài chính (`monopolyBoardEngine.ts`, `FinancialMonopolyModal.tsx`).
+  - [x] Mascot Lottie Animation: 4 trạng thái cảm xúc (`FLYING_HIGH`, `CHILL`, `PANIC`, `STARVING`) trên Greeting Header Home (`PigFlyLottieMascot.tsx`).
+  - [x] Android Native AppWidget Config Plugin (`plugins/withAppWidget.js`).
 
 ---
 
-### 📌 GIAI ĐOẠN 2: SUPABASE CLOUD PRODUCTION & ĐỒNG BỘ ĐA THIẾT BỊ
-*Trọng tâm: Khởi tạo hạ tầng Cloud an toàn tuyệt đối, đồng bộ dữ liệu thời gian thực.*
+### 📌 GIAI ĐOẠN 2: SQUAD 2.0, ANIME MAGAZINE REPORT & CLOUD SYNC (ĐANG TRIỂN KHAI)
+*Trọng tâm: Trải nghiệm chia sẻ nhóm bạn thân, báo cáo tài chính tạp chí Anime và đồng bộ đám mây Supabase.*
 
-- [ ] **2.1. Cấu Hình Supabase Production:**
+- [/] **2.1. Phân Hệ Trực Quan Hóa Báo Cáo Anime & Squad 2.0 (Phase 2A):**
+  - [/] Báo cáo Magazine Anime trong Tab Thống Kê (`AnimeMagazineReportSheet.tsx` hiển thị 3 KPI mới: Runway Score, Impulse Ratio, Savings Velocity).
+  - [/] Đặt lối tắt mở Bàn cờ Cờ Tỷ Phú độc quyền trong Tab 3 (Squad Room) phục vụ sinh hoạt nhóm bạn thân.
+  - [/] SOS Overspending Alarm Protocol: Tự động kích hoạt còi cảnh báo cứu ví trong Squad Room khi người dùng chi tiêu vượt hạn mức ngày.
+  - [x] Bảng xếp hạng tuần (Squad Leaderboard) thi đua tỷ lệ tiết kiệm và chuỗi ngày kỷ luật.
+- [ ] **2.2. Supabase Cloud Production & Đa Thiết Bị (Phase 2B):**
   - [ ] Chạy bộ migration hoàn chỉnh (`001` $\rightarrow$ `006_nickname_and_age_survey.sql`).
   - [ ] Cấu hình Row Level Security (RLS) cách ly dữ liệu nhiều người dùng.
-- [ ] **2.2. Google Sign-In Native:**
+  - [ ] Google Sign-In Native: Cấu hình OAuth Client IDs (Web, Android SHA-1, iOS URL Scheme).
+  - [ ] Nén ảnh WebP dual-resolution tự động trước khi upload Supabase Storage và đồng bộ Realtime 2 chiều.
   - [ ] Cấu hình Google Cloud Console OAuth Client IDs (Web, Android SHA-1, iOS URL Scheme).
   - [ ] Luồng đăng nhập 1 chạm an toàn, hỗ trợ chuyển đổi từ tài khoản Khách (Guest) sang Google giữ nguyên toàn bộ dữ liệu.
 - [ ] **2.3. Lưu Trữ Hình Ảnh Đám Mây Đa Tầng:**

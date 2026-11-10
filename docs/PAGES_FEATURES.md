@@ -1,8 +1,8 @@
 # 📱 TÍNH NĂNG TỪNG TRANG: PIGFLY (PAGES_FEATURES.MD)
 
 > **Dự án:** PigFly (Ví Locket) — Mobile App Chi Tiêu Bằng Ảnh & Quét Mã QR  
-> **Phiên bản:** NEW v3.0 (Đã loại bỏ hoàn toàn tính năng Voice, tối ưu tốc độ ghi chép $\le 3$s, linh vật PigFly và bảo mật Zero-STK)  
-> **Phong cách thiết kế:** Hà Nội Thu Đông, 100% Vector Icons nổi trần `lucide-react-native` (`strokeWidth: 2.6`, không viền bo hộp), font số `tabular-nums`.
+> **Phiên bản:** NEW v4.1 (AI-First Dual-Scan, Voice NLP, Zero FEP Points & Pop-Anime Gamification)  
+> **Phong cách thiết kế:** 2 Theme độc bản: "Hồng Heo" (`pink`) và "Xanh Mint" (`mint`) chuẩn WCAG 2.1 AAA/AA, 100% Vector Icons nổi trần `lucide-react-native` (`strokeWidth: 2.6`, không viền bo hộp), font số `tabular-nums`.
 
 ---
 
@@ -94,6 +94,14 @@ Ghi một khoản chi tiêu bằng ảnh **trong $\le 3$ giây**, hoặc quét m
 ---
 
 ## 💬 4. TAB 3: CỐ VẤN & SQUAD ROOM (CHAT)
+
+### 4.0. Tính Năng Gamification Độc Quyền Trong Squad Room
+1. **Bàn Cờ Cờ Tỷ Phú Tài Chính (Financial Monopoly):**
+   - Đặt độc quyền trong phòng Squad để nhóm bạn cùng sinh hoạt tài chính lành mạnh.
+   - Bàn cờ 16 ô thử thách: Né bẫy FOMO (Lựa chọn Cứu Ví), Đầu tư tích lũy, Rút thẻ cơ hội may mắn.
+2. **Còi Báo Động Cứu Ví SOS (Overspending Beacon):**
+   - Tự động kích hoạt khi có thành viên chi tiêu vượt hạn mức ngày (`todaySpent > todayBudget`).
+   - Bạn bè trong phòng nhận cảnh báo nhấp nháy kèm 2 nút tương tác tức thì: `[🛡️ Thả Meme Khuyên Can]` hoặc `[☕ Động Viên]`.
 
 *Chi tiết quy chuẩn giao diện xem tại [docs/screens/CHAT.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/CHAT.md).*
 
