@@ -593,3 +593,6 @@
 
   - **Quyết định 112 (09/11/2026): Tối Giản Gamification — Loại Bỏ Điểm FEP Ảo, Tập Trung Vào Chuỗi Streak & Tâm Trạng Chú Heo PigFly Lottie:**
     - *Bối Cảnh & Bản Chất:* Người dùng đánh giá việc tích lũy điểm năng lượng FEP ảo không mang lại giá trị thiết thực và gây rối mắt. Dự án quyết định khai tử hoàn toàn hệ thống điểm số FEP ảo (Zero Virtual Points Policy). Toàn bộ động lực gắn kết người dùng được quy tụ vào 2 trụ cột trực quan, minh bạch và gần gũi nhất: **Chuỗi ngày kỷ luật (Streak Days)** (tương tự Locket/Duolingo) và **Trạng thái cảm xúc thực tế của chú heo PigFly** (4 mood: `FLYING_HIGH`, `CHILL`, `PANIC`, `STARVING`) cùng các tầng mây chinh phục tính theo chuỗi ngày liên tiếp.
+
+  - **Quyết định 113 (10/11/2026): Khai Tử Supabase Cloud & Google Sign-In — Kiến Trúc Thuần Local-First (100% Offline-First):**
+    - *Bối Cảnh & Bản Chất:* Người dùng ưu tiên tối đa quyền riêng tư và trải nghiệm mượt mà không phụ thuộc hạ tầng mạng bên thứ ba. Dự án loại bỏ hoàn toàn các phụ thuộc Supabase và Google OAuth, chuyển sang kiến trúc Thuần Local-First: mọi dữ liệu lưu trữ 100% cục bộ trên thiết bị (`AsyncStorage`/SQLite), đăng nhập bằng biệt danh tại chỗ, sao lưu/phục hồi thủ công. Hệ thống đạt trạng thái 0-delay (phản hồi 0ms), 0 chi phí duy trì backend và bảo mật tuyệt đối.

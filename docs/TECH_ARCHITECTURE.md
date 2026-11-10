@@ -22,13 +22,7 @@ Ví Locket v3.1 xây dựng kiến trúc Mobile tối ưu hóa với **AI Coach 
           │                                                  │
           ▼ REST / Storage Upload                            ▼ Edge AI
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        BACKEND: SUPABASE CLOUD                         │
-│                                                                        │
-│  [ Supabase Storage ]      [ PostgreSQL Database ]       [ Gemini AI ] │
-│   - item-photos Bucket      - transactions, profiles      - Gemini Flash│
-│   - LRU 30-day Cache        - personal_goals, habits      - Chat PT &   │
-│                                                           Tiện ích/Trend│
-└────────────────────────────────────────────────────────────────────────┘
+
 ```
 
 ---

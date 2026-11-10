@@ -1,5 +1,5 @@
 import { File, Directory, Paths } from 'expo-file-system';
-import { supabase } from './supabase';
+
 import { optimizeExpensePhoto } from './imageOptimizer';
 
 export interface UploadPhotoResult {

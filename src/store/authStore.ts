@@ -91,7 +91,7 @@ interface AuthState {
   signInWithEmail: (email: string) => Promise<{ success: boolean; error?: string }>;
   verifyEmailOtp: (token: string) => Promise<{ success: boolean; error?: string }>;
   resetOtpState: () => void;
-  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+
   signInWithNickname: (nickname: string, birthYear?: number | null) => Promise<{ success: boolean; error?: string }>;
   checkNicknameAvailable: (nickname: string) => Promise<boolean>;
   continueAsGuest: () => Promise<void>;
@@ -181,9 +181,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ otpSent: false, otpEmail: '', error: null });
   },
 
-  signInWithGoogle: async () => {
-    return { success: false, error: 'Ứng dụng hoạt động 100% ngoại tuyến trên thiết bị.' };
-  },
+
 
   /**
    * KIỂM TRA BIỆT DANH KHẢ DỤNG 100% LOCAL (0ms phản hồi)
