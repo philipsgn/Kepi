@@ -1,7 +1,7 @@
 # QUY TẮC & QUY TRÌNH DÀNH CHO AI AGENT (AGENTS.MD)
 
 > **Dự án:** PigFly (Ví Locket) — Mobile App Chi Tiêu Bằng Ảnh, Quét Mã QR & AI-First Gamification  
-> **Phiên bản tài liệu:** NEW v4.1 (AI-First Dual-Scan, Voice NLP, Zero FEP Points & Pop-Anime Gamification)  
+> **Phiên bản tài liệu:** NEW v4.3 (Offline-First Rock-Solid Persistence, Zero FEP Points & Cloud-Ready Architecture)  
 > **Áp dụng cho:** Tất cả các AI Agent tham gia lập trình và phát triển dự án.
 
 ---
@@ -119,6 +119,10 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
    - **Tuyệt đối không lưu số tài khoản người nhận** vào CSDL, SQLite, AsyncStorage hay logs.
    - Luôn làm sạch siêu dữ liệu EXIF trước khi lưu ảnh vào bộ nhớ máy.
    - Dữ liệu sự kiện phân tích (Telemetry) phải được làm sạch qua hàm `sanitize` (không chứa PII, số tiền, tên nơi nhận).
+4. **Ưu Tiên Tuyệt Đối Offline-First & Bảo Toàn Ảnh Bền Vững (Quyết định 114):**
+   - **Triết lý ngoại tuyến:** Mọi tính năng cốt lõi (Chụp ảnh, Ghi sổ, Quét hóa đơn OCR, Voice NLP, Cờ Tỷ Phú, Stats Báo cáo) BẮT BUỘC hoạt động trơn tru 100% ngoại tuyến khi ra đường không có mạng 4G/Wifi.
+   - **Lưu trữ ảnh vĩnh viễn:** Toàn bộ ảnh chụp và biên lai bắt buộc nén WebP dual-res (~50KB) và lưu vào `FileSystem.documentDirectory + 'pigfly_photos/'`, tuyệt đối không để ở `cacheDirectory` để tránh bị hệ điều hành xóa khi đầy bộ nhớ.
+   - **Tầng Cloud sẵn sàng (Cloud-Ready):** Tầng Cloud (Supabase PostgreSQL + Storage + RLS) chỉ được tích hợp như một lớp Adapter mở rộng sau khi tầng Offline-First đã chạy ổn định 100%.
 
 ---
 

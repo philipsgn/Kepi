@@ -50,36 +50,49 @@
 
 ---
 
-### 📌 GIAI ĐOẠN 2: SQUAD 2.0, ANIME MAGAZINE REPORT & CLOUD SYNC (ĐANG TRIỂN KHAI)
-*Trọng tâm: Trải nghiệm chia sẻ nhóm bạn thân, báo cáo tài chính tạp chí Anime và đồng bộ đám mây Supabase.*
+### 📌 GIAI ĐOẠN 2 (MILESTONE M3): OFFLINE-FIRST ROCK-SOLID ENGINE (TRỌNG TÂM SỐ 1 - ĐANG TRIỂN KHAI)
+*Trọng tâm: Ưu tiên tuyệt đối trải nghiệm ngoại tuyến. Cho phép người dùng ra đường không có mạng 4G/Wifi vẫn chụp ảnh, ghi sổ, quét OCR hóa đơn và voice NLP mượt mà.*
 
-- [/] **2.1. Phân Hệ Trực Quan Hóa Báo Cáo Anime & Squad 2.0 (Phase 2A):**
+- [x] **2.1. Động Cơ Lưu Trữ Hình Ảnh Bền Vững Ngoại Tuyến (Offline Persistence Engine):**
+  - [x] Lưu trữ ảnh WebP nén (~50KB/ảnh, nén 95%) và thumbnail (240px) vĩnh viễn vào `DocumentDirectory` (`pigfly_photos/{YYYY-MM}/{txId}.webp`).
+  - [x] Bảo vệ ảnh không bao giờ bị hệ điều hành dọn dẹp bộ nhớ xóa nhầm khi điện thoại đầy dung lượng.
+  - [x] Cô lập thuật toán dọn dẹp cache `cleanOldPhotoCache` chỉ dọn file tạm trong `cacheDirectory`.
+- [x] **2.2. Bộ Công Cụ Nhập Liệu AI Ngoại Tuyến $\le 3$s:**
+  - [x] AI Receipt OCR Scanner với Carousel Fallback $\le 3$s.
+  - [x] Voice-to-Expense NLP tiếng Việt tự nhiên $\le 2$s.
+  - [x] On-Device Vision Classifier nhận diện đối tượng tiêu dùng.
+- [/] **2.3. Phân Hệ Trực Quan Hóa Báo Cáo Anime & Squad 2.0 (Offline-First):**
   - [/] Báo cáo Magazine Anime trong Tab Thống Kê (`AnimeMagazineReportSheet.tsx` hiển thị 3 KPI mới: Runway Score, Impulse Ratio, Savings Velocity).
   - [/] Đặt lối tắt mở Bàn cờ Cờ Tỷ Phú độc quyền trong Tab 3 (Squad Room) phục vụ sinh hoạt nhóm bạn thân.
   - [/] SOS Overspending Alarm Protocol: Tự động kích hoạt còi cảnh báo cứu ví trong Squad Room khi người dùng chi tiêu vượt hạn mức ngày.
   - [x] Bảng xếp hạng tuần (Squad Leaderboard) thi đua tỷ lệ tiết kiệm và chuỗi ngày kỷ luật.
-- [ ] **2.2. Supabase Cloud Production & Đa Thiết Bị (Phase 2B):**
-  - [ ] Chạy bộ migration hoàn chỉnh (`001` $\rightarrow$ `006_nickname_and_age_survey.sql`).
-  - [ ] Cấu hình Row Level Security (RLS) cách ly dữ liệu nhiều người dùng.
-  - [ ] Google Sign-In Native: Cấu hình OAuth Client IDs (Web, Android SHA-1, iOS URL Scheme).
-  - [ ] Nén ảnh WebP dual-resolution tự động trước khi upload Supabase Storage và đồng bộ Realtime 2 chiều.
-  - [ ] Cấu hình Google Cloud Console OAuth Client IDs (Web, Android SHA-1, iOS URL Scheme).
-  - [ ] Luồng đăng nhập 1 chạm an toàn, hỗ trợ chuyển đổi từ tài khoản Khách (Guest) sang Google giữ nguyên toàn bộ dữ liệu.
-- [ ] **2.3. Lưu Trữ Hình Ảnh Đám Mây Đa Tầng:**
-  - [ ] Tự động nén WebP dual-resolution trước khi upload Supabase Storage (ảnh gốc 1080px và thumbnail 240px).
-  - [ ] Cơ chế đồng bộ 2 chiều Realtime: Mở app trên iPad hoặc đổi điện thoại mới tải lại toàn bộ nhật ký ngay lập tức.
+- [x] **2.4. Tiện Ích Native & Két Sao Lưu Cục Bộ (Offline Vault):**
+  - [x] Android Native AppWidget Config Plugin ghim số dư và linh vật.
+  - [x] Xuất / Nhập sao lưu toàn diện định dạng JSON & CSV (UTF-8 BOM).
 
 ---
 
-### 📌 GIAI ĐOẠN 3: ĐÓNG GÓI NATIVE BUILD EAS & PHÁT HÀNH STORE
+### 📌 GIAI ĐOẠN 3 (MILESTONE M4): SUPABASE CLOUD READY & MULTI-DEVICE SYNC (TÍCH HỢP SAU KHI M3 ỔN ĐỊNH HOÀN TOÀN)
+*Trọng tâm: Chỉ kích hoạt sau khi hệ thống Offline-First M3 đã hoạt động hoàn toàn ổn định. Đám mây đóng vai trò lớp Adapter mở rộng (Extension Layer).*
+
+- [ ] **3.1. Supabase Cloud Database & Storage Adapter:**
+  - [ ] Outbox Sync Worker đồng bộ ngầm 2 chiều khi có mạng (Zero-distraction, không ảnh hưởng thao tác offline).
+  - [ ] Supabase PostgreSQL Database, Storage Bucket (`receipt-photos`) và RLS Multi-User Isolation.
+  - [ ] Quản lý phiên đăng nhập đa thiết bị (Đồng bộ iPad / Điện thoại mới).
+- [ ] **3.2. Cloud Aggregation & Kỷ Niệm Locket:**
+  - [ ] Xử lý luồng tổng hợp dữ liệu lớn, tạo video recap và album kỷ niệm tự động (tương tự kiến trúc Locket gốc).
+
+---
+
+### 📌 GIAI ĐOẠN 4 (MILESTONE M5): ĐÓNG GÓI NATIVE BUILD EAS & PHÁT HÀNH STORE
 *Trọng tâm: Đưa PigFly lên Google Play Store và Apple App Store.*
 
-- [ ] **3.1. Native Android Plugin & Widget:**
+- [ ] **4.1. Native Android Plugin & Widget:**
   - [ ] Đóng gói AppWidget Android vào APK/AAB sản xuất.
   - [ ] Cấu hình `NotificationListenerService` đọc biến động số dư tự động trong file build.
-- [ ] **3.2. Native iOS WidgetKit Extension:**
+- [ ] **4.2. Native iOS WidgetKit Extension:**
   - [ ] Xây dựng Swift WidgetKit Extension hiển thị chú heo PigFly và số dư `Hôm nay tiêu được` trên màn hình khóa iOS 16+.
-- [ ] **3.3. Kiểm Toán Bảo Mật & Phát Hành Ứng Dụng:**
+- [ ] **4.3. Kiểm Toán Bảo Mật & Phát Hành Ứng Dụng:**
   - [ ] Kiểm toán 0 rò rỉ STK theo tiêu chuẩn Apple App Store Guideline 5.1.1 (Privacy).
   - [ ] Đóng gói EAS Build Production và phát hành bản Beta trên TestFlight & Google Play Internal Testing.
   - [ ] Ra mắt chính thức trên App Store & CH Play.

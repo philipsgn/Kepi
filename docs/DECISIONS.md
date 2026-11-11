@@ -596,3 +596,6 @@
 
   - **Quyết định 113 (10/11/2026): Khai Tử Supabase Cloud & Google Sign-In — Kiến Trúc Thuần Local-First (100% Offline-First):**
     - *Bối Cảnh & Bản Chất:* Người dùng ưu tiên tối đa quyền riêng tư và trải nghiệm mượt mà không phụ thuộc hạ tầng mạng bên thứ ba. Dự án loại bỏ hoàn toàn các phụ thuộc Supabase và Google OAuth, chuyển sang kiến trúc Thuần Local-First: mọi dữ liệu lưu trữ 100% cục bộ trên thiết bị (`AsyncStorage`/SQLite), đăng nhập bằng biệt danh tại chỗ, sao lưu/phục hồi thủ công. Hệ thống đạt trạng thái 0-delay (phản hồi 0ms), 0 chi phí duy trì backend và bảo mật tuyệt đối.
+
+  - **Quyết định 114 (11/11/2026): Chiến Lược 2 Giai Đoạn — Ưu Tiên Tuyệt Đối Offline-First Rock-Solid Trước, Tích Hợp Supabase Cloud Sau Khi Đã Ổn Định Hoàn Toàn:**
+    - *Bối Cảnh & Bản Chất:* Nghiên cứu từ mô hình thực tế của Locket Widget (lưu trữ cục bộ cho widget & cache, đám mây cho phân tích và đồng bộ). Người dùng khẳng định triết lý cốt lõi: Ứng dụng phải ưu tiên Offline trước để người dùng có thể ra đường chụp ảnh, ghi sổ kể cả khi không có mạng 4G/Wifi. Ảnh WebP nén (~50KB/ảnh) được lưu vĩnh viễn vào `DocumentDirectory` (không bao giờ bị hệ điều hành xóa rác). Hạ tầng Cloud (Supabase PostgreSQL + Storage + RLS) chỉ được tích hợp như một lớp Adapter mở rộng sau khi tầng Offline-First đã hoạt động hoàn hảo 100%.

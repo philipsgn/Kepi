@@ -1,28 +1,41 @@
-# KIẾN TRÚC KỸ THUẬT (TECH ARCHITECTURE) — VÍ LOCKET v3.1
+# KIẾN TRÚC KỸ THUẬT (TECH ARCHITECTURE) — PIGFLY v4.3
+> **Chiến Lược 2 Tầng:** Tầng 1: Offline-First Rock-Solid Core ➔ Tầng 2: Cloud-Ready Adapter  
+> **Cập nhật:** Tháng 11/2026 (Theo Quyết định 114)
 
 ---
 
-## 1. TỔNG QUAN HỆ THỐNG (SYSTEM OVERVIEW v3.1)
+## 1. TỔNG QUAN HỆ THỐNG 2 TẦNG (TWO-TIER SYSTEM ARCHITECTURE v4.3)
 
-Ví Locket v3.1 xây dựng kiến trúc Mobile tối ưu hóa với **AI Coach Minh Locket ("Anh PT Tài Chính")** sử dụng hình tượng Chân Dung Signature 3D Stylized Pixar và phân hệ Chat 2 chiều thời gian thực kết nối với Gemini AI.
+PigFly triển khai mô hình kiến trúc lấy cảm hứng từ Locket Widget: **Ưu tiên số 1 cho Offline-First** để người dùng thoải mái ra đường không có mạng vẫn chụp ảnh, quét hóa đơn OCR, nói giọng nói NLP và ghi chép mượt mà 100%. Hạ tầng Cloud (Supabase) được tách bạch thành một lớp Adapter sẵn sàng kết nối ngầm khi tầng Offline đã ổn định hoàn toàn.
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        CLIENT: EXPO REACT NATIVE                       │
-│                                                                        │
-│  [ Camera & Shutter ]   [ PanResponder Swipe-Up ]  [ Coach Signature ] │
-│         │                          │               (3D Stylized Pixar) │
-│         ▼                          ▼                       ▼           │
-│  [ Image Processor ]    [ History Peek Sheet ]      [ AI Coach Chat UI]│
-│  (WebP 1080px/240px)                                [ Minh Coach Store]│
-│         │                                           [ Goal & Habit ]   │
-│         ▼                                                  ▼           │
-│  [ Offline Sync Queue ] ────────────► [ Zustand Persistence Cache ]    │
-└─────────┬──────────────────────────────────────────────────┬───────────┘
-          │                                                  │
-          ▼ REST / Storage Upload                            ▼ Edge AI
-┌────────────────────────────────────────────────────────────────────────┐
-
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│              TẦNG 1: OFFLINE-FIRST ROCK-SOLID CORE (TRỌNG TÂM SỐ 1)             │
+│                                                                                 │
+│   [ Camera 4:5 ] ───► [ Image Manipulator ] ───► [ Persistent Storage ]        │
+│                       (WebP Dual-Res ~50KB)      (${documentDirectory}/        │
+│                                                   pigfly_photos/{YYYY-MM}/)    │
+│                                                                                 │
+│   [ On-Device AI Pipeline ]                     [ Zustand Stores ]              │
+│   - OCR Receipt Scanner (Regex)                 - transactionStore              │
+│   - Voice NLP Parser (Vietnamese)               - budgetStore (Daily Rollover)  │
+│   - Vision Classifier (Offline)                 - gamificationStore (Streak)    │
+│                                                 - squadStore / authStore        │
+│                                                           │                     │
+│                                                           ▼                     │
+│                                                 [ AsyncStorage Local Vault ]    │
+│                                                 (Chạy 100% Offline 0ms delay)   │
+└────────────────────────────────────────┬────────────────────────────────────────┘
+                                         │
+                                         ▼ (Tích hợp sau khi Tầng 1 ổn định 100%)
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│              TẦNG 2: CLOUD-READY ADAPTER (SUPABASE EXTENSION LAYER)             │
+│                                                                                 │
+│   [ Outbox Sync Worker ] ─────────────────────► [ Supabase Cloud ]              │
+│   - Đồng bộ ngầm hai chiều khi có mạng          - PostgreSQL Database           │
+│   - Zero-distraction UI (0 icon giật lag)       - Storage Bucket (receipt-photos│
+│   - Khôi phục dữ liệu khi đổi thiết bị          - Row Level Security (RLS)      │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -97,7 +110,7 @@ Ví Locket v3.1 xây dựng kiến trúc Mobile tối ưu hóa với **AI Coach 
    - Quản lý trạng thái hiện tại của Minh 3D (Biểu cảm, Lời thoại động).
    - Động cơ phân tích 3 câu hỏi: Tiện ích thực tế, Cảnh báo trend, Tác động mục tiêu cá nhân.
 4. **`authStore.ts`**:
-   - Quản lý phiên đăng nhập Google OAuth (hỗ trợ `/(auth)/callback`) và chế độ Khách (Guest) 100% offline.
+   - Quản lý phiên tài khoản cục bộ Offline (Biệt danh, Sandbox Khách) lưu bền vững trong `AsyncStorage` (0-delay, 100% offline). Sẵn sàng chuyển tiếp sang Supabase Auth ở Giai đoạn Tầng 2 khi người dùng có nhu cầu đồng bộ đám mây.
 5. **`categoryStore.ts`**:
    - Danh mục tùy biến (Thu / Chi), icon vector, màu sắc, đồng bộ AsyncStorage.
 
