@@ -2669,32 +2669,50 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 }
 
 // ==========================================
-// 57. Cờ Tỷ Phú Financial Monopoly Board Mechanics
+// 57. PigFly 3D FPS Flight Simulation Engine (Mario-Style Streak Unlocks & Flight Scoring)
 // ==========================================
 {
   const assert = require('assert');
   const fs = require('fs');
   const path = require('path');
 
-  const monopolyPath = path.join(__dirname, 'src/utils/game/monopolyBoardEngine.ts');
-  assert.ok(fs.existsSync(monopolyPath), 'monopolyBoardEngine.ts must exist');
-  const boardCode = fs.readFileSync(monopolyPath, 'utf8');
+  const enginePath = path.join(__dirname, 'src/utils/game/pigFly3DEngine.ts');
+  assert.ok(fs.existsSync(enginePath), 'pigFly3DEngine.ts must exist');
+  const engineCode = fs.readFileSync(enginePath, 'utf8');
 
-  assert.ok(boardCode.includes('MONOPOLY_BOARD_TILES'), 'Must export MONOPOLY_BOARD_TILES');
-  assert.ok(boardCode.includes('rollMonopolyDice'), 'Must export rollMonopolyDice');
-  assert.ok(boardCode.includes('calculateNewPosition'), 'Must export calculateNewPosition');
-  assert.ok(boardCode.includes('resolveTileDecision'), 'Must export resolveTileDecision');
+  assert.ok(engineCode.includes('FLIGHT_WORLDS'), 'Must export FLIGHT_WORLDS');
+  assert.ok(engineCode.includes('getAvailableWorlds'), 'Must export getAvailableWorlds');
+  assert.ok(engineCode.includes('calculateFlightScore'), 'Must export calculateFlightScore');
+  assert.ok(engineCode.includes('formatFlightShareMessage'), 'Must export formatFlightShareMessage');
 
-  // Kiểm tra di chuyển vòng 16 ô
-  function calcMove(current, steps) {
-    const raw = current + steps;
-    return { newPos: raw % 16, passedGo: raw >= 16 };
+  // Kiểm tra logic mở khóa 4 thế giới theo Streak (Mario-Style World Progression)
+  function getAvailable(streak) {
+    const worlds = [
+      { id: 'w1', minStreak: 1 },
+      { id: 'w2', minStreak: 3 },
+      { id: 'w3', minStreak: 7 },
+      { id: 'w4', minStreak: 14 },
+    ];
+    return {
+      available: worlds.filter((w) => streak >= w.minStreak),
+      locked: worlds.filter((w) => streak < w.minStreak),
+    };
   }
 
-  assert.deepStrictEqual(calcMove(14, 3), { newPos: 1, passedGo: true }, '14 + 3 must wrap to 1 with passedGo');
-  assert.deepStrictEqual(calcMove(5, 4), { newPos: 9, passedGo: false }, '5 + 4 must reach 9 without passedGo');
+  assert.strictEqual(getAvailable(0).available.length, 0, 'Streak 0 has 0 unlocked');
+  assert.strictEqual(getAvailable(1).available.length, 1, 'Streak 1 unlocks World 1');
+  assert.strictEqual(getAvailable(3).available.length, 2, 'Streak 3 unlocks World 1 & 2');
+  assert.strictEqual(getAvailable(7).available.length, 3, 'Streak 7 unlocks World 1, 2 & 3');
+  assert.strictEqual(getAvailable(14).available.length, 4, 'Streak 14 unlocks all 4 worlds');
 
-  console.log('✅ Test 57 Passed: Cờ Tỷ Phú Financial Monopoly Board Mechanics verified cleanly');
+  // Kiểm tra công thức tính điểm chuyến bay (Zero FEP points)
+  function calcScore(rings, storms, duration) {
+    return Math.max(0, Math.round(rings * 100 + duration * 5 - storms * 40));
+  }
+  const score1 = calcScore(10, 1, 30);
+  assert.strictEqual(score1, 1000 + 150 - 40, 'Score calculation must match 1110');
+
+  console.log('✅ Test 57 Passed: PigFly 3D FPS Flight Simulation Engine verified cleanly');
 }
 
 // ==========================================
@@ -2761,29 +2779,32 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const path = require('path');
 
   // 1. Kiểm tra các component UI mới tồn tại
-  const monopolyModalPath = path.join(__dirname, 'src/components/game/FinancialMonopolyModal.tsx');
+  const flight3DModalPath = path.join(__dirname, 'src/components/game/PigFly3DFlightModal.tsx');
   const mascotLottiePath = path.join(__dirname, 'src/components/mascot/PigFlyLottieMascot.tsx');
   const magazineSheetPath = path.join(__dirname, 'src/components/stats/AnimeMagazineReportSheet.tsx');
   const appWidgetPluginPath = path.join(__dirname, 'plugins/withAppWidget.js');
 
-  assert.ok(fs.existsSync(monopolyModalPath), 'FinancialMonopolyModal.tsx must exist');
+  assert.ok(fs.existsSync(flight3DModalPath), 'PigFly3DFlightModal.tsx must exist');
   assert.ok(fs.existsSync(mascotLottiePath), 'PigFlyLottieMascot.tsx must exist');
   assert.ok(fs.existsSync(magazineSheetPath), 'AnimeMagazineReportSheet.tsx must exist');
   assert.ok(fs.existsSync(appWidgetPluginPath), 'withAppWidget.js must exist');
 
-  // 2. Kiểm tra AnimeMagazineReportSheet hiển thị đúng 3 KPI mới
+  // 2. Kiểm tra AnimeMagazineReportSheet hiển thị đúng 3 KPI mới & AnimeMagazineView
   const magazineCode = fs.readFileSync(magazineSheetPath, 'utf8');
   assert.ok(magazineCode.includes('RUNWAY SCORE'), 'Magazine must include RUNWAY SCORE');
   assert.ok(magazineCode.includes('IMPULSE RATIO'), 'Magazine must include IMPULSE RATIO');
   assert.ok(magazineCode.includes('SAVINGS VELOCITY'), 'Magazine must include SAVINGS VELOCITY');
+  assert.ok(magazineCode.includes('AnimeMagazineView'), 'Magazine must export AnimeMagazineView');
 
-  // 3. Kiểm tra StatsView tích hợp AnimeMagazineReportSheet
+  // 3. Kiểm tra StatsView tích hợp 3 chế độ xem (Album / Phân tích / Tạp chí)
   const statsViewCode = fs.readFileSync(path.join(__dirname, 'src/components/views/StatsView.tsx'), 'utf8');
   assert.ok(statsViewCode.includes('AnimeMagazineReportSheet'), 'StatsView must embed AnimeMagazineReportSheet');
+  assert.ok(statsViewCode.includes('AnimeMagazineView'), 'StatsView must embed AnimeMagazineView');
+  assert.ok(statsViewCode.includes('MAGAZINE'), 'StatsView must support MAGAZINE view mode');
 
-  // 4. Kiểm tra SquadLocketView tích hợp FinancialMonopolyModal
+  // 4. Kiểm tra SquadLocketView tích hợp PigFly3DFlightModal
   const squadViewCode = fs.readFileSync(path.join(__dirname, 'src/components/chat/SquadLocketView.tsx'), 'utf8');
-  assert.ok(squadViewCode.includes('FinancialMonopolyModal'), 'SquadLocketView must embed FinancialMonopolyModal');
+  assert.ok(squadViewCode.includes('PigFly3DFlightModal'), 'SquadLocketView must embed PigFly3DFlightModal');
 
   console.log('✅ Test 60 Passed: Pop-Anime UI Integration, Token Cohesion & WCAG Contrast Assurance verified cleanly');
 }

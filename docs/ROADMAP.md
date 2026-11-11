@@ -61,10 +61,12 @@
   - [x] AI Receipt OCR Scanner với Carousel Fallback $\le 3$s.
   - [x] Voice-to-Expense NLP tiếng Việt tự nhiên $\le 2$s.
   - [x] On-Device Vision Classifier nhận diện đối tượng tiêu dùng.
-- [/] **2.3. Phân Hệ Trực Quan Hóa Báo Cáo Anime & Squad 2.0 (Offline-First):**
-  - [/] Báo cáo Magazine Anime trong Tab Thống Kê (`AnimeMagazineReportSheet.tsx` hiển thị 3 KPI mới: Runway Score, Impulse Ratio, Savings Velocity).
-  - [/] Đặt lối tắt mở Bàn cờ Cờ Tỷ Phú độc quyền trong Tab 3 (Squad Room) phục vụ sinh hoạt nhóm bạn thân.
-  - [/] SOS Overspending Alarm Protocol: Tự động kích hoạt còi cảnh báo cứu ví trong Squad Room khi người dùng chi tiêu vượt hạn mức ngày.
+- [/] **2.3. Phân Hệ Trực Quan Hóa Báo Cáo Anime & PigFly 3D Flight Simulator (Phase 2A - Đang Triển Khai):**
+  - [/] Tab Thống Kê 3 chế độ xem (`[📸 Album | 📊 Phân tích | 📖 Tạp chí Anime]`) kết nối dữ liệu tài chính thời gian thực cho 3 chỉ số mới (Runway Score, Impulse Ratio, Savings Velocity).
+  - [/] Khai tử Bàn cờ Cờ Tỷ Phú, thay bằng **PigFly 3D FPS Flight Simulator** (mô phỏng góc nhìn thứ nhất nhúng Three.js WebGL 60 FPS, 100% offline).
+  - [/] Cơ chế mở khóa 4 thế giới đường bay 3D theo Chuỗi Streak thực tế (Mario World style: *Đất Mây Khởi Động $\to$ Hoàng Hôn Nắng Thu $\to$ Bầu Trời Mint $\to$ Đêm Sao Cực Quang*).
+  - [/] Tích hợp Squad Room: Nút phóng chuyến bay 3D, haptic feedback và chia sẻ thành tích bay vào Squad Chat.
+  - [x] SOS Overspending Alarm Protocol: Tự động kích hoạt còi cảnh báo cứu ví trong Squad Room khi người dùng chi tiêu vượt hạn mức ngày.
   - [x] Bảng xếp hạng tuần (Squad Leaderboard) thi đua tỷ lệ tiết kiệm và chuỗi ngày kỷ luật.
 - [x] **2.4. Tiện Ích Native & Két Sao Lưu Cục Bộ (Offline Vault):**
   - [x] Android Native AppWidget Config Plugin ghim số dư và linh vật.

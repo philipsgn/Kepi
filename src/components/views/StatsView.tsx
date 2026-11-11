@@ -13,9 +13,10 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
-import { BarChart2, Camera, Eye, EyeOff, Images, Sparkles } from 'lucide-react-native';
+import { BarChart2, BookOpen, Camera, Eye, EyeOff, Images, Sparkles } from 'lucide-react-native';
 import { Strings } from '../../constants/strings';
 import { useTransactionStore } from '../../store/transactionStore';
+import { useBudgetStore } from '../../store/budgetStore';
 import { Transaction } from '../../types/database';
 import {
   MonthSectionData,
@@ -28,7 +29,7 @@ import { TransactionPhotoCell } from '../stats/TransactionPhotoCell';
 import { MonthDetailBottomSheet } from '../stats/MonthDetailBottomSheet';
 import { DayDetailBottomSheet } from '../journal/DayDetailBottomSheet';
 import { AnalyticsDashboardView } from '../stats/AnalyticsDashboardView';
-import { AnimeMagazineReportSheet } from '../stats/AnimeMagazineReportSheet';
+import { AnimeMagazineReportSheet, AnimeMagazineView } from '../stats/AnimeMagazineReportSheet';
 import { getDaysRemainingInMonth } from '../../utils/calendarUtils';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
@@ -66,8 +67,31 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
   const [isMasked, setIsMasked] = useState<boolean>(false);
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('ALL');
   const [activeMonthKey, setActiveMonthKey] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'ALBUM' | 'ANALYTICS'>('ALBUM');
+  const [viewMode, setViewMode] = useState<'ALBUM' | 'ANALYTICS' | 'MAGAZINE'>('ALBUM');
   const [periodMode, setPeriodMode] = useState<'WEEK' | 'MONTH'>('MONTH');
+
+  const { monthlyIncome } = useBudgetStore();
+  const remainingDays = useMemo(() => getDaysRemainingInMonth(), []);
+
+  // Tổng chi tháng hiện tại từ transactions confirmed
+  const currentMonthSpent = useMemo(() => {
+    const currentMonthPrefix = new Date().toISOString().slice(0, 7);
+    return transactions
+      .filter(
+        (tx) =>
+          tx.status === 'CONFIRMED' &&
+          tx.occurred_at?.startsWith(currentMonthPrefix) &&
+          tx.type === 'EXPENSE'
+      )
+      .reduce((acc, tx) => acc + (tx.amount || 0), 0);
+  }, [transactions]);
+
+  // Tỷ lệ tiết kiệm thực tế
+  const currentSavingsRate = useMemo(() => {
+    if (!monthlyIncome || monthlyIncome <= 0) return 25;
+    const rate = Math.round(((monthlyIncome - currentMonthSpent) / monthlyIncome) * 100);
+    return Math.max(0, Math.min(100, rate));
+  }, [monthlyIncome, currentMonthSpent]);
 
 
   // Sheet phân tích chi tiết tháng
@@ -414,6 +438,38 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
             Phân tích
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setViewMode('MAGAZINE');
+          }}
+          style={[
+            styles.segmentBtn,
+            viewMode === 'MAGAZINE' && [
+              styles.segmentBtnActive,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ],
+          ]}
+        >
+          <BookOpen
+            size={14}
+            color={viewMode === 'MAGAZINE' ? tokens.primary : tokens.textMuted}
+            strokeWidth={2.4}
+          />
+          <Text
+            style={[
+              styles.segmentText,
+              {
+                color: viewMode === 'MAGAZINE' ? tokens.text : tokens.textMuted,
+                fontWeight: viewMode === 'MAGAZINE' ? '700' : '500',
+              },
+            ]}
+          >
+            Tạp chí
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* RẼ NHÁNH CHẾ ĐỘ XEM */}
@@ -533,7 +589,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
             />
           )}
         </View>
-      ) : (
+      ) : viewMode === 'ANALYTICS' ? (
         /* CHẾ ĐỘ PHÂN TÍCH DATA */
         <View style={{ flex: 1 }}>
           {/* THANH CHỌN THÁNG */}
@@ -612,6 +668,17 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
               </Text>
             </View>
           )}
+        </View>
+      ) : (
+        /* CHẾ ĐỘ 3: TẠP CHÍ TÀI CHÍNH ANIME DIGEST */
+        <View style={{ flex: 1 }}>
+          <AnimeMagazineView
+            monthlyIncome={monthlyIncome}
+            monthlySpent={currentMonthSpent}
+            remainingDays={remainingDays}
+            savingsRate={currentSavingsRate}
+            isInline
+          />
         </View>
       )}
 

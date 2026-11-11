@@ -1,35 +1,53 @@
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
+  Alert,
   Dimensions,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { X, Sparkles, TrendingUp, Zap, HeartHandshake, ShieldCheck } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
+import * as Clipboard from 'expo-clipboard';
+import {
+  HeartHandshake,
+  Send,
+  Share2,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  X,
+  Zap,
+} from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { PigFlyLottieMascot } from '../mascot/PigFlyLottieMascot';
 
-interface AnimeMagazineReportSheetProps {
-  visible: boolean;
-  onClose: () => void;
+interface AnimeMagazineReportProps {
   monthlyIncome?: number;
   monthlySpent?: number;
   remainingDays?: number;
   savingsRate?: number;
+  isInline?: boolean;
+}
+
+interface AnimeMagazineReportSheetProps extends AnimeMagazineReportProps {
+  visible: boolean;
+  onClose: () => void;
 }
 
 const { width } = Dimensions.get('window');
 
-export const AnimeMagazineReportSheet: React.FC<AnimeMagazineReportSheetProps> = ({
-  visible,
-  onClose,
+/**
+ * Nội dung Tạp chí Tài Chính Anime — Phong cách Shonen Manga & Y2K Pop-Art
+ */
+export const AnimeMagazineView: React.FC<AnimeMagazineReportProps> = ({
   monthlyIncome = 15000000,
   monthlySpent = 6500000,
   remainingDays = 14,
   savingsRate = 28,
+  isInline = false,
 }) => {
   const { tokens } = useTheme();
 
@@ -38,17 +56,173 @@ export const AnimeMagazineReportSheet: React.FC<AnimeMagazineReportSheetProps> =
   const remainingCash = Math.max(0, monthlyIncome - monthlySpent);
   const runwayDays = dailyBurn > 0 ? Math.round(remainingCash / dailyBurn) : remainingDays;
 
-  // 2. Impulse Ratio: Tỷ lệ chi tiêu bốc đồng (ước tính ~20% nếu kiểm soát tốt, ~45% nếu tiêu lố)
+  // 2. Impulse Ratio: Tỷ lệ chi tiêu bốc đồng (ước tính ~18% nếu kiểm soát tốt, ~38% nếu tiêu lố)
   const impulseRatio = savingsRate >= 20 ? 18 : 38;
 
   // 3. Savings Velocity: Tốc độ tích lũy hàng ngày
   const savingsVelocity = Math.round(remainingCash / Math.max(1, remainingDays));
 
+  // Chia sẻ tóm tắt báo cáo Manga
+  const handleShareReport = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const summaryText = `📖 [PigFly Anime Digest] Số 08:\n✨ Sức khỏe tài chính: ${
+      savingsRate >= 20 ? 'Phong độ Đỉnh Cao 🌟' : 'Đang hồi sức 🌿'
+    }\n🛡️ Runway Score: ${runwayDays} ngày an toàn\n⚡ Impulse Ratio: ${impulseRatio}%\n📈 Savings Velocity: +${savingsVelocity.toLocaleString(
+      'vi-VN'
+    )} đ/ngày!\nCùng giữ ví với PigFly nào! 🐷✨`;
+
+    await Clipboard.setStringAsync(summaryText);
+    Alert.alert(
+      'Đã Sao Chép Tạp Chí Manga! 📖✨',
+      'Đoạn tóm tắt báo cáo tài chính phong cách Anime đã được lưu vào bộ nhớ tạm. Bạn có thể dán vào Zalo/Messenger để khoe bạn bè!'
+    );
+  };
+
+  return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={[
+        styles.scrollContent,
+        isInline && { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 100 },
+      ]}
+    >
+      {/* Banner Tiêu Đề Số Tạp Chí */}
+      <View style={[styles.issueBanner, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
+        <View style={styles.badgeRow}>
+          <Text style={[styles.mangaSticker, { backgroundColor: tokens.primary }]}>DOKI DOKI! ✨</Text>
+          <Text style={[styles.mangaSticker, { backgroundColor: '#10B981' }]}>VOL.08</Text>
+        </View>
+        <Text style={[styles.magazineIssue, { color: tokens.primary }]}>PIGFLY WEEKLY DIGEST</Text>
+        <Text style={[styles.magazineTitle, { color: tokens.text }]}>TẠP CHÍ TÀI CHÍNH ANIME</Text>
+        <Text style={[styles.magazineSubtitle, { color: tokens.textMuted }]}>
+          "Tiết kiệm – Kỷ luật – Bay cao cùng đồng đội"
+        </Text>
+      </View>
+
+      {/* Panel 1: Hero Comic Banner */}
+      <View style={[styles.comicPanel, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
+        <View style={styles.panelHeader}>
+          <Text style={[styles.panelBadge, { backgroundColor: tokens.primary }]}>CHƯƠNG 1</Text>
+          <Text style={[styles.panelTitle, { color: tokens.text }]}>CHIẾN DỊCH GIỮ VÍ TUẦN QUA</Text>
+        </View>
+        <View style={styles.heroRow}>
+          <PigFlyLottieMascot size={74} showBadge />
+          <View style={styles.heroTextGroup}>
+            <Text style={[styles.heroQuote, { color: tokens.text }]}>
+              {savingsRate >= 20
+                ? '“Cơ bắp tài chính nở nang thấy rõ! Giữ phong độ này cuối tháng bao trọn chuyến đi chơi bồ nhé!”'
+                : '“Hôm nay ví hơi thở dốc rồi bồ ơi! Bớt trà sữa topping lại để heo lấy sức bay tiếp nào!”'}
+            </Text>
+            <Text style={[styles.coachSign, { color: tokens.primary }]}>
+              — Minh Locket (Anh PT Giữ Ví)
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Panel 2: Bộ 3 Chỉ Số Sức Khỏe Mới */}
+      <View style={[styles.comicPanel, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
+        <View style={styles.panelHeader}>
+          <Text style={[styles.panelBadge, { backgroundColor: tokens.primary }]}>CHƯƠNG 2</Text>
+          <Text style={[styles.panelTitle, { color: tokens.text }]}>3 CHỈ SỐ RUNWAY & TỐC ĐỘ</Text>
+        </View>
+
+        <View style={styles.kpiGrid}>
+          {/* KPI 1 */}
+          <View style={[styles.kpiCard, { backgroundColor: tokens.surface }]}>
+            <View style={styles.kpiIconRow}>
+              <ShieldCheck size={18} color={tokens.primary} strokeWidth={2.4} />
+              <Text style={[styles.kpiLabel, { color: tokens.textMuted }]}>RUNWAY SCORE</Text>
+            </View>
+            <Text style={[styles.kpiValue, { color: tokens.text }]}>
+              {runwayDays} <Text style={styles.kpiUnit}>ngày</Text>
+            </Text>
+            <Text style={[styles.kpiSub, { color: tokens.textMuted }]}>
+              Dòng tiền đủ vững tới hết tháng
+            </Text>
+          </View>
+
+          {/* KPI 2 */}
+          <View style={[styles.kpiCard, { backgroundColor: tokens.surface }]}>
+            <View style={styles.kpiIconRow}>
+              <Zap size={18} color={tokens.danger} strokeWidth={2.4} />
+              <Text style={[styles.kpiLabel, { color: tokens.textMuted }]}>IMPULSE RATIO</Text>
+            </View>
+            <Text style={[styles.kpiValue, { color: tokens.text }]}>
+              {impulseRatio}%
+            </Text>
+            <Text style={[styles.kpiSub, { color: tokens.textMuted }]}>
+              {impulseRatio < 25 ? 'Kiềm chế FOMO cực tốt' : 'Cần siết bớt mua sắm cảm xúc'}
+            </Text>
+          </View>
+        </View>
+
+        {/* KPI 3: Savings Velocity */}
+        <View style={[styles.velocityBanner, { backgroundColor: tokens.surface }]}>
+          <View style={styles.kpiIconRow}>
+            <TrendingUp size={18} color={tokens.success} strokeWidth={2.4} />
+            <Text style={[styles.kpiLabel, { color: tokens.textMuted }]}>SAVINGS VELOCITY</Text>
+          </View>
+          <Text style={[styles.velocityValue, { color: tokens.success }]}>
+            +{savingsVelocity.toLocaleString('vi-VN')} đ / ngày
+          </Text>
+          <Text style={[styles.kpiSub, { color: tokens.textMuted }]}>
+            Tốc độ tiến tới mục tiêu tài chính Thác Nước
+          </Text>
+        </View>
+      </View>
+
+      {/* Panel 3: Lời Khuyên Tuần Tới */}
+      <View style={[styles.comicPanel, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
+        <View style={styles.panelHeader}>
+          <Text style={[styles.panelBadge, { backgroundColor: tokens.primary }]}>CHƯƠNG 3</Text>
+          <Text style={[styles.panelTitle, { color: tokens.text }]}>BÀI TẬP TUẦN MỚI CỦA MINH PT</Text>
+        </View>
+        <View style={styles.adviceItem}>
+          <Text style={styles.adviceNum}>1.</Text>
+          <Text style={[styles.adviceText, { color: tokens.text }]}>
+            Thử thách 48h nói KHÔNG với các thông báo flash sale mua sắm.
+          </Text>
+        </View>
+        <View style={styles.adviceItem}>
+          <Text style={styles.adviceNum}>2.</Text>
+          <Text style={[styles.adviceText, { color: tokens.text }]}>
+            Chụp ảnh ít nhất 2 bữa ăn chính mỗi ngày để heo có năng lượng vỗ cánh.
+          </Text>
+        </View>
+        <View style={styles.adviceItem}>
+          <Text style={styles.adviceNum}>3.</Text>
+          <Text style={[styles.adviceText, { color: tokens.text }]}>
+            Vào Chuyến Bay PigFly 3D FPS hoàn thành 1 chặng bay xuyên qua các Vòng Tiết Kiệm.
+          </Text>
+        </View>
+      </View>
+
+      {/* Nút Chia Sẻ Báo Cáo Manga */}
+      <TouchableOpacity
+        style={[styles.shareReportBtn, { backgroundColor: tokens.primary }]}
+        activeOpacity={0.85}
+        onPress={handleShareReport}
+      >
+        <Share2 size={16} color="#FFF" strokeWidth={2.4} />
+        <Text style={styles.shareReportBtnText}>Chia Sẻ Tạp Chí Anime Với Bạn Bè</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+};
+
+export const AnimeMagazineReportSheet: React.FC<AnimeMagazineReportSheetProps> = ({
+  visible,
+  onClose,
+  ...props
+}) => {
+  const { tokens } = useTheme();
+
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={[styles.sheetContainer, { backgroundColor: tokens.surface }]}>
-          {/* Header */}
+          {/* Header Modal */}
           <View style={styles.headerRow}>
             <View>
               <Text style={[styles.magazineIssue, { color: tokens.primary }]}>
@@ -66,106 +240,7 @@ export const AnimeMagazineReportSheet: React.FC<AnimeMagazineReportSheetProps> =
             </TouchableOpacity>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-            {/* Panel 1: Hero Comic Banner */}
-            <View style={[styles.comicPanel, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-              <View style={styles.panelHeader}>
-                <Text style={[styles.panelBadge, { backgroundColor: tokens.primary }]}>CHƯƠNG 1</Text>
-                <Text style={[styles.panelTitle, { color: tokens.text }]}>CHIẾN DỊCH GIỮ VÍ TUẦN QUA</Text>
-              </View>
-              <View style={styles.heroRow}>
-                <PigFlyLottieMascot size={74} showBadge />
-                <View style={styles.heroTextGroup}>
-                  <Text style={[styles.heroQuote, { color: tokens.text }]}>
-                    {savingsRate >= 20
-                      ? '“Cơ bắp tài chính nở nang thấy rõ! Giữ phong độ này cuối tháng bao trọn chuyến đi chơi bồ nhé!”'
-                      : '“Hôm nay ví hơi thở dốc rồi bồ ơi! Bớt trà sữa topping lại để heo lấy sức bay tiếp nào!”'}
-                  </Text>
-                  <Text style={[styles.coachSign, { color: tokens.primary }]}>
-                    — Minh Locket (Anh PT Giữ Ví)
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Panel 2: Bộ 3 Chỉ Số Sức Khỏe Mới */}
-            <View style={[styles.comicPanel, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-              <View style={styles.panelHeader}>
-                <Text style={[styles.panelBadge, { backgroundColor: tokens.primary }]}>CHƯƠNG 2</Text>
-                <Text style={[styles.panelTitle, { color: tokens.text }]}>3 CHỈ SỐ RUNWAY & TỐC ĐỘ</Text>
-              </View>
-
-              <View style={styles.kpiGrid}>
-                {/* KPI 1 */}
-                <View style={[styles.kpiCard, { backgroundColor: tokens.surface }]}>
-                  <View style={styles.kpiIconRow}>
-                    <ShieldCheck size={18} color={tokens.primary} strokeWidth={2.4} />
-                    <Text style={[styles.kpiLabel, { color: tokens.textMuted }]}>RUNWAY SCORE</Text>
-                  </View>
-                  <Text style={[styles.kpiValue, { color: tokens.text }]}>
-                    {runwayDays} <Text style={styles.kpiUnit}>ngày</Text>
-                  </Text>
-                  <Text style={[styles.kpiSub, { color: tokens.textMuted }]}>
-                    Dòng tiền đủ vững tới hết tháng
-                  </Text>
-                </View>
-
-                {/* KPI 2 */}
-                <View style={[styles.kpiCard, { backgroundColor: tokens.surface }]}>
-                  <View style={styles.kpiIconRow}>
-                    <Zap size={18} color={tokens.danger} strokeWidth={2.4} />
-                    <Text style={[styles.kpiLabel, { color: tokens.textMuted }]}>IMPULSE RATIO</Text>
-                  </View>
-                  <Text style={[styles.kpiValue, { color: tokens.text }]}>
-                    {impulseRatio}%
-                  </Text>
-                  <Text style={[styles.kpiSub, { color: tokens.textMuted }]}>
-                    {impulseRatio < 25 ? 'Kiềm chế FOMO cực tốt' : 'Cần siết bớt mua sắm cảm xúc'}
-                  </Text>
-                </View>
-              </View>
-
-              {/* KPI 3: Savings Velocity */}
-              <View style={[styles.velocityBanner, { backgroundColor: tokens.surface }]}>
-                <View style={styles.kpiIconRow}>
-                  <TrendingUp size={18} color={tokens.success} strokeWidth={2.4} />
-                  <Text style={[styles.kpiLabel, { color: tokens.textMuted }]}>SAVINGS VELOCITY</Text>
-                </View>
-                <Text style={[styles.velocityValue, { color: tokens.success }]}>
-                  +{savingsVelocity.toLocaleString('vi-VN')} đ / ngày
-                </Text>
-                <Text style={[styles.kpiSub, { color: tokens.textMuted }]}>
-                  Tốc độ tiến tới mục tiêu tài chính Thác Nước
-                </Text>
-              </View>
-            </View>
-
-            {/* Panel 3: Lời Khuyên Tuần Tới */}
-            <View style={[styles.comicPanel, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-              <View style={styles.panelHeader}>
-                <Text style={[styles.panelBadge, { backgroundColor: tokens.primary }]}>CHƯƠNG 3</Text>
-                <Text style={[styles.panelTitle, { color: tokens.text }]}>BÀI TẬP TUẦN MỚI CỦA MINH PT</Text>
-              </View>
-              <View style={styles.adviceItem}>
-                <Text style={styles.adviceNum}>1.</Text>
-                <Text style={[styles.adviceText, { color: tokens.text }]}>
-                  Thử thách 48h nói KHÔNG với các thông báo flash sale mua sắm.
-                </Text>
-              </View>
-              <View style={styles.adviceItem}>
-                <Text style={styles.adviceNum}>2.</Text>
-                <Text style={[styles.adviceText, { color: tokens.text }]}>
-                  Chụp ảnh ít nhất 2 bữa ăn chính mỗi ngày để heo có năng lượng vỗ cánh.
-                </Text>
-              </View>
-              <View style={styles.adviceItem}>
-                <Text style={styles.adviceNum}>3.</Text>
-                <Text style={[styles.adviceText, { color: tokens.text }]}>
-                  Vào Cờ Tỷ Phú hoàn thành 2 lượt đổ xúc xắc nhận Flashcard Lãi Kép.
-                </Text>
-              </View>
-            </View>
-          </ScrollView>
+          <AnimeMagazineView {...props} />
         </View>
       </View>
     </Modal>
@@ -179,12 +254,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheetContainer: {
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    paddingTop: 20,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     paddingHorizontal: 20,
-    maxHeight: '88%',
-    paddingBottom: 30,
+    paddingTop: 20,
+    maxHeight: '90%',
   },
   headerRow: {
     flexDirection: 'row',
@@ -192,15 +266,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  issueBanner: {
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 2,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+  },
+  mangaSticker: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: '900',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    letterSpacing: 0.5,
+  },
   magazineIssue: {
     fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1,
+    fontWeight: '900',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
   magazineTitle: {
     fontSize: 18,
     fontWeight: '900',
     letterSpacing: 0.5,
+    marginTop: 2,
+  },
+  magazineSubtitle: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 4,
   },
   scrollContent: {
     paddingBottom: 24,
@@ -307,5 +409,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     fontWeight: '600',
+  },
+  shareReportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 16,
+    gap: 8,
+    marginTop: 4,
+  },
+  shareReportBtnText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '800',
   },
 });

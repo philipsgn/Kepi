@@ -22,11 +22,28 @@
 
 ## 2. Wireframe Chữ (ASCII Wireframe)
 
-### 2.1. Trạng Thái Chính (Dual-Mode: Album Ảnh vs Phân Tích Data)
+### 2.1. Trạng Thái Chính (Tri-Mode: Album Ảnh vs Phân Tích Data vs Tạp Chí Anime)
 ```text
 ┌────────────────────────────────────────────────────────┐
 │ Thống kê                                    [Ẩn tiền]  │
-│ [📸 Album] (Mặc định)                 [📊 Phân tích]   │ (Segmented Switch)
+│ [📸 Album]           [📊 Phân tích]      [📖 Tạp chí]  │ (Segmented Switch 3 Chế Độ)
+├────────────────────────────────────────────────────────┤
+│ CHẾ ĐỘ 3: TẠP CHÍ ANIME (Manga Comic Strip & 3 KPI Mới)│
+│ PIGFLY WEEKLY DIGEST #08 — TẠP CHÍ TÀI CHÍNH ANIME     │
+│ ┌ CHƯƠNG 1: CHIẾN DỊCH GIỮ VÍ TUẦN QUA ───────────────┐│
+│ │ [PigFly Lottie Mascot] “Cơ bắp tài chính nở nang...” ││
+│ │ — Minh Locket (Anh PT Giữ Ví)                       ││
+│ └─────────────────────────────────────────────────────┘│
+│ ┌ CHƯƠNG 2: 3 CHỈ SỐ RUNWAY & TỐC ĐỘ ─────────────────┐│
+│ │ 🛡️ RUNWAY SCORE: 14 ngày (Dòng tiền trụ vững)       ││
+│ │ ⚡ IMPULSE RATIO: 18% (Kiềm chế FOMO cực tốt)       ││
+│ │ 📈 SAVINGS VELOCITY: +150.000 đ/ngày                ││
+│ └─────────────────────────────────────────────────────┘│
+│ ┌ CHƯƠNG 3: BÀI TẬP TUẦN MỚI CỦA MINH PT ──────────────┐│
+│ │ 1. Thử thách 48h nói KHÔNG với flash sale.          ││
+│ │ 2. Chụp ảnh 2 bữa ăn chính mỗi ngày cho heo ăn.     ││
+│ └─────────────────────────────────────────────────────┘│
+│ [✨ Nút Chia Sẻ Trang Tạp Chí Anime Với Bạn Bè]        │
 ├────────────────────────────────────────────────────────┤
 │ CHẾ ĐỘ 1: PHÂN TÍCH DATA (10 Biểu Đồ Trực Quan Hóa)     │
 │ Tháng: [10] [9] [8] [7] ... (thanh chọn tháng)         │

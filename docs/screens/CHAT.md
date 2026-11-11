@@ -113,8 +113,8 @@
   │     ├── <ContextPromptChips> (Hàng chip câu hỏi gợi ý nhanh)
   │     └── <ChatInputBar> (Thanh nhập liệu: Nút chụp ảnh/thư viện, Input chữ, Nút gửi)
   │
-  └── [Ngăn 2: Bạn bè]
-        └── <FriendsComingSoonView> (Màn hình giới thiệu tính năng M2 + Nút "Báo khi có")
+  └── [Ngăn 2: Bạn bè / Squad Nuôi Heo 2.0]
+        └── <SquadLocketView> (Hội nhóm 4 bạn thân, Locket Feed, Còi cứu ví SOS, Bảng xếp hạng kỷ luật và Game PigFly 3D FPS Flight Simulator)
 ```
 
 ### Bảng Chi Tiết Props:

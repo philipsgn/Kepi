@@ -24,6 +24,7 @@ import {
   LogOut,
   MessageCircle,
   Plus,
+  Rocket,
   Send,
   ShieldCheck,
   Sparkles,
@@ -33,9 +34,10 @@ import {
 import { useSquadStore, SquadFeedItem } from '../../store/squadStore';
 import { useAuthStore } from '../../store/authStore';
 import { useTransactionStore } from '../../store/transactionStore';
+import { useGamificationStore } from '../../store/gamificationStore';
 import { useTheme } from '../../theme/ThemeContext';
 import { PigBoMascot } from '../mascot/PigBoMascot';
-import { FinancialMonopolyModal } from '../game/FinancialMonopolyModal';
+import { PigFly3DFlightModal } from '../game/PigFly3DFlightModal';
 import { formatVND } from '../../utils/currency';
 import { useBottomInset } from '../../hooks/useBottomInset';
 
@@ -68,7 +70,8 @@ export const SquadLocketView: React.FC = () => {
   const [squadNameInput, setSquadNameInput] = useState('');
   const [squadCodeInput, setSquadCodeInput] = useState('');
   const [chatInput, setChatInput] = useState('');
-  const [showMonopolyModal, setShowMonopolyModal] = useState(false);
+  const [show3DFlightModal, setShow3DFlightModal] = useState(false);
+  const { streakDays } = useGamificationStore();
 
   const currentUserName = profile?.full_name || 'Tôi';
 
@@ -225,7 +228,13 @@ export const SquadLocketView: React.FC = () => {
           </View>
         </Modal>
 
-        <FinancialMonopolyModal visible={showMonopolyModal} onClose={() => setShowMonopolyModal(false)} />
+        <PigFly3DFlightModal
+          visible={show3DFlightModal}
+          onClose={() => setShow3DFlightModal(false)}
+          streakDays={streakDays}
+          userName={currentUserName}
+          onShareToSquad={(msg) => sendSquadMessage(msg, currentUserName)}
+        />
 
         {/* MODAL NHẬP MÃ PHÒNG */}
         <Modal visible={showJoinModal} transparent animationType="fade">
@@ -317,14 +326,32 @@ export const SquadLocketView: React.FC = () => {
           </View>
         ) : null}
 
-        {/* NÚT CHƠI CỜ TỶ PHÚ TÀI CHÍNH */}
+        {/* NÚT PHÓNG CHUYẾN BAY PIGFLY 3D FPS (MARIO-STYLE UNLOCK) */}
         <TouchableOpacity
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: tokens.primary, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 14, marginBottom: 14, gap: 8 }}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: tokens.primary,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderRadius: 16,
+            marginBottom: 14,
+            gap: 8,
+          }}
           activeOpacity={0.85}
-          onPress={() => setShowMonopolyModal(true)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            setShow3DFlightModal(true);
+          }}
         >
-          <Dices size={18} color="#FFFFFF" strokeWidth={2.4} />
-          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>Cờ Tỷ Phú Đầu Tư Tài Chính 🎲</Text>
+          <Rocket size={18} color="#FFFFFF" strokeWidth={2.6} />
+          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>
+            Chuyến Bay PigFly 3D FPS 🚀
+          </Text>
+          <View style={{ backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 }}>
+            <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>{streakDays}N</Text>
+          </View>
         </TouchableOpacity>
 
         {/* 2. HÀNG AVATAR HỘI BẠN & TRẠNG THÁI HEO */}
