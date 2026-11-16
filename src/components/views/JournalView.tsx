@@ -42,6 +42,7 @@ import {
 } from '../pixel/PixelGardenWebView';
 
 // Modals & Supporting Components
+import { PixelPigAvatar } from '../pixel/PixelPigAvatar';
 import { PigFlyMascot } from '../mascot/PigBoMascot';
 import { CompactMonthGrid } from '../journal/CompactMonthGrid';
 import { DayDetailBottomSheet } from '../journal/DayDetailBottomSheet';
@@ -267,7 +268,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
             accessibilityLabel="Mở Hồ sơ"
           >
             <View style={styles.avatarInner}>
-              <PigFlyMascot size={32} />
+              <PixelPigAvatar size={34} mood="idle" borderless />
             </View>
           </TouchableOpacity>
 
@@ -427,7 +428,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
             {/* Lời nhắn thoại của Heo */}
             <View style={styles.pigTalkRow}>
               <View style={styles.pigTalkAvatar}>
-                <Text style={styles.pigTalkEmoji}>🐷</Text>
+                <PixelPigAvatar size={24} mood="happy" borderless />
               </View>
               <Text
                 style={[

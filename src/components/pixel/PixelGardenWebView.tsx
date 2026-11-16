@@ -262,7 +262,8 @@ function pickTarget(){for(let i=0;i<20;i++){const x=MINX+Math.random()*(MAXX-MIN
   if(!blocked(x,y)&&Math.hypot(x-pig.x,y-pig.y)>18)return{x,y}}return null}
 
 const bubble=document.getElementById('bubble');let bubbleUntil=0;
-let apple = null; // Quả táo rơi { x, y, targetY, active }
+let apples = []; // Chùm 3 quả táo rơi [{ x, y, targetY }]
+let treeShake = 0; // Thời gian rung lá cây
 let pondSplash = 0; // Thời gian cá quẫy sóng nước
 let lastPigTapTime = 0, pigTapCount = 0; // Đếm số lần gãi bụng
 let watering = null; // { x, y, targetX, targetY, t, dur }
@@ -311,8 +312,11 @@ function placeBubble(){
 
 function update(dt){
   pig.t+=dt;pig.ft+=dt;
-  if(apple && apple.active && apple.y < apple.targetY){
-    apple.y = Math.min(apple.targetY, apple.y + dt * 110);
+  if(treeShake > 0) treeShake = Math.max(0, treeShake - dt);
+  if(apples.length > 0){
+    apples.forEach(a => {
+      if(a.y < a.targetY) a.y = Math.min(a.targetY, a.y + dt * 110);
+    });
   }
   if(pondSplash > 0){
     pondSplash = Math.max(0, pondSplash - dt);
@@ -417,13 +421,15 @@ function draw(t){
   [{b:106,f:()=>ctx.drawImage(bananaSpr,-4,48)},{b:86,f:()=>ctx.drawImage(stoolSpr,96,70)},{b:pig.y,f:()=>drawPig(t)}]
     .sort((a,b)=>a.b-b.b).forEach(i=>i.f());
 
-  if(apple && apple.active){
-    const ax=Math.round(apple.x),ay=Math.round(apple.y);
-    ctx.fillStyle='rgba(30,50,20,.22)';
-    ctx.fillRect(ax-1,Math.round(apple.targetY)+3,6,2);
-    R(ctx,ax,ay,4,4,'#E0452B');
-    R(ctx,ax+1,ay+1,1,1,'#FFAAA5');
-    R(ctx,ax+1,ay-1,1,1,'#6E9A44');
+  if(apples.length > 0){
+    apples.forEach(a => {
+      const ax=Math.round(a.x),ay=Math.round(a.y);
+      ctx.fillStyle='rgba(30,50,20,.22)';
+      ctx.fillRect(ax-1,Math.round(a.targetY)+3,6,2);
+      R(ctx,ax,ay,4,4,'#E0452B');
+      R(ctx,ax+1,ay+1,1,1,'#FFAAA5');
+      R(ctx,ax+1,ay-1,1,1,'#6E9A44');
+    });
   }
   if(pondSplash > 0){
     const phase = (1.8 - pondSplash) * 8;
@@ -494,22 +500,27 @@ garden.addEventListener('pointerdown', e => {
         x = (e.clientX - r.left) / r.width * W,
         y = (e.clientY - r.top) / r.height * H;
 
-  // 1. Chạm vào Tán Cây Táo (Rung rụng táo)
-  if(x >= 120 && x <= 176 && y <= 45) {
-    if (apple && apple.active) {
-      say('Heo đang nhắm quả táo kìa!', 1400);
+  // 1. Chạm vào Tán Cây Táo hoặc Thân Cây (Rung rụng táo)
+  if(x >= 108 && x <= 176 && y <= 66) {
+    if (apples.length > 0) {
+      say('Heo đang nhắm chùm táo kìa!', 1400);
       return;
     }
     say('Rung cây táo nè! 🍎', 1200);
-    apple = { x: 145, y: 26, targetY: 82, active: true };
+    treeShake = 0.5;
+    apples = [
+      { x: 136, y: 22, targetY: 76 },
+      { x: 146, y: 16, targetY: 82 },
+      { x: 158, y: 24, targetY: 78 }
+    ];
     setTimeout(() => {
       say('A, có táo rơi kìa!', 1400);
-      walkTo(140, 84, () => {
+      walkTo(144, 82, () => {
         pig.face = 1;
-        setMode('eat', 2.5, () => {
-          apple = null;
+        setMode('eat', 3.0, () => {
+          apples = [];
           say('Táo ngọt giòn rụm luôn 🍎!', 1800);
-          setMode('happy', 1.5);
+          setMode('happy', 1.6);
         });
       });
     }, 400);

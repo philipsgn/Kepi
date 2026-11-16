@@ -10,7 +10,7 @@ import * as Haptics from 'expo-haptics';
 import { formatMaskedCurrency } from '../../utils/profileUtils';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
-import { PigBoMascot } from '../mascot/PigBoMascot';
+import { PixelPigAvatar } from '../pixel/PixelPigAvatar';
 
 interface ProfileIdentityCardProps {
   name: string;
@@ -79,7 +79,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
       {/* 1. HÀNG THÔNG TIN TÀI KHOẢN: AVATAR CHÚ HEO PIGFLY CHIBI */}
       <View style={styles.topRow}>
         <View style={styles.mascotAvatarWrapper}>
-          <PigBoMascot pose="welcome" size={48} />
+          <PixelPigAvatar size={48} mood="happy" />
         </View>
 
         <View style={styles.nameCol}>

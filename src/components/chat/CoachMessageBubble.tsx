@@ -7,6 +7,7 @@ import {
 import { ChatMessage } from '../../types/chat';
 import { MiniMetricCard } from './MiniMetricCard';
 import { InlineConfirmationCard } from './InlineConfirmationCard';
+import { PixelPigAvatar } from '../pixel/PixelPigAvatar';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 
@@ -35,20 +36,9 @@ export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
 
   return (
     <View style={styles.wrapper}>
-      {/* 1. AVATAR TRÒN CHỮ "M" */}
-      <View
-        style={[
-          styles.avatarBox,
-          isHeocon
-            ? {
-                backgroundColor: '#F9B8C4',
-                borderColor: '#2B2118',
-                borderWidth: 2,
-              }
-            : { backgroundColor: tokens.primary, borderColor: tokens.border },
-        ]}
-      >
-        <Text style={[styles.avatarText, isHeocon && { color: '#2B2118' }]}>M</Text>
+      {/* 1. AVATAR CHÚ HEO PIXEL */}
+      <View style={styles.avatarWrapper}>
+        <PixelPigAvatar size={32} mood="idle" borderless />
       </View>
 
       <View style={styles.bubbleCol}>
@@ -136,6 +126,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginVertical: 6,
     paddingHorizontal: 16,
+  },
+  avatarWrapper: {
+    marginRight: 10,
+    marginTop: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarBox: {
     width: 32,
