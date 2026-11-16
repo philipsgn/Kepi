@@ -473,15 +473,6 @@ export const JournalView: React.FC<JournalViewProps> = ({
               </TouchableOpacity>
             ))}
           </ScrollView>
-
-          {/* Nút Cho heo ăn 🌾 */}
-          <View style={styles.feedActionRow}>
-            <NeoButton
-              variant="gold"
-              title="Cho heo ăn 🌾"
-              onPress={handleFeedPig}
-            />
-          </View>
         </View>
 
         {/* 5. LỊCH GHI CHÉP THÁNG (COMPACT MONTH GRID 7 CỘT) */}

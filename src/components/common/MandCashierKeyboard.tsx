@@ -390,19 +390,10 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
             activeOpacity={0.85}
           >
             <Check
-              size={24}
+              size={28}
               color={isHeocon ? '#2B2118' : '#FFFFFF'}
-              strokeWidth={3}
-              style={{ marginBottom: 4 }}
+              strokeWidth={3.2}
             />
-            <Text
-              style={[
-                styles.submitKeyText,
-                isHeocon && { color: '#2B2118', fontWeight: '800' },
-              ]}
-            >
-              {submitText}
-            </Text>
           </TouchableOpacity>
         </View>
       </View>

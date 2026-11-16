@@ -262,6 +262,7 @@ function pickTarget(){for(let i=0;i<20;i++){const x=MINX+Math.random()*(MAXX-MIN
   if(!blocked(x,y)&&Math.hypot(x-pig.x,y-pig.y)>18)return{x,y}}return null}
 
 const bubble=document.getElementById('bubble');let bubbleUntil=0;
+let apple = null; // Quả táo rơi { x, y, targetY, active }
 function say(t,ms){
   bubble.textContent=t;
   bubble.classList.add('on');
@@ -280,6 +281,9 @@ function placeBubble(){
 
 function update(dt){
   pig.t+=dt;pig.ft+=dt;
+  if(apple && apple.active && apple.y < apple.targetY){
+    apple.y = Math.min(apple.targetY, apple.y + dt * 110);
+  }
   const sad=SPENT>LIMIT;
   if(pig.mode==='idle'){
     if(pig.t>pig.dur){
@@ -322,6 +326,14 @@ function draw(t){
     const dir=Math.sign(-Math.sin(f.a)*f.s)||1;R(ctx,x,y,3,2,'#F2872B');R(ctx,dir>0?x-1:x+3,y,1,1,'#FFD1A8')});
   [{b:106,f:()=>ctx.drawImage(bananaSpr,-4,48)},{b:86,f:()=>ctx.drawImage(stoolSpr,96,70)},{b:pig.y,f:()=>drawPig(t)}]
     .sort((a,b)=>a.b-b.b).forEach(i=>i.f());
+  if(apple && apple.active){
+    const ax=Math.round(apple.x),ay=Math.round(apple.y);
+    ctx.fillStyle='rgba(30,50,20,.22)';
+    ctx.fillRect(ax-1,Math.round(apple.targetY)+3,6,2);
+    R(ctx,ax,ay,4,4,'#E0452B');
+    R(ctx,ax+1,ay+1,1,1,'#FFAAA5');
+    R(ctx,ax+1,ay-1,1,1,'#6E9A44');
+  }
   ctx.drawImage(fg,0,0);
   const T=TOD[tod];
   if(T.tint){R(ctx,0,0,W,H,T.tint)}
@@ -358,6 +370,36 @@ garden.addEventListener('pointerdown', e => {
   const r = garden.getBoundingClientRect(),
         x = (e.clientX - r.left) / r.width * W,
         y = (e.clientY - r.top) / r.height * H;
+
+  // 1. Chạm vào Tán Cây Táo (Rung rụng táo)
+  if(x >= 120 && x <= 176 && y <= 45) {
+    if (apple && apple.active) {
+      say('Heo đang nhắm quả táo kìa!', 1400);
+      return;
+    }
+    say('Rung cây táo nè! 🍎', 1200);
+    apple = { x: 145, y: 26, targetY: 82, active: true };
+    setTimeout(() => {
+      say('A, có táo rơi kìa!', 1400);
+      walkTo(140, 84, () => {
+        pig.face = 1;
+        setMode('eat', 2.5, () => {
+          apple = null;
+          say('Táo ngọt giòn rụm luôn 🍎!', 1800);
+          setMode('happy', 1.5);
+        });
+      });
+    }, 400);
+    return;
+  }
+
+  // 2. Chạm vào Máng Cám (Đổ cám cho heo ăn trực tiếp)
+  if(x >= 68 && x <= 92 && y >= 102 && y <= 124) {
+    window.pigFeed();
+    return;
+  }
+
+  // 3. Chạm vào Chú Heo (Nựng Heo)
   if(x > pig.x - 13 && x < pig.x + 13 && y > pig.y - 22 && y < pig.y + 3) {
     const quotes = ['Ủn ỉn!', 'Heo đây, heo đây!', 'Gãi bụng đi nè', 'Tiết kiệm giỏi ghê!'];
     const q = quotes[(Math.random() * quotes.length) | 0];
@@ -372,6 +414,8 @@ garden.addEventListener('pointerdown', e => {
     } catch(e){}
     return;
   }
+
+  // 4. Chạm vào mặt đất để Heo đi dạo
   const tx = clamp(x, MINX, MAXX), ty = clamp(y, MINY, MAXY);
   if(blocked(tx, ty)){
     say('Ở đó có ao, heo không bơi đâu nha', 1800);
