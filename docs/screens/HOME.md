@@ -2,18 +2,25 @@
 
 > **Mã màn hình:** `HOME` (`JournalView`)  
 > **Vị trí điều hướng:** Tab 0 trên thanh Floating Pill Tab Bar  
-> **Trạng thái:** Chờ thi công (Stage A: Documentation — đã hoàn thành)  
-> **Phiên bản:** 2.0 (Style Heo Con — Kawaii Neo-Brutalist, giữ nguyên 100% features v1.0)  
-> **Lần cập nhật cuối:** 2026-11-14  
+> **Trạng thái:** Đã hoàn thành 100% (Stage B: Implementation & Verification — 60/60 tests pass)  
+> **Phiên bản:** 3.0 (Style Heo Con Pixel Neo-Brutalist, Cây Thông Noel, Đèn Đêm, Chu Trình Ăn Táo Vô Hạn & Trục Xương Sống Backend)  
+> **Lần cập nhật cuối:** 2026-11-16  
 > **Style Guide bắt buộc đọc trước:** [`docs/STYLE_HEOCON.md`](../STYLE_HEOCON.md) — mọi giá trị viền/bóng/bo/màu/chữ đều lấy từ đó.
 
 ---
 
-## 0. THAY ĐỔI V2.0 (TÓM TẮT)
+## 0. THAY ĐỔI V3.0 (TÓM TẮT)
 
-- **Đổi "da", KHÔNG đổi logic:** toàn bộ features v1.0 (thẻ hạn mức, thanh 10 ô, lịch ảnh tuần/tháng, Ẩn tiền, Chi/Thu tháng, lọc danh mục, Day Detail Sheet, Streak, Rollover, Confirmation Inbox, Quick Settings) giữ nguyên hành vi nghiệp vụ, chỉ được trình bày lại bằng hệ component Neo (`NeoCard`, `NeoButton`, `SegmentBar10`, `OverlineLabel`…).
-- **Bổ sung khu vườn pixel heo** (Plan 5/6/7) đặt phía trên thẻ "Chi hôm nay", heo phản ứng theo hạn mức ngày.
-- Theme áp dụng: **`heocon` (mặc định)** — pink/mint vẫn chạy bình thường, các component Neo tự tô màu theo token theme đang chọn.
+- **Đổi "da", KHÔNG đổi logic:** toàn bộ features v1.0 (thẻ hạn mức, thanh 10 ô, lịch ảnh tuần/tháng, Ẩn tiền, Chi/Thu tháng, lọc danh mục, Day Detail Sheet, Streak, Rollover, Confirmation Inbox, Quick Settings) giữ nguyên hành vi nghiệp vụ, được nâng cấp sang hệ component Neo (`NeoCard`, `NeoButton`, `SegmentBar10`, `OverlineLabel`…).
+- **Lưới Avatar Heo Pixel 16×16 (`PixelPigAvatar`):** Chuyển đổi toàn diện avatar PNG sang dạng lưới pixel SVG thuần 16×16 với 5 biểu cảm (`idle`, `happy`, `sad`, `blink`, `sleep`) nhún haptic.
+- **Khu vườn pixel heo tương tác cao:** 
+  - Đặt cây thông Noel 3 tầng lá với ngôi sao vàng phát sáng trên hiên nhà (`x: 42..56, y: 34..56`), dải đèn tròn dọc viền mái hiên rực sáng lung linh vào ban đêm.
+  - Chu trình ăn táo biến mất tuần tự (800ms / 1600ms / 2400ms) và vòng lặp vô hạn khi bấm lại cây táo.
+  - Tự động thay đổi cảnh trời và ánh sáng theo thời gian thực tế của điện thoại (ngày/hoàng hôn/đêm).
+- **Trục Xương Sống Backend & Động cơ Lời khuyên Ngộ nghĩnh (`pigAdviceEngine`):**
+  - Tab Home là trung tâm kết nối 2 chiều với 4 Tab (Camera, Stats, Squad/Chat, Profile).
+  - Tự động đồng bộ ngân sách và kích hoạt phản ứng của chú heo trong vườn (`PixelGardenWebView`).
+  - Sinh câu thoại dí dỏm, thông minh theo 5 mốc ngân sách và thời gian trong ngày.
 
 ---
 

@@ -26,13 +26,20 @@
 - Máy trạng thái: `pixelGarden.ts` port nguyên `update()` — 68% đi dạo / 14% ngủ / còn lại đứng; speed 24 (sad: 15) px/s; đổi khung 0.2s; dt ≤ 0.05.
 - **Liên kết ngân sách:** `spent > budget` → sprite `sad` + slow 15 px/s + bubble "Ối, lố hạn mức rồi" 1 lần khi vừa vượt; về dưới hạn mức → trở lại `stand`.
 - **Thưởng:** không có "cám"; cuối ngày dưới hạn mức tăng Streak + "Đã giữ lại X đ" (hiện trên Thẻ hạn mức & toast hiện có).
+- **Cây Thông Noel & Dây Đèn Tròn Mái Hiên (Giáng Sinh & Đêm Lung Linh):**
+  - Cây thông Noel 3 tầng tán lá xanh (`#2D5A27`, `#3E8139`), chậu gỗ mộc (`#B5603A`), đỉnh ngọn gắn ngôi sao vàng 5 cánh phát quang (`#F4B93B`, `#FFF08A`), thân đính hạt châu đỏ/vàng/trắng đặt trên hiên nhà (`x: 42..56, y: 34..56`).
+  - Dây đèn tròn treo dọc viền mái hiên (`x: 8..106, y: 49..51`).
+  - **Hiệu ứng ban đêm (`tod === 'night'`):** Hào quang vàng ấm áp rực rỡ tỏa rộng từ ngôi sao đỉnh cây (`rgba(255, 240, 140, 0.40)`), thân cây (`rgba(255, 220, 100, 0.30)`) và từng bóng đèn tròn viền mái hiên (`rgba(255, 225, 90, 0.42)`).
+  - **Tự động chuyển đổi cảnh trời theo thời gian thực:** Bắt theo đồng hồ điện thoại (`06h-16h: day`, `16h-18h: dusk`, `18h-06h: night`).
 
-## 4. Tương tác (port `pointerdown` 1:1)
+## 4. Tương tác (port `pointerdown` 1:1 & mở rộng đồ chơi tương tác)
 1. Chạm heo (hit-box x±13, y−22→+3): `happy` 1.2s + thoại ngẫu nhiên ["Ủn ỉn!","Heo đây, heo đây!","Gãi bụng đi nè"] + `Haptics.Light`.
 2. Chạm ao (blocked): "Ở đó có ao, heo không bơi đâu nha".
 3. Chạm sân: heo chạy tới (clamp vùng đi được, né ao trượt mép).
 4. "Vào chuồng": `sleep` 8s + "Heo vào chuồng ngủ đây".
-5. **Khóa cuộn:** `onStartShouldSetPanResponder` trả true trong khung → ScrollView cha không cuộn (giống lịch tháng v1.0).
+5. **Cây táo & Chu trình ăn táo vô hạn:** Bấm vào vòm cây táo (`x: 108..176, y <= 66`) $\to$ 3 quả táo rụng xuống bãi cỏ $\to$ heo chạy lại ăn ngon miệng $\to$ táo biến mất tuần tự theo từng nhịp nhai (800ms: quả 1, 1600ms: quả 2, 2400ms: quả 3, 3200ms: dọn sạch và heo vui mừng bắn tim `happy`) $\to$ cho phép bấm lại cây táo để bắt đầu chu trình mới lặp lại vô hạn.
+6. **Cây thông Noel trên hiên:** Bấm vào cây thông $\to$ bung sao lấp lánh $\to$ heo chạy lại reo: *"Giáng Sinh an lành nha! 🎄✨"*.
+7. **Khóa cuộn:** `onStartShouldSetPanResponder` trả true trong khung → ScrollView cha không cuộn (giống lịch tháng v1.0).
 
 ## 5. Props & hiệu năng
 - Props: `spentToday`, `todayBudget`, `streakDays`, `onLogExpense()`, `reducedMotion` (từ `AccessibilityInfo.isReduceMotionEnabled`).

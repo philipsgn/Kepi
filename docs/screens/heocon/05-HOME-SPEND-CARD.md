@@ -25,14 +25,17 @@
 | Phải dòng 2 | Số còn lại 18 Baloo (đỏ khi lố, có dấu `+` khi âm) | `(over?'+'+fmt(spent−limit):fmt(limit−spent))+' đ'` |
 | Giữa | `SegmentBar10` variant neo | `on=min(10,floor(spent/limit*10)); lố → toàn ô đỏ` |
 | Ngăn | `DashedDivider` 2px `#D9C9A4` | `.dash` |
-| Đáy | **Hàng heo mini (72×60, `stand`, sad khi lố + tim đỏ khi không lố) + câu thoại** | `.talk` + `message(r)` |
+| Đáy | **Hàng heo mini (`PixelPigAvatar` 24px) + Động cơ Lời khuyên Ngộ nghĩnh (`pigAdviceEngine`)** | `.talk` + `getPigContextualAdvice()` |
 
-- Câu thoại 5 bucket (§6.1 STYLE_HEOCON, port `message(r)` nguyên văn):
-  - `0` → "Chưa chi đồng nào. Heo đang ngủ gật, đừng đánh thức nha."
+- **Động cơ Lời khuyên Ngộ nghĩnh (`getPigContextualAdvice`):**
+  - Đầy đủ 5 bucket hạn mức kết hợp yếu tố thời gian trong ngày (sáng, trưa, xế chiều, đêm muộn) và chuỗi streak:
+  - `0` → "Chưa chi đồng nào. Heo đang ngủ gật, đừng đánh thức nha." (hoặc chào buổi sáng pha cà phê, hoặc khen giữ ví 0đ).
   - `<.4` → "Chi nhẹ nhàng ghê. Heo ủn ỉn khen một cái."
-  - `<.75` → "Đang vừa vặn. Heo vẫn để mắt tới nha."
-  - `≤1` → "Gần chạm hạn mức rồi. Heo bắt đầu lo lo."
-  - `>1` → "Lố hạn mức rồi... Heo buồn xíu. Mai mình chi gọn lại nha."
+  - `<.75` → "Đang vừa vặn lắm. Tránh bẫy trà sữa xế chiều là cuối tháng no đủ nha!"
+  - `≤1` → "Gần chạm nóc rồi đó! Tối nay ăn cơm nhà cho heo an lòng nha."
+  - `>1` → "Étt o étt! Lố hạn mức rồi... Heo hơi xót ví, mai mình nhịn ăn vặt bù lại nha!"
+  - `Đêm muộn (23h-05h)` → "Khuya rồi, đừng lướt săn sale nha, heo đi ngủ đây khò khò..." (`mood: sleep`).
+- `PixelPigAvatar 24px`: Tự động thay đổi biểu cảm (`happy` khi < 75%, `idle`/`blink` khi 75-100%, `sad` khi > 100%, `sleep` khi đêm muộn).
 - **Dữ liệu nguồn (giữ nguyên v1.0):** `todaySpent`, `todayBudget`, `savedMoney`, số ngày còn lại (`getDaysRemainingInMonth`), trạng thái "Chưa đặt mục tiêu" + hint khi thiếu thu nhập. Chế độ Ẩn tiền → mọi số thành `••••` (giữ `maskMoney`).
 - Số lăn `RollingNumber` 500ms giữ nguyên; font đổi sang Baloo 2 + `tabular-nums`.
 

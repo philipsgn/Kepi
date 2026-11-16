@@ -5,11 +5,12 @@
 
 ## 1. Bố cục 1:1
 ```
-[NeoAvatar 56 viền 3px bóng 0 3 0]  [Tên 24 Baloo 800 / "Chuỗi N ngày" 13 Nunito 700 muted]
+[PixelPigAvatar 44-56 viền 3px bóng 0 3 0]  [Tên 24 Baloo 800 / "Chuỗi N ngày" 13 Nunito 700 muted]
                      [NeoButton dark "Pro" icon Sparkles 14] [NeoButton round icon Settings 22]
 ```
 - CSS gốc: `.top{display:flex;align-items:center;gap:10px}` · `.who b{font:800 24px/1.1 Baloo}` · `.who span{color:var(--muted);font-weight:700;font-size:13px}`.
 - Khoảng cách phần tử: `gap 10`; avatar flex:none; `.who{flex:1;min-width:0}`.
+- **PixelPigAvatar 16×16 SVG Grid:** Port 1:1 từ `drawFace(c)` của prototype, dựng lưới SVG pixel thuần túy không mờ vỡ, hỗ trợ 5 biểu cảm (`idle`, `happy`, `sad`, `blink`, `sleep`), chạm nhún vật lý và phản hồi xúc giác Haptics.
 - Nút Pro: variant `dark` (nền ink `#2B2118`, chữ kem `#F6EEDC`) — giữ nguyên chức năng hiện có (Premium placeholder).
 - Nút cài đặt: `round` 44×44, icon `Settings` 22px stroke 2.2, mở `QuickSettingsSheet` (giữ nguyên hành vi v1.0 — AC-1 cũ: không bánh răng nổi).
 

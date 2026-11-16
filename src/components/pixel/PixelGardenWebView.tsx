@@ -7,6 +7,7 @@ const SafeWebView = WebView as unknown as React.ComponentType<any>;
 export interface PixelGardenWebViewRef {
   feedPig: () => void;
   updateBudget: (spent: number, limit: number) => void;
+  triggerReaction: (type: 'happy' | 'sad' | 'feed' | 'warn' | 'celebrate' | 'sleep') => void;
   putPigToSleep: () => void;
 }
 
@@ -30,6 +31,10 @@ export const PixelGardenWebView = forwardRef<
     },
     updateBudget: (newSpent: number, newLimit: number) => {
       const code = `if (window.setBudget) { window.setBudget(${newSpent}, ${newLimit}); }`;
+      webViewRef.current?.injectJavaScript(code);
+    },
+    triggerReaction: (type: 'happy' | 'sad' | 'feed' | 'warn' | 'celebrate' | 'sleep') => {
+      const code = `if (window.triggerReaction) { window.triggerReaction('${type}'); }`;
       webViewRef.current?.injectJavaScript(code);
     },
     putPigToSleep: () => {
@@ -531,8 +536,33 @@ window.pigFeed = function() {
 };
 
 window.setBudget = function(s, l) {
+  const wasOver = SPENT > LIMIT;
   SPENT = s;
   LIMIT = l;
+  if (SPENT > LIMIT && !wasOver) {
+    say('Ối, lố hạn mức rồi! 🥺', 2200);
+    setMode('sad', 4);
+  } else if (SPENT <= LIMIT && wasOver) {
+    say('Hạn mức an toàn rồi! ✨', 1800);
+    setMode('happy', 2);
+  }
+};
+
+window.triggerReaction = function(type) {
+  if (type === 'happy' || type === 'celebrate') {
+    say('Ủn ỉn! Tuyệt vời quá nha! ✨', 1800);
+    setMode('happy', 2.5);
+  } else if (type === 'sad') {
+    say('Hu hu, heo hơi buồn... 🥺', 2000);
+    setMode('sad', 3);
+  } else if (type === 'warn') {
+    say('Ối, cẩn thận hạn mức nha! ⚠️', 2000);
+    setMode('sad', 2.5);
+  } else if (type === 'feed') {
+    if (window.pigFeed) window.pigFeed();
+  } else if (type === 'sleep') {
+    if (window.goSleep) window.goSleep();
+  }
 };
 
 window.goSleep = function() {

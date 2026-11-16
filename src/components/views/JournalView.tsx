@@ -67,6 +67,7 @@ import {
   getVietnamDateString,
 } from '../../utils/calendarUtils';
 import { calculateStreakDays } from '../../utils/profileUtils';
+import { getPigContextualAdvice, PigAdviceResult } from '../../utils/pigAdviceEngine';
 import { Transaction } from '../../types/database';
 
 const STORAGE_PREFS_KEY = '@vi_locket_home_preferences';
@@ -116,7 +117,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
 
   // View state
   const [isPrivacyHidden, setIsPrivacyHidden] = useState<boolean>(false);
-  const [pigQuote, setPigQuote] = useState<string>('Ủn ỉn! Heo đang giữ ví giúp bạn nè.');
+  const [temporaryQuote, setTemporaryQuote] = useState<string | null>(null);
 
   // Modals & Sheets
   const [selectedDayCell, setSelectedDayCell] = useState<DayCalendarCell | null>(null);
@@ -182,23 +183,22 @@ export const JournalView: React.FC<JournalViewProps> = ({
   const remainingToday = Math.max(0, effectiveLimit - todaySpent);
   const overspentAmount = Math.max(0, todaySpent - effectiveLimit);
 
-  // Dynamic empathetic message
-  const dynamicMessage = useMemo(() => {
-    if (todaySpent === 0) {
-      return 'Chưa chi đồng nào. Heo đang ngủ gật, đừng đánh thức nha.';
-    }
-    const ratio = todaySpent / effectiveLimit;
-    if (ratio < 0.4) {
-      return 'Chi nhẹ nhàng ghê. Heo ủn ỉn khen một cái!';
-    }
-    if (ratio < 0.75) {
-      return 'Đang vừa vặn lắm. Heo vẫn để mắt canh chừng nha.';
-    }
-    if (ratio <= 1.0) {
-      return 'Gần chạm hạn mức rồi đó. Heo bắt đầu hơi lo lo.';
-    }
-    return 'Lố hạn mức rồi... Heo buồn xíu. Mai mình chi gọn lại nha!';
+  // Trục xương sống: Tự động đồng bộ ngân sách & biểu cảm xuống Vườn Pixel khi có biến động từ bất kỳ Tab nào
+  useEffect(() => {
+    gardenRef.current?.updateBudget(todaySpent, effectiveLimit);
   }, [todaySpent, effectiveLimit]);
+
+  // Động cơ Lời khuyên Ngộ nghĩnh & Biểu cảm Heo theo bối cảnh
+  const contextualAdvice: PigAdviceResult = useMemo(() => {
+    return getPigContextualAdvice({
+      todayBudget: effectiveLimit,
+      todaySpent,
+      streakDays: currentStreak,
+    });
+  }, [effectiveLimit, todaySpent, currentStreak]);
+
+  const displayedAdviceText = temporaryQuote || contextualAdvice.text;
+  const displayedPigMood = contextualAdvice.mood;
 
   // Quick log execution
   const handleExecuteQuickExpense = async (name: string, amount: number, category: string) => {
@@ -221,7 +221,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
       gardenRef.current?.feedPig();
       gardenRef.current?.updateBudget(todaySpent + amount, effectiveLimit);
 
-      setPigQuote(`${name} −${formatVND(amount)}! Heo đã ghi vào sổ rồi nha.`);
+      setTemporaryQuote(`${name} −${formatVND(amount)}! Heo đã ghi vào sổ rồi nha.`);
     } catch (e) {
       Alert.alert('Lỗi', 'Không thể ghi nhận khoản chi');
     }
@@ -245,7 +245,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
   const handleFeedPig = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     gardenRef.current?.feedPig();
-    setPigQuote('Ngon quá! Heo cảm ơn bạn nha 🌾');
+    setTemporaryQuote('Ngon quá! Heo cảm ơn bạn nha 🌾');
   };
 
   return (
@@ -351,7 +351,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
                 ref={gardenRef}
                 spent={todaySpent}
                 limit={effectiveLimit}
-                onPigTap={(quote) => setPigQuote(quote)}
+                onPigTap={(quote) => setTemporaryQuote(quote)}
               />
               {/* Badge trạng thái vườn */}
               <View style={styles.gardenStateBadge}>
@@ -425,10 +425,18 @@ export const JournalView: React.FC<JournalViewProps> = ({
 
             <DashedDivider />
 
-            {/* Lời nhắn thoại của Heo */}
-            <View style={styles.pigTalkRow}>
+            {/* Lời nhắn thoại của Heo (Động cơ Lời khuyên bối cảnh & Avatar cảm xúc) */}
+            <TouchableOpacity
+              style={styles.pigTalkRow}
+              activeOpacity={0.8}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                setTemporaryQuote(null);
+                gardenRef.current?.triggerReaction('happy');
+              }}
+            >
               <View style={styles.pigTalkAvatar}>
-                <PixelPigAvatar size={24} mood="happy" borderless />
+                <PixelPigAvatar size={24} mood={displayedPigMood} borderless />
               </View>
               <Text
                 style={[
@@ -436,9 +444,9 @@ export const JournalView: React.FC<JournalViewProps> = ({
                   { color: tokens.text || '#2B2118' },
                 ]}
               >
-                {pigQuote || dynamicMessage}
+                {displayedAdviceText}
               </Text>
-            </View>
+            </TouchableOpacity>
           </View>
         </NeoCard>
 
