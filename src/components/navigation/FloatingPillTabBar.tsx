@@ -12,7 +12,7 @@ import Animated, {
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { BarChart2, Camera, Home, MessageSquare, User } from 'lucide-react-native';
+import { BarChart2, Camera, Home, MessageSquare, Trees, User } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { TAB_BAR_HEIGHT, useBottomInset } from '../../hooks/useBottomInset';
@@ -93,11 +93,11 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
   };
 
   const tabs = [
-    { id: 'home', icon: Home, label: 'Home' },
-    { id: 'stats', icon: BarChart2, label: 'Thống kê' },
+    { id: 'home', icon: Trees, label: 'Sân Vườn' },
+    { id: 'stats', icon: Home, label: 'Nhà Heo' },
     { id: 'camera', icon: Camera, label: 'Camera', isCenter: true },
-    { id: 'chat', icon: MessageSquare, label: 'Chat' },
-    { id: 'profile', icon: User, label: 'Hồ sơ' },
+    { id: 'chat', icon: MessageSquare, label: 'Nuôi Heo' },
+    { id: 'profile', icon: User, label: 'Hồ Sơ' },
   ];
 
   return (

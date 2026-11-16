@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { Platform, StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -15,13 +15,14 @@ interface PixelGardenWebViewProps {
   spent: number;
   limit: number;
   onPigTap?: (quote: string) => void;
+  onEnterHouse?: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
 export const PixelGardenWebView = forwardRef<
   PixelGardenWebViewRef,
   PixelGardenWebViewProps
->(({ spent, limit, onPigTap, style }, ref) => {
+>(({ spent, limit, onPigTap, onEnterHouse, style }, ref) => {
   const webViewRef = useRef<any>(null);
 
   useImperativeHandle(ref, () => ({
@@ -42,6 +43,22 @@ export const PixelGardenWebView = forwardRef<
       webViewRef.current?.injectJavaScript(code);
     },
   }));
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const handleWebMsg = (e: any) => {
+      try {
+        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+        if ((data?.type === 'PIG_TAP' || data?.type === 'PIG_TALK') && onPigTap) {
+          onPigTap(data.text);
+        } else if (data?.type === 'ENTER_HOUSE' && onEnterHouse) {
+          onEnterHouse();
+        }
+      } catch (err) {}
+    };
+    window.addEventListener('message', handleWebMsg);
+    return () => window.removeEventListener('message', handleWebMsg);
+  }, [onPigTap, onEnterHouse]);
 
   const htmlSource = `
 <!DOCTYPE html>
@@ -107,12 +124,52 @@ export const PixelGardenWebView = forwardRef<
       border-bottom: 3px solid #2B2118;
       transform: translateX(-50%) rotate(45deg);
     }
+    .tl {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.2;
+      z-index: 5;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: #FFFBF1;
+      color: #2B2118;
+      border: 2px solid #2B2118;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-weight: 800;
+      font-size: 11px;
+      box-shadow: 0 2px 0 #2B2118;
+      cursor: pointer;
+    }
+    .btn.round {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+    }
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 0 #2B2118;
+    }
   </style>
 </head>
 <body>
   <div class="scene" id="scene">
     <canvas id="garden" width="176" height="132"></canvas>
     <div class="bubble" id="bubble"></div>
+    <div class="tl">
+      <button class="btn round" type="button" id="pen" aria-label="Vào nhà">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button class="btn" type="button" id="penBtn">Vào nhà</button>
+    </div>
   </div>
 
 <script>
@@ -155,25 +212,90 @@ const bg=mk(W,H,(c)=>{
   R(c,112,44,64,2,C.woodDark);R(c,112,53,64,2,C.woodDark);
   for(let x=112;x<176;x+=4){const t=40+((x/4)%3)*2;R(c,x,t,3,60-t,C.bamboo);R(c,x+2,t,1,60-t,C.bambooDark);R(c,x,t,3,1,'#EAD08A')}
   R(c,112,60,64,2,'rgba(40,60,20,.25)');
-  // nhà
-  R(c,0,10,112,40,C.wall);R(c,0,40,112,10,C.wallShade);
-  for(let i=0;i<40;i++)R(c,(rand()*110)|0,12+((rand()*30)|0),2,1,'#EAD392');
+  // ====== NGÔI NHÀ 2 TẦNG CHUẨN PIXEL (THEO TEMPLATE & NOEL) ======
+  // 1. Tường chính toàn bộ nhà x: 0..114, y: 10..50
+  R(c,0,10,114,40,C.wall);
+  R(c,0,44,114,6,C.wallShade);
+  for(let i=0;i<45;i++)R(c,(rand()*110)|0,11+((rand()*36)|0),2,1,'#EAD392');
+
+  // 2. Mái ngói đỏ 2 tầng trên đỉnh (y: 0..11)
   R(c,0,0,116,11,C.roof);
-  for(let y=2;y<9;y+=3){R(c,0,y,116,1,C.roofDark);for(let x=(y%2?0:3);x<116;x+=6)R(c,x,y+1,1,2,C.roofDark)}
+  for(let y=2;y<9;y+=3){
+    R(c,0,y,116,1,C.roofDark);
+    for(let x=(y%2?0:3);x<116;x+=6)R(c,x,y+1,1,2,C.roofDark);
+  }
   for(let x=0;x<116;x+=6)R(c,x,0,3,1,C.roofLight);
-  R(c,0,11,112,2,'rgba(60,35,20,.22)');
-  R(c,10,16,30,34,C.woodDark);R(c,12,18,12,30,C.wood);R(c,26,18,12,30,C.wood);R(c,24,18,2,30,C.woodDark);
-  for(let y=20;y<48;y+=3){R(c,12,y,12,1,C.woodLight);R(c,26,y,12,1,C.woodLight)}
-  R(c,22,33,1,3,C.gold);R(c,27,33,1,3,C.gold);
-  R(c,50,18,6,22,'#4E9A6B');R(c,86,18,6,22,'#4E9A6B');
-  for(let y=20;y<40;y+=3){R(c,51,y,4,1,'#3C7F55');R(c,87,y,4,1,'#3C7F55')}
-  R(c,56,18,30,22,C.woodDark);R(c,58,20,26,18,'#BFE3E8');R(c,70,20,2,18,C.woodDark);R(c,58,28,26,2,C.woodDark);R(c,59,21,5,3,'#E8F6F7');
-  R(c,54,40,34,2,C.woodLight);
-  R(c,96,13,1,3,C.woodDark);R(c,94,16,5,6,C.red);R(c,95,15,3,1,C.gold);R(c,95,22,3,1,C.gold);R(c,96,23,1,2,C.gold);
-  R(c,108,11,5,42,C.wood);R(c,111,11,2,42,C.woodDark);
-  // hiên
-  R(c,0,50,112,9,'#D9A878');for(let x=0;x<112;x+=9)R(c,x,50,1,9,'#C48F63');
-  R(c,0,50,112,1,C.woodLight);R(c,0,59,112,2,'#A87650');R(c,0,61,112,2,'rgba(40,30,10,.18)');
+  // Ống khói nhỏ trên nóc (x: 20..26, y: 0..4)
+  R(c,20,0,6,5,'#8E2816');R(c,19,0,8,2,'#5E1609');R(c,21,1,4,1,'#B93220');
+
+  // 3. TẦNG 2: 2 Cửa sổ lớn (x: 10..42 và x: 72..104, y: 12..24)
+  // Cửa sổ tầng 2 trái:
+  R(c,10,12,32,12,'#4B2B21');
+  R(c,11,13,30,10,'#FFF4D0');
+  // Chấn song chia 6 ô
+  R(c,21,13,1,10,'#4B2B21');R(c,31,13,1,10,'#4B2B21');R(c,11,18,30,1,'#4B2B21');
+  R(c,12,14,8,3,'#FFE699');R(c,22,14,8,3,'#FFE699');R(c,32,14,8,3,'#FFE699');
+
+  // Cửa sổ tầng 2 phải:
+  R(c,72,12,32,12,'#4B2B21');
+  R(c,73,13,30,10,'#FFF4D0');
+  // Chấn song chia 6 ô
+  R(c,83,13,1,10,'#4B2B21');R(c,93,13,1,10,'#4B2B21');R(c,73,18,30,1,'#4B2B21');
+  R(c,74,14,8,3,'#FFE699');R(c,84,14,8,3,'#FFE699');R(c,94,14,8,3,'#FFE699');
+
+  // 4. DẦM GỖ CHIA TẦNG & LAN CAN BAN CÔNG (y: 24..28)
+  R(c,0,24,115,4,'#8A5A34');
+  R(c,0,24,115,1,'#B07A48');
+  R(c,0,27,115,1,'#4B2B21');
+  // Hàng con tiện lan can
+  for(let x=6;x<110;x+=8){
+    R(c,x,22,2,3,'#5E3A20');
+    R(c,x,21,3,1,'#8A5A34');
+  }
+
+  // 5. TẦNG 1:
+  // Cột gỗ chịu lực bên hông nhà
+  R(c,110,11,5,42,C.wood);R(c,113,11,2,42,C.woodDark);
+
+  // 5.1. Cửa chính đôi ở giữa (x: 44..70, y: 26..50)
+  R(c,44,26,26,24,'#4B2B21'); // Khung cửa ngoài
+  R(c,46,28,11,22,'#8A5A34');R(c,59,28,11,22,'#8A5A34'); // 2 cánh cửa gỗ
+  R(c,57,28,2,22,'#5E3A20'); // Khe giữa
+  for(let y=31;y<48;y+=4){
+    R(c,47,y,9,1,'#C99A6B');R(c,60,y,9,1,'#C99A6B');
+  }
+  // 2 tay nắm cửa vàng
+  R(c,55,38,1,3,C.gold);R(c,60,38,1,3,C.gold);
+
+  // Đèn lồng đỏ trên cửa chính (x: 55..59, y: 21..25)
+  R(c,56,20,2,2,'#4B2B21');
+  R(c,54,22,6,5,C.red);R(c,55,21,4,1,C.gold);R(c,55,27,4,1,C.gold);R(c,56,28,2,2,C.gold);
+
+  // 5.2. Cửa sổ bên trái (Phòng làm việc - bàn + máy tính): x: 8..40, y: 28..46
+  R(c,8,28,32,18,'#4B2B21'); // Khung gỗ
+  R(c,10,30,28,14,'#D2E3F2'); // Tường trong phòng
+  // Chấn song rèm xanh
+  R(c,7,28,3,18,'#4E9A6B');R(c,38,28,3,18,'#4E9A6B');
+  // Bàn làm việc & Máy tính bên trong
+  R(c,12,39,24,5,'#B07A48');R(c,14,41,2,3,'#8A5A34');
+  R(c,18,33,12,7,'#2B2118');R(c,19,34,10,5,'#7FD4E0'); // Màn hình PC cyan
+  R(c,23,40,4,1,'#FFFFFF'); // Bàn phím
+
+  // 5.3. Cửa sổ bên phải (Phòng khách - sofa hồng): x: 74..106, y: 28..46
+  R(c,74,28,32,18,'#4B2B21'); // Khung gỗ
+  R(c,76,30,28,14,'#DCEBC9'); // Tường trong phòng
+  // Chấn song rèm xanh
+  R(c,73,28,3,18,'#4E9A6B');R(c,104,28,3,18,'#4E9A6B');
+  // Sofa hồng xinh xắn bên trong
+  R(c,78,35,24,6,'#E86F8B'); // Lưng ghế
+  R(c,76,39,28,6,'#F08DA4'); // Đệm ngồi
+  R(c,80,36,5,5,'#F4B93B'); // Gối tựa vàng
+  R(c,76,43,2,3,'#B5603A');R(c,102,43,2,3,'#B5603A'); // Chân ghế
+
+  // 6. Hiên nhà (y: 50..59)
+  R(c,0,50,114,9,'#D9A878');
+  for(let x=0;x<114;x+=9)R(c,x,50,1,9,'#C48F63');
+  R(c,0,50,114,1,C.woodLight);R(c,0,59,114,2,'#A87650');R(c,0,61,114,2,'rgba(40,30,10,.18)');
 
   // Dây đèn tròn Giáng Sinh giăng dọc mái hiên (x=8..106)
   const bulbCols=['#E0452B','#F4B93B','#3E8139','#F4B93B','#E0452B','#FFF08A'];
@@ -495,12 +617,28 @@ function draw(t){
     drawWaterCan(ctx, watering.x, watering.y);
   }
 
+  // Khi cửa mở (doorOpen > 0): vẽ cửa mở trượt để lộ lối vào tối
+  if(doorOpen > 0){
+    R(ctx, 46, 28, 22, 22, '#2B1A10');
+    R(ctx, 48, 30, 18, 20, '#F7D58A');
+    R(ctx, 48, 30, 18, 5, '#FBE7B0');
+    R(ctx, 40, 27, 6, 23, '#8A5A34');
+    R(ctx, 68, 27, 6, 23, '#8A5A34');
+  }
+
   ctx.drawImage(fg,0,0);
   const T=TOD[tod];
   if(T.tint){R(ctx,0,0,W,H,T.tint)}
   if(tod==='night'){
-    R(ctx,59,21,24,16,'#FFE08A');R(ctx,70,20,2,18,C.woodDark);R(ctx,58,28,26,2,C.woodDark);
-    E(ctx,96,19,7,7,'rgba(255,200,90,.28)');
+    // 2 Cửa sổ lớn tầng 2 bừng sáng ánh đèn vàng ấm áp
+    E(ctx, 26, 18, 16, 8, 'rgba(255, 230, 100, 0.45)');
+    E(ctx, 88, 18, 16, 8, 'rgba(255, 230, 100, 0.45)');
+    // 2 Cửa sổ lớn tầng 1 bừng sáng ánh đèn vàng ấm áp
+    E(ctx, 24, 37, 16, 9, 'rgba(255, 230, 100, 0.42)');
+    E(ctx, 90, 37, 16, 9, 'rgba(255, 230, 100, 0.42)');
+    // Đèn lồng đỏ trên cửa chính
+    E(ctx, 57, 24, 7, 7, 'rgba(255, 90, 50, 0.45)');
+
     flies.forEach(f=>{if(Math.sin(f.p+t*2)>.2)R(ctx,Math.round(f.x+Math.sin(t+f.p)*4),Math.round(f.y+Math.cos(t*.8+f.p)*3),2,2,'#FFF08A')});
 
     // Đèn vàng bừng sáng cây thông Noel & ngôi sao ⭐
@@ -516,6 +654,10 @@ function draw(t){
     }
   } else if(tod==='dusk'){
     // Chiều hoàng hôn: Đèn ửng sáng ấm áp
+    E(ctx, 26, 18, 8, 5, 'rgba(255, 210, 90, 0.25)');
+    E(ctx, 88, 18, 8, 5, 'rgba(255, 210, 90, 0.25)');
+    E(ctx, 24, 37, 8, 5, 'rgba(255, 210, 90, 0.25)');
+    E(ctx, 90, 37, 8, 5, 'rgba(255, 210, 90, 0.25)');
     E(ctx,48,34,6,6,'rgba(255,220,100,.22)');
     for(let bx=8;bx<=106;bx+=16){
       E(ctx,bx,52,3,3,'rgba(255,200,80,.20)');
@@ -570,10 +712,43 @@ window.goSleep = function() {
   setMode('sleep', 8);
 };
 
+let entering = false, doorOpen = 0;
+function enterHouse() {
+  if (entering) return;
+  entering = true;
+  doorOpen = 1;
+  say('Vào nhà thôi! 🏠', 1800);
+  walkTo(56, 54, () => {
+    try {
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ENTER_HOUSE' }));
+      } else if (window.parent) {
+        window.parent.postMessage(JSON.stringify({ type: 'ENTER_HOUSE' }), '*');
+      }
+    } catch(e) {}
+    setTimeout(() => {
+      doorOpen = 0;
+      entering = false;
+    }, 2000);
+  });
+}
+window.enterHouse = enterHouse;
+
+const penBtn = document.getElementById('penBtn');
+if (penBtn) penBtn.addEventListener('click', enterHouse);
+const pen = document.getElementById('pen');
+if (pen) pen.addEventListener('click', enterHouse);
+
 garden.addEventListener('pointerdown', e => {
   const r = garden.getBoundingClientRect(),
         x = (e.clientX - r.left) / r.width * W,
         y = (e.clientY - r.top) / r.height * H;
+
+  // 0. Chạm vào Cửa chính của ngôi nhà (x: 42..72, y: 24..54)
+  if(x >= 42 && x <= 72 && y >= 24 && y <= 54) {
+    enterHouse();
+    return;
+  }
 
   // 1. Chạm vào Tán Cây Táo hoặc Thân Cây (Rung rụng táo)
   if(x >= 108 && x <= 176 && y <= 66) {
@@ -737,8 +912,10 @@ requestAnimationFrame(loop);
         onMessage={(event: any) => {
           try {
             const data = JSON.parse(event.nativeEvent.data);
-            if (data.type === 'PIG_TAP' && onPigTap) {
+            if ((data.type === 'PIG_TAP' || data.type === 'PIG_TALK') && onPigTap) {
               onPigTap(data.text);
+            } else if (data.type === 'ENTER_HOUSE' && onEnterHouse) {
+              onEnterHouse();
             }
           } catch (e) {}
         }}

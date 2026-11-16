@@ -14,11 +14,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
-import { BarChart2, BookOpen, Camera, Eye, EyeOff, Images, Sparkles } from 'lucide-react-native';
+import { BarChart2, BookOpen, Camera, Eye, EyeOff, Home, Images, Sparkles } from 'lucide-react-native';
 import { Strings } from '../../constants/strings';
 import { useTransactionStore } from '../../store/transactionStore';
 import { useBudgetStore } from '../../store/budgetStore';
 import { Transaction } from '../../types/database';
+import { formatVND } from '../../utils/currency';
+import { PixelHouseWebView, RoomInfo } from '../pixel/PixelHouseWebView';
 import {
   MonthSectionData,
   MonthSummary,
@@ -68,11 +70,39 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
   const [isMasked, setIsMasked] = useState<boolean>(false);
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('ALL');
   const [activeMonthKey, setActiveMonthKey] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'ALBUM' | 'ANALYTICS' | 'MAGAZINE'>('ALBUM');
+  const [viewMode, setViewMode] = useState<'HOUSE' | 'ALBUM' | 'ANALYTICS' | 'MAGAZINE'>('HOUSE');
+  const [selectedHouseRoom, setSelectedHouseRoom] = useState<RoomInfo>({
+    id: 'sanh',
+    name: 'Sảnh',
+    category: 'all',
+    subtitle: 'Tổng quan',
+  });
   const [periodMode, setPeriodMode] = useState<'WEEK' | 'MONTH'>('MONTH');
 
-  const { monthlyIncome } = useBudgetStore();
+  const { monthlyIncome, savedMoney, realBalance } = useBudgetStore();
   const remainingDays = useMemo(() => getDaysRemainingInMonth(), []);
+
+  const foodSpent = useMemo(() => {
+    return transactions
+      .filter((t) => (t.status === 'CONFIRMED' || !t.status) && t.type === 'EXPENSE' && (t.category === 'an_uong' || t.category === 'cafe' || t.category === 'giai_tri'))
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  }, [transactions]);
+
+  const shopSpent = useMemo(() => {
+    return transactions
+      .filter((t) => (t.status === 'CONFIRMED' || !t.status) && t.type === 'EXPENSE' && t.category === 'mua_sam')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  }, [transactions]);
+
+  const transportSpent = useMemo(() => {
+    return transactions
+      .filter((t) => (t.status === 'CONFIRMED' || !t.status) && t.type === 'EXPENSE' && t.category === 'di_chuyen')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  }, [transactions]);
+
+  const photosCount = useMemo(() => {
+    return transactions.filter((t) => Boolean(t.photo_url)).length;
+  }, [transactions]);
 
   // Tổng chi tháng hiện tại từ transactions confirmed
   const currentMonthSpent = useMemo(() => {
@@ -369,13 +399,45 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
         </View>
       </View>
 
-      {/* 1B. NÚT GẠT CHUYỂN ĐỔI CHẾ ĐỘ: CUỐN ALBUM ẢNH (TRÁI) VS PHÂN TÍCH DATA (PHẢI) */}
+      {/* 1B. NÚT GẠT CHUYỂN ĐỔI CHẾ ĐỘ: NHÀ HEO VS ALBUM VS PHÂN TÍCH VS TẠP CHÍ */}
       <View
         style={[
           styles.segmentContainer,
           { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
         ]}
       >
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setViewMode('HOUSE');
+          }}
+          style={[
+            styles.segmentBtn,
+            viewMode === 'HOUSE' && [
+              styles.segmentBtnActive,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ],
+          ]}
+        >
+          <Home
+            size={14}
+            color={viewMode === 'HOUSE' ? tokens.primary : tokens.textMuted}
+            strokeWidth={2.4}
+          />
+          <Text
+            style={[
+              styles.segmentText,
+              {
+                color: viewMode === 'HOUSE' ? tokens.text : tokens.textMuted,
+                fontWeight: viewMode === 'HOUSE' ? '700' : '500',
+              },
+            ]}
+          >
+            Nhà Heo
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => {
@@ -474,7 +536,124 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
       </View>
 
       {/* RẼ NHÁNH CHẾ ĐỘ XEM */}
-      {viewMode === 'ALBUM' ? (
+      {viewMode === 'HOUSE' ? (
+        /* CHẾ ĐỘ XEM NHÀ HEO 2 TẦNG 6 PHÒNG */
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: contentBottomPadding + 20 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* 1. KHUNG VƯỜN PIXEL NHÀ HEO */}
+          <View style={styles.houseHeroWrapper}>
+            <PixelHouseWebView
+              onSelectRoom={(r) => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setSelectedHouseRoom(r);
+              }}
+            />
+          </View>
+
+          {/* 2. THẺ CHI TIẾT CĂN PHÒNG ĐANG CHỌN (KẾT NỐI SỐ LIỆU THẬT) */}
+          <View
+            style={[
+              styles.roomDetailCard,
+              {
+                backgroundColor: tokens.surface || '#FFFBF1',
+                borderColor: tokens.border || '#2B2118',
+              },
+            ]}
+          >
+            <View style={styles.roomDetailHeader}>
+              <View style={styles.roomBadgePill}>
+                <Text style={styles.roomBadgeText}>{selectedHouseRoom.name}</Text>
+              </View>
+              <Text style={[styles.roomSubtitleText, { color: tokens.textMuted }]}>
+                {selectedHouseRoom.subtitle}
+              </Text>
+            </View>
+
+            {selectedHouseRoom.id === 'bep' && (
+              <View style={styles.roomContentBox}>
+                <Text style={styles.roomMetricLabel}>Tổng chi Ăn uống tháng này:</Text>
+                <Text style={[styles.roomMetricValue, { color: tokens.text }]}>
+                  {isMasked ? '••••••' : formatVND(foodSpent)}
+                </Text>
+                <Text style={[styles.roomHintText, { color: tokens.textMuted }]}>
+                  🍲 Bếp luôn đỏ lửa cơm canh thơm ngon. Nhớ duy trì ăn uống lành mạnh nha!
+                </Text>
+              </View>
+            )}
+
+            {selectedHouseRoom.id === 'khach' && (
+              <View style={styles.roomContentBox}>
+                <Text style={styles.roomMetricLabel}>Tổng chi Mua sắm tháng này:</Text>
+                <Text style={[styles.roomMetricValue, { color: tokens.text }]}>
+                  {isMasked ? '••••••' : formatVND(shopSpent)}
+                </Text>
+                <Text style={[styles.roomHintText, { color: tokens.textMuted }]}>
+                  🛋️ Phòng khách sang trọng tiếp đón bạn bè. Đừng để bẫy săn sale làm vơi ví nha!
+                </Text>
+              </View>
+            )}
+
+            {selectedHouseRoom.id === 'lamviec' && (
+              <View style={styles.roomContentBox}>
+                <Text style={styles.roomMetricLabel}>Tổng chi Đi lại / Làm việc:</Text>
+                <Text style={[styles.roomMetricValue, { color: tokens.text }]}>
+                  {isMasked ? '••••••' : formatVND(transportSpent)}
+                </Text>
+                <Text style={[styles.roomHintText, { color: tokens.textMuted }]}>
+                  💻 Đi lại chăm chỉ kiếm tiền. Chú heo chúc bạn công việc luôn hanh thông!
+                </Text>
+              </View>
+            )}
+
+            {selectedHouseRoom.id === 'ngu' && (
+              <View style={styles.roomContentBox}>
+                <Text style={styles.roomMetricLabel}>Khoản tiền Đã Cứu Ví / Giữ lại được:</Text>
+                <Text style={[styles.roomMetricValue, { color: '#5E9A57' }]}>
+                  {isMasked ? '••••••' : formatVND(savedMoney)}
+                </Text>
+                <Text style={[styles.roomHintText, { color: tokens.textMuted }]}>
+                  🛏️ Giấc ngủ ngon là liều thuốc vàng. Mỗi đồng giữ lại hôm nay sẽ nuôi lớn tương lai!
+                </Text>
+              </View>
+            )}
+
+            {selectedHouseRoom.id === 'anh' && (
+              <View style={styles.roomContentBox}>
+                <Text style={styles.roomMetricLabel}>Khoảnh khắc chụp ảnh:</Text>
+                <Text style={[styles.roomMetricValue, { color: tokens.text }]}>
+                  {photosCount} ảnh kỷ niệm
+                </Text>
+                <TouchableOpacity
+                  style={styles.roomActionBtn}
+                  activeOpacity={0.8}
+                  onPress={() => setViewMode('ALBUM')}
+                >
+                  <Text style={styles.roomActionBtnText}>Xem toàn bộ Cuốn Album 📸</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {selectedHouseRoom.id === 'sanh' && (
+              <View style={styles.roomContentBox}>
+                <Text style={styles.roomMetricLabel}>Số dư ví khả dụng hiện tại:</Text>
+                <Text style={[styles.roomMetricValue, { color: '#5E9A57' }]}>
+                  {isMasked ? '••••••' : formatVND(realBalance)}
+                </Text>
+                <TouchableOpacity
+                  style={styles.roomActionBtn}
+                  activeOpacity={0.8}
+                  onPress={() => setViewMode('ANALYTICS')}
+                >
+                  <Text style={styles.roomActionBtnText}>Xem phân tích tài chính chuyên sâu 📊</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      ) : viewMode === 'ALBUM' ? (
         /* CHẾ ĐỘ CUỐN ALBUM ẢNH */
         <View style={{ flex: 1 }}>
           {/* 2. CHIP LỌC CUỘN NGANG */}
@@ -1036,5 +1215,75 @@ const styles = StyleSheet.create({
   },
   periodPillText: {
     fontSize: 12,
+  },
+  houseHeroWrapper: {
+    marginTop: 10,
+    marginBottom: 12,
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  roomDetailCard: {
+    borderWidth: 2,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#2B2118',
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  roomDetailHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+  },
+  roomBadgePill: {
+    backgroundColor: '#F4B93B',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  roomBadgeText: {
+    color: '#2B2118',
+    fontWeight: '800',
+    fontSize: 13,
+  },
+  roomSubtitleText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  roomContentBox: {
+    gap: 6,
+  },
+  roomMetricLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#85735E',
+    textTransform: 'uppercase',
+  },
+  roomMetricValue: {
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  roomHintText: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  roomActionBtn: {
+    marginTop: 10,
+    backgroundColor: '#2B2118',
+    borderRadius: 999,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  roomActionBtnText: {
+    color: '#FFFBF1',
+    fontWeight: '800',
+    fontSize: 13,
   },
 });

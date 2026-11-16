@@ -76,12 +76,14 @@ export interface JournalViewProps {
   onOpenTransactionDetail?: (tx: Transaction) => void;
   onOpenProfile?: () => void;
   onOpenCamera?: () => void;
+  onOpenHouse?: () => void;
 }
 
 export const JournalView: React.FC<JournalViewProps> = ({
   onOpenTransactionDetail,
   onOpenProfile,
   onOpenCamera,
+  onOpenHouse,
 }) => {
   const insets = useSafeAreaInsets();
   const { tokens } = useTheme();
@@ -352,6 +354,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
                 spent={todaySpent}
                 limit={effectiveLimit}
                 onPigTap={(quote) => setTemporaryQuote(quote)}
+                onEnterHouse={onOpenHouse}
               />
               {/* Badge trạng thái vườn */}
               <View style={styles.gardenStateBadge}>

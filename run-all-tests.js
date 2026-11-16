@@ -2889,4 +2889,60 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 61 Passed: Home Backend as Central Pivot, Cross-Tab Sync & Pig Advice Engine verified cleanly');
 }
 
-console.log('\n🎉 ALL 61 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (61/61)!');
+// ==========================================
+// 62. Two-Story Noel House Facade, PixelHouseWebView 6-Room System & Cross-Tab Navigation
+// ==========================================
+{
+  const assert = require('assert');
+  const fs = require('fs');
+  const path = require('path');
+
+  // 1. Kiểm tra tồn tại file PixelHouseWebView.tsx
+  const houseWebViewPath = path.join(__dirname, 'src/components/pixel/PixelHouseWebView.tsx');
+  assert.ok(fs.existsSync(houseWebViewPath), 'PixelHouseWebView.tsx must exist');
+
+  // 2. Kiểm tra nội dung PixelHouseWebView: mặt cắt 2 tầng 6 phòng và nội thất chi tiết
+  const houseCode = fs.readFileSync(houseWebViewPath, 'utf8');
+  assert.ok(houseCode.includes('W_MAP = 176, H_MAP = 108'), 'House map must be 176x108');
+  assert.ok(houseCode.includes('W_ROOM = 176, H_ROOM = 96'), 'Room interior must be 176x96');
+  assert.ok(houseCode.includes('sanh') && houseCode.includes('bep') && houseCode.includes('khach'), 'Must define Floor 1 rooms (sanh, bep, khach)');
+  assert.ok(houseCode.includes('lamviec') && houseCode.includes('anh') && houseCode.includes('ngu'), 'Must define Floor 2 rooms (lamviec, anh, ngu)');
+  assert.ok(houseCode.includes('drawMap') && houseCode.includes('drawRoom'), 'Must implement drawMap and drawRoom');
+  assert.ok(houseCode.includes('ROOM_SELECTED'), 'Must dispatch ROOM_SELECTED message');
+
+  // 3. Kiểm tra PixelGardenWebView: Mặt tiền nhà 2 tầng, cửa mở và hiệu ứng Giáng Sinh
+  const gardenWebViewPath = path.join(__dirname, 'src/components/pixel/PixelGardenWebView.tsx');
+  const gardenCode = fs.readFileSync(gardenWebViewPath, 'utf8');
+  assert.ok(gardenCode.includes('NGÔI NHÀ 2 TẦNG CHUẨN PIXEL'), 'Garden must include 2-story house facade');
+  assert.ok(gardenCode.includes('doorOpen'), 'Garden must support doorOpen animation');
+  assert.ok(gardenCode.includes('enterHouse'), 'Garden must support enterHouse function');
+  assert.ok(gardenCode.includes('ENTER_HOUSE'), 'Garden must dispatch ENTER_HOUSE message');
+  assert.ok(gardenCode.includes('onEnterHouse'), 'Garden must accept onEnterHouse prop');
+  assert.ok(gardenCode.includes('Vào nhà'), 'Garden must have Vào nhà button');
+
+  // 4. Kiểm tra FloatingPillTabBar: Chuẩn hóa 5 Tab
+  const tabBarPath = path.join(__dirname, 'src/components/navigation/FloatingPillTabBar.tsx');
+  const tabBarCode = fs.readFileSync(tabBarPath, 'utf8');
+  assert.ok(tabBarCode.includes("label: 'Sân Vườn'") && tabBarCode.includes("Trees"), 'Tab 0 must be Sân Vườn with Trees icon');
+  assert.ok(tabBarCode.includes("label: 'Nhà Heo'") && tabBarCode.includes("Home"), 'Tab 1 must be Nhà Heo with Home icon');
+
+  // 5. Kiểm tra StatsView: Tích hợp PixelHouseWebView & liên kết dữ liệu 6 phòng
+  const statsViewPath = path.join(__dirname, 'src/components/views/StatsView.tsx');
+  const statsCode = fs.readFileSync(statsViewPath, 'utf8');
+  assert.ok(statsCode.includes('PixelHouseWebView'), 'StatsView must embed PixelHouseWebView');
+  assert.ok(statsCode.includes("viewMode === 'HOUSE'"), 'StatsView must support HOUSE view mode');
+  assert.ok(statsCode.includes('foodSpent') && statsCode.includes('shopSpent') && statsCode.includes('transportSpent'), 'StatsView must calculate room spendings');
+
+  // 6. Kiểm tra JournalView & app/(main)/index.tsx: Liên kết onOpenHouse
+  const journalPath = path.join(__dirname, 'src/components/views/JournalView.tsx');
+  const journalCode = fs.readFileSync(journalPath, 'utf8');
+  assert.ok(journalCode.includes('onOpenHouse'), 'JournalView must support onOpenHouse prop');
+
+  const mainIndexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const mainIndexCode = fs.readFileSync(mainIndexPath, 'utf8');
+  assert.ok(mainIndexCode.includes('onOpenHouse={() => handleTabPress(1)}'), 'Main index must wire onOpenHouse to Tab 1');
+
+  console.log('✅ Test 62 Passed: Two-Story Noel House Facade, PixelHouseWebView 6-Room System & Cross-Tab Navigation verified cleanly');
+}
+
+console.log('\n🎉 ALL 62 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (62/62)!');

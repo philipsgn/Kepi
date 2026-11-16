@@ -1027,7 +1027,7 @@ export default function MainAppScreen() {
         scrollEnabled={false}
         style={styles.pager}
       >
-        {/* ================= PAGE 0: HOME ================= */}
+        {/* ================= PAGE 0: SÂN VƯỜN ================= */}
         <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}>
           <JournalView
             onOpenTransactionDetail={(tx) => {
@@ -1036,6 +1036,7 @@ export default function MainAppScreen() {
             }}
             onOpenProfile={() => handleTabPress(4)}
             onOpenCamera={() => handleTabPress(2)}
+            onOpenHouse={() => handleTabPress(1)}
           />
         </View>
 
