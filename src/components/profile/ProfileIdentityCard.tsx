@@ -35,7 +35,8 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
   onEditName,
   onPressStreak,
 }) => {
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
 
   const handleEditName = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -45,7 +46,23 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
   const initialLetter = name ? name.trim().charAt(0).toUpperCase() : 'U';
 
   return (
-    <View style={[styles.container, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
+    <View
+      style={[
+        styles.container,
+        isHeocon
+          ? {
+              backgroundColor: '#FFFBF1',
+              borderColor: '#2B2118',
+              borderWidth: 3,
+              shadowColor: '#2B2118',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 1,
+              shadowRadius: 0,
+              elevation: 4,
+            }
+          : { backgroundColor: tokens.surface, borderColor: tokens.border },
+      ]}
+    >
       {/* NÚT BÚT CHÌ ĐỔI TÊN NẰM SÁT GÓC TRÊN BÊN PHẢI */}
       {onEditName && (
         <TouchableOpacity
@@ -55,7 +72,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="Đổi tên người dùng"
         >
-          <Edit2 size={15} color={tokens.textMuted} strokeWidth={2.2} />
+          <Edit2 size={15} color={isHeocon ? '#2B2118' : tokens.textMuted} strokeWidth={2.2} />
         </TouchableOpacity>
       )}
 
@@ -66,16 +83,32 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
         </View>
 
         <View style={styles.nameCol}>
-          <Text style={[styles.nameText, { color: tokens.text }]} numberOfLines={1}>
+          <Text
+            style={[
+              styles.nameText,
+              { color: isHeocon ? '#2B2118' : tokens.text },
+              isHeocon && { fontWeight: '800' },
+            ]}
+            numberOfLines={1}
+          >
             {name || 'Người dùng Ví'}
           </Text>
-
-          
         </View>
       </View>
 
       {/* 2. DẢI 3 CHỈ SỐ TÓM TẮT */}
-      <View style={[styles.statsRow, { backgroundColor: tokens.surfaceAlt }]}>
+      <View
+        style={[
+          styles.statsRow,
+          isHeocon
+            ? {
+                backgroundColor: '#F6EEDC',
+                borderColor: '#2B2118',
+                borderWidth: 2,
+              }
+            : { backgroundColor: tokens.surfaceAlt },
+        ]}
+      >
         {/* Chỉ số 1: Chuỗi ngày (Bấm mở Modal Điểm Danh) */}
         <TouchableOpacity
           style={styles.statCell}
@@ -87,34 +120,72 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
           accessibilityLabel="Xem chi tiết điểm danh chuỗi ngày"
         >
           <View style={styles.statIconBadge}>
-            <Flame size={16} color={tokens.primary} strokeWidth={2.4} />
+            <Flame size={16} color={isHeocon ? '#E0452B' : tokens.primary} strokeWidth={2.4} />
           </View>
-          <Text style={[styles.statValue, { color: tokens.text }]}>{streakDays} ngày</Text>
-          <Text style={[styles.statLabel, { color: tokens.textMuted }]}>Chuỗi ghi</Text>
+          <Text
+            style={[
+              styles.statValue,
+              { color: isHeocon ? '#2B2118' : tokens.text },
+              isHeocon && { fontWeight: '800' },
+            ]}
+          >
+            {streakDays} ngày
+          </Text>
+          <Text style={[styles.statLabel, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
+            Chuỗi ghi
+          </Text>
         </TouchableOpacity>
 
-        <View style={[styles.statDivider, { backgroundColor: tokens.border }]} />
+        <View
+          style={[
+            styles.statDivider,
+            { backgroundColor: isHeocon ? '#2B2118' : tokens.border },
+          ]}
+        />
 
         {/* Chỉ số 2: Đã giữ lại */}
         <View style={styles.statCell}>
           <View style={styles.statIconBadge}>
-            <ShieldCheck size={16} color={tokens.success} strokeWidth={2.4} />
+            <ShieldCheck size={16} color={isHeocon ? '#5E9A57' : tokens.success} strokeWidth={2.4} />
           </View>
-          <Text style={[styles.statValue, { color: tokens.text }]}>
+          <Text
+            style={[
+              styles.statValue,
+              { color: isHeocon ? '#2B2118' : tokens.text },
+              isHeocon && { fontWeight: '800' },
+            ]}
+          >
             {formatMaskedCurrency(savedMoney, isMasked, false)}
           </Text>
-          <Text style={[styles.statLabel, { color: tokens.textMuted }]}>Đã giữ lại</Text>
+          <Text style={[styles.statLabel, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
+            Đã giữ lại
+          </Text>
         </View>
 
-        <View style={[styles.statDivider, { backgroundColor: tokens.border }]} />
+        <View
+          style={[
+            styles.statDivider,
+            { backgroundColor: isHeocon ? '#2B2118' : tokens.border },
+          ]}
+        />
 
         {/* Chỉ số 3: Món đã ghi */}
         <View style={styles.statCell}>
           <View style={styles.statIconBadge}>
-            <ShoppingBag size={16} color={tokens.accent} strokeWidth={2.4} />
+            <ShoppingBag size={16} color={isHeocon ? '#F4B93B' : tokens.accent} strokeWidth={2.4} />
           </View>
-          <Text style={[styles.statValue, { color: tokens.text }]}>{entriesCount} món</Text>
-          <Text style={[styles.statLabel, { color: tokens.textMuted }]}>Đã lưu</Text>
+          <Text
+            style={[
+              styles.statValue,
+              { color: isHeocon ? '#2B2118' : tokens.text },
+              isHeocon && { fontWeight: '800' },
+            ]}
+          >
+            {entriesCount} món
+          </Text>
+          <Text style={[styles.statLabel, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
+            Đã lưu
+          </Text>
         </View>
       </View>
     </View>

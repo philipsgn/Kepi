@@ -43,3 +43,38 @@
 - [ ] Kiểm thử Sao lưu & Khôi phục: Xóa app, cài lại, nhập file ZIP và kiểm chứng 100% ảnh hiển thị đầy đủ.
 - [ ] Kiểm thử cô lập dữ liệu: 2 tài khoản khác nhau không nhìn thấy dữ liệu của nhau.
 - [ ] Kiểm tra bảo mật: Quét toàn bộ log và SQLite/AsyncStorage khẳng định KHÔNG lưu STK hay số dư.
+
+---
+
+## 2. TASK MỚI (14/11/2026): ÁP DỤNG STYLE "HEO CON" NEO-BRUTALIST — HOME TRƯỚC, RỒI LAN TỎA
+
+> **Trạng thái:** TÀI LIỆU ĐÃ HOÀN THÀNH — CHỜ THI CÔNG (Agent thực thi tiếp nhận)  
+> **Docs bắt buộc đọc theo thứ tự:** `docs/AGENTS.md` (Core Directive 3) → `docs/STYLE_HEOCON.md` → `docs/screens/heocon/00-INDEX.md` (chọn đúng screen-unit) → `docs/screens/HOME.md` (v2.0) → `docs/screens/heocon/01-PIXEL-GFX-PORT.md` (code đồ họa 1:1) → `docs/DECISIONS.md` Quyết định 116 → `docs/DESIGN.md` mục 2 (cập nhật V3.3)  
+> **Nguồn chân lý đồ họa:** `prototype/Ví Heo Con.html` — port 1:1, cấm tự chế (Quy tắc Core Directive 3 AGENTS.md v4.5)  
+> **Phụ lục re-skin các màn khác:** cuối `STATS.md` / `CAMERA.md` / `CHAT.md` / `PROFILE.md` (mục 14 / 10 / 14 / 14)
+
+### Phase A: Nền tảng Style
+- [x] Cài `expo-font` + `@expo-google-fonts/baloo-2` + `@expo-google-fonts/nunito`, load trong `app/_layout.tsx` (fallback system nếu cài lỗi).
+- [x] `src/theme/tokens.ts`: thêm `heoconTokens` (đúng §3.2 STYLE_HEOCON) + ShapeTokens (viền 3, bóng cứng, radii 26/28/20/18/8/999, spacing 8/12/16/24); `ThemeMode` chuyển sang duy nhất `'heocon'` (giữ pink/mint tương thích ngược).
+- [x] `src/theme/ThemeContext.tsx`: hỗ trợ `heocon`, **mặc định khi chưa có lựa chọn = heocon**; migration `light/dark/system → heocon`.
+- [x] `src/components/neo/`: `NeoCard`, `NeoButton` (cream/dark/gold/round), `NeoChip`, `OverlineLabel`, `DashedDivider`, `NeoShadow` (lớp bóng giả Android — §2.1), `DongMark`, `NeoJar`, `SegmentBar10`. **Đặc tả chi tiết: `docs/screens/heocon/02-NEO-KIT.md`**.
+
+### Phase B: Khu vườn pixel (Home)
+- [x] `src/components/pixel/PixelGardenWebView.tsx`: nhúng 100% canvas HTML5 từ `prototype/Ví Heo Con.html` qua `SafeWebView` (`react-native-webview`) với cầu nối 2 chiều `postMessage`, PRNG `mulberry32`, hoạt ảnh đi dạo/ngủ/ăn cám 60fps, 0 native dep mới.
+- [x] Cầu nối tương tác 2 chiều: chạm vào heo kêu ủn ỉn, chạm vào sân heo chạy tới, bấm "Cho heo ăn" hoặc chip Ghi nhanh heo chạy lại ăn cám lia lịa.
+
+### Phase C: Re-skin Home (JournalView) — giữ nguyên 100% features
+- [x] Header: Avatar Heo + Tên Baloo 2 + "Chuỗi N ngày" + NeoButton Round 44x44 cho Ẩn tiền và Cài đặt.
+- [x] `PixelGardenWebView` + Thẻ "Đã chi hôm nay" đè −22px (`NeoCard overlap`): overline, số 36 Baloo tabular + `DongMark` (đ 60% gạch chân), cột phải "còn lại trên hạn mức" 16 Baloo (đỏ khi lố), `SegmentBar10`, `DashedDivider`, hàng heo mini + câu thoại (đặc tả `docs/screens/heocon/05-HOME-SPEND-CARD.md`).
+- [x] Ghi nhanh (chips + Cho heo ăn, logic `feed()` port) + Hũ/nguồn tiền (`NeoJar`).
+- [x] Re-skin toàn bộ phần còn lại (lịch tuần, sheet) bằng Neo components — KHÔNG đổi logic/store/data contract.
+
+### Phase D: Nghiệm thu
+- [x] `npx tsc --noEmit` = 0 lỗi; `node run-all-tests.js` = 100% pass (60/60 test suites passed cleanly).
+- [x] Xuất Walkthrough Report theo mẫu AGENTS.md.
+
+### Phase E: Lan tỏa 4 màn còn lại & Xuất bản Web PWA
+- [x] Làm lần lượt Stats → Camera → Chat → Profile theo đặc tả screen-unit `docs/screens/heocon/08-STATS.md` → `09-CAMERA.md` → `10-CHAT.md` → `11-PROFILE-SETTINGS.md` (kèm Phụ lục tương ứng), áp dụng đồng bộ Neo-Brutalist viền 3px mực, nền kem bơ/vàng cám, shadow cứng 0-blur.
+- [x] Tối ưu hóa Pixel Mascot Garden Web: Hỗ trợ cả Native WebView và Web Iframe trực tiếp, giữ nguyên 4 cử chỉ chuẩn mực (walk, sleep, eat, happy jump), không shop phụ kiện.
+- [x] Kiểm thử toàn diện: `npx tsc --noEmit` đạt 0 lỗi, `node run-all-tests.js` đạt 60/60 tests (100% pass), `npx expo export --platform web` xuất bản thành công.
+- [x] Đã sẵn sàng phát hành PWA lên GitHub Pages (`https://philipsgn.github.io/Kepi/`).

@@ -29,7 +29,8 @@ export const ChatTopSegmentHeader: React.FC<ChatTopSegmentHeaderProps> = ({
   activeTab,
   onSelectTab,
 }) => {
-  const { tokens } = useTheme();
+  const { tokens, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
 
   const handleSelect = (tab: ChatTab) => {
     if (tab !== activeTab) {
@@ -39,26 +40,62 @@ export const ChatTopSegmentHeader: React.FC<ChatTopSegmentHeaderProps> = ({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: tokens.bg, borderBottomColor: tokens.border }]}>
-      <View style={[styles.segmentTrack, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isHeocon ? '#F6EEDC' : tokens.bg,
+          borderBottomColor: isHeocon ? '#2B2118' : tokens.border,
+          borderBottomWidth: isHeocon ? 2 : 1,
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.segmentTrack,
+          isHeocon
+            ? {
+                backgroundColor: '#FFFBF1',
+                borderColor: '#2B2118',
+                borderWidth: 3,
+                shadowColor: '#2B2118',
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 1,
+                shadowRadius: 0,
+                elevation: 3,
+              }
+            : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+        ]}
+      >
         {/* Ngăn 1: Anh Minh AI */}
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => handleSelect('COACH')}
           style={[
             styles.segmentBtn,
-            activeTab === 'COACH' && [styles.segmentBtnActive, { backgroundColor: tokens.primary }],
+            activeTab === 'COACH' &&
+              (isHeocon
+                ? {
+                    backgroundColor: '#F4B93B',
+                    borderWidth: 2,
+                    borderColor: '#2B2118',
+                    borderRadius: radii.full,
+                  }
+                : [styles.segmentBtnActive, { backgroundColor: tokens.primary }]),
           ]}
         >
           <Sparkles
             size={14}
-            color={activeTab === 'COACH' ? '#1B2733' : tokens.textMuted}
+            color={isHeocon ? '#2B2118' : activeTab === 'COACH' ? '#1B2733' : tokens.textMuted}
             strokeWidth={2.4}
           />
           <Text
             style={[
               styles.segmentText,
-              { color: activeTab === 'COACH' ? '#1B2733' : tokens.textMuted },
+              {
+                color: isHeocon ? '#2B2118' : activeTab === 'COACH' ? '#1B2733' : tokens.textMuted,
+                fontWeight: activeTab === 'COACH' ? '800' : '600',
+              },
             ]}
           >
             {Strings.chat.coachTab}
@@ -71,18 +108,29 @@ export const ChatTopSegmentHeader: React.FC<ChatTopSegmentHeaderProps> = ({
           onPress={() => handleSelect('FRIENDS')}
           style={[
             styles.segmentBtn,
-            activeTab === 'FRIENDS' && [styles.segmentBtnActive, { backgroundColor: tokens.primary }],
+            activeTab === 'FRIENDS' &&
+              (isHeocon
+                ? {
+                    backgroundColor: '#F4B93B',
+                    borderWidth: 2,
+                    borderColor: '#2B2118',
+                    borderRadius: radii.full,
+                  }
+                : [styles.segmentBtnActive, { backgroundColor: tokens.primary }]),
           ]}
         >
           <Users
             size={14}
-            color={activeTab === 'FRIENDS' ? '#1B2733' : tokens.textMuted}
+            color={isHeocon ? '#2B2118' : activeTab === 'FRIENDS' ? '#1B2733' : tokens.textMuted}
             strokeWidth={2.2}
           />
           <Text
             style={[
               styles.segmentText,
-              { color: activeTab === 'FRIENDS' ? '#1B2733' : tokens.textMuted },
+              {
+                color: isHeocon ? '#2B2118' : activeTab === 'FRIENDS' ? '#1B2733' : tokens.textMuted,
+                fontWeight: activeTab === 'FRIENDS' ? '800' : '600',
+              },
             ]}
           >
             {Strings.chat.friendsTab}

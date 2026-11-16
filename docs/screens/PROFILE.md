@@ -338,3 +338,32 @@ Toàn bộ các thiết lập hệ thống được trình bày dưới dạng c
   - *Giải pháp:* Thiết kế hộp thoại xác nhận 2 tầng nghiêm ngặt (Double Confirmation Dialog); bắt buộc gõ mã hoặc chờ 3 giây trước khi nút Xác nhận sáng lên.
 - **Rủi ro:** Khi người dùng nhập Thu nhập nhỏ hơn Chi phí cố định khiến Định mức ngày bị âm.  
   - *Giải pháp:* Khống chế sàn tối thiểu (Floor Guard) $\text{Base Daily Budget} \ge 20.000\text{ đ}$, hiển thị thông báo ân cần từ Anh Minh để hỗ trợ người dùng cân đối lại.
+
+---
+
+## 14. PHỤ LỤC: ĐỒNG BỘ PHONG CÁCH "HEO CON" (Neo-Brutalist — v2.0)
+
+> **Bắt buộc đọc:** [`docs/STYLE_HEOCON.md`](../STYLE_HEOCON.md). Profile re-skin theo style Heo Con, **KHÔNG thay đổi** cấu trúc thẻ/logic nghiệp vụ trong §1–13.
+
+### 14.1. Áp dụng hình ngôn ngữ neo (khi theme = `heocon`)
+| Bề mặt hiện có | Re-skin theo style Heo Con |
+|---|---|
+| Thẻ Đầu Trang danh tính | `NeoCard` bo 28 viền 3px bóng cứng; avatar tròn 56 viền 3px (mặt heo pixel 16×16 khi theme heocon) |
+| Thẻ Cân Bằng Ngân Sách Số 0 | `NeoCard` bo 26; thanh trượt = "rail" viền 2px ink với thumb tròn viền 3px nền Vàng Cám; số 24–38 Baloo 800 tabular |
+| Thẻ Mục Tiêu / tiến độ | Thanh tiến độ đổi thành `SegmentBar10` variant neo (10 ô viền 2px) — số ô đầy = tiến độ, đồng bộ với Home |
+| Khối Cài Đặt (`SettingsView`) | Giữ danh sách dòng; **mỗi dòng bọc `NeoCard` bo 20 viền 3px** thay hairline; icon vector nổi trần giữ nguyên (Quyết định 66) |
+| Modal / Bottom Sheet (Goal Edit, Category Form, Bank Settings…) | Sheet nền `#FFFBF1`, viền trên 3px ink bo 28; nút Lưu = `NeoButton` gold; nút hủy = `cream`; nút nguy hiểm = nền `#E0452B` chữ kem |
+| Chip danh mục / chip preset % | `NeoChip` bo 18; đang chọn = nền Vàng Cám chữ Nâu Mực |
+
+### 14.2. Thẻ Chuyển Đổi Theme (`ThemeSettingsCard.tsx`) — cập nhật lên 3 theme chính thức
+- **Xóa trạng thái cũ `light/dark/cool`** (đã deprecated trong code). Chuẩn mới: segmented pill **3 lựa chọn**:
+  1. `[🐷 Heo Con]` — `heocon` (MẶC ĐỊNH): nền Kem Sàn `#F6EEDC`, viền nâu mực, bóng cứng.
+  2. `[🌸 Hồng Heo]` — `pink`: Kem Dâu Sữa `#FFF5F7` (giữ nguyên hiện trạng).
+  3. `[🍃 Xanh Mint]` — `mint`: Bạc Hà Sương Mai `#F0FDF9` (giữ nguyên hiện trạng).
+- Tương tác: pill viền 3px, mục đang chọn nền mực chữ kem, `Haptics.selectionAsync()`, lưu `vi_locket_theme_mode` (AsyncStorage, giá trị `heocon|pink|mint`; migration: `light/dark/system→heocon`, `cool→mint`).
+- ⚠️ Mục 3.8 hiện tại của file này mô tả `light/dark/cool` — coi như **lỗi thời**, đã thay bằng chuẩn 3 theme này.
+
+### 14.3. AC bổ sung
+- [ ] **AC-PF1:** Khi theme = `heocon`, mọi thẻ/modal/trượt đạt checklist QA §9 STYLE_HEOCON.
+- [ ] **AC-PF2:** Chuyển theme heocon ↔ pink ↔ mint hoạt động mọi tab; công thức hạn mức, Floor Guard, Ẩn tiền không đổi.
+- [ ] **AC-PF3:** Migration theme cũ (`light/dark/system/cool`) tự động về theme mới đúng, không crash.

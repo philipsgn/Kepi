@@ -697,7 +697,8 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
   favUnit,
   isMasked = false,
   onSaveBudgetSettings }) => {
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
 
   // Local state for income
   const [income, setIncome] = useState<number>(monthlyIncome);
@@ -928,9 +929,20 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
       <TouchableOpacity
         style={[
           styles.summaryCard,
-          {
-            backgroundColor: isDark ? '#162231' : '#FFFFFF',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
+          isHeocon
+            ? {
+                backgroundColor: '#FFFBF1',
+                borderColor: '#2B2118',
+                borderWidth: 3,
+                shadowColor: '#2B2118',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 1,
+                shadowRadius: 0,
+                elevation: 4,
+              }
+            : {
+                backgroundColor: isDark ? '#162231' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
         ]}
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -943,15 +955,15 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
         <View style={styles.summaryHeader}>
           <View style={styles.sectionLabelRow}>
             <View style={styles.summaryIconBadge}>
-              <Scale size={20} color={tokens.primary} strokeWidth={2.4} />
+              <Scale size={20} color={isHeocon ? '#E0452B' : tokens.primary} strokeWidth={2.4} />
             </View>
-            <Text style={[styles.summaryTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+            <Text style={[styles.summaryTitle, { color: isHeocon ? '#2B2118' : isDark ? '#FAF6EC' : '#1B2733' }]}>
               CÂN BẰNG NGÂN SÁCH
             </Text>
           </View>
 
           <View style={styles.summaryEditButton}>
-            <SlidersHorizontal size={19} color={tokens.primary} strokeWidth={2.4} />
+            <SlidersHorizontal size={19} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.4} />
           </View>
         </View>
 
@@ -959,18 +971,24 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
         <View
           style={[
             styles.summarySpotlightBox,
-            {
-              backgroundColor: isDark ? 'rgba(229, 152, 68, 0.08)' : 'rgba(229, 152, 68, 0.06)',
-              borderColor: isDark ? 'rgba(229, 152, 68, 0.2)' : 'rgba(229, 152, 68, 0.15)' },
+            isHeocon
+              ? {
+                  backgroundColor: '#F6EEDC',
+                  borderColor: '#2B2118',
+                  borderWidth: 2,
+                }
+              : {
+                  backgroundColor: isDark ? 'rgba(229, 152, 68, 0.08)' : 'rgba(229, 152, 68, 0.06)',
+                  borderColor: isDark ? 'rgba(229, 152, 68, 0.2)' : 'rgba(229, 152, 68, 0.15)' },
           ]}
         >
           <View style={styles.spotlightTopRow}>
-            <Text style={[styles.spotlightLabel, { color: tokens.textMuted }]}>
+            <Text style={[styles.spotlightLabel, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
               Hôm nay tiêu được
             </Text>
           </View>
 
-          <Text style={[styles.spotlightAmount, { color: tokens.primary }]}>
+          <Text style={[styles.spotlightAmount, { color: isHeocon ? '#2B2118' : tokens.primary }]}>
             {isMasked ? '•••• đ' : `${formatVND(autoCalculatedDaily || baseDailyBudget)} / ngày`}
           </Text>
         </View>

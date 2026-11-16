@@ -291,3 +291,29 @@ export interface MonthSectionData {
 ## 13. Rủi Ro & Giải Pháp
 - **Rủi ro:** Khi người dùng có hàng nghìn ảnh chi tiêu qua nhiều năm, việc render tất cả sẽ gây tràn bộ nhớ hoặc giật lag.
 - **Giải pháp:** Sử dụng danh sách ảo hóa chia theo Section (SectionList hoặc FlatList theo từng tháng). Chỉ tải thumbnail 240px với `expo-image` cache đĩa.
+
+---
+
+## 14. PHỤ LỤC: ĐỒNG BỘ PHONG CÁCH "HEO CON" (Neo-Brutalist — v2.0)
+
+> **Bắt buộc đọc:** [`docs/STYLE_HEOCON.md`](../STYLE_HEOCON.md). Màn Stats được re-skin theo style Heo Con, **KHÔNG thay đổi** bất kỳ logic dữ liệu/KPI/trạng thái nào trong §1–13.
+
+### 14.1. Áp dụng hình ngôn ngữ neo
+| Bề mặt hiện có | Re-skin theo style Heo Con |
+|---|---|
+| Khối/Thẻ tổng chi tháng | `NeoCard` viền 3px ink bo 28 bóng cứng `0 4 0`; số tổng 24–38 Baloo 2 · 800 tabular + "đ" 60% gạch chân |
+| Chip chọn tháng / nút "Chi tiết ›" | `NeoButton`/`NeoChip` viên thuốc viền 3px, bóng `0 3 0`, nhấn lún 2px + haptic |
+| Chip lọc danh mục | `NeoChip` bo 18; chip đang chọn = nền Vàng Cám chữ Nâu Mực |
+| Ô ảnh khoảnh khắc | Giữ chồng ảnh Locket; **viền đổi thành 3px ink bo 20** (thay viền hairline), badge `+N` = pill nền mực chữ kem |
+| Ô "Chưa có giá" / "Không mua" | Viền đứt 2px `#D9C9A4` (Chưa có giá) / viền vàng cám 3px (Không mua — giữ ngữ nghĩa) |
+| Overlay Phân Tích Data / Tạp Chí | Nền `#FFFBF1`, khối KPI = `NeoCard` bo 20; số KPI 18–24 Baloo 800 tabular |
+| Bong bóng nhận xét "heo đọc số" | `NeoBubble` viền 3px bo 14 + đuôi kim cương; giọng văn theo §6.1 STYLE_HEOCON (không mắng) |
+| Biểu đồ cột so hạn mức (nếu có) | Cột: xanh lá `#5E9A57` = dưới hạn mức, đỏ `#E0452B` = lố, kem = không ghi; đường gạch đứt hạn mức 2px `#D9C9A4` (khớp Màn 4 Plan 4) |
+
+### 14.2. Typography Stats
+- Tiêu đề tháng: 18–24 Baloo 2 · 800. Số tổng tháng: 38 tabular. Nhãn nhóm ngày "HÔM NAY"/"HÔM QUA": overline 12 · 800 · ls 0.16em · Nâu Vôi Dịu.
+- 3 KPI (Savings Rate, Burn Rate, Runway): số 24 tabular, nhãn 12 overline.
+
+### 14.3. AC bổ sung
+- [ ] **AC-SC1:** Khi theme = `heocon`, mọi thẻ/chip/overlay Stats đạt checklist QA §9 STYLE_HEOCON (viền 3px, bóng cứng, tabular, "đ" gạch chân).
+- [ ] **AC-SC2:** Khi theme = pink/mint, Stats giữ nguyên diện mạo mềm hiện có (chỉ nhận màu từ token) — không regression.

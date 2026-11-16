@@ -109,13 +109,23 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
   const formattedAmount = amount.toLocaleString('vi-VN');
 
   // Màu sắc phím bấm theo theme
-  const keypadBg = tokens.surfaceAlt;
-  const keyBg = tokens.surface;
-  const keyText = tokens.text;
-  const accentColor = tokens.primary;
+  const isHeocon = mode === 'heocon' || !mode;
+  const keypadBg = isHeocon ? '#FFFBF1' : tokens.surfaceAlt;
+  const keyBg = isHeocon ? '#FFFBF1' : tokens.surface;
+  const keyText = isHeocon ? '#2B2118' : tokens.text;
+  const accentColor = isHeocon ? '#F4B93B' : tokens.primary;
 
   return (
-    <View style={[styles.container, { backgroundColor: keypadBg, borderTopColor: tokens.border }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: keypadBg,
+          borderTopColor: isHeocon ? '#2B2118' : tokens.border,
+          borderTopWidth: isHeocon ? 3 : StyleSheet.hairlineWidth,
+        },
+      ]}
+    >
       {/* ================= ZONE 1: MICRO CATEGORY STRIP ================= */}
       <View style={styles.categoryStripWrapper}>
         <ScrollView
@@ -130,7 +140,16 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
                 key={cat.id}
                 style={[
                   styles.categoryChip,
-                  {
+                  isHeocon && {
+                    backgroundColor: isSelected ? '#F4B93B' : '#FFFBF1',
+                    borderColor: '#2B2118',
+                    borderWidth: 2,
+                    shadowColor: '#2B2118',
+                    shadowOffset: { width: 0, height: 1.5 },
+                    shadowOpacity: isSelected ? 1 : 0.4,
+                    shadowRadius: 0,
+                  },
+                  !isHeocon && {
                     backgroundColor: isSelected
                       ? isDark
                         ? 'rgba(45, 212, 191, 0.18)'
@@ -145,15 +164,23 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
                 {renderCategoryMonochromeIcon({
                   categoryId: cat.id,
                   size: 14,
-                  color: isSelected ? accentColor : tokens.textSub,
+                  color: isHeocon
+                    ? '#2B2118'
+                    : isSelected
+                    ? accentColor
+                    : tokens.textSub,
                   strokeWidth: 2.2,
                 })}
                 <Text
                   style={[
                     styles.categoryText,
                     {
-                      color: isSelected ? accentColor : tokens.textSub,
-                      fontWeight: isSelected ? '700' : '500',
+                      color: isHeocon
+                        ? '#2B2118'
+                        : isSelected
+                        ? accentColor
+                        : tokens.textSub,
+                      fontWeight: isSelected ? '800' : '600',
                     },
                   ]}
                   numberOfLines={1}
@@ -169,17 +196,27 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
       {/* ================= ZONE 2: MAND FINANCIAL AMOUNT DISPLAY ================= */}
       <View style={styles.amountDisplayRow}>
         <View style={styles.amountTextGroup}>
-          <Text style={[styles.amountValueText, { color: tokens.text }]}>
+          <Text
+            style={[
+              styles.amountValueText,
+              { color: isHeocon ? '#2B2118' : tokens.text },
+            ]}
+          >
             {formattedAmount}
           </Text>
-          <Text style={[styles.currencySuffix, { color: tokens.textSub }]}>
+          <Text
+            style={[
+              styles.currencySuffix,
+              { color: isHeocon ? '#2B2118' : tokens.textSub },
+            ]}
+          >
             đ
           </Text>
           <View
             style={[
               styles.cursorBar,
               {
-                backgroundColor: accentColor,
+                backgroundColor: isHeocon ? '#2B2118' : accentColor,
                 opacity: cursorVisible ? 1 : 0,
               },
             ]}
@@ -196,7 +233,11 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
             {['1', '2', '3'].map((d) => (
               <TouchableOpacity
                 key={d}
-                style={[styles.digitKey, { backgroundColor: keyBg }]}
+                style={[
+                  styles.digitKey,
+                  { backgroundColor: keyBg },
+                  isHeocon && styles.neoDigitKey,
+                ]}
                 onPress={() => handlePressDigit(d)}
                 activeOpacity={0.65}
               >
@@ -210,7 +251,11 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
             {['4', '5', '6'].map((d) => (
               <TouchableOpacity
                 key={d}
-                style={[styles.digitKey, { backgroundColor: keyBg }]}
+                style={[
+                  styles.digitKey,
+                  { backgroundColor: keyBg },
+                  isHeocon && styles.neoDigitKey,
+                ]}
                 onPress={() => handlePressDigit(d)}
                 activeOpacity={0.65}
               >
@@ -224,7 +269,11 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
             {['7', '8', '9'].map((d) => (
               <TouchableOpacity
                 key={d}
-                style={[styles.digitKey, { backgroundColor: keyBg }]}
+                style={[
+                  styles.digitKey,
+                  { backgroundColor: keyBg },
+                  isHeocon && styles.neoDigitKey,
+                ]}
                 onPress={() => handlePressDigit(d)}
                 activeOpacity={0.65}
               >
@@ -236,7 +285,11 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
           {/* Hàng 4: . | 0 | 000 */}
           <View style={styles.gridRow}>
             <TouchableOpacity
-              style={[styles.digitKey, { backgroundColor: keyBg }]}
+              style={[
+                styles.digitKey,
+                { backgroundColor: keyBg },
+                isHeocon && styles.neoDigitKey,
+              ]}
               onPress={() => handlePressDigit('0')}
               activeOpacity={0.65}
             >
@@ -244,19 +297,45 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.digitKey, { backgroundColor: keyBg }]}
+              style={[
+                styles.digitKey,
+                { backgroundColor: keyBg },
+                isHeocon && styles.neoDigitKey,
+              ]}
               onPress={handlePressTripleZero}
               activeOpacity={0.65}
             >
-              <Text style={[styles.digitKeySpecialText, { color: accentColor }]}>000</Text>
+              <Text
+                style={[
+                  styles.digitKeySpecialText,
+                  { color: isHeocon ? '#2B2118' : accentColor },
+                ]}
+              >
+                000
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.digitKey, { backgroundColor: keyBg }]}
+              style={[
+                styles.digitKey,
+                { backgroundColor: keyBg },
+                isHeocon && styles.neoDigitKey,
+              ]}
               onPress={handleClearAll}
               activeOpacity={0.65}
             >
-              <Text style={[styles.digitKeyText, { color: tokens.textMuted, fontSize: 16 }]}>C</Text>
+              <Text
+                style={[
+                  styles.digitKeyText,
+                  {
+                    color: isHeocon ? '#E0452B' : tokens.textMuted,
+                    fontSize: 16,
+                    fontWeight: '800',
+                  },
+                ]}
+              >
+                C
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -265,28 +344,65 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
         <View style={styles.rightActionCol}>
           {/* Nút Xóa Lùi ⌫ */}
           <TouchableOpacity
-            style={[styles.backspaceKey, { backgroundColor: keyBg }]}
+            style={[
+              styles.backspaceKey,
+              { backgroundColor: keyBg },
+              isHeocon && styles.neoBackspaceKey,
+            ]}
             onPress={handleBackspace}
             onLongPress={handleClearAll}
             activeOpacity={0.65}
           >
-            <Delete size={22} color={tokens.text} strokeWidth={2.2} />
+            <Delete
+              size={22}
+              color={isHeocon ? '#2B2118' : tokens.text}
+              strokeWidth={2.4}
+            />
           </TouchableOpacity>
 
           {/* Nút Primary LƯU SỔ (Cao chiếm 3 hàng) */}
           <TouchableOpacity
             style={[
               styles.submitKey,
-              {
-                backgroundColor: amount > 0 && !disabled ? accentColor : isDark ? '#253242' : '#E2D8C3',
-              },
+              isHeocon
+                ? {
+                    backgroundColor:
+                      amount > 0 && !disabled ? '#F4B93B' : '#E2D8C3',
+                    borderWidth: 3,
+                    borderColor: '#2B2118',
+                    shadowColor: '#2B2118',
+                    shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 1,
+                    shadowRadius: 0,
+                    elevation: 3,
+                  }
+                : {
+                    backgroundColor:
+                      amount > 0 && !disabled
+                        ? accentColor
+                        : isDark
+                        ? '#253242'
+                        : '#E2D8C3',
+                  },
             ]}
             onPress={handleSubmit}
             disabled={disabled || amount <= 0}
             activeOpacity={0.85}
           >
-            <Check size={24} color="#FFFFFF" strokeWidth={2.8} style={{ marginBottom: 4 }} />
-            <Text style={styles.submitKeyText}>{submitText}</Text>
+            <Check
+              size={24}
+              color={isHeocon ? '#2B2118' : '#FFFFFF'}
+              strokeWidth={3}
+              style={{ marginBottom: 4 }}
+            />
+            <Text
+              style={[
+                styles.submitKeyText,
+                isHeocon && { color: '#2B2118', fontWeight: '800' },
+              ]}
+            >
+              {submitText}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -429,5 +545,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     letterSpacing: 0.3,
+  },
+  neoDigitKey: {
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    borderRadius: 12,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  neoBackspaceKey: {
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    borderRadius: 12,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
   },
 });

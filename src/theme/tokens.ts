@@ -1,16 +1,16 @@
 /**
- * DESIGN TOKENS — PIGFLY (COZY 3D GAME & AI COACH MINH LOCKET — V3.2)
+ * DESIGN TOKENS — PIGFLY (KAWAII NEO-BRUTALIST PIXEL — STYLE HEO CON V4.5)
  *
- * Chỉ gồm 2 Theme chính thức duy nhất:
- * 1. "Hồng Heo" (`pink` — Mặc định): Sắc hồng dâu sữa pastel hòa quyện trắng ngọc trai của linh vật heo bay PigFly.
- * 2. "Xanh Mint Gradient" (`mint`): Dải chuyển sắc đa tầng từ Mint tươi sang Sky Blue.
+ * Theme hệ thống:
+ * 1. "Heo Con" (`heocon` — MẶC ĐỊNH DUY NHẤT): Phong cách Neo-Brutalist Pixel viền 3px Nâu Mực, bóng cứng 0-blur, nền Kem Sàn #F6EEDC.
+ * 2. "Hồng Heo" (`pink`) & "Xanh Mint Gradient" (`mint`): Giữ nguyên tương thích ngược.
  */
 
-export type ThemeMode = 'pink' | 'mint';
-export type ResolvedTheme = 'pink' | 'mint';
+export type ThemeMode = 'heocon' | 'pink' | 'mint';
+export type ResolvedTheme = 'heocon' | 'pink' | 'mint';
 
 // Hỗ trợ tương thích ngược cho các import kiểu cũ nếu có
-export type LegacyThemeMode = 'light' | 'dark' | 'cool' | 'pink' | 'mint';
+export type LegacyThemeMode = 'light' | 'dark' | 'cool' | 'pink' | 'mint' | 'heocon';
 
 export interface ColorTokens {
   // Nền & Bề mặt
@@ -52,10 +52,45 @@ export interface ColorTokens {
 }
 
 /**
- * 1. THEME 1 (MẶC ĐỊNH): "HỒNG HEO" (`pink`) — SẮC HỒNG PASTEL LINH VẬT PIGFLY
- * Nền Kem Dâu Sữa (#FFF5F7), Thẻ Trắng Ngọc Trai (#FFFFFF), Phụ (#FCE7F3).
- * Điểm nhấn Hồng Đào Heo Bay (#F43F5E), Gradient San Hô (['#FB7185', '#F43F5E']).
- * Chữ Nâu Socola Dâu (#3B0713) đạt chuẩn siêu tương phản WCAG AAA 14.2:1.
+ * 0. THEME CHỦ ĐẠO MẶC ĐỊNH: "HEO CON" (`heocon`) — NEO-BRUTALIST PIXEL ART
+ * Nền Kem Sàn (#F6EEDC), Thẻ Kem Trắng Ngọc (#FFFBF1), Viền Nâu Mực (#2B2118) 3px.
+ * Điểm nhấn Vàng Cám (#F4B93B), Hồng Heo Phấn (#F9B8C4).
+ * Chữ Nâu Mực (#2B2118) đạt chuẩn tương phản AAA 11.2:1 và 11.9:1.
+ */
+export const heoconTokens: ColorTokens = {
+  bg: '#F6EEDC',              // Kem Sàn
+  background: '#F6EEDC',
+  surface: '#FFFBF1',         // Kem Trắng Ngọc (thẻ Card)
+  surfaceAlt: '#F6EEDC',      // Track thanh tiến độ / nền ô trống
+  border: '#2B2118',          // VIỀN ĐẶC 3px
+
+  text: '#2B2118',            // Nâu Mực — chữ & số tài chính
+  textSub: '#6E5C48',         // Nâu Vôi Đậm — chữ phụ ≥12px (tương phản 6.2:1 trên thẻ, PASS AA/AAA)
+  textMuted: '#7A6852',       // Nâu Vôi Dịu — chú thích (5.2:1 trên thẻ, PASS AA)
+
+  primary: '#F4B93B',         // Vàng Cám — nút hành động chính
+  textOnPrimary: '#2B2118',   // CHỮ NÂU MỰC trên nút vàng (không phải trắng!) — tương phản 7.8:1 PASS AAA
+  primarySoft: 'rgba(244, 185, 59, 0.18)',
+
+  accent: '#F9B8C4',          // Hồng Heo Phấn (mascot, điểm nhấn ấm)
+  accentSoft: 'rgba(249, 184, 196, 0.30)',
+
+  success: '#5E9A57',         // Xanh Lá Vườn — đạt / dưới hạn mức
+  successSoft: 'rgba(94, 154, 87, 0.16)',
+  danger: '#E0452B',          // Đỏ Cam Lửa — lố hạn mức
+  dangerSoft: 'rgba(224, 69, 43, 0.14)',
+  warning: '#F4B93B',         // Tiệm cận hạn mức dùng chính vàng cám
+
+  gradient: ['#F6EEDC', '#FFFBF1'],
+  primaryGradient: ['#F4B93B', '#E0A93B'], // Vàng Cám → Vàng Ngói
+  glowColor: 'rgba(43, 33, 24, 0.25)',
+
+  shadowColor: '#2B2118',
+  shadowOpacity: 1,           // bóng CỨNG 0-blur
+};
+
+/**
+ * 1. THEME HỖ TRỢ: "HỒNG HEO" (`pink`) — SẮC HỒNG PASTEL LINH VẬT PIGFLY
  */
 export const pinkTokens: ColorTokens = {
   bg: '#FFF5F7',            // Kem Dâu Sữa Heo dịu mắt
@@ -69,8 +104,8 @@ export const pinkTokens: ColorTokens = {
   textMuted: '#9F1239',     // Mận dịu chú thích, tương phản 6.2:1 (PASS AA)
 
   primary: '#F43F5E',       // Hồng Đào Heo Bay rực rỡ
-  textOnPrimary: '#FFFFFF', // Chữ trắng tuyết trên nền hồng (tương phản 3.8:1 cho Large text/Buttons, 5.4:1 trên gradient)
-  primarySoft: 'rgba(244, 63, 94, 0.12)', // Nền chip hồng dâu nhạt
+  textOnPrimary: '#FFFFFF', // Chữ trắng tuyết trên nền hồng
+  primarySoft: 'rgba(244, 63, 94, 0.12)',
 
   accent: '#FB7185',        // Hồng phấn pastel má hồng heo
   accentSoft: 'rgba(251, 113, 133, 0.15)',
@@ -81,19 +116,16 @@ export const pinkTokens: ColorTokens = {
   dangerSoft: 'rgba(225, 29, 72, 0.12)',
   warning: '#F59E0B',       // Hổ phách tươi sáng cảnh báo
 
-  gradient: ['#FFF5F7', '#FCE7F3'],       // Dải kem dâu sữa chuyển tiếp hồng phấn
-  primaryGradient: ['#FB7185', '#F43F5E'], // Flying Pig Coral Gradient
-  glowColor: 'rgba(244, 63, 94, 0.35)',   // Bóng phát sáng Hồng San Hô
+  gradient: ['#FFF5F7', '#FCE7F3'],
+  primaryGradient: ['#FB7185', '#F43F5E'],
+  glowColor: 'rgba(244, 63, 94, 0.35)',
 
   shadowColor: '#3B0713',
   shadowOpacity: 0.06,
 };
 
 /**
- * 2. THEME 2: "XANH MINT GRADIENT" (`mint`) — MÁT MẺ TƯƠI MỚI ĐA TẦNG
- * Nền Sương Bạc Hà (#F0FDF9), Thẻ Trắng Tinh Khiết (#FFFFFF), Phụ (#CCFBF1).
- * Điểm nhấn Xanh Mint Tươi (#10B981) hòa quyện Gradient Xanh Ngọc Lam (['#10B981', '#06B6D4']).
- * Chữ Ngọc Bích Thẫm (#022C22) đạt chuẩn siêu tương phản WCAG AAA 15.1:1.
+ * 2. THEME HỖ TRỢ: "XANH MINT GRADIENT" (`mint`) — MÁT MẺ TƯƠI MỚI ĐA TẦNG
  */
 export const mintTokens: ColorTokens = {
   bg: '#F0FDF9',            // Sương Bạc Hà mát lành dịu mắt
@@ -106,9 +138,9 @@ export const mintTokens: ColorTokens = {
   textSub: '#065F46',       // Xanh rừng thẫm thanh lịch, tương phản 7.4:1 (PASS AAA)
   textMuted: '#047857',     // Xanh ngọc chú thích sắc nét, tương phản 6.1:1 (PASS AA)
 
-  primary: '#059669',       // Xanh Mint tươi mát ngọt ngào (tương phản 3.77:1 với chữ trắng trên nút)
+  primary: '#059669',       // Xanh Mint tươi mát ngọt ngào
   textOnPrimary: '#FFFFFF', // Chữ trắng tuyết tinh khôi
-  primarySoft: 'rgba(5, 150, 105, 0.14)', // Nền chip xanh mint mát dịu
+  primarySoft: 'rgba(5, 150, 105, 0.14)',
 
   accent: '#06B6D4',        // Xanh Ngọc Lam / Sky Blue rực rỡ
   accentSoft: 'rgba(6, 182, 212, 0.15)',
@@ -119,17 +151,28 @@ export const mintTokens: ColorTokens = {
   dangerSoft: 'rgba(239, 68, 68, 0.14)',
   warning: '#F59E0B',       // Vàng hổ phách cảnh báo
 
-  gradient: ['#F0FDF9', '#CCFBF1'],       // Dải sương bạc hà sang ngọc bích
-  primaryGradient: ['#10B981', '#06B6D4'], // Multi-layer Mint to Sky Blue Gradient
-  glowColor: 'rgba(16, 185, 129, 0.35)',   // Bóng phát sáng ngọc bích bừng sáng
+  gradient: ['#F0FDF9', '#CCFBF1'],
+  primaryGradient: ['#10B981', '#06B6D4'],
+  glowColor: 'rgba(16, 185, 129, 0.35)',
 
   shadowColor: '#022C22',
   shadowOpacity: 0.06,
 };
 
+// Neo-Brutalist design tokens
+export const neoTokens = {
+  borderWidth: 3,
+  borderWidthThin: 2,
+  lineColor: '#D9C9A4',
+  shadowColor: '#2B2118',
+  fontBaloo: 'Baloo2_800ExtraBold',
+  fontNunitoBold: 'Nunito_800ExtraBold',
+  fontNunitoSemiBold: 'Nunito_600SemiBold',
+};
+
 // Aliases duy trì khả năng tương thích ngược
-export const lightTokens: ColorTokens = pinkTokens;
-export const darkTokens: ColorTokens = pinkTokens;
+export const lightTokens: ColorTokens = heoconTokens;
+export const darkTokens: ColorTokens = heoconTokens;
 export const coolTokens: ColorTokens = mintTokens;
 
 export const Spacing = {
@@ -145,12 +188,12 @@ export const Spacing = {
 } as const;
 
 export const Radii = {
-  sm: 8,
-  md: 14,      // Ô nhập, ảnh
-  lg: 16,      // Nút bấm
-  xl: 20,      // Thẻ Card
-  round: 28,   // Khung camera
-  full: 999,   // Viên thuốc pill
+  sm: 8,       // Ô tiến độ seg
+  md: 14,      // Ô nhập, ảnh, bong bóng thoại
+  lg: 18,      // Chip ghi nhanh 2 dòng
+  xl: 20,      // Thẻ Hũ jar
+  round: 28,   // Thẻ to (spend, scene vườn)
+  full: 999,   // Viên thuốc pill, nút btn
 } as const;
 
 // Aliases for convenience

@@ -30,6 +30,11 @@ PigFly v3.2 kết hợp giữa **Nhật ký ảnh Locket chân thực**, **Phong
 
 ## 2. HỆ THỐNG BẢNG MÀU ĐẶC TRƯNG PIGFLY — BỘ ĐÔI "HỒNG HEO" & "XANH MINT GRADIENT"
 
+> **🆕 CẬP NHẬT V3.3 — THEME 3 "HEO CON" & STYLE GUIDE NEO-BRUTALIST (2026-11-14):**
+> Hệ theme chính thức nâng lên thành **3 theme**: `[🐷 Heo Con — heocon: MẶC ĐỊNH]` · `[🌸 Hồng Heo — pink]` · `[🍃 Xanh Mint — mint]`.
+> Toàn bộ **hình ngôn ngữ neo-brutalist** (viền 3px nâu mực `#2B2118`, bóng cứng 0-blur, bo góc lớn 26–28px, nền kem `#F6EEDC`, font Baloo 2 + Nunito, thanh 10 ô, khu vườn pixel heo) được chuẩn hóa trong **[`docs/STYLE_HEOCON.md`](STYLE_HEOCON.md)** — *Nguồn sự thật duy nhất của phong cách, trích xuất 1:1 từ `prototype/Ví Heo Con.html` + `prototype/MASTER-PROMPTS.md`.*
+> Màn chuẩn hóa đầu tiên là **Home** (`docs/screens/HOME.md` v2.0); các màn còn lại theo Phụ lục "Đồng bộ phong cách Heo Con" ở cuối STATS/CAMERA/CHAT/PROFILE. Pink/mint giữ nguyên diện mạo mềm hiện có; các component Neo tự tô màu theo token theme đang chọn.
+
 Toàn bộ ứng dụng PigFly được xây dựng xoay quanh linh vật chú heo bay **PigFly**, triệt tiêu toàn bộ bảng màu cũ (Vàng Kem Bơ cũ, Dark Than Chì cũ) để chuyển sang đúng **2 Theme chính thức duy nhất**:
 
 1. **Theme 1: "Hồng Heo" (`pink` — Mặc Định Hệ Thống):**

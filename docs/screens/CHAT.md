@@ -249,3 +249,26 @@ export interface ChatMessage {
 ## 13. Rủi Ro & Giải Pháp
 - **Rủi ro:** Khi mất mạng hoặc API Gemini bị timeout, người dùng gửi tin nhắn bị treo hoặc hiện lỗi thô kỹ thuật.
 - **Giải pháp:** Bắt timeout 8 giây; khi lỗi mạng tự động kích hoạt câu trả lời mẫu thông minh kèm thẻ số liệu từ bộ nhớ cục bộ mà không báo lỗi thô.
+
+---
+
+## 14. PHỤ LỤC: ĐỒNG BỘ PHONG CÁCH "HEO CON" (Neo-Brutalist — v2.0)
+
+> **Bắt buộc đọc:** [`docs/STYLE_HEOCON.md`](../STYLE_HEOCON.md). Chat re-skin theo style Heo Con, **KHÔNG thay đổi** luồng chat/persona/Squad trong §1–13.
+
+### 14.1. Áp dụng hình ngôn ngữ neo (khi theme = `heocon`)
+| Bề mặt hiện có | Re-skin theo style Heo Con |
+|---|---|
+| Bong bóng tin nhắn **người dùng** | Nền mực `#2B2118` chữ kem, viền 3px ink bo 14 + đuôi kim cương (thay gradient hồng/mint) |
+| Bong bóng tin nhắn **Anh Minh** | `NeoBubble`: nền `#FFFBF1` viền 3px bo 14, chữ 15 Nunito 600 ink |
+| Thẻ "Giá thật" trong khung chat | `NeoCard` bo 20 viền 3px; số tiền 24 Baloo 800 tabular; nhãn overline 12 ls 0.16em |
+| Ô nhập tin nhắn | `NeoInput`: viền 3px ink bo 999, nền `#FFFBF1`; nút gửi tròn 44 nền Vàng Cám chữ Nâu Mực |
+| Header chat / chip Squad | `NeoChip` viên thuốc viền 3px; HP heo no bụng = `SegmentBar10` variant neo (xanh/đỏ) |
+| Khối "heo phán" (nhận xét nhanh) | Pill nền mực chữ kem, giọng văn theo §6.1 STYLE_HEOCON |
+
+### 14.2. Persona & giọng điệu
+- Giữ persona "Anh PT Giữ Ví" cho Anh Minh; heo pixel (bong bóng thoại + avatar heo mini) chỉ là điểm nhấn tự nhiên theo §6 STYLE_HEOCON — không thay nhân vật chính.
+
+### 14.3. AC bổ sung
+- [ ] **AC-SH1:** Khi theme = `heocon`, bong bóng/thẻ/ô nhập đạt checklist QA §9 STYLE_HEOCON.
+- [ ] **AC-SH2:** Timeout 8s + fallback offline giữ nguyên hành vi; chỉ thay da.

@@ -62,7 +62,8 @@ type ActiveSheetType = 'BACKUP' | 'THEME' | 'WIDGET' | 'BANK' | 'QR' | null;
 export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { tokens, isDark, themeMode } = useTheme();
+  const { tokens, isDark, themeMode, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
   const { contentBottomPadding } = useBottomInset();
 
   const { user, updateProfile, signOut } = useAuthStore();
@@ -165,7 +166,23 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
 
   // Text helpers
   const themeLabel =
-    themeMode === 'mint' ? 'Xanh Mint' : 'Hồng Heo';
+    themeMode === 'heocon' ? 'Heo Con' : themeMode === 'mint' ? 'Xanh Mint' : 'Hồng Heo';
+
+  const cardBgStyle = isHeocon
+    ? {
+        backgroundColor: '#FFFBF1',
+        borderColor: '#2B2118',
+        borderWidth: 3,
+        shadowColor: '#2B2118',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 4,
+      }
+    : {
+        backgroundColor: isDark ? '#162231' : '#FFFFFF',
+        borderColor: isDark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(229, 152, 68, 0.16)',
+      };
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top + Spacing.sm }]}>
@@ -203,10 +220,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
         <View
           style={[
             styles.groupedCard,
-            {
-              backgroundColor: isDark ? '#162231' : '#FFFFFF',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(229, 152, 68, 0.16)',
-            },
+            cardBgStyle,
           ]}
         >
           <TouchableOpacity
@@ -241,10 +255,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
         <View
           style={[
             styles.groupedCard,
-            {
-              backgroundColor: isDark ? '#162231' : '#FFFFFF',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(229, 152, 68, 0.16)',
-            },
+            cardBgStyle,
           ]}
         >
           {/* Row: Theme */}
@@ -284,10 +295,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
         <View
           style={[
             styles.groupedCard,
-            {
-              backgroundColor: isDark ? '#162231' : '#FFFFFF',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(229, 152, 68, 0.16)',
-            },
+            cardBgStyle,
           ]}
         >
           {/* Row 1: Ẩn số tiền */}
@@ -323,10 +331,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
         <View
           style={[
             styles.groupedCard,
-            {
-              backgroundColor: isDark ? '#162231' : '#FFFFFF',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(229, 152, 68, 0.16)',
-            },
+            cardBgStyle,
           ]}
         >
           {/* Row 1: Lock Screen Widget */}
@@ -413,10 +418,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
         <View
           style={[
             styles.groupedCard,
-            {
-              backgroundColor: isDark ? '#162231' : '#FFFFFF',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(229, 152, 68, 0.16)',
-            },
+            cardBgStyle,
           ]}
         >
           {/* Định danh thiết bị & Lưu trữ */}

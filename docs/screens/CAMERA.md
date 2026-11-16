@@ -287,3 +287,27 @@ Nhằm tối ưu hóa trải nghiệm trên Android và mở rộng trong tươn
 - **Dải danh mục thu nhỏ (Micro Category Strip):** Nằm ngay phía trên con số tiền, gồm các icon vector nổi trần (`Ăn uống`, `Cà phê`, `Mua sắm`, `Đi lại`...) cho phép chuyển đổi 1-chạm cực nhanh.
 - **Con số to bản (Mand Amount Display):** Hiển thị số tiền kích thước 36px, `fontVariant: ['tabular-nums']`, đơn vị `đ` thanh mảnh và con trỏ nhấp nháy êm ái.
 - **Phím `000` siêu tốc & Nút Lưu 3 hàng:** Phím `000` giúp gõ nhanh tiền nghìn/trăm nghìn VND; cột ngoài cùng bên phải tích hợp phím `⌫` và nút `LƯU ✔` to bản (chiếm 3 hàng), hoàn tất ghi chép chỉ trong $\le 2$ giây.
+
+---
+
+## 10. PHỤ LỤC: ĐỒNG BỘ PHONG CÁCH "HEO CON" (Neo-Brutalist — v2.0)
+
+> **Bắt buộc đọc:** [`docs/STYLE_HEOCON.md`](../STYLE_HEOCON.md). Camera re-skin theo style Heo Con, **KHÔNG thay đổi** luồng chụp/ghi/QR/3-in-1 Hub nào trong §1–9.
+
+### 10.1. Áp dụng hình ngôn ngữ neo (khi theme = `heocon`)
+| Bề mặt hiện có | Re-skin theo style Heo Con |
+|---|---|
+| Nền màn Camera | Nền Kem Sàn `#F6EEDC` (thay gradient điện ảnh khi theme heocon; pink/mint giữ gradient) |
+| Nút Shutter | Giữ kích thước/chức năng; viền 3px ink + bóng cứng `0 4 0`, nền Vàng Cám `#F4B93B` chữ Nâu Mực; nhấn lún 2px + `Haptics.Heavy` (giữ nguyên cơ học 1-chạm) |
+| Nút Thư viện / Lật camera | `NeoButton` tròn 44 viền 3px, nền `#FFFBF1` |
+| ModeSwitchPill (capsule chế độ) | Pill viền 3px ink bo 999; mục đang chọn nền mực chữ kem |
+| Màn ghi chép `LocketReviewModal` | Sheet nền `#FFFBF1` viền trên 3px ink bo 28; số tiền 38 Baloo 2 · 800 tabular + "đ" 60% gạch chân; `MandCashierKeyboard` phím nền kem viền 2px ink, phím `000` & nút LƯU nền Vàng Cám |
+| Chip giá nhanh / Micro Category Strip | `NeoChip` bo 18 viền 3px; đang chọn = nền Vàng Cám |
+| Smart Floating Pill (tự ghi NH) | Pill nền mực `#2B2118` chữ kem, viền 3px, bóng cứng `0 3 0` |
+
+### 10.2. Ngôn ngữ heo trong luồng ghi chép (tùy chọn Phase sau)
+- Khi lưu khoản < hạn mức: heo mini `happy` 0.9s + bubble "「Món」 −45.000đ"; vừa vượt hạn mức: heo `sad` + "Ối, lố hạn mức rồi" (tái dùng `pixelGarden` speechFor).
+
+### 10.3. AC bổ sung
+- [ ] **AC-CH1:** Khi theme = `heocon`, Shutter/keyboard/sheet đạt checklist QA §9 STYLE_HEOCON; tốc độ ghi chép vẫn ≤ 2s.
+- [ ] **AC-CH2:** Luồng 3-in-1 (Shutter, VietQR, Notification Pill) không đổi hành vi; chỉ thay da.

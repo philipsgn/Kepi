@@ -116,39 +116,23 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
           styles.barContainer,
           {
             width: barWidth,
-            borderColor: tokens.border,
-            shadowColor: isDark ? 'transparent' : tokens.shadowColor,
-            shadowOpacity: isDark ? 0 : 0.08,
-            shadowRadius: isDark ? 0 : 18,
-            elevation: isDark ? 0 : 4,
+            borderColor: tokens.border || '#2B2118',
+            backgroundColor: tokens.surface || '#FFFBF1',
+            shadowColor: tokens.border || '#2B2118',
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            shadowOffset: { width: 0, height: 3 },
           },
         ]}
       >
-        {/* NỀN KÍNH MỜ THÍCH ỨNG THEME */}
-        <BlurView
-          intensity={65}
-          tint={isDark ? 'dark' : 'light'}
-          style={StyleSheet.absoluteFill}
-        >
-          <View
-            style={[
-              styles.blurTintOverlay,
-              {
-                backgroundColor: isDark
-                  ? 'rgba(22, 34, 49, 0.82)'
-                  : 'rgba(255, 253, 248, 0.82)',
-              },
-            ]}
-          />
-        </BlurView>
-
-        {/* VIÊN THUỐC TRƯỢT NỘI SUY (SLIDING PILL) - BORDERLESS */}
+        {/* VIÊN THUỐC TRƯỢT NỘI SUY (SLIDING PILL) - NEO BRUTALIST */}
         <Animated.View
           style={[
             styles.slidingPill,
             {
               width: tabWidth,
-              backgroundColor: tokens.primarySoft,
+              backgroundColor: tokens.primarySoft || 'rgba(244, 185, 59, 0.3)',
+              borderColor: tokens.border || '#2B2118',
             },
             animatedPillStyle,
           ]}
@@ -173,22 +157,24 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
                     style={[
                       styles.centerCameraCircle,
                       {
-                        backgroundColor: tokens.primary,
+                        backgroundColor: tokens.primary || '#F4B93B',
+                        borderColor: tokens.border || '#2B2118',
+                        shadowColor: tokens.border || '#2B2118',
                       },
                       isSelected && styles.centerCameraCircleActive,
                     ]}
                   >
                     <IconComponent
-                      size={21}
-                      color="#1B2733"
-                      strokeWidth={2.4}
+                      size={22}
+                      color="#2B2118"
+                      strokeWidth={2.6}
                     />
                   </View>
                 ) : (
                   <IconComponent
                     size={20}
-                    color={isSelected ? tokens.primary : tokens.textMuted}
-                    strokeWidth={isSelected ? 2.4 : 1.8}
+                    color={isSelected ? tokens.text || '#2B2118' : tokens.textMuted || '#7A6852'}
+                    strokeWidth={isSelected ? 2.6 : 2.0}
                   />
                 )}
               </TouchableOpacity>
@@ -211,18 +197,9 @@ const styles = StyleSheet.create({
   barContainer: {
     height: TAB_BAR_HEIGHT,
     borderRadius: radii.full,
-    overflow: 'hidden',
-    borderWidth: 1,
+    borderWidth: 3,
     padding: INNER_PADDING,
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 6 },
-  },
-  blurTintOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
   },
   slidingPill: {
     position: 'absolute',
@@ -230,6 +207,7 @@ const styles = StyleSheet.create({
     bottom: INNER_PADDING,
     left: INNER_PADDING,
     borderRadius: radii.full,
+    borderWidth: 2,
   },
   tabIconsRow: {
     flexDirection: 'row',
@@ -243,15 +221,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   centerCameraCircle: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     borderRadius: radii.full,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
+    borderWidth: 3,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
+    shadowOpacity: 1,
+    shadowRadius: 0,
     elevation: 3,
   },
   centerCameraCircleActive: {

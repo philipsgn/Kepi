@@ -1,7 +1,7 @@
 # QUY TẮC & QUY TRÌNH DÀNH CHO AI AGENT (AGENTS.MD)
 
 > **Dự án:** PigFly (Ví Locket) — Mobile App Chi Tiêu Bằng Ảnh, Quét Mã QR & AI-First Gamification  
-> **Phiên bản tài liệu:** NEW v4.4 (Anime Magazine 3-Segment Stats, PigFly 3D FPS Flight Simulator & Zero FEP Points)  
+> **Phiên bản tài liệu:** NEW v4.5 (Style "Heo Con" Neo-Brutalist Pixel + Bắt Buộc Bám Sát Code Đồ Họa Prototype)  
 > **Áp dụng cho:** Tất cả các AI Agent tham gia lập trình và phát triển dự án.
 
 ---
@@ -22,6 +22,17 @@
   1. Chạy toàn bộ kiểm thử xác thực: `npx tsc --noEmit` (0 lỗi) và `node run-all-tests.js` (100% pass).
   2. Xuất **Walkthrough Report** minh bạch: Ghi nhận bằng chứng kiểm thử thực tế và kế hoạch tiếp theo.
 
+### 3. QUY TẮC "BÁM SÁT CODE ĐỒ HỌA PROTOTYPE" (STYLE "HEO CON" — PIXEL NEO-BRUTALIST)
+* **Nguồn chân lý đồ họa:** `prototype/Ví Heo Con.html` (CSS + code vẽ canvas JS). Toàn bộ hình ảnh pixel (sprite heo 24×20, mặt heo 16×16, cảnh vườn Việt hóa 176×132, máy trạng thái heo) **PHẢI PORT 1:1** từ code gốc — **CẤM TỰ CHẾ** hình dáng, tọa độ, bảng màu, seed.
+* **Trước khi code BẤT KỲ màn hình/UI nào**, Agent bắt buộc đọc theo thứ tự:
+  1. `docs/STYLE_HEOCON.md` — ngôn ngữ thiết kế chung (token, viền 3px, bóng cứng 0-blur, thang chữ, giọng văn heo).
+  2. `docs/screens/heocon/` — đặc tả screen-unit nhỏ tương ứng (xem `00-INDEX.md` để chọn đúng file).
+  3. `prototype/Ví Heo Con.html` — code đồ họa gốc, đặc biệt với mọi màn có pixel art (port theo `docs/screens/heocon/01-PIXEL-GFX-PORT.md`).
+* **Quy tắc port pixel art:** giữ nguyên hex/bảng màu (`C`, `PAL`), tọa độ logic, seed `mulberry32`; chỉ được đổi API vẽ (canvas → PNG generator / RN View) và scale 4× nearest-neighbor; ≤ 32 màu; cấm làm mờ/anti-alias. Mọi lệch so với prototype phải ghi vào `docs/DECISIONS.md` kèm lý do.
+* **Token-only:** cấm hard-code hex trong component — mọi màu qua `src/theme/tokens.ts` (bảng `heoconTokens`).
+* **Giữ nguyên 100% tính năng & logic:** re-skin chỉ thay da; không đổi store/data contract/luồng nghiệp vụ.
+* **Không thêm đơn vị điểm ảo ("cám"/FEP)** — phần thưởng quy về Chuỗi Streak + "Đã giữ lại" (Quyết định 112/116).
+
 ---
 
 ## 🗺️ MA TRẬN TRA CỨU TÀI LIỆU THEO TÍNH NĂNG (FEATURE-TO-DOC MATRIX)
@@ -31,17 +42,18 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
 | Nhóm Tính Năng / Màn Hình | Tài Liệu Bắt Buộc Phải Đọc Trong `/docs` | Trọng Tâm Nghiệp Vụ Cần Nắm |
 | :--- | :--- | :--- |
 | **Toàn Bộ Dự Án (Core Vision)** | - [docs/PRD_PIGFLY_MASTER.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PRD_PIGFLY_MASTER.md)<br>- [docs/ROADMAP.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/ROADMAP.md)<br>- [docs/PAGES_FEATURES.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PAGES_FEATURES.md) | Mục tiêu sản phẩm PigFly, slogan "Tiết kiệm – Duy trì – Sinh lời bền vững", 5 trụ cột điều hướng, lộ trình chiến lược v4.1. |
-| **Giao Diện, Màu Sắc, Linh Vật** | - [docs/DESIGN.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/DESIGN.md)<br>- [docs/PIGFLY_PROMPT_STUDIO.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PIGFLY_PROMPT_STUDIO.md)<br>- [docs/screens/_TEMPLATE.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/_TEMPLATE.md) | 2 Theme độc bản: "Hồng Heo" (`pink`) và "Xanh Mint" (`mint`) chuẩn WCAG 2.1 AAA/AA, linh vật PigFly Lottie 4 Moods, 100% Vector icons nổi trần `lucide-react-native`. |
+| **Giao Diện, Màu Sắc, Linh Vật & Style "Heo Con"** | - [docs/DESIGN.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/DESIGN.md)<br>- [docs/STYLE_HEOCON.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/STYLE_HEOCON.md)<br>- [docs/screens/heocon/00-INDEX.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/00-INDEX.md)<br>- [prototype/Ví Heo Con.html](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/prototype/Ví%20Heo%20Con.html)<br>- [docs/PIGFLY_PROMPT_STUDIO.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PIGFLY_PROMPT_STUDIO.md)<br>- [docs/screens/_TEMPLATE.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/_TEMPLATE.md) | **Hệ 3 Theme: "Heo Con" (`heocon` — MẶC ĐỊNH, neo-brutalist pixel: kem `#F6EEDC` + nâu mực + hồng heo + vàng cám)**, "Hồng Heo" (`pink`) và "Xanh Mint" (`mint`) chuẩn WCAG 2.1 AAA/AA. Style Heo Con: viền 3px, bóng cứng 0-blur, font Baloo 2 + Nunito, pixel garden port 1:1 từ prototype, 100% Vector icons nổi trần `lucide-react-native`. |
 | **Game Hóa PigFly & Squad** | - [docs/features/PIGFLY_GAMIFICATION_SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/features/PIGFLY_GAMIFICATION_SPEC.md) | **Zero FEP Virtual Points (Quyết định 112 & 115)**, Động lực Chuỗi Streak (ngày), 5 Tầng Mây Tài Chính, Game PigFly 3D FPS Flight Simulator, Squad Nuôi Heo 2.0 & SOS Overspending Alarm. |
 | **Kiến Trúc, CSDL & State Store** | - [docs/TECH_ARCHITECTURE.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/TECH_ARCHITECTURE.md)<br>- [docs/DECISIONS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/DECISIONS.md)<br>- [docs/DATABASE_API_CONTRACT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/DATABASE_API_CONTRACT.md) | Cấu trúc Expo + Supabase + Zustand, RLS policies, phân lập Pure Functions, AI NLP/OCR Pipeline và Unit Tests. |
 | **Quyền Riêng Tư & Bảo Mật** | - [docs/PRIVACY.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PRIVACY.md)<br>- [docs/PRIVACY_POLICY_DRAFT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/PRIVACY_POLICY_DRAFT.md) | **Không lưu số tài khoản người nhận**, làm sạch EXIF ảnh, chế độ làm mờ "Ẩn tiền", telemetry không chứa PII. |
-| **Tab 0: Sổ Nhật Ký (Home)** | - [docs/screens/HOME.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/HOME.md) | Lịch ảnh 7 cột, Rollover 100% ngân sách ngày, chuỗi Streak, PigFly Lottie bay lơ lửng trên Greeting Header với 4 trạng thái cảm xúc thời gian thực. |
-| **Tab 1: Thống Kê (Stats)** | - [docs/screens/STATS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/STATS.md) | Cuộn Album ảnh tháng 3:4, Hộp Cảm Xúc PigFly, Báo cáo Tạp chí Anime Magazine 3 Chế Độ Xem (Album / Phân Tích / Tạp Chí) & 3 KPI Mới (Runway Score, Impulse Ratio, Savings Velocity). |
-| **Tab 2: Camera Quick Hub** | - [docs/screens/CAMERA.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/CAMERA.md) | Khung ngắm 4:5 bo góc 24px thoáng đãng 100%, nút Shutter 1-chạm nhún xúc giác, **Nút Voice-to-Expense 🎤 $\le 2$s**, **AI Receipt OCR Scanner với Carousel Fallback $\le 3$s**, cuộn Locket Stream. |
-| **Tab 3: AI Coach & Squad (Chat)** | - [docs/screens/CHAT.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/CHAT.md) | Persona Anh PT Giữ Ví, Gemini API 2 chiều, Squad Nuôi Heo 2.0 (tối đa 4 bạn thân), Còi SOS Overspending Beacon và Game PigFly 3D FPS Flight Simulator. |
-| **Tab 4: Hồ Sơ & Cài Đặt (Profile)** | - [docs/screens/PROFILE.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/screens/PROFILE.md) | Hạn mức ngày `Hôm nay tiêu được` (0 hardcode), Mục tiêu Thác nước, Cài đặt bảo mật Zero-STK minh bạch. |
-| **Quét Mã VietQR (Luồng 1)** | - [docs/features/QR_PAY.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/features/QR_PAY.md)<br>- [docs/qr/BANK_DEEPLINK_MATRIX.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/qr/BANK_DEEPLINK_MATRIX.md)<br>- [docs/qr/EMV_PARSER_SPEC.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/qr/EMV_PARSER_SPEC.md) | Nhận diện mã VietQR offline, phân luồng Autofill (MB, ICB, BIDV, ACB, OCB), deeplink v2, hỏi "Đã chuyển xong chưa?". |
-| **AI Receipt OCR & Voice (Luồng 2)** | - [docs/features/RECEIPT_UPLOAD.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/features/RECEIPT_UPLOAD.md)<br>- [docs/features/CONFIRMATION_INBOX_SPEC.md](file:///c:/Users/TanPhat/Documents/AI_E/Ví-Locket/docs/features/CONFIRMATION_INBOX_SPEC.md) | AI OCR tự động trích xuất hóa đơn sau khi chụp $\le 1$s, xuất Top 3 Carousel Fallback Selector trên bàn phím `MandCashierKeyboard`, nhập giọng nói $\le 2$s qua `voiceExpenseParser`. |
+| **Tab 0: Sổ Nhật Ký (Home)** | - [docs/screens/HOME.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/HOME.md)<br>- [docs/screens/heocon/03-HOME-HEADER.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/03-HOME-HEADER.md)<br>- [docs/screens/heocon/04-HOME-GARDEN.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/04-HOME-GARDEN.md)<br>- [docs/screens/heocon/05-HOME-SPEND-CARD.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/05-HOME-SPEND-CARD.md)<br>- [docs/screens/heocon/06-HOME-QUICKLOG-JARS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/06-HOME-QUICKLOG-JARS.md)<br>- [docs/screens/heocon/07-HOME-CALENDAR.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/07-HOME-CALENDAR.md) | Lịch ảnh 7 cột, Rollover 100% ngân sách ngày, chuỗi Streak, **Pixel Garden port 1:1 từ prototype** (heo 24×20, vườn 176×132, máy trạng thái), thẻ "Chi hôm nay" đè −22px với 10 ô hạn mức. |
+| **Tab 1: Thống Kê (Stats)** | - [docs/screens/STATS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/STATS.md)<br>- [docs/screens/heocon/08-STATS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/08-STATS.md) | Cuộn Album ảnh tháng 3:4, Hộp Cảm Xúc PigFly, Báo cáo Tạp chí Anime Magazine 3 Chế Độ Xem (Album / Phân Tích / Tạp Chí) & 3 KPI Mới (Runway Score, Impulse Ratio, Savings Velocity). Re-skin Heo Con: viền 3px ink, nhãn giá pill nền mực. |
+| **Tab 2: Camera Quick Hub** | - [docs/screens/CAMERA.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/CAMERA.md)<br>- [docs/screens/heocon/09-CAMERA.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/09-CAMERA.md) | Khung ngắm 4:5 bo góc 24px thoáng đãng 100%, nút Shutter 1-chạm nhún xúc giác, **Nút Voice-to-Expense 🎤 $\le 2$s**, **AI Receipt OCR Scanner với Carousel Fallback $\le 3$s**, cuộn Locket Stream. Re-skin Heo Con: Shutter vàng cám viền 3px, keyboard phím viền 2px ink. |
+| **Tab 3: AI Coach & Squad (Chat)** | - [docs/screens/CHAT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/CHAT.md)<br>- [docs/screens/heocon/10-CHAT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-CHAT.md) | Persona Anh Minh Giữ Ví, Gemini API 2 chiều, Squad Nuôi Heo 2.0 (tối đa 4 bạn thân), Còi SOS Overspending Beacon và Game PigFly 3D FPS Flight Simulator. Re-skin Heo Con: bong bóng viền 3px + đuôi kim cương. |
+| **Tab 4: Hồ Sơ & Cài Đặt (Profile)** | - [docs/screens/PROFILE.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/PROFILE.md)<br>- [docs/screens/heocon/11-PROFILE-SETTINGS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/11-PROFILE-SETTINGS.md) | Hạn mức ngày `Hôm nay tiêu được` (0 hardcode), Mục tiêu Thác nước, Cài đặt bảo mật Zero-STK minh bạch. Re-skin Heo Con + **Theme 3-way switch (`heocon`/`pink`/`mint`)**. |
+| **Quét Mã VietQR (Luồng 1)** | - [docs/features/QR_PAY.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/features/QR_PAY.md)<br>- [docs/qr/BANK_DEEPLINK_MATRIX.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/qr/BANK_DEEPLINK_MATRIX.md)<br>- [docs/qr/EMV_PARSER_SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/qr/EMV_PARSER_SPEC.md) | Nhận diện mã VietQR offline, phân luồng Autofill (MB, ICB, BIDV, ACB, OCB), deeplink v2, hỏi "Đã chuyển xong chưa?". |
+| **Login & Onboarding** | - [docs/screens/heocon/12-LOGIN-ONBOARDING.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/12-LOGIN-ONBOARDING.md) | Luồng 1-chạm Local-First ≤ 0.5s (biệt danh + năm sinh, 0 pre-filled), badge pill "● PIGFLY", nền pastel đơn sắc, Nút Nguồn bừng Vàng Cám. |
+| **AI Receipt OCR & Voice (Luồng 2)** | - [docs/features/RECEIPT_UPLOAD.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/features/RECEIPT_UPLOAD.md)<br>- [docs/features/CONFIRMATION_INBOX_SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/features/CONFIRMATION_INBOX_SPEC.md) | AI OCR tự động trích xuất hóa đơn sau khi chụp $\le 1$s, xuất Top 3 Carousel Fallback Selector trên bàn phím `MandCashierKeyboard`, nhập giọng nói $\le 2$s qua `voiceExpenseParser`. |
 
 ---
 
@@ -51,7 +63,10 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
 ┌────────────────────────────────────────────────────────────────────────┐
 │ BƯỚC 1: TRA CỨU VÀ ĐỌC TÀI LIỆU THEO TÍNH NĂNG (Context Loading)       │
 │ Tra cứu Ma trận Feature-to-Doc và nạp đầy đủ tài liệu liên quan trong   │
-│ thư mục /docs/ trước khi suy nghĩ giải pháp.                           │
+│ thư mục /docs/ trước khi suy nghĩ giải pháp.                            │
+│ ► Có pixel art? BẮT BUỘC đọc thêm code đồ họa gốc trong                 │
+│   prototype/Ví Heo Con.html + docs/screens/heocon/01-PIXEL-GFX-PORT.md  │
+│   (port 1:1 — cấm tự chế hình dáng/tọa độ/bảng màu).                    │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
                                     ▼
@@ -86,20 +101,22 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
 
 ## 🎨 QUY CHUẨN THIẾT KẾ & THẨM MỸ (AESTHETIC RULES)
 
-1. **Hệ Thống 2 Theme Độc Bản (Hồng Heo & Xanh Mint) & WCAG 2.1:**
+1. **Hệ Thống 3 Theme (Heo Con — Mặc Định, Hồng Heo, Xanh Mint) & WCAG 2.1:**
    - CẤM dùng màu mặc định cẩu thả (`#FF0000`, `#00FF00`, `#0000FF`).
    - Mọi component bắt buộc dùng token màu từ `src/theme/tokens.ts`:
-     - **Theme Hồng Heo (`pink` - Mặc định):** Tông hồng pastel ngọt ngào ấm cúng, tương phản WCAG AAA/AA cao.
+     - **Theme Heo Con (`heocon` - MẶC ĐỊNH, neo-brutalist pixel):** Kem Sàn `#F6EEDC` + Nâu Mực `#2B2118` + Hồng Heo `#F9B8C4` + Vàng Cám `#F4B93B`. Viền 3px ink, bóng cứng 0-blur, hình ngôn ngữ neo-brutalist — chi tiết đầy đủ trong `docs/STYLE_HEOCON.md`. `textOnPrimary` = Nâu Mực (KHÔNG phải trắng).
+     - **Theme Hồng Heo (`pink`):** Tông hồng pastel ngọt ngào ấm cúng, tương phản WCAG AAA/AA cao.
      - **Theme Xanh Mint (`mint`):** Tông xanh ngọc bạc hà tươi mát, gradient dịu nhẹ thư thái.
-     - Nút hành động / Accent: Nắng Thu Hà Nội `#E59844` (tương phản 8.2:1 trên nền tối).
-     - Trạng thái An toàn / Thu nhập: Cốm Non Làng Vòng `#7E9F80`.
-     - Trạng thái Chi / Cảnh báo: Ngói Rêu Phố Cổ `#C86D51` (tương phản 4.8:1 trên nền sáng).
+     - Trạng thái An toàn / Thu nhập: Xanh Lá `#5E9A57` (heocon) / Cốm Non Làng Vòng `#7E9F80` (pink/mint).
+     - Trạng thái Chi / Cảnh báo: Đỏ Cam `#E0452B` (heocon) / Ngói Rêu Phố Cổ `#C86D51` (pink/mint).
 2. **Kiểu chữ có hồn & Con số chuẩn xác (Typography):**
-   - Tiêu đề & Cảm xúc: **Be Vietnam Pro** mang chất thơ Hà Nội.
+   - Theme Heo Con: tiêu đề & số tiền = **Baloo 2 (800)** tròn trịa playful; body = **Nunito (600–800)** — qua `expo-font` + `@expo-google-fonts/*` (cần `npm i expo-font @expo-google-fonts/baloo-2 @expo-google-fonts/nunito`).
+   - Theme Pink/Mint: giữ **Be Vietnam Pro** mang chất thơ Hà Nội.
    - Con số tài chính: Bắt buộc dùng `fontVariant: ['tabular-nums']` để số không bị giật khi đếm.
-3. **Chuẩn Vector Icons Nổi Trần & In Đậm (Pure Floating Bold Icons):**
+3. **Quy tắc Pixel Art (Style Heo Con) & Chuẩn Vector Icons Nổi Trần:**
+   - **Pixel art (vườn, sprite heo):** PORT 1:1 từ `prototype/Ví Heo Con.html` theo `docs/screens/heocon/01-PIXEL-GFX-PORT.md` — giữ nguyên hex, tọa độ logic, seed `mulberry32`; scale 4× nearest-neighbor (cấm làm mờ); ≤ 32 màu; sinh PNG bằng Node (`zlib`, 0 native dep mới).
    - **100% Vector Icons** từ thư viện `lucide-react-native`. Tuyệt đối không dùng emoji làm icon chính trên nút bấm điều hướng.
-   - **Bỏ 100% viền bo & hộp nền màu (Zero Border & Boxless):** Mọi icon xuất hiện trong toàn App (Tabs, Header, Cards, Modals, Detail Sheets) bắt buộc hiển thị dạng vector nổi trần tự nhiên (`borderWidth: 0, backgroundColor: 'transparent'`), cấm dùng khối bo tròn/vuông màu bọc icon.
+   - **Icon nổi trần (Zero Border & Boxless):** Mọi icon trong Tabs, Header, Cards, Modals, Detail Sheets hiển thị vector nổi trần (`borderWidth: 0, backgroundColor: 'transparent'`). **Ngoại lệ chủ ý Style Heo Con:** icon trong `NeoJar`/badge đặt trên khối pastel đặc có viền — quy định tại đặc tả từng component (`docs/screens/heocon/02-NEO-KIT.md`).
    - **Tô đậm nét (Bold Stroke):** Luôn dùng `strokeWidth: 2.4 - 2.8` với kích thước 18-22px để icon nổi bật, sắc nét và có độ tương phản cao.
    - Kích thước vùng chạm (Touch area) tối thiểu $\ge 44 \times 44$px thông qua `hitSlop`.
 4. **Tương tác Xúc giác & Chuyển động (Haptics & Spring Animations):**

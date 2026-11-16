@@ -8,7 +8,8 @@ import { useCategoryStore } from '../../store/categoryStore';
 import { CategoryManagementSheet } from './CategoryManagementSheet';
 
 export const CategorySettingsCard: React.FC = () => {
-  const { tokens } = useTheme();
+  const { tokens, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
   const { categories } = useCategoryStore();
   const [sheetVisible, setSheetVisible] = useState<boolean>(false);
 
@@ -25,28 +26,39 @@ export const CategorySettingsCard: React.FC = () => {
       <TouchableOpacity
         style={[
           styles.container,
-          {
-            backgroundColor: tokens.surface,
-            borderColor: tokens.border,
-          },
+          isHeocon
+            ? {
+                backgroundColor: '#FFFBF1',
+                borderColor: '#2B2118',
+                borderWidth: 3,
+                shadowColor: '#2B2118',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 1,
+                shadowRadius: 0,
+                elevation: 4,
+              }
+            : {
+                backgroundColor: tokens.surface,
+                borderColor: tokens.border,
+              },
         ]}
         onPress={handleOpen}
         activeOpacity={0.85}
       >
         <View style={styles.iconBox}>
-          <FolderTree size={20} color={tokens.primary} strokeWidth={2.6} />
+          <FolderTree size={20} color={isHeocon ? '#E0452B' : tokens.primary} strokeWidth={2.6} />
         </View>
 
         <View style={styles.contentCol}>
-          <Text style={[styles.title, { color: tokens.text }]}>
+          <Text style={[styles.title, { color: isHeocon ? '#2B2118' : tokens.text }]}>
             DANH MỤC THU & CHI
           </Text>
-          <Text style={[styles.subtitle, { color: tokens.textMuted }]}>
+          <Text style={[styles.subtitle, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
             {activeExpense} mục Chi · {activeIncome} mục Thu đang hoạt động
           </Text>
         </View>
 
-        <ChevronRight size={18} color={tokens.textMuted} strokeWidth={2.6} />
+        <ChevronRight size={18} color={isHeocon ? '#2B2118' : tokens.textMuted} strokeWidth={2.6} />
       </TouchableOpacity>
 
       <CategoryManagementSheet

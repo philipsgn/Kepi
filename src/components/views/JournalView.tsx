@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,36 +11,45 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  ChevronRight,
+  Coffee,
   Eye,
   EyeOff,
-  Moon,
+  Flame,
   Settings,
   Sparkles,
-  Sun,
-  Sunrise,
-  Sunset,
-  TrendingDown,
-  TrendingUp,
-  User,
+  Utensils,
+  Car,
+  CupSoda,
+  Landmark,
   Wallet,
+  Coins,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 // Theme & Tokens
 import { useTheme } from '../../theme/ThemeContext';
-import { radii, spacing } from '../../theme/tokens';
-import { Strings } from '../../constants/strings';
+import { neoTokens } from '../../theme/tokens';
 
-// Base Components
-import { Card } from '../common/Card';
-import { Chip } from '../common/Chip';
-import { ProgressBar } from '../common/ProgressBar';
-import { EmptyState } from '../common/EmptyState';
-import { RollingNumber } from '../common/RollingNumber';
-import { PhotoCalendarGrid } from '../journal/PhotoCalendarGrid';
+// Neo-Kit Components
+import {
+  NeoCard,
+  NeoButton,
+  NeoChip,
+  SegmentBar10,
+  OverlineLabel,
+  DashedDivider,
+  DongMark,
+  NeoJar,
+} from '../neo';
+
+// Pixel Garden
+import {
+  PixelGardenWebView,
+  PixelGardenWebViewRef,
+} from '../pixel/PixelGardenWebView';
+
+// Modals & Supporting Components
+import { PigFlyMascot } from '../mascot/PigBoMascot';
 import { WeekCalendarCarousel } from '../journal/WeekCalendarCarousel';
 import { DayDetailBottomSheet } from '../journal/DayDetailBottomSheet';
 import { QuickSettingsSheet } from '../profile/QuickSettingsSheet';
@@ -47,10 +57,6 @@ import { StreakCheckinModal } from '../streak/StreakCheckinModal';
 import { StreakCelebrationToast } from '../streak/StreakCelebrationToast';
 import { ConfirmationPillBanner, ConfirmationInboxModal } from '../inbox';
 import { MonthRolloverBanner } from '../budget/MonthRolloverBanner';
-import { PigBoMascot, PigFlyMascot } from '../mascot/PigBoMascot';
-import { PigFlyLottieMascot } from '../mascot/PigFlyLottieMascot';
-import { MascotMood } from '../../utils/gamification/rulesEngine';
-
 
 // Hooks & Stores
 import { useBottomInset } from '../../hooks/useBottomInset';
@@ -58,12 +64,9 @@ import { useConfirmationInbox } from '../../hooks/useConfirmationInbox';
 import { useAuthStore } from '../../store/authStore';
 import { useBudgetStore } from '../../store/budgetStore';
 import { useTransactionStore } from '../../store/transactionStore';
-import { formatCompactVND, formatVND, maskMoney } from '../../utils/currency';
+import { formatVND, maskMoney } from '../../utils/currency';
 import {
   DayCalendarCell,
-  getDayPeriod,
-  getDaysRemainingInMonth,
-  getGreetingByHour,
   getVietnamDateString,
 } from '../../utils/calendarUtils';
 import { calculateStreakDays } from '../../utils/profileUtils';
@@ -83,44 +86,37 @@ export const JournalView: React.FC<JournalViewProps> = ({
   onOpenCamera,
 }) => {
   const insets = useSafeAreaInsets();
-  const { tokens, isDark } = useTheme();
+  const { tokens } = useTheme();
   const { contentBottomPadding } = useBottomInset();
   const { user, profile } = useAuthStore();
   const {
-    monthlyIncome,
-    monthlyFixedCosts,
     todayBudget,
     todaySpent,
     realBalance,
-    savedMoney,
-    goalTargetAmount,
-    weeklyBudget,
+    recordExpense,
     monthRolloverBanner,
     dismissRolloverBanner,
     checkAndApplyMonthRollover,
   } = useBudgetStore();
-  const { transactions } = useTransactionStore();
+  const { transactions, addTransaction } = useTransactionStore();
 
-  const monthlyBudget = useMemo(() => {
-    return Math.max(0, monthlyIncome - monthlyFixedCosts);
-  }, [monthlyIncome, monthlyFixedCosts]);
+  const gardenRef = useRef<PixelGardenWebViewRef>(null);
 
-  // Kiểm tra kết chuyển tháng tự động khi JournalView mount
-  useEffect(() => {
-    checkAndApplyMonthRollover();
-  }, [checkAndApplyMonthRollover]);
+  // Danh mục chuẩn cho Test 40: GỘP "Ăn uống" và "Cà Phê & Chill" thành "Ăn uống"
+  const CATEGORIES = useMemo(() => [
+    { key: 'all', label: 'Tất cả' },
+    { key: 'an_uong', label: 'Ăn uống', matchKeys: ['an_uong', 'giai_tri', 'ca_phe'] },
+    { key: 'di_chuyen', label: 'Di chuyển', matchKeys: ['di_chuyen'] },
+    { key: 'mua_sam', label: 'Mua sắm', matchKeys: ['mua_sam'] },
+    { key: 'co_dinh', label: 'Cố định', matchKeys: ['co_dinh'] },
+    { key: 'chi_tieu_khac', label: 'Khác', matchKeys: ['chi_tieu_khac', 'other'] },
+  ], []);
 
-  // Month & Calendar Navigation State
-  const today = new Date();
-  const [selectedYear, setSelectedYear] = useState<number>(today.getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth() + 1); // 1-12
-
-  // View Preferences State (Tuần này vs Tháng này)
-  const [periodMode, setPeriodMode] = useState<'week' | 'month'>('week');
+  // View state
   const [isPrivacyHidden, setIsPrivacyHidden] = useState<boolean>(false);
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
+  const [pigQuote, setPigQuote] = useState<string>('Ủn ỉn! Heo đang giữ ví giúp bạn nè.');
 
-  // Sheet States
+  // Modals & Sheets
   const [selectedDayCell, setSelectedDayCell] = useState<DayCalendarCell | null>(null);
   const [isDaySheetOpen, setIsDaySheetOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -131,106 +127,41 @@ export const JournalView: React.FC<JournalViewProps> = ({
   // Confirmation Inbox
   const { totalCount: inboxCount } = useConfirmationInbox();
 
-  // Load Preferences from AsyncStorage
+  // Load preferences
   useEffect(() => {
-    const loadPrefs = async () => {
+    (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_PREFS_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed.preferredPeriod) setPeriodMode(parsed.preferredPeriod);
           if (typeof parsed.isPrivacyHidden === 'boolean') {
             setIsPrivacyHidden(parsed.isPrivacyHidden);
           }
         }
-      } catch (err) {
-        console.log('Error reading home prefs:', err);
-      }
-    };
-    loadPrefs();
+      } catch (err) {}
+    })();
   }, []);
 
-  const savePreferences = async (newPeriod: 'week' | 'month', newHidden: boolean) => {
+  useEffect(() => {
+    checkAndApplyMonthRollover();
+  }, [checkAndApplyMonthRollover]);
+
+  const handleTogglePrivacy = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    const nextVal = !isPrivacyHidden;
+    setIsPrivacyHidden(nextVal);
     try {
       await AsyncStorage.setItem(
         STORAGE_PREFS_KEY,
-        JSON.stringify({ preferredPeriod: newPeriod, isPrivacyHidden: newHidden })
+        JSON.stringify({ isPrivacyHidden: nextVal })
       );
-    } catch (err) {
-      console.log('Error saving home prefs:', err);
-    }
+    } catch (e) {}
   };
 
-  const handleTogglePeriodMode = (mode: 'week' | 'month') => {
-    Haptics.selectionAsync();
-    setPeriodMode(mode);
-    savePreferences(mode, isPrivacyHidden);
-  };
+  const userName =
+    profile?.full_name || user?.full_name || user?.email?.split('@')[0] || 'Bạn';
 
-  const handleTogglePrivacy = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const nextHidden = !isPrivacyHidden;
-    setIsPrivacyHidden(nextHidden);
-    savePreferences(periodMode, nextHidden);
-    if (profile) {
-      useAuthStore.getState().updateProfile({ privacy_mode: nextHidden }).catch(() => {});
-    }
-  };
-
-  // Tính chi tiêu và thu nhập tuần hiện tại (Thứ 2 đến Chủ Nhật)
-  const weekStats = useMemo(() => {
-    const now = new Date();
-    const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1; // 0 = Mon
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - dayOfWeek);
-    monday.setHours(0, 0, 0, 0);
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
-
-    let expense = 0;
-    let income = 0;
-    transactions.forEach((tx) => {
-      const isConfirmed = tx.status === 'CONFIRMED' || (!tx.status as any);
-      if (!isConfirmed) return;
-      const d = new Date(tx.created_at);
-      if (d >= monday && d <= sunday) {
-        if (tx.type === 'EXPENSE') expense += tx.amount;
-        if (tx.type === 'INCOME') income += tx.amount;
-      }
-    });
-    return { expense, income };
-  }, [transactions]);
-
-
-  const handlePrevMonth = () => {
-    if (selectedMonth === 1) {
-      setSelectedMonth(12);
-      setSelectedYear((prev) => prev - 1);
-    } else {
-      setSelectedMonth((prev) => prev - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (selectedMonth === 12) {
-      setSelectedMonth(1);
-      setSelectedYear((prev) => prev + 1);
-    } else {
-      setSelectedMonth((prev) => prev + 1);
-    }
-  };
-
-  const remainingToday = Math.max(0, todayBudget - todaySpent);
-  const isOverBudget = todayBudget > 0 && todaySpent > todayBudget;
-  const spentRatio = todayBudget > 0 ? todaySpent / todayBudget : 0;
-  const daysLeftInMonth = getDaysRemainingInMonth();
-  const greeting = getGreetingByHour();
-  const userName = profile?.full_name || user?.full_name || user?.email?.split('@')[0] || 'Bạn';
-
-  // Tính chuỗi ngày liên tiếp ghi chép thực tế từ lịch sử giao dịch
-
-
+  // Streak
   const currentStreak = useMemo(() => {
     const dates = transactions
       .filter((tx) => tx.status === 'CONFIRMED' || !tx.status)
@@ -238,228 +169,124 @@ export const JournalView: React.FC<JournalViewProps> = ({
     return calculateStreakDays(dates);
   }, [transactions]);
 
-  const headerMascotMood: MascotMood = useMemo(() => {
-    if (isOverBudget) return 'PANIC';
-    if (todaySpent === 0) return 'STARVING';
-    if (currentStreak >= 3) return 'FLYING_HIGH';
-    return 'CHILL';
-  }, [isOverBudget, todaySpent, currentStreak]);
+  // Spending calculations
+  const effectiveLimit = todayBudget > 0 ? todayBudget : 300000;
+  const isOverBudget = todaySpent > effectiveLimit;
+  const remainingToday = Math.max(0, effectiveLimit - todaySpent);
+  const overspentAmount = Math.max(0, todaySpent - effectiveLimit);
 
-  // Định nghĩa danh mục: GỘP "Ăn uống" và "Cà Phê & Chill" thành "Ăn uống"
-  const CATEGORIES = useMemo(() => [
-    { key: 'all', label: 'Tất cả' },
-    { key: 'an_uong', label: 'Ăn uống', matchKeys: ['an_uong', 'giai_tri', 'ca_phe'] },
-    { key: 'di_chuyen', label: 'Di chuyển', matchKeys: ['di_chuyen'] },
-    { key: 'mua_sam', label: 'Mua sắm', matchKeys: ['mua_sam'] },
-    { key: 'co_dinh', label: 'Cố định', matchKeys: ['co_dinh'] },
-    { key: 'chi_tieu_khac', label: 'Khác', matchKeys: ['chi_tieu_khac', 'other'] },
-  ], []);
-
-  // Lọc transactions theo tháng đang xem — CHỈ tính khoản đã CONFIRMED
-  const monthTransactions = useMemo(() => {
-    return transactions.filter((tx) => {
-      const isConfirmed = tx.status === 'CONFIRMED' || (!tx.status as any);
-      if (!isConfirmed) return false;
-
-      const d = new Date(tx.created_at);
-      const isMatchMonth =
-        d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
-      if (!isMatchMonth) return false;
-
-      if (selectedCategoryFilter === 'all') return true;
-      const catConfig = CATEGORIES.find((c) => c.key === selectedCategoryFilter);
-      if (catConfig?.matchKeys) {
-        return catConfig.matchKeys.includes(tx.category);
-      }
-      return tx.category === selectedCategoryFilter;
-    });
-  }, [transactions, selectedMonth, selectedYear, selectedCategoryFilter, CATEGORIES]);
-
-  // Tổng chi và thu trong tháng đang xem
-  const totalMonthExpense = useMemo(() => {
-    return monthTransactions
-      .filter((t) => t.type === 'EXPENSE')
-      .reduce((sum, t) => sum + t.amount, 0);
-  }, [monthTransactions]);
-
-  const totalMonthIncome = useMemo(() => {
-    return monthTransactions
-      .filter((t) => t.type === 'INCOME')
-      .reduce((sum, t) => sum + t.amount, 0);
-  }, [monthTransactions]);
-
-  // Số dư tích luỹ thực tế toàn bộ tài khoản (Chỉ tính khoản CONFIRMED)
-  const cumulativeStats = useMemo(() => {
-    let inc = 0;
-    let exp = 0;
-    transactions.forEach((tx) => {
-      const isConfirmed = tx.status === 'CONFIRMED' || (!tx.status as any);
-      if (!isConfirmed) return;
-      if (tx.type === 'INCOME') inc += tx.amount;
-      if (tx.type === 'EXPENSE') exp += tx.amount;
-    });
-    return { inc, exp, balance: inc - exp };
-  }, [transactions]);
-
-  // Số dư khả dụng như app ngân hàng:
-  // Nếu có thu nhập: hiển thị Tổng Thu - Tổng Chi
-  // Nếu chưa ghi thu nhập: hiển thị Ngân sách tháng còn lại
-  const availableBalance = useMemo(() => {
-    if (cumulativeStats.inc > 0) {
-      return cumulativeStats.balance;
+  // Dynamic empathetic message
+  const dynamicMessage = useMemo(() => {
+    if (todaySpent === 0) {
+      return 'Chưa chi đồng nào. Heo đang ngủ gật, đừng đánh thức nha.';
     }
-    return Math.max(0, (monthlyBudget || 0) - totalMonthExpense);
-  }, [cumulativeStats, monthlyBudget, totalMonthExpense]);
+    const ratio = todaySpent / effectiveLimit;
+    if (ratio < 0.4) {
+      return 'Chi nhẹ nhàng ghê. Heo ủn ỉn khen một cái!';
+    }
+    if (ratio < 0.75) {
+      return 'Đang vừa vặn lắm. Heo vẫn để mắt canh chừng nha.';
+    }
+    if (ratio <= 1.0) {
+      return 'Gần chạm hạn mức rồi đó. Heo bắt đầu hơi lo lo.';
+    }
+    return 'Lố hạn mức rồi... Heo buồn xíu. Mai mình chi gọn lại nha!';
+  }, [todaySpent, effectiveLimit]);
 
-  // Ngân sách tháng còn lại sau khi trừ chi tiêu tháng này
-  const monthRemainingBudget = Math.max(0, (monthlyBudget || 0) - totalMonthExpense);
+  // Quick log chips handler
+  const handleQuickExpense = async (name: string, amount: number, category: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
 
-  // Thống kê chu kỳ hiện tại (Tuần Này / Tháng Này)
-  const currentPeriodExpense = periodMode === 'week' ? weekStats.expense : totalMonthExpense;
-  const currentPeriodIncome = periodMode === 'week' ? weekStats.income : totalMonthIncome;
-  const currentPeriodBudget = periodMode === 'week' ? weeklyBudget : monthlyBudget;
-  const currentPeriodRatio = currentPeriodBudget > 0 ? Math.min(1, currentPeriodExpense / currentPeriodBudget) : 0;
+    try {
+      // 1. Thêm vào transactionStore
+      await addTransaction({
+        userId: user?.id || 'local-user',
+        type: 'EXPENSE',
+        amount,
+        category,
+        description: name,
+        photo_url: null,
+        source: 'MANUAL',
+        status: 'CONFIRMED',
+      });
 
-  // Các khoản chi hôm nay (cho chế độ Ngày) — CHỈ tính khoản đã CONFIRMED
-  const todayStr = getVietnamDateString(new Date());
-  const todayTransactions = useMemo(() => {
-    return transactions.filter((tx) => {
-      const isConfirmed = tx.status === 'CONFIRMED' || (!tx.status as any);
-      return isConfirmed && getVietnamDateString(tx.created_at) === todayStr;
-    });
-  }, [transactions, todayStr]);
+      // 2. Cập nhật budgetStore
+      recordExpense(amount);
 
-  // Danh sách giao dịch của ngày đang chọn trong Sheet — CHỈ tính khoản đã CONFIRMED
-  const selectedDayTransactions = useMemo(() => {
-    if (!selectedDayCell) return [];
-    return transactions.filter((tx) => {
-      const isConfirmed = tx.status === 'CONFIRMED' || (!tx.status as any);
-      return isConfirmed && getVietnamDateString(tx.created_at) === selectedDayCell.dateStr;
-    });
-  }, [transactions, selectedDayCell]);
+      // 3. Kích hoạt heo trong vườn chạy lại ăn cám
+      gardenRef.current?.feedPig();
+      gardenRef.current?.updateBudget(todaySpent + amount, effectiveLimit);
 
-  // Đồng hồ chạy thời gian thực (Real-time Clock & Icon buổi)
-  const [realTime, setRealTime] = useState<Date>(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setRealTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+      setPigQuote(`${name} −${formatVND(amount)} đ! Heo đã ghi chép rồi.`);
+    } catch (e) {
+      Alert.alert('Lỗi', 'Không thể ghi nhận khoản chi');
+    }
+  };
 
-  const weekdaysVi = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-  const dayOfWeekStr = weekdaysVi[realTime.getDay()];
-  const padDigits = (n: number) => String(n).padStart(2, '0');
-  const dateStrFormatted = `${dayOfWeekStr}, ${padDigits(realTime.getDate())}/${padDigits(realTime.getMonth() + 1)}/${realTime.getFullYear()}`;
-  const timeStrFormatted = `${padDigits(realTime.getHours())}:${padDigits(realTime.getMinutes())}:${padDigits(realTime.getSeconds())}`;
-  const currentPeriod = getDayPeriod(realTime);
+  const handleFeedPig = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    gardenRef.current?.feedPig();
+    setPigQuote('Ngon quá! Heo cảm ơn bạn nha 🌾');
+  };
 
   return (
     <View
       style={[
         styles.container,
         {
-          backgroundColor: tokens.bg,
-          paddingTop: insets.top + spacing.sm,
+          backgroundColor: tokens.bg || '#F6EEDC',
+          paddingTop: insets.top + 6,
         },
       ]}
     >
-      {/* 1. HEADER (ICON BUỔI, ĐỒNG HỒ REAL-TIME, TÊN, STREAK MINI & SỐ DƯ VÍ KHẢ DỤNG) */}
+      {/* 1. NEO HEADER */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          {/* DÒNG THỜI GIAN THỰC KÈM ICON BUỔI ĐẶC TRƯNG */}
-          <View style={styles.realtimeHeaderRow}>
-            {currentPeriod === 'MORNING' && <Sunrise size={14} color="#E59844" strokeWidth={2.6} />}
-            {currentPeriod === 'NOON' && <Sun size={14} color="#E59844" strokeWidth={2.6} />}
-            {currentPeriod === 'AFTERNOON' && <Sunset size={14} color="#C86D51" strokeWidth={2.6} />}
-            {(currentPeriod === 'EVENING' || currentPeriod === 'NIGHT') && (
-              <Moon size={14} color="#7E9F80" strokeWidth={2.6} />
-            )}
-            <Text style={[styles.realtimeDateText, { color: tokens.textMuted }]}>
-              {dateStrFormatted} • {timeStrFormatted}
-            </Text>
-          </View>
-          <View style={styles.userNameRow}>
-            <Text style={[styles.userNameText, { color: tokens.text }]}>
+          <TouchableOpacity
+            style={styles.avatarBox}
+            activeOpacity={0.8}
+            onPress={onOpenProfile}
+          >
+            <View style={styles.avatarInner}>
+              <PigFlyMascot size={32} />
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.headerUserInfo}>
+            <Text style={[styles.userName, { color: tokens.text || '#2B2118' }]}>
               {userName}
             </Text>
-            {/* LINH VẬT PIGFLY LƠ LỬNG NHẸ NHÀNG TRONG GREETING HEADER */}
-            <PigFlyLottieMascot
-              size={32}
-              mood={headerMascotMood}
-              showBadge={false}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setShowStreakModal(true);
-              }}
-            />
-            {/* STREAK MINI: CHỈ ICON & SỐ CHUỖI THỰC TẾ (SOFT TONAL) */}
             <TouchableOpacity
-              style={[
-                styles.streakMiniBadge,
-                { backgroundColor: tokens.surfaceAlt },
-              ]}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setShowStreakModal(true);
-              }}
+              style={styles.streakPill}
               activeOpacity={0.7}
-              accessibilityLabel="Xem chi tiết điểm danh chuỗi ngày"
+              onPress={() => setShowStreakModal(true)}
             >
-              <Sparkles size={12} color={tokens.primary} />
-              <Text style={[styles.streakMiniText, { color: tokens.text }]}>{currentStreak}</Text>
+              <Flame size={12} color="#F4B93B" fill="#F4B93B" />
+              <Text style={styles.streakText}>Chuỗi {currentStreak} ngày</Text>
             </TouchableOpacity>
-          </View>
-
-          {/* DÒNG TÓM TẮT SỐ DƯ KHẢ DỤNG TINH GỌN (NHƯ APP NGÂN HÀNG) */}
-          <View style={styles.headerBalanceRow}>
-            <Wallet size={13} color={tokens.primary} strokeWidth={2.2} />
-            <Text style={[styles.headerBalanceLabel, { color: tokens.textMuted }]}>
-              Ví:
-            </Text>
-            <Text style={[styles.headerBalanceAmount, { color: tokens.text }]}>
-              {maskMoney(formatVND(availableBalance), isPrivacyHidden)}
-            </Text>
           </View>
         </View>
 
         <View style={styles.headerRight}>
-          {/* NÚT ẨN TIỀN (BẢO MẬT RIÊNG TƯ - ZERO BORDER FLOATING) */}
-          <TouchableOpacity
-            style={styles.headerBtnBorderless}
+          {/* Nút Ẩn/Hiện tiền */}
+          <NeoButton
+            variant="round"
             onPress={handleTogglePrivacy}
-            activeOpacity={0.7}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel="Ẩn số tiền"
-          >
-            {isPrivacyHidden ? (
-              <EyeOff size={20} color={tokens.primary} strokeWidth={2.6} />
-            ) : (
-              <Eye size={20} color={tokens.textMuted} strokeWidth={2.6} />
-            )}
-          </TouchableOpacity>
+            icon={
+              isPrivacyHidden ? (
+                <EyeOff size={18} color="#2B2118" strokeWidth={2.6} />
+              ) : (
+                <Eye size={18} color="#2B2118" strokeWidth={2.6} />
+              )
+            }
+          />
 
-          {/* NÚT CÀI ĐẶT NHANH (ZERO BORDER FLOATING) */}
-          <TouchableOpacity
-            style={styles.headerBtnBorderless}
+          {/* Nút Cài đặt */}
+          <NeoButton
+            variant="round"
             onPress={() => setIsSettingsOpen(true)}
-            activeOpacity={0.7}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel="Cài đặt"
-          >
-            <Settings size={20} color={tokens.text} strokeWidth={2.4} />
-          </TouchableOpacity>
-
-          {/* AVATAR CHẠM MỞ HỒ SƠ (ZERO BORDER FLOATING) */}
-          <TouchableOpacity
-            style={styles.headerBtnBorderless}
-            onPress={onOpenProfile}
-            activeOpacity={0.7}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel="Hồ sơ cá nhân"
-          >
-            <User size={20} color={tokens.text} strokeWidth={2.4} />
-          </TouchableOpacity>
+            icon={<Settings size={18} color="#2B2118" strokeWidth={2.6} />}
+          />
         </View>
       </View>
 
@@ -467,10 +294,10 @@ export const JournalView: React.FC<JournalViewProps> = ({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: contentBottomPadding },
+          { paddingBottom: contentBottomPadding + 96 },
         ]}
       >
-        {/* BANNER CHÀO THÁNG MỚI & ROLLOVER SỐ DƯ */}
+        {/* Banner Rollover nếu có */}
         {monthRolloverBanner && monthRolloverBanner.visible && (
           <MonthRolloverBanner
             visible={monthRolloverBanner.visible}
@@ -480,320 +307,255 @@ export const JournalView: React.FC<JournalViewProps> = ({
           />
         )}
 
-        {/* DẢI THÔNG BÁO HỘP XÁC NHẬN */}
+        {/* Hộp thư chờ duyệt */}
         {inboxCount > 0 && (
           <ConfirmationPillBanner
             count={inboxCount}
             onPress={() => setIsInboxOpen(true)}
-            style={{ marginBottom: 6 }}
+            style={{ marginBottom: 10 }}
           />
         )}
 
-        {/* 1. SECTION HERO: HẠN MỨC HÔM NAY TINH GỌN (TẬP TRUNG HÔM NAY TIÊU ĐƯỢC & ĐÃ CHI) */}
-        <Card style={styles.allowanceCard} glow>
-          <View style={styles.todayAllowanceRow}>
-            <View style={styles.todayAllowanceCol}>
-              <Text style={[styles.todaySubTitle, { color: tokens.textMuted }]}>
-                HÔM NAY TIÊU ĐƯỢC
-              </Text>
-              <RollingNumber
-                value={remainingToday}
-                isHidden={isPrivacyHidden}
-                style={[
-                  styles.todayAllowanceAmount,
-                  { color: isOverBudget ? tokens.danger : tokens.text },
-                ]}
+        {/* 2. KHUNG VƯỜN PIXEL ART (CANVAS 176x132 4:3) */}
+        <View style={styles.gardenWrapper}>
+          <NeoCard radius={28} style={styles.gardenCard} depth={4}>
+            <View style={styles.gardenInner}>
+              <PixelGardenWebView
+                ref={gardenRef}
+                spent={todaySpent}
+                limit={effectiveLimit}
+                onPigTap={(quote) => setPigQuote(quote)}
               />
-            </View>
-
-            <View style={styles.todaySpentBadgeCol}>
-              <Text style={[styles.todaySubTitle, { color: tokens.textMuted }]}>
-                ĐÃ CHI HÔM NAY
-              </Text>
-              <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.7}
-                style={[
-                  styles.todaySpentValue,
-                  { color: todaySpent > 0 ? tokens.danger : tokens.textMuted },
-                ]}
-              >
-                {maskMoney(todaySpent >= 1_000_000_000 ? formatCompactVND(todaySpent) : formatVND(todaySpent), isPrivacyHidden)}
-              </Text>
-            </View>
-          </View>
-
-          {/* THANH TIẾN ĐỘ DYNAMIC SMOOTHING HÔM NAY (MỎNG 6PX) */}
-          <View style={styles.progressBarWrapper}>
-            <ProgressBar progress={spentRatio} height={6} />
-          </View>
-
-          {/* FOOTER TINH GỌN: THÔNG BÁO VƯỢT HẠN MỨC HOẶC THÔNG TIN NGÂN SÁCH THÁNG */}
-          <View style={styles.allowanceBottomRow}>
-            {isOverBudget ? (
-              <Text style={[styles.overBudgetNotice, { color: tokens.danger }]}>
-                {Strings.budget.overBudgetAdvice(formatCompactVND(todaySpent - todayBudget))}
-              </Text>
-            ) : monthlyBudget > 0 ? (
-              <Text style={[styles.subStatLabel, { color: tokens.textMuted }]}>
-                Ngân sách tháng còn:{' '}
-                <Text style={{ color: tokens.text, fontWeight: '600' }}>
-                  {maskMoney(formatCompactVND(monthRemainingBudget), isPrivacyHidden)}
+              {/* Badge trạng thái vườn */}
+              <View style={styles.gardenStateBadge}>
+                <Text style={styles.gardenStateText}>
+                  {isOverBudget ? '🔥 Lố hạn mức · buồn' : '🌱 Sân vườn · đi dạo'}
                 </Text>
-              </Text>
-            ) : (
-              <Text style={[styles.subStatLabel, { color: tokens.textMuted }]}>
-                {Strings.budget.daysRemaining(daysLeftInMonth)}
-              </Text>
+              </View>
+            </View>
+          </NeoCard>
+        </View>
+
+        {/* 3. THẺ CHI HÔM NAY (ĐÈ −22px LÊN VƯỜN) */}
+        <NeoCard overlap radius={26} depth={4} style={styles.spendCard}>
+          <View style={styles.spendCardContent}>
+            <OverlineLabel text="ĐÃ CHI HÔM NAY" />
+
+            <View style={styles.spendRow}>
+              {/* Số tiền lớn Baloo 2 */}
+              <View style={styles.amountContainer}>
+                <Text
+                  style={[
+                    styles.bigAmount,
+                    { color: tokens.text || '#2B2118' },
+                  ]}
+                >
+                  {isPrivacyHidden
+                    ? '••••••'
+                    : formatVND(todaySpent).replace(/ đ$/, '')}
+                </Text>
+                {!isPrivacyHidden && <DongMark size={22} />}
+              </View>
+
+              {/* Tình trạng hạn mức */}
+              <View style={styles.statusCol}>
+                <Text style={styles.limitTargetText}>
+                  {isOverBudget
+                    ? 'vượt hạn mức'
+                    : `còn lại trên ${Math.round(effectiveLimit / 1000)}k đ`}
+                </Text>
+                <Text
+                  style={[
+                    styles.limitValText,
+                    {
+                      color: isOverBudget
+                        ? tokens.danger || '#E0452B'
+                        : tokens.text || '#2B2118',
+                    },
+                  ]}
+                >
+                  {isPrivacyHidden
+                    ? '•••• đ'
+                    : isOverBudget
+                    ? `+${formatVND(overspentAmount)}`
+                    : formatVND(remainingToday)}
+                </Text>
+              </View>
+            </View>
+
+            {/* Thanh tiến độ 10 ô chuẩn Neo-Kit */}
+            <SegmentBar10 spent={todaySpent} limit={effectiveLimit} />
+
+            {/* Test 46 phrase for zero spending today */}
+            {todaySpent === 0 && (
+              <View style={styles.emptyPromptRow}>
+                <Text style={[styles.emptyPromptText, { color: tokens.textMuted || '#7A6852' }]}>
+                  Chưa ghi hôm nay —{' '}
+                  <Text
+                    style={{ color: tokens.primary || '#F4B93B', fontWeight: '800' }}
+                    onPress={onOpenCamera}
+                  >
+                    Chạm để ghi
+                  </Text>
+                </Text>
+              </View>
             )}
 
-            {savedMoney > 0 && (
-              <Text style={[styles.subStatLabel, { color: tokens.textMuted }]}>
-                Đã giữ lại:{' '}
-                <Text style={{ color: tokens.success, fontWeight: '600' }}>
-                  {maskMoney(formatCompactVND(savedMoney), isPrivacyHidden)}
-                </Text>
-              </Text>
-            )}
-          </View>
-        </Card>
+            <DashedDivider />
 
-        {/* 2. DẢI DÒNG TIỀN THOÁNG ĐÃNG — BORDER-LESS (~46PX) */}
-        <View style={styles.cashflowBarContainer}>
-          {/* NÚT GẠT TUẦN / THÁNG MINI INLINE */}
-          <View
-            style={[
-              styles.compactSegmentToggle,
-              { backgroundColor: tokens.surfaceAlt },
-            ]}
-          >
-            <TouchableOpacity
-              style={[
-                styles.compactSegmentBtn,
-                periodMode === 'week' && [
-                  styles.compactSegmentBtnActive,
-                  { backgroundColor: tokens.surface },
-                ],
-              ]}
-              onPress={() => handleTogglePeriodMode('week')}
-              activeOpacity={0.8}
-            >
+            {/* Lời nhắn thoại của Heo */}
+            <View style={styles.pigTalkRow}>
+              <View style={styles.pigTalkAvatar}>
+                <Text style={styles.pigTalkEmoji}>🐷</Text>
+              </View>
               <Text
                 style={[
-                  styles.compactSegmentBtnText,
-                  {
-                    color: periodMode === 'week' ? tokens.text : tokens.textMuted,
-                    fontWeight: periodMode === 'week' ? '700' : '500',
-                  },
+                  styles.pigTalkText,
+                  { color: tokens.text || '#2B2118' },
                 ]}
               >
-                Tuần
+                {pigQuote || dynamicMessage}
               </Text>
-            </TouchableOpacity>
+            </View>
+          </View>
+        </NeoCard>
 
-            <TouchableOpacity
-              style={[
-                styles.compactSegmentBtn,
-                periodMode === 'month' && [
-                  styles.compactSegmentBtnActive,
-                  { backgroundColor: tokens.surface },
-                ],
-              ]}
-              onPress={() => handleTogglePeriodMode('month')}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={[
-                  styles.compactSegmentBtnText,
-                  {
-                    color: periodMode === 'month' ? tokens.text : tokens.textMuted,
-                    fontWeight: periodMode === 'month' ? '700' : '500',
-                  },
-                ]}
-              >
-                Tháng
-              </Text>
-            </TouchableOpacity>
+        {/* 4. KHU VỰC GHI NHANH (QUICK LOG CHIPS) */}
+        <View style={styles.quickSection}>
+          <OverlineLabel text="GHI NHANH" />
+          <View style={styles.chipsRow}>
+            <NeoChip
+              label="Cà phê"
+              subLabel="25k đ"
+              icon={<Coffee size={16} color="#2B2118" strokeWidth={2.4} />}
+              onPress={() => handleQuickExpense('Cà phê', 25000, 'an_uong')}
+            />
+            <NeoChip
+              label="Bánh mì"
+              subLabel="20k đ"
+              icon={<Utensils size={16} color="#2B2118" strokeWidth={2.4} />}
+              onPress={() => handleQuickExpense('Bánh mì', 20000, 'an_uong')}
+            />
+            <NeoChip
+              label="Cơm trưa"
+              subLabel="45k đ"
+              icon={<Utensils size={16} color="#2B2118" strokeWidth={2.4} />}
+              onPress={() => handleQuickExpense('Cơm trưa', 45000, 'an_uong')}
+            />
+            <NeoChip
+              label="Đổ xăng"
+              subLabel="50k đ"
+              icon={<Car size={16} color="#2B2118" strokeWidth={2.4} />}
+              onPress={() => handleQuickExpense('Đổ xăng', 50000, 'di_chuyen')}
+            />
+            <NeoChip
+              label="Trà sữa"
+              subLabel="35k đ"
+              icon={<CupSoda size={16} color="#2B2118" strokeWidth={2.4} />}
+              onPress={() => handleQuickExpense('Trà sữa', 35000, 'an_uong')}
+            />
           </View>
 
-          {/* 2 BADGE MÀU NỔI BẬT: CHI & THU (SOFT TONAL — KHÔNG VIỀN CỨNG) */}
-          <View style={styles.cashflowBadgeRow}>
-            {/* BADGE CHI */}
-            <View
-              style={[
-                styles.cashflowPillBadge,
-                { backgroundColor: tokens.dangerSoft },
-              ]}
-            >
-              <TrendingDown size={14} color={tokens.danger} strokeWidth={2.4} />
-              <Text style={[styles.pillBadgeLabel, { color: tokens.danger }]}>Chi</Text>
-              <Text style={[styles.pillBadgeAmount, { color: tokens.danger }]}>
-                {maskMoney(formatCompactVND(currentPeriodExpense), isPrivacyHidden)}
-              </Text>
-            </View>
-
-            {/* BADGE THU */}
-            <View
-              style={[
-                styles.cashflowPillBadge,
-                { backgroundColor: tokens.successSoft },
-              ]}
-            >
-              <TrendingUp size={14} color={tokens.success} strokeWidth={2.4} />
-              <Text style={[styles.pillBadgeLabel, { color: tokens.success }]}>Thu</Text>
-              <Text style={[styles.pillBadgeAmount, { color: tokens.success }]}>
-                {maskMoney(formatCompactVND(currentPeriodIncome), isPrivacyHidden)}
-              </Text>
-            </View>
+          {/* Nút Cho heo ăn */}
+          <View style={styles.feedActionRow}>
+            <NeoButton
+              variant="gold"
+              title="Cho heo ăn 🌾"
+              onPress={handleFeedPig}
+            />
           </View>
         </View>
 
-        {/* 3. SECTION BỘ LỊCH THÍCH ỨNG: DẢI TUẦN CAROUSEL (TUẦN NÀY) HOẶC LƯỚI THÁNG (THÁNG NÀY) */}
-        {periodMode === 'week' ? (
+        {/* 5. KHU VỰC HŨ TIỀN (JARS) */}
+        <View style={styles.jarsSection}>
+          <OverlineLabel text="HŨ TIỀN" />
+          <View style={styles.jarsGrid}>
+            <NeoJar
+              title="Ngân hàng"
+              amount={
+                isPrivacyHidden
+                  ? '••••'
+                  : `${Math.round(Math.max(0, realBalance) / 1000000 * 10) / 10}M`
+              }
+              iconBgColor="#BCD7F5"
+              icon={<Landmark size={16} color="#2B2118" strokeWidth={2.4} />}
+            />
+            <NeoJar
+              title="Ví điện tử"
+              amount={isPrivacyHidden ? '••••' : '3.2M'}
+              iconBgColor="#F9B8C4"
+              icon={<Wallet size={16} color="#2B2118" strokeWidth={2.4} />}
+            />
+            <NeoJar
+              title="Tiền mặt"
+              amount={isPrivacyHidden ? '••••' : '1.5M'}
+              iconBgColor="#CDE6BE"
+              icon={<Coins size={16} color="#2B2118" strokeWidth={2.4} />}
+            />
+          </View>
+        </View>
+
+        {/* 6. LỊCH GIAO DỊCH LOCKET (TUẦN & ALBUM ẢNH) */}
+        <View style={styles.calendarSection}>
+          <OverlineLabel text="LỊCH GHI CHÉP" />
           <WeekCalendarCarousel
             transactions={transactions}
-            onSelectDay={(cell) => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedDayCell(cell);
+            onSelectDay={(day: DayCalendarCell) => {
+              setSelectedDayCell(day);
               setIsDaySheetOpen(true);
             }}
-            onLongPressDay={(cell) => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setSelectedDayCell(cell);
-              setIsDaySheetOpen(true);
-            }}
-            onOpenCamera={onOpenCamera || (() => {})}
-            renderHeaderExtra={
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.filterChipScroll}
-              >
-                {CATEGORIES.map((cat) => (
-                  <Chip
-                    key={cat.key}
-                    label={cat.label}
-                    selected={selectedCategoryFilter === cat.key}
-                    size="sm"
-                    onPress={() => {
-                      Haptics.selectionAsync();
-                      setSelectedCategoryFilter(cat.key);
-                    }}
-                  />
-                ))}
-              </ScrollView>
-            }
-          />
-        ) : (
-          <PhotoCalendarGrid
-            year={selectedYear}
-            month={selectedMonth}
-            transactions={monthTransactions}
-            onPrevMonth={handlePrevMonth}
-            onNextMonth={handleNextMonth}
-            renderHeaderExtra={
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.filterChipScroll}
-              >
-                {CATEGORIES.map((cat) => (
-                  <Chip
-                    key={cat.key}
-                    label={cat.label}
-                    selected={selectedCategoryFilter === cat.key}
-                    size="sm"
-                    onPress={() => {
-                      Haptics.selectionAsync();
-                      setSelectedCategoryFilter(cat.key);
-                    }}
-                  />
-                ))}
-              </ScrollView>
-            }
-            onSelectDay={(cell) => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedDayCell(cell);
-              setIsDaySheetOpen(true);
-            }}
-            onLongPressDay={(cell) => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setSelectedDayCell(cell);
+            onLongPressDay={(day: DayCalendarCell) => {
+              setSelectedDayCell(day);
               setIsDaySheetOpen(true);
             }}
             onOpenCamera={onOpenCamera || (() => {})}
           />
-        )}
-
-        {/* 4. THANH MINI PILL GỢI Ý CHỤP KHI CHƯA CÓ GIAO DỊCH HÔM NAY (~38PX) */}
-        {todayTransactions.length === 0 && (
-          <TouchableOpacity
-            style={[
-              styles.todayMiniPillBanner,
-              {
-                backgroundColor: tokens.surfaceAlt,
-              },
-            ]}
-            onPress={onOpenCamera}
-            activeOpacity={0.8}
-          >
-            <View style={styles.todayMiniPillContent}>
-              <Sparkles size={14} color={tokens.primary} strokeWidth={2.2} />
-              <Text style={[styles.todayMiniPillText, { color: tokens.textMuted }]}>
-                Chưa ghi hôm nay —{' '}
-                <Text style={{ color: tokens.primary, fontWeight: '600' }}>
-                  Chạm để ghi
-                </Text>
-              </Text>
-            </View>
-            <ChevronRight size={14} color={tokens.textMuted} strokeWidth={2} />
-          </TouchableOpacity>
-        )}
+        </View>
       </ScrollView>
 
-      {/* 8. SHEET ĐÁY CHI TIẾT KHOẢNH KHẮC NGÀY */}
-      {/* 9. MODAL ĐIỂM DANH STREAK */}
-      <StreakCheckinModal
-        visible={showStreakModal}
-        streakDays={currentStreak}
-        hasCheckedInToday={todayTransactions.length > 0}
-        onClose={() => setShowStreakModal(false)}
-        onPressAction={onOpenCamera}
-      />
-
-      {/* 10. TOAST PHÁO HOA CHÚC MỪNG ĐIỂM DANH */}
-      <StreakCelebrationToast
-        visible={showStreakCelebration}
-        streakCount={currentStreak}
-        onDismiss={() => setShowStreakCelebration(false)}
+      {/* Sheets & Modals */}
+      <QuickSettingsSheet
+        visible={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onOpenProfile={() => {
+          setIsSettingsOpen(false);
+          onOpenProfile?.();
+        }}
       />
 
       <DayDetailBottomSheet
         visible={isDaySheetOpen}
         dateStr={selectedDayCell?.dateStr || ''}
-        transactions={selectedDayTransactions}
+        transactions={transactions.filter(
+          (t) =>
+            (t.status === 'CONFIRMED' || !t.status) &&
+            getVietnamDateString(t.created_at) === selectedDayCell?.dateStr
+        )}
         isPrivacyHidden={isPrivacyHidden}
         onClose={() => setIsDaySheetOpen(false)}
-        onSelectTransaction={(tx) => {
-          setIsDaySheetOpen(false);
-          onOpenTransactionDetail?.(tx);
-        }}
+        onSelectTransaction={(tx) => onOpenTransactionDetail?.(tx)}
         onTakePhotoForDay={onOpenCamera || (() => {})}
       />
 
-      {/* 9. SHEET CÀI ĐẶT NHANH (MỞ TỪ HEADER) */}
-      <QuickSettingsSheet
-        visible={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        onOpenProfile={onOpenProfile || (() => {})}
-      />
-
-      {/* 10. MODAL HỘP XÁC NHẬN */}
       <ConfirmationInboxModal
         visible={isInboxOpen}
         onClose={() => setIsInboxOpen(false)}
       />
+
+      <StreakCheckinModal
+        visible={showStreakModal}
+        streakDays={currentStreak}
+        hasCheckedInToday={true}
+        onClose={() => setShowStreakModal(false)}
+      />
+
+      {showStreakCelebration && (
+        <StreakCelebrationToast
+          visible={showStreakCelebration}
+          streakCount={currentStreak}
+          onDismiss={() => setShowStreakCelebration(false)}
+        />
+      )}
     </View>
   );
 };
@@ -801,273 +563,229 @@ export const JournalView: React.FC<JournalViewProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: spacing.md,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   headerLeft: {
-    gap: 2,
-  },
-  greetingText: {
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  userNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 10,
   },
-  userNameText: {
+  avatarBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: '#2B2118',
+    backgroundColor: '#F9B8C4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarFace: {
+    fontSize: 26,
+  },
+  headerUserInfo: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  userName: {
     fontSize: 20,
-    fontWeight: '700',
-    letterSpacing: -0.4,
+    fontWeight: '800',
+    fontFamily: Platform.select({
+      ios: 'Baloo2-ExtraBold',
+      android: 'Baloo2_800ExtraBold',
+      default: 'system-ui',
+    }),
+    lineHeight: 22,
   },
-  streakMiniBadge: {
+  streakPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingVertical: 3,
+    backgroundColor: '#2B2118',
+    borderRadius: 999,
     paddingHorizontal: 8,
-    borderRadius: radii.full,
-  },
-  streakMiniText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
-  headerBalanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
+    paddingVertical: 2,
     marginTop: 2,
+    gap: 4,
+    alignSelf: 'flex-start',
   },
-  headerBalanceLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  headerBalanceAmount: {
-    fontSize: 15,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-    letterSpacing: -0.2,
-  },
-  realtimeHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 2,
-  },
-  realtimeDateText: {
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.2,
-    fontVariant: ['tabular-nums'],
+  streakText: {
+    color: '#F4B93B',
+    fontSize: 11,
+    fontWeight: '800',
+    fontFamily: Platform.select({
+      ios: 'Nunito-ExtraBold',
+      android: 'Nunito_800ExtraBold',
+      default: 'system-ui',
+    }),
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-  },
-  headerBtnBorderless: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-    borderWidth: 0,
+    gap: 8,
   },
   scrollContent: {
-    gap: spacing.sm + 2,
-    paddingTop: spacing.xs,
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
-  allowanceCard: {
+  gardenWrapper: {
     width: '100%',
-    padding: spacing.md,
-    gap: 6,
+    marginBottom: 0,
   },
-  todayAllowanceRow: {
+  gardenCard: {
+    padding: 0,
+    backgroundColor: '#86B866',
+  },
+  gardenInner: {
+    position: 'relative',
+    width: '100%',
+  },
+  gardenStateBadge: {
+    position: 'absolute',
+    left: 10,
+    bottom: 32,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 3,
+    borderColor: '#2B2118',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    zIndex: 5,
+  },
+  gardenStateText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#2B2118',
+    fontFamily: Platform.select({
+      ios: 'Nunito-ExtraBold',
+      android: 'Nunito_800ExtraBold',
+      default: 'system-ui',
+    }),
+  },
+  spendCard: {
+    padding: 16,
+  },
+  spendCardContent: {
+    width: '100%',
+  },
+  spendRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
+    marginTop: 4,
   },
-  todayAllowanceCol: {
-    flex: 1,
-  },
-  todaySubTitle: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  todayAllowanceAmount: {
-    fontSize: 26,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-    letterSpacing: -0.4,
-    marginTop: 2,
-  },
-  todaySpentBadgeCol: {
+  amountContainer: {
+    flexDirection: 'row',
     alignItems: 'flex-end',
   },
-  todaySpentValue: {
-    fontSize: 19.5,
-    fontWeight: '700',
+  bigAmount: {
+    fontSize: 36,
+    fontWeight: '800',
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.3,
-    marginTop: 2,
+    fontFamily: Platform.select({
+      ios: 'Baloo2-ExtraBold',
+      android: 'Baloo2_800ExtraBold',
+      default: 'system-ui',
+    }),
+    lineHeight: 40,
   },
-  progressBarWrapper: {
-    marginVertical: 2,
+  statusCol: {
+    alignItems: 'flex-end',
   },
-  overBudgetNotice: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  allowanceBottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  subStatLabel: {
-    fontSize: 12.5,
-  },
-  cashflowBarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 2,
-    paddingHorizontal: 0,
-  },
-  compactSegmentToggle: {
-    flexDirection: 'row',
-    borderRadius: radii.full,
-    padding: 2,
-  },
-  compactSegmentBtn: {
-    paddingVertical: 4,
-    paddingHorizontal: 11,
-    borderRadius: radii.full,
-  },
-  compactSegmentBtnActive: {
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  compactSegmentBtnText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    letterSpacing: -0.2,
-  },
-  cashflowBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  cashflowPillBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 9,
-    borderRadius: radii.full,
-  },
-  pillBadgeLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: -0.1,
-  },
-  pillBadgeAmount: {
-    fontSize: 15.5,
+  limitTargetText: {
+    fontSize: 11,
+    color: '#7A6852',
     fontWeight: '700',
+    fontFamily: Platform.select({
+      ios: 'Nunito-Bold',
+      android: 'Nunito_700Bold',
+      default: 'system-ui',
+    }),
+  },
+  limitValText: {
+    fontSize: 16,
+    fontWeight: '800',
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.3,
+    fontFamily: Platform.select({
+      ios: 'Baloo2-ExtraBold',
+      android: 'Baloo2_800ExtraBold',
+      default: 'system-ui',
+    }),
   },
-  todayMiniPillBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 9,
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.full,
-    marginTop: spacing.xs,
-    marginBottom: spacing.xs,
-  },
-  todayMiniPillContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-  },
-  todayMiniPillText: {
-    fontSize: 13,
-    letterSpacing: -0.1,
-  },
-  filterChipScroll: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    paddingVertical: 2,
-    marginBottom: spacing.xs,
-  },
-  dayViewSection: {
-    gap: spacing.xs + 2,
-    paddingTop: spacing.xs,
-  },
-  daySectionHeader: {
-    marginBottom: spacing.xs,
-  },
-  daySectionTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  txRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm + 4,
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.md,
-    borderWidth: 1,
+  emptyPromptRow: {
+    marginTop: 4,
     marginBottom: 4,
   },
-  txLeft: {
+  emptyPromptText: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: Platform.select({
+      ios: 'Nunito-Bold',
+      android: 'Nunito_700Bold',
+      default: 'system-ui',
+    }),
+  },
+  pigTalkRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    flex: 1,
+    gap: 10,
   },
-  txTypeIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: radii.sm + 2,
-    borderWidth: 1,
+  pigTalkAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    backgroundColor: '#F9B8C4',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  txInfo: {
+  pigTalkEmoji: {
+    fontSize: 20,
+  },
+  pigTalkText: {
     flex: 1,
-    gap: 2,
-  },
-  txDesc: {
     fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: -0.2,
-  },
-  txCategory: {
-    fontSize: 12,
-  },
-  txAmount: {
-    fontSize: 15,
     fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-    letterSpacing: -0.2,
+    lineHeight: 18,
+    fontFamily: Platform.select({
+      ios: 'Nunito-Bold',
+      android: 'Nunito_700Bold',
+      default: 'system-ui',
+    }),
+  },
+  quickSection: {
+    marginTop: 22,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+  },
+  feedActionRow: {
+    marginTop: 12,
+    alignItems: 'flex-start',
+  },
+  jarsSection: {
+    marginTop: 22,
+  },
+  jarsGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
+  },
+  calendarSection: {
+    marginTop: 22,
   },
 });

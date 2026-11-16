@@ -5,6 +5,7 @@ import {
   ColorTokens,
   ResolvedTheme,
   ThemeMode,
+  heoconTokens,
   mintTokens,
   pinkTokens,
 } from './tokens';
@@ -22,34 +23,30 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  mode: 'pink',
-  themeMode: 'pink',
-  activeTheme: 'pink',
-  tokens: pinkTokens,
+  mode: 'heocon',
+  themeMode: 'heocon',
+  activeTheme: 'heocon',
+  tokens: heoconTokens,
   isDark: false,
   setMode: async () => {},
   setThemeMode: async () => {},
 });
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setModeState] = useState<ThemeMode>('pink');
+  const [mode, setModeState] = useState<ThemeMode>('heocon');
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Khôi phục và tự động di chuyển cài đặt Theme từ AsyncStorage khi mở app
+  // Khôi phục cài đặt Theme từ AsyncStorage (mặc định luôn là 'heocon')
   useEffect(() => {
     (async () => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY_THEME);
-        if (saved === 'pink' || saved === 'mint') {
+        if (saved === 'heocon' || saved === 'pink' || saved === 'mint') {
           setModeState(saved as ThemeMode);
-        } else if (saved === 'cool') {
-          // Di chuyển theme 'cool' cũ sang 'mint' mới
-          setModeState('mint');
-          await AsyncStorage.setItem(STORAGE_KEY_THEME, 'mint');
-        } else if (saved === 'light' || saved === 'dark' || saved === 'system') {
-          // Di chuyển các theme cũ 'light'/'dark'/'system' sang 'pink' (Hồng Heo Mặc Định)
-          setModeState('pink');
-          await AsyncStorage.setItem(STORAGE_KEY_THEME, 'pink');
+        } else {
+          // Mặc định luôn là heocon
+          setModeState('heocon');
+          await AsyncStorage.setItem(STORAGE_KEY_THEME, 'heocon');
         }
       } catch (err) {
         console.warn('[ThemeContext] Failed to load theme mode:', err);
@@ -69,11 +66,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Xác định theme thực tế (resolved)
-  // 'pink' => Hồng Heo (Linh vật PigFly)
-  // 'mint' => Xanh Mint Gradient (Mát mẻ đa tầng)
-  const activeTheme: ResolvedTheme = mode === 'mint' ? 'mint' : 'pink';
+  // 'heocon' => Neo-brutalist Pixel (Mặc định)
+  // 'pink' => Hồng Heo
+  // 'mint' => Xanh Mint Gradient
+  const activeTheme: ResolvedTheme = mode === 'mint' ? 'mint' : mode === 'pink' ? 'pink' : 'heocon';
   const isDark = false;
-  const tokens = activeTheme === 'mint' ? mintTokens : pinkTokens;
+  const tokens = activeTheme === 'mint' ? mintTokens : activeTheme === 'pink' ? pinkTokens : heoconTokens;
 
   return (
     <ThemeContext.Provider

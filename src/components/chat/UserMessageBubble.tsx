@@ -19,27 +19,54 @@ interface UserMessageBubbleProps {
  * - Căn phải, nền vàng ấm tokens.primary, chữ tối tương phản cao, bo góc 16px.
  */
 export const UserMessageBubble: React.FC<UserMessageBubbleProps> = ({ message }) => {
-  const { tokens } = useTheme();
+  const { tokens, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
 
   return (
     <View style={styles.wrapper}>
       <View style={styles.bubbleCol}>
-        <View style={[styles.bubble, { backgroundColor: tokens.primary }]}>
+        <View
+          style={[
+            styles.bubble,
+            isHeocon
+              ? {
+                  backgroundColor: '#F4B93B',
+                  borderWidth: 3,
+                  borderColor: '#2B2118',
+                  shadowColor: '#2B2118',
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 1,
+                  shadowRadius: 0,
+                  elevation: 3,
+                }
+              : { backgroundColor: tokens.primary },
+          ]}
+        >
           {message.photoUrl ? (
             <Image
               source={{ uri: message.photoUrl }}
-              style={styles.attachedPhoto}
+              style={[
+                styles.attachedPhoto,
+                isHeocon && { borderWidth: 2, borderColor: '#2B2118' },
+              ]}
               contentFit="cover"
               cachePolicy="disk"
             />
           ) : null}
 
           {message.text ? (
-            <Text style={styles.messageText}>{message.text}</Text>
+            <Text
+              style={[
+                styles.messageText,
+                isHeocon && { color: '#2B2118', fontWeight: '700' },
+              ]}
+            >
+              {message.text}
+            </Text>
           ) : null}
         </View>
 
-        <Text style={[styles.timeText, { color: tokens.textMuted }]}>
+        <Text style={[styles.timeText, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
           {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
       </View>

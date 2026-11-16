@@ -42,7 +42,8 @@ import { formatVND } from '../../utils/currency';
 import { useBottomInset } from '../../hooks/useBottomInset';
 
 export const SquadLocketView: React.FC = () => {
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
   const { contentBottomPadding } = useBottomInset();
   const { profile } = useAuthStore();
   const { transactions } = useTransactionStore();
@@ -332,12 +333,19 @@ export const SquadLocketView: React.FC = () => {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: tokens.primary,
+            backgroundColor: isHeocon ? '#F4B93B' : tokens.primary,
             paddingVertical: 12,
             paddingHorizontal: 16,
             borderRadius: 16,
             marginBottom: 14,
             gap: 8,
+            borderWidth: isHeocon ? 3 : 0,
+            borderColor: '#2B2118',
+            shadowColor: '#2B2118',
+            shadowOffset: { width: 0, height: isHeocon ? 3 : 0 },
+            shadowOpacity: isHeocon ? 1 : 0,
+            shadowRadius: 0,
+            elevation: isHeocon ? 3 : 0,
           }}
           activeOpacity={0.85}
           onPress={() => {
@@ -345,12 +353,23 @@ export const SquadLocketView: React.FC = () => {
             setShow3DFlightModal(true);
           }}
         >
-          <Rocket size={18} color="#FFFFFF" strokeWidth={2.6} />
-          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>
+          <Rocket size={18} color={isHeocon ? '#2B2118' : '#FFFFFF'} strokeWidth={2.6} />
+          <Text style={{ color: isHeocon ? '#2B2118' : '#FFFFFF', fontSize: 13, fontWeight: '800' }}>
             Chuyến Bay PigFly 3D FPS 🚀
           </Text>
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 }}>
-            <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>{streakDays}N</Text>
+          <View
+            style={{
+              backgroundColor: isHeocon ? '#FFFBF1' : 'rgba(255,255,255,0.25)',
+              borderWidth: isHeocon ? 1.5 : 0,
+              borderColor: '#2B2118',
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: 10,
+            }}
+          >
+            <Text style={{ color: isHeocon ? '#2B2118' : '#FFFFFF', fontSize: 10, fontWeight: '800' }}>
+              {streakDays}N
+            </Text>
           </View>
         </TouchableOpacity>
 
@@ -359,7 +378,24 @@ export const SquadLocketView: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: tokens.text }]}>Hội Nuôi Heo ({members.length}/4 Bạn)</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.membersScroll}>
             {members.map((member) => (
-              <View key={member.id} style={[styles.memberCard, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
+              <View
+                key={member.id}
+                style={[
+                  styles.memberCard,
+                  isHeocon
+                    ? {
+                        backgroundColor: '#FFFBF1',
+                        borderColor: '#2B2118',
+                        borderWidth: 2,
+                        shadowColor: '#2B2118',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 2,
+                      }
+                    : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                ]}
+              >
                 <PigBoMascot pose={member.avatarPose} size={48} />
                 <Text style={[styles.memberName, { color: tokens.text }]} numberOfLines={1}>
                   {member.name}
@@ -400,7 +436,24 @@ export const SquadLocketView: React.FC = () => {
             </View>
           ) : (
             feedItems.map((item) => (
-              <View key={item.id} style={[styles.feedCard, { backgroundColor: isDark ? '#16202C' : '#FFFFFF', borderColor: tokens.border }]}>
+              <View
+                key={item.id}
+                style={[
+                  styles.feedCard,
+                  isHeocon
+                    ? {
+                        backgroundColor: '#FFFBF1',
+                        borderColor: '#2B2118',
+                        borderWidth: 3,
+                        shadowColor: '#2B2118',
+                        shadowOffset: { width: 0, height: 3 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 3,
+                      }
+                    : { backgroundColor: isDark ? '#16202C' : '#FFFFFF', borderColor: tokens.border },
+                ]}
+              >
                 <View style={styles.feedHeader}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <PigBoMascot pose="welcome" size={32} />

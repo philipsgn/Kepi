@@ -30,20 +30,62 @@ export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
   onConfirmRecord,
   onCancelRecord,
 }) => {
-  const { tokens } = useTheme();
+  const { tokens, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
 
   return (
     <View style={styles.wrapper}>
       {/* 1. AVATAR TRÒN CHỮ "M" */}
-      <View style={[styles.avatarBox, { backgroundColor: tokens.primary, borderColor: tokens.border }]}>
-        <Text style={styles.avatarText}>M</Text>
+      <View
+        style={[
+          styles.avatarBox,
+          isHeocon
+            ? {
+                backgroundColor: '#F9B8C4',
+                borderColor: '#2B2118',
+                borderWidth: 2,
+              }
+            : { backgroundColor: tokens.primary, borderColor: tokens.border },
+        ]}
+      >
+        <Text style={[styles.avatarText, isHeocon && { color: '#2B2118' }]}>M</Text>
       </View>
 
       <View style={styles.bubbleCol}>
-        <Text style={[styles.senderName, { color: tokens.textMuted }]}>Anh Minh</Text>
+        <Text
+          style={[
+            styles.senderName,
+            { color: isHeocon ? '#6E5D4F' : tokens.textMuted },
+          ]}
+        >
+          Anh Minh
+        </Text>
 
-        <View style={[styles.bubble, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
-          <Text style={[styles.messageText, { color: tokens.text }]}>{message.text}</Text>
+        <View
+          style={[
+            styles.bubble,
+            isHeocon
+              ? {
+                  backgroundColor: '#FFFBF1',
+                  borderColor: '#2B2118',
+                  borderWidth: 3,
+                  shadowColor: '#2B2118',
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 1,
+                  shadowRadius: 0,
+                  elevation: 3,
+                }
+              : { backgroundColor: tokens.surface, borderColor: tokens.border },
+          ]}
+        >
+          <Text
+            style={[
+              styles.messageText,
+              { color: isHeocon ? '#2B2118' : tokens.text },
+            ]}
+          >
+            {message.text}
+          </Text>
 
           {/* 2. THẺ SỐ LIỆU MINI */}
           {message.cardType === 'METRIC' && message.cardData && (
@@ -75,7 +117,12 @@ export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
           )}
         </View>
 
-        <Text style={[styles.timeText, { color: tokens.textMuted }]}>
+        <Text
+          style={[
+            styles.timeText,
+            { color: isHeocon ? '#6E5D4F' : tokens.textMuted },
+          ]}
+        >
           {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
       </View>

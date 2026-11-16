@@ -95,7 +95,8 @@ export const GoalSectionCard: React.FC<GoalSectionCardProps> = ({
   goalDeadline,
   goalReason,
 }) => {
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
 
   // 1. Chuẩn hóa danh sách mục tiêu dài hạn (hỗ trợ cả goals array lẫn single goal fallback)
   const effectiveGoals = useMemo<GoalItem[]>(() => {
@@ -185,7 +186,18 @@ export const GoalSectionCard: React.FC<GoalSectionCardProps> = ({
     <TouchableOpacity
       style={[
         styles.container,
-        { backgroundColor: tokens.surface, borderColor: tokens.border },
+        isHeocon
+          ? {
+              backgroundColor: '#FFFBF1',
+              borderColor: '#2B2118',
+              borderWidth: 3,
+              shadowColor: '#2B2118',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 1,
+              shadowRadius: 0,
+              elevation: 4,
+            }
+          : { backgroundColor: tokens.surface, borderColor: tokens.border },
       ]}
       onPress={handleCardPress}
       activeOpacity={0.88}
@@ -195,9 +207,9 @@ export const GoalSectionCard: React.FC<GoalSectionCardProps> = ({
       <View style={styles.headerRow}>
         <View style={styles.titleGroup}>
           <View style={styles.targetIconBox}>
-            <Target size={19} color={tokens.primary} strokeWidth={2.4} />
+            <Target size={19} color={isHeocon ? '#E0452B' : tokens.primary} strokeWidth={2.4} />
           </View>
-          <Text style={[styles.sectionTitle, { color: tokens.text }]}>
+          <Text style={[styles.sectionTitle, { color: isHeocon ? '#2B2118' : tokens.text }]}>
             {Strings.profile.goalSectionTitle}
           </Text>
         </View>

@@ -11,12 +11,13 @@ import { useTheme } from '../../theme/ThemeContext';
 import { ThemeMode, radii } from '../../theme/tokens';
 
 export const ThemeSettingsCard: React.FC = () => {
-  const { themeMode, setThemeMode, tokens } = useTheme();
+  const { themeMode, setThemeMode, tokens, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
 
-  const handleSelectMode = (mode: ThemeMode) => {
-    if (mode !== themeMode) {
+  const handleSelectMode = (m: ThemeMode) => {
+    if (m !== themeMode) {
       Haptics.selectionAsync();
-      setThemeMode(mode);
+      setThemeMode(m);
     }
   };
 
@@ -26,12 +27,23 @@ export const ThemeSettingsCard: React.FC = () => {
     icon: (active: boolean) => React.ReactNode;
   }[] = [
     {
+      mode: 'heocon',
+      label: 'Heo Con',
+      icon: (active) => (
+        <Sparkles
+          size={16}
+          color={active ? (isHeocon ? '#2B2118' : tokens.textOnPrimary) : tokens.textMuted}
+          strokeWidth={2.6}
+        />
+      ),
+    },
+    {
       mode: 'pink',
       label: 'Hồng Heo',
       icon: (active) => (
         <Sparkles
           size={16}
-          color={active ? tokens.textOnPrimary : tokens.textMuted}
+          color={active ? (isHeocon ? '#2B2118' : tokens.textOnPrimary) : tokens.textMuted}
           strokeWidth={2.6}
         />
       ),
@@ -42,7 +54,7 @@ export const ThemeSettingsCard: React.FC = () => {
       icon: (active) => (
         <Leaf
           size={16}
-          color={active ? tokens.textOnPrimary : tokens.textMuted}
+          color={active ? (isHeocon ? '#2B2118' : tokens.textOnPrimary) : tokens.textMuted}
           strokeWidth={2.6}
         />
       ),
@@ -50,18 +62,45 @@ export const ThemeSettingsCard: React.FC = () => {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
+    <View
+      style={[
+        styles.container,
+        isHeocon
+          ? {
+              backgroundColor: '#FFFBF1',
+              borderColor: '#2B2118',
+              borderWidth: 3,
+              shadowColor: '#2B2118',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 1,
+              shadowRadius: 0,
+              elevation: 4,
+            }
+          : { backgroundColor: tokens.surface, borderColor: tokens.border },
+      ]}
+    >
       <View style={styles.headerRow}>
-        <Palette size={20} color={tokens.primary} strokeWidth={2.6} />
+        <Palette size={20} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.6} />
         <View style={styles.titleCol}>
-          <Text style={[styles.title, { color: tokens.text }]}>Màu Sắc Giao Diện</Text>
-          <Text style={[styles.subtitle, { color: tokens.textMuted }]}>
-            Bộ đôi giao diện PigFly chuẩn tương phản WCAG AAA
+          <Text style={[styles.title, { color: isHeocon ? '#2B2118' : tokens.text }]}>Màu Sắc Giao Diện</Text>
+          <Text style={[styles.subtitle, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
+            Hệ 3 giao diện PigFly: Heo Con Pixel, Hồng Heo & Xanh Mint
           </Text>
         </View>
       </View>
 
-      <View style={[styles.segmentTrack, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
+      <View
+        style={[
+          styles.segmentTrack,
+          isHeocon
+            ? {
+                backgroundColor: '#F6EEDC',
+                borderColor: '#2B2118',
+                borderWidth: 2,
+              }
+            : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+        ]}
+      >
         {options.map((opt) => {
           const isActive = themeMode === opt.mode;
           return (
@@ -69,13 +108,21 @@ export const ThemeSettingsCard: React.FC = () => {
               key={opt.mode}
               style={[
                 styles.segmentBtn,
-                isActive && [
-                  styles.segmentBtnActive,
-                  {
-                    backgroundColor: tokens.primary,
-                    shadowColor: tokens.glowColor,
-                  },
-                ],
+                isActive &&
+                  (isHeocon
+                    ? {
+                        backgroundColor: '#F4B93B',
+                        borderWidth: 2,
+                        borderColor: '#2B2118',
+                        borderRadius: radii.full,
+                      }
+                    : [
+                        styles.segmentBtnActive,
+                        {
+                          backgroundColor: tokens.primary,
+                          shadowColor: tokens.glowColor,
+                        },
+                      ]),
               ]}
               onPress={() => handleSelectMode(opt.mode)}
               activeOpacity={0.8}
@@ -84,7 +131,16 @@ export const ThemeSettingsCard: React.FC = () => {
               <Text
                 style={[
                   styles.segmentText,
-                  { color: isActive ? tokens.textOnPrimary : tokens.textMuted },
+                  {
+                    color: isActive
+                      ? isHeocon
+                        ? '#2B2118'
+                        : tokens.textOnPrimary
+                      : isHeocon
+                      ? '#6E5D4F'
+                      : tokens.textMuted,
+                    fontWeight: isActive ? '800' : '600',
+                  },
                 ]}
               >
                 {opt.label}

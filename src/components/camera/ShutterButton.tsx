@@ -31,7 +31,8 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
   isRecording = false,
   disabled = false,
 }) => {
-  const { tokens } = useTheme();
+  const { tokens, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
   const [isPressed, setIsPressed] = useState(false);
   const [recordingActive, setRecordingActive] = useState(false);
   const animatedProgress = useRef(new Animated.Value(0)).current;
@@ -176,10 +177,21 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
         onPress={handlePress}
         style={[
           styles.shutterInner,
-          {
-            backgroundColor: recordingActive ? '#C86D51' : tokens.primary,
-            shadowColor: recordingActive ? '#C86D51' : tokens.primary,
-          },
+          isHeocon
+            ? {
+                backgroundColor: recordingActive ? '#E0452B' : '#F4B93B',
+                borderWidth: 3,
+                borderColor: '#2B2118',
+                shadowColor: '#2B2118',
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 1,
+                shadowRadius: 0,
+                elevation: 3,
+              }
+            : {
+                backgroundColor: recordingActive ? '#C86D51' : tokens.primary,
+                shadowColor: recordingActive ? '#C86D51' : tokens.primary,
+              },
           (isPressed || recordingActive) && styles.shutterPressed,
         ]}
       />

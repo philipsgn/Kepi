@@ -996,7 +996,7 @@ export default function MainAppScreen() {
   }
 
   return (
-    <View style={[styles.rootContainer, { backgroundColor: isDark ? '#0E1620' : '#FAF6EC' }]}>
+    <View style={[styles.rootContainer, { backgroundColor: tokens.bg || '#F6EEDC' }]}>
       <BankClipboardToast
         onSnapshot={handleBankSnapshot}
         onFastLog={handleBankFastLog}
@@ -1712,15 +1712,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginVertical: spacing.xs,
     borderRadius: 38,
-    borderWidth: 0,
+    borderWidth: 3,
+    borderColor: '#2B2118',
     overflow: 'hidden',
     position: 'relative',
     backgroundColor: '#0E1620',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 6 },
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4 },
   viewfinder: {
     flex: 1,
     position: 'relative' },
