@@ -169,9 +169,34 @@ const bg=mk(W,H,(c)=>{
   // hiên
   R(c,0,50,112,9,'#D9A878');for(let x=0;x<112;x+=9)R(c,x,50,1,9,'#C48F63');
   R(c,0,50,112,1,C.woodLight);R(c,0,59,112,2,'#A87650');R(c,0,61,112,2,'rgba(40,30,10,.18)');
-  // chậu cây
-  R(c,43,50,8,8,'#B5603A');R(c,42,50,10,2,'#C97248');
-  E(c,47,44,6,6,C.leaf1);E(c,45,42,3,3,'#6DB85A');E(c,50,45,3,3,C.leaf2);R(c,48,40,2,2,'#F59BB0');
+
+  // Dây đèn tròn Giáng Sinh giăng dọc mái hiên (x=8..106)
+  const bulbCols=['#E0452B','#F4B93B','#3E8139','#F4B93B','#E0452B','#FFF08A'];
+  for(let bx=8;bx<=106;bx+=8){
+    const col=bulbCols[((bx/8)|0)%bulbCols.length];
+    R(c,bx,49,1,2,'#4B2B21');
+    R(c,bx-1,51,3,3,col);
+    R(c,bx,51,1,1,'#FFFFFF');
+  }
+
+  // Cây Thông Noel nhỏ trên hiên (Merry Christmas)
+  R(c,44,52,8,6,'#B5603A');R(c,43,51,10,2,'#C97248'); // Chậu gỗ
+  R(c,47,49,2,3,'#5E3A20'); // Gốc thông
+  // Tầng 3 (rộng nhất): y=45..49, x=38..58
+  for(let y=0;y<5;y++){const w=12+y*2;R(c,48-((w/2)|0),45+y,w,1,'#2D5A27')}
+  R(c,39,49,18,1,'#3E8139');
+  // Tầng 2 (vừa): y=41..45, x=41..55
+  for(let y=0;y<5;y++){const w=8+y*2;R(c,48-((w/2)|0),41+y,w,1,'#2D5A27')}
+  R(c,42,45,12,1,'#3E8139');
+  // Tầng 1 (đỉnh): y=37..41, x=44..52
+  for(let y=0;y<5;y++){const w=4+y*2;R(c,48-((w/2)|0),37+y,w,1,'#2D5A27')}
+  R(c,45,41,6,1,'#3E8139');
+  // Ngôi sao vàng Noel trên đỉnh ⭐ (x=46..50, y=32..36)
+  R(c,47,33,3,3,'#F4B93B');R(c,48,32,1,5,'#FFF08A');R(c,46,34,5,1,'#FFF08A');
+  // Quả châu trang trí Noel
+  R(c,42,47,2,2,'#E0452B');R(c,52,47,2,2,'#F4B93B');
+  R(c,45,43,2,2,'#F4B93B');R(c,49,43,2,2,'#E0452B');
+  R(c,47,39,2,2,'#FFFFFF');
   // sân gạch hoa
   const px0=20,py0=72;
   R(c,px0-2,py0-2,76,34,'#B9AE92');
@@ -423,12 +448,14 @@ function draw(t){
 
   if(apples.length > 0){
     apples.forEach(a => {
-      const ax=Math.round(a.x),ay=Math.round(a.y);
-      ctx.fillStyle='rgba(30,50,20,.22)';
-      ctx.fillRect(ax-1,Math.round(a.targetY)+3,6,2);
-      R(ctx,ax,ay,4,4,'#E0452B');
-      R(ctx,ax+1,ay+1,1,1,'#FFAAA5');
-      R(ctx,ax+1,ay-1,1,1,'#6E9A44');
+      if(!a.eaten){
+        const ax=Math.round(a.x),ay=Math.round(a.y);
+        ctx.fillStyle='rgba(30,50,20,.22)';
+        ctx.fillRect(ax-1,Math.round(a.targetY)+3,6,2);
+        R(ctx,ax,ay,4,4,'#E0452B');
+        R(ctx,ax+1,ay+1,1,1,'#FFAAA5');
+        R(ctx,ax+1,ay-1,1,1,'#6E9A44');
+      }
     });
   }
   if(pondSplash > 0){
@@ -470,6 +497,24 @@ function draw(t){
     R(ctx,59,21,24,16,'#FFE08A');R(ctx,70,20,2,18,C.woodDark);R(ctx,58,28,26,2,C.woodDark);
     E(ctx,96,19,7,7,'rgba(255,200,90,.28)');
     flies.forEach(f=>{if(Math.sin(f.p+t*2)>.2)R(ctx,Math.round(f.x+Math.sin(t+f.p)*4),Math.round(f.y+Math.cos(t*.8+f.p)*3),2,2,'#FFF08A')});
+
+    // Đèn vàng bừng sáng cây thông Noel & ngôi sao ⭐
+    E(ctx,48,34,9,9,'rgba(255,240,140,.40)');
+    E(ctx,48,44,15,12,'rgba(255,220,100,.30)');
+    R(ctx,47,33,3,3,'#FFF08A');
+
+    // Dây đèn tròn dọc mái hiên bừng sáng lung linh
+    for(let bx=8;bx<=106;bx+=8){
+      E(ctx,bx,52,5,5,'rgba(255,225,90,.42)');
+      R(ctx,bx-1,51,3,3,'#FFF08A');
+      R(ctx,bx,52,1,1,'#FFFFFF');
+    }
+  } else if(tod==='dusk'){
+    // Chiều hoàng hôn: Đèn ửng sáng ấm áp
+    E(ctx,48,34,6,6,'rgba(255,220,100,.22)');
+    for(let bx=8;bx<=106;bx+=16){
+      E(ctx,bx,52,3,3,'rgba(255,200,80,.20)');
+    }
   }
 }
 
@@ -502,46 +547,44 @@ garden.addEventListener('pointerdown', e => {
 
   // 1. Chạm vào Tán Cây Táo hoặc Thân Cây (Rung rụng táo)
   if(x >= 108 && x <= 176 && y <= 66) {
-    if (apples.length > 0) {
+    if (apples.some(a => !a.eaten)) {
       say('Heo đang nhắm chùm táo kìa!', 1400);
       return;
     }
     say('Rung cây táo nè! 🍎', 1200);
     treeShake = 0.5;
     apples = [
-      { x: 136, y: 22, targetY: 76 },
-      { x: 146, y: 16, targetY: 82 },
-      { x: 158, y: 24, targetY: 78 }
+      { x: 136, y: 22, targetY: 76, eaten: false },
+      { x: 146, y: 16, targetY: 82, eaten: false },
+      { x: 158, y: 24, targetY: 78, eaten: false }
     ];
     setTimeout(() => {
       say('A, có táo rơi kìa!', 1400);
-      walkTo(144, 82, () => {
+      walkTo(140, 82, () => {
         pig.face = 1;
-        setMode('eat', 3.0, () => {
+        setMode('eat', 3.2, () => {
           apples = [];
           say('Táo ngọt giòn rụm luôn 🍎!', 1800);
           setMode('happy', 1.6);
         });
+        setTimeout(() => { if(apples[0]) apples[0].eaten = true; }, 800);
+        setTimeout(() => { if(apples[1]) apples[1].eaten = true; }, 1600);
+        setTimeout(() => { if(apples[2]) apples[2].eaten = true; }, 2400);
       });
     }, 400);
     return;
   }
 
-  // 2. Chạm vào Chậu Cây Cảnh Hiên Nhà (Tưới cây nước mát)
-  if(x >= 38 && x <= 58 && y >= 38 && y <= 62) {
-    if(watering){
-      say('Đang tưới nước mát nè! 🌿', 1200);
-      return;
+  // 2. Chạm vào Cây Thông Noel trên hiên (Merry Christmas)
+  if(x >= 38 && x <= 58 && y >= 32 && y <= 62) {
+    say('Giáng Sinh an lành nha! 🎄✨', 1600);
+    for(let i=0; i<8; i++){
+      addSparkle(42 + Math.random()*12, 36 + Math.random()*16, '#FFE08A');
     }
-    say('Tưới cây cảnh hiên nhà! 🌿🚿', 1400);
-    watering = { x: 42, y: 34, targetX: 47, targetY: 46, t: 0, dur: 2.2 };
-    setTimeout(() => {
-      say('Cây được uống nước mát rồi! 🌿✨', 1600);
-      walkTo(62, 78, () => {
-        pig.face = -1;
-        setMode('happy', 1.4);
-      });
-    }, 1800);
+    walkTo(62, 78, () => {
+      pig.face = -1;
+      setMode('happy', 1.5);
+    });
     return;
   }
 
