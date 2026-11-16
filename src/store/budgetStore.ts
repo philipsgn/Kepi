@@ -59,6 +59,7 @@ interface BudgetState {
   checkAndApplyMonthRollover: () => Promise<boolean>;
   dismissRolloverBanner: () => void;
   recalculateDynamicBudget: (totalSpentThisMonth?: number) => void;
+  adjustWalletBalance: (newBalance: number, reason: string) => Promise<void>;
 }
 
 export const useBudgetStore = create<BudgetState>((set, get) => ({
@@ -452,6 +453,32 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
       todayBudget: newDaily,
       weeklyBudget: weeklyLimit,
     });
+  },
+
+  adjustWalletBalance: async (newBalance: number, reason: string) => {
+    const prev = get().realBalance;
+    set({ realBalance: newBalance });
+    get().recalculateDynamicBudget();
+    try {
+      const cached = await AsyncStorage.getItem('vi_locket_budget_data');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        parsed.realBalance = newBalance;
+        await AsyncStorage.setItem('vi_locket_budget_data', JSON.stringify(parsed));
+      }
+      const historyStr = await AsyncStorage.getItem('vi_locket_wallet_adjustments');
+      const history = historyStr ? JSON.parse(historyStr) : [];
+      history.push({
+        id: `adj-${Date.now()}`,
+        prevBalance: prev,
+        newBalance,
+        reason,
+        timestamp: new Date().toISOString(),
+      });
+      await AsyncStorage.setItem('vi_locket_wallet_adjustments', JSON.stringify(history));
+    } catch (e) {
+      console.warn('Failed to save adjusted wallet balance:', e);
+    }
   },
 }));
 

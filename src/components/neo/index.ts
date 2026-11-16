@@ -7,3 +7,4 @@ export * from './OverlineLabel';
 export * from './DashedDivider';
 export * from './DongMark';
 export * from './NeoJar';
+export * from './NeoWalletPill';
