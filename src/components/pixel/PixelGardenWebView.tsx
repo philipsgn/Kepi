@@ -263,6 +263,9 @@ function pickTarget(){for(let i=0;i<20;i++){const x=MINX+Math.random()*(MAXX-MIN
 
 const bubble=document.getElementById('bubble');let bubbleUntil=0;
 let apple = null; // Quả táo rơi { x, y, targetY, active }
+let wheatGrains = null; // Hạt thóc rơi { items: [{x, y, targetY}], active }
+let pondSplash = 0; // Thời gian cá quẫy sóng nước
+let lastPigTapTime = 0, pigTapCount = 0; // Đếm số lần gãi bụng
 function say(t,ms){
   bubble.textContent=t;
   bubble.classList.add('on');
@@ -284,6 +287,14 @@ function update(dt){
   if(apple && apple.active && apple.y < apple.targetY){
     apple.y = Math.min(apple.targetY, apple.y + dt * 110);
   }
+  if(wheatGrains && wheatGrains.active){
+    wheatGrains.items.forEach(g => {
+      if(g.y < g.targetY) g.y = Math.min(g.targetY, g.y + dt * 90);
+    });
+  }
+  if(pondSplash > 0){
+    pondSplash = Math.max(0, pondSplash - dt);
+  }
   const sad=SPENT>LIMIT;
   if(pig.mode==='idle'){
     if(pig.t>pig.dur){
@@ -303,19 +314,29 @@ function update(dt){
 }
 
 function drawPig(t){
-  const m=pig.mode,sad=SPENT>LIMIT,happy=m==='happy';
+  const m=pig.mode,sad=SPENT>LIMIT,happy=m==='happy',tickle=m==='tickle';
   pig.jump=happy?Math.abs(Math.sin(pig.t*9))*5:0;
   pcx.clearRect(0,0,24,20);
   drawPigSprite(pcx,{pose:m==='walk'?'walk':m==='sleep'?'sleep':m==='eat'?'eat':'stand',frame:pig.frame,
-    mood:sad?'sad':'ok',happy,blink:(t%3.2)<.12,tail:Math.floor(t*3)%2===1});
+    mood:sad?'sad':'ok',happy:happy||tickle,blink:(t%3.2)<.12,tail:Math.floor(t*3)%2===1});
   const sw=Math.round(8-pig.jump*.6);
   ctx.fillStyle='rgba(30,50,20,.22)';
   ctx.fillRect(Math.round(pig.x)-sw,Math.round(pig.y)-1,sw*2,2);ctx.fillRect(Math.round(pig.x)-sw+2,Math.round(pig.y)+1,sw*2-4,1);
   const y=Math.round(pig.y-18-pig.jump);
   ctx.save();
-  if(pig.face<0){ctx.translate(Math.round(pig.x+11),y);ctx.scale(-1,1);ctx.drawImage(pc,0,0)}
-  else ctx.drawImage(pc,Math.round(pig.x-11),y);
+  if(tickle){
+    ctx.translate(Math.round(pig.x), y + 10);
+    ctx.rotate(Math.sin(t * 14) * 0.35 + Math.PI); // Ngửa bụng cười ngoe nguẩy
+    ctx.drawImage(pc, -12, -10);
+  } else if(pig.face<0){
+    ctx.translate(Math.round(pig.x+11),y);ctx.scale(-1,1);ctx.drawImage(pc,0,0);
+  } else {
+    ctx.drawImage(pc,Math.round(pig.x-11),y);
+  }
   ctx.restore();
+  if(tickle){
+    R(ctx, Math.round(pig.x + Math.sin(t*10)*8), Math.round(pig.y - 24), 2, 2, '#60A5FA');
+  }
   if(m==='sleep')for(let i=0;i<3;i++){const p=(t*.8+i/3)%1;ctx.globalAlpha=1-p;zGlyph(ctx,Math.round(pig.x+10+p*8),Math.round(pig.y-20-p*12));ctx.globalAlpha=1}
   if(happy){const p=Math.min(1,pig.t/pig.dur);ctx.globalAlpha=1-p*.6;heart(ctx,Math.round(pig.x+2),Math.round(pig.y-28-p*6),'#E0452B');ctx.globalAlpha=1}
 }
@@ -333,6 +354,27 @@ function draw(t){
     R(ctx,ax,ay,4,4,'#E0452B');
     R(ctx,ax+1,ay+1,1,1,'#FFAAA5');
     R(ctx,ax+1,ay-1,1,1,'#6E9A44');
+  }
+  if(wheatGrains && wheatGrains.active){
+    wheatGrains.items.forEach(g => {
+      const gx = Math.round(g.x), gy = Math.round(g.y);
+      R(ctx, gx, gy, 2, 3, '#F4B93B');
+      R(ctx, gx, gy + 1, 1, 1, '#FFE08A');
+    });
+  }
+  if(pondSplash > 0){
+    const phase = (1.8 - pondSplash) * 8;
+    ctx.strokeStyle = '#93C5FD';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(136, 106, Math.min(22, 10 + phase * 2), Math.min(12, 5 + phase), 0, 0, Math.PI * 2);
+    ctx.stroke();
+    const fishH = Math.sin(pondSplash * 3.5) * 12;
+    if(fishH > 0){
+      R(ctx, 136, Math.round(106 - fishH), 4, 3, '#F4B93B');
+      R(ctx, 138, Math.round(105 - fishH), 2, 1, '#FFF');
+      R(ctx, 134, Math.round(107 - fishH), 2, 2, '#E0452B');
+    }
   }
   ctx.drawImage(fg,0,0);
   const T=TOD[tod];
@@ -399,8 +441,71 @@ garden.addEventListener('pointerdown', e => {
     return;
   }
 
-  // 3. Chạm vào Chú Heo (Nựng Heo)
+  // 3. Chạm vào Bụi Lúa / Thảm Cỏ (Thu hoạch lúa vàng)
+  if(x >= 148 && x <= 176 && y >= 110 && y <= 132) {
+    if(wheatGrains && wheatGrains.active){
+      say('Heo đang mót thóc nha! 🌾', 1200);
+      return;
+    }
+    say('Thu hoạch lúa vàng! 🌾', 1200);
+    wheatGrains = {
+      active: true,
+      items: [
+        { x: 154, y: 114, targetY: 122 },
+        { x: 162, y: 112, targetY: 124 },
+        { x: 168, y: 115, targetY: 123 }
+      ]
+    };
+    setTimeout(() => {
+      say('A, có thóc thơm quá!', 1400);
+      walkTo(154, 122, () => {
+        pig.face = 1;
+        setMode('eat', 2.5, () => {
+          wheatGrains = null;
+          say('Lúa vàng thơm ngọt ghê! 🌾', 1800);
+          setMode('happy', 1.5);
+        });
+      });
+    }, 300);
+    return;
+  }
+
+  // 4. Chạm vào Ao Sen (Cá quẫy nước tạo sóng)
+  if(x >= 118 && x <= 162 && y >= 94 && y <= 122) {
+    pondSplash = 1.8;
+    say('Cá quẫy ao sen kìa! 🐟💦', 1400);
+    walkTo(116, 108, () => {
+      pig.face = 1;
+      say('Cá quẫy nước mát ghê! 🐟', 1600);
+      setMode('happy', 1.2);
+    });
+    return;
+  }
+
+  // 5. Chạm vào Chú Heo (Nựng Heo & Gãi Bụng)
   if(x > pig.x - 13 && x < pig.x + 13 && y > pig.y - 22 && y < pig.y + 3) {
+    const nowTap = performance.now();
+    if(nowTap - lastPigTapTime < 800) {
+      pigTapCount++;
+    } else {
+      pigTapCount = 1;
+    }
+    lastPigTapTime = nowTap;
+
+    if(pigTapCount >= 3){
+      pigTapCount = 0;
+      say('Hihi nhột quá, đừng gãi nữa mà! 😂', 2400);
+      setMode('tickle', 3.0, () => setMode('happy', 1.4));
+      try {
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'PIG_TAP', text: 'Hihi nhột quá!' }));
+        } else if (window.parent) {
+          window.parent.postMessage(JSON.stringify({ type: 'PIG_TAP', text: 'Hihi nhột quá!' }), '*');
+        }
+      } catch(e){}
+      return;
+    }
+
     const quotes = ['Ủn ỉn!', 'Heo đây, heo đây!', 'Gãi bụng đi nè', 'Tiết kiệm giỏi ghê!'];
     const q = quotes[(Math.random() * quotes.length) | 0];
     say(q, 1500);
@@ -415,7 +520,7 @@ garden.addEventListener('pointerdown', e => {
     return;
   }
 
-  // 4. Chạm vào mặt đất để Heo đi dạo
+  // 6. Chạm vào mặt đất để Heo đi dạo
   const tx = clamp(x, MINX, MAXX), ty = clamp(y, MINY, MAXY);
   if(blocked(tx, ty)){
     say('Ở đó có ao, heo không bơi đâu nha', 1800);
