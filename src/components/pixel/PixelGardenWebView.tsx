@@ -257,16 +257,12 @@ const fish=[{a:0,s:.7,rx:14,ry:5},{a:3,s:-.5,rx:10,ry:3}];
 const flies=Array.from({length:9},(_,i)=>({x:20+((i*37)%140),y:70+((i*23)%50),p:i*1.7}));
 
 function setMode(m,dur,after){pig.mode=m;pig.t=0;pig.dur=dur||0;pig.after=after||null}
-function walkTo(x,y,after){
-  if(x >= 148 && x <= 176 && y > 115) y = 115;
-  pig.tx=x;pig.ty=y;pig.after=after||null;pig.mode='walk';pig.t=0;
-}
+function walkTo(x,y,after){pig.tx=x;pig.ty=y;pig.after=after||null;pig.mode='walk';pig.t=0}
 function pickTarget(){for(let i=0;i<20;i++){const x=MINX+Math.random()*(MAXX-MINX),y=MINY+Math.random()*(MAXY-MINY);
   if(!blocked(x,y)&&Math.hypot(x-pig.x,y-pig.y)>18)return{x,y}}return null}
 
 const bubble=document.getElementById('bubble');let bubbleUntil=0;
 let apple = null; // Quả táo rơi { x, y, targetY, active }
-let wheatGrains = null; // Hạt thóc rơi { items: [{x, y, targetY}], active }
 let pondSplash = 0; // Thời gian cá quẫy sóng nước
 let lastPigTapTime = 0, pigTapCount = 0; // Đếm số lần gãi bụng
 let watering = null; // { x, y, targetX, targetY, t, dur }
@@ -318,11 +314,6 @@ function update(dt){
   if(apple && apple.active && apple.y < apple.targetY){
     apple.y = Math.min(apple.targetY, apple.y + dt * 110);
   }
-  if(wheatGrains && wheatGrains.active){
-    wheatGrains.items.forEach(g => {
-      if(g.y < g.targetY) g.y = Math.min(g.targetY, g.y + dt * 90);
-    });
-  }
   if(pondSplash > 0){
     pondSplash = Math.max(0, pondSplash - dt);
   }
@@ -350,20 +341,12 @@ function update(dt){
       pig.t=0;pig.dur=1.5+Math.random()*2.5;
     }
   }else if(pig.mode==='walk'){
-    const inWheat = pig.x >= 148 && pig.x <= 176 && pig.y >= 105 && pig.y <= 118;
-    const speedMult = inWheat ? 0.5 : 1.0;
-    if(inWheat && !pig.wheatAnnounced){
-      pig.wheatAnnounced = true;
-      say('Lúa vàng vướng chân ủn ỉn quá! 🌾', 1600);
-    } else if(!inWheat){
-      pig.wheatAnnounced = false;
-    }
     const dx=pig.tx-pig.x,dy=pig.ty-pig.y,d=Math.hypot(dx,dy);
     if(d<1.2){const a=pig.after;pig.after=null;if(a)a();else setMode('idle',1.5+Math.random()*2.5);return}
-    const step=Math.min(d,(sad?15:24)*speedMult*dt);let nx=pig.x+dx/d*step,ny=pig.y+dy/d*step;
+    const step=Math.min(d,(sad?15:24)*dt);let nx=pig.x+dx/d*step,ny=pig.y+dy/d*step;
     if(blocked(nx,ny)){if(!blocked(nx,pig.y))ny=pig.y;else if(!blocked(pig.x,ny))nx=pig.x;else{setMode('idle',1);return}}
     if(Math.abs(dx)>.5)pig.face=dx>0?1:-1;
-    pig.x=nx;pig.y=ny;if(pig.ft>(inWheat?.3:.2)){pig.ft=0;pig.frame^=1}
+    pig.x=nx;pig.y=ny;if(pig.ft>.2){pig.ft=0;pig.frame^=1}
   }else if(pig.t>pig.dur){const a=pig.after;pig.after=null;if(a)a();else setMode('idle',1.5)}
 }
 
@@ -431,16 +414,6 @@ function draw(t){
     }
   });
 
-  // Vẽ bãi lúa vàng lay động
-  const inWheat = pig.x >= 144 && pig.x <= 176 && pig.y >= 104 && pig.y <= 118;
-  const sway = inWheat ? Math.sin(t * 12) * 1.5 : Math.sin(t * 2) * 0.6;
-  for(let wx = 150; wx <= 172; wx += 4){
-    const h = 7 + ((wx * 7) % 4);
-    const topX = Math.round(wx + sway);
-    R(ctx, topX, 114 - h, 2, 3, '#F4B93B');
-    R(ctx, wx, 117 - h, 1, h, '#7DB066');
-  }
-
   [{b:106,f:()=>ctx.drawImage(bananaSpr,-4,48)},{b:86,f:()=>ctx.drawImage(stoolSpr,96,70)},{b:pig.y,f:()=>drawPig(t)}]
     .sort((a,b)=>a.b-b.b).forEach(i=>i.f());
 
@@ -451,13 +424,6 @@ function draw(t){
     R(ctx,ax,ay,4,4,'#E0452B');
     R(ctx,ax+1,ay+1,1,1,'#FFAAA5');
     R(ctx,ax+1,ay-1,1,1,'#6E9A44');
-  }
-  if(wheatGrains && wheatGrains.active){
-    wheatGrains.items.forEach(g => {
-      const gx = Math.round(g.x), gy = Math.round(g.y);
-      R(ctx, gx, gy, 2, 3, '#F4B93B');
-      R(ctx, gx, gy + 1, 1, 1, '#FFE08A');
-    });
   }
   if(pondSplash > 0){
     const phase = (1.8 - pondSplash) * 8;
@@ -574,53 +540,7 @@ garden.addEventListener('pointerdown', e => {
     return;
   }
 
-  // 4. Chạm vào Bụi Lúa / Thảm Cỏ (Tưới lúa hoặc Thu hoạch lúa vàng)
-  if(x >= 148 && x <= 176 && y >= 96 && y <= 132) {
-    if(y <= 110) {
-      if(watering){
-        say('Đang tưới lúa mọc nhanh nè! 🌾', 1200);
-        return;
-      }
-      say('Tưới nước cho lúa trổ bông! 🌾🚿', 1400);
-      watering = { x: 154, y: 92, targetX: 162, targetY: 106, t: 0, dur: 2.0 };
-      setTimeout(() => {
-        say('Lúa xanh tốt trổ bông rồi! 🌾✨', 1600);
-        walkTo(148, 114, () => {
-          pig.face = 1;
-          setMode('happy', 1.3);
-        });
-      }, 1600);
-      return;
-    }
-
-    if(wheatGrains && wheatGrains.active){
-      say('Heo đang mót thóc nha! 🌾', 1200);
-      return;
-    }
-    say('Thu hoạch lúa vàng! 🌾', 1200);
-    wheatGrains = {
-      active: true,
-      items: [
-        { x: 154, y: 106, targetY: 114 },
-        { x: 162, y: 105, targetY: 115 },
-        { x: 168, y: 107, targetY: 114 }
-      ]
-    };
-    setTimeout(() => {
-      say('A, có thóc thơm quá!', 1400);
-      walkTo(152, 114, () => {
-        pig.face = 1;
-        setMode('eat', 2.5, () => {
-          wheatGrains = null;
-          say('Lúa vàng thơm ngọt ghê! 🌾', 1800);
-          setMode('happy', 1.5);
-        });
-      });
-    }, 300);
-    return;
-  }
-
-  // 5. Chạm vào Ao Sen (Thả cám cho cá ăn)
+  // 4. Chạm vào Ao Sen (Thả cám cho cá ăn)
   if(x >= 118 && x <= 162 && y >= 94 && y <= 122) {
     if(fishFood.length > 0){
       say('Cá đang ăn ngon lành nè! 🐟', 1200);
@@ -639,7 +559,7 @@ garden.addEventListener('pointerdown', e => {
     return;
   }
 
-  // 6. Chạm vào Chú Heo (Nựng Heo & Gãi Bụng)
+  // 5. Chạm vào Chú Heo (Nựng Heo & Gãi Bụng)
   if(x > pig.x - 13 && x < pig.x + 13 && y > pig.y - 22 && y < pig.y + 3) {
     const nowTap = performance.now();
     if(nowTap - lastPigTapTime < 800) {
@@ -677,7 +597,7 @@ garden.addEventListener('pointerdown', e => {
     return;
   }
 
-  // 7. Chạm vào mặt đất để Heo đi dạo
+  // 6. Chạm vào mặt đất để Heo đi dạo
   const tx = clamp(x, MINX, MAXX), ty = clamp(y, MINY, MAXY);
   if(blocked(tx, ty)){
     say('Ở đó có ao, heo không bơi đâu nha', 1800);
