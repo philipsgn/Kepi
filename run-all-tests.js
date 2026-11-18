@@ -3152,4 +3152,46 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 67 Passed: Neo-Brutalist Camera Heo Con Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 67 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (67/67)!');
+// ==============================================================================
+// 🧪 TEST 68: CAMERA HEO CON V2 (IN-FRAME REVIEW, SHUTTER VOICE 2-IN-1 & ZERO-BORDER ICONS) AUDIT
+// ==============================================================================
+{
+  const inFramePath = path.join(__dirname, 'src/components/camera/InFrameReviewOverlay.tsx');
+  const inFrameCode = fs.readFileSync(inFramePath, 'utf8');
+  const shutterPath = path.join(__dirname, 'src/components/camera/ShutterButton.tsx');
+  const shutterCode = fs.readFileSync(shutterPath, 'utf8');
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. InFrameReviewOverlay Component Contract
+  assert.ok(inFrameCode.includes('InFrameReviewOverlayProps'), 'Must declare InFrameReviewOverlayProps');
+  assert.ok(inFrameCode.includes('isRecordingVoice'), 'Must support isRecordingVoice prop');
+  assert.ok(inFrameCode.includes('handleStepAmount'), 'Must support +-5k step adjustment');
+  assert.ok(inFrameCode.includes('MandCashierKeyboard'), 'Must integrate MandCashierKeyboard modal');
+  assert.ok(inFrameCode.includes('btnRetake') && inFrameCode.includes('btnSave'), 'Must provide Retake and Save buttons');
+  assert.ok(inFrameCode.includes('StyleSheet.absoluteFill'), 'Must fill 100% inside 4:5 viewfinder container');
+
+  // 2. ShutterButton 2-in-1 Integration
+  assert.ok(shutterCode.includes('onVoiceStart'), 'ShutterButton must accept onVoiceStart');
+  assert.ok(shutterCode.includes('onVoiceEnd'), 'ShutterButton must accept onVoiceEnd');
+  assert.ok(shutterCode.includes('isVoiceActive') || shutterCode.includes('isAnyVoiceActive'), 'ShutterButton must support voice visual state');
+
+  // 3. Index.tsx Integration & Zero-Border Bottom Bar
+  assert.ok(indexCode.includes('InFrameReviewOverlay'), 'index.tsx must mount InFrameReviewOverlay');
+  assert.ok(indexCode.includes('handleShutterVoiceStart'), 'index.tsx must handle voice recording start');
+  assert.ok(indexCode.includes('handleShutterVoiceEnd'), 'index.tsx must handle voice recording end');
+  assert.ok(indexCode.includes('zeroBorderToolButton'), 'index.tsx must use zeroBorderToolButton for floating icons');
+
+  // 4. Docs & Reverse Sync
+  assert.ok(docCode.includes('IN-FRAME REVIEW') || docCode.includes('InFrameReviewOverlay'), '09-CAMERA.md must document In-Frame Review');
+  assert.ok(docCode.includes('Shutter 2-in-1'), '09-CAMERA.md must document Shutter 2-in-1');
+  assert.ok(decisionsCode.includes('Quyết định 127') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 127'), 'DECISIONS.md must document Quyết định 127');
+
+  console.log('✅ Test 68 Passed: Camera Heo Con v2 In-Frame Review, Shutter Voice 2-in-1 & Zero-Border Icons Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 68 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (68/68)!');

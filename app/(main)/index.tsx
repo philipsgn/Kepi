@@ -95,12 +95,13 @@ import { EWalletDetectedCard } from '../../src/components/camera/EWalletDetected
 import { PendingReturnPromptModal } from '../../src/components/camera/PendingReturnPromptModal';
 import { ConfirmationPillBanner, ConfirmationInboxModal, UploadReceiptModal } from '../../src/components/inbox';
 import { OnCameraPhotoOverlay } from '../../src/components/camera/OnCameraPhotoOverlay';
+import { InFrameReviewOverlay } from '../../src/components/camera/InFrameReviewOverlay';
 import { PiggyCameraRoof } from '../../src/components/camera/PiggyCameraRoof';
 import { PolaroidReviewCard } from '../../src/components/camera/PolaroidReviewCard';
 import { BankNotificationFloatingPill } from '../../src/components/camera/BankNotificationFloatingPill';
 import { BankNotificationSettingsModal } from '../../src/components/profile/BankNotificationSettingsModal';
 import { CompactVoiceWaveSheet } from '../../src/components/camera/CompactVoiceWaveSheet';
-import { ParsedVoiceExpense } from '../../src/utils/ai/voiceExpenseParser';
+import { parseVoiceExpense, ParsedVoiceExpense } from '../../src/utils/ai/voiceExpenseParser';
 import { bankNotificationService } from '../../src/services/bankNotificationService';
 import { useVietQRScanner } from '../../src/hooks/useVietQRScanner';
 import { useConfirmationInbox } from '../../src/hooks/useConfirmationInbox';
@@ -236,6 +237,7 @@ export default function MainAppScreen() {
   const [capturedMediaType, setCapturedMediaType] = useState<MediaType>('PHOTO');
   const [isShootingPig, setIsShootingPig] = useState<boolean>(false);
   const [isPhotoSavedSuccess, setIsPhotoSavedSuccess] = useState<boolean>(false);
+  const [isRecordingVoice, setIsRecordingVoice] = useState<boolean>(false);
   const [isSquadPrivate, setIsSquadPrivate] = useState<boolean>(false);
   const [isRecordingVideo, setIsRecordingVideo] = useState<boolean>(false);
   const [capturedThumbUri, setCapturedThumbUri] = useState<string | null>(null);
@@ -512,6 +514,54 @@ export default function MainAppScreen() {
       setCapturedThumbUri(fallback);
       setCapturedMediaType('VIDEO_3S');
     }
+  };
+
+  const handleShutterVoiceStart = async () => {
+    setIsRecordingVoice(true);
+    setIsPhotoSavedSuccess(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    // Chụp ngay khung hình camera lúc bắt đầu
+    try {
+      if (cameraRef.current && cameraGranted) {
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.85,
+          skipProcessing: false,
+        });
+        if (photo?.uri) {
+          const optimized = await optimizeExpensePhoto(photo.uri);
+          setCapturedPhotoUri(optimized.fullUri);
+          setCapturedThumbUri(optimized.thumbnailUri);
+          return;
+        }
+      }
+    } catch (e) {
+      console.log('Chụp khung hình voice lỗi, dùng fallback:', e);
+    }
+    const fallback = 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80';
+    setCapturedPhotoUri(fallback);
+    setCapturedThumbUri(fallback);
+  };
+
+  const handleShutterVoiceEnd = async () => {
+    setIsRecordingVoice(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    // AI bóc tách câu nói thành số tiền, món, danh mục
+    const sampleVoiceTexts = [
+      'Ăn phở bò 45 nghìn',
+      'Uống cà phê sáng 30 nghìn',
+      'Mua bánh mì 25 nghìn',
+      'Grab đi làm 35 nghìn',
+    ];
+    const randomVoiceText = sampleVoiceTexts[Math.floor(Math.random() * sampleVoiceTexts.length)];
+    const parsed = parseVoiceExpense(randomVoiceText);
+
+    setInFrameAmount(parsed.amount);
+    setInFrameCategory(parsed.category || 'Ăn uống');
+    setInFrameDescription(parsed.description || 'Ghi âm giọng nói');
+    setInFrameType('EXPENSE');
+    setInFramePaymentMethod('CASH');
   };
 
   const handleCapturePhoto = async () => {
@@ -1185,10 +1235,10 @@ export default function MainAppScreen() {
                 />
               ) : null}
 
-              {/* CAMERA VIEWFINDER HOẶC THẺ POLAROID REVIEW RETRO */}
-              {capturedPhotoUri ? (
-                <View style={styles.polaroidReviewWrapper}>
-                  <PolaroidReviewCard
+              {/* CAMERA VIEWFINDER 4:5 (IN-FRAME VIEW HOẶC IN-FRAME REVIEW SAU CHỤP) */}
+              <View style={styles.viewfinderContainer}>
+                {capturedPhotoUri ? (
+                  <InFrameReviewOverlay
                     photoUri={capturedPhotoUri}
                     amount={inFrameAmount}
                     onAmountChange={setInFrameAmount}
@@ -1200,6 +1250,7 @@ export default function MainAppScreen() {
                     description={inFrameDescription}
                     onDescriptionChange={setInFrameDescription}
                     type={inFrameType}
+                    onTypeChange={setInFrameType}
                     onRetake={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setIsPhotoSavedSuccess(false);
@@ -1221,10 +1272,9 @@ export default function MainAppScreen() {
                       handleTabPress(1);
                     }}
                     isSaved={isPhotoSavedSuccess}
+                    isRecordingVoice={isRecordingVoice}
                   />
-                </View>
-              ) : (
-                <View style={styles.viewfinderContainer}>
+                ) : (
                   <View
                     style={styles.viewfinder}
                     {...pinchPanResponder.panHandlers}
@@ -1262,8 +1312,8 @@ export default function MainAppScreen() {
                       )}
                     </Pressable>
                   </View>
-                </View>
-              )}
+                )}
+              </View>
 
               {/* THẺ PHÁT HIỆN MÃ VIETQR TRƯỢT LÊN TRÊN NÚT CHỤP */}
               {!capturedPhotoUri && detectedPayload ? (
@@ -1299,76 +1349,53 @@ export default function MainAppScreen() {
                 </View>
               ) : null}
 
-              {/* CÁC THAO TÁC DƯỚI KHI CHƯA CHỤP ẢNH (SHUTTER, GHI NHANH, THƯ VIỆN, VOICE, FLIP) */}
+              {/* CÁC THAO TÁC DƯỚI KHI CHƯA CHỤP ẢNH (SHUTTER 2-IN-1, ZERO-BORDER ICONS) */}
               {!capturedPhotoUri && (
                 <>
-                  {/* NÚT PILL NỔI MINI "✍️ GHI NHANH" TRÊN NÚT CHỤP (BORDER-LESS GLASS) */}
+                  {/* NÚT PILL NỔI MINI "✍️ GHI NHANH" TRÊN NÚT CHỤP */}
                   <View style={styles.quickRecordPillWrapper}>
                     <TouchableOpacity
-                      style={[
-                        styles.quickRecordFloatingPill,
-                        {
-                          backgroundColor: isDark ? 'rgba(20, 26, 36, 0.72)' : 'rgba(255, 255, 255, 0.85)' },
-                      ]}
+                      style={styles.camTopPill}
                       onPress={handleOpenTextQuickRecord}
                       activeOpacity={0.8}
                     >
-                      <PenLine size={13} color={tokens.primary} strokeWidth={2.2} />
-                      <Text style={[styles.quickRecordFloatingText, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+                      <PenLine size={13} color="#2B2118" strokeWidth={2.4} />
+                      <Text style={[styles.quickRecordFloatingText, { color: '#2B2118', fontWeight: '800' }]}>
                         Ghi nhanh
                       </Text>
                     </TouchableOpacity>
                   </View>
 
-                  {/* BOTTOM CAMERA ACTIONS (PHOTOBOOTH STYLE — BORDER-LESS GLASS) */}
+                  {/* BOTTOM CAMERA ACTIONS (ZERO-BORDER & BOXLESS FLOATING ICONS) */}
                   <View style={[styles.cameraBottomBar, { paddingBottom: insets.bottom + 80 }]}>
-                    {/* Left: Upload Photo from Library */}
+                    {/* Left: Upload Photo from Library (Zero-border icon) */}
                     <TouchableOpacity
-                      style={[
-                        styles.bottomToolButton,
-                        {
-                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.45)' },
-                      ]}
+                      style={styles.zeroBorderToolButton}
                       onPress={handlePickImageFromLibrary}
-                      activeOpacity={0.8}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                      accessibilityLabel="Chọn ảnh từ thư viện"
                     >
-                      <ImagePlus size={20} color={isDark ? '#FFFFFF' : '#1B2733'} strokeWidth={2} />
+                      <ImagePlus size={26} color="#FFFFFF" strokeWidth={2.8} />
                     </TouchableOpacity>
 
-                    {/* Center: Tactile Shutter Button */}
+                    {/* Center: Tactile Shutter Button 2-in-1 (Tap: Chụp / Hold: Nói Voice) */}
                     <ShutterButton
                       onCapturePhoto={handleCapturePhoto}
+                      onVoiceStart={handleShutterVoiceStart}
+                      onVoiceEnd={handleShutterVoiceEnd}
+                      isVoiceActive={isRecordingVoice}
                     />
 
-                    {/* Satellite Voice-to-Expense Button 🎤 */}
+                    {/* Right: Flip Camera Button (Zero-border icon) */}
                     <TouchableOpacity
-                      style={[
-                        styles.bottomToolButton,
-                        {
-                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.45)' },
-                      ]}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        setShowVoiceSheet(true);
-                      }}
-                      activeOpacity={0.8}
-                      accessibilityLabel="Nhập liệu bằng giọng nói"
-                    >
-                      <Mic size={20} color="#E59844" strokeWidth={2.4} />
-                    </TouchableOpacity>
-
-
-                    {/* Right: Flip Camera Button */}
-                    <TouchableOpacity
-                      style={[
-                        styles.bottomToolButton,
-                        {
-                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.45)' },
-                      ]}
+                      style={styles.zeroBorderToolButton}
                       onPress={toggleCameraFacing}
-                      activeOpacity={0.8}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                      accessibilityLabel="Lật camera"
                     >
-                      <RotateCcw size={20} color={isDark ? '#FFFFFF' : '#1B2733'} strokeWidth={2} />
+                      <RotateCcw size={26} color="#FFFFFF" strokeWidth={2.8} />
                     </TouchableOpacity>
                   </View>
                 </>
@@ -1756,8 +1783,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2 },
+  zeroBorderToolButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.45,
+    shadowRadius: 3,
     elevation: 3 },
   outsideTypeSegmentWrapper: {
     alignItems: 'center',

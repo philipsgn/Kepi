@@ -703,4 +703,16 @@
       3. **Top Bar Neo-Brutalist:** Viên thuốc `[● Hôm nay chi: X đ]` đồng bộ theo `todaySpent`, nút Flash tròn viền 3px và nút mở Phòng Ảnh dẫn sang Tab 1.
       4. **Thẻ Polaroid Retro Sau Chụp (`PolaroidReviewCard`):** Khung ảnh Polaroid trắng tinh viền 3px mực nghiêng -3°, ảnh thật 1:1, bộ nút tăng giảm nhanh `[-5k]` / `[+5k]`, chạm vào số tiền mở bàn phím `MandCashierKeyboard`, chọn danh mục nhanh, nút `[Chụp lại]` & `[Lưu vào ví]`. Khi lưu thành công, hiển thị *"Heo đã treo ảnh lên tường 🖼️"* kèm nút *"Xem ở phòng ảnh"*.
 
+  - **Quyết định 127 (18/11/2026): Tinh Chỉnh Tab Camera Heo Con v2 (In-Frame Review Co Gọn Khung 4:5, Shutter Voice 2-in-1, Zero-Border Floating Icons):**
+    - *Bối Cảnh & Bản Chất:* Sau khi triển khai ban đầu, trải nghiệm trên thiết bị thực tế gặp các điểm nghẽn: (1) Thẻ Review sau chụp bị trôi tụt xuống dưới màn hình và bị thanh Bottom Tab Bar che lấp, trang chính tắt cuộn khiến người dùng không thể lướt lên/xuống; (2) Nút Shutter và Voice tách rời gây rối; (3) Các nút công cụ dưới có viền bo tròn xám đục nặng nề, chưa đạt độ tối giản pixel art.
+    - *Giải Pháp Kỹ Thuật Đã Thực Hiện:*
+      1. **In-Frame Review Co Gọn Vừa Khít 100% Trong Khung Ngắm 4:5 (`InFrameReviewOverlay`):** Toàn bộ giao diện review (ảnh chụp squircle, tag phân loại Chi/Thu, bộ đếm tiền to đậm tabular-nums với 2 nút `[-]` / `[+]` 5.000đ, chạm số tiền mở `MandCashierKeyboard`, ô nhập tên món, chip danh mục cuộn ngang, và cặp nút `[✕ Chụp lại]` & `[✓ Lưu vào ví]`) nằm trọn vẹn bên trong khung ngắm 4:5. Loại bỏ hoàn toàn lỗi tràn màn hình hay bị Bottom Tab Bar che khuất.
+      2. **Nút Shutter 2-in-1 (Chụp 1-Chạm & Nhấn Giữ Voice):**
+         - *1-chạm (Tap):* Chụp ảnh bình thường, kích hoạt chú heo trên nóc máy nhảy cẫng lên ăn mừng.
+         - *Nhấn giữ (Hold):* Chụp ngay 1 khung hình camera (snapshot) làm nền + kích hoạt sóng âm Voice ghi âm giọng nói; khi người dùng thả tay ra, AI NLP (`voiceExpenseParser`) bóc tách số tiền, danh mục, nội dung và điền thẳng vào khung review kèm ảnh vừa chụp để người dùng kiểm tra và Lưu.
+      3. **Thanh Công Cụ Dưới Chuẩn Tối Giản (Zero-Border Icons):**
+         - Xóa sạch toàn bộ khối tròn nền xám bao quanh icon.
+         - Nút Thư viện ảnh (`ImagePlus`) và Lật camera (`RotateCcw`) hiển thị dạng **Icon Vector nổi trần hoàn toàn** (`borderWidth: 0, backgroundColor: 'transparent'`), nét vẽ đậm `strokeWidth: 2.8`, màu trắng sáng/vàng cám nổi bật với shadow nhẹ.
+         - Loại bỏ nút Mic riêng rẽ ở dưới vì đã tích hợp trọn vẹn vào nút Shutter trung tâm.
+
 

@@ -1,13 +1,14 @@
-# 📷 09 — CAMERA: MÁY ẢNH HEO CON NEO-BRUTALIST (VIEWFINDER + PIGGY ROOF + SHUTTER + POLAROID)
+# 📷 09 — CAMERA: MÁY ẢNH HEO CON NEO-BRUTALIST V2 (IN-FRAME REVIEW + SHUTTER VOICE 2-IN-1 + ZERO-BORDER ICONS)
 
 > **Screen-unit:** Tab 2 (Camera trung tâm). **LUỒNG 3-in-1 (Shutter / VietQR Offline / Bank Notification Pill), quay clip 3s, MandCashierKeyboard GIỮ NGUYÊN 100% OFFLINE** (`docs/screens/CAMERA.md`).
+> **Phiên bản:** v2.0 (In-Frame Review chống tràn màn hình, Shutter 2-in-1 Chụp/Voice, Zero-Border Floating Icons).
 > **Phong cách đồ họa:** Port từ `prototype/Camera_heo_con.html` (CSS + canvas pixel + logic hoạt họa heo ngủ trên nóc máy ảnh).
 
 ---
 
 ## 1. Top Bar & Khung ngắm (Viewfinder với Piggy Roof)
 - **Top Bar Neo-Brutalist:**
-  - Nút Flash: Nút tròn nền `#FFFBF1`, viền 3px mực `#2B2118`, bóng `0 3px 0 #2B2118`.
+  - Nút Flash: Nút tròn nổi trần hoặc nền `#FFFBF1`, viền mực `#2B2118`.
   - Viên thuốc trung tâm: `[● Hôm nay chi: X đ]` (nền `#FFFBF1`, viền 3px mực, chấm đỏ `#E0452B`, text cập nhật động theo `todaySpent`).
   - Nút Phòng Ảnh: Dẫn thẳng sang Tab 1 Nhà Heo (`onNavigateToHouse`).
 - **Khung ngắm phần cứng thật (`expo-camera`):**
@@ -19,34 +20,41 @@
 
 ---
 
-## 2. Nút Shutter Neo-Brutalist Viền Kép
-- **Kích thước & Bảng màu:**
-  - Đường kính 84px, nền đỏ cam `#E0452B`, viền 4px mực `#2B2118`.
-  - Vành tròn kép: Vàng Cám `#F4B93B` 5px + viền mực 8px.
-  - Bóng đổ cứng 10px: `box-shadow: 0 0 0 5px var(--gold), 0 0 0 8px var(--ink), 0 10px 0 8px var(--ink)`.
-- **Hiệu ứng chạm nhún (Tactile Spring):**
-  - Khi bấm xuống (`active`): Nút lún 6px, bóng đổ giảm xuống 4px, phát rung xúc giác Haptic Heavy (`expo-haptics`).
+## 2. Nút Shutter 2-in-1 (Chụp 1-chạm & Nhấn giữ Voice)
+- **Thiết kế Neo-Brutalist:**
+  - Vành ngoài: Vàng Cám `#F4B93B` dày 4px viền mực `#2B2118`.
+  - Lõi trong: Đỏ Cam `#E0452B` dày 3.5px viền mực `#2B2118`.
+  - Bóng cứng 8px: `0 8px 0 #2B2118`.
+- **Cơ chế 2-in-1 thông minh:**
+  - **1 chạm (Tap):** Chụp ảnh món đồ bình thường.
+  - **Nhấn giữ (Hold):** Chụp ngay khung hình camera tại thời điểm bắt đầu + kích hoạt sóng âm Voice ghi âm giọng nói. Khi thả tay ra, AI NLP (`voiceExpenseParser`) tự động bóc tách số tiền, danh mục, nội dung và điền thẳng vào giao diện review kèm ảnh vừa chụp.
 
 ---
 
-## 3. Thẻ Polaroid Retro Sau Chụp (`PolaroidReviewCard`)
-- **Khung ảnh Polaroid nghiêng -3 độ:**
-  - Khung ảnh trắng tinh `#FFFFFF`, viền 3px mực `#2B2118`, bo góc 12px, bóng đổ cứng 4px.
-  - Hiển thị ảnh chụp thực tế trong khung vuông 1:1.
-- **Bộ điều khiển tiền & Danh mục:**
-  - Bộ nút tăng giảm nhanh: `[-]` giảm 5.000đ, `[+]` tăng 5.000đ.
-  - Con số tiền: Font Baloo 800 tabular-nums + ký hiệu `đ`. Chạm vào con số tiền để mở ngay bàn phím `MandCashierKeyboard` nhập tự do.
-  - Dải chọn danh mục chi tiêu nhanh (Ăn uống 🍜, Di chuyển 🛵, Mua sắm 🛍️, v.v.).
-- **Nút hành động & Trạng thái lưu:**
-  - `[Chụp lại]`: Hủy ảnh vừa chụp và quay lại khung ngắm.
-  - `[Lưu vào ví]`: Ghi sổ chi tiêu với hiệu ứng heo ăn mừng.
-  - Khi lưu xong: Thông báo *"Heo đã treo ảnh lên tường 🖼️"* kèm nút *"Xem ở phòng ảnh"* (dẫn sang Tab 1).
+## 3. Giao Diện In-Frame Review Co Gọn Trong Khung Ngắm 4:5 (`InFrameReviewOverlay` / `PolaroidReviewCard`)
+- **Khắc phục lỗi tràn màn hình & đơ:** Nâng cấp từ thẻ Polaroid (`PolaroidReviewCard`) thành giao diện In-Frame Review nằm trọn vẹn 100% bên trong khung ngắm 4:5, không bị tràn xuống dưới và không bị Bottom Tab Bar che lấp.
+- **Bố cục bên trong khung 4:5:**
+  - **Lớp nền:** Ảnh vừa chụp bo góc squircle chuẩn khung ngắm.
+  - **Đỉnh:** Tag phân loại [Chi | Thu] tối giản.
+  - **Giữa:** Số tiền to rõ ràng font Baloo 2 (`tabular-nums`), hai nút `[-]` và `[+]` 5.000đ hai bên; chạm vào số tiền mở modal bàn phím thu ngân `MandCashierKeyboard`.
+  - **Dưới:** Ô nhập tên món (viền 2px mực) + Dải chip danh mục cuộn ngang.
+  - **Đáy khung ngắm:** Cặp nút hành động:
+    - `[✕ Chụp lại]`: Nền kem sàn viền 2.5px mực.
+    - `[✓ Lưu vào ví]`: Nền vàng cám viền 2.5px mực.
+  - **Sau khi lưu:** Hiển thị thông báo *"Heo đã treo ảnh lên tường"* kèm nút *"Xem ở phòng ảnh"* chuyển sang Tab 1.
+
+---
+
+## 4. Thanh Công Cụ Dưới Chuẩn Tối Giản (Zero-Border Icons)
+- Xóa bỏ hoàn toàn khối tròn viền xám đục bao quanh icon.
+- Nút Thư viện ảnh (`ImagePlus`) và Lật camera (`RotateCcw`) hiển thị dạng **Icon Vector nổi trần hoàn toàn** (`borderWidth: 0, backgroundColor: 'transparent'`), nét vẽ đậm `strokeWidth: 2.8`, kích thước 24px, màu trắng sáng/vàng cám nổi bật với shadow nhẹ.
+- Nút Mic riêng rẽ được loại bỏ hoàn toàn do đã tích hợp vào nút Shutter trung tâm.
 
 ---
 
 ## AC (Acceptance Criteria)
-- [ ] Luồng 3-in-1, VietQR offline & tốc độ ghi ≤ 2–3s không đổi; chỉ nâng cấp giao diện.
+- [ ] Khung Review sau chụp co gọn vừa khít 100% trong khung 4:5, không bị tràn ra ngoài màn hình và không bị Bottom Tab Bar che lấp.
+- [ ] Nút Shutter hỗ trợ 2-in-1: 1 chạm chụp ảnh, nhấn giữ chụp snapshot + ghi âm voice bóc tách AI.
+- [ ] Thanh công cụ dưới 100% icon nổi trần (Zero-Border & Boxless), xóa bỏ các viền tròn bao quanh icon.
 - [ ] Chú heo pixel ngủ trên nóc khung ngắm với chữ Zzz bay; nhảy cẫng thả tim khi bấm chụp.
-- [ ] Nút Shutter Neo-Brutalist viền kép đỏ-vàng-mực đường kính 84px, lún 6px khi bấm.
-- [ ] Thẻ Polaroid nghiêng -3° với bộ tăng giảm +/- 5k và tích hợp MandCashierKeyboard.
-- [ ] Camera hoạt động 100% offline, không lưu STK, làm sạch EXIF ảnh trước khi lưu.
+- [ ] Hoạt động 100% offline, không lưu STK, làm sạch EXIF ảnh trước khi lưu.

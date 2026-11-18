@@ -9,6 +9,9 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface ShutterButtonProps {
   onCapturePhoto: () => Promise<void> | void;
+  onVoiceStart?: () => void;
+  onVoiceEnd?: () => void;
+  isVoiceActive?: boolean;
   onStartRecordingVideo?: () => void;
   onStopRecordingVideo?: (completed: boolean) => void;
   isRecording?: boolean;
@@ -19,13 +22,16 @@ const CIRCLE_RADIUS = 38;
 const CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS; // ≈ 238.76
 
 /**
- * Nút chụp Shutter Đa Năng (Hybrid Shutter Button) — Kepi v5.0
- * - Chạm 1 lần: Chụp ảnh tĩnh tức thì (kèm xúc giác Heavy Haptic)
- * - Giữ đè (Long Press): Quay video 3 giây (kèm vòng tròn tiến độ SVG Vàng Hổ Phách chạy đủ 360 độ)
- * - Tự động dừng và lưu khi chạm mốc 3.0 giây
+ * Nút chụp Shutter 2-in-1 Neo-Brutalist — Kepi & PigFly
+ * - Chạm 1 lần: Chụp ảnh tĩnh tức thì (kèm rung Heavy Haptic)
+ * - Nhấn giữ (>350ms): Ghi âm giọng nói (kèm vòng sóng âm SVG bừng sáng)
+ * - Thả tay: Dừng ghi âm và gọi AI NLP bóc tách
  */
 export const ShutterButton: React.FC<ShutterButtonProps> = ({
   onCapturePhoto,
+  onVoiceStart,
+  onVoiceEnd,
+  isVoiceActive = false,
   onStartRecordingVideo,
   onStopRecordingVideo,
   isRecording = false,
@@ -34,10 +40,13 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
   const { tokens, mode } = useTheme();
   const isHeocon = mode === 'heocon' || !mode;
   const [isPressed, setIsPressed] = useState(false);
+  const [voiceRecordingInternal, setVoiceRecordingInternal] = useState(false);
   const [recordingActive, setRecordingActive] = useState(false);
   const animatedProgress = useRef(new Animated.Value(0)).current;
   const longPressTimer = useRef<any>(null);
   const recordingTimer = useRef<any>(null);
+
+  const isAnyVoiceActive = isVoiceActive || voiceRecordingInternal;
 
   // Tính strokeDashoffset từ Animated.Value
   const strokeDashoffset = animatedProgress.interpolate({
@@ -88,10 +97,16 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
     if (disabled) return;
     setIsPressed(true);
 
-    // Đặt hẹn giờ 400ms: nếu vẫn giữ tay thì chuyển sang chế độ quay video 3s
+    // Đặt hẹn giờ 350ms: nếu giữ đè thì kích hoạt chế độ Voice hoặc quay video
     longPressTimer.current = setTimeout(() => {
-      startRecordingInternal();
-    }, 400);
+      if (onVoiceStart) {
+        setVoiceRecordingInternal(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        onVoiceStart();
+      } else {
+        startRecordingInternal();
+      }
+    }, 350);
   };
 
   const handlePressOut = () => {
@@ -102,7 +117,13 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
       longPressTimer.current = null;
     }
 
-    if (recordingActive) {
+    if (voiceRecordingInternal) {
+      setVoiceRecordingInternal(false);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      if (onVoiceEnd) {
+        onVoiceEnd();
+      }
+    } else if (recordingActive) {
       // Người dùng thả tay sớm
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       stopRecordingInternal(false);
@@ -110,7 +131,7 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
   };
 
   const handlePress = async () => {
-    if (disabled || recordingActive) return;
+    if (disabled || recordingActive || isAnyVoiceActive) return;
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       await onCapturePhoto();
@@ -145,20 +166,20 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
             cx="46"
             cy="46"
             r={CIRCLE_RADIUS}
-            stroke={recordingActive ? 'rgba(229, 152, 68, 0.25)' : 'rgba(246, 184, 0, 0.35)'}
+            stroke={isAnyVoiceActive ? 'rgba(224, 69, 43, 0.45)' : recordingActive ? 'rgba(229, 152, 68, 0.25)' : 'rgba(246, 184, 0, 0.35)'}
             strokeWidth="3.5"
             fill="none"
           />
-          {/* Vòng tiến độ động khi đang quay video 3s */}
-          {recordingActive && (
+          {/* Vòng tiến độ động khi đang quay video 3s hoặc đang voice */}
+          {(recordingActive || isAnyVoiceActive) && (
             <AnimatedCircle
               cx="46"
               cy="46"
               r={CIRCLE_RADIUS}
-              stroke="#E59844"
+              stroke={isAnyVoiceActive ? '#E0452B' : '#E59844'}
               strokeWidth="4"
               strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={strokeDashoffset}
+              strokeDashoffset={isAnyVoiceActive ? 0 : strokeDashoffset}
               strokeLinecap="round"
               fill="none"
               rotation="-90"
@@ -201,14 +222,14 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
             styles.shutterCenterCore,
             isHeocon
               ? {
-                  backgroundColor: recordingActive ? '#B93220' : '#E0452B',
+                  backgroundColor: (recordingActive || isAnyVoiceActive) ? '#B93220' : '#E0452B',
                   borderColor: '#2B2118',
                   borderWidth: 3.5,
                 }
               : {
-                  backgroundColor: recordingActive ? '#C86D51' : tokens.primary,
+                  backgroundColor: (recordingActive || isAnyVoiceActive) ? '#C86D51' : tokens.primary,
                 },
-            recordingActive && { borderRadius: 18, width: 44, height: 44 },
+            (recordingActive || isAnyVoiceActive) && { borderRadius: 18, width: 44, height: 44 },
           ]}
         />
       </TouchableOpacity>
