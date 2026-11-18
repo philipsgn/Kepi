@@ -73,6 +73,7 @@ import { Transaction } from '../../types/database';
 const STORAGE_PREFS_KEY = '@vi_locket_home_preferences';
 
 export interface JournalViewProps {
+  isActive?: boolean;
   onOpenTransactionDetail?: (tx: Transaction) => void;
   onOpenProfile?: () => void;
   onOpenCamera?: () => void;
@@ -80,6 +81,7 @@ export interface JournalViewProps {
 }
 
 export const JournalView: React.FC<JournalViewProps> = ({
+  isActive,
   onOpenTransactionDetail,
   onOpenProfile,
   onOpenCamera,
@@ -353,15 +355,11 @@ export const JournalView: React.FC<JournalViewProps> = ({
                 ref={gardenRef}
                 spent={todaySpent}
                 limit={effectiveLimit}
+                streak={currentStreak}
+                isActive={isActive}
                 onPigTap={(quote) => setTemporaryQuote(quote)}
                 onEnterHouse={onOpenHouse}
               />
-              {/* Badge trạng thái vườn */}
-              <View style={styles.gardenStateBadge}>
-                <Text style={styles.gardenStateText}>
-                  {isOverBudget ? '🔥 Lố hạn mức · buồn' : '🌱 Sân vườn · đi dạo'}
-                </Text>
-              </View>
             </View>
           </NeoCard>
         </View>

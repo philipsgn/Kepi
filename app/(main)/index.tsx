@@ -1030,6 +1030,7 @@ export default function MainAppScreen() {
         {/* ================= PAGE 0: SÂN VƯỜN ================= */}
         <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}>
           <JournalView
+            isActive={activeTabIndex === 0}
             onOpenTransactionDetail={(tx) => {
               setSelectedTxForDetail(tx);
               setShowActualPrice(true);
@@ -1043,6 +1044,7 @@ export default function MainAppScreen() {
         {/* ================= PAGE 1: THỐNG KÊ (ALBUM THEO THÁNG) ================= */}
         <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}>
           <StatsView
+            isActive={activeTabIndex === 1}
             onNavigateToCamera={() => handleTabPress(2)}
             onNavigateHome={() => handleTabPress(0)}
           />

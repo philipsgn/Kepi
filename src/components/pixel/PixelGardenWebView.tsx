@@ -15,6 +15,7 @@ interface PixelGardenWebViewProps {
   spent: number;
   limit: number;
   streak?: number;
+  isActive?: boolean;
   onPigTap?: (quote: string) => void;
   onEnterHouse?: () => void;
   style?: StyleProp<ViewStyle>;
@@ -23,9 +24,13 @@ interface PixelGardenWebViewProps {
 export const PixelGardenWebView = forwardRef<
   PixelGardenWebViewRef,
   PixelGardenWebViewProps
->(({ spent, limit, streak = 24, onPigTap, onEnterHouse, style }, ref) => {
+>(({ spent, limit, streak = 24, onPigTap, onEnterHouse, style, isActive }, ref) => {
   const webViewRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  // Guard iOS Fabric offscreen: chỉ mount WebView sau lần đầu tab được active
+  // (giống pattern đã áp dụng thành công cho PixelHouseWebView)
+  const hasMountedOnce = useRef(false);
+  if (isActive) hasMountedOnce.current = true;
   // Lấy chiều rộng màn hình để tính explicit height (tránh canvas collapse trên iOS Fabric offscreen)
   const { width: winWidth } = useWindowDimensions();
   // Tỉ lệ vườn: 176×132 → height = width × (132/176)
@@ -511,6 +516,9 @@ function update(dt){
 function drawPig(t){
   const m=pig.mode,sad=SPENT>LIMIT,happy=m==='happy',tickle=m==='tickle';
   pig.jump=happy?Math.abs(Math.sin(pig.t*9))*5:0;
+  // Reset HOÀN TOÀN canvas pig sprite buffer trước mỗi frame
+  // Fix: pcx.setTransform reset triệt để tích lũy scale(-1,1) từ face flip
+  pcx.setTransform(1,0,0,1,0,0);
   pcx.clearRect(0,0,24,20);
   drawPigSprite(pcx,{pose:m==='walk'?'walk':m==='sleep'?'sleep':m==='eat'?'eat':'stand',frame:pig.frame,
     mood:sad?'sad':'ok',happy:happy||tickle,blink:(t%3.2)<.12,tail:Math.floor(t*3)%2===1});
@@ -544,6 +552,7 @@ function drawDoor(c){
 function draw(t){
   // 1. Reset ma trận biến đổi cọ vẽ & xóa màn hình (Fix triệt để lỗi biến dạng vạch pixel kéo dài ở Ảnh 1)
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1; // Đảm bảo alpha reset hoàn toàn mỗi frame (guard nếu frame trước bị crash giữa chừng)
   ctx.clearRect(0, 0, W, H);
 
   ctx.drawImage(bg,0,0);
@@ -906,6 +915,20 @@ requestAnimationFrame(loop);
           style={{ width: '100%', height: '100%', border: 'none', background: '#86B866' } as any}
         />
       </View>
+    );
+  }
+
+  // iOS Fabric offscreen guard: chỉ mount WebView sau khi tab Vườn được active lần đầu.
+  // Điều này tránh WKWebView blank khi render khi tab ở offscreen position.
+  if (!hasMountedOnce.current) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { width: winWidth, height: gardenHeight, backgroundColor: '#86B866' },
+          style,
+        ]}
+      />
     );
   }
 
