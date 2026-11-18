@@ -730,4 +730,23 @@
       4. **Re-skin Bàn Phím `MandCashierKeyboard` Sang Neo-Brutalist Pixel Art:**
          - Nền container Kem Sàn `#F6EEDC` viền Nâu Mực `#2B2118` 3px, phím số trắng sữa `#FFFBF1` viền 2px đổ bóng cứng 2px 0-blur, nút Xác nhận Vàng Cám `#F4B93B` viền 3px mực.
 
+  - **Quyết định 129 (18/11/2026): Nâng Cấp Toàn Diện Tab Camera v4 (Bầu Trời Pixel Dreamy, Buông Tay Chụp Frame Cuối, Thanh Pill Mô Tả Sát Đáy Trong Khung & Khung Lịch Sử Polaroid Pixel Hoài Niệm):**
+    - *Bối Cảnh & Bản Chất:* Người dùng cung cấp phản hồi thực tế kèm 4 ảnh chụp trên máy: (1) Voice đang không nhận ảnh đúng lúc: đè Shutter nói, khi buông tay hệ thống phải tự động chụp ngay frame ảnh cuối cùng từ camera đưa vào khung hình; (2) Màu sắc nền xám đen hiện tại u tối, cần chuyển sang tone màu Dreamy mộng mơ (Hồng pastel `#FCE3E8`, Xanh da trời `#D2E3F2`, Xanh mint `#DDEBD9`), phía trên có mây và ánh nắng pixel art, chú heo nằm khò sát sạt nóc khung ảnh, mở rộng chiều ngang khung camera; (3) Ô nhập mô tả nằm ngoài khung ảnh khi bấm gõ chữ sẽ bị bàn phím ảo của điện thoại che mất, cần chuyển thành dạng Thanh Pill Mini nổi sát đáy bên trong khung hình (cách đáy 8px); (4) Khung xem lại ảnh Locket khi trượt xuống đang bo tròn hiện đại nhẵn nhụi, cần chuyển sang phong cách Polaroid Pixel hoài niệm.
+    - *Giải Pháp Kỹ Thuật Đã Thực Hiện:*
+      1. **Bầu Trời Pixel Dreamy & Mây Nắng Pixel Art:**
+         - Gradient nền chuyển sắc nhẹ nhàng: Xanh da trời `#D2E3F2` pha Hồng phấn `#FCE3E8` trên đỉnh, chân nền Xanh mint `#DDEBD9` cỏ vườn.
+         - Tạo component `PixelSkySunCloud` với mặt trời pixel vàng ấm `#F4B93B` và các đám mây pixel art trắng bồng bềnh.
+         - Kê sát sạt chú heo `PiggyCameraRoof` tiếp giáp trực tiếp nóc khung ảnh (`marginTop: -4`).
+         - Mở rộng chiều ngang khung ngắm: `width: Math.min(SCREEN_WIDTH - 20, 360)`.
+      2. **Thanh Pill Mini Nhập Mô Tả Nổi Sát Đáy Trong Khung Ngắm (Anti-Keyboard Overlap):**
+         - Nằm nổi cách đáy khung ảnh 8px (`bottom: 8`), dạng viên thuốc pill 999px, nền kem viền 2px mực, bóng cứng 2px.
+         - Do nằm ở nửa trên màn hình, khi bàn phím ảo điện thoại bật lên từ đáy (chiếm ~300px), ô nhập chữ hoàn toàn không bao giờ bị che lấp.
+         - Cụm bên dưới khung ảnh siêu gọn: chỉ còn bộ đếm tiền và dải chip danh mục cuộn ngang.
+      3. **Cơ Chế Snap-on-Release Voice:**
+         - Đè Shutter nói voice: Camera vẫn live để ngắm.
+         - Buông tay khỏi nút Shutter (`onVoiceEnd`): Lập tức gọi `takePictureAsync` chụp frame ảnh camera cuối cùng đưa vào khung hình, đồng thời AI NLP bóc tách điền số tiền, tên món và danh mục.
+      4. **Thẻ Lịch Sử Locket Chuẩn Polaroid Pixel Hoài Niệm (`LocketMomentCard`):**
+         - Khung ảnh Polaroid viền kem dày đáy kiểu ảnh rửa phim cổ điển, viền ngoài 2.5px Nâu Mực, bóng cứng 4px 0-blur.
+         - Góc dán miếng băng keo washi pixel art, nhãn giá tiền dạng tem dán góc (Price Stamp) màu Vàng Cám font Baloo 2.
+
 

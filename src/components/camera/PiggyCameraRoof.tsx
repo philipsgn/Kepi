@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics';
 export interface PiggyCameraRoofProps {
   isShooting?: boolean;
   onPigTap?: () => void;
+  style?: any;
 }
 
 // Bảng màu chuẩn từ prototype Camera_heo_con.html
@@ -111,6 +112,7 @@ function getPigBodyMatrix(isHappy: boolean): (string | null)[][] {
 export const PiggyCameraRoof: React.FC<PiggyCameraRoofProps> = ({
   isShooting = false,
   onPigTap,
+  style,
 }) => {
   const breathAnim = useRef(new Animated.Value(0)).current;
   const zzz1Anim = useRef(new Animated.Value(0)).current;
@@ -223,7 +225,7 @@ export const PiggyCameraRoof: React.FC<PiggyCameraRoofProps> = ({
   };
 
   return (
-    <View style={styles.roofWrapper}>
+    <View style={[styles.roofWrapper, style]}>
       {!isShooting && (
         <View style={styles.zzzContainer} pointerEvents="none">
           <Animated.Text
@@ -352,7 +354,7 @@ const styles = StyleSheet.create({
   roofWrapper: {
     alignItems: 'center',
     justifyContent: 'flex-end',
-    marginBottom: -6,
+    marginBottom: -4,
     zIndex: 10,
   },
   pigTouch: {

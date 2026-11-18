@@ -1,62 +1,66 @@
-# 📷 09 — CAMERA: MÁY ẢNH HEO CON NEO-BRUTALIST V3 (UNIFIED FIXED FRAME + IN-OUT BALANCED CONTROLS + PIXEL KEYPAD)
+# 📷 09 — CAMERA: MÁY ẢNH HEO CON NEO-BRUTALIST V4 (DREAMY PIXEL SKY + SNAP-ON-RELEASE VOICE + IN-FRAME BOTTOM PILL + POLAROID PIXEL MOMENTS)
 
 > **Screen-unit:** Tab 2 (Camera trung tâm). **LUỒNG 3-in-1 (Shutter / VietQR Offline / Bank Notification Pill), quay clip 3s, MandCashierKeyboard GIỮ NGUYÊN 100% OFFLINE** (`docs/screens/CAMERA.md`).
-> **Phiên bản:** v3.0 (Kế thừa từ `PolaroidReviewCard` và `InFrameReviewOverlay`: Khung máy ảnh cố định trung tâm từ đầu tới cuối, thông tin Giá tiền/Mô tả/Danh mục nằm dưới khung, nút Lưu ở Bottom Bar trên Tab Bar, bàn phím số Pixel Art).
+> **Phiên bản:** v4.0 (Kế thừa từ `PolaroidReviewCard` và `InFrameReviewOverlay`: Bầu trời Pixel Dreamy mây nắng, buông tay Shutter voice tự động chụp frame ảnh cuối cùng, ô mô tả dạng Pill Mini sát đáy trong khung hình không bị keyboard che lấp, mở rộng chiều ngang khung camera, và Khung lịch sử ảnh Locket Polaroid Pixel hoài niệm).
 > **Phong cách đồ họa:** Port từ `prototype/Camera_heo_con.html` (CSS + canvas pixel + logic hoạt họa heo ngủ trên nóc máy ảnh).
 
 ---
 
-## 1. Khung Máy Ảnh Thống Nhất Cố Định (Unified Fixed Frame)
-- **Vị trí & Kích thước cố định:**
-  - Khung ngắm nằm ở trung tâm màn hình, tỷ lệ squircle thoáng đãng, viền 3px mực `#2B2118`, bóng cứng 4px.
-  - Từ lúc ngắm chụp (live preview) cho tới lúc chụp xong (review): **LÀ CHUNG 1 KHUNG HÌNH DUY NHẤT**, không dịch chuyển, không co giật hay tụt đáy.
-- **Chú Heo Ngủ Trên Nóc Khung Ngắm (`PiggyCameraRoof`):**
+## 1. Bầu Trời Pixel Dreamy & Khung Ngắm Thống Nhất Cố Định Mở Rộng (Unified Fixed Frame)
+- **Nền Gradient Pixel Dreamy:**
+  - Chuyển từ tông đen tối sang dải chuyển sắc mộng mơ: Xanh da trời pastel `#D2E3F2` pha Hồng phấn `#FCE3E8` ở trên đỉnh, chuyển mượt mà xuống Xanh mint cỏ vườn `#DDEBD9` và Kem Sàn `#F6EEDC`.
+  - Bầu trời điểm xuyết vệt nắng vàng ấm `#F4B93B` và các đám mây pixel art trắng bồng bềnh (`PixelSkySunCloud`).
+- **Chú Heo Ngủ Khò Sát Nóc Khung Ngắm (`PiggyCameraRoof`):**
   - Chú heo pixel art 24×20 nằm ngủ ngoan khò khò (`pose: 'sleep'`), chữ `Z z z` bay lượn li ti.
-  - Hiển thị **xuyên suốt từ đầu đến cuối**. Khi chụp ảnh: Chú heo giật mình nhảy cẫng lên vui mừng (`pose: 'stand', happy: true`), thả tim đỏ `#E0452B` bay lên.
-- **Bên trong khung ngắm:**
-  - Khi chưa chụp: CameraView quét thời gian thực.
-  - Khi đã chụp: Ảnh chụp hiển thị sắc nét với bo góc squircle chuẩn.
-  - Góc trên gờ khung: Badge phân loại `[Chi | Thu]` và nút `[Lật cam / Chụp lại]`.
-  - **Mặt ảnh hoàn toàn sạch sẽ, không nhồi nhét chữ/nút đè che khuôn mặt hoặc món đồ!**
+  - Kê khít sát sạt gờ trên (Header) của Khung ảnh (`marginTop: -4`), tạo cảm giác chú heo đang ngủ tựa cằm ngay trên nóc chiếc máy ảnh. Khi chụp ảnh: Chú heo giật mình nhảy cẫng lên vui mừng, thả tim đỏ bay lên.
+- **Khung Ngắm Rộng Thoáng Đãng:**
+  - Mở rộng chiều ngang: `width: Math.min(SCREEN_WIDTH - 20, 360)`, `height: Math.min((SCREEN_WIDTH - 20) * 0.88, 320)`.
+  - Viền 3px Nâu Mực `#2B2118`, bóng cứng 4px.
+  - Gờ trên trong khung: Badge gạt `[Chi | Thu]` và nút `[Chụp lại / Lật cam]`.
 
 ---
 
-## 2. Khu Vực Thông Tin Khoản Chi (Nằm Ngay Dưới Khung Ảnh)
-- **Hàng 1: Bộ đếm tiền to rõ Neo-Brutalist:**
-  - Nút `[-] 5k` (nền kem viền 2px mực) + Khối hiển thị số tiền font Baloo 2 `tabular-nums` màu nâu mực `#2B2118` + Nút `[+] 5k` (nền kem viền 2px mực).
-  - Chạm vào số tiền: Mở Modal bàn phím thu ngân `MandCashierKeyboard` được re-skin chuẩn Pixel Art để gõ tự do.
-- **Hàng 2: Ô nhập tên món chi tiêu:**
-  - Nền kem trắng sữa `#FFFBF1`, viền 2px mực `#2B2118`, bo góc 12px, placeholder: *"Nhập tên món chi tiêu..."*.
-- **Hàng 3: Dải chip danh mục cuộn ngang:**
-  - Các chip danh mục (Ăn uống, Di chuyển, Mua sắm,...) kèm icon đơn sắc, viền 1.5px mực; chip được chọn bừng sáng màu Vàng Cám `#F4B93B` viền 2px.
+## 2. Thanh Pill Mini Ghi Mô Tả Nổi Sát Đáy Trong Khung (Anti-Keyboard Overlap)
+- **Vị trí:** Đặt nổi cách đáy khung ngắm 8px (`bottom: 8`), bo tròn dạng viên thuốc 999px.
+- **Phong cách:** Nền kem trắng sữa `#FFFBF1` (hoặc bán trong suốt `rgba(255, 251, 241, 0.95)`), viền 2px Nâu Mực `#2B2118`, bóng cứng 2px.
+- **Ưu điểm vượt trội:** Nằm ở nửa trên màn hình, khi người dùng chạm vào gõ chữ, bàn phím ảo của điện thoại (chiếm đáy ~300px) **hoàn toàn KHÔNG BAO GIỜ CHE MẤT chữ đang gõ!**
 
 ---
 
-## 3. Thanh Điều Khiển Dưới (Bottom Bar) Không Bị Che Lấp
-- Nằm phía trên Bottom Tab Bar với khoảng đệm an toàn (`insets.bottom + 70`), đảm bảo 100% không bao giờ bị Tab Bar che.
-- **Trạng thái chưa chụp:**
-  - Trái: Nút Thư viện ảnh (`ImagePlus`) nổi trần Zero-Border nét đậm 2.8px.
-  - Giữa: Nút Shutter 2-in-1 Neo-Brutalist viền kép đỏ-vàng-mực (1 chạm chụp, nhấn giữ nói Voice).
-  - Phải: Nút Lật camera (`RotateCcw`) nổi trần Zero-Border nét đậm 2.8px.
-- **Trạng thái đã chụp xong:**
-  - Trái: Nút `[✕ Chụp lại]` (nền Kem Sàn `#FFFBF1`, viền 2.5px mực, chữ nâu mực).
-  - Phải/Giữa: Nút `[✓ Lưu vào ví]` to đẹp nổi bật (nền Vàng Cám `#F4B93B`, viền 3px mực, bóng cứng 3px, chữ Baloo 2 đậm nét).
+## 3. Cơ Chế Shutter 2-in-1: Buông Tay Chụp Frame Ảnh Cuối Cùng (Snap-on-Release Voice)
+- **1 chạm (Tap):** Chụp ảnh live camera lập tức.
+- **Đè nút (Hold):** Kích hoạt Voice ghi âm chi tiêu. Camera vẫn live để người dùng căn chỉnh góc nhìn.
+- **Buông tay (Release):**
+  - Hệ thống tự động bắt ngay frame ảnh camera cuối cùng (`takePictureAsync`), đưa vào khung hình hiển thị.
+  - Đồng thời AI bóc tách giọng nói: điền tự động số tiền vào bộ đếm, tên món vào thanh Pill mô tả, chọn chip danh mục tương ứng.
+  - Chuyển nút điều khiển đáy sang `[✕ Chụp lại]` và `[✓ Lưu vào ví]`.
 
 ---
 
-## 4. Bàn Phím Thu Ngân Pixel Art (`MandCashierKeyboard`)
-- Nền container: Kem Sàn `#F6EEDC`, viền Nâu Mực `#2B2118` 3px, bo góc trên 24px.
-- Phím bấm số 0-9: Nền trắng sữa `#FFFBF1`, viền mực 2px, bóng cứng 2px 0-blur, font Baloo 2 `tabular-nums` màu nâu mực.
-- Nút Xóa: Phím kem viền 2px.
-- Nút Xác nhận: Nền Vàng Cám `#F4B93B`, viền 3px mực, bóng cứng 3px 0-blur.
-- Xóa bỏ hoàn toàn tone màu hồng ngân hàng hiện đại lạc lõng.
+## 4. Khu Vực Thông Tin Chi Tiêu Dưới Khung Ảnh (Siêu Gọn & Thoáng Đãng)
+- **Hàng 1: Bộ đếm số tiền [-] [SỐ TIỀN đ] [+]** (Baloo 2 to rõ, chạm mở bàn phím số thu ngân).
+- **Hàng 2: Dải chip danh mục cuộn ngang** (Ăn uống, Đi lại, Cafe, Mua sắm...).
+- **Thanh Bottom Bar an toàn:** Cách sàn màn hình `insets.bottom + 85px`, 100% không bao giờ bị Bottom Tab Bar che lấp.
+
+---
+
+## 5. Dòng Khoảnh Khắc Locket: Khung Ảnh Polaroid Pixel Hoài Niệm
+- **Tạo hình Khung Polaroid Cổ Điển:**
+  - Nền khung: Trắng ngà / Kem sữa `#FFFBF1`.
+  - Viền ngoài: 2.5px Nâu Mực `#2B2118`, bo góc 12px.
+  - Bóng cứng: `shadowColor: '#2B2118'`, `shadowOffset: { width: 0, height: 4 }`, `shadowOpacity: 1`.
+  - Lề đáy Polaroid rộng dày 44px kiểu ảnh Polaroid rửa phim.
+- **Chi Tiết Hoài Niệm Pixel Art:**
+  - Miếng dán băng keo washi pixel art dán lệch ở góc trên khung ảnh.
+  - Nhãn giá tiền dạng tem dán góc (Price Stamp) màu Vàng Cám `#F4B93B` viền 2px mực, font Baloo 2 to rõ.
+  - Tên món + Dấu mộc thời gian dạng con dấu bưu điện hoài niệm.
 
 ---
 
 ## AC (Acceptance Criteria)
-- [ ] Khung ngắm và preview thống nhất làm 1 khung hình cố định trung tâm từ đầu tới cuối.
-- [ ] Chú heo trên nóc máy ảnh hiển thị xuyên suốt, nhảy cẫng thả tim khi chụp ảnh.
-- [ ] Thông tin giá tiền, tên món, chip danh mục nằm ngay dưới khung ảnh, không đè che mặt ảnh.
-- [ ] Nút Lưu và Chụp lại nằm ở thanh điều khiển dưới phía trên Tab Bar, 100% không bị che lấp.
-- [ ] Bàn phím số MandCashierKeyboard được re-skin 100% chuẩn Neo-Brutalist Pixel Art kem/mực.
+- [ ] Bầu trời Dreamy Xanh da trời + Hồng pastel + Xanh mint + Mây nắng pixel art bồng bềnh.
+- [ ] Chú heo ngủ khít sát nóc khung ảnh, khung mở rộng chiều ngang `SCREEN_WIDTH - 20`.
+- [ ] Thanh Pill Mini nhập mô tả nổi sát đáy trong khung hình, gõ chữ không bị keyboard che lấp.
+- [ ] Đè Shutter nói voice, buông tay tự động chụp frame ảnh cuối cùng gán vào khung hình và điền dữ liệu.
+- [ ] Thẻ lịch sử ảnh Locket Moment chuyển sang phong cách Polaroid Pixel hoài niệm (băng keo washi, tem giá).
 - [ ] Hoạt động 100% offline, không lưu STK, làm sạch EXIF ảnh trước khi lưu.

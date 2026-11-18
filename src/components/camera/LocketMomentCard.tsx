@@ -12,7 +12,7 @@ import { ShieldCheck } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii, spacing } from '../../theme/tokens';
 import { Transaction } from '../../types/database';
-import { formatCompactVND, formatVND, maskMoney } from '../../utils/currency';
+import { formatVND, maskMoney } from '../../utils/currency';
 import { renderCategoryMonochromeIcon } from '../../constants/categories';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -24,10 +24,10 @@ interface LocketMomentCardProps {
 }
 
 /**
- * Thẻ Khoảnh Khắc Lớn Chuẩn Ứng Dụng Locket (Hình #3)
- * - Tỉ lệ 4:5, bo góc tròn mềm 26px, viền mảnh hairline
- * - Tràn viền rộng rãi, đè nhẹ nhãn giá tiền & thời gian
- * - Món không ảnh: Hiển thị icon danh mục đơn sắc ở trung tâm trên nền màu ấm
+ * Thẻ Khoảnh Khắc Locket Chuẩn Khung Ảnh Polaroid Pixel Hoài Niệm
+ * - Khung ảnh Polaroid viền kem sữa #FFFBF1, viền 2.5px Nâu Mực #2B2118, bóng cứng 4px
+ * - Miếng dán băng keo washi pixel art góc trên
+ * - Lề đáy Polaroid dày 46px với tem dán giá tiền Vàng Cám + Dấu mộc thời gian hoài niệm
  */
 export const LocketMomentCard: React.FC<LocketMomentCardProps> = ({
   item,
@@ -56,14 +56,14 @@ export const LocketMomentCard: React.FC<LocketMomentCardProps> = ({
 
       if (diffHours < 1) {
         const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
-        return `${diffMins} phút trước`;
+        return `${diffMins}m trước`;
       }
       if (diffHours < 24) {
         return `${diffHours}h trước`;
       }
       const days = Math.floor(diffHours / 24);
       if (days === 1) return 'Hôm qua';
-      if (days < 7) return `${days} ngày trước`;
+      if (days < 7) return `${days}d trước`;
       return `${d.getDate()}/${d.getMonth() + 1}`;
     } catch {
       return '';
@@ -74,96 +74,134 @@ export const LocketMomentCard: React.FC<LocketMomentCardProps> = ({
     <TouchableOpacity
       activeOpacity={0.92}
       onPress={handlePress}
-      style={[
-        styles.cardContainer,
-        {
-          backgroundColor: isDark ? '#141E2B' : '#F5EFE6',
-          borderColor: tokens.border,
-        },
-      ]}
+      style={styles.polaroidFrame}
     >
-      {hasPhoto ? (
-        <Image
-          source={{ uri: (item.photo_url || item.thumbnail_url) ?? undefined }}
-          style={styles.imageBackground}
-          contentFit="cover"
-          cachePolicy="disk"
-          transition={200}
-        />
-      ) : (
-        <View style={styles.noPhotoCenterBox}>
+      {/* 1. MIẾNG BĂNG KEO WASHI TAPE PIXEL DÁN GÓC TRÊN */}
+      <View style={styles.washiTapeWrapper} pointerEvents="none">
+        <View style={styles.washiTape} />
+      </View>
+
+      {/* 2. KHU VỰC BỨC ẢNH CHỤP (PHOTO APERTURE) */}
+      <View style={styles.photoContainer}>
+        {hasPhoto ? (
+          <Image
+            source={{ uri: (item.photo_url || item.thumbnail_url) ?? undefined }}
+            style={styles.imageBackground}
+            contentFit="cover"
+            cachePolicy="disk"
+            transition={200}
+          />
+        ) : (
+          <View style={styles.noPhotoCenterBox}>
+            {renderCategoryMonochromeIcon({
+              categoryId: item.category,
+              isIncome,
+              size: 54,
+              color: isIncome ? '#5E9A57' : '#2B2118',
+              strokeWidth: 2,
+            })}
+          </View>
+        )}
+
+        {/* Badge Không mua (Cứu ví) nếu có */}
+        {isSkipped && (
+          <View style={styles.skippedTag}>
+            <ShieldCheck size={13} color="#2B2118" strokeWidth={2.6} />
+            <Text style={styles.skippedText}>Cứu ví</Text>
+          </View>
+        )}
+      </View>
+
+      {/* 3. LỀ ĐÁY DÀY KIỂU ẢNH POLAROID RỬA PHIM */}
+      <View style={styles.polaroidBottomBar}>
+        {/* Nhãn tem giá tiền (Price Stamp) */}
+        <View
+          style={[
+            styles.priceStamp,
+            { backgroundColor: isIncome ? '#5E9A57' : '#F4B93B' },
+          ]}
+        >
           {renderCategoryMonochromeIcon({
             categoryId: item.category,
             isIncome,
-            size: 54,
-            color: isIncome ? tokens.success : tokens.primary,
-            strokeWidth: 1.8,
+            size: 13,
+            color: isIncome ? '#FFFBF1' : '#2B2118',
+            strokeWidth: 2.4,
           })}
+          <Text
+            style={[
+              styles.priceStampText,
+              { color: isIncome ? '#FFFBF1' : '#2B2118' },
+            ]}
+          >
+            {isIncome ? '+' : '−'}
+            {maskMoney(formatVND(item.amount), isMasked)}
+          </Text>
         </View>
-      )}
 
-      {/* Lớp gradient/vignette mờ dưới chân thẻ */}
-      <View style={styles.bottomVignette} />
-
-      {/* Nhãn giá góc dưới trái (Viên thuốc nổi mờ tối) */}
-      <View
-        style={[
-          styles.pricePill,
-          {
-            backgroundColor: isDark ? 'rgba(14, 22, 32, 0.82)' : 'rgba(250, 246, 236, 0.88)',
-            borderColor: tokens.border,
-          },
-        ]}
-      >
-        {renderCategoryMonochromeIcon({
-          categoryId: item.category,
-          isIncome,
-          size: 15,
-          color: isIncome ? tokens.success : tokens.primary,
-          strokeWidth: 2,
-        })}
-        <Text
-          style={[
-            styles.priceText,
-            { color: isIncome ? tokens.success : tokens.text },
-          ]}
-        >
-          {isIncome ? '+' : ''}
-          {maskMoney(formatVND(item.amount), isMasked)}
-        </Text>
-      </View>
-
-      {/* Thời gian góc dưới phải */}
-      <View style={styles.timeTag}>
-        <Text style={styles.timeText}>{formatRelativeTime(item.created_at)}</Text>
-      </View>
-
-      {/* Badge Không mua (Cứu ví) nếu có */}
-      {isSkipped && (
-        <View style={[styles.skippedTag, { backgroundColor: tokens.primary }]}>
-          <ShieldCheck size={14} color="#1B2733" strokeWidth={2.4} />
-          <Text style={styles.skippedText}>Cứu ví</Text>
+        {/* Tên món chi tiêu & Con dấu thời gian */}
+        <View style={styles.photoInfoCol}>
+          <Text style={styles.photoDescText} numberOfLines={1}>
+            {item.description || item.category || 'Khoảnh khắc chi tiêu'}
+          </Text>
+          <View style={styles.stampDateBadge}>
+            <Text style={styles.stampDateText}>
+              • {formatRelativeTime(item.created_at)}
+            </Text>
+          </View>
         </View>
-      )}
+      </View>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    width: SCREEN_WIDTH - 28,
-    aspectRatio: 4 / 5,
-    borderRadius: 38,
-    overflow: 'hidden',
+  polaroidFrame: {
+    width: SCREEN_WIDTH - 24,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    borderRadius: 16,
+    paddingTop: 10,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
     alignSelf: 'center',
     marginVertical: 14,
-    borderWidth: 0,
     position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    elevation: 6,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
+  washiTapeWrapper: {
+    position: 'absolute',
+    top: -8,
+    left: '42%',
+    zIndex: 10,
+    transform: [{ rotate: '-3deg' }],
+  },
+  washiTape: {
+    width: 60,
+    height: 16,
+    backgroundColor: 'rgba(249, 184, 196, 0.92)',
+    borderWidth: 1.5,
+    borderColor: '#2B2118',
+    borderRadius: 2,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 0,
+  },
+  photoContainer: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 10,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    backgroundColor: '#1E2836',
+    position: 'relative',
   },
   imageBackground: {
     width: '100%',
@@ -173,60 +211,76 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#FAF6EC',
   },
-  bottomVignette: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 70,
-    backgroundColor: 'rgba(0, 0, 0, 0.38)',
-  },
-  pricePill: {
-    position: 'absolute',
-    bottom: 14,
-    left: 14,
+  polaroidBottomBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: radii.full,
-    borderWidth: 0,
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    paddingHorizontal: 4,
+    gap: 8,
   },
-  priceText: {
-    fontSize: 13,
-    fontWeight: '700',
+  priceStamp: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 9,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 1.5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  priceStampText: {
+    fontFamily: 'Baloo2-Bold',
+    fontSize: 14,
+    fontWeight: '800',
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.2,
   },
-  timeTag: {
-    position: 'absolute',
-    bottom: 18,
-    right: 16,
+  photoInfoCol: {
+    flex: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
-  timeText: {
-    color: '#FAF6EC',
-    fontSize: 12,
-    fontWeight: '600',
-    textShadowColor: 'rgba(0,0,0,0.6)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+  photoDescText: {
+    fontFamily: 'Nunito',
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#2B2118',
+    maxWidth: 150,
+  },
+  stampDateBadge: {
+    marginTop: 2,
+  },
+  stampDateText: {
+    fontFamily: 'Nunito',
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#85735E',
   },
   skippedTag: {
     position: 'absolute',
-    top: 14,
-    right: 14,
+    top: 8,
+    right: 8,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: radii.full,
+    backgroundColor: '#F4B93B',
+    borderWidth: 1.5,
+    borderColor: '#2B2118',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
   },
   skippedText: {
-    color: '#1B2733',
+    fontFamily: 'Nunito',
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '800',
+    color: '#2B2118',
   },
 });

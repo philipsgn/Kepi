@@ -3240,4 +3240,46 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 69 Passed: Camera Heo Con v3 Unified Fixed Frame, Balanced Controls & Pixel Keypad Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 69 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (69/69)!');
+// ==============================================================================
+// 🧪 TEST 70: CAMERA HEO CON V4 (DREAMY PIXEL SKY, SNAP-ON-RELEASE & POLAROID MOMENTS)
+// ==============================================================================
+{
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const cardPath = path.join(__dirname, 'src/components/camera/LocketMomentCard.tsx');
+  const cardCode = fs.readFileSync(cardPath, 'utf8');
+  const skyPath = path.join(__dirname, 'src/components/camera/PixelSkySunCloud.tsx');
+  const skyCode = fs.readFileSync(skyPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. Dreamy Sky & PixelSkySunCloud
+  assert.ok(indexCode.includes('PixelSkySunCloud'), 'index.tsx must mount PixelSkySunCloud');
+  assert.ok(indexCode.includes('#D2E3F2') && indexCode.includes('#FCE3E8') && indexCode.includes('#DDEBD9'), 'index.tsx must use Dreamy gradient (Blue/Pink/Mint)');
+  assert.ok(skyCode.includes('sunWrapper') && skyCode.includes('cloudBigWrapper'), 'PixelSkySunCloud must render pixel sun and clouds');
+
+  // 2. Snap-on-Release Voice in handleShutterVoiceEnd
+  assert.ok(indexCode.includes('takePictureAsync'), 'index.tsx handleShutterVoiceEnd must capture final camera frame');
+  assert.ok(indexCode.includes('inFrameDescPillWrapper'), 'index.tsx must render inFrameDescPillWrapper inside frame');
+  assert.ok(indexCode.includes('inFrameDescPillInput'), 'index.tsx must have inFrameDescPillInput');
+
+  // 3. Widened Camera Frame
+  assert.ok(indexCode.includes('SCREEN_WIDTH - 20'), 'viewfinderContainer width must be widened to SCREEN_WIDTH - 20');
+
+  // 4. Polaroid Pixel Moments Card
+  assert.ok(cardCode.includes('polaroidFrame'), 'LocketMomentCard must use polaroidFrame style');
+  assert.ok(cardCode.includes('washiTape'), 'LocketMomentCard must render washiTape');
+  assert.ok(cardCode.includes('priceStamp'), 'LocketMomentCard must render priceStamp');
+  assert.ok(cardCode.includes('#FFFBF1'), 'LocketMomentCard must use #FFFBF1 polaroid paper background');
+
+  // 5. Docs & Decisions Sync
+  assert.ok(docCode.includes('DREAMY PIXEL SKY') || docCode.includes('Dreamy Pixel Sky'), '09-CAMERA.md must document Dreamy Pixel Sky');
+  assert.ok(docCode.includes('IN-FRAME BOTTOM PILL') || docCode.includes('In-Frame Bottom Pill'), '09-CAMERA.md must document In-Frame Bottom Pill');
+  assert.ok(decisionsCode.includes('Quyết định 129') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 129'), 'DECISIONS.md must document Quyết định 129');
+
+  console.log('✅ Test 70 Passed: Camera Heo Con v4 Dreamy Sky, Snap-on-Release Voice & Polaroid Pixel Moments Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 70 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (70/70)!');

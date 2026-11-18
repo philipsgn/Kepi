@@ -99,6 +99,7 @@ import { ConfirmationPillBanner, ConfirmationInboxModal, UploadReceiptModal } fr
 import { OnCameraPhotoOverlay } from '../../src/components/camera/OnCameraPhotoOverlay';
 import { InFrameReviewOverlay } from '../../src/components/camera/InFrameReviewOverlay';
 import { PiggyCameraRoof } from '../../src/components/camera/PiggyCameraRoof';
+import { PixelSkySunCloud } from '../../src/components/camera/PixelSkySunCloud';
 import { PolaroidReviewCard } from '../../src/components/camera/PolaroidReviewCard';
 import { BankNotificationFloatingPill } from '../../src/components/camera/BankNotificationFloatingPill';
 import { BankNotificationSettingsModal } from '../../src/components/profile/BankNotificationSettingsModal';
@@ -552,8 +553,14 @@ export default function MainAppScreen() {
     setIsRecordingVoice(true);
     setIsPhotoSavedSuccess(false);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Giữ camera live view trong suốt quá trình nói để ngắm góc máy
+  };
 
-    // Chụp ngay khung hình camera lúc bắt đầu
+  const handleShutterVoiceEnd = async () => {
+    setIsRecordingVoice(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    // 1. Tức thì chụp frame ảnh cuối cùng từ camera khi buông tay
     try {
       if (cameraRef.current && cameraGranted) {
         const photo = await cameraRef.current.takePictureAsync({
@@ -564,22 +571,20 @@ export default function MainAppScreen() {
           const optimized = await optimizeExpensePhoto(photo.uri);
           setCapturedPhotoUri(optimized.fullUri);
           setCapturedThumbUri(optimized.thumbnailUri);
-          return;
         }
+      } else {
+        const fallback = 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80';
+        setCapturedPhotoUri(fallback);
+        setCapturedThumbUri(fallback);
       }
     } catch (e) {
-      console.log('Chụp khung hình voice lỗi, dùng fallback:', e);
+      console.log('Chụp frame cuối khi buông voice lỗi:', e);
+      const fallback = 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80';
+      setCapturedPhotoUri(fallback);
+      setCapturedThumbUri(fallback);
     }
-    const fallback = 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80';
-    setCapturedPhotoUri(fallback);
-    setCapturedThumbUri(fallback);
-  };
 
-  const handleShutterVoiceEnd = async () => {
-    setIsRecordingVoice(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-    // AI bóc tách câu nói thành số tiền, món, danh mục
+    // 2. AI bóc tách câu nói thành số tiền, món, danh mục
     const sampleVoiceTexts = [
       'Ăn phở bò 45 nghìn',
       'Uống cà phê sáng 30 nghìn',
@@ -594,6 +599,10 @@ export default function MainAppScreen() {
     setInFrameDescription(parsed.description || 'Ghi âm giọng nói');
     setInFrameType('EXPENSE');
     setInFramePaymentMethod('CASH');
+
+    // Chú heo nhảy cẫng lên ăn mừng
+    setIsShootingPig(true);
+    setTimeout(() => setIsShootingPig(false), 900);
   };
 
   const handleCapturePhoto = async () => {
@@ -1167,12 +1176,15 @@ export default function MainAppScreen() {
             <LinearGradient
               colors={
                 isDark
-                  ? ['#1A2433', '#161F2C', '#101722', '#0E1620']
-                  : ['#222A33', '#39424D', '#8C8880', '#FAF6EC']
+                  ? ['#1A2535', '#243245', '#1F2A38', '#141E28']
+                  : ['#D2E3F2', '#E8DBF0', '#FCE3E8', '#DDEBD9']
               }
-              locations={[0, 0.42, 0.80, 1.0]}
+              locations={[0, 0.32, 0.65, 1.0]}
               style={[styles.cameraScreenSection, { height: SCREEN_HEIGHT }]}
             >
+              {/* BẦU TRỜI PIXEL DREAMY MÂY NẮNG (GÓC TRÊN CAMERA) */}
+              <PixelSkySunCloud />
+
               {/* TOP HEADER CONTROLS OVER CAMERA */}
               <View style={[styles.cameraTopHeader, { paddingTop: insets.top + Spacing.sm }]}>
                 {/* FLASH TOGGLE (BORDERLESS) */}
@@ -1372,6 +1384,20 @@ export default function MainAppScreen() {
                     <Text style={styles.inFrameVoiceText}>Đang nghe bạn nói...</Text>
                   </View>
                 )}
+
+                {/* THANH PILL MINI NHẬP MÔ TẢ NỔI SÁT ĐÁY KHUNG (ANTI-KEYBOARD OVERLAP) */}
+                <View style={styles.inFrameDescPillWrapper}>
+                  <PenLine size={13} color="#2B2118" strokeWidth={2.4} />
+                  <TextInput
+                    value={inFrameDescription}
+                    onChangeText={setInFrameDescription}
+                    placeholder="Ghi tên món chi tiêu..."
+                    placeholderTextColor="rgba(43, 33, 24, 0.45)"
+                    style={styles.inFrameDescPillInput}
+                    maxLength={50}
+                    returnKeyType="done"
+                  />
+                </View>
               </View>
 
               {/* THẺ PHÁT HIỆN MÃ VIETQR TRƯỢT LÊN TRÊN NÚT CHỤP */}
@@ -1408,7 +1434,7 @@ export default function MainAppScreen() {
                 </View>
               ) : null}
 
-              {/* CỤM THÔNG TIN CHI TIÊU NẰM NGAY DƯỚI KHUNG ẢNH (BỘ ĐẾM TIỀN, TÊN MÓN, CHIP DANH MỤC) */}
+              {/* CỤM THÔNG TIN CHI TIÊU NẰM NGAY DƯỚI KHUNG ẢNH (BỘ ĐẾM TIỀN & CHIP DANH MỤC) */}
               <View style={styles.camBelowCluster}>
                 {/* HÀNG 1: BỘ ĐẾM SỐ TIỀN [-] [SỐ TIỀN đ] [+] */}
                 <View style={styles.camBelowAmountRow}>
@@ -1442,20 +1468,7 @@ export default function MainAppScreen() {
                   </TouchableOpacity>
                 </View>
 
-                {/* HÀNG 2: Ô NHẬP TÊN MÓN CHI TIÊU */}
-                <View style={styles.camBelowDescRow}>
-                  <TextInput
-                    value={inFrameDescription}
-                    onChangeText={setInFrameDescription}
-                    placeholder="Nhập tên món chi tiêu..."
-                    placeholderTextColor="rgba(43, 33, 24, 0.45)"
-                    style={styles.camBelowDescInput}
-                    maxLength={50}
-                    returnKeyType="done"
-                  />
-                </View>
-
-                {/* HÀNG 3: DẢI CHIP DANH MỤC CUỘN NGANG */}
+                {/* HÀNG 2: DẢI CHIP DANH MỤC CUỘN NGANG */}
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -1854,8 +1867,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8 },
   viewfinderContainer: {
-    width: Math.min(SCREEN_WIDTH - 36, 320),
-    height: Math.min(SCREEN_WIDTH - 36, 320),
+    width: Math.min(SCREEN_WIDTH - 20, 360),
+    height: Math.min((SCREEN_WIDTH - 20) * 0.88, 320),
     alignSelf: 'center',
     marginVertical: 4,
     borderRadius: 24,
@@ -1869,6 +1882,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 4 },
+  inFrameDescPillWrapper: {
+    position: 'absolute',
+    bottom: 8,
+    left: 12,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    backgroundColor: 'rgba(255, 251, 241, 0.96)',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    borderRadius: 999,
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.9,
+    shadowRadius: 0,
+    elevation: 3,
+    zIndex: 15 },
+  inFrameDescPillInput: {
+    flex: 1,
+    fontFamily: 'Nunito',
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2B2118',
+    paddingVertical: 0 },
   inFrameTopBar: {
     position: 'absolute',
     top: 8,
@@ -1956,9 +1996,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFBF1' },
   camBelowCluster: {
-    width: Math.min(SCREEN_WIDTH - 36, 320),
+    width: Math.min(SCREEN_WIDTH - 20, 360),
     alignSelf: 'center',
-    marginTop: 6,
+    marginTop: 8,
     gap: 6,
     zIndex: 10 },
   camBelowAmountRow: {
