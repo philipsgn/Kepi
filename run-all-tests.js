@@ -3194,4 +3194,50 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 68 Passed: Camera Heo Con v2 In-Frame Review, Shutter Voice 2-in-1 & Zero-Border Icons Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 68 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (68/68)!');
+// ==============================================================================
+// 🧪 TEST 69: CAMERA HEO CON V3 (UNIFIED FIXED FRAME, BALANCED CONTROLS & PIXEL KEYPAD)
+// ==============================================================================
+{
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const keypadPath = path.join(__dirname, 'src/components/common/MandCashierKeyboard.tsx');
+  const keypadCode = fs.readFileSync(keypadPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. Unified Fixed Camera Frame & Roof Mascot in index.tsx
+  assert.ok(indexCode.includes('viewfinderContainer'), 'index.tsx must have unified viewfinderContainer');
+  assert.ok(indexCode.includes('PiggyCameraRoof'), 'PiggyCameraRoof must be present on top of viewfinder');
+  assert.ok(indexCode.includes('inFrameTopBar'), 'index.tsx must render inFrameTopBar with Chi/Thu toggle');
+  assert.ok(indexCode.includes('inFrameTypeBtnActiveExpense'), 'index.tsx must have inFrameTypeBtnActiveExpense');
+
+  // 2. Below-Frame Balanced Expense Controls
+  assert.ok(indexCode.includes('camBelowCluster'), 'index.tsx must have camBelowCluster below frame');
+  assert.ok(indexCode.includes('camBelowAmountRow'), 'index.tsx must have camBelowAmountRow with +-5k buttons');
+  assert.ok(indexCode.includes('camBelowDescInput'), 'index.tsx must have camBelowDescInput text input');
+  assert.ok(indexCode.includes('camBelowChipsScroll'), 'index.tsx must have camBelowChipsScroll for categories');
+
+  // 3. Bottom Safe Action Bar (Above TabBar)
+  assert.ok(indexCode.includes('cameraBottomBarReview'), 'index.tsx must have cameraBottomBarReview for captured state');
+  assert.ok(indexCode.includes('camReviewRetakeBtn'), 'index.tsx must have camReviewRetakeBtn');
+  assert.ok(indexCode.includes('camReviewSaveBtn'), 'index.tsx must have camReviewSaveBtn');
+  assert.ok(indexCode.includes('insets.bottom + 85'), 'Bottom bars must use insets.bottom + 85 padding to avoid TabBar overlap');
+
+  // 4. Smooth Vertical Scroll for Locket Moments
+  assert.ok(indexCode.includes('!showKeyboardModal'), 'Vertical scroll must be smoothly enabled when keyboard is closed');
+
+  // 5. Neo-Brutalist MandCashierKeyboard
+  assert.ok(keypadCode.includes('neoDigitKey'), 'MandCashierKeyboard must have neoDigitKey style');
+  assert.ok(keypadCode.includes('#F6EEDC'), 'MandCashierKeyboard must use Kem San #F6EEDC background');
+  assert.ok(keypadCode.includes('#F4B93B'), 'MandCashierKeyboard submit button must use Vang Cam #F4B93B');
+
+  // 6. Docs & Decisions Sync
+  assert.ok(docCode.includes('UNIFIED FIXED FRAME') || docCode.includes('Unified Fixed Frame'), '09-CAMERA.md must document Unified Fixed Frame');
+  assert.ok(decisionsCode.includes('Quyết định 128') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 128'), 'DECISIONS.md must document Quyết định 128');
+
+  console.log('✅ Test 69 Passed: Camera Heo Con v3 Unified Fixed Frame, Balanced Controls & Pixel Keypad Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 69 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (69/69)!');

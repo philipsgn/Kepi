@@ -715,4 +715,19 @@
          - Nút Thư viện ảnh (`ImagePlus`) và Lật camera (`RotateCcw`) hiển thị dạng **Icon Vector nổi trần hoàn toàn** (`borderWidth: 0, backgroundColor: 'transparent'`), nét vẽ đậm `strokeWidth: 2.8`, màu trắng sáng/vàng cám nổi bật với shadow nhẹ.
          - Loại bỏ nút Mic riêng rẽ ở dưới vì đã tích hợp trọn vẹn vào nút Shutter trung tâm.
 
+  - **Quyết định 128 (18/11/2026): Tái Cấu Trúc Toàn Diện Tab Camera v3 (Unified Fixed Frame, In-Out Balanced Controls, Re-skin Neo-Brutalist Keypad):**
+    - *Bối Cảnh & Bản Chất:* Người dùng phản ánh 2 vấn đề lớn trên thiết bị thực tế: (1) Khung ảnh bị đẩy tụt xuống đáy, nhồi nhét tất cả chữ và nút đè lên mặt ảnh che khuất người/món đồ, cặp nút Lưu/Hủy vẫn bị Tab Bar che một nửa; (2) Khi chạm vào số tiền, bàn phím thu ngân `MandCashierKeyboard` mở lên tone màu hồng/trắng hiện đại lạc lõng so với phong cách Neo-Brutalist Pixel Art Kem/Mực của Heo Con.
+    - *Giải Pháp Kỹ Thuật Đã Thực Hiện:*
+      1. **Khung Máy Ảnh Thống Nhất Cố Định (Unified Fixed Frame):** Từ lúc ngắm chụp tới lúc review là duy nhất 1 khung hình cố định nằm cân đối ở trung tâm màn hình, không bị dịch chuyển hay tụt đáy. Chú heo trên nóc (`PiggyCameraRoof`) hiển thị xuyên suốt. Trong khung ảnh giữ sạch sẽ, chỉ có badge gạt [Chi | Thu] và nút lật camera ở gờ trên.
+      2. **Khu Vực Thông Tin Nằm Ngay Dưới Khung Ảnh:**
+         - Bộ số tiền to rõ với 2 nút `[-]` và `[+]` 5.000đ hai bên font Baloo 2 `tabular-nums`.
+         - Ô nhập mô tả / tên món chi tiêu (viền 2px mực, nền kem).
+         - Dải chip danh mục cuộn ngang (Ăn uống, Di chuyển, Mua sắm, v.v.).
+      3. **Thanh Điều Khiển Dưới (Bottom Bar) Đặt Phía Trên Tab Bar An Toàn:**
+         - Nằm phía trên Tab Bar với khoảng đệm an toàn `insets.bottom + 70`, 100% không bao giờ bị Tab Bar che.
+         - Khi chưa chụp: Nút Thư viện ảnh + ShutterButton 2-in-1 (tap chụp / hold voice) + Lật camera.
+         - Khi đã chụp: Cặp nút Neo-Brutalist `[✕ Chụp lại]` (nền kem viền 2.5px) và `[✓ Lưu vào ví]` (nền vàng cám viền 3px to rõ).
+      4. **Re-skin Bàn Phím `MandCashierKeyboard` Sang Neo-Brutalist Pixel Art:**
+         - Nền container Kem Sàn `#F6EEDC` viền Nâu Mực `#2B2118` 3px, phím số trắng sữa `#FFFBF1` viền 2px đổ bóng cứng 2px 0-blur, nút Xác nhận Vàng Cám `#F4B93B` viền 3px mực.
+
 

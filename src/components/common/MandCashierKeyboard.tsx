@@ -108,12 +108,12 @@ export const MandCashierKeyboard: React.FC<MandCashierKeyboardProps> = ({
   // Format số có dấu chấm ngăn cách hàng nghìn
   const formattedAmount = amount.toLocaleString('vi-VN');
 
-  // Màu sắc phím bấm theo theme
-  const isHeocon = mode === 'heocon' || !mode;
-  const keypadBg = isHeocon ? '#FFFBF1' : tokens.surfaceAlt;
-  const keyBg = isHeocon ? '#FFFBF1' : tokens.surface;
-  const keyText = isHeocon ? '#2B2118' : tokens.text;
-  const accentColor = isHeocon ? '#F4B93B' : tokens.primary;
+  // Màu sắc phím bấm theo phong cách Neo-Brutalist Pixel Art (Heo Con)
+  const isHeocon = mode === 'heocon' || true; // Luôn áp dụng Neo-Brutalist Pixel Art chuẩn
+  const keypadBg = '#F6EEDC'; // Kem Sàn
+  const keyBg = '#FFFBF1'; // Trắng Sữa
+  const keyText = '#2B2118'; // Nâu Mực
+  const accentColor = '#F4B93B'; // Vàng Cám
 
   return (
     <View
@@ -447,6 +447,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   amountValueText: {
+    fontFamily: 'Baloo2-Bold',
     fontSize: 34,
     fontWeight: '800',
     letterSpacing: -0.5,
