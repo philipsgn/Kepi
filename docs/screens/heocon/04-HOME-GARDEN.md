@@ -11,12 +11,12 @@
 ```
 - RN: `NeoCard radius 28 + NeoShadow depth 4`; bên trong `Image garden-bg.png` (asset 4× = 704×528) `aspectRatio: 4/3`, `resizeMode:'stretch'` (asset đã phóng sẵn nên vẫn nét).
 
-## 2. Overlay đè lên khung (CSS `.tl`/`.tr`/`.state`/`.bubble`/`.cam`)
+## 2. Overlay đè lên khung (CSS `.tr`/`.state`/`.bubble`/`.cam`)
 | Vị trí | Phần tử | CSS gốc | Port RN |
 |---|---|---|---|
-| Trái-trên (`left:10;top:10`, gap 8) | Nút tròn "vào chuồng" (icon giấc ngủ `Moon`) + nút pill "Vào chuồng" | `.tl` + `.btn.round` + `.btn` | `NeoButton round` + `NeoButton` cream |
-| Phải-trên (`right:10;top:10`) | **Badge "Chuỗi N ngày"** nền mực (thay "24 cám" — không thêm economy) | `.cam{background:var(--ink);color:var(--screen);border:3px solid var(--ink);border-radius:999px;padding:6px 14px;font:800 14px Nunito}` | `NeoButton dark` dạng display-only |
-| Dưới-trái (`left:10;bottom:34`) | Nhãn trạng thái pill: `Nắng · sân · đi dạo` — **chạm để đổi thời điểm** (demo) | `.state{background:var(--card);border:3px solid var(--ink);border-radius:999px;padding:5px 12px;font:800 12px}` | `NeoButton` mini (height auto) |
+| Trái-trên (`left:10;top:10`) | *(Đã gỡ bỏ cụm nút Vào nhà để khung hình thoáng đãng, tương tác trực tiếp qua cánh cửa)* | — | — |
+| Phải-trên (`right:10;top:10`) | **Badge "Chuỗi N ngày / cám"** nền mực | `.cam{background:var(--ink);color:var(--screen);border:3px solid var(--ink);border-radius:999px;padding:6px 14px;font:800 13px}` | Badge display-only |
+| Dưới-trái (`left:10;bottom:10`) | Nhãn trạng thái pill: `Nắng · sân · đi dạo` — **Tự động cập nhật theo đồng hồ thực tế** (không bấm đổi) | `.state{background:var(--card);border:3px solid var(--ink);border-radius:999px;padding:5px 12px;font:800 12px;cursor:default}` | Status pill display-only |
 | Theo heo | `NeoBubble` thoại (đuôi kim cương, hiện 1.5–2s) | `.bubble` + `::after` | §2.9 NEO-KIT |
 
 - Lưu ý: đồng xu vàng trong badge gốc (`.coin{14px;background:var(--gold);box-shadow:inset 0 0 0 2px #B97A14}`) chỉ giữ khi hiển thị phần thưởng — với badge Chuỗi thì thay icon `Flame`/`Calendar` vector kem.
@@ -41,10 +41,10 @@
 1. Chạm heo (hit-box x±13, y−22→+3): `happy` 1.2s + thoại ngẫu nhiên ["Ủn ỉn!","Heo đây, heo đây!","Gãi bụng đi nè"] + `Haptics.Light`.
 2. Chạm ao (blocked): "Ở đó có ao, heo không bơi đâu nha".
 3. Chạm sân: heo chạy tới (clamp vùng đi được, né ao trượt mép).
-4. **Chạm Cửa Chính Nhà hoặc Bấm "Vào nhà":** Cửa chính mở trượt sang 2 bên (`doorOpen = 1`), chú heo chạy lại trước cửa, reo *"Vào nhà thôi! 🏠"* $\to$ Tự động kích hoạt chuyển hướng sang **Tab 1: Nhà Heo**.
+4. **Chạm Cửa Chính Nhà:** Cửa chính mở trượt sang 2 bên (`doorOpen = 1`), chú heo chạy lại trước cửa, reo *"Vào nhà thôi! 🏠"* $\to$ Tự động kích hoạt chuyển hướng sang **Tab 1: Nhà Heo** (chạm trực tiếp vào cánh cửa nhà `x: 44..74, y: 34..64`).
 5. **Cây táo & Chu trình ăn táo vô hạn:** Bấm vào vòm cây táo (`x: 108..176, y <= 66`) $\to$ 3 quả táo rụng xuống bãi cỏ $\to$ heo chạy lại ăn ngon miệng $\to$ táo biến mất tuần tự theo từng nhịp nhai (800ms: quả 1, 1600ms: quả 2, 2400ms: quả 3, 3200ms: dọn sạch và heo vui mừng bắn tim `happy`) $\to$ cho phép bấm lại cây táo để bắt đầu chu trình mới lặp lại vô hạn.
 6. **Cây thông Noel trên hiên:** Bấm vào cây thông $\to$ bung sao lấp lánh $\to$ heo chạy lại reo: *"Giáng Sinh an lành nha! 🎄✨"*.
-7. **Khóa cuộn:** `onStartShouldSetPanResponder` trả true trong khung → ScrollView cha không cuộn (giống lịch tháng v1.0).
+7. **Khắc phục lỗi biến dạng & lỗi cỏ đè heo (Quyết định 123):** Reset ma trận vẽ `ctx.setTransform(1, 0, 0, 1, 0, 0)` và `clearRect` trước mỗi frame; đưa layer cỏ foreground `fg` vào chu trình sắp xếp độ sâu `Y-sorting` theo `pig.y` để heo luôn nổi trên bề mặt cỏ khi ngủ.
 
 ## 5. Props & hiệu năng
 - Props: `spentToday`, `todayBudget`, `streakDays`, `onLogExpense()`, `reducedMotion` (từ `AccessibilityInfo.isReduceMotionEnabled`).

@@ -1981,9 +1981,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(!indexCode.includes('styles.zoomContainer'), 'Zoom slider container must be eliminated for clean camera view');
   assert.ok(indexCode.includes('pinchPanResponder'), 'Must support natural 2-finger pinch-to-zoom');
 
-  // 2. Post-capture review bottom bar: pure iconic circular buttons with no text
-  assert.ok(indexCode.includes('styles.inFrameRetakeIconButton'), 'Must use inFrameRetakeIconButton for [X]');
-  assert.ok(indexCode.includes('styles.inFrameSaveIconButton'), 'Must use inFrameSaveIconButton for [Check]');
+  // 2. Post-capture review bottom bar: PolaroidReviewCard (Decision 126) or pure iconic circular buttons
+  assert.ok(indexCode.includes('PolaroidReviewCard') || indexCode.includes('styles.inFrameRetakeIconButton'), 'Must use PolaroidReviewCard or inFrameRetakeIconButton for review');
+  assert.ok(indexCode.includes('PolaroidReviewCard') || indexCode.includes('styles.inFrameSaveIconButton'), 'Must use PolaroidReviewCard or inFrameSaveIconButton for review');
   assert.ok(!indexCode.includes('styles.inFrameRetakeButtonText'), 'Must remove text "Chụp lại" from retake button');
   assert.ok(!indexCode.includes('styles.inFrameSaveButtonText'), 'Must remove text "Lưu vào sổ" from save button');
 
@@ -3103,4 +3103,53 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 66 Passed: Photo Room Redesign, Prototype Photobooth & Camera Transition Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 66 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (66/66)!');
+// ==============================================================================
+// 🧪 TEST 67: NEO-BRUTALIST CAMERA HEO CON (ROOF PIGGY, SHUTTER & POLAROID) AUDIT
+// ==============================================================================
+{
+  const roofPath = path.join(__dirname, 'src/components/camera/PiggyCameraRoof.tsx');
+  const roofCode = fs.readFileSync(roofPath, 'utf8');
+  const shutterPath = path.join(__dirname, 'src/components/camera/ShutterButton.tsx');
+  const shutterCode = fs.readFileSync(shutterPath, 'utf8');
+  const polaroidPath = path.join(__dirname, 'src/components/camera/PolaroidReviewCard.tsx');
+  const polaroidCode = fs.readFileSync(polaroidPath, 'utf8');
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. PiggyCameraRoof Component
+  assert.ok(roofCode.includes('PiggyCameraRoofProps'), 'PiggyCameraRoof must declare PiggyCameraRoofProps');
+  assert.ok(roofCode.includes('isShooting?: boolean'), 'PiggyCameraRoofProps must accept isShooting');
+  assert.ok(roofCode.includes('zzzContainer') && roofCode.includes('zzzText'), 'PiggyCameraRoof must display sleeping Zzz effect');
+  assert.ok(roofCode.includes('#F9B8C4') || roofCode.includes('#F4B93B'), 'PiggyCameraRoof must use prototype brand colors');
+
+  // 2. ShutterButton Neo-Brutalist
+  assert.ok(shutterCode.includes('#F4B93B'), 'Shutter outer ring must use yellow brand color #F4B93B');
+  assert.ok(shutterCode.includes('#E0452B'), 'Shutter inner core must use red accent #E0452B');
+  assert.ok(shutterCode.includes('#2B2118'), 'Shutter must use ink border #2B2118');
+
+  // 3. PolaroidReviewCard Component
+  assert.ok(polaroidCode.includes("rotate: '-3deg'") || polaroidCode.includes('rotate: "-3deg"'), 'Polaroid frame must have -3deg retro tilt');
+  assert.ok(polaroidCode.includes('handleStepAmount'), 'Polaroid card must support quick step amount');
+  assert.ok(polaroidCode.includes('MandCashierKeyboard'), 'Polaroid card must integrate MandCashierKeyboard on amount press');
+  assert.ok(polaroidCode.includes('onOpenPhotoRoom'), 'Polaroid card must declare onOpenPhotoRoom prop');
+
+  // 4. Index.tsx Camera Integration
+  assert.ok(indexCode.includes('camTopPill'), 'index.tsx must render camTopPill');
+  assert.ok(indexCode.includes('Hôm nay chi:'), 'camTopPill must show Hôm nay chi:');
+  assert.ok(indexCode.includes('PiggyCameraRoof'), 'index.tsx must mount PiggyCameraRoof');
+  assert.ok(indexCode.includes('PolaroidReviewCard'), 'index.tsx must mount PolaroidReviewCard');
+  assert.ok(indexCode.includes('handleTabPress(1)'), 'index.tsx must have navigation to Photo Room (Tab 1)');
+
+  // 5. Documentation & Decisions Reverse Sync
+  assert.ok(docCode.includes('PiggyCameraRoof'), '09-CAMERA.md must document PiggyCameraRoof');
+  assert.ok(docCode.includes('PolaroidReviewCard'), '09-CAMERA.md must document PolaroidReviewCard');
+  assert.ok(decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 126') || decisionsCode.includes('Quyết định 126'), 'DECISIONS.md must document Quyết định 126');
+
+  console.log('✅ Test 67 Passed: Neo-Brutalist Camera Heo Con Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 67 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (67/67)!');

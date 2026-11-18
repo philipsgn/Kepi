@@ -38,6 +38,7 @@ import {
   Flame,
   Hourglass,
   ImagePlus,
+  Images,
   Layers,
   Leaf,
   PenLine,
@@ -94,6 +95,8 @@ import { EWalletDetectedCard } from '../../src/components/camera/EWalletDetected
 import { PendingReturnPromptModal } from '../../src/components/camera/PendingReturnPromptModal';
 import { ConfirmationPillBanner, ConfirmationInboxModal, UploadReceiptModal } from '../../src/components/inbox';
 import { OnCameraPhotoOverlay } from '../../src/components/camera/OnCameraPhotoOverlay';
+import { PiggyCameraRoof } from '../../src/components/camera/PiggyCameraRoof';
+import { PolaroidReviewCard } from '../../src/components/camera/PolaroidReviewCard';
 import { BankNotificationFloatingPill } from '../../src/components/camera/BankNotificationFloatingPill';
 import { BankNotificationSettingsModal } from '../../src/components/profile/BankNotificationSettingsModal';
 import { CompactVoiceWaveSheet } from '../../src/components/camera/CompactVoiceWaveSheet';
@@ -231,6 +234,8 @@ export default function MainAppScreen() {
   // Modals & Sheets
   const [capturedPhotoUri, setCapturedPhotoUri] = useState<string | null>(null);
   const [capturedMediaType, setCapturedMediaType] = useState<MediaType>('PHOTO');
+  const [isShootingPig, setIsShootingPig] = useState<boolean>(false);
+  const [isPhotoSavedSuccess, setIsPhotoSavedSuccess] = useState<boolean>(false);
   const [isSquadPrivate, setIsSquadPrivate] = useState<boolean>(false);
   const [isRecordingVideo, setIsRecordingVideo] = useState<boolean>(false);
   const [capturedThumbUri, setCapturedThumbUri] = useState<string | null>(null);
@@ -510,6 +515,9 @@ export default function MainAppScreen() {
   };
 
   const handleCapturePhoto = async () => {
+    setIsShootingPig(true);
+    setTimeout(() => setIsShootingPig(false), 900);
+    setIsPhotoSavedSuccess(false);
     if (Platform.OS === 'web') {
       try {
         if (cameraRef.current && cameraGranted) {
@@ -689,19 +697,17 @@ export default function MainAppScreen() {
   };
 
   const handleSaveInFramePhoto = async () => {
-    // 1. Bắt buộc người dùng phải chọn danh mục
-    if (!inFrameCategory) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setShowInFrameCategoryPicker(true);
-      setUndoToastMessage('Vui lòng chọn danh mục cho khoản này');
-      setUndoToastVisible(true);
-      return;
+    // 1. Nếu chưa có danh mục, mặc định fallback "Ăn uống"
+    let effectiveCategory = inFrameCategory;
+    if (!effectiveCategory) {
+      effectiveCategory = 'Ăn uống';
+      setInFrameCategory('Ăn uống');
     }
 
     // 2. Bắt buộc người dùng phải nhập số tiền > 0
     if (inFrameAmount <= 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setUndoToastMessage('Vui lòng nhập số tiền');
+      setUndoToastMessage('Vui lòng nhập số tiền cho món đồ');
       setUndoToastVisible(true);
       return;
     }
@@ -716,8 +722,8 @@ export default function MainAppScreen() {
 
     let finalDesc = inFrameDescription.trim();
     if (!finalDesc || finalDesc === bankTag) {
-      finalDesc = inFrameCategory
-        ? (bankTag ? `${bankTag} ${inFrameCategory}` : inFrameCategory)
+      finalDesc = effectiveCategory
+        ? (bankTag ? `${bankTag} ${effectiveCategory}` : effectiveCategory)
         : (inFrameType === 'EXPENSE' ? `${bankTag} Chi tiêu bằng ảnh`.trim() : `${bankTag} Thu nhập`.trim());
     }
 
@@ -725,7 +731,7 @@ export default function MainAppScreen() {
       userId,
       amount: finalAmount,
       type: inFrameType,
-      category: inFrameCategory,
+      category: effectiveCategory,
       description: finalDesc,
       photo_url: capturedPhotoUri,
       thumbnail_url: capturedThumbUri || capturedPhotoUri,
@@ -751,10 +757,21 @@ export default function MainAppScreen() {
     setLastSavedOrDeletedTx({ action: 'ADD', tx });
     setUndoToastMessage(`Đã lưu khoảnh khắc: ${formatVND(finalAmount)}`);
     setUndoToastVisible(true);
-    setCapturedPhotoUri(null);
-    setCapturedThumbUri(null);
-    setCapturedMediaType('PHOTO');
-    setIsSquadPrivate(false);
+    setIsPhotoSavedSuccess(true);
+
+    // Tự động đóng sau 2.5s nếu người dùng không bấm nút chuyển phòng ảnh
+    setTimeout(() => {
+      setIsPhotoSavedSuccess((current) => {
+        if (current) {
+          setCapturedPhotoUri(null);
+          setCapturedThumbUri(null);
+          setCapturedMediaType('PHOTO');
+          setIsSquadPrivate(false);
+          return false;
+        }
+        return current;
+      });
+    }, 2500);
 
     // Cuộn nhẹ xuống dòng khoảnh khắc để xem ảnh vừa chụp
     setTimeout(() => {
@@ -1090,29 +1107,35 @@ export default function MainAppScreen() {
                   )}
                 </TouchableOpacity>
 
-                {/* "HÔM NAY TIÊU ĐƯỢC" REFINED PILL CHIP */}
+                {/* TOP BAR PILL: [● Hôm nay chi: {formatVND(todaySpent)}] */}
                 <TouchableOpacity
                   onPress={() => handleTabPress(0)}
                   activeOpacity={0.85}
-                  style={styles.todayBudgetChipWrapper}
+                  style={styles.camTopPill}
                 >
-                  <Chip
-                    label={`${Strings.budget.dailyAllowance}: ${formatCompactVND(remainingToday)}`}
-                    statusDot={remainingToday > todayBudget * 0.2 ? 'warning' : 'danger'}
-                    size="sm"
-                    style={{
-                      borderWidth: 0,
-                      backgroundColor: isDark ? 'rgba(20, 26, 36, 0.72)' : 'rgba(255, 255, 255, 0.85)' }}
-                  />
+                  <View style={styles.camTopPillDot} />
+                  <Text style={styles.camTopPillText}>
+                    Hôm nay chi: {formatVND(todaySpent)}
+                  </Text>
                 </TouchableOpacity>
 
-                {/* NOTIFICATION HUB SHORTCUT (BORDERLESS) */}
+                {/* TOP RIGHT CONTROLS: Gallery to Photo Room + Notification Hub */}
                 <View style={styles.topRightControls}>
+                  <TouchableOpacity
+                    style={styles.headerIconButton}
+                    onPress={() => handleTabPress(1)}
+                    activeOpacity={0.8}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    accessibilityLabel="Mở Phòng Ảnh"
+                  >
+                    <Images size={20} color={tokens.primary} strokeWidth={2.6} />
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.headerIconButton}
                     onPress={() => setShowBankSettingsFromCamera(true)}
                     activeOpacity={0.8}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    accessibilityLabel="Cài đặt thông báo"
                   >
                     <Bell size={20} color={tokens.primary} strokeWidth={2.6} />
                   </TouchableOpacity>
@@ -1154,15 +1177,18 @@ export default function MainAppScreen() {
                 />
               )}
 
-              {/* CAMERA VIEWFINDER (LOCKET SQUIRCLE FRAME 38PX HOẶC ẢNH VỪA CHỤP) */}
-              {capturedPhotoUri ? (
-                <View style={styles.capturedPhotoMascotWrapper}>
-                  <PigFlyMascot pose="happy" size={38} />
-                </View>
+              {/* CHÚ HEO CON NGỦ / NHẢY CẪNG TRÊN NÓC MÁY ẢNH (CHỈ KHI CHƯA CHỤP) */}
+              {!capturedPhotoUri ? (
+                <PiggyCameraRoof
+                  isShooting={isShootingPig}
+                  onPigTap={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+                />
               ) : null}
-              <View style={styles.viewfinderContainer}>
-                {capturedPhotoUri ? (
-                  <OnCameraPhotoOverlay
+
+              {/* CAMERA VIEWFINDER HOẶC THẺ POLAROID REVIEW RETRO */}
+              {capturedPhotoUri ? (
+                <View style={styles.polaroidReviewWrapper}>
+                  <PolaroidReviewCard
                     photoUri={capturedPhotoUri}
                     amount={inFrameAmount}
                     onAmountChange={setInFrameAmount}
@@ -1171,20 +1197,34 @@ export default function MainAppScreen() {
                       setInFrameCategory(cat);
                       setShowInFrameCategoryPicker(false);
                     }}
-                    showCategoryPicker={showInFrameCategoryPicker}
-                    onToggleCategoryPicker={() => setShowInFrameCategoryPicker((prev) => !prev)}
                     description={inFrameDescription}
                     onDescriptionChange={setInFrameDescription}
-                    onCancel={() => {
+                    type={inFrameType}
+                    onRetake={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setIsPhotoSavedSuccess(false);
                       setCapturedPhotoUri(null);
                       setCapturedThumbUri(null);
                       setInFrameAmount(0);
                       setInFrameCategory('');
-                      setShowInFrameCategoryPicker(false);
+                      setInFrameDescription('');
                       setInFramePaymentMethod('CASH');
                     }}
+                    onSave={handleSaveInFramePhoto}
+                    onOpenPhotoRoom={() => {
+                      setIsPhotoSavedSuccess(false);
+                      setCapturedPhotoUri(null);
+                      setCapturedThumbUri(null);
+                      setInFrameAmount(0);
+                      setInFrameCategory('');
+                      setInFrameDescription('');
+                      handleTabPress(1);
+                    }}
+                    isSaved={isPhotoSavedSuccess}
                   />
-                ) : (
+                </View>
+              ) : (
+                <View style={styles.viewfinderContainer}>
                   <View
                     style={styles.viewfinder}
                     {...pinchPanResponder.panHandlers}
@@ -1221,93 +1261,12 @@ export default function MainAppScreen() {
                         </View>
                       )}
                     </Pressable>
-
-                    
-                  </View>
-                )}
-              </View>
-
-              {/* CỤM NÚT GẠT [ CHI | THU ] SÁT DƯỚI NGOÀI KHUNG CAMERA KHI ĐÃ CHỤP */}
-              {capturedPhotoUri && (
-                <View style={styles.outsideTypeSegmentWrapper}>
-                  <View
-                    style={[
-                      styles.outsideTypeSegmentContainer,
-                      {
-                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
-                    ]}
-                  >
-                    <TouchableOpacity
-                      style={[
-                        styles.outsideTypeButton,
-                        inFrameType === 'EXPENSE' && {
-                          backgroundColor: '#C86D51',
-                          shadowColor: '#C86D51',
-                          shadowOpacity: 0.3,
-                          shadowRadius: 6,
-                          elevation: 3 },
-                      ]}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setInFrameType('EXPENSE');
-                      }}
-                      activeOpacity={0.8}
-                    >
-                      <ArrowUpRight
-                        size={15}
-                        color={inFrameType === 'EXPENSE' ? '#FFFFFF' : isDark ? 'rgba(255, 255, 255, 0.6)' : '#666666'}
-                        strokeWidth={2.5}
-                      />
-                      <Text
-                        style={[
-                          styles.outsideTypeText,
-                          {
-                            color: inFrameType === 'EXPENSE' ? '#FFFFFF' : isDark ? 'rgba(255, 255, 255, 0.7)' : '#555555',
-                            fontWeight: inFrameType === 'EXPENSE' ? '700' : '500' },
-                        ]}
-                      >
-                        Chi
-                      </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[
-                        styles.outsideTypeButton,
-                        inFrameType === 'INCOME' && {
-                          backgroundColor: '#7E9F80',
-                          shadowColor: '#7E9F80',
-                          shadowOpacity: 0.3,
-                          shadowRadius: 6,
-                          elevation: 3 },
-                      ]}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setInFrameType('INCOME');
-                      }}
-                      activeOpacity={0.8}
-                    >
-                      <ArrowDownLeft
-                        size={15}
-                        color={inFrameType === 'INCOME' ? '#FFFFFF' : isDark ? 'rgba(255, 255, 255, 0.6)' : '#666666'}
-                        strokeWidth={2.5}
-                      />
-                      <Text
-                        style={[
-                          styles.outsideTypeText,
-                          {
-                            color: inFrameType === 'INCOME' ? '#FFFFFF' : isDark ? 'rgba(255, 255, 255, 0.7)' : '#555555',
-                            fontWeight: inFrameType === 'INCOME' ? '700' : '500' },
-                        ]}
-                      >
-                        Thu
-                      </Text>
-                    </TouchableOpacity>
                   </View>
                 </View>
               )}
 
               {/* THẺ PHÁT HIỆN MÃ VIETQR TRƯỢT LÊN TRÊN NÚT CHỤP */}
-              {detectedPayload && (
+              {!capturedPhotoUri && detectedPayload ? (
                 <View style={styles.vietQRCardWrapper}>
                   <VietQRDetectedCard
                     payload={detectedPayload}
@@ -1323,10 +1282,10 @@ export default function MainAppScreen() {
                     }}
                   />
                 </View>
-              )}
+              ) : null}
 
               {/* THẺ PHÁT HIỆN VÍ ĐIỆN TỬ (ZALOPAY / MOMO) TRƯỢT LÊN TRÊN NÚT CHỤP */}
-              {detectedWalletPayload && (
+              {!capturedPhotoUri && detectedWalletPayload ? (
                 <View style={styles.vietQRCardWrapper}>
                   <EWalletDetectedCard
                     wallet={detectedWalletPayload}
@@ -1338,53 +1297,10 @@ export default function MainAppScreen() {
                     }}
                   />
                 </View>
-              )}
+              ) : null}
 
-              {/* KHI ĐANG REVIEW TRÊN KHUNG CAMERA: CẶP NÚT SONG HÀNH [✕] & [✓] */}
-              {capturedPhotoUri ? (
-                <View style={[styles.cameraBottomBar, { paddingBottom: insets.bottom + 80, paddingHorizontal: 40, justifyContent: 'center', gap: 48, flexDirection: 'row', alignItems: 'center' }]}>
-                  {/* Nút Tròn Retake / Hủy [✕] */}
-                  <TouchableOpacity
-                    style={styles.inFrameRetakeIconButton}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setCapturedPhotoUri(null);
-                      setCapturedThumbUri(null);
-                      setInFrameAmount(0);
-                      setInFrameCategory('');
-                      setShowInFrameCategoryPicker(false);
-                      setInFramePaymentMethod('CASH');
-                    }}
-                    activeOpacity={0.8}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    accessibilityLabel="Chụp lại"
-                  >
-                    <X size={24} color="#FFFFFF" strokeWidth={2.6} />
-                  </TouchableOpacity>
-
-                  {/* Nút Tròn Lưu vào sổ [✓] */}
-                  {(() => {
-                    const isSaveReady = Boolean(inFrameCategory) && inFrameAmount > 0;
-                    return (
-                      <TouchableOpacity
-                        style={[
-                          styles.inFrameSaveIconButton,
-                          {
-                            backgroundColor: inFrameType === 'INCOME' ? '#7E9F80' : '#E59844',
-                            opacity: isSaveReady ? 1 : 0.45 },
-                        ]}
-                        disabled={!isSaveReady}
-                        onPress={handleSaveInFramePhoto}
-                        activeOpacity={0.85}
-                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                        accessibilityLabel="Lưu vào sổ"
-                      >
-                        <Check size={26} color="#0E1620" strokeWidth={2.8} />
-                      </TouchableOpacity>
-                    );
-                  })()}
-                </View>
-              ) : (
+              {/* CÁC THAO TÁC DƯỚI KHI CHƯA CHỤP ẢNH (SHUTTER, GHI NHANH, THƯ VIỆN, VOICE, FLIP) */}
+              {!capturedPhotoUri && (
                 <>
                   {/* NÚT PILL NỔI MINI "✍️ GHI NHANH" TRÊN NÚT CHỤP (BORDER-LESS GLASS) */}
                   <View style={styles.quickRecordPillWrapper}>
@@ -1674,6 +1590,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
     zIndex: 20 },
+  camTopPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF6EC',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: radii.full,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    gap: 6,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2 },
+  camTopPillDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#E0452B' },
+  camTopPillText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#2B2118' },
+  polaroidReviewWrapper: {
+    width: SCREEN_WIDTH,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.xs,
+    zIndex: 30 },
   headerIconButton: {
     width: 44,
     height: 44,

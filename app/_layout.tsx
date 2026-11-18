@@ -54,7 +54,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <StatusBar style="auto" />
+        <StatusBar style="dark" />
         <PWAInstallBanner />
         <Stack
           screenOptions={{

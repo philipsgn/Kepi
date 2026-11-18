@@ -382,8 +382,140 @@ Nếu mục nào "Không đạt", nêu cách sửa bằng token hoặc mã cụ 
 
 ---
 
+## PLAN 12: Map Plan (bản đồ thật Việt Nam, lưu chi tiêu theo vị trí, 0 đồng)
+
+Quyết định kỹ thuật đã chốt (đừng đổi nếu không có lý do):
+
+| Phần | Chọn | Lý do |
+|---|---|---|
+| Nền bản đồ | MapLibre + OpenFreeMap (vector tile, dữ liệu OpenStreetMap) | Miễn phí, không khóa API, không giới hạn lượt xem, được dùng thương mại, chỉ cần ghi nguồn |
+| Web/prototype | MapLibre GL JS | Cùng engine với app, style chỉnh được thành pixel |
+| App Flutter | gói `maplibre` (hoặc `maplibre_gl`), chọn gói còn được bảo trì tại thời điểm làm | Cùng style JSON với web |
+| Tên quán từ tọa độ | Nominatim (reverse), tối đa 1 lần/giây, gọi khi người dùng bấm Lưu chi, có cache, có User-Agent riêng | Đúng chính sách của OSM |
+| Quán gần đó | Overpass API, truy vấn bán kính 50 m, cache theo ô 100 m | Miễn phí, chỉ gọi lúc Lưu chi |
+| Lưu dữ liệu | SQLite trong máy (Drift hoặc Isar), không gửi vị trí lên máy chủ | 0 đồng, riêng tư, chạy offline |
+| Vị trí | Chỉ đọc GPS lúc Lưu chi (một lần, độ chính xác cân bằng), không theo dõi nền | Tiết kiệm pin, ít vướng quy định dữ liệu cá nhân |
+
+Cần kiểm tra lại trước khi làm vì có thể đã đổi: địa chỉ style JSON hiện hành của OpenFreeMap (xem openfreemap.org/quick_start), tên gói Flutter, điều khoản của Nominatim và Overpass. Không dùng `tile.openstreetmap.org` làm nền cho app chạy thật.
+
+### 12.1 Prompt A: Bối cảnh cho agent (dán đầu mọi phiên làm Map)
+
+````
+Bạn là kỹ sư bản đồ cho app ví chi tiêu mascot Heo {APP_NAME}. Người dùng là người Việt, dùng ở Việt Nam.
+
+NHIỆM VỤ: thay "Map Pixel giả lập" bằng bản đồ thật của Việt Nam. Mỗi khoản chi được lưu kèm vị trí thật nơi tiêu, hiển thị thành ghim trên bản đồ, và có bốn chế độ xem: Hay tới gần đây, Quán thường xuyên, Vị trí gần đây, Vị trí tới nhiều nhất.
+
+RÀNG BUỘC CỨNG
+1. Chi phí hạ tầng bằng 0: không dùng Google Maps, Mapbox hay dịch vụ tính tiền theo lượt. Không có máy chủ riêng cho dữ liệu vị trí.
+2. Nền bản đồ: MapLibre với tile OpenFreeMap. Hiển thị dòng ghi nguồn "© OpenStreetMap contributors" và "OpenFreeMap" ở góc bản đồ, không được ẩn.
+3. Ngôn ngữ nhãn: ưu tiên tiếng Việt (name:vi, rồi name). Địa danh có dấu hiển thị đúng, không lỗi font.
+4. Chủ quyền: bản đồ hiển thị cho người dùng Việt Nam phải ghi đúng Hoàng Sa và Trường Sa thuộc Việt Nam (nhãn "Quần đảo Hoàng Sa", "Quần đảo Trường Sa" thuộc Việt Nam, đường biển giới theo quy định của Việt Nam). Kiểm tra bằng mắt trên bản đồ thật ở mức zoom thấp và báo cáo kết quả. Nếu tile công khai hiển thị khác, thêm lớp nhãn tự vẽ (GeoJSON) đè lên. Đây là mục bắt buộc trước khi phát hành.
+5. Riêng tư: vị trí là dữ liệu nhạy cảm. Chỉ xin quyền khi người dùng bấm Lưu chi lần đầu, nói rõ lý do bằng tiếng Việt. Từ chối quyền thì app vẫn lưu chi bình thường, chỉ không có ghim. Không theo dõi nền. Cho phép xóa vị trí của từng khoản chi và xóa toàn bộ lịch sử vị trí.
+6. Giữ đúng phong cách pixel kawaii của app (Plan 1 đến 7): heo là điểm "bạn đang ở đây", ghim hình giọt nước viền nâu mực, màu ghim theo danh mục, bóng cứng không blur.
+7. Chạy được khi mất mạng: ghim và danh sách đọc từ SQLite. Nền bản đồ lỗi thì hiện nền phẳng kem với ghim, không báo lỗi trắng màn.
+
+Trả lời bằng tiếng Việt, đưa mã đầy đủ cho một bước mỗi lần, nêu cách chạy thử và tiêu chí hoàn thành.
+````
+
+### 12.2 Prompt B: Áp vào Prototype web (thay Map Pixel bằng bản đồ thật, vẫn giữ chất pixel)
+
+````
+Mở rộng tab "Bản đồ" của prototype Ví Heo Con (HTML/CSS/JS thuần, một file) để dùng bản đồ thật.
+
+LƯU Ý MÔI TRƯỜNG: nếu chạy trong khung xem trước bị chặn mạng (artifact), tile sẽ không tải được. Khi đó giữ nguyên bản đồ pixel giả lập làm phương án dự phòng, và chỉ bật bản đồ thật khi tải được style trong 4 giây.
+
+THỰC HIỆN
+1. Tải MapLibre GL JS từ CDN với phiên bản cố định, tạo map trong một div thay cho canvas bản đồ. Style: OpenFreeMap (chọn "positron" hoặc "bright" rồi chỉnh màu).
+2. Chất pixel: tạo style tùy chỉnh bằng cách đổi màu theo token của app (nền kem #F6EEDC, nước #9AD3E6, công viên #B5DB9A, đường #FFFBF1 viền nâu #2B2118). Thử hiệu ứng pixel: đặt map ở độ phân giải thấp (pixelRatio khoảng 0.4 nếu thư viện hỗ trợ, nếu không thì dùng CSS: map nằm trong khung nhỏ rồi scale lên với image-rendering: pixelated) và báo cáo cách nào hoạt động.
+3. Ghim: dùng marker HTML. Marker là canvas 9x12 vẽ lại bằng hàm drawPin hiện có (giữ màu và biểu tượng theo danh mục). Marker "bạn" dùng khuôn mặt heo 16x16 trong vòng tròn.
+4. Vị trí thật: navigator.geolocation.getCurrentPosition khi bấm "Lưu chi tại đây". Không dùng watchPosition. Từ chối quyền thì hiện câu thoại heo và cho chọn vị trí bằng cách chạm lên bản đồ.
+5. Tên quán: gọi Nominatim reverse một lần khi lưu, gắn header/Referer nhận diện app, cache theo tọa độ làm tròn 4 chữ số. Nếu không có tên quán thì cho người dùng gõ tên. Có nút "Sửa tên".
+6. Lưu: mỗi khoản chi có {id, amount, category, ts, lat, lng, accuracy, placeId}. Địa điểm gom theo bán kính 40 m (công thức haversine) thành một "place" với số lần ghé, tổng chi, lần cuối.
+7. Bốn chế độ xem, tính từ dữ liệu thật:
+   - Hay tới gần đây: số lần ghé trong 14 ngày gần nhất.
+   - Quán thường xuyên: số lần ghé trong 30 ngày, nhãn "Khách quen" khi từ 6 lần, nêu chu kỳ "cứ ~N ngày ghé 1 lần".
+   - Vị trí gần đây: 6 điểm gần nhất nối bằng đường chấm theo thứ tự thời gian.
+   - Vị trí tới nhiều nhất: lớp nhiệt (heatmap) theo số lần ghé và bục top 3.
+8. Khi bấm Lưu chi, ghim rơi xuống đúng tọa độ, heo nhún vui, thanh hạn mức cập nhật (đúng như luồng hiện tại).
+9. Giữ nguyên các id và hàm đã có (addItem, addExpense) để Nhà, Vườn, Camera vẫn hoạt động.
+
+TIÊU CHÍ HOÀN THÀNH: chạy được trên điện thoại ở 360 px, không tràn ngang, chữ có dấu đúng, có :focus-visible, tôn trọng prefers-reduced-motion, không lỗi console. Báo rõ phần nào không kiểm thử được vì bị chặn mạng.
+````
+
+### 12.3 Prompt C: App production (Flutter)
+
+````
+Dựng tính năng Bản đồ cho app Flutter {APP_NAME} theo thứ tự dưới đây. Tuân thủ Prompt A.
+
+KIẾN TRÚC
+- features/map với 3 lớp: data (SQLite qua Drift), domain (Place, Visit, quy tắc gom nhóm), ui (MapScreen, PinLayer, FilterChips, PlaceSheet, ListPanel).
+- Services: LocationService (geolocator, getCurrentPosition một lần), GeocodeService (Nominatim reverse, hàng đợi 1 yêu cầu/giây, cache), PlaceFinder (Overpass bán kính 50 m).
+- State: Riverpod. Provider nhận bộ lọc (4 chế độ) và trả danh sách place đã xếp hạng.
+
+BƯỚC 1: Lược đồ dữ liệu
+  expense(id, amount, category, ts, note, lat?, lng?, accuracy?, placeId?)
+  place(id, name, kind, lat, lng, createdAt)
+  Chỉ số theo ts và placeId. Lat/lng làm tròn 5 chữ số (khoảng 1 m). Viết test cho quy tắc gom nhóm: hai khoản chi cách nhau dưới 40 m cùng một place, trên 40 m tách place.
+BƯỚC 2: Quyền và vị trí
+  Xin quyền khi bấm Lưu chi lần đầu, có màn giải thích tiếng Việt. Android: ACCESS_COARSE/FINE_LOCATION. iOS: NSLocationWhenInUseUsageDescription bằng tiếng Việt. Từ chối thì vẫn lưu chi, bật "chọn vị trí bằng tay".
+BƯỚC 3: Bản đồ nền
+  MapLibre với style OpenFreeMap đã chỉnh màu theo token. Mặc định nhìn vào vị trí hiện tại hoặc khu vực có nhiều ghim. Giới hạn vùng xem trong Việt Nam. Dòng ghi nguồn luôn hiện. Kiểm tra chủ quyền Hoàng Sa, Trường Sa (xem Prompt A, mục 4).
+BƯỚC 4: Ghim và heo
+  PinLayer vẽ ghim pixel (cache bitmap theo danh mục và kích thước, FilterQuality.none). Heo là marker vị trí hiện tại. Ghim mới rơi xuống 300 ms khi lưu. Gom cụm (cluster) khi zoom xa.
+BƯỚC 5: Bốn chế độ xem và danh sách
+  Cùng quy tắc như prototype (14 ngày, 30 ngày, 6 điểm gần nhất, heatmap). Chạm hàng trong danh sách thì bản đồ bay tới ghim và mở PlaceSheet (lần ghé, tổng chi, mỗi lần, lần gần nhất, nút "Chỉ đường" mở Google Maps hoặc Apple Maps bằng deep link của máy, không tốn phí API).
+BƯỚC 6: Tên quán
+  Lưu khoản chi trước, sau đó chạy ngầm reverse geocode và PlaceFinder để điền tên, không chặn giao diện. Tên tự điền thì người dùng sửa được; tên sửa tay được ưu tiên về sau. Không gọi lặp khi tọa độ nằm trong 40 m của place đã có tên.
+BƯỚC 7: Quyền riêng tư
+  Màn Cài đặt có: bật/tắt lưu vị trí, xóa vị trí của một khoản chi, xóa toàn bộ lịch sử vị trí, xuất dữ liệu. Mặc định chỉ lưu trong máy.
+BƯỚC 8: Ngoại tuyến và lỗi
+  Mất mạng: nền phẳng kem + ghim vẫn hiện. Nominatim trả lỗi 429 thì chờ và thử lại chậm dần. Không bao giờ chặn việc lưu chi vì lỗi vị trí.
+
+TIÊU CHÍ HOÀN THÀNH MỖI BƯỚC: 60 fps với 500 ghim, không overflow ở 360x640, tap target từ 44 dp, có test đơn vị cho gom nhóm, xếp hạng 4 chế độ và cache, golden test cho ghim.
+````
+
+### 12.4 Prompt D: Dữ liệu cá nhân và pháp lý (Việt Nam)
+
+````
+Rà soát tính năng Bản đồ của app {APP_NAME} về dữ liệu cá nhân và nội dung bản đồ tại Việt Nam, trả lời bằng bảng "Mục - Hiện trạng - Rủi ro - Cách sửa".
+
+KIỂM TRA
+1. Vị trí được xem là dữ liệu cá nhân nhạy cảm theo quy định bảo vệ dữ liệu cá nhân của Việt Nam (Nghị định 13/2023/NĐ-CP và luật bảo vệ dữ liệu cá nhân có hiệu lực từ 2026; hãy đối chiếu bản hiện hành). Có đủ: thông báo mục đích, sự đồng ý rõ ràng, quyền xem/sửa/xóa, thời hạn lưu?
+2. Chính sách quyền riêng tư tiếng Việt, giải thích: lấy vị trí khi nào, lưu ở đâu, có chia sẻ cho ai không (mặc định không).
+3. Dịch vụ bên thứ ba: tile OpenFreeMap và Nominatim nhận được gì (địa chỉ IP, tọa độ khi tra cứu)? Nêu rõ trong chính sách.
+4. Nội dung bản đồ: biên giới, chủ quyền biển đảo, tên địa danh. Đối chiếu với quy định về xuất bản bản đồ tại Việt Nam trước khi phát hành.
+5. Địa giới hành chính Việt Nam đã thay đổi lớn từ 2025 nên dữ liệu OSM có thể chưa kịp cập nhật. App chỉ lưu tên quán và tọa độ, không phụ thuộc tên phường/quận/tỉnh.
+6. Cửa hàng ứng dụng: khai báo Data Safety (Google Play) và App Privacy (Apple) đúng với thực tế.
+
+Đây là rà soát kỹ thuật, không thay cho tư vấn của luật sư. Cuối bảng ghi mục nào cần luật sư xác nhận.
+````
+
+### 12.5 Prompt E: QA cho Map
+
+````
+Kiểm tra tính năng Bản đồ của {APP_NAME}. Với mỗi mục trả lời Đạt / Không đạt kèm bằng chứng và cách sửa.
+
+VỊ TRÍ THẬT
+[ ] Lưu chi tại Hà Nội, TP.HCM, Đà Nẵng, một vùng nông thôn: ghim đúng chỗ (sai lệch dưới độ chính xác báo về)
+[ ] Từ chối quyền: vẫn lưu chi, có đường chọn vị trí tay   [ ] Tắt GPS: không treo, có thông báo
+[ ] Trong nhà (độ chính xác kém): hiện vòng sai số, không ghim sai nhà bên cạnh mà không báo
+BẢN ĐỒ
+[ ] Nhãn tiếng Việt có dấu đúng   [ ] Hoàng Sa, Trường Sa ghi đúng   [ ] Có dòng ghi nguồn OSM và OpenFreeMap
+[ ] Giới hạn vùng xem trong Việt Nam   [ ] Mất mạng: nền phẳng và ghim vẫn hiện
+DỮ LIỆU
+[ ] Gom nhóm 40 m đúng ở ranh giới (39 m, 41 m)   [ ] Xếp hạng 4 chế độ khớp công thức   [ ] Xóa vị trí xóa sạch cả ghim và thống kê
+[ ] Gọi Nominatim không vượt 1 yêu cầu/giây, có User-Agent, có cache   [ ] Không có gọi mạng ngầm khi chỉ mở bản đồ
+HIỆU NĂNG VÀ PIN
+[ ] 500 ghim vẫn 60 fps   [ ] Không có dịch vụ vị trí chạy nền   [ ] Pin tiêu hao thêm dưới 1% sau 1 giờ dùng
+GIAO DIỆN
+[ ] Ghim và heo đúng phong cách pixel (viền nâu, bóng cứng)   [ ] Tap target từ 44 dp   [ ] Giảm chuyển động hoạt động đúng
+````
+
+---
+
 ## Gợi ý cuối
 
+- Plan 12 (Map) là bộ prompt riêng: dán Prompt A trước, rồi B cho prototype web hoặc C cho app Flutter, sau đó D và E.
 - Chạy Plan 5 và Plan 6 sớm, vì khu vườn và sprite heo quyết định bản sắc cả app.
 - Prototype tương tác của mình có thể làm điểm đối chiếu cho Plan 5, 6, 7 (heo, ao, bát cám, thời điểm trong ngày đều khớp mô tả ở trên).
 - Khi đã có tên app thật, thay biến ở đầu file rồi dán lại các Plan.

@@ -695,3 +695,12 @@
          - Truyền `photos` từ `useTransactionStore` (các giao dịch có ảnh) vào `PixelHouseWebView`.
          - Panel phòng ảnh hiển thị lưới ảnh chụp thực tế (thumbnail, tên món, số tiền, ngày). Nếu chưa có ảnh, hiển thị empty state đáng yêu mời chụp món đầu tiên.
 
+  - **Quyết định 126 (18/11/2026): Nâng Cấp Tab Camera Heo Con Neo-Brutalist (Chú Heo Ngủ Trên Nóc, Nút Shutter Viền Kép & Thẻ Polaroid Retro):**
+    - *Bối Cảnh & Bản Chất:* Tab Camera (Tab 2) là trái tim ghi chép của PigFly. Người dùng yêu cầu giữ nguyên 100% phần cứng thật `expo-camera` (chụp ảnh thật, quét mã VietQR offline, quét hóa đơn AI, EXIF sạch) nhưng nâng cấp toàn diện ngôn ngữ thị giác bám sát prototype `Camera_heo_con.html`: chú heo nằm ngủ trên nóc khung ngắm (`PiggyCameraRoof`), nút Shutter Neo-Brutalist viền kép đỏ-vàng-mực, Top bar pill "Hôm nay chi" và thẻ xem lại Polaroid Retro nghiêng -3 độ.
+    - *Giải Pháp Kỹ Thuật Đã Thực Hiện:*
+      1. **Chú Heo Ngủ Trên Nóc Khung Ngắm (`PiggyCameraRoof`):** Chú heo pixel art 24×20 nằm ngủ `sleep` trên nóc máy ảnh với chữ `Z z z` bay lơ lửng. Khi bấm Shutter, heo giật mình nhảy cẫng lên `happy` thả tim đỏ `#E0452B` bay lên.
+      2. **Nút Shutter Neo-Brutalist Viền Kép:** Kích thước 84px, nền đỏ `#E0452B`, viền 4px mực `#2B2118`, viền kép vàng cám `#F4B93B` 5px + viền mực 8px, bóng cứng 10px, nhún 6px mượt mà với Haptic Heavy (`expo-haptics`).
+      3. **Top Bar Neo-Brutalist:** Viên thuốc `[● Hôm nay chi: X đ]` đồng bộ theo `todaySpent`, nút Flash tròn viền 3px và nút mở Phòng Ảnh dẫn sang Tab 1.
+      4. **Thẻ Polaroid Retro Sau Chụp (`PolaroidReviewCard`):** Khung ảnh Polaroid trắng tinh viền 3px mực nghiêng -3°, ảnh thật 1:1, bộ nút tăng giảm nhanh `[-5k]` / `[+5k]`, chạm vào số tiền mở bàn phím `MandCashierKeyboard`, chọn danh mục nhanh, nút `[Chụp lại]` & `[Lưu vào ví]`. Khi lưu thành công, hiển thị *"Heo đã treo ảnh lên tường 🖼️"* kèm nút *"Xem ở phòng ảnh"*.
+
+

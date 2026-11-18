@@ -1,35 +1,52 @@
-# 📷 09 — CAMERA: KHUNG NGẮM + SHUTTER + REVIEW + KEYBOARD (re-skin)
+# 📷 09 — CAMERA: MÁY ẢNH HEO CON NEO-BRUTALIST (VIEWFINDER + PIGGY ROOF + SHUTTER + POLAROID)
 
-> **Screen-unit:** Tab 2. **LUỒNG 3-in-1 (Shutter/VietQR/Notification Pill), quay clip 3s, MandCashierKeyboard GIỮ NGUYÊN** (`docs/screens/CAMERA.md`). Chỉ thay da.
+> **Screen-unit:** Tab 2 (Camera trung tâm). **LUỒNG 3-in-1 (Shutter / VietQR Offline / Bank Notification Pill), quay clip 3s, MandCashierKeyboard GIỮ NGUYÊN 100% OFFLINE** (`docs/screens/CAMERA.md`).
+> **Phong cách đồ họa:** Port từ `prototype/Camera_heo_con.html` (CSS + canvas pixel + logic hoạt họa heo ngủ trên nóc máy ảnh).
 
-## 1. Khung ngắm (Viewfinder)
-- Nền trang: khi theme heocon → **Kem Sàn `#F6EEDC`** (thay gradient điện ảnh; pink/mint giữ gradient).
-- Khung ngắm 4:5: **viền 3px ink bo 28 + bóng cứng 0 4 0** (thay squircle hairline).
-- Icon Flash/chuyển camera: nổi trần 22px stroke 2.6, hitSlop 44 (QĐ 66/84 — giữ nguyên).
+---
 
-## 2. Cụm Shutter
-- Đĩa Shutter: **nền Vàng Cám `#F4B93B`, viền 3px ink, bóng cứng 0 4 0**; onPress chụp (haptic Heavy — giữ nguyên), onLongPress quay 3s + vòng tiến độ.
-- Vòng tiến độ quay clip: stroke ink 3px trên track kem `#D9C9A4`.
-- Nút Thư viện / Lật: `NeoButton round` 44 nền `#FFFBF1` viền 3px.
-- ModeSwitchPill: pill viền 3px ink; mục chọn nền ink chữ kem.
-- Pinch-to-zoom + badge `0.5x–3.0x`: badge nền mực chữ kem pill (QĐ 75).
+## 1. Top Bar & Khung ngắm (Viewfinder với Piggy Roof)
+- **Top Bar Neo-Brutalist:**
+  - Nút Flash: Nút tròn nền `#FFFBF1`, viền 3px mực `#2B2118`, bóng `0 3px 0 #2B2118`.
+  - Viên thuốc trung tâm: `[● Hôm nay chi: X đ]` (nền `#FFFBF1`, viền 3px mực, chấm đỏ `#E0452B`, text cập nhật động theo `todaySpent`).
+  - Nút Phòng Ảnh: Dẫn thẳng sang Tab 1 Nhà Heo (`onNavigateToHouse`).
+- **Khung ngắm phần cứng thật (`expo-camera`):**
+  - Tỉ lệ 4:5 thoáng đãng, bo góc 28px, viền 3px mực `#2B2118`, bóng cứng `0 4px 0 #2B2118`.
+  - Giữ nguyên quét mã VietQR offline và nhận diện hóa đơn.
+- **Chú Heo Ngủ Trên Nóc Khung Ngắm (`PiggyCameraRoof`):**
+  - Sprite chú heo pixel art 24×20 nằm ngủ ngoan khò khò (`pose: 'sleep'`), chữ `Z z z` bay lượn li ti.
+  - Khi bấm Shutter chụp ảnh: Chớp flash màn hình $\to$ chú heo giật mình nhảy cẫng lên vui mừng (`pose: 'stand', happy: true`), thả tim đỏ `#E0452B` bay lên.
 
-## 3. Smart Pill (tự ghi NH) + Fast Category
-- Pill thông báo NH: nền mực `#2B2118` chữ kem viền 3px bóng `0 3 0` — text giữ nguyên `⚡ TPBank: Đã tự động ghi -48.000đ (Highlands)`.
-- Dải danh mục: `NeoChip` bo 18; chip chọn = Vàng Cám/ink.
+---
 
-## 4. Màn Review sau chụp (`LocketReviewModal`)
-- Sheet nền `#FFFBF1`, viền trên 3px ink bo 28 (grabber ink 2px).
-- Ảnh 4:5: viền 3px ink bo 20; tag danh mục = pill nền mực; công tắc riêng tư hội bạn = pill viền 3px (giữ QĐ 83).
-- Con số tiền: **38 Baloo 800 tabular + "đ" 60% gạch chân** (thay 36px mảnh — chuẩn số tiền Heo Con).
-- `MandCashierKeyboard`: phím nền `#FFFBF1` viền 2px ink bo 8 (giống `.seg`); phím `000` & cột `⌫` nền surfaceAlt; **nút LƯU = Vàng Cám chữ ink viền 3px, chiếm 3 hàng**.
-- Cặp nút đáy `[✕ chụp lại]` / `[✓ lưu]`: tròn 44 viền 3px — ✕ nền surface, ✓ nền Vàng Cám (QĐ 75).
+## 2. Nút Shutter Neo-Brutalist Viền Kép
+- **Kích thước & Bảng màu:**
+  - Đường kính 84px, nền đỏ cam `#E0452B`, viền 4px mực `#2B2118`.
+  - Vành tròn kép: Vàng Cám `#F4B93B` 5px + viền mực 8px.
+  - Bóng đổ cứng 10px: `box-shadow: 0 0 0 5px var(--gold), 0 0 0 8px var(--ink), 0 10px 0 8px var(--ink)`.
+- **Hiệu ứng chạm nhún (Tactile Spring):**
+  - Khi bấm xuống (`active`): Nút lún 6px, bóng đổ giảm xuống 4px, phát rung xúc giác Haptic Heavy (`expo-haptics`).
 
-## 5. Heo phản ứng sau lưu (tùy chọn Phase sau, tái dùng engine vườn)
-- Lưu khoản < hạn mức → heo mini `happy` 0.9s + bubble "「Món」 −45.000đ"; vừa vượt → heo `sad` + "Ối, lố hạn mức rồi".
+---
 
-## AC
-- [ ] Luồng 3-in-1 & tốc độ ghi ≤ 2–3s không đổi; chỉ thay da.
-- [ ] Shutter vàng cám viền 3px; keyboard phím viền 2px ink bo 8; LƯU vàng cám 3 hàng.
-- [ ] Số tiền 38 tabular + DongMark; review sheet viền trên 3px ink bo 28.
-- [ ] Camera vẫn hoạt động 100% offline; không lưu STK; EXIF sạch (giữ nguyên).
+## 3. Thẻ Polaroid Retro Sau Chụp (`PolaroidReviewCard`)
+- **Khung ảnh Polaroid nghiêng -3 độ:**
+  - Khung ảnh trắng tinh `#FFFFFF`, viền 3px mực `#2B2118`, bo góc 12px, bóng đổ cứng 4px.
+  - Hiển thị ảnh chụp thực tế trong khung vuông 1:1.
+- **Bộ điều khiển tiền & Danh mục:**
+  - Bộ nút tăng giảm nhanh: `[-]` giảm 5.000đ, `[+]` tăng 5.000đ.
+  - Con số tiền: Font Baloo 800 tabular-nums + ký hiệu `đ`. Chạm vào con số tiền để mở ngay bàn phím `MandCashierKeyboard` nhập tự do.
+  - Dải chọn danh mục chi tiêu nhanh (Ăn uống 🍜, Di chuyển 🛵, Mua sắm 🛍️, v.v.).
+- **Nút hành động & Trạng thái lưu:**
+  - `[Chụp lại]`: Hủy ảnh vừa chụp và quay lại khung ngắm.
+  - `[Lưu vào ví]`: Ghi sổ chi tiêu với hiệu ứng heo ăn mừng.
+  - Khi lưu xong: Thông báo *"Heo đã treo ảnh lên tường 🖼️"* kèm nút *"Xem ở phòng ảnh"* (dẫn sang Tab 1).
+
+---
+
+## AC (Acceptance Criteria)
+- [ ] Luồng 3-in-1, VietQR offline & tốc độ ghi ≤ 2–3s không đổi; chỉ nâng cấp giao diện.
+- [ ] Chú heo pixel ngủ trên nóc khung ngắm với chữ Zzz bay; nhảy cẫng thả tim khi bấm chụp.
+- [ ] Nút Shutter Neo-Brutalist viền kép đỏ-vàng-mực đường kính 84px, lún 6px khi bấm.
+- [ ] Thẻ Polaroid nghiêng -3° với bộ tăng giảm +/- 5k và tích hợp MandCashierKeyboard.
+- [ ] Camera hoạt động 100% offline, không lưu STK, làm sạch EXIF ảnh trước khi lưu.

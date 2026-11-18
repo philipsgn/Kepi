@@ -168,33 +168,50 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
         </Svg>
       </View>
 
-      {/* NÚT BẤM SHUTTER CHÍNH */}
+      {/* NÚT BẤM SHUTTER CHÍNH (THEO PROTOTYPE CAMERA_HEO_CON NEO-BRUTALIST ĐỎ-VÀNG-MỰC) */}
       <TouchableOpacity
-        activeOpacity={0.9}
+        activeOpacity={0.92}
         disabled={disabled}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={handlePress}
         style={[
-          styles.shutterInner,
+          styles.shutterOuterRing,
           isHeocon
             ? {
-                backgroundColor: recordingActive ? '#E0452B' : '#F4B93B',
-                borderWidth: 3,
                 borderColor: '#2B2118',
+                backgroundColor: '#F4B93B',
                 shadowColor: '#2B2118',
-                shadowOffset: { width: 0, height: 3 },
+                shadowOffset: { width: 0, height: isPressed ? 4 : 8 },
                 shadowOpacity: 1,
                 shadowRadius: 0,
-                elevation: 3,
+                elevation: isPressed ? 3 : 8,
+                transform: [{ translateY: isPressed ? 4 : 0 }],
               }
             : {
-                backgroundColor: recordingActive ? '#C86D51' : tokens.primary,
-                shadowColor: recordingActive ? '#C86D51' : tokens.primary,
+                borderColor: tokens.primary,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                shadowColor: tokens.primary,
+                transform: [{ scale: isPressed ? 0.92 : 1 }],
               },
-          (isPressed || recordingActive) && styles.shutterPressed,
         ]}
-      />
+      >
+        <View
+          style={[
+            styles.shutterCenterCore,
+            isHeocon
+              ? {
+                  backgroundColor: recordingActive ? '#B93220' : '#E0452B',
+                  borderColor: '#2B2118',
+                  borderWidth: 3.5,
+                }
+              : {
+                  backgroundColor: recordingActive ? '#C86D51' : tokens.primary,
+                },
+            recordingActive && { borderRadius: 18, width: 44, height: 44 },
+          ]}
+        />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -204,8 +221,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    width: 92,
-    height: 92,
+    width: 96,
+    height: 96,
   },
   svgOverlay: {
     position: 'absolute',
@@ -215,17 +232,23 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
   },
-  shutterInner: {
-    width: 66,
-    height: 66,
-    borderRadius: radii.full,
+  shutterOuterRing: {
+    width: 82,
+    height: 82,
+    borderRadius: 41,
+    borderWidth: 4,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.38,
-    shadowRadius: 12,
-    elevation: 6,
+    zIndex: 1,
+  },
+  shutterCenterCore: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   shutterPressed: {
     transform: [{ scale: 0.9 }],
