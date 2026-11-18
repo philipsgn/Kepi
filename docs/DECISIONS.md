@@ -636,3 +636,62 @@
          - Cấp 1 (Mặt cắt 2 tầng `#map`): Chạm vào phòng nào, heo tự động leo cầu thang gỗ `STAIR` chạy sang phòng đó.
          - Cấp 2 (Phòng chi tiết `#room`): Chạm trực tiếp vào Giường (`ngu`), Nồi súp (`bep`), Bàn PC (`lamviec`), Sofa/Cây thông (`khach`), Tường ảnh (`anh`), Hũ tiền (`sanh`), hoặc chạm vào chính Chú Heo để kích hoạt hoạt ảnh sinh động và câu thoại hóm hỉnh tương ứng.
       4. **Tinh Giản Giao Diện (User-Driven):** Bỏ nút "Dẫn tham quan" tự động, giữ header sạch sẽ với thẻ Tháng, tiêu đề Nhà Của Heo và nút "Ra vườn chơi" chuyển mượt về Tab 0.
+
+  - **Quyết định 121 (17/11/2026): Nâng Cấp Bảng Màu "Hồng Heo Mơ Mộng Pastel" (#FFF0F3), Bố Cục Nhà Heo Sát Trần & Đồng Bộ Sân Vườn 1:1 Theo Prototype:**
+    - *Bối Cảnh & Bản Chất:* Người dùng phản ánh Nhà của Heo gặp lỗi màn hình vàng khè, yêu cầu nâng cấp bảng màu sang chuẩn "Hồng Heo Mơ Mộng Pastel", loại bỏ chữ "Thống kê" ở Header để không gian nằm cao sát trần, và gửi ảnh đối chiếu 3 panel trực quan của prototype ngoài Sân Vườn (Nắng, Đêm, Vào nhà).
+    - *Giải Pháp Kỹ Thuật Đã Thực Hiện:*
+      1. **Khắc Phục Lỗi Màn Hình Vàng Khè:** Sửa lỗi cú pháp JavaScript `#'2B2118'` $\to$ `'#2B2118'` tại hàm `mini` (phòng bếp). Script WebView chạy mượt mà 100% không còn bị gián đoạn hay crash.
+      2. **Bảng Màu "Hồng Heo Mơ Mộng Pastel":**
+         - Nền ứng dụng: `--screen: #FFF0F3` (Hồng pastel dịu ngọt, mơ mộng, sáng sủa).
+         - Thẻ nội dung: `--card: #FFFFFF` (Trắng tinh khôi, tương phản cao với viền mực `#2B2118` và bóng đổ cứng `0 3px 0 #2B2118`).
+         - 6 Phòng pastel tươi sáng: Sảnh (`#FFF6E5`), Bếp (`#FFEBD9`), Khách (`#E4F4DC`), Làm việc (`#E3F2FD`), Phòng ảnh (`#F2E7FA`), Phòng ngủ (`#FCE4EC`).
+      3. **Bố Cục Đẩy Cao Sát Trần & Tích Hợp Top Bar:**
+         - Loại bỏ hoàn toàn thanh Header tĩnh `<View style={styles.header}>` khi ở chế độ Nhà Heo (`HOUSE`).
+         - Tích hợp các nút điều khiển trực tiếp vào Top Bar của Nhà Heo: Avatar 16×16 pixel, tiêu đề & số ngày chuỗi, nút Tạp chí Anime ✨ (`OPEN_MAGAZINE`), nút Ẩn tiền 👁️ / 🙈 (`TOGGLE_MASK`), và nút Tham quan (`tourBtn`).
+         - Đệm an toàn đỉnh gắn liền với `insets.top`, tạo cảm giác không gian nhà bừng sáng chạm trần máy.
+      4. **Đồng Bộ Sân Vườn (Garden) Chuẩn Xác 1:1 Theo 3 Panel Prototype:**
+         - Góc trên trái: Nút tròn icon chân heo (paw SVG) + nút viên thuốc "Vào nhà".
+         - Góc trên phải: Huy hiệu đồng xu + số ngày chuỗi `[ 🪙 24 cám / Chuỗi X ngày ]`.
+         - Góc dưới trái: Nút trạng thái `[ Nắng · sân · đứng ngắm ]` cho phép người dùng chạm để chuyển đổi linh hoạt thời điểm trong ngày (Nắng $\to$ Chiều $\to$ Đêm) và đồng bộ trạng thái heo.
+         - Hoạt cảnh vào nhà 4 bước: Heo reo $\to$ Bước lên bậc thềm đá $\to$ Cửa trượt mở hé lộ ánh sáng vàng $\to$ Bước qua ngưỡng cửa vào trong lòng nhà $\to$ Chuyển tab.
+      5. **Hỗ Trợ Web Preview:** Tích hợp fallback thẻ `iframe` với `srcDoc` cho `PixelHouseWebView` trên nền tảng `Platform.OS === 'web'`.
+
+  - **Quyết định 122 (18/11/2026): Chuẩn Hóa Vòng Đời & Kiến Trúc Hiển Thị PixelHouseWebView Trên iOS RN 0.88 Fabric (Khắc Phục Triệt Để Màn Hình Trơn #FFF0F3):**
+    - *Bối Cảnh & Bản Chất:* Trên thiết bị iPhone chạy React Native 0.88.0-rc.4 Fabric và react-native-webview 14.0.1, khi WebView đặt tại Trang 1 trong Horizontal ScrollView đa trang, WKWebView bị gắn ngoài viewport (`x = SCREEN_WIDTH`) tại thời điểm khởi động dẫn đến hiện tượng màn hình trắng/hồng trơn do WebKit trì hoãn cấp phát surface vẽ; đồng thời CSS `flex: 1` không có chiều cao số tường minh, thẻ Google Fonts CDN chặn vẽ và StatusBar style auto bị tàng hình trong Dark Mode.
+    - *Giải Pháp Kỹ Thuật Đã Thực Hiện:*
+      1. **Lazy-Mount On-Screen (`isActive`):** Truyền `isActive={activeTabIndex === 1}` từ `index.tsx` qua `StatsView` vào `PixelHouseWebView`. WebView chỉ mount khi người dùng lần đầu tiên kích hoạt Tab 1 (hoặc qua hoạt cảnh vào nhà từ Tab 0), đảm bảo bề mặt vẽ luôn được cấp phát ngay lập tức trên màn hình (on-screen).
+      2. **Kích Thước Pixel Số Tường Minh Cho Fabric:** Xác định `boxWidth` và `boxHeight` qua `useWindowDimensions()` và truyền trực tiếp vào `containerStyle` và `style` của `SafeWebView` (`flex: 0`), giải quyết dứt điểm lỗi sập chiều cao của Fabric container.
+      3. **100% Offline-First System Fonts:** Loại bỏ thẻ `<link rel="stylesheet" href="https://fonts.googleapis.com/...">` chặn luồng render mạng; chuyển sang font hệ thống bo tròn offline chuẩn iOS (`'SF Pro Rounded', 'Nunito', -apple-system`).
+      4. **`useMemo` Source Cố Định & Cầu Nối `window.syncData`:** Cố định `source = { html: initialHtml, baseUrl: '' }` bằng `useMemo` tránh tạo mới đối tượng gây reload WebView khi cha re-render; đồng bộ số liệu và trạng thái ẩn tiền tức thì qua `injectJavaScript('window.syncData(...)')`.
+      5. **Phục Hồi Tự Động WebKit Termination:** Gắn `key={'pig-house-' + reloadKey}`, bắt sự kiện `onContentProcessDidTerminate` và `onError` kèm giao diện cứu trợ 1 chạm nếu tiến trình WebKit bị hệ điều hành giải phóng.
+      6. **Thanh Trạng Thái (StatusBar) Tối Sắc Nét:** Đổi `StatusBar` sang `style="dark"` trên các trang nền sáng để thông tin giờ, pin và sóng luôn hiển thị rõ ràng trên nền hồng `#FFF0F3`.
+
+  - **Quyết định 123 (18/11/2026): Nâng Cấp Sân Vườn Pixel (Khắc Phục Biến Dạng Ma Trận, Triệt Tiêu Lỗi Cỏ Đè Heo, Decor Noel Tinh Tế, Auto-TOD Theo Giờ Thật & Chạm Cánh Cửa Vào Nhà):**
+    - *Bối Cảnh & Bản Chất:* Người dùng cung cấp ảnh thực tế về hiện tượng khung vườn bị kéo dãn bẹp dí sọc rách pixel (ảnh 1), chi tiết cỏ đè lên thân heo khi ngủ ở góc sân (ảnh 2). Đồng thời yêu cầu trang trí Noel ấm cúng tinh tế, tự động chuyển trời sáng/chiều/tối theo giờ thực tế (không cho chỉnh tay) và gỡ bỏ nút "Vào nhà" để tương tác 100% bằng cách chạm trực tiếp vào cánh cửa nhà.
+    - *Giải Pháp Kỹ Thuật Đã Thực Hiện:*
+      1. **Khắc Phục Biến Dạng Ma Trận (Fix Ảnh 1):** Gọi `ctx.setTransform(1, 0, 0, 1, 0, 0)` và `ctx.clearRect(0, 0, W, H)` trước mỗi frame `draw(t)` để triệt tiêu việc tích lũy scale âm/rotate lệch ma trận qua các vòng lặp animation.
+      2. **Triệt Tiêu Lỗi Cỏ Đè Heo (Fix Ảnh 2):** Đưa layer foreground `fg` vào chu trình sắp xếp chiều sâu `Y-sorting` cùng chú heo theo `pig.y` và nâng giới hạn di chuyển `MINX = 30` để heo luôn nổi 100% trên bề mặt cỏ khi nằm ngủ.
+      3. **Decor Noel Ấm Cúng Tinh Tế:** Viền tuyết trắng li ti trên mái ngói đỏ và mái hiên tầng 1; chuỗi đèn LED Giáng Sinh 4 màu (đỏ, vàng, xanh lá, xanh băng) nhấp nháy dọc ban công tầng 2; chậu cây thông Noel mini đính sao vàng và hạt châu trên hiên nhà; vòng nguyệt quế xanh nơ đỏ phía trên cửa chính.
+      4. **Tự Động Hóa Chu Kỳ Sáng/Chiều/Tối (Auto-TOD):** Bắt giờ thực tế từ đồng hồ thiết bị (`06h-17h: day` trời nắng, `17h-19h: dusk` hoàng hôn ngả cam, `19h-06h: night` đêm sao sáng đèn cửa sổ). Bỏ sự kiện click đổi thủ công trên nhãn trạng thái `.state`.
+      5. **Bỏ Nút "Vào Nhà" & Tương Tác Trực Tiếp Cánh Cửa:** Gỡ bỏ cụm nút `.tl` ở góc trên trái. Mở rộng vùng cảm ứng chạm trực tiếp vào cánh cửa chính trên ngôi nhà (`x: 44..74, y: 34..64`) để kích hoạt hoạt cảnh mở cửa và bước vào nhà chuyển sang Tab 1.
+
+  - **Quyết định 124 (18/11/2026): Khắc Phục Lỗi Màn Trắng Hồng Tab 0 & Lỗi Canvas Heo Biến Dạng Blob Đen:**
+    - *Bối Cảnh & Bản Chất:* Người dùng cung cấp ảnh thực tế về lỗi Tab 0 (Sân Vườn) đôi khi bị màn hình trơn trắng/hồng khi khởi động ứng dụng (ảnh 1, 3) và chú heo bị vẽ biến dạng thành một khối blob đen dài che phủ sân (ảnh 4).
+    - *Giải Pháp Kỹ Thuật Đã Thực Hiện:*
+      1. Bổ sung `isActive` prop và `hasMountedOnce` ref guard cho `PixelGardenWebView` (tương tự như `PixelHouseWebView` ở Quyết định 122). Ngăn chặn việc WKWebView mount khi tab đang ở vị trí offscreen ngoài viewport trên iOS Fabric.
+      2. Truyền `isActive={activeTabIndex === 0}` từ `index.tsx` qua `JournalView` xuống `PixelGardenWebView`.
+      3. Bổ sung `pcx.setTransform(1, 0, 0, 1, 0, 0)` và `ctx.globalAlpha = 1` reset triệt để ma trận cọ vẽ trước mỗi frame `drawPig` và `draw()`, loại bỏ hoàn toàn tích lũy ma trận lật mặt `scale(-1, 1)` gây ra lỗi heo blob đen.
+
+  - **Quyết định 125 (18/11/2026): Thiết Kế Lại Phòng Ảnh (Photo Room), Port 1:1 Buồng Photobooth & Chuyển Hướng Sang Tab Camera:**
+    - *Bối Cảnh & Bản Chất:* Theo đặc tả prototype mới `Nhà heo con.html`, Phòng Ảnh (`anh`) là trung tâm thị giác quan trọng với buồng chụp ảnh **Photobooth**. Người dùng yêu cầu port 1:1 hoạt họa buồng chụp (kéo rèm xanh, thò 2 chân hồng, flash 600ms, heo reo) và khi nhấn "Chụp ảnh", app tự động chuyển sang Tab Camera (Tab 2). Đồng thời, danh sách ảnh trong panel phòng ảnh phải hiển thị ảnh thực tế từ bộ nhớ thiết bị (`transactionStore` với `photo_url`), không hardcode ảnh giả, và hiển thị empty state sạch sẽ nếu chưa có ảnh.
+    - *Giải Pháp Kỹ Thuật Đã Thực Hiện:*
+      1. **Port Buồng Chụp Pixel Art 1:1:** Thêm hàm `booth(c, t)` và trạng thái `bs = { closed: false, flash: 0, pigIn: false }`. Thân buồng đỏ `#E0452B`, mái cong trắng `#FFFBF1`, ống kính cyan `#7FD4E0`, rèm xanh `#6DA9D9` trượt đóng/mở và 2 bàn chân heo hồng `#F9B8C4` thò ra mép rèm khi chụp.
+      2. **Luồng Điều Hướng Photobooth Transition:**
+         - Chạm vào buồng chụp (`x: 126..170, y: 18..66`) hoặc nút *"📸 Heo ơi, đi chụp ảnh"* trong panel $\to$ Heo chạy đến tọa độ `(148, 84)`.
+         - Nút `#boothBtn` ("Chụp ảnh") xuất hiện ở góc dưới khi heo đứng gần buồng chụp ($< 28\text{px}$).
+         - Bấm "Chụp ảnh" $\to$ Kéo rèm kín $\to$ Flash trắng bừng sáng 600ms $\to$ WebView gửi `postMessage({ type: 'OPEN_CAMERA' })`.
+         - `PixelHouseWebView` gọi prop `onOpenCamera()` $\to$ `StatsView` gọi `onNavigateToCamera()` $\to$ `index.tsx` chuyển tab sang Tab 2 (Camera).
+      3. **Trưng Bày Ảnh Thực Tế (Zero Hardcode):**
+         - Truyền `photos` từ `useTransactionStore` (các giao dịch có ảnh) vào `PixelHouseWebView`.
+         - Panel phòng ảnh hiển thị lưới ảnh chụp thực tế (thumbnail, tên món, số tiền, ngày). Nếu chưa có ảnh, hiển thị empty state đáng yêu mời chụp món đầu tiên.
+

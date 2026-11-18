@@ -2946,36 +2946,161 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 }
 
 // ==============================================================================
-// 🧪 TEST 63: PIXEL HOUSE V2 — CUTE SPRITE, NOEL INTERIOR & TOUCH ACTIONS
+// 🧪 TEST 63: PIXEL HOUSE 1:1 EXACT PROTOTYPE PORT & 4-STEP ENTRANCE ANIMATION
 // ==============================================================================
 {
   const housePath = path.join(__dirname, 'src/components/pixel/PixelHouseWebView.tsx');
   const houseCode = fs.readFileSync(housePath, 'utf8');
 
-  // 1. Kiểm tra Sprite Heo Con chuẩn (PAL palette, shape function, bell, blush)
-  assert.ok(houseCode.includes('PAL = {') && houseCode.includes("p: '#F9B8C4'"), 'PixelHouseWebView must define authentic PAL palette');
+  // 1. Kiểm tra Sprite Heo Con chuẩn 1:1 từ prototype (PAL, shape, drawPigSprite, bell, blush)
+  assert.ok(houseCode.includes('PAL=') && houseCode.includes("p:'#F9B8C4'"), 'PixelHouseWebView must define authentic PAL palette');
   assert.ok(houseCode.includes('function shape('), 'PixelHouseWebView must use shape() function for pixel perfection');
   assert.ok(houseCode.includes('function drawPigSprite('), 'PixelHouseWebView must include drawPigSprite');
   assert.ok(houseCode.includes('PAL.g') && houseCode.includes('PAL.s'), 'Pig sprite must have gold bell and blush cheeks');
 
-  // 2. Kiểm tra Không khí Noel ấm cúng trong 6 phòng
-  assert.ok(houseCode.includes('CÂY THÔNG NOEL MINI') || houseCode.includes('tx + 8, ty + 20'), 'Living room must include mini Christmas tree');
-  assert.ok(houseCode.includes('LÒ SƯỞI') || houseCode.includes('lửa đỏ'), 'Living room must include brick fireplace');
-  assert.ok(houseCode.includes('Bít tất Noel') || houseCode.includes('tuyết rơi'), 'Bedroom must include Christmas stocking and gentle snowfall');
-  assert.ok(houseCode.includes('bốc 3 làn khói') || houseCode.includes('yy = 26'), 'Kitchen must include boiling pot with steaming smoke');
-
-  // 3. Kiểm tra Hệ thống Touch Actions 2 cấp độ
-  assert.ok(houseCode.includes("selRoom === 'ngu'") && houseCode.includes("rp.mode = 'sleep'"), 'Bedroom must support sleeping action when tapping bed');
-  assert.ok(houseCode.includes("selRoom === 'bep'") && houseCode.includes("rp.mode = 'eat'"), 'Kitchen must support sniffing/eating action when tapping pot');
-  assert.ok(houseCode.includes("selRoom === 'lamviec'") && houseCode.includes("rp.mode = 'work'"), 'Working room must support work typing action when tapping PC');
+  // 2. Kiểm tra Port 1:1 Bảng phân tích Panel & Biểu đồ SVG
+  assert.ok(houseCode.includes('function barsSVG('), 'PixelHouseWebView must include barsSVG chart engine');
+  assert.ok(houseCode.includes('function lineSVG('), 'PixelHouseWebView must include lineSVG chart engine');
+  assert.ok(houseCode.includes('function stackHTML('), 'PixelHouseWebView must include stackHTML category breakdown');
+  assert.ok(houseCode.includes('function panelHTML('), 'PixelHouseWebView must include panelHTML for room financial centers');
+  assert.ok(houseCode.includes('function paintPanel('), 'PixelHouseWebView must include paintPanel renderer');
+  assert.ok(houseCode.includes('tourBtn'), 'PixelHouseWebView must support tourBtn');
   assert.ok(houseCode.includes('EXIT_TO_GARDEN'), 'PixelHouseWebView must support EXIT_TO_GARDEN message');
+
+  // 3. Kiểm tra Hoạt cảnh 4 bước tự nhiên khi bước vào nhà trong PixelGardenWebView
+  const gardenPath = path.join(__dirname, 'src/components/pixel/PixelGardenWebView.tsx');
+  const gardenCode = fs.readFileSync(gardenPath, 'utf8');
+  assert.ok(gardenCode.includes('doorOpen > 0') && gardenCode.includes('walkTo(58, 54'), 'Garden must animate pig walking to porch steps');
+  assert.ok(gardenCode.includes('walkTo(58, 44'), 'Garden must animate pig stepping through doorway into house');
 
   // 4. Kiểm tra StatsView & index.tsx kết nối onExitToGarden
   const statsViewPath = path.join(__dirname, 'src/components/views/StatsView.tsx');
   const statsCode = fs.readFileSync(statsViewPath, 'utf8');
   assert.ok(statsCode.includes('onExitToGarden={onNavigateHome}'), 'StatsView must wire onExitToGarden to onNavigateHome');
 
-  console.log('✅ Test 63 Passed: House of Pig v2 (Cute Sprite, Noel Interior Decor & 2-Level Touch Actions) verified cleanly');
+  console.log('✅ Test 63 Passed: House of Pig 1:1 Exact Prototype Port & 4-Step Entrance Animation verified cleanly');
 }
 
-console.log('\n🎉 ALL 63 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (63/63)!');
+// ==============================================================================
+// 🧪 TEST 64: iOS FABRIC WKWEBVIEW STABILITY & OFFLINE-FIRST HOUSE AUDIT
+// ==============================================================================
+{
+  const housePath = path.join(__dirname, 'src/components/pixel/PixelHouseWebView.tsx');
+  const houseCode = fs.readFileSync(housePath, 'utf8');
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const layoutPath = path.join(__dirname, 'app/_layout.tsx');
+  const layoutCode = fs.readFileSync(layoutPath, 'utf8');
+
+  // 1. Zero Google Fonts CDN (100% Offline-First)
+  assert.ok(!houseCode.includes('fonts.googleapis.com'), 'PixelHouseWebView must NOT contain Google Fonts CDN link');
+
+  // 2. useMemo source + baseUrl: ''
+  assert.ok(houseCode.includes("baseUrl: ''") || houseCode.includes('baseUrl:""'), 'PixelHouseWebView source must include baseUrl: empty string');
+  assert.ok(houseCode.includes('useMemo('), 'PixelHouseWebView must use useMemo to memoize HTML source');
+
+  // 3. isActive lazy-mount guard
+  assert.ok(houseCode.includes('isActive'), 'PixelHouseWebView must accept isActive prop');
+  assert.ok(houseCode.includes('hasMountedOnce'), 'PixelHouseWebView must implement hasMountedOnce lazy-mount guard');
+
+  // 4. Explicit pixel dimensions & containerStyle for Fabric
+  assert.ok(houseCode.includes('containerStyle'), 'PixelHouseWebView must pass containerStyle to SafeWebView');
+  assert.ok(houseCode.includes('boxWidth') && houseCode.includes('boxHeight'), 'PixelHouseWebView must compute explicit pixel dimensions');
+
+  // 5. WebKit Process Termination & Error Auto-Recovery
+  assert.ok(houseCode.includes('onContentProcessDidTerminate'), 'PixelHouseWebView must handle onContentProcessDidTerminate');
+  assert.ok(houseCode.includes('reloadKey'), 'PixelHouseWebView must maintain reloadKey for WebKit auto-recovery');
+
+  // 6. window.syncData bridge for seamless updates without reloads
+  assert.ok(houseCode.includes('window.syncData = function'), 'HTML script must implement window.syncData bridge');
+  assert.ok(houseCode.includes('syncDataToWebView'), 'PixelHouseWebView must implement syncDataToWebView');
+
+  // 7. StatusBar contrast on light background
+  assert.ok(layoutCode.includes('style="dark"'), 'StatusBar in app/_layout.tsx must use style="dark"');
+
+  // 8. index.tsx passes isActive={activeTabIndex === 1} to StatsView
+  assert.ok(indexCode.includes('isActive={activeTabIndex === 1}'), 'index.tsx must pass isActive={activeTabIndex === 1} to StatsView');
+
+  console.log('✅ Test 64 Passed: iOS Fabric WKWebView Stability & Offline-First House Audit verified cleanly');
+}
+
+// ==============================================================================
+// 🧪 TEST 65: NOEL GARDEN, MATRIX STABILITY, AUTO TOD & DIRECT DOOR TAP AUDIT
+// ==============================================================================
+{
+  const gardenPath = path.join(__dirname, 'src/components/pixel/PixelGardenWebView.tsx');
+  const gardenCode = fs.readFileSync(gardenPath, 'utf8');
+
+  // 1. Gỡ bỏ nút Vào nhà góc trên (.tl, penBtn, pen)
+  assert.ok(!gardenCode.includes('id="penBtn"'), 'PixelGardenWebView must remove penBtn button');
+  assert.ok(!gardenCode.includes('class="scene .tl"'), 'PixelGardenWebView must remove .tl styling');
+
+  // 2. Tự động hóa thời gian theo giờ thực tế (getAutoTOD, không click đổi thủ công)
+  assert.ok(gardenCode.includes('getAutoTOD'), 'PixelGardenWebView must implement getAutoTOD function');
+  assert.ok(gardenCode.includes('pointer-events: none') || gardenCode.includes('cursor: default'), 'State badge must not be interactive');
+
+  // 3. Khắc phục biến dạng ma trận (ctx.setTransform, ctx.clearRect)
+  assert.ok(gardenCode.includes('ctx.setTransform(1, 0, 0, 1, 0, 0)'), 'draw() must reset canvas matrix with ctx.setTransform');
+  assert.ok(gardenCode.includes('ctx.clearRect(0, 0, W, H)'), 'draw() must clear canvas frame');
+
+  // 4. Khắc phục cỏ đè lên heo (Y-sorting đưa fg vào mảng chiều sâu & MINX >= 30)
+  assert.ok(gardenCode.includes('b:126,f:()=>ctx.drawImage(fg,0,0)'), 'fg layer must be included in Y-sorting');
+  assert.ok(gardenCode.includes('MINX=30'), 'MINX bound must be raised to 30 to prevent grass overlap');
+
+  // 5. Decor Noel ấm cúng (viền tuyết mái nhà, chuỗi đèn LED, cây thông mini)
+  assert.ok(gardenCode.includes('ledCols') && gardenCode.includes('34,2,2,col'), 'Garden must animate Christmas LED lights on balcony');
+  assert.ok(gardenCode.includes('Ngôi sao vàng') || gardenCode.includes('Hạt châu Noel'), 'Garden must feature mini Christmas tree on porch');
+
+  // 6. Chạm trực tiếp vào cánh cửa nhà
+  assert.ok(gardenCode.includes('x >= 44 && x <= 74') && gardenCode.includes('enterHouse()'), 'Tapping directly on the front door must trigger enterHouse');
+
+  console.log('✅ Test 65 Passed: Noel Garden, Matrix Stability, Auto TOD & Direct Door Tap Audit verified cleanly');
+}
+
+// ==============================================================================
+// 🧪 TEST 66: PHOTO ROOM REDESIGN, PROTOYPE PHOTOBOOTH & CAMERA TRANSITION AUDIT
+// ==============================================================================
+{
+  const housePath = path.join(__dirname, 'src/components/pixel/PixelHouseWebView.tsx');
+  const houseCode = fs.readFileSync(housePath, 'utf8');
+  const statsPath = path.join(__dirname, 'src/components/views/StatsView.tsx');
+  const statsCode = fs.readFileSync(statsPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/13-HOUSE-OF-PIG.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+
+  // 1. PixelHouseWebView Props & Interface
+  assert.ok(houseCode.includes('onOpenCamera?: () => void'), 'PixelHouseWebViewProps must declare onOpenCamera');
+  assert.ok(houseCode.includes('photos?: RealPhotoItem[]'), 'PixelHouseWebViewProps must declare photos prop');
+
+  // 2. Photobooth Canvas port 1:1 từ prototype
+  assert.ok(houseCode.includes('const bs = { closed: false, flash: 0, pigIn: false }') || houseCode.includes('bs={closed:false,flash:0,pigIn:false}'), 'Must declare photobooth state bs');
+  assert.ok(houseCode.includes('function booth(c,t)') || houseCode.includes('function booth(c, t)'), 'Must declare booth drawing function');
+  assert.ok(houseCode.includes('#E0452B') && houseCode.includes('#7FD4E0') && houseCode.includes('#6DA9D9'), 'Booth must use exact prototype colors');
+  assert.ok(houseCode.includes('#F9B8C4') && houseCode.includes('bs.pigIn'), 'Pig paws must show when pigIn is true');
+
+  // 3. Nút #boothBtn & class .shoot
+  assert.ok(houseCode.includes('id="boothBtn"'), 'Must have boothBtn button element');
+  assert.ok(houseCode.includes('.btn.shoot') || houseCode.includes('.shoot'), 'Must style .shoot button');
+
+  // 4. Luồng điều hướng OPEN_CAMERA
+  assert.ok(houseCode.includes('OPEN_CAMERA'), 'Must postMessage OPEN_CAMERA on booth use');
+  assert.ok(houseCode.includes("data.type === 'OPEN_CAMERA' && onOpenCamera"), 'onMessage must dispatch OPEN_CAMERA to onOpenCamera prop');
+
+  // 5. Panel phòng ảnh: Button Heo ơi đi chụp ảnh & Real photos gallery
+  assert.ok(houseCode.includes('id="goBooth"'), 'Panel must include goBooth button');
+  assert.ok(houseCode.includes('Chưa có bức ảnh nào trong tháng này'), 'Panel must show empty state when no photos');
+  assert.ok(houseCode.includes('REAL_PHOTOS'), 'Must use REAL_PHOTOS for dynamic photo gallery');
+
+  // 6. StatsView integration
+  assert.ok(statsCode.includes('photoTransactions'), 'StatsView must extract photoTransactions from transactions');
+  assert.ok(statsCode.includes('photos={photoTransactions}'), 'StatsView must pass photos to PixelHouseWebView');
+  assert.ok(statsCode.includes('onOpenCamera={onNavigateToCamera}'), 'StatsView must pass onNavigateToCamera as onOpenCamera');
+
+  // 7. Docs synchronization
+  assert.ok(docCode.includes('Phòng ảnh / Buồng Photobooth'), '13-HOUSE-OF-PIG.md must document Photobooth room');
+  assert.ok(docCode.includes('OPEN_CAMERA'), '13-HOUSE-OF-PIG.md must document OPEN_CAMERA navigation');
+
+  console.log('✅ Test 66 Passed: Photo Room Redesign, Prototype Photobooth & Camera Transition Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 66 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (66/66)!');

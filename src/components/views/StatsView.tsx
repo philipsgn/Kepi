@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,6 +19,7 @@ import { BarChart2, BookOpen, Camera, Eye, EyeOff, Home, Images, Sparkles } from
 import { Strings } from '../../constants/strings';
 import { useTransactionStore } from '../../store/transactionStore';
 import { useBudgetStore } from '../../store/budgetStore';
+import { useGamificationStore } from '../../store/gamificationStore';
 import { Transaction } from '../../types/database';
 import { formatVND } from '../../utils/currency';
 import { PixelHouseWebView, RoomInfo } from '../pixel/PixelHouseWebView';
@@ -43,6 +45,7 @@ const PREFS_STORAGE_KEY = '@vi_locket_home_preferences';
 interface StatsViewProps {
   onNavigateToCamera?: () => void;
   onNavigateHome?: () => void;
+  isActive?: boolean;
 }
 
 type FilterType = 'ALL' | 'EXPENSE' | 'INCOME' | 'SKIPPED' | 'UNPRICED' | string;
@@ -61,10 +64,12 @@ interface RowData {
  * - Danh mục gộp: "Ăn uống".
  * - Khoảng đệm đáy chuẩn xác với useBottomInset().
  */
-export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavigateHome }) => {
+export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavigateHome, isActive = true }) => {
   const insets = useSafeAreaInsets();
+  const { width: winWidth, height: winHeight } = useWindowDimensions();
   const { tokens } = useTheme();
   const { contentBottomPadding } = useBottomInset();
+  const houseHeight = Math.max(420, winHeight - insets.top - contentBottomPadding);
   const [showMagazine, setShowMagazine] = useState(false);
   const { transactions, updateTransaction } = useTransactionStore();
 
@@ -80,7 +85,9 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavi
   });
   const [periodMode, setPeriodMode] = useState<'WEEK' | 'MONTH'>('MONTH');
 
-  const { monthlyIncome, savedMoney, realBalance } = useBudgetStore();
+  const { monthlyIncome, savedMoney, realBalance, baseDailyBudget, todayBudget } = useBudgetStore();
+  const streakDays = useGamificationStore((s) => s.streakDays);
+  const dailyLimit = todayBudget || baseDailyBudget || 300000;
   const remainingDays = useMemo(() => getDaysRemainingInMonth(), []);
 
   const foodSpent = useMemo(() => {
@@ -103,6 +110,18 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavi
 
   const photosCount = useMemo(() => {
     return transactions.filter((t) => Boolean(t.photo_url)).length;
+  }, [transactions]);
+
+  const photoTransactions = useMemo(() => {
+    return transactions
+      .filter((t) => Boolean(t.photo_url || t.thumbnail_url))
+      .map((t) => ({
+        id: t.id,
+        url: t.thumbnail_url || t.photo_url || '',
+        name: t.description || 'Khoản chi',
+        amount: t.amount,
+        date: t.created_at || t.occurred_at || new Date().toISOString(),
+      }));
   }, [transactions]);
 
   // Tổng chi tháng hiện tại từ transactions confirmed
@@ -366,295 +385,75 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavi
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
-      {/* 1. HEADER TRANG THỐNG KÊ */}
-      <View style={[styles.header, { borderBottomColor: tokens.border }]}>
-        <Text style={[styles.headerTitle, { color: tokens.text }]}>{Strings.stats.title}</Text>
+    <View style={[styles.container, { backgroundColor: viewMode === 'HOUSE' ? '#FFF0F3' : tokens.bg, paddingTop: insets.top }]}>
+      {/* 1. HEADER TRANG THỐNG KÊ (CHỈ HIỂN THỊ KHI Ở CHẾ ĐỘ ALBUM / ANALYTICS / MAGAZINE, LOẠI BỎ Ở CHẾ ĐỘ NHÀ HEO ĐỂ NHÀ SÁT TRẦN) */}
+      {viewMode !== 'HOUSE' && (
+        <View style={[styles.header, { borderBottomColor: tokens.border }]}>
+          <Text style={[styles.headerTitle, { color: tokens.text }]}>{Strings.stats.title}</Text>
 
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => {
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowMagazine(true);
+              }}
+              style={[styles.iconBtnBorderless, { marginRight: 8 }]}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityLabel="Tạp chí Anime"
+            >
+              <Sparkles size={20} color={tokens.primary} strokeWidth={2.6} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={toggleMaskMoney}
+              style={styles.iconBtnBorderless}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityLabel="Ẩn số tiền"
+            >
+              {isMasked ? (
+                <EyeOff size={20} color={tokens.primary} strokeWidth={2.6} />
+              ) : (
+                <Eye size={20} color={tokens.text} strokeWidth={2.6} />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* 1. CHẾ ĐỘ XEM CHÍNH: NHÀ CỦA HEO 100% NGUYÊN BẢN TỪ PROTOTYPE */}
+      {viewMode === 'HOUSE' ? (
+        <View style={{ flex: 1, paddingBottom: contentBottomPadding }}>
+          <PixelHouseWebView
+            currentMonth={new Date().getMonth() + 1}
+            totalSpent={currentMonthSpent}
+            monthlyIncome={monthlyIncome}
+            dailyLimit={dailyLimit}
+            categorySpent={{ an: foodSpent, di: transportSpent, mua: shopSpent }}
+            savedAmount={savedMoney}
+            streak={streakDays}
+            photos={photoTransactions}
+            isMasked={isMasked}
+            isActive={isActive}
+            viewportWidth={winWidth}
+            viewportHeight={houseHeight}
+            onSelectRoom={(r) => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setSelectedHouseRoom(r);
+            }}
+            onExitToGarden={onNavigateHome}
+            onOpenCamera={onNavigateToCamera}
+            onOpenMagazine={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setShowMagazine(true);
             }}
-            style={[styles.iconBtnBorderless, { marginRight: 8 }]}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel="Tạp chí Anime"
-          >
-            <Sparkles size={20} color={tokens.primary} strokeWidth={2.6} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={toggleMaskMoney}
-            style={styles.iconBtnBorderless}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel="Ẩn số tiền"
-          >
-            {isMasked ? (
-              <EyeOff size={20} color={tokens.primary} strokeWidth={2.6} />
-            ) : (
-              <Eye size={20} color={tokens.text} strokeWidth={2.6} />
-            )}
-          </TouchableOpacity>
+            onToggleMask={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              toggleMaskMoney();
+            }}
+            style={{ flex: 1 }}
+          />
         </View>
-      </View>
-
-      {/* 1B. NÚT GẠT CHUYỂN ĐỔI CHẾ ĐỘ: NHÀ HEO VS ALBUM VS PHÂN TÍCH VS TẠP CHÍ */}
-      <View
-        style={[
-          styles.segmentContainer,
-          { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
-        ]}
-      >
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setViewMode('HOUSE');
-          }}
-          style={[
-            styles.segmentBtn,
-            viewMode === 'HOUSE' && [
-              styles.segmentBtnActive,
-              { backgroundColor: tokens.surface, borderColor: tokens.border },
-            ],
-          ]}
-        >
-          <Home
-            size={14}
-            color={viewMode === 'HOUSE' ? tokens.primary : tokens.textMuted}
-            strokeWidth={2.4}
-          />
-          <Text
-            style={[
-              styles.segmentText,
-              {
-                color: viewMode === 'HOUSE' ? tokens.text : tokens.textMuted,
-                fontWeight: viewMode === 'HOUSE' ? '700' : '500',
-              },
-            ]}
-          >
-            Nhà Heo
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setViewMode('ALBUM');
-          }}
-          style={[
-            styles.segmentBtn,
-            viewMode === 'ALBUM' && [
-              styles.segmentBtnActive,
-              { backgroundColor: tokens.surface, borderColor: tokens.border },
-            ],
-          ]}
-        >
-          <Images
-            size={14}
-            color={viewMode === 'ALBUM' ? tokens.primary : tokens.textMuted}
-            strokeWidth={2.4}
-          />
-          <Text
-            style={[
-              styles.segmentText,
-              {
-                color: viewMode === 'ALBUM' ? tokens.text : tokens.textMuted,
-                fontWeight: viewMode === 'ALBUM' ? '700' : '500',
-              },
-            ]}
-          >
-            Album
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setViewMode('ANALYTICS');
-          }}
-          style={[
-            styles.segmentBtn,
-            viewMode === 'ANALYTICS' && [
-              styles.segmentBtnActive,
-              { backgroundColor: tokens.surface, borderColor: tokens.border },
-            ],
-          ]}
-        >
-          <BarChart2
-            size={14}
-            color={viewMode === 'ANALYTICS' ? tokens.primary : tokens.textMuted}
-            strokeWidth={2.4}
-          />
-          <Text
-            style={[
-              styles.segmentText,
-              {
-                color: viewMode === 'ANALYTICS' ? tokens.text : tokens.textMuted,
-                fontWeight: viewMode === 'ANALYTICS' ? '700' : '500',
-              },
-            ]}
-          >
-            Phân tích
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setViewMode('MAGAZINE');
-          }}
-          style={[
-            styles.segmentBtn,
-            viewMode === 'MAGAZINE' && [
-              styles.segmentBtnActive,
-              { backgroundColor: tokens.surface, borderColor: tokens.border },
-            ],
-          ]}
-        >
-          <BookOpen
-            size={14}
-            color={viewMode === 'MAGAZINE' ? tokens.primary : tokens.textMuted}
-            strokeWidth={2.4}
-          />
-          <Text
-            style={[
-              styles.segmentText,
-              {
-                color: viewMode === 'MAGAZINE' ? tokens.text : tokens.textMuted,
-                fontWeight: viewMode === 'MAGAZINE' ? '700' : '500',
-              },
-            ]}
-          >
-            Tạp chí
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* RẼ NHÁNH CHẾ ĐỘ XEM */}
-      {viewMode === 'HOUSE' ? (
-        /* CHẾ ĐỘ XEM NHÀ HEO 2 TẦNG 6 PHÒNG */
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: contentBottomPadding + 20 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* 1. KHUNG VƯỜN PIXEL NHÀ HEO */}
-          <View style={styles.houseHeroWrapper}>
-            <PixelHouseWebView
-              onSelectRoom={(r) => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setSelectedHouseRoom(r);
-              }}
-              onExitToGarden={onNavigateHome}
-            />
-          </View>
-
-          {/* 2. THẺ CHI TIẾT CĂN PHÒNG ĐANG CHỌN (KẾT NỐI SỐ LIỆU THẬT) */}
-          <View
-            style={[
-              styles.roomDetailCard,
-              {
-                backgroundColor: tokens.surface || '#FFFBF1',
-                borderColor: tokens.border || '#2B2118',
-              },
-            ]}
-          >
-            <View style={styles.roomDetailHeader}>
-              <View style={styles.roomBadgePill}>
-                <Text style={styles.roomBadgeText}>{selectedHouseRoom.name}</Text>
-              </View>
-              <Text style={[styles.roomSubtitleText, { color: tokens.textMuted }]}>
-                {selectedHouseRoom.subtitle}
-              </Text>
-            </View>
-
-            {selectedHouseRoom.id === 'bep' && (
-              <View style={styles.roomContentBox}>
-                <Text style={styles.roomMetricLabel}>Tổng chi Ăn uống tháng này:</Text>
-                <Text style={[styles.roomMetricValue, { color: tokens.text }]}>
-                  {isMasked ? '••••••' : formatVND(foodSpent)}
-                </Text>
-                <Text style={[styles.roomHintText, { color: tokens.textMuted }]}>
-                  🍲 Bếp luôn đỏ lửa cơm canh thơm ngon. Nhớ duy trì ăn uống lành mạnh nha!
-                </Text>
-              </View>
-            )}
-
-            {selectedHouseRoom.id === 'khach' && (
-              <View style={styles.roomContentBox}>
-                <Text style={styles.roomMetricLabel}>Tổng chi Mua sắm tháng này:</Text>
-                <Text style={[styles.roomMetricValue, { color: tokens.text }]}>
-                  {isMasked ? '••••••' : formatVND(shopSpent)}
-                </Text>
-                <Text style={[styles.roomHintText, { color: tokens.textMuted }]}>
-                  🛋️ Phòng khách sang trọng tiếp đón bạn bè. Đừng để bẫy săn sale làm vơi ví nha!
-                </Text>
-              </View>
-            )}
-
-            {selectedHouseRoom.id === 'lamviec' && (
-              <View style={styles.roomContentBox}>
-                <Text style={styles.roomMetricLabel}>Tổng chi Đi lại / Làm việc:</Text>
-                <Text style={[styles.roomMetricValue, { color: tokens.text }]}>
-                  {isMasked ? '••••••' : formatVND(transportSpent)}
-                </Text>
-                <Text style={[styles.roomHintText, { color: tokens.textMuted }]}>
-                  💻 Đi lại chăm chỉ kiếm tiền. Chú heo chúc bạn công việc luôn hanh thông!
-                </Text>
-              </View>
-            )}
-
-            {selectedHouseRoom.id === 'ngu' && (
-              <View style={styles.roomContentBox}>
-                <Text style={styles.roomMetricLabel}>Khoản tiền Đã Cứu Ví / Giữ lại được:</Text>
-                <Text style={[styles.roomMetricValue, { color: '#5E9A57' }]}>
-                  {isMasked ? '••••••' : formatVND(savedMoney)}
-                </Text>
-                <Text style={[styles.roomHintText, { color: tokens.textMuted }]}>
-                  🛏️ Giấc ngủ ngon là liều thuốc vàng. Mỗi đồng giữ lại hôm nay sẽ nuôi lớn tương lai!
-                </Text>
-              </View>
-            )}
-
-            {selectedHouseRoom.id === 'anh' && (
-              <View style={styles.roomContentBox}>
-                <Text style={styles.roomMetricLabel}>Khoảnh khắc chụp ảnh:</Text>
-                <Text style={[styles.roomMetricValue, { color: tokens.text }]}>
-                  {photosCount} ảnh kỷ niệm
-                </Text>
-                <TouchableOpacity
-                  style={styles.roomActionBtn}
-                  activeOpacity={0.8}
-                  onPress={() => setViewMode('ALBUM')}
-                >
-                  <Text style={styles.roomActionBtnText}>Xem toàn bộ Cuốn Album 📸</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {selectedHouseRoom.id === 'sanh' && (
-              <View style={styles.roomContentBox}>
-                <Text style={styles.roomMetricLabel}>Số dư ví khả dụng hiện tại:</Text>
-                <Text style={[styles.roomMetricValue, { color: '#5E9A57' }]}>
-                  {isMasked ? '••••••' : formatVND(realBalance)}
-                </Text>
-                <TouchableOpacity
-                  style={styles.roomActionBtn}
-                  activeOpacity={0.8}
-                  onPress={() => setViewMode('ANALYTICS')}
-                >
-                  <Text style={styles.roomActionBtnText}>Xem phân tích tài chính chuyên sâu 📊</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        </ScrollView>
       ) : viewMode === 'ALBUM' ? (
         /* CHẾ ĐỘ CUỐN ALBUM ẢNH */
         <View style={{ flex: 1 }}>
