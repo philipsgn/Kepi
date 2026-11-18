@@ -20,22 +20,46 @@ Mặt cắt ngôi nhà gồm 2 tầng và 6 phòng chức năng (Canvas 176×108
 
 ---
 
-## 2. KIẾN TRÚC & HOẠT HỌA PIXEL
+## 2. KIẾN TRÚC & HOẠT HỌA PIXEL V2 (SPRITE CUTE & KHÔNG KHÍ NOEL)
 
-1. **Cầu thang gỗ nối tầng (`STAIR`):**
+1. **Sprite Chú Heo Siêu Dễ Thương (24×20 pixel):**
+   - Sử dụng thuật toán vẽ `shape()` và bảng màu `PAL` chuẩn:
+     - Viền mực nâu đậm `#4B2B21`, thân hồng `#F9B8C4`, mảng tối `#F08DA4` và bóng bụng `#D9758D`.
+     - Má hồng phúng phính `#EE90A6`, vòng chuông cổ vàng `#F4B93B`.
+     - Mắt to tròn long lanh có đốm sáng trắng `#FFF`, mắt híp cung tròn khi vui `happy`, chớp mắt tự nhiên `blink`.
+     - Tai rung rinh nảy theo bước chân waddle 4 chân, đuôi xoắn ngoe nguẩy.
+     - Khi vui: Nhảy cẫng `happy jump` thả tim đỏ `#E0452B` bay lơ lửng.
+     - Khi ngủ: Cuộn tròn đầu gục mềm mại, bóng chữ `Z z z` bay dần lên cao.
+2. **Không Khí Noel Ấm Cúng Trong 6 Phòng:**
+   - **Phòng khách (`khach`):** Cây thông Noel mini với chùm đèn LED 3 màu nhấp nháy chuyển sắc đỏ/vàng/xanh, lò sưởi gạch có lửa đỏ cam bập bùng.
+   - **Phòng ngủ (`ngu`):** Bít tất Noel đỏ viền trắng treo đầu giường, cửa sổ đêm có tuyết rơi li ti.
+   - **Phòng bếp (`bep`):** Nồi súp nóng hổi bốc 3 làn khói mờ ảo, lò nướng bánh Giáng sinh.
+   - **Phòng làm việc (`lamviec`):** Màn hình PC phát ánh sáng cyan nhấp nháy, cốc cà phê bốc khói, lịch Noel đỏ.
+   - **Phòng ảnh (`anh`):** Giá vẽ gỗ có gắn nơ đỏ, 5 khung ảnh kỷ niệm rực rỡ.
+   - **Sảnh (`sanh`):** Thảm đỏ hoa văn Giáng Sinh, vòng nguyệt quế treo cửa.
+3. **Cầu thang gỗ nối tầng (`STAIR`):**
    - Vị trí từ `x: 76, y: 98` (Sảnh tầng 1) lên `x: 108, y: 54` (Phòng ảnh tầng 2).
-   - Khi người dùng bấm chọn phòng ở tầng khác, chú heo chạy dọc theo cầu thang gỗ để di chuyển giữa 2 tầng (`stairsY(x)`).
-2. **Chi tiết nội thất phòng (`room` Canvas 176×96):**
-   - Nội thất đồ gỗ, thiết bị, đèn trần vẽ pixel tỉ mỉ 1:1.
-   - Tranh ảnh pixel 24×24 mô phỏng các khoản chi: phở, cà phê, nồi lẩu, grab, rau củ, bánh mì, áo sơ mi, hộp quà, đồng xu vàng tiết kiệm.
-   - Chú heo xuất hiện trong phòng đang chọn, tự do đi lại và biểu cảm vui vẻ.
-3. **Thẻ Dữ Liệu Thực Tế Phía Dưới:**
-   - Khi chọn phòng nào, thẻ chi tiết bên dưới tự động hiển thị số tiền đã chi, số món, % ngân sách của danh mục tương ứng trong tháng.
-   - Người dùng có thể bấm chuyển nhanh sang các chế độ xem nâng cao: `[Cuốn Album | Phân Tích Data | Tạp Chí Anime]`.
+   - Khi người dùng bấm chọn phòng ở tầng khác trên `#map`, chú heo chạy dọc theo cầu thang gỗ để di chuyển giữa 2 tầng (`stairsY(x)`).
 
 ---
 
-## 3. TƯƠNG TÁC ĐIỀU HƯỚNG LIÊN TAB
+## 3. HỆ THỐNG TƯƠNG TÁC TOUCH ACTIONS 2 CẤP ĐỘ
+
+1. **Cấp độ 1 (Mặt cắt 2 tầng `#map`):**
+   - Chạm vào bất kỳ phòng nào trên mặt cắt $\to$ Chú heo leo cầu thang chạy sang phòng đó và đồng bộ phòng chi tiết bên dưới.
+2. **Cấp độ 2 (Phòng chi tiết `#room`):**
+   - Chạm trực tiếp vào các đồ vật trong phòng để kích hoạt hành động đặc biệt:
+     - **Giường ngủ (`ngu`):** Heo nhảy lên giường ngủ khò khò, chữ `Z z z` bay lên: *"Khò khò... Giường êm quá! Noel ngủ ngon lành 💤"*.
+     - **Nồi súp (`bep`):** Heo chạy lại hít hà, pose ăn ngon miệng: *"Thơm nức mũi! Nấu ăn tại nhà tiết kiệm được bao nhiêu tiền 🍲"*.
+     - **Bàn làm việc / PC (`lamviec`):** Màn hình chớp sáng, heo ngồi gõ phím: *"Cày deadline săn thưởng cuối năm sắm quà Noel nào! 💻"*.
+     - **Sofa / Cây thông (`khach`):** Đèn Noel lấp lánh, heo nhảy vui vẻ thả tim: *"Phòng khách ấm áp ghê! Noel này ở nhà chill là nhất 🎄"*.
+     - **Tường ảnh (`anh`):** Heo ngắm nghía tranh ảnh: *"Từng bức ảnh ghi dấu những bữa ăn ngon và kỷ niệm đẹp 📸"*.
+     - **Hũ tiền / Kệ tủ (`sanh`):** Đồng xu nảy lên: *"Tích tiểu thành đại! Ví Heo Con luôn đồng hành cùng bạn 🪙"*.
+     - **Chạm vào Heo:** Heo nhảy tưng bừng: *"Ủn ỉn! Heo yêu bạn nhất trần đời! ❤️"*.
+
+---
+
+## 4. TƯƠNG TÁC ĐIỀU HƯỚNG LIÊN TAB
 
 - Từ **Sân Vườn (Tab 0)**: Bấm vào cửa chính nhà hoặc nút "Vào nhà" $\to$ Chú heo chạy tới trước cửa, cửa mở trượt sang 2 bên reo *"Vào nhà thôi! 🏠"* $\to$ Tự động chuyển sang **Tab 1: Nhà Heo**.
-- Từ **Nhà Heo (Tab 1)**: Có thể bấm vào Tab `[🌱 Sân Vườn]` trên thanh điều hướng dưới cùng để quay lại sân vườn thảnh thơi.
+- Từ **Nhà Heo (Tab 1)**: Nút "Ra vườn chơi" trên header hoặc Tab `[🌱 Sân Vườn]` trên thanh điều hướng để quay lại sân vườn thảnh thơi.

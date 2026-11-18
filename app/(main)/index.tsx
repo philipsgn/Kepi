@@ -1042,7 +1042,10 @@ export default function MainAppScreen() {
 
         {/* ================= PAGE 1: THỐNG KÊ (ALBUM THEO THÁNG) ================= */}
         <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}>
-          <StatsView onNavigateToCamera={() => handleTabPress(2)} />
+          <StatsView
+            onNavigateToCamera={() => handleTabPress(2)}
+            onNavigateHome={() => handleTabPress(0)}
+          />
         </View>
 
         {/* ================= PAGE 2: CAMERA + HISTORY CONTINUOUS ================= */}

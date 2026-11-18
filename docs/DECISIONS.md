@@ -627,3 +627,12 @@
       2. **Nhà Của Heo 6 Phòng (Tab Thống Kê / Tab 1):** Port 1:1 code đồ họa từ prototype gồm mặt cắt ngôi nhà 2 tầng 6 phòng (Canvas 176×108), cầu thang gỗ nối 2 tầng, chú heo di chuyển giữa các phòng khi chọn phòng; dải chọn phòng; chi tiết nội thất phòng (Canvas 176×96) với đầy đủ tranh ảnh pixel treo tường.
       3. **Kết Nối Dữ Liệu Chi Tiêu Thực Tế Từng Phòng:** Bếp (chi Ăn uống), Phòng khách (chi Mua sắm), Phòng làm việc (chi Đi lại), Phòng ngủ (khoản tiền Cứu ví / Đã giữ lại), Phòng ảnh (Album ảnh món ăn & hóa đơn thật), Sảnh (Tổng quan ngân sách tháng).
       4. **Chuẩn Hóa Điều Hướng 5 Tab:** Tab 0 `[🌱 Sân Vườn]` (icon Trees/Sprout) $\leftrightarrow$ Tab 1 `[🏠 Nhà Heo]` (icon Home - Nhật ký thống kê & 6 phòng). Chạm cửa nhà trên sân vườn sẽ chạy hoạt ảnh mở cửa và chuyển ngay sang Tab Nhà Heo.
+
+  - **Quyết định 119 (17/11/2026): Nâng Cấp Toàn Diện Nhà Của Heo v2 (Sprite Heo Con Siêu Cute, Không Khí Noel Ấm Cúng & Hệ Thống Tương Tác Touch Actions 2 Cấp Độ):**
+    - *Bối Cảnh & Bản Chất:* Sau khi triển khai bước đầu Tab Nhà Heo, người dùng nhận xét sprite chú heo cần dễ thương hơn và nội thất cần nhiều chi tiết vui nhộn, giàu tương tác hơn. Grill-Me phê duyệt phương án nâng cấp toàn diện:
+      1. **Port 1:1 Sprite Heo Con Siêu Cute Chuẩn Pixel:** Thay thế hoàn toàn thuật toán vẽ bằng hàm `shape()` và bảng màu `PAL` chuẩn: viền mực `#4B2B21`, má hồng phúng phính `#EE90A6`, vòng chuông cổ vàng `#F4B93B`, mắt tròn long lanh có đốm sáng trắng `#FFF`, tai rung rinh, đuôi xoắn ngoe nguẩy, hoạt ảnh nhún nhảy `happy` thả tim bay lơ lửng, ngủ cuộn tròn có chữ `Z z z` bay lên.
+      2. **Không Khí Noel Ấm Cúng Trong 6 Phòng:** Cây thông Noel mini với chùm đèn LED 3 màu nhấp nháy, lò sưởi bập bùng lửa đỏ trong phòng khách, bít tất đỏ viền trắng treo đầu giường, cửa sổ đêm có tuyết rơi li ti, nồi súp bốc khói 3 làn mờ ảo trên bếp, màn hình máy tính phát ánh sáng cyan nhấp nháy.
+      3. **Hệ Thống Tương Tác Chạm Đồ Vật (Touch Actions 2 Cấp Độ):**
+         - Cấp 1 (Mặt cắt 2 tầng `#map`): Chạm vào phòng nào, heo tự động leo cầu thang gỗ `STAIR` chạy sang phòng đó.
+         - Cấp 2 (Phòng chi tiết `#room`): Chạm trực tiếp vào Giường (`ngu`), Nồi súp (`bep`), Bàn PC (`lamviec`), Sofa/Cây thông (`khach`), Tường ảnh (`anh`), Hũ tiền (`sanh`), hoặc chạm vào chính Chú Heo để kích hoạt hoạt ảnh sinh động và câu thoại hóm hỉnh tương ứng.
+      4. **Tinh Giản Giao Diện (User-Driven):** Bỏ nút "Dẫn tham quan" tự động, giữ header sạch sẽ với thẻ Tháng, tiêu đề Nhà Của Heo và nút "Ra vườn chơi" chuyển mượt về Tab 0.

@@ -42,6 +42,7 @@ const PREFS_STORAGE_KEY = '@vi_locket_home_preferences';
 
 interface StatsViewProps {
   onNavigateToCamera?: () => void;
+  onNavigateHome?: () => void;
 }
 
 type FilterType = 'ALL' | 'EXPENSE' | 'INCOME' | 'SKIPPED' | 'UNPRICED' | string;
@@ -60,7 +61,7 @@ interface RowData {
  * - Danh mục gộp: "Ăn uống".
  * - Khoảng đệm đáy chuẩn xác với useBottomInset().
  */
-export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
+export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavigateHome }) => {
   const insets = useSafeAreaInsets();
   const { tokens } = useTheme();
   const { contentBottomPadding } = useBottomInset();
@@ -550,6 +551,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera }) => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setSelectedHouseRoom(r);
               }}
+              onExitToGarden={onNavigateHome}
             />
           </View>
 

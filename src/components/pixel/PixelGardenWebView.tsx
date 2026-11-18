@@ -1,5 +1,5 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import { Platform, StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback } from 'react';
+import { Platform, StyleSheet, View, ViewStyle, StyleProp, useWindowDimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
@@ -14,6 +14,7 @@ export interface PixelGardenWebViewRef {
 interface PixelGardenWebViewProps {
   spent: number;
   limit: number;
+  streak?: number;
   onPigTap?: (quote: string) => void;
   onEnterHouse?: () => void;
   style?: StyleProp<ViewStyle>;
@@ -22,8 +23,13 @@ interface PixelGardenWebViewProps {
 export const PixelGardenWebView = forwardRef<
   PixelGardenWebViewRef,
   PixelGardenWebViewProps
->(({ spent, limit, onPigTap, onEnterHouse, style }, ref) => {
+>(({ spent, limit, streak = 24, onPigTap, onEnterHouse, style }, ref) => {
   const webViewRef = useRef<any>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  // Lấy chiều rộng màn hình để tính explicit height (tránh canvas collapse trên iOS Fabric offscreen)
+  const { width: winWidth } = useWindowDimensions();
+  // Tỉ lệ vườn: 176×132 → height = width × (132/176)
+  const gardenHeight = Math.round(winWidth * (132 / 176));
 
   useImperativeHandle(ref, () => ({
     feedPig: () => {
@@ -44,6 +50,19 @@ export const PixelGardenWebView = forwardRef<
     },
   }));
 
+  // Sync budget/streak live qua injectJavaScript thay vì reload WebView
+  useEffect(() => {
+    if (!isLoaded) return;
+    const code = `if (window.setBudget) { window.setBudget(${spent}, ${limit}); }`;
+    webViewRef.current?.injectJavaScript(code);
+  }, [spent, limit, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const code = `if (window.updateStreak) { window.updateStreak(${streak}); }`;
+    webViewRef.current?.injectJavaScript(code);
+  }, [streak, isLoaded]);
+
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     const handleWebMsg = (e: any) => {
@@ -60,7 +79,10 @@ export const PixelGardenWebView = forwardRef<
     return () => window.removeEventListener('message', handleWebMsg);
   }, [onPigTap, onEnterHouse]);
 
-  const htmlSource = `
+  // ⚡ useMemo: HTML được tạo 1 lần duy nhất với initial values.
+  // Budget/streak updates sau đó được push qua injectJavaScript.
+  // Điều này ngăn WebView reload khi parent re-render (fix màn trắng).
+  const htmlSource = useMemo(() => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -124,39 +146,47 @@ export const PixelGardenWebView = forwardRef<
       border-bottom: 3px solid #2B2118;
       transform: translateX(-50%) rotate(45deg);
     }
-    .tl {
+    .scene .tr {
       position: absolute;
-      left: 8px;
-      top: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      right: 10px;
+      top: 10px;
       line-height: 1.2;
       z-index: 5;
     }
-    .btn {
+    .cam {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 4px;
-      background: #FFFBF1;
-      color: #2B2118;
-      border: 2px solid #2B2118;
+      gap: 6px;
+      background: #2B2118;
+      color: #FFFBF1;
+      border: 3px solid #2B2118;
       border-radius: 999px;
-      padding: 4px 10px;
-      font-weight: 800;
-      font-size: 11px;
-      box-shadow: 0 2px 0 #2B2118;
-      cursor: pointer;
+      padding: 6px 14px;
+      font: 800 13px/1.2 sans-serif;
+      box-shadow: 0 3px 0 #2B2118;
     }
-    .btn.round {
-      width: 28px;
-      height: 28px;
-      padding: 0;
+    .coin {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #F4B93B;
+      box-shadow: inset 0 0 0 2px #B97A14;
     }
-    .btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 0 #2B2118;
+    .state {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      line-height: 1.2;
+      font: 800 12px sans-serif;
+      color: #2B2118;
+      background: #FFFBF1;
+      border: 3px solid #2B2118;
+      border-radius: 999px;
+      padding: 5px 12px;
+      box-shadow: 0 3px 0 #2B2118;
+      cursor: default;
+      pointer-events: none;
+      z-index: 5;
     }
   </style>
 </head>
@@ -164,12 +194,10 @@ export const PixelGardenWebView = forwardRef<
   <div class="scene" id="scene">
     <canvas id="garden" width="176" height="132"></canvas>
     <div class="bubble" id="bubble"></div>
-    <div class="tl">
-      <button class="btn round" type="button" id="pen" aria-label="Vào nhà">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </button>
-      <button class="btn" type="button" id="penBtn">Vào nhà</button>
+    <div class="tr">
+      <span class="cam"><i class="coin"></i><b id="cam">${streak || 24}</b> cám</span>
     </div>
+    <div class="state" id="state" role="status" aria-live="polite">Nắng · sân · đứng ngắm</div>
   </div>
 
 <script>
@@ -185,6 +213,7 @@ const C={grass1:'#86B866',grass2:'#74A659',grass3:'#9CCB78',wall:'#F2DFA8',wallS
   pad:'#4F9A4F',stone:'#CFC6B0',stoneDark:'#A99F87',trunk:'#6B4426',leaf1:'#4E9A47',leaf2:'#3E8139',leafLight:'#72B95B',
   bamboo:'#D6B66A',bambooDark:'#A98A45',red:'#E0452B',gold:'#F4B93B'};
 const PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',h:'#FFE3E8',k:'#2B2118',g:'#F4B93B',G:'#B97A14',w:'#FFFFFF'};
+const WINS=[[11,14,22,13],[47,14,22,13],[83,14,22,13],[11,41,22,13],[83,41,22,13]];
 const R=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
 const E=(c,cx,cy,rx,ry,col)=>{c.fillStyle=col;for(let y=-ry;y<=ry;y++)for(let x=-rx;x<=rx;x++)if(x*x/(rx*rx)+y*y/(ry*ry)<=1)c.fillRect(cx+x,cy+y,1,1)};
 function shape(c,rows,fill,ox,oy,outline=true){
@@ -212,118 +241,67 @@ const bg=mk(W,H,(c)=>{
   R(c,112,44,64,2,C.woodDark);R(c,112,53,64,2,C.woodDark);
   for(let x=112;x<176;x+=4){const t=40+((x/4)%3)*2;R(c,x,t,3,60-t,C.bamboo);R(c,x+2,t,1,60-t,C.bambooDark);R(c,x,t,3,1,'#EAD08A')}
   R(c,112,60,64,2,'rgba(40,60,20,.25)');
-  // ====== NGÔI NHÀ 2 TẦNG CHUẨN PIXEL (THEO TEMPLATE & NOEL) ======
-  // 1. Tường chính toàn bộ nhà x: 0..114, y: 10..50
-  R(c,0,10,114,40,C.wall);
-  R(c,0,44,114,6,C.wallShade);
-  for(let i=0;i<45;i++)R(c,(rand()*110)|0,11+((rand()*36)|0),2,1,'#EAD392');
-
-  // 2. Mái ngói đỏ 2 tầng trên đỉnh (y: 0..11)
+  // ====== NGÔI NHÀ 2 TẦNG CHUẨN PIXEL (THEO PROTOTYPE NHÀ HEO CON) ======
+  // nhà phố 2 tầng, 3 gian: khớp 6 phòng bên trong (trên: làm việc | ảnh | ngủ, dưới: bếp | sảnh | khách)
+  R(c,0,12,116,51,C.wall);R(c,0,50,116,8,C.wallShade);
+  for(let i=0;i<46;i++)R(c,2+((rand()*110)|0),14+((rand()*42)|0),2,1,'#EAD392');
+  // mái ngói
   R(c,0,0,116,11,C.roof);
-  for(let y=2;y<9;y+=3){
-    R(c,0,y,116,1,C.roofDark);
-    for(let x=(y%2?0:3);x<116;x+=6)R(c,x,y+1,1,2,C.roofDark);
-  }
+  // Viền tuyết mỏng trên chóp mái ngói đỏ (Không khí Noel)
+  R(c,0,0,116,2,'#FFFFFF');
+  for(let x=0;x<116;x+=5)R(c,x,2,2,1,'#FFFFFF');
+  for(let y=2;y<9;y+=3){R(c,0,y,116,1,C.roofDark);for(let x=(y%2?0:3);x<116;x+=6)R(c,x,y+1,1,2,C.roofDark)}
   for(let x=0;x<116;x+=6)R(c,x,0,3,1,C.roofLight);
-  // Ống khói nhỏ trên nóc (x: 20..26, y: 0..4)
-  R(c,20,0,6,5,'#8E2816');R(c,19,0,8,2,'#5E1609');R(c,21,1,4,1,'#B93220');
-
-  // 3. TẦNG 2: 2 Cửa sổ lớn (x: 10..42 và x: 72..104, y: 12..24)
-  // Cửa sổ tầng 2 trái:
-  R(c,10,12,32,12,'#4B2B21');
-  R(c,11,13,30,10,'#FFF4D0');
-  // Chấn song chia 6 ô
-  R(c,21,13,1,10,'#4B2B21');R(c,31,13,1,10,'#4B2B21');R(c,11,18,30,1,'#4B2B21');
-  R(c,12,14,8,3,'#FFE699');R(c,22,14,8,3,'#FFE699');R(c,32,14,8,3,'#FFE699');
-
-  // Cửa sổ tầng 2 phải:
-  R(c,72,12,32,12,'#4B2B21');
-  R(c,73,13,30,10,'#FFF4D0');
-  // Chấn song chia 6 ô
-  R(c,83,13,1,10,'#4B2B21');R(c,93,13,1,10,'#4B2B21');R(c,73,18,30,1,'#4B2B21');
-  R(c,74,14,8,3,'#FFE699');R(c,84,14,8,3,'#FFE699');R(c,94,14,8,3,'#FFE699');
-
-  // 4. DẦM GỖ CHIA TẦNG & LAN CAN BAN CÔNG (y: 24..28)
-  R(c,0,24,115,4,'#8A5A34');
-  R(c,0,24,115,1,'#B07A48');
-  R(c,0,27,115,1,'#4B2B21');
-  // Hàng con tiện lan can
-  for(let x=6;x<110;x+=8){
-    R(c,x,22,2,3,'#5E3A20');
-    R(c,x,21,3,1,'#8A5A34');
-  }
-
-  // 5. TẦNG 1:
-  // Cột gỗ chịu lực bên hông nhà
-  R(c,110,11,5,42,C.wood);R(c,113,11,2,42,C.woodDark);
-
-  // 5.1. Cửa chính đôi ở giữa (x: 44..70, y: 26..50)
-  R(c,44,26,26,24,'#4B2B21'); // Khung cửa ngoài
-  R(c,46,28,11,22,'#8A5A34');R(c,59,28,11,22,'#8A5A34'); // 2 cánh cửa gỗ
-  R(c,57,28,2,22,'#5E3A20'); // Khe giữa
-  for(let y=31;y<48;y+=4){
-    R(c,47,y,9,1,'#C99A6B');R(c,60,y,9,1,'#C99A6B');
-  }
-  // 2 tay nắm cửa vàng
-  R(c,55,38,1,3,C.gold);R(c,60,38,1,3,C.gold);
-
-  // Đèn lồng đỏ trên cửa chính (x: 55..59, y: 21..25)
-  R(c,56,20,2,2,'#4B2B21');
-  R(c,54,22,6,5,C.red);R(c,55,21,4,1,C.gold);R(c,55,27,4,1,C.gold);R(c,56,28,2,2,C.gold);
-
-  // 5.2. Cửa sổ bên trái (Phòng làm việc - bàn + máy tính): x: 8..40, y: 28..46
-  R(c,8,28,32,18,'#4B2B21'); // Khung gỗ
-  R(c,10,30,28,14,'#D2E3F2'); // Tường trong phòng
-  // Chấn song rèm xanh
-  R(c,7,28,3,18,'#4E9A6B');R(c,38,28,3,18,'#4E9A6B');
-  // Bàn làm việc & Máy tính bên trong
-  R(c,12,39,24,5,'#B07A48');R(c,14,41,2,3,'#8A5A34');
-  R(c,18,33,12,7,'#2B2118');R(c,19,34,10,5,'#7FD4E0'); // Màn hình PC cyan
-  R(c,23,40,4,1,'#FFFFFF'); // Bàn phím
-
-  // 5.3. Cửa sổ bên phải (Phòng khách - sofa hồng): x: 74..106, y: 28..46
-  R(c,74,28,32,18,'#4B2B21'); // Khung gỗ
-  R(c,76,30,28,14,'#DCEBC9'); // Tường trong phòng
-  // Chấn song rèm xanh
-  R(c,73,28,3,18,'#4E9A6B');R(c,104,28,3,18,'#4E9A6B');
-  // Sofa hồng xinh xắn bên trong
-  R(c,78,35,24,6,'#E86F8B'); // Lưng ghế
-  R(c,76,39,28,6,'#F08DA4'); // Đệm ngồi
-  R(c,80,36,5,5,'#F4B93B'); // Gối tựa vàng
-  R(c,76,43,2,3,'#B5603A');R(c,102,43,2,3,'#B5603A'); // Chân ghế
-
-  // 6. Hiên nhà (y: 50..59)
-  R(c,0,50,114,9,'#D9A878');
-  for(let x=0;x<114;x+=9)R(c,x,50,1,9,'#C48F63');
-  R(c,0,50,114,1,C.woodLight);R(c,0,59,114,2,'#A87650');R(c,0,61,114,2,'rgba(40,30,10,.18)');
-
-  // Dây đèn tròn Giáng Sinh giăng dọc mái hiên (x=8..106)
-  const bulbCols=['#E0452B','#F4B93B','#3E8139','#F4B93B','#E0452B','#FFF08A'];
-  for(let bx=8;bx<=106;bx+=8){
-    const col=bulbCols[((bx/8)|0)%bulbCols.length];
-    R(c,bx,49,1,2,'#4B2B21');
-    R(c,bx-1,51,3,3,col);
-    R(c,bx,51,1,1,'#FFFFFF');
-  }
-
-  // Cây Thông Noel nhỏ trên hiên (Merry Christmas)
-  R(c,44,52,8,6,'#B5603A');R(c,43,51,10,2,'#C97248'); // Chậu gỗ
-  R(c,47,49,2,3,'#5E3A20'); // Gốc thông
-  // Tầng 3 (rộng nhất): y=45..49, x=38..58
-  for(let y=0;y<5;y++){const w=12+y*2;R(c,48-((w/2)|0),45+y,w,1,'#2D5A27')}
-  R(c,39,49,18,1,'#3E8139');
-  // Tầng 2 (vừa): y=41..45, x=41..55
-  for(let y=0;y<5;y++){const w=8+y*2;R(c,48-((w/2)|0),41+y,w,1,'#2D5A27')}
-  R(c,42,45,12,1,'#3E8139');
-  // Tầng 1 (đỉnh): y=37..41, x=44..52
-  for(let y=0;y<5;y++){const w=4+y*2;R(c,48-((w/2)|0),37+y,w,1,'#2D5A27')}
-  R(c,45,41,6,1,'#3E8139');
-  // Ngôi sao vàng Noel trên đỉnh ⭐ (x=46..50, y=32..36)
-  R(c,47,33,3,3,'#F4B93B');R(c,48,32,1,5,'#FFF08A');R(c,46,34,5,1,'#FFF08A');
-  // Quả châu trang trí Noel
-  R(c,42,47,2,2,'#E0452B');R(c,52,47,2,2,'#F4B93B');
-  R(c,45,43,2,2,'#F4B93B');R(c,49,43,2,2,'#E0452B');
-  R(c,47,39,2,2,'#FFFFFF');
+  R(c,18,0,8,2,C.roofDark);R(c,0,11,116,2,'rgba(60,35,20,.30)');
+  // Tuyết đọng mép mái
+  for(let x=2;x<114;x+=7)R(c,x,11,3,1,'#FFFFFF');
+  // cột hai bên
+  R(c,0,11,3,52,C.wood);R(c,2,11,1,52,C.woodDark);R(c,112,11,4,52,C.wood);R(c,114,11,2,52,C.woodDark);
+  // tầng 2: ba cửa sổ, màu kính = màu tường phòng bên trong
+  [[11,'#D2E3F2',0],[47,'#E9DCF2',1],[83,'#F8D6DF',2]].forEach(([x,col,k])=>{
+    R(c,x-5,13,4,15,'#4E9A6B');R(c,x+23,13,4,15,'#4E9A6B');
+    for(let y=15;y<27;y+=3){R(c,x-4,y,2,1,'#3C7F55');R(c,x+24,y,2,1,'#3C7F55')}
+    R(c,x-1,13,24,15,C.woodDark);R(c,x,14,22,13,col);
+    if(k===0){R(c,x+1,24,20,2,'#B07A48');R(c,x+13,20,6,4,'#2B2118');R(c,x+14,21,4,2,'#7FD4E0')}
+    else if(k===1){R(c,x+2,15,5,5,'#F4B93B');R(c,x+9,15,5,5,'#F08DA4');R(c,x+16,15,5,5,'#6DA9D9')}
+    else{R(c,x+1,21,20,5,'#8FC1E3');R(c,x+1,19,6,4,'#F9B8C4')}
+    R(c,x+10,14,1,13,C.woodDark);R(c,x,20,22,1,C.woodDark);R(c,x+1,14,4,2,'rgba(255,255,255,.55)');
+  });
+  // ban công
+  R(c,3,29,110,2,'#8A5A34');for(let x=4;x<112;x+=3)R(c,x,31,1,3,'#4B2B21');
+  R(c,0,33,116,3,'#8A5A34');R(c,0,33,116,1,C.woodLight);R(c,0,36,116,2,'rgba(40,25,10,.22)');
+  // tầng 1: bếp và phòng khách ở hai bên cửa
+  [[11,'#F6D9C0',0],[83,'#DCEBC9',1]].forEach(([x,col,k])=>{
+    R(c,x-5,40,4,16,'#4E9A6B');R(c,x+23,40,4,16,'#4E9A6B');
+    for(let y=42;y<54;y+=3){R(c,x-4,y,2,1,'#3C7F55');R(c,x+24,y,2,1,'#3C7F55')}
+    R(c,x-1,40,24,16,C.woodDark);R(c,x,41,22,13,col);
+    if(k===0){R(c,x+2,43,6,11,'#DDE6EE');R(c,x+10,48,11,6,'#A8754A');R(c,x+13,45,5,3,'#8B8B93')}
+    else{R(c,x+3,48,16,6,'#F08DA4');R(c,x+4,45,14,4,'#E86F8B')}
+    R(c,x+10,41,1,13,C.woodDark);R(c,x+1,41,4,2,'rgba(255,255,255,.5)');R(c,x-2,55,26,2,C.woodLight);
+  });
+  // cửa chính (sảnh), mái che nhỏ, đèn lồng
+  R(c,45,35,27,3,C.roof);R(c,45,38,27,1,'rgba(60,35,20,.3)');
+  // Tuyết mỏng mái hiên cửa chính
+  R(c,45,35,27,1,'#FFFFFF');
+  R(c,47,38,22,21,C.woodDark);R(c,49,40,9,18,C.wood);R(c,59,40,9,18,C.wood);R(c,58,40,1,18,C.woodDark);
+  for(let y=45;y<57;y+=3){R(c,49,y,9,1,'#6B4426');R(c,59,y,9,1,'#6B4426')}
+  R(c,51,42,5,6,'#BFE3E8');R(c,61,42,5,6,'#BFE3E8');R(c,56,50,1,2,C.gold);R(c,60,50,1,2,C.gold);
+  R(c,74,37,1,2,C.woodDark);R(c,72,39,5,6,C.red);R(c,73,38,3,1,C.gold);R(c,73,45,3,1,C.gold);R(c,74,46,1,2,C.gold);
+  // Vòng hoa nguyệt quế Noel treo trên cửa chính
+  E(c,58,37,4,4,'#2D5A27');E(c,58,37,2,2,'#4E9A47');R(c,57,36,2,2,'#E0452B');R(c,58,35,1,1,'#F4B93B');
+  // Chậu cây thông Noel mini bên hiên nhà (Góc trái x: 38..48, y: 44..58)
+  R(c,38,52,8,6,'#8A5A34');R(c,37,51,10,1,'#B07A48'); // Chậu gỗ
+  E(c,42,48,6,4,'#1E4D2B');E(c,42,47,5,3,'#2D5A27'); // Tầng tán 1
+  E(c,42,43,4,3,'#2D5A27');E(c,42,42,3,2,'#3E8139'); // Tầng tán 2
+  E(c,42,39,2,2,'#3E8139'); // Đỉnh thông
+  R(c,41,37,3,2,'#F4B93B');R(c,42,36,1,3,'#FFE08A'); // Ngôi sao vàng
+  R(c,40,46,2,2,'#E0452B');R(c,44,44,2,2,'#F4B93B');R(c,41,43,1,1,'#60A5FA'); // Hạt châu Noel
+  // Chậu cây cam bên phải cửa
+  R(c,70,51,7,7,'#C97248');E(c,73,48,4,4,C.leaf2);E(c,75,47,3,3,C.leafLight);
+  // nền hiên gạch, bậc thềm, đá lót tới sân
+  R(c,0,58,116,5,'#D9A878');for(let x=0;x<116;x+=9)R(c,x,58,1,5,'#C48F63');
+  R(c,0,58,116,1,C.woodLight);R(c,0,63,116,2,'#A87650');R(c,0,65,116,2,'rgba(40,30,10,.18)');
+  R(c,46,62,24,3,'#CFC6B0');E(c,56,67,4,2,C.stone);E(c,62,69,4,2,C.stone);
   // sân gạch hoa
   const px0=20,py0=72;
   R(c,px0-2,py0-2,76,34,'#B9AE92');
@@ -399,16 +377,40 @@ function zGlyph(c,x,y){[[0,0],[1,0],[2,0],[1,1],[0,2],[1,2],[2,2]].forEach(([a,b
 
 const garden=document.getElementById('garden'),ctx=garden.getContext('2d');
 const pc=document.createElement('canvas');pc.width=24;pc.height=20;const pcx=pc.getContext('2d');
-const MINX=26,MAXX=164,MINY=78,MAXY=118;
+// Nâng giới hạn MINX = 30 để heo không chạm vào mép tán chuối bên trái khi ngủ (Chống đè cỏ)
+const MINX=30,MAXX=164,MINY=78,MAXY=118;
 const pig={x:88,y:98,face:1,mode:'idle',t:0,dur:2,tx:0,ty:0,frame:0,ft:0,after:null,jump:0};
 const blocked=(x,y)=>{const dx=(x-136)/31,dy=(y-106)/13;return dx*dx+dy*dy<1};
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
-let tod=(()=>{const h=new Date().getHours();return h>=6&&h<16?'day':h>=16&&h<19?'dusk':'night'})();
+
+// Tự động thay đổi thời gian theo giờ thực tế (Không cho bấm đổi thủ công)
+function getAutoTOD(){
+  const h=new Date().getHours();
+  return (h>=6 && h<17) ? 'day' : (h>=17 && h<19) ? 'dusk' : 'night';
+}
+let tod=getAutoTOD();
 const TOD={day:{label:'Nắng',tint:null},dusk:{label:'Chiều',tint:'rgba(255,140,60,.20)'},night:{label:'Đêm',tint:'rgba(20,30,90,.44)'}};
 const fish=[{a:0,s:.7,rx:14,ry:5},{a:3,s:-.5,rx:10,ry:3}];
 const flies=Array.from({length:9},(_,i)=>({x:20+((i*37)%140),y:70+((i*23)%50),p:i*1.7}));
 
-function setMode(m,dur,after){pig.mode=m;pig.t=0;pig.dur=dur||0;pig.after=after||null}
+// Tự động kiểm tra cập nhật cảnh trời mỗi 30s
+setInterval(()=>{
+  const nextTod=getAutoTOD();
+  if(nextTod!==tod){
+    tod=nextTod;
+    updateLabel();
+  }
+}, 30000);
+
+const MODETXT={idle:'đứng ngắm',walk:'đi dạo',sleep:'ngủ',eat:'ăn cám',happy:'vui'};
+function updateLabel(){
+  const s=document.getElementById('state');if(!s)return;
+  const tn={day:'Nắng',dusk:'Chiều',night:'Đêm'}[tod]||'Nắng';
+  const mn=MODETXT[pig.mode]||'đứng ngắm';
+  s.textContent=tn+' · sân · '+mn;
+}
+
+function setMode(m,dur,after){pig.mode=m;pig.t=0;pig.dur=dur||0;pig.after=after||null;updateLabel()}
 function walkTo(x,y,after){pig.tx=x;pig.ty=y;pig.after=after||null;pig.mode='walk';pig.t=0}
 function pickTarget(){for(let i=0;i<20;i++){const x=MINX+Math.random()*(MAXX-MINX),y=MINY+Math.random()*(MAXY-MINY);
   if(!blocked(x,y)&&Math.hypot(x-pig.x,y-pig.y)>18)return{x,y}}return null}
@@ -534,8 +536,25 @@ function drawPig(t){
   if(happy){const p=Math.min(1,pig.t/pig.dur);ctx.globalAlpha=1-p*.6;heart(ctx,Math.round(pig.x+2),Math.round(pig.y-28-p*6),'#E0452B');ctx.globalAlpha=1}
 }
 
+function drawDoor(c){
+  if(doorOpen<=0)return;
+  R(c,49,40,18,18,'#2B1A10');R(c,51,43,14,15,'#F7D58A');R(c,51,43,14,4,'#FBE7B0');R(c,46,39,4,20,'#5E3A20');
+}
+
 function draw(t){
+  // 1. Reset ma trận biến đổi cọ vẽ & xóa màn hình (Fix triệt để lỗi biến dạng vạch pixel kéo dài ở Ảnh 1)
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
   ctx.drawImage(bg,0,0);
+  if(doorOpen > 0) drawDoor(ctx);
+
+  // Chuỗi đèn LED Noel nhấp nháy 4 màu dọc dầm ban công tầng 2 (y: 35)
+  const ledCols=['#E0452B','#F4B93B','#5E9A57','#60A5FA'];
+  for(let i=0;i<18;i++){
+    const col=ledCols[(i+Math.floor(t*3))%ledCols.length];
+    R(ctx,6+i*6,34,2,2,col);
+  }
 
   // Cá bơi và ăn mồi
   const hasFood = fishFood.some(f => !f.eaten);
@@ -570,7 +589,12 @@ function draw(t){
     }
   });
 
-  [{b:106,f:()=>ctx.drawImage(bananaSpr,-4,48)},{b:86,f:()=>ctx.drawImage(stoolSpr,96,70)},{b:pig.y,f:()=>drawPig(t)}]
+  // Sắp xếp chiều sâu (Y-sorting): Đưa fg vào danh sách vẽ theo chiều sâu pig.y
+  // Khi heo ngủ hoặc đi dạo (y < 124), thân heo luôn nổi hoàn toàn trên lớp cỏ fg
+  [{b:86,f:()=>ctx.drawImage(stoolSpr,96,70)},
+   {b:106,f:()=>ctx.drawImage(bananaSpr,-4,48)},
+   {b:pig.y,f:()=>drawPig(t)},
+   {b:126,f:()=>ctx.drawImage(fg,0,0)}]
     .sort((a,b)=>a.b-b.b).forEach(i=>i.f());
 
   if(apples.length > 0){
@@ -617,51 +641,16 @@ function draw(t){
     drawWaterCan(ctx, watering.x, watering.y);
   }
 
-  // Khi cửa mở (doorOpen > 0): vẽ cửa mở trượt để lộ lối vào tối
-  if(doorOpen > 0){
-    R(ctx, 46, 28, 22, 22, '#2B1A10');
-    R(ctx, 48, 30, 18, 20, '#F7D58A');
-    R(ctx, 48, 30, 18, 5, '#FBE7B0');
-    R(ctx, 40, 27, 6, 23, '#8A5A34');
-    R(ctx, 68, 27, 6, 23, '#8A5A34');
-  }
-
-  ctx.drawImage(fg,0,0);
   const T=TOD[tod];
   if(T.tint){R(ctx,0,0,W,H,T.tint)}
   if(tod==='night'){
-    // 2 Cửa sổ lớn tầng 2 bừng sáng ánh đèn vàng ấm áp
-    E(ctx, 26, 18, 16, 8, 'rgba(255, 230, 100, 0.45)');
-    E(ctx, 88, 18, 16, 8, 'rgba(255, 230, 100, 0.45)');
-    // 2 Cửa sổ lớn tầng 1 bừng sáng ánh đèn vàng ấm áp
-    E(ctx, 24, 37, 16, 9, 'rgba(255, 230, 100, 0.42)');
-    E(ctx, 90, 37, 16, 9, 'rgba(255, 230, 100, 0.42)');
-    // Đèn lồng đỏ trên cửa chính
-    E(ctx, 57, 24, 7, 7, 'rgba(255, 90, 50, 0.45)');
-
+    WINS.forEach(([x,y,w,h])=>{R(ctx,x,y,w,h,'#FFE08A');R(ctx,x+10,y,1,h,C.woodDark);R(ctx,x,y+((h/2)|0),w,1,C.woodDark)});
+    R(ctx,51,42,5,6,'#FFE08A');R(ctx,61,42,5,6,'#FFE08A');
+    E(ctx,74,42,7,7,'rgba(255,200,90,.28)');
     flies.forEach(f=>{if(Math.sin(f.p+t*2)>.2)R(ctx,Math.round(f.x+Math.sin(t+f.p)*4),Math.round(f.y+Math.cos(t*.8+f.p)*3),2,2,'#FFF08A')});
-
-    // Đèn vàng bừng sáng cây thông Noel & ngôi sao ⭐
-    E(ctx,48,34,9,9,'rgba(255,240,140,.40)');
-    E(ctx,48,44,15,12,'rgba(255,220,100,.30)');
-    R(ctx,47,33,3,3,'#FFF08A');
-
-    // Dây đèn tròn dọc mái hiên bừng sáng lung linh
-    for(let bx=8;bx<=106;bx+=8){
-      E(ctx,bx,52,5,5,'rgba(255,225,90,.42)');
-      R(ctx,bx-1,51,3,3,'#FFF08A');
-      R(ctx,bx,52,1,1,'#FFFFFF');
-    }
   } else if(tod==='dusk'){
-    // Chiều hoàng hôn: Đèn ửng sáng ấm áp
-    E(ctx, 26, 18, 8, 5, 'rgba(255, 210, 90, 0.25)');
-    E(ctx, 88, 18, 8, 5, 'rgba(255, 210, 90, 0.25)');
-    E(ctx, 24, 37, 8, 5, 'rgba(255, 210, 90, 0.25)');
-    E(ctx, 90, 37, 8, 5, 'rgba(255, 210, 90, 0.25)');
-    E(ctx,48,34,6,6,'rgba(255,220,100,.22)');
-    for(let bx=8;bx<=106;bx+=16){
-      E(ctx,bx,52,3,3,'rgba(255,200,80,.20)');
-    }
+    WINS.forEach(([x,y,w,h])=>E(ctx,x+11,y+6,7,4,'rgba(255,210,90,.25)'));
+    E(ctx,74,42,4,4,'rgba(255,200,80,.20)');
   }
 }
 
@@ -716,36 +705,53 @@ let entering = false, doorOpen = 0;
 function enterHouse() {
   if (entering) return;
   entering = true;
-  doorOpen = 1;
-  say('Vào nhà thôi! 🏠', 1800);
-  walkTo(56, 54, () => {
-    try {
-      if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ENTER_HOUSE' }));
-      } else if (window.parent) {
-        window.parent.postMessage(JSON.stringify({ type: 'ENTER_HOUSE' }), '*');
-      }
-    } catch(e) {}
+
+  // Bước 1: Heo reo "Vào nhà thôi! 🏠"
+  say('Vào nhà thôi!', 1400);
+
+  // Bước 2: Heo bước thẳng lên thềm đá trước hiên nhà
+  walkTo(58, 54, () => {
+    // Bước 3: Cửa trượt mở hé lộ ánh sáng ấm áp
+    doorOpen = 1;
+    pig.face = -1;
+
+    // Bước 4: Heo bước qua ngưỡng cửa vào trong nhà
     setTimeout(() => {
-      doorOpen = 0;
-      entering = false;
-    }, 2000);
+      walkTo(58, 44, () => {
+        setTimeout(() => {
+          try {
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ENTER_HOUSE' }));
+            } else if (window.parent) {
+              window.parent.postMessage(JSON.stringify({ type: 'ENTER_HOUSE' }), '*');
+            }
+          } catch(e) {}
+          setTimeout(() => {
+            doorOpen = 0;
+            entering = false;
+          }, 1200);
+        }, 250);
+      });
+    }, 200);
   });
 }
 window.enterHouse = enterHouse;
 
-const penBtn = document.getElementById('penBtn');
-if (penBtn) penBtn.addEventListener('click', enterHouse);
-const pen = document.getElementById('pen');
-if (pen) pen.addEventListener('click', enterHouse);
+// API cập nhật streak từ React Native mà không reload WebView
+window.updateStreak = function(newStreak) {
+  const camEl = document.getElementById('cam');
+  if (camEl) camEl.textContent = newStreak;
+};
+
+updateLabel();
 
 garden.addEventListener('pointerdown', e => {
   const r = garden.getBoundingClientRect(),
         x = (e.clientX - r.left) / r.width * W,
         y = (e.clientY - r.top) / r.height * H;
 
-  // 0. Chạm vào Cửa chính của ngôi nhà (x: 42..72, y: 24..54)
-  if(x >= 42 && x <= 72 && y >= 24 && y <= 54) {
+  // 0. Chạm trực tiếp vào Cánh cửa chính của ngôi nhà (x: 44..74, y: 34..64) -> Cửa mở ra và heo đi vào
+  if(x >= 44 && x <= 74 && y >= 34 && y <= 64) {
     enterHouse();
     return;
   }
@@ -876,11 +882,14 @@ requestAnimationFrame(loop);
 </script>
 </body>
 </html>
-  `;
+  `, []); // ⚡ deps rỗng: HTML được tạo 1 lần, budget sync qua injectJavaScript
+
+  // Memoize source object để WebView không reload khi parent re-render
+  const memoizedSource = useMemo(() => ({ html: htmlSource, baseUrl: '' }), [htmlSource]);
 
   if (Platform.OS === 'web') {
     return (
-      <View style={[styles.container, style]}>
+      <View style={[styles.container, { height: gardenHeight }, style]}>
         <iframe
           ref={(el: any) => {
             if (el) {
@@ -901,14 +910,20 @@ requestAnimationFrame(loop);
   }
 
   return (
-    <View style={[styles.container, style]}>
+    // Explicit width + height thay vì chỉ dùng aspectRatio
+    // Fix canvas collapse trên iOS Fabric khi render offscreen
+    <View style={[styles.container, { width: winWidth, height: gardenHeight }, style]}>
       <SafeWebView
         ref={webViewRef}
-        source={{ html: htmlSource }}
+        source={memoizedSource}
         originWhitelist={['*']}
         style={styles.webView}
         scrollEnabled={false}
         javaScriptEnabled={true}
+        domStorageEnabled={true}
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
+        onLoadEnd={() => setIsLoaded(true)}
         onMessage={(event: any) => {
           try {
             const data = JSON.parse(event.nativeEvent.data);
@@ -926,14 +941,12 @@ requestAnimationFrame(loop);
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    aspectRatio: 176 / 132, // Khung vườn chuẩn 4:3
+    // width và height được set động qua props để tránh Fabric collapse
     overflow: 'hidden',
     backgroundColor: '#86B866',
   },
   webView: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
     backgroundColor: 'transparent',
   },
 });

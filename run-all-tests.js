@@ -2945,4 +2945,37 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 62 Passed: Two-Story Noel House Facade, PixelHouseWebView 6-Room System & Cross-Tab Navigation verified cleanly');
 }
 
-console.log('\n🎉 ALL 62 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (62/62)!');
+// ==============================================================================
+// 🧪 TEST 63: PIXEL HOUSE V2 — CUTE SPRITE, NOEL INTERIOR & TOUCH ACTIONS
+// ==============================================================================
+{
+  const housePath = path.join(__dirname, 'src/components/pixel/PixelHouseWebView.tsx');
+  const houseCode = fs.readFileSync(housePath, 'utf8');
+
+  // 1. Kiểm tra Sprite Heo Con chuẩn (PAL palette, shape function, bell, blush)
+  assert.ok(houseCode.includes('PAL = {') && houseCode.includes("p: '#F9B8C4'"), 'PixelHouseWebView must define authentic PAL palette');
+  assert.ok(houseCode.includes('function shape('), 'PixelHouseWebView must use shape() function for pixel perfection');
+  assert.ok(houseCode.includes('function drawPigSprite('), 'PixelHouseWebView must include drawPigSprite');
+  assert.ok(houseCode.includes('PAL.g') && houseCode.includes('PAL.s'), 'Pig sprite must have gold bell and blush cheeks');
+
+  // 2. Kiểm tra Không khí Noel ấm cúng trong 6 phòng
+  assert.ok(houseCode.includes('CÂY THÔNG NOEL MINI') || houseCode.includes('tx + 8, ty + 20'), 'Living room must include mini Christmas tree');
+  assert.ok(houseCode.includes('LÒ SƯỞI') || houseCode.includes('lửa đỏ'), 'Living room must include brick fireplace');
+  assert.ok(houseCode.includes('Bít tất Noel') || houseCode.includes('tuyết rơi'), 'Bedroom must include Christmas stocking and gentle snowfall');
+  assert.ok(houseCode.includes('bốc 3 làn khói') || houseCode.includes('yy = 26'), 'Kitchen must include boiling pot with steaming smoke');
+
+  // 3. Kiểm tra Hệ thống Touch Actions 2 cấp độ
+  assert.ok(houseCode.includes("selRoom === 'ngu'") && houseCode.includes("rp.mode = 'sleep'"), 'Bedroom must support sleeping action when tapping bed');
+  assert.ok(houseCode.includes("selRoom === 'bep'") && houseCode.includes("rp.mode = 'eat'"), 'Kitchen must support sniffing/eating action when tapping pot');
+  assert.ok(houseCode.includes("selRoom === 'lamviec'") && houseCode.includes("rp.mode = 'work'"), 'Working room must support work typing action when tapping PC');
+  assert.ok(houseCode.includes('EXIT_TO_GARDEN'), 'PixelHouseWebView must support EXIT_TO_GARDEN message');
+
+  // 4. Kiểm tra StatsView & index.tsx kết nối onExitToGarden
+  const statsViewPath = path.join(__dirname, 'src/components/views/StatsView.tsx');
+  const statsCode = fs.readFileSync(statsViewPath, 'utf8');
+  assert.ok(statsCode.includes('onExitToGarden={onNavigateHome}'), 'StatsView must wire onExitToGarden to onNavigateHome');
+
+  console.log('✅ Test 63 Passed: House of Pig v2 (Cute Sprite, Noel Interior Decor & 2-Level Touch Actions) verified cleanly');
+}
+
+console.log('\n🎉 ALL 63 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (63/63)!');
