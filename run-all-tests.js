@@ -3579,4 +3579,37 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 78 Passed: Chữ Mô Tả IG Story Trong Suốt (Draggable) & Triệt Tiêu Tag Tự Sinh (Quyết định 138) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 78 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (78/78)!');
+// ==============================================================================
+// 🧪 TEST 79: KÉO THẢ TEXT IG STORY SIÊU MƯỢT & ZERO PLACEHOLDER (QUYẾT ĐỊNH 139) AUDIT
+// ==============================================================================
+{
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. Dual-phase gesture: Separate isEditingStoryText mode and Text display
+  assert.ok(indexCode.includes('isEditingStoryText') && indexCode.includes('storyInputRef'), 'Must support isEditingStoryText state and storyInputRef');
+  assert.ok(indexCode.includes('camStoryTextDisplay'), 'Must render camStoryTextDisplay for pure Text drag performance');
+
+  // 2. Zero Placeholder: Removed visible placeholder in favor of invisible touch area
+  assert.ok(!indexCode.includes('placeholder="Chạm để viết chữ..."'), 'Must eliminate visible placeholder text');
+  assert.ok(indexCode.includes('camStoryInvisibleTouchArea'), 'Must provide invisible touch area for habituated touch trigger');
+
+  // 3. Smart Tap vs Drag separation
+  assert.ok(indexCode.includes('onStartShouldSetPanResponder: () => true'), 'PanResponder must immediately capture drag touches');
+  assert.ok(indexCode.includes('setIsEditingStoryText(true)'), 'Must switch to editing mode on tap release');
+
+  // 4. Living Docs Reverse Sync (AGENTS.md, 09-CAMERA.md, DECISIONS.md)
+  assert.ok(agentsCode.includes('Quyết định 139') || agentsCode.includes('Zero Placeholder'), 'AGENTS.md must document Quyết định 139');
+  assert.ok(docCode.includes('Quyết định 139') || docCode.includes('Quyáº¿t Ä‘á»‹nh 139'), '09-CAMERA.md must document Quyết định 139');
+  assert.ok(decisionsCode.includes('Quyết định 139') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 139'), 'DECISIONS.md must document Quyết định 139');
+
+  console.log('✅ Test 79 Passed: Kéo Thả Text IG Story Siêu Mượt & Zero Placeholder (Quyết định 139) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 79 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (79/79)!');

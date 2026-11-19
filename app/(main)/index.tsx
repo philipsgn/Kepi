@@ -260,8 +260,10 @@ export default function MainAppScreen() {
   const [inFrameCategory, setInFrameCategory] = useState<string>('');
   const [showInFrameCategoryPicker, setShowInFrameCategoryPicker] = useState<boolean>(false);
   const [inFrameDescription, setInFrameDescription] = useState<string>('');
+  const [isEditingStoryText, setIsEditingStoryText] = useState<boolean>(false);
+  const storyInputRef = useRef<React.ComponentRef<typeof TextInput>>(null);
 
-  // Chữ mô tả IG Story trong suốt kéo thả tự do (Quyết định 138)
+  // Chữ mô tả IG Story trong suốt kéo thả tự do (Quyết định 138 & 139)
   const descPan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const descPanOffset = useRef({ x: 0, y: 0 });
 
@@ -274,18 +276,26 @@ export default function MainAppScreen() {
     };
   }, [descPan]);
 
+  useEffect(() => {
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setIsEditingStoryText(false);
+    });
+    return () => hideSub.remove();
+  }, []);
+
   const resetDescPan = () => {
     descPan.setValue({ x: 0, y: 0 });
     descPan.setOffset({ x: 0, y: 0 });
     descPanOffset.current = { x: 0, y: 0 };
+    setIsEditingStoryText(false);
   };
 
   const descPanResponder = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => false,
+        onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: (_, gestureState) =>
-          Math.abs(gestureState.dx) > 3 || Math.abs(gestureState.dy) > 3,
+          Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2,
         onPanResponderGrant: () => {
           descPan.setOffset({
             x: descPanOffset.current.x,
@@ -296,8 +306,15 @@ export default function MainAppScreen() {
         onPanResponderMove: Animated.event([null, { dx: descPan.x, dy: descPan.y }], {
           useNativeDriver: false,
         }),
-        onPanResponderRelease: () => {
+        onPanResponderRelease: (_, gestureState) => {
           descPan.flattenOffset();
+          // Cú chạm nhẹ (Tap): mở chế độ gõ chữ
+          if (Math.abs(gestureState.dx) < 6 && Math.abs(gestureState.dy) < 6) {
+            setIsEditingStoryText(true);
+            setTimeout(() => {
+              storyInputRef.current?.focus();
+            }, 60);
+          }
         },
         onPanResponderTerminate: () => {
           descPan.flattenOffset();
@@ -1545,30 +1562,56 @@ export default function MainAppScreen() {
                   </View>
                 )}
 
-                {/* CHỮ MÔ TẢ IG STORY TRONG SUỐT KÉO THẢ TỰ DO (QUYẾT ĐỊNH 138) */}
-                <Animated.View
-                  style={[
-                    styles.camStoryDraggableContainer,
-                    {
-                      transform: [
-                        { translateX: descPan.x },
-                        { translateY: descPan.y },
-                      ],
-                    },
-                  ]}
-                  {...descPanResponder.panHandlers}
-                >
-                  <TextInput
-                    value={inFrameDescription}
-                    onChangeText={setInFrameDescription}
-                    placeholder="Chạm để viết chữ..."
-                    placeholderTextColor="rgba(255, 255, 255, 0.65)"
-                    style={styles.camStoryTextInput}
-                    maxLength={40}
-                    returnKeyType="done"
-                    multiline={false}
-                  />
-                </Animated.View>
+                {/* CHỮ MÔ TẢ IG STORY TRONG SUỐT KÉO THẢ TỰ DO (QUYẾT ĐỊNH 138 & 139) */}
+                {isEditingStoryText ? (
+                  <Animated.View
+                    style={[
+                      styles.camStoryDraggableContainer,
+                      {
+                        transform: [
+                          { translateX: descPan.x },
+                          { translateY: descPan.y },
+                        ],
+                      },
+                    ]}
+                  >
+                    <TextInput
+                      ref={storyInputRef}
+                      value={inFrameDescription}
+                      onChangeText={setInFrameDescription}
+                      autoFocus
+                      onBlur={() => setIsEditingStoryText(false)}
+                      onSubmitEditing={() => setIsEditingStoryText(false)}
+                      placeholder=""
+                      style={styles.camStoryTextInput}
+                      maxLength={40}
+                      returnKeyType="done"
+                      multiline={false}
+                    />
+                  </Animated.View>
+                ) : (
+                  <Animated.View
+                    style={[
+                      styles.camStoryDraggableContainer,
+                      {
+                        transform: [
+                          { translateX: descPan.x },
+                          { translateY: descPan.y },
+                        ],
+                      },
+                    ]}
+                    {...descPanResponder.panHandlers}
+                  >
+                    {inFrameDescription.trim() ? (
+                      <Text style={styles.camStoryTextDisplay}>
+                        {inFrameDescription}
+                      </Text>
+                    ) : (
+                      /* Vùng chạm tàng hình (Zero Placeholder - Bỏ chữ "Chạm để viết chữ...") */
+                      <View style={styles.camStoryInvisibleTouchArea} />
+                    )}
+                  </Animated.View>
+                )}
               </View>
 
               {/* THẺ PHÁT HIỆN MÃ VIETQR TRƯỢT LÊN TRÊN NÚT CHỤP */}
@@ -2145,6 +2188,24 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
     minWidth: 80,
+    backgroundColor: 'transparent',
+  },
+  camStoryTextDisplay: {
+    fontFamily: 'Nunito',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1.5 },
+    textShadowRadius: 3,
+    padding: 0,
+    margin: 0,
+    backgroundColor: 'transparent',
+  },
+  camStoryInvisibleTouchArea: {
+    width: 220,
+    height: 44,
     backgroundColor: 'transparent',
   },
   flashToggleButton: {

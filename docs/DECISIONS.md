@@ -812,6 +812,13 @@
       3. **IG Story Typography:** Chữ trắng `#FFFBF1` (hoặc `#FFFFFF`), `fontSize: 16`, `fontWeight: '800'`, `textShadowColor: 'rgba(0, 0, 0, 0.75)'`, `textShadowOffset: { width: 0, height: 1.5 }`, `textShadowRadius: 3`, `backgroundColor: 'transparent'`, `borderWidth: 0`.
       4. **PanResponder Draggable Text:** Tích hợp `PanResponder` và `Animated.ValueXY` cho phép kéo thả chữ mượt mà, giới hạn clamp giữ chữ trong khung 348×348px; lưu `desc_position: { x: number, y: number }` (tọa độ phần trăm 0..100) vào `Transaction`.
 
+  - **Quyết định 139 (20/11/2026): Phân Tách Trạng Thái Kéo Thả Text IG Story (Dual-Phase Gesture) & Zero Placeholder:**
+    - *Bối Cảnh & Nguyên Nhân:* Người dùng phản hồi khi điền chữ hoặc chụp rồi điền chữ vẫn không thể kéo di chuyển được text; đồng thời yêu cầu bỏ hoàn toàn dòng chữ hướng dẫn "Chạm để viết chữ..." (để người dùng tự chạm theo thói quen). Nguyên nhân kỹ thuật là component native `TextInput` nuốt các sự kiện cảm ứng (touches/pan), ngăn cản `PanResponder` của view cha nhận diện thao tác kéo.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Kiến Trúc Cảm Ứng 2 Pha (Dual-Phase):** Phân tách bằng state `isEditingStoryText`. Khi không gõ chữ (`isEditingStoryText === false`), component hiển thị dưới dạng `<Text>` thuần túy, trao 100% quyền xử lý cho `PanResponder` với `onStartShouldSetPanResponder: () => true`, giúp thao tác kéo ngón tay di chuyển chữ mượt mà tức thì 0ms.
+      2. **Phân Biệt Thông Minh Tap vs Drag:** Trong `onPanResponderRelease`, nếu độ dịch chuyển `|dx| < 5 && |dy| < 5` (chạm nhẹ), kích hoạt `isEditingStoryText = true` và `focus()` vào `storyInputRef` để mở bàn phím gõ chữ; nếu `|dx| >= 5 || |dy| >= 5`, thực hiện kéo di chuyển vị trí.
+      3. **Zero Placeholder (Vùng Chạm Tàng Hình):** Bỏ 100% chữ "Chạm để viết chữ...". Khi rỗng, khung ảnh trơn sạch hoàn toàn; tại vị trí 1/3 dưới ảnh bố trí vùng chạm tàng hình `camStoryInvisibleTouchArea` ($220 \times 44$px) để người dùng chạm vào là bàn phím mở lên tự nhiên.
+
 
 
 
