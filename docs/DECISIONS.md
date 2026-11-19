@@ -781,6 +781,9 @@
       - Tuyệt đối không có nút "Xem ở phòng ảnh".
       - Lịch sử ảnh cuộn xuống: **Một ảnh - một khung hình**, sắp xếp từ gần nhất về các giờ/ngày trước.
 
+  - **Quyết định 133 (19/11/2026): Tối Ưu Tab Camera Locket 1:1 Vuông & Tối Giản Tức Thì (Zero-Latency Capture):**
+    - *Bối Cảnh & Nguyên Nhân:* Người dùng thử nghiệm trên thiết bị di động thực tế và phản hồi chi tiết: (1) Nút Chi/Thu cần đụng sát trần như prototype; (2) Nút Flash bỏ viền bo hộp, chuyển vào góc trên bên trái bên trong khung camera; (3) Khung ngắm quá nhỏ, cần mở rộng sang tỷ lệ vuông 1:1 chuẩn Locket (348×348px), bỏ 4 góc vuông và chấm đỏ REC, giữ heo ngủ góc; (4) Ô mô tả nền đặc hiện đang che ảnh chụp, cần chuyển thành viên thuốc kính mờ tối trong suốt `rgba(0,0,0,0.42)` chữ trắng tinh sát đáy khung hình; (5) Cụm số tiền bỏ nhãn "SỐ TIỀN", đổi sang nền trơn không viền hộp; (6) Dải tag danh mục đổi từ lưới 2 hàng thành thanh trượt ngang 1 hàng có font chữ to 14px và padding thoáng; (7) Khắc phục hiện tượng trễ 1-2s khi chụp bằng cách gán `photo.uri` ngay lập tức (0ms transition delay), chuyển nén WebP sang chạy ngầm hoặc lúc Lưu; (8) Bỏ dòng chữ hướng dẫn "Chạm [✓] để lưu vào ví...".
+
 
 
 

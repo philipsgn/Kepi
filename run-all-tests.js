@@ -3356,7 +3356,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 1. Warm Cream Background #F6EEDC & Full Segment Pills
   assert.ok(indexCode.includes('#F6EEDC') || indexCode.includes('#0D0D0D'), 'Tab Camera must support warm cream background #F6EEDC');
-  assert.ok(indexCode.includes('camSegWrapFull') && indexCode.includes('flashToggleButton'), 'Header must have Flash + [Chi | Thu] full pills');
+  assert.ok(indexCode.includes('camCeilingSegWrap') || indexCode.includes('camSegWrapFull'), 'Header must have ceiling or full pills');
   assert.ok(indexCode.includes('ViewfinderCornerMascot'), 'index.tsx must mount ViewfinderCornerMascot');
 
   // 2. Action Bar 2 Round Buttons & Zero "Xem ở phòng ảnh"
@@ -3365,7 +3365,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 3. ViewfinderCornerMascot Component Contract
   assert.ok(mascotCode.includes('PAL') && mascotCode.includes('getPigBodyMatrix'), 'ViewfinderCornerMascot must port pig sprite matrix');
-  assert.ok(mascotCode.includes('recDot') || mascotCode.includes('REC'), 'ViewfinderCornerMascot must render blinking REC indicator');
+  assert.ok(mascotCode.includes('recDot') || mascotCode.includes('REC') || mascotCode.includes('mascotTouch'), 'ViewfinderCornerMascot must render mascot');
 
   // 4. Docs & Decisions Sync
   assert.ok(docCode.includes('Quyết định 132') || docCode.includes('Quyáº¿t Ä‘á»‹nh 132'), '09-CAMERA.md must document Quyết định 132');
@@ -3374,4 +3374,44 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 72 Passed: Tab Camera Tối Giản Chuẩn 1:1 Prototype Ví Heo Con (Hình 4 & Quyết định 132) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 72 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (72/72)!');
+// ==============================================================================
+// 🧪 TEST 73: TAB CAMERA LOCKET 1:1 VUÔNG & TỐI GIẢN TỨC THÌ (QUYẾT ĐỊNH 133) AUDIT
+// ==============================================================================
+{
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const mascotPath = path.join(__dirname, 'src/components/camera/ViewfinderCornerMascot.tsx');
+  const mascotCode = fs.readFileSync(mascotPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. Ceiling Header Chi/Thu & In-Frame Borderless Flash
+  assert.ok(indexCode.includes('camCeilingSegWrap'), 'Header Chi/Thu must touch top ceiling with camCeilingSegWrap');
+  assert.ok(indexCode.includes('camInFrameFlashBtn'), 'Flash button must be positioned borderless inside camera frame');
+
+  // 2. Square 1:1 Locket Frame & Clean Viewfinder (No REC, No Corner Lines, Pig Corner Retained)
+  assert.ok(indexCode.includes('width: Math.min(SCREEN_WIDTH - 24, 348)'), 'Viewfinder must use 1:1 square Locket dimensions');
+  assert.ok(mascotCode.includes('mascotTouch') && mascotCode.includes('getPigBodyMatrix'), 'Sleeping pig mascot must be retained in corner');
+
+  // 3. Translucent Dark Glassy Description Pill & Flat Amount & 1-Row Tags
+  assert.ok(indexCode.includes('camDescGlassyPillInside'), 'Description input must use translucent dark glassy pill inside frame');
+  assert.ok(indexCode.includes('camAmountDisplayFlat'), 'Amount counter must use flat transparent display without SỐ TIỀN label');
+  assert.ok(indexCode.includes('camTagsScrollView') && indexCode.includes('camCatChipLarge'), 'Category tags must be a single horizontal scroll row with large chips');
+
+  // 4. Zero Latency Instant Capture & Zero Clutter Instruction Text
+  assert.ok(indexCode.includes('setCapturedPhotoUri(photo.uri)'), 'handleCapturePhoto must immediately assign captured photo with 0ms delay');
+  assert.ok(!indexCode.includes('Chạm [✓] để lưu vào ví · [↺] để chụp lại'), 'Must remove redundant hint instruction text');
+
+  // 5. Living Docs Reverse Sync (AGENTS.md, 09-CAMERA.md, DECISIONS.md)
+  assert.ok(agentsCode.includes('Khung ngắm vuông 1:1 chuẩn Locket') || agentsCode.includes('Chụp tức thì 0ms latency'), 'AGENTS.md must document Quyết định 133');
+  assert.ok(docCode.includes('Quyết định 133') || docCode.includes('Quyáº¿t Ä‘á»‹nh 133'), '09-CAMERA.md must document Quyết định 133');
+  assert.ok(decisionsCode.includes('Quyết định 133') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 133'), 'DECISIONS.md must document Quyết định 133');
+
+  console.log('✅ Test 73 Passed: Tab Camera Locket 1:1 Vuông & Tối Giản Tức Thì (Quyết định 133) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 73 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (73/73)!');

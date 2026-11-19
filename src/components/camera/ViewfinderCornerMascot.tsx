@@ -175,17 +175,8 @@ export const ViewfinderCornerMascot: React.FC<ViewfinderCornerMascotProps> = ({
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      {/* 1. GÓC TRÊN TRÁI (TOP-LEFT): GÓC PIXEL TRẮNG + REC ĐỎ (BỎ NGÀY THÁNG) */}
-      <View style={styles.cornerTopLeft}>
-        <View style={styles.pixelCornerTL} />
-        <View style={styles.recContainer}>
-          <Animated.View style={[styles.recDot, { opacity: flashAnim }]} />
-        </View>
-      </View>
-
-      {/* 2. GÓC TRÊN PHẢI (TOP-RIGHT): GÓC PIXEL + CHÚ HEO NGỦ / NHẢY */}
+      {/* GÓC TRÊN PHẢI (TOP-RIGHT): CHÚ HEO NGỦ / NHẢY PIXEL ĐẶC TRƯNG CỦA APP */}
       <View style={styles.cornerTopRight}>
-        <View style={styles.pixelCornerTR} />
         <TouchableOpacity
           style={styles.mascotTouch}
           activeOpacity={0.85}
@@ -237,16 +228,6 @@ export const ViewfinderCornerMascot: React.FC<ViewfinderCornerMascotProps> = ({
             </Svg>
           </Animated.View>
         </TouchableOpacity>
-      </View>
-
-      {/* 3. GÓC DƯỚI TRÁI (BOTTOM-LEFT): GÓC PIXEL TRẮNG */}
-      <View style={styles.cornerBottomLeft}>
-        <View style={styles.pixelCornerBL} />
-      </View>
-
-      {/* 4. GÓC DƯỚI PHẢI (BOTTOM-RIGHT): GÓC PIXEL TRẮNG */}
-      <View style={styles.cornerBottomRight}>
-        <View style={styles.pixelCornerBR} />
       </View>
     </View>
   );

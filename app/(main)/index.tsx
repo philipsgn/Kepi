@@ -579,9 +579,14 @@ export default function MainAppScreen() {
           skipProcessing: false,
         });
         if (photo?.uri) {
-          const optimized = await optimizeExpensePhoto(photo.uri);
-          setCapturedPhotoUri(optimized.fullUri);
-          setCapturedThumbUri(optimized.thumbnailUri);
+          setCapturedPhotoUri(photo.uri);
+          setCapturedThumbUri(photo.uri);
+          optimizeExpensePhoto(photo.uri)
+            .then((optimized) => {
+              setCapturedPhotoUri(optimized.fullUri);
+              setCapturedThumbUri(optimized.thumbnailUri);
+            })
+            .catch(() => {});
         }
       } else {
         const fallback = 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80';
@@ -644,11 +649,16 @@ export default function MainAppScreen() {
             skipProcessing: false,
           });
           if (photo?.uri) {
-            const optimized = await optimizeExpensePhoto(photo.uri);
-            photoUriToSave = optimized.fullUri;
-            thumbUriToSave = optimized.thumbnailUri;
-            setCapturedPhotoUri(optimized.fullUri);
-            setCapturedThumbUri(optimized.thumbnailUri);
+            photoUriToSave = photo.uri;
+            thumbUriToSave = photo.uri;
+            setCapturedPhotoUri(photo.uri);
+            setCapturedThumbUri(photo.uri);
+            optimizeExpensePhoto(photo.uri)
+              .then((opt) => {
+                setCapturedPhotoUri(opt.fullUri);
+                setCapturedThumbUri(opt.thumbnailUri);
+              })
+              .catch(() => {});
           }
         }
       } catch (err) {
@@ -730,10 +740,15 @@ export default function MainAppScreen() {
             skipProcessing: false,
           });
           if (photo?.uri) {
-            const optimized = await optimizeExpensePhoto(photo.uri);
-            setCapturedPhotoUri(optimized.fullUri);
+            setCapturedPhotoUri(photo.uri);
             setCapturedMediaType('PHOTO');
-            setCapturedThumbUri(optimized.thumbnailUri);
+            setCapturedThumbUri(photo.uri);
+            optimizeExpensePhoto(photo.uri)
+              .then((optimized) => {
+                setCapturedPhotoUri(optimized.fullUri);
+                setCapturedThumbUri(optimized.thumbnailUri);
+              })
+              .catch(() => {});
             setInFrameAmount(0);
             setInFrameType('EXPENSE');
             setInFrameCategory('');
@@ -780,10 +795,17 @@ export default function MainAppScreen() {
           quality: 0.85,
           skipProcessing: false });
         if (photo?.uri) {
-          const optimized = await optimizeExpensePhoto(photo.uri);
-          setCapturedPhotoUri(optimized.fullUri);
+          // 0ms transition: Gán tức thì URI ảnh để chuyển trạng thái không độ trễ
+          setCapturedPhotoUri(photo.uri);
           setCapturedMediaType('PHOTO');
-          setCapturedThumbUri(optimized.thumbnailUri);
+          setCapturedThumbUri(photo.uri);
+          // Nén WebP dual-res ngầm trong background
+          optimizeExpensePhoto(photo.uri)
+            .then((optimized) => {
+              setCapturedPhotoUri(optimized.fullUri);
+              setCapturedThumbUri(optimized.thumbnailUri);
+            })
+            .catch(() => {});
           if (activeBankSnapshotEvent) {
             setInFrameAmount(activeBankSnapshotEvent.amount);
             setInFrameType(activeBankSnapshotEvent.type);
@@ -1277,80 +1299,64 @@ export default function MainAppScreen() {
             scrollEnabled={!showKeyboardModal && !detectedPayload && !detectedWalletPayload}
             style={[styles.verticalScroll, { backgroundColor: isDark ? '#0E1620' : '#FAF6EC' }]}
           >
-            {/* --- TOP 100vh: CAMERA TINH GỌN CHUẨN PROTOTYPE HÌNH 4 (NỀN KEM #F6EEDC) --- */}
+            {/* --- TOP 100vh: CAMERA TINH GỌN CHUẨN LOCKET 1:1 VUÔNG (NỀN KEM #F6EEDC) --- */}
             <View
               style={[
                 styles.cameraScreenSection,
                 {
                   height: SCREEN_HEIGHT,
                   backgroundColor: '#F6EEDC',
-                  paddingTop: insets.top + 6,
+                  paddingTop: Math.max(insets.top, 8),
                   paddingBottom: insets.bottom + 85,
                   justifyContent: 'space-between',
                 },
               ]}
             >
-              {/* TOP HEADER CONTROLS (TỐI GIẢN: FLASH + CHI/THU TRẢI ĐỀU 100%) */}
-              <View style={[styles.cameraTopHeader, { paddingTop: insets.top + 4 }]}>
-                {/* FLASH TOGGLE BUTTON */}
+              {/* TOP HEADER CONTROLS: 2 NÚT [ CHI ] VÀ [ THU ] ÁP SÁT TRẦN (1:1 PROTOTYPE) */}
+              <View style={styles.camCeilingSegWrap}>
                 <TouchableOpacity
-                  style={styles.flashToggleButton}
-                  onPress={toggleFlash}
-                  activeOpacity={0.8}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  accessibilityLabel="Bật/Tắt Flash"
+                  style={[
+                    styles.camCeilingSegBtn,
+                    inFrameType === 'EXPENSE' ? styles.camCeilingSegBtnActiveChi : styles.camCeilingSegBtnInactive,
+                  ]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setInFrameType('EXPENSE');
+                  }}
+                  activeOpacity={0.85}
+                  accessibilityLabel="Chọn Chi tiêu"
                 >
-                  {flashMode === 'off' ? (
-                    <ZapOff size={22} color="#2B2118" strokeWidth={2.8} />
-                  ) : (
-                    <Zap size={22} color="#E0452B" strokeWidth={2.8} />
-                  )}
+                  <Text
+                    style={[
+                      styles.camCeilingSegText,
+                      inFrameType === 'EXPENSE' && styles.camCeilingSegTextActive,
+                    ]}
+                  >
+                    Chi
+                  </Text>
                 </TouchableOpacity>
 
-                {/* SEGMENT CHỌN CHI/THU (.camseg 1:1 PROTOTYPE) */}
-                <View style={styles.camSegWrapFull}>
-                  <TouchableOpacity
+                <TouchableOpacity
+                  style={[
+                    styles.camCeilingSegBtn,
+                    inFrameType === 'INCOME' ? styles.camCeilingSegBtnActiveThu : styles.camCeilingSegBtnInactive,
+                  ]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setInFrameType('INCOME');
+                  }}
+                  activeOpacity={0.85}
+                  accessibilityLabel="Chọn Thu nhập"
+                >
+                  <Text
                     style={[
-                      styles.camSegBtnFull,
-                      inFrameType === 'EXPENSE' ? styles.camSegBtnActiveChi : styles.camSegBtnInactiveFull,
+                      styles.camCeilingSegText,
+                      inFrameType === 'INCOME' && styles.camCeilingSegTextActive,
                     ]}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setInFrameType('EXPENSE');
-                    }}
-                    activeOpacity={0.85}
                   >
-                    <Text
-                      style={[
-                        styles.camSegTextFull,
-                        inFrameType === 'EXPENSE' && styles.camSegTextActiveFull,
-                      ]}
-                    >
-                      Chi
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.camSegBtnFull,
-                      inFrameType === 'INCOME' ? styles.camSegBtnActiveThu : styles.camSegBtnInactiveFull,
-                    ]}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setInFrameType('INCOME');
-                    }}
-                    activeOpacity={0.85}
-                  >
-                    <Text
-                      style={[
-                        styles.camSegTextFull,
-                        inFrameType === 'INCOME' && styles.camSegTextActiveFull,
-                      ]}
-                    >
-                      Thu
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                    Thu
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               {/* BANNER NỔI LOCKET BANK SNAPSHOT */}
@@ -1388,7 +1394,7 @@ export default function MainAppScreen() {
                 />
               )}
 
-              {/* CAMERA VIEWFINDER (LIVE KHUNG NGẮM PIXEL 4:3 RỘNG RÃI ~295px) */}
+              {/* CAMERA VIEWFINDER (LIVE KHUNG NGẮM LOCKET 1:1 VUÔNG 348x348px) */}
               <View style={styles.viewfinderContainer}>
                 {capturedPhotoUri ? (
                   <Image
@@ -1436,7 +1442,22 @@ export default function MainAppScreen() {
                   </View>
                 )}
 
-                {/* 4 GÓC NGẮM PIXEL + CHẤM REC + HEO CON GÓC KHUNG HÌNH (0 CÓ NGÀY THÁNG) */}
+                {/* NÚT FLASH NỔI TRẦN KHÔNG VIỀN Ở GÓC TRÊN TRÁI KHUNG CAMERA */}
+                <TouchableOpacity
+                  style={styles.camInFrameFlashBtn}
+                  onPress={toggleFlash}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  accessibilityLabel="Bật/Tắt Flash"
+                >
+                  {flashMode === 'off' ? (
+                    <ZapOff size={22} color="#FFFBF1" strokeWidth={2.4} />
+                  ) : (
+                    <Zap size={22} color="#F4B93B" strokeWidth={2.8} />
+                  )}
+                </TouchableOpacity>
+
+                {/* CHÚ HEO PIXEL NGỦ GÓC TRÊN PHẢI KHUNG HÌNH (0 REC, 0 VIỀN VUÔNG) */}
                 <ViewfinderCornerMascot
                   isHappy={isShootingPig}
                   onPigTap={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
@@ -1452,15 +1473,15 @@ export default function MainAppScreen() {
                   </View>
                 )}
 
-                {/* Ô NHẬP MÔ TẢ NỔI SÁT ĐÁY TRONG KHUNG HÌNH (.camdesc phẳng 999px - CHỐNG CHE KEYBOARD) */}
-                <View style={styles.camDescPillInside}>
-                  <PenLine size={13} color="#2B2118" strokeWidth={2.4} />
+                {/* Ô NHẬP MÔ TẢ NỀN KÍNH MỜ TỐI TRONG SUỐT (VIÊN THUỐC PILL 999px - KHÔNG CHE ẢNH) */}
+                <View style={styles.camDescGlassyPillInside}>
+                  <PenLine size={14} color="#FFFBF1" strokeWidth={2.4} />
                   <TextInput
                     value={inFrameDescription}
                     onChangeText={setInFrameDescription}
                     placeholder="Ghi mô tả..."
-                    placeholderTextColor="rgba(43, 33, 24, 0.45)"
-                    style={[styles.camDescPillInput, styles.camBelowDescInput]}
+                    placeholderTextColor="rgba(255, 251, 241, 0.65)"
+                    style={styles.camDescGlassyInput}
                     maxLength={40}
                     returnKeyType="done"
                   />
@@ -1503,49 +1524,51 @@ export default function MainAppScreen() {
 
               {/* CỤM ĐIỀU KHIỂN CHI TIÊU & NÚT HÀNH ĐỘNG DƯỚI KHUNG ẢNH */}
               <View style={[styles.camBelowCluster, styles.camControlsSection]}>
-                {/* HÀNG 1: BỘ ĐẾM SỐ TIỀN [-] [SỐ TIỀN đ] [+] */}
-                <View style={styles.camAmountBlock}>
-                  <Text style={styles.camAmountLabel}>SỐ TIỀN</Text>
-                  <View style={styles.camBelowAmountRow}>
-                    <TouchableOpacity
-                      style={styles.camStepBtn}
-                      onPress={() => handleStepInFrameAmount(inFrameType === 'INCOME' ? -500000 : -5000)}
-                      activeOpacity={0.8}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <Minus size={18} color="#2B2118" strokeWidth={3} />
-                    </TouchableOpacity>
+                {/* HÀNG 1: BỘ ĐẾM SỐ TIỀN NỀN TRƠN [-] [SỐ TIỀN đ] [+] (BỎ CHỮ "SỐ TIỀN") */}
+                <View style={styles.camBelowAmountRow}>
+                  <TouchableOpacity
+                    style={styles.camStepBtn}
+                    onPress={() => handleStepInFrameAmount(inFrameType === 'INCOME' ? -500000 : -5000)}
+                    activeOpacity={0.8}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Minus size={18} color="#2B2118" strokeWidth={3} />
+                  </TouchableOpacity>
 
-                    <TouchableOpacity
-                      style={styles.camAmountDisplay}
-                      onPress={() => setShowKeyboardModal(true)}
-                      activeOpacity={0.85}
-                    >
-                      <Text style={styles.camAmountNumberText}>
-                        {inFrameAmount > 0 ? formatVND(inFrameAmount).replace(/ đ$/, '') : '0'}
-                      </Text>
-                      <DongMark size={18} color="#2B2118" />
-                    </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.camAmountDisplayFlat}
+                    onPress={() => setShowKeyboardModal(true)}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={styles.camAmountNumberTextFlat}>
+                      {inFrameAmount > 0 ? formatVND(inFrameAmount).replace(/ đ$/, '') : '0'}
+                    </Text>
+                    <DongMark size={22} color="#2B2118" />
+                  </TouchableOpacity>
 
-                    <TouchableOpacity
-                      style={styles.camStepBtn}
-                      onPress={() => handleStepInFrameAmount(inFrameType === 'INCOME' ? 500000 : 5000)}
-                      activeOpacity={0.8}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <Plus size={18} color="#2B2118" strokeWidth={3} />
-                    </TouchableOpacity>
-                  </View>
+                  <TouchableOpacity
+                    style={styles.camStepBtn}
+                    onPress={() => handleStepInFrameAmount(inFrameType === 'INCOME' ? 500000 : 5000)}
+                    activeOpacity={0.8}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Plus size={18} color="#2B2118" strokeWidth={3} />
+                  </TouchableOpacity>
                 </View>
 
-                {/* HÀNG 2: LƯỚI THẺ DANH MỤC 2 HÀNG (.camtags & .tg CHUẨN HÌNH 4) */}
-                <View style={styles.camTagsGridWrap}>
-                  {activeCameraCategories.slice(0, 6).map((cat) => {
+                {/* HÀNG 2: DẢI TAG DANH MỤC 1 HÀNG TRƯỢT NGANG CHỮ TO */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.camTagsScrollRow}
+                  style={styles.camTagsScrollView}
+                >
+                  {activeCameraCategories.map((cat) => {
                     const isSelected = inFrameCategory === cat.id;
                     return (
                       <TouchableOpacity
                         key={cat.id}
-                        style={[styles.camCatChip, isSelected && styles.camCatChipSelected]}
+                        style={[styles.camCatChipLarge, isSelected && styles.camCatChipLargeSelected]}
                         onPress={() => {
                           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           setInFrameCategory(cat.id);
@@ -1554,17 +1577,17 @@ export default function MainAppScreen() {
                       >
                         {renderCategoryMonochromeIcon({
                           categoryId: cat.id,
-                          size: 13,
+                          size: 15,
                           color: '#2B2118',
                           strokeWidth: 2.6,
                         })}
-                        <Text style={[styles.camCatChipText, isSelected && styles.camCatChipTextSelected]}>
+                        <Text style={[styles.camCatChipTextLarge, isSelected && styles.camCatChipTextLargeSelected]}>
                           {cat.name}
                         </Text>
                       </TouchableOpacity>
                     );
                   })}
-                </View>
+                </ScrollView>
 
                 {/* HÀNG 3: VÙNG ACTION BAR - SHUTTER HOẶC 2 NÚT [ ↺ ] & [ ✓ ] */}
                 <View style={styles.camShutterWrapper}>
@@ -1620,12 +1643,6 @@ export default function MainAppScreen() {
                       </TouchableOpacity>
                     </View>
                   )}
-
-                  <Text style={styles.camHintText}>
-                    {!capturedPhotoUri
-                      ? (camHintMessage || 'Chạm để chụp · giữ để nói')
-                      : 'Chạm [✓] để lưu vào ví · [↺] để chụp lại'}
-                  </Text>
                 </View>
               </View>
             </View>
@@ -1938,21 +1955,85 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8 },
   viewfinderContainer: {
-    width: Math.min(SCREEN_WIDTH - 24, 380),
-    height: Math.min(SCREEN_HEIGHT * 0.33, 245),
+    width: Math.min(SCREEN_WIDTH - 24, 348),
+    height: Math.min(SCREEN_WIDTH - 24, 348),
     alignSelf: 'center',
     marginVertical: 4,
-    borderRadius: 20,
+    borderRadius: 24,
     borderWidth: 3,
     borderColor: '#2B2118',
     overflow: 'hidden',
     position: 'relative',
-    backgroundColor: '#121212',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
+    backgroundColor: '#DDEBD9',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 6 },
+    elevation: 4 },
+  camCeilingSegWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    width: Math.min(SCREEN_WIDTH - 24, 348),
+    alignSelf: 'center',
+    marginBottom: 4 },
+  camCeilingSegBtn: {
+    flex: 1,
+    minHeight: 46,
+    borderRadius: 999,
+    borderWidth: 3,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3 },
+  camCeilingSegBtnActiveChi: {
+    backgroundColor: '#E0452B' },
+  camCeilingSegBtnActiveThu: {
+    backgroundColor: '#5E9A57' },
+  camCeilingSegBtnInactive: {
+    backgroundColor: '#FFFFFF' },
+  camCeilingSegText: {
+    fontFamily: 'Nunito',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#2B2118' },
+  camCeilingSegTextActive: {
+    color: '#FFFBF1' },
+  camInFrameFlashBtn: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    zIndex: 20,
+    padding: 7,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    borderRadius: 999 },
+  camDescGlassyPillInside: {
+    position: 'absolute',
+    left: 14,
+    right: 14,
+    bottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.42)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.28)',
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    zIndex: 20 },
+  camDescGlassyInput: {
+    flex: 1,
+    fontFamily: 'Nunito',
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFBF1',
+    paddingVertical: 0 },
   flashToggleButton: {
     width: 44,
     height: 44,
@@ -2297,6 +2378,58 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 0,
     elevation: 1 },
+  camAmountDisplayFlat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+    minWidth: 130 },
+  camAmountNumberTextFlat: {
+    fontFamily: 'Baloo2-Bold',
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#2B2118',
+    fontVariant: ['tabular-nums'],
+    marginRight: 4 },
+  camTagsScrollView: {
+    width: '100%',
+    maxHeight: 48,
+    marginVertical: 4 },
+  camTagsScrollRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12 },
+  camCatChipLarge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2.2,
+    borderColor: '#2B2118',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 0,
+    elevation: 2 },
+  camCatChipLargeSelected: {
+    backgroundColor: '#F9B8C4',
+    borderColor: '#2B2118',
+    borderWidth: 2.5,
+    shadowOpacity: 1 },
+  camCatChipTextLarge: {
+    fontFamily: 'Nunito',
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#2B2118' },
+  camCatChipTextLargeSelected: {
+    fontWeight: '900',
+    color: '#2B2118' },
   camTagsGridWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
