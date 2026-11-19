@@ -22,6 +22,7 @@ import { CameraView } from 'expo-camera';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
+import { Image as ExpoImage } from 'expo-image';
 import {
   Mic,
   Bell,
@@ -243,6 +244,8 @@ export default function MainAppScreen() {
 
   // Modals & Sheets
   const [capturedPhotoUri, setCapturedPhotoUri] = useState<string | null>(null);
+  const optimizedPhotoRef = useRef<string | null>(null);
+  const optimizedThumbRef = useRef<string | null>(null);
   const [capturedMediaType, setCapturedMediaType] = useState<MediaType>('PHOTO');
   const [isShootingPig, setIsShootingPig] = useState<boolean>(false);
   const [isPhotoSavedSuccess, setIsPhotoSavedSuccess] = useState<boolean>(false);
@@ -290,6 +293,8 @@ export default function MainAppScreen() {
   const handleRetakeCamera = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setIsPhotoSavedSuccess(false);
+    optimizedPhotoRef.current = null;
+    optimizedThumbRef.current = null;
     setCapturedPhotoUri(null);
     setCapturedThumbUri(null);
     setInFrameAmount(0);
@@ -581,10 +586,11 @@ export default function MainAppScreen() {
         if (photo?.uri) {
           setCapturedPhotoUri(photo.uri);
           setCapturedThumbUri(photo.uri);
+          // Quyết định 135: Lưu kết quả nén vào ref, không swap URI on-screen để triệt tiêu nháy ảnh
           optimizeExpensePhoto(photo.uri)
             .then((optimized) => {
-              setCapturedPhotoUri(optimized.fullUri);
-              setCapturedThumbUri(optimized.thumbnailUri);
+              optimizedPhotoRef.current = optimized.fullUri;
+              optimizedThumbRef.current = optimized.thumbnailUri;
             })
             .catch(() => {});
         }
@@ -743,10 +749,11 @@ export default function MainAppScreen() {
             setCapturedPhotoUri(photo.uri);
             setCapturedMediaType('PHOTO');
             setCapturedThumbUri(photo.uri);
+            // Quyết định 135: Lưu kết quả nén vào ref, không swap URI on-screen để triệt tiêu nháy ảnh
             optimizeExpensePhoto(photo.uri)
               .then((optimized) => {
-                setCapturedPhotoUri(optimized.fullUri);
-                setCapturedThumbUri(optimized.thumbnailUri);
+                optimizedPhotoRef.current = optimized.fullUri;
+                optimizedThumbRef.current = optimized.thumbnailUri;
               })
               .catch(() => {});
             // Quyết định 134: Bảo toàn số tiền, danh mục, mô tả người dùng đã nhập trước khi chụp
@@ -798,11 +805,11 @@ export default function MainAppScreen() {
           setCapturedPhotoUri(photo.uri);
           setCapturedMediaType('PHOTO');
           setCapturedThumbUri(photo.uri);
-          // Nén WebP dual-res ngầm trong background
+          // Quyết định 135: Nén WebP dual-res ngầm và lưu vào ref, KHÔNG swap URI on-screen
           optimizeExpensePhoto(photo.uri)
             .then((optimized) => {
-              setCapturedPhotoUri(optimized.fullUri);
-              setCapturedThumbUri(optimized.thumbnailUri);
+              optimizedPhotoRef.current = optimized.fullUri;
+              optimizedThumbRef.current = optimized.thumbnailUri;
             })
             .catch(() => {});
           if (activeBankSnapshotEvent) {
@@ -948,27 +955,30 @@ export default function MainAppScreen() {
         : (inFrameType === 'EXPENSE' ? `${bankTag} Chi tiêu bằng ảnh`.trim() : `${bankTag} Thu nhập`.trim());
     }
 
+    const savePhotoUri = optimizedPhotoRef.current || capturedPhotoUri;
+    const saveThumbUri = optimizedThumbRef.current || capturedThumbUri || savePhotoUri;
+
     const tx = await addTransaction({
       userId,
       amount: finalAmount,
       type: inFrameType,
       category: effectiveCategory,
       description: finalDesc,
-      photo_url: capturedPhotoUri,
-      thumbnail_url: capturedThumbUri || capturedPhotoUri,
+      photo_url: savePhotoUri,
+      thumbnail_url: saveThumbUri,
       payment_method: inFramePaymentMethod,
       source: 'PHOTO',
       status: 'CONFIRMED' });
 
-    if (capturedPhotoUri) {
+    if (savePhotoUri) {
       uploadExpensePhotoAsync({
         userId,
         transactionId: tx.id,
-        fullPhotoUri: capturedPhotoUri,
-        thumbnailUri: capturedThumbUri || undefined }).catch(() => {});
+        fullPhotoUri: savePhotoUri,
+        thumbnailUri: saveThumbUri || undefined }).catch(() => {});
 
       // Nếu có sự kiện thông báo ngân hàng vừa đến, tự động gắn ảnh vào giao dịch ngân hàng đó
-      bankNotificationService.attachPhotoToLatestTransaction(capturedPhotoUri).catch(() => {});
+      bankNotificationService.attachPhotoToLatestTransaction(savePhotoUri).catch(() => {});
     }
 
     if (inFrameType === 'EXPENSE') {
@@ -980,6 +990,8 @@ export default function MainAppScreen() {
     setUndoToastVisible(true);
     setIsPhotoSavedSuccess(true);
     // Reset tức thì về live camera để ngắm chụp tiếp
+    optimizedPhotoRef.current = null;
+    optimizedThumbRef.current = null;
     setCapturedPhotoUri(null);
     setCapturedThumbUri(null);
     setInFrameAmount(0);
@@ -1392,50 +1404,55 @@ export default function MainAppScreen() {
 
               {/* CAMERA VIEWFINDER (LIVE KHUNG NGẮM LOCKET 1:1 VUÔNG 348x348px) */}
               <View style={styles.viewfinderContainer}>
-                {capturedPhotoUri ? (
-                  <Image
+                {/* LỚP 1: LIVE CAMERAVIEW GIỮ NGUYÊN KHÔNG UNMOUNT ĐỂ CHỐNG NHÁY */}
+                <View
+                  style={styles.viewfinder}
+                  {...pinchPanResponder.panHandlers}
+                >
+                  <Pressable
+                    style={StyleSheet.absoluteFill}
+                    onPress={handleDoubleTapViewfinder}
+                  >
+                    {cameraGranted && isCameraActive ? (
+                      <CameraView
+                        ref={cameraRef}
+                        style={StyleSheet.absoluteFill}
+                        facing={cameraFacing}
+                        enableTorch={flashMode === 'on'}
+                        zoom={cameraZoom}
+                        barcodeScannerSettings={{
+                          barcodeTypes: ['qr'] }}
+                        onBarcodeScanned={capturedPhotoUri ? undefined : handleBarcodeScanned}
+                      />
+                    ) : (
+                      <View style={styles.permissionFallback}>
+                        <Camera size={44} color="#666666" strokeWidth={2} />
+                        <Text style={styles.permissionText}>
+                          {Platform.OS === 'web'
+                            ? 'Chạm nút bên dưới để Chụp hoặc Tải ảnh chi tiêu'
+                            : 'Chạm đúp để kiểm tra hoặc cấp quyền Camera'}
+                        </Text>
+                        <BlockButton
+                          title={Platform.OS === 'web' ? 'Chụp / Tải Ảnh' : 'Mở Cài Đặt'}
+                          onPress={Platform.OS === 'web' ? handlePickImageFromLibrary : openAppSettings}
+                          variant="secondary"
+                          size="sm"
+                        />
+                      </View>
+                    )}
+                  </Pressable>
+                </View>
+
+                {/* LỚP 2: ẢNH CHỤP TĨNH PHỦ LÊN TRÊN (SEAMLESS FREEZE-FRAME, 0 DELAY, KHÔNG CO GIẬT KHUNG) */}
+                {capturedPhotoUri && (
+                  <ExpoImage
                     source={{ uri: capturedPhotoUri }}
                     style={StyleSheet.absoluteFill}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    transition={0}
+                    priority="high"
+                    cachePolicy="memory-disk"
                   />
-                ) : (
-                  <View
-                    style={styles.viewfinder}
-                    {...pinchPanResponder.panHandlers}
-                  >
-                    <Pressable
-                      style={StyleSheet.absoluteFill}
-                      onPress={handleDoubleTapViewfinder}
-                    >
-                      {cameraGranted && isCameraActive ? (
-                        <CameraView
-                          ref={cameraRef}
-                          style={StyleSheet.absoluteFill}
-                          facing={cameraFacing}
-                          enableTorch={flashMode === 'on'}
-                          zoom={cameraZoom}
-                          barcodeScannerSettings={{
-                            barcodeTypes: ['qr'] }}
-                          onBarcodeScanned={handleBarcodeScanned}
-                        />
-                      ) : (
-                        <View style={styles.permissionFallback}>
-                          <Camera size={44} color="#666666" strokeWidth={2} />
-                          <Text style={styles.permissionText}>
-                            {Platform.OS === 'web'
-                              ? 'Chạm nút bên dưới để Chụp hoặc Tải ảnh chi tiêu'
-                              : 'Chạm đúp để kiểm tra hoặc cấp quyền Camera'}
-                          </Text>
-                          <BlockButton
-                            title={Platform.OS === 'web' ? 'Chụp / Tải Ảnh' : 'Mở Cài Đặt'}
-                            onPress={Platform.OS === 'web' ? handlePickImageFromLibrary : openAppSettings}
-                            variant="secondary"
-                            size="sm"
-                          />
-                        </View>
-                      )}
-                    </Pressable>
-                  </View>
                 )}
 
                 {/* NÚT FLASH NỔI TRẦN KHÔNG VIỀN Ở GÓC TRÊN TRÁI KHUNG CAMERA */}
@@ -1469,16 +1486,16 @@ export default function MainAppScreen() {
                   </View>
                 )}
 
-                {/* Ô NHẬP MÔ TẢ NỀN KÍNH MỜ TỐI TRONG SUỐT (VIÊN THUỐC PILL 999px - KHÔNG CHE ẢNH) */}
+                {/* Ô NHẬP MÔ TẢ NỀN KÍNH MỎNG NHẸ TỰ CO GIÃN (AUTO-EXPANDING GLASSY PILL - QUYẾT ĐỊNH 135) */}
                 <View style={styles.camDescGlassyPillInside}>
-                  <PenLine size={14} color="#FFFBF1" strokeWidth={2.4} />
+                  <PenLine size={13} color="#FFFBF1" strokeWidth={2.4} />
                   <TextInput
                     value={inFrameDescription}
                     onChangeText={setInFrameDescription}
                     placeholder="Ghi mô tả..."
                     placeholderTextColor="rgba(255, 251, 241, 0.65)"
                     style={styles.camDescGlassyInput}
-                    maxLength={40}
+                    maxLength={35}
                     returnKeyType="done"
                   />
                 </View>
@@ -2034,26 +2051,27 @@ const styles = StyleSheet.create({
     borderRadius: 999 },
   camDescGlassyPillInside: {
     position: 'absolute',
-    left: 14,
-    right: 14,
+    alignSelf: 'center',
     bottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.42)',
+    gap: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.22)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.28)',
+    borderColor: 'rgba(255, 255, 255, 0.32)',
     borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    minWidth: 110,
+    maxWidth: Math.min(SCREEN_WIDTH - 60, 310),
     zIndex: 20 },
   camDescGlassyInput: {
-    flex: 1,
     fontFamily: 'Nunito',
     fontSize: 13,
     fontWeight: '700',
     color: '#FFFBF1',
-    paddingVertical: 0 },
+    paddingVertical: 0,
+    minWidth: 70 },
   flashToggleButton: {
     width: 44,
     height: 44,

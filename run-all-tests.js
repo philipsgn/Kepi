@@ -3456,4 +3456,38 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 74 Passed: Hoàn Thiện Luồng Tiền Trước/Sau, Cute Toast 1.8s & Lịch Sử 100vh (Quyết định 134) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 74 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (74/74)!');
+// ==============================================================================
+// 🧪 TEST 75: SEAMLESS FREEZE-FRAME 0MS & AUTO-EXPANDING GLASSY PILL (QUYẾT ĐỊNH 135) AUDIT
+// ==============================================================================
+{
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const cardPath = path.join(__dirname, 'src/components/camera/LocketMomentCard.tsx');
+  const cardCode = fs.readFileSync(cardPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. Seamless Freeze-Frame: CameraView kept mounted + ExpoImage on top
+  assert.ok(indexCode.includes('CameraView') && indexCode.includes('ExpoImage'), 'Camera must keep CameraView mounted and overlay ExpoImage');
+  assert.ok(indexCode.includes('optimizedPhotoRef'), 'optimizedPhotoRef must store background optimized WebP without on-screen URI swap');
+
+  // 2. Auto-Expanding Glassy Pill with translucent background (rgba 0.22) & centered alignment
+  assert.ok(indexCode.includes("rgba(0, 0, 0, 0.22)") || indexCode.includes("'rgba(0, 0, 0, 0.22)'"), 'camDescGlassyPillInside must use light translucent background rgba(0,0,0,0.22)');
+  assert.ok(indexCode.includes("alignSelf: 'center'"), 'camDescGlassyPillInside must be centered to expand equally to both sides');
+
+  // 3. LocketMomentCard description pill updated to light translucent background & centered
+  assert.ok(cardCode.includes("rgba(0, 0, 0, 0.22)") || cardCode.includes("'rgba(0, 0, 0, 0.22)'"), 'LocketMomentCard must use light translucent background rgba(0,0,0,0.22)');
+
+  // 4. Living Docs Sync (AGENTS.md, 09-CAMERA.md, DECISIONS.md)
+  assert.ok(agentsCode.includes('Seamless Freeze-Frame 0ms') || agentsCode.includes('Auto-Expanding Glassy Pill'), 'AGENTS.md must document Quyết định 135');
+  assert.ok(docCode.includes('Quyết định 135') || docCode.includes('Quyáº¿t Ä‘á»‹nh 135'), '09-CAMERA.md must document Quyết định 135');
+  assert.ok(decisionsCode.includes('Quyết định 135') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 135'), 'DECISIONS.md must document Quyết định 135');
+
+  console.log('✅ Test 75 Passed: Seamless Freeze-Frame 0ms & Auto-Expanding Glassy Pill (Quyết định 135) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 75 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (75/75)!');

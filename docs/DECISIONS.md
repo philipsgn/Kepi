@@ -787,6 +787,14 @@
   - **Quyết định 134 (19/11/2026): Hoàn Thiện Luồng Tiền Trước/Sau Chụp, Cute Toast Tự Tắt 1.8s & Lịch Sử 100vh 1 Ảnh 1 Khung Hình:**
     - *Bối Cảnh & Nguyên Nhân:* Người dùng phản hồi thực tế kèm 4 ảnh chụp: (1) Cho phép nhập tiền, tag danh mục, mô tả trước hoặc sau khi chụp (sửa lỗi chụp xong bị reset về 0đ); (2) Toast "Đã lưu khoảnh khắc" bị đơ cứng, cần tự tắt sau 1.8s và thiết kế lại dễ thương; (3) Lịch sử ảnh bị chia nửa hiển thị dở dang hai ảnh cùng lúc, cần chuẩn hóa mỗi ảnh chiếm trọn 1 màn hình 100vh snap paging mượt mà; (4) Thẻ lịch sử: Mô tả dạng pill kính mờ sát đáy bên trong khung ảnh, bên phải ngoài khung ảnh hiển thị tên danh mục tiếng Việt có dấu chuẩn (`Ăn uống`, `Gia đình & Cho mẹ`...) thay vì raw id thô (`an_uong`, `gia_dinh`).
 
+  - **Quyết định 135 (19/11/2026): Khóa Tĩnh Khung Hình Chụp 0ms (Zero-Shift Freeze-Frame) & Ô Mô Tả Tự Co Giãn Kính Mỏng Nhẹ:**
+    - *Bối Cảnh & Nguyên Nhân:* Người dùng phản hồi cảm giác khi chụp ảnh xong có một khung ảnh khác đè lên và chuyển động nhẹ trong 0.000001s, đồng thời ô mô tả bè ngang quá rộng che ảnh và nền quá tối.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Seamless Freeze-Frame:** Không unmount `CameraView` khi chụp; hiển thị ảnh chụp tĩnh tức thì qua `<ExpoImage>` phủ lên trên với `transition={0}`, `priority="high"` và `cachePolicy="memory-disk"`.
+      2. **Không Swap URI khi Nén Ngầm:** Giữ nguyên URI ảnh chụp cục bộ cho bản xem trước on-screen, lưu URI ảnh WebP nén vào `optimizedPhotoRef` để dùng khi bấm Lưu, triệt tiêu 100% hiện tượng flash/reload ảnh trên màn hình.
+      3. **Auto-Expanding Glassy Pill:** Ô mô tả căn giữa đáy ảnh (`alignSelf: 'center'`), ban đầu ngắn gọn (~110px), nền kính trong suốt mỏng nhẹ `rgba(0, 0, 0, 0.22)` viền trắng mờ mảnh `rgba(255, 255, 255, 0.32)`, tự động mở rộng đều sang 2 bên khi người dùng gõ chữ (tối đa 310px).
+
+
 
 
 
