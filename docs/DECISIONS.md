@@ -770,4 +770,24 @@
          - Zero-STK (không lưu số tài khoản trên map hay log).
          - 100% Offline-First và đồng nhất ngôn ngữ thiết kế Neo-Brutalist Heo Con (Kem Sàn `#F6EEDC`, Nâu Mực `#2B2118`, Hồng Heo `#F9B8C4`, Vàng Cám `#F4B93B`, viền 3px, bóng cứng 0-blur).
 
+  - **Quyết định 131 (19/11/2026): Tái Thiết Kế Tab Camera Tối Giản Adidas Pixel Art Hội An (Nền Đen Tuyền Sâu, Viewfinder Chân Thực, Shutter Đèn Lồng Hội An & Thẻ Polaroid 1:1 Prototype):**
+    - *Bối Cảnh & Bản Chất:* Người dùng yêu cầu dựng lại hoàn toàn Tab Camera dựa trên `prototype/Ví Heo Con_new_19_11.html` (Tab Chụp) mới nhất: loại bỏ các chi tiết mây trời dreamy rườm rà, đưa nền xung quanh khung ảnh về màu Đen Tuyền Sâu (`#0D0D0D` - `#121212`) để đạt độ tối giản tuyệt đối, kết hợp phong cách thể thao Adidas dứt khoát và sắc màu văn hóa Hội An (Vàng Nghệ `#F4B93B`, Đỏ Đèn Lồng `#E0452B`, Nâu Mực `#2B2118`).
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Bố Cục Tối Giản Nền Đen Tuyền Sâu (`#0D0D0D`):**
+         - Toàn bộ nền bao quanh Tab Camera sử dụng màu đen tuyền sâu `#0D0D0D` tương phản mạnh, triệt tiêu mọi sao nhãng thị giác, dồn toàn bộ sự chú ý vào khung ngắm camera.
+      2. **Khung Ngắm Chân Thực Với 4 Góc Ngắm Pixel Trắng & Heo Góc Khung Hình:**
+         - Live Expo Camera thật 100% nằm gọn trong khung tỷ lệ chuẩn có viền Nâu Mực viền đôi sắc nét.
+         - 4 góc ngắm pixel trắng `[[8,8],[148,8],[8,120],[148,120]]`, chấm đỏ REC nhấp nháy, tem ngày tháng pixel retro `YY.MM.DD`.
+         - Chú heo nhỏ nằm ở góc khung hình (`sleep` ngoan ngoãn khi ngắm, nhảy cẫng thả tim khi chụp).
+         - Ô nhập mô tả `.camdesc` dạng pill bo tròn đặt nổi sát đáy bên trong khung hình (chống che lấp bởi bàn phím).
+      3. **Thanh Phân Đoạn `[Chi | Thu]` & Cụm Nhập Số Tiền Tối Giản:**
+         - Segment gạt [Chi | Thu] trên đầu: Nút Chi (mực `#2B2118`), Nút Thu (xanh `#5E9A57`).
+         - Cụm số tiền to rõ với 2 nút `[-]` và `[+]` 5k (hoặc 500k khi Thu), ô hiển thị font Baloo 2 `tabular-nums`.
+         - Dải tag danh mục `.tg` phong cách pill viền 2.5px mực với icon pixel 5x5.
+      4. **Nút Shutter Adidas Đèn Lồng Hội An 2-in-1:**
+         - Nút Shutter to tròn 84×84px viền đôi đa tầng đặc trưng: `border: 4px solid #2B2118; background: #E0452B; box-shadow: 0 0 0 5px #F4B93B, 0 0 0 8px #2B2118, 0 8px 0 8px #2B2118;`.
+         - 1 chạm = Chụp và lưu; Giữ = Nói Voice $\rightarrow$ buông tay tự động bóc tách số tiền, tên món và danh mục.
+      5. **Thẻ Polaroid Xác Nhận Kết Quả 1:1 Prototype:**
+         - Ngay sau khi chụp, hiển thị Thẻ Polaroid rửa phim nghiêng −3° với thumbnail ảnh vuông 72×72px, dòng xác nhận `Đã lưu và treo ảnh` và 2 nút bấm: `[ Chụp tiếp ]` (reset form chụp tiếp) và `[ Xem ở phòng ảnh ]` (chuyển sang xem ảnh).
+
 
