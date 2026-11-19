@@ -749,11 +749,10 @@ export default function MainAppScreen() {
                 setCapturedThumbUri(optimized.thumbnailUri);
               })
               .catch(() => {});
-            setInFrameAmount(0);
-            setInFrameType('EXPENSE');
-            setInFrameCategory('');
-            setShowInFrameCategoryPicker(false);
-            setInFrameDescription('');
+            // Quyết định 134: Bảo toàn số tiền, danh mục, mô tả người dùng đã nhập trước khi chụp
+            if (!inFrameCategory) {
+              setInFrameCategory(inFrameType === 'INCOME' ? 'luong' : 'an_uong');
+            }
             return;
           }
         }
@@ -818,12 +817,10 @@ export default function MainAppScreen() {
             setInFramePaymentMethod('BANK');
             setShowInFrameCategoryPicker(true);
           } else {
-            setInFrameAmount(0);
-            setInFrameType('EXPENSE');
-            setInFrameCategory('');
-            setShowInFrameCategoryPicker(false);
-            setInFrameDescription('');
-            setInFramePaymentMethod('CASH');
+            // Quyết định 134: Bảo toàn số tiền, danh mục, mô tả người dùng đã nhập trước khi chụp
+            if (!inFrameCategory) {
+              setInFrameCategory(inFrameType === 'INCOME' ? 'luong' : 'an_uong');
+            }
           }
           return;
         }
@@ -847,12 +844,10 @@ export default function MainAppScreen() {
       setInFramePaymentMethod('BANK');
       setShowInFrameCategoryPicker(true);
     } else {
-      setInFrameAmount(0);
-      setInFrameType('EXPENSE');
-      setInFrameCategory('');
-      setShowInFrameCategoryPicker(false);
-      setInFrameDescription('');
-      setInFramePaymentMethod('CASH');
+      // Quyết định 134: Bảo toàn số tiền, danh mục, mô tả người dùng đã nhập trước khi chụp
+      if (!inFrameCategory) {
+        setInFrameCategory(inFrameType === 'INCOME' ? 'luong' : 'an_uong');
+      }
     }
   };
 
@@ -991,9 +986,9 @@ export default function MainAppScreen() {
     setInFrameDescription('');
     setCamHintMessage('Đã lưu khoảnh khắc vào ví!');
 
-    // Cuộn nhẹ xuống dòng khoảnh khắc để xem ảnh vừa chụp
+    // Cuộn xuống đúng 1 màn hình để xem ảnh vừa chụp (Quyết định 134)
     setTimeout(() => {
-      verticalHistoryScrollRef.current?.scrollTo({ y: SCREEN_HEIGHT * 0.45, animated: true });
+      verticalHistoryScrollRef.current?.scrollTo({ y: SCREEN_HEIGHT, animated: true });
     }, 300);
   };
 
@@ -1647,47 +1642,71 @@ export default function MainAppScreen() {
               </View>
             </View>
 
-            {/* --- DÒNG KHOẢNH KHẮC LIÊN TỤC CHUẨN LOCKET (HÌNH #3) --- */}
-            <View
-              style={[
-                styles.historyContainer,
-                {
-                  minHeight: SCREEN_HEIGHT,
-                  paddingTop: insets.top + spacing.sm,
-                  backgroundColor: isDark ? '#0E1620' : '#FAF6EC' },
-              ]}
-            >
-              {/* NÚT TRỞ LẠI CAMERA Ở ĐỈNH LỊCH SỬ */}
-              <TouchableOpacity
-                style={styles.backToCameraPill}
-                onPress={scrollToCamera}
-                activeOpacity={0.8}
+            {/* --- DÒNG KHOẢNH KHẮC 100VH 1 ẢNH 1 KHUNG HÌNH (QUYẾT ĐỊNH 134) --- */}
+            {confirmedTransactions.map((tx) => (
+              <View
+                key={tx.id}
+                style={[
+                  styles.historySnapPage,
+                  {
+                    height: SCREEN_HEIGHT,
+                    paddingTop: insets.top + 6,
+                    paddingBottom: insets.bottom + 85,
+                  },
+                ]}
               >
-                <ChevronDown size={14} color={tokens.textMuted} strokeWidth={2.5} />
-                <Text style={[styles.backToCameraText, { color: tokens.textMuted }]}>
-                  Trở lại Camera
-                </Text>
-              </TouchableOpacity>
-              {confirmedTransactions.map((tx) => (
-                <LocketMomentCard
-                  key={tx.id}
-                  item={tx}
-                  isMasked={false}
-                />
-              ))}
+                {/* NÚT TRỞ LẠI CAMERA Ở ĐỈNH KHUNG HÌNH */}
+                <TouchableOpacity
+                  style={styles.backToCameraPill}
+                  onPress={scrollToCamera}
+                  activeOpacity={0.8}
+                >
+                  <ChevronDown size={14} color="#2B2118" strokeWidth={2.8} />
+                  <Text style={styles.backToCameraText}>
+                    Trở lại Camera
+                  </Text>
+                </TouchableOpacity>
 
-              {confirmedTransactions.length === 0 && (
+                {/* KHUNG ẢNH POLAROID CĂN GIỮA TOÀN MÀN HÌNH */}
+                <View style={styles.historyCardCentering}>
+                  <LocketMomentCard
+                    item={tx}
+                    isMasked={false}
+                  />
+                </View>
+              </View>
+            ))}
+
+            {confirmedTransactions.length === 0 && (
+              <View
+                style={[
+                  styles.historySnapPage,
+                  {
+                    height: SCREEN_HEIGHT,
+                    paddingTop: insets.top + 6,
+                    paddingBottom: insets.bottom + 85,
+                  },
+                ]}
+              >
+                <TouchableOpacity
+                  style={styles.backToCameraPill}
+                  onPress={scrollToCamera}
+                  activeOpacity={0.8}
+                >
+                  <ChevronDown size={14} color="#2B2118" strokeWidth={2.8} />
+                  <Text style={styles.backToCameraText}>
+                    Trở lại Camera
+                  </Text>
+                </TouchableOpacity>
+
                 <View style={styles.emptyGridContainer}>
-                  <Leaf size={32} color={tokens.textMuted} strokeWidth={2} />
-                  <Text style={[styles.emptyGridText, { color: tokens.textMuted }]}>
+                  <Leaf size={32} color="#2B2118" strokeWidth={2} />
+                  <Text style={[styles.emptyGridText, { color: '#2B2118' }]}>
                     Chưa có khoảnh khắc nào. Chụp thử món đầu tiên nhé!
                   </Text>
                 </View>
-              )}
-
-              {/* Extra spacing for Bottom Tab Bar */}
-              <View style={{ height: insets.bottom + 90 }} />
-            </View>
+              </View>
+            )}
           </ScrollView>
         </View>
 
@@ -1765,17 +1784,17 @@ export default function MainAppScreen() {
         onClose={() => setShowLessons(false)}
       />
 
-      {/* THANH HOÀN TÁC 5 GIÂY (UNDO TOAST) */}
+      {/* THANH HOÀN TÁC DỄ THƯƠNG 1.8 GIÂY (CUTE UNDO TOAST - QUYẾT ĐỊNH 134) */}
       <UndoToastBar
         visible={undoToastVisible}
         message={undoToastMessage}
-        durationMs={5000}
+        durationMs={1800}
         onUndo={handleUndo}
         onExpire={() => {
           setUndoToastVisible(false);
           setLastSavedOrDeletedTx(null);
         }}
-        bottomOffset={insets.bottom + 80}
+        bottomOffset={insets.bottom + 85}
       />
 
       {/* THẺ HỎI XÁC NHẬN "ĐÃ CHUYỂN XONG CHƯA?" KHI QUAY LẠI TỪ APP NGÂN HÀNG */}
@@ -2730,19 +2749,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
     letterSpacing: 0.2 },
-    backToCameraPill: {
+  backToCameraPill: {
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: radii.full,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    marginBottom: spacing.sm },
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 0,
+    elevation: 2,
+    marginTop: 4,
+    marginBottom: 6,
+    zIndex: 10,
+  },
   backToCameraText: {
-    fontSize: 12,
-    fontWeight: '600' },
+    fontFamily: 'Nunito',
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#2B2118',
+  },
+  historySnapPage: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+    backgroundColor: '#F6EEDC',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  historyCardCentering: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
   historyPeekTab: {
     position: 'absolute',
     alignSelf: 'center',

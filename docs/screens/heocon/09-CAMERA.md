@@ -75,6 +75,7 @@ sequenceDiagram
 - **v4.0:** Giai đoạn Dreamy Pixel Sky (bầu trời mây nắng) kết hợp thanh nhập mô tả In-Frame Bottom Pill và Snap-on-Release Voice.
 - **v5.0 (Quyết định 131):** Giai đoạn đen tuyền tối giản Adidas Pixel Art Hội An.
 - **v6.0 (Quyết định 132):** Tinh gọn 1:1 Prototype: Nền Kem Sàn `#F6EEDC`, Header Chi/Thu + Flash, khung ảnh 4:3 rộng thoáng, bỏ ngày tháng trong khung, danh mục 2 hàng, chụp xong hiện 2 nút tròn `[ ↺ ]` và `[ ✓ ]` thay thế Shutter, cuộn xuống 1 ảnh - 1 khung hình.
-- **v7.0 (Hiện tại - Quyết định 133):** Khung vuông 1:1 chuẩn Locket (348×348px), Chi/Thu sát trần, Flash nổi trần trong khung, mô tả kính mờ tối trong suốt, số tiền nền trơn, tag 1 hàng trượt ngang chữ to, chụp tức thì 0ms latency.
+- **v7.0 (Quyết định 133):** Khung vuông 1:1 chuẩn Locket (348×348px), Chi/Thu sát trần, Flash nổi trần trong khung, mô tả kính mờ tối trong suốt, số tiền nền trơn, tag 1 hàng trượt ngang chữ to, chụp tức thì 0ms latency.
+- **v8.0 (Hiện tại - Quyết định 134):** Hoàn thiện luồng nhập tiền & tag trước/sau khi chụp không bị reset; Cute Toast tự ẩn sau 1.8s; Lịch sử 100vh 1 ảnh 1 khung hình snap paging; Thẻ lịch sử: mô tả kính mờ trong ảnh sát đáy, tên danh mục tiếng Việt có dấu chuẩn bên ngoài.
 
 

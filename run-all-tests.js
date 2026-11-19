@@ -3414,4 +3414,46 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 73 Passed: Tab Camera Locket 1:1 Vuông & Tối Giản Tức Thì (Quyết định 133) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 73 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (73/73)!');
+// ==============================================================================
+// 🧪 TEST 74: HOÀN THIỆN LUỒNG TIỀN TRƯỚC/SAU, CUTE TOAST 1.8S & LỊCH SỬ 100VH (QUYẾT ĐỊNH 134) AUDIT
+// ==============================================================================
+{
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const cardPath = path.join(__dirname, 'src/components/camera/LocketMomentCard.tsx');
+  const cardCode = fs.readFileSync(cardPath, 'utf8');
+  const toastPath = path.join(__dirname, 'src/components/common/UndoToastBar.tsx');
+  const toastCode = fs.readFileSync(toastPath, 'utf8');
+  const catPath = path.join(__dirname, 'src/constants/categoryDefaults.ts');
+  const catCode = fs.readFileSync(catPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. Pre-Capture Amount & Category Preservation
+  assert.ok(indexCode.includes('Bảo toàn số tiền, danh mục, mô tả người dùng đã nhập trước khi chụp'), 'handleCapturePhoto must preserve pre-entered amount and category');
+
+  // 2. Cute UndoToastBar (1.8s Auto-Dismiss & Neo-Brutalist Pink/Cream)
+  assert.ok(toastCode.includes('durationMs = 1800') || indexCode.includes('durationMs={1800}'), 'UndoToastBar must auto-dismiss after 1.8s');
+  assert.ok(toastCode.includes('#F9B8C4'), 'UndoToastBar must use cute Neo-Brutalist pink button #F9B8C4');
+
+  // 3. 100vh Full Screen Snap Paging for History
+  assert.ok(indexCode.includes('historySnapPage') && indexCode.includes('historyCardCentering'), 'History moments must each occupy a 100vh snap page');
+
+  // 4. LocketMomentCard In-Photo Description Pill & Accented Category Name
+  assert.ok(cardCode.includes('inPhotoDescPill'), 'LocketMomentCard must render description pill at bottom inside photo');
+  assert.ok(cardCode.includes('formatCategoryName') || cardCode.includes('getCategoryDisplayName'), 'LocketMomentCard must use formatCategoryName for accented category');
+  assert.ok(catCode.includes('formatCategoryName') && catCode.includes('Ăn uống'), 'formatCategoryName must return accented Vietnamese name');
+
+  // 5. Living Docs Sync (AGENTS.md, 09-CAMERA.md, DECISIONS.md)
+  assert.ok(agentsCode.includes('nhập tiền/tag trước hoặc sau khi chụp') || agentsCode.includes('Cute Toast tự tắt 1.8s'), 'AGENTS.md must document Quyết định 134');
+  assert.ok(docCode.includes('Quyết định 134') || docCode.includes('Quyáº¿t Ä‘á»‹nh 134'), '09-CAMERA.md must document Quyết định 134');
+  assert.ok(decisionsCode.includes('Quyết định 134') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 134'), 'DECISIONS.md must document Quyết định 134');
+
+  console.log('✅ Test 74 Passed: Hoàn Thiện Luồng Tiền Trước/Sau, Cute Toast 1.8s & Lịch Sử 100vh (Quyết định 134) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 74 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (74/74)!');

@@ -323,22 +323,33 @@ export function formatCategoryName(rawCat?: string, customCats?: CategoryItem[])
     an_uong: 'Ăn uống',
     cafe: 'Cà phê & Trà',
     di_chuyen: 'Đi lại & Xe cộ',
+    di_lai: 'Đi lại & Xe cộ',
     nha_cua: 'Nhà cửa & Hóa đơn',
     mua_sam: 'Mua sắm & Quần áo',
     suc_khoe: 'Thuốc men & Sức khỏe',
+    thuoc_men: 'Thuốc men & Sức khỏe',
     gia_dinh: 'Gia đình & Cho mẹ',
+    thu_cung: 'Nuôi thú cưng',
     giai_tri: 'Giải trí & Phim ảnh',
     hoc_tap: 'Học tập & Sách vở',
     chi_tieu_khac: 'Chi tiêu khác',
-    luong: 'Tiền lương',
+    khac: 'Chi tiêu khác',
+    luong: 'Tiền lương chính',
     thuong: 'Thưởng & Tip',
     phu_cap: 'Phụ cấp công việc',
     dau_tu: 'Lợi nhuận đầu tư',
     ban_do: 'Thanh lý / Bán đồ cũ',
+    qua_nhan: 'Được cho / Quà',
     thu_khac: 'Thu nhập khác',
     cuu_vi: 'Cứu ví',
+    chi_tieu: 'Chi tiêu',
+    thu_nhap: 'Thu nhập',
   };
 
-  return fallbackMap[rawCat] || rawCat;
+  const mapped = fallbackMap[rawCat.toLowerCase()];
+  if (mapped) return mapped;
+  return rawCat.replace(/_/g, ' ');
 }
+
+export const getCategoryDisplayName = formatCategoryName;
 

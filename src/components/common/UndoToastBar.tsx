@@ -30,7 +30,7 @@ interface UndoToastBarProps {
 export const UndoToastBar: React.FC<UndoToastBarProps> = ({
   visible,
   message,
-  durationMs = 5000,
+  durationMs = 1800,
   onUndo,
   onExpire,
   bottomOffset = 85,
@@ -43,6 +43,7 @@ export const UndoToastBar: React.FC<UndoToastBarProps> = ({
 
   useEffect(() => {
     if (visible) {
+      if (timerRef.current) clearTimeout(timerRef.current);
       progressAnim.setValue(1);
       slideAnim.setValue(20);
       fadeAnim.setValue(0);
@@ -52,12 +53,12 @@ export const UndoToastBar: React.FC<UndoToastBarProps> = ({
         Animated.spring(slideAnim, {
           toValue: 0,
           useNativeDriver: true,
-          tension: 70,
+          tension: 80,
           friction: 9,
         }),
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 250,
+          duration: 200,
           useNativeDriver: true,
         }),
         Animated.timing(progressAnim, {
@@ -68,7 +69,13 @@ export const UndoToastBar: React.FC<UndoToastBarProps> = ({
       ]).start();
 
       timerRef.current = setTimeout(() => {
-        onExpire();
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start(() => {
+          onExpire();
+        });
       }, durationMs);
 
       return () => {
@@ -96,68 +103,37 @@ export const UndoToastBar: React.FC<UndoToastBarProps> = ({
         },
       ]}
     >
-      <View
-        style={[
-          styles.toastCard,
-          {
-            backgroundColor: isDark ? 'rgba(22, 34, 49, 0.94)' : 'rgba(255, 255, 255, 0.95)',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(0, 0, 0, 0.08)',
-          },
-        ]}
-      >
+      <View style={styles.toastCard}>
         <View style={styles.contentRow}>
-          {/* Icon Checkmark tinh tế nổi trần */}
+          {/* Icon Checkmark / Mầm cây dễ thương */}
           <View style={styles.iconBadge}>
-            <CheckCircle2 size={20} color="#7E9F80" strokeWidth={2.6} />
+            <CheckCircle2 size={18} color="#5E9A57" strokeWidth={3} />
           </View>
 
           {/* Dòng thông báo nổi bật */}
-          <Text
-            style={[
-              styles.messageText,
-              { color: isDark ? '#FAF6EC' : '#1B2733' },
-            ]}
-            numberOfLines={1}
-          >
+          <Text style={styles.messageText} numberOfLines={1}>
             {message}
           </Text>
 
-          {/* Nút Hoàn tác mini pill viền mỏng */}
+          {/* Nút Hoàn tác mini pill bo tròn Hồng Heo #F9B8C4 */}
           <TouchableOpacity
-            activeOpacity={0.75}
+            activeOpacity={0.8}
             onPress={handlePressUndo}
-            style={[
-              styles.undoBtn,
-              {
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
-                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-              },
-            ]}
+            style={styles.undoBtn}
           >
-            <RotateCcw size={12} color={isDark ? '#FAF6EC' : '#1B2733'} strokeWidth={2.4} />
-            <Text
-              style={[
-                styles.undoBtnText,
-                { color: isDark ? '#FAF6EC' : '#1B2733' },
-              ]}
-            >
+            <RotateCcw size={12} color="#2B2118" strokeWidth={2.6} />
+            <Text style={styles.undoBtnText}>
               Hoàn tác
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Thanh đếm ngược tiến trình siêu mảnh 2.5px */}
-        <View
-          style={[
-            styles.progressTrack,
-            { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)' },
-          ]}
-        >
+        {/* Thanh đếm ngược tiến trình siêu mảnh 2px */}
+        <View style={styles.progressTrack}>
           <Animated.View
             style={[
               styles.progressBar,
               {
-                backgroundColor: '#E59844',
                 width: progressAnim.interpolate({
                   inputRange: [0, 1],
                   outputRange: ['0%', '100%'],
@@ -181,55 +157,68 @@ const styles = StyleSheet.create({
   },
   toastCard: {
     width: '100%',
-    borderRadius: 24,
-    borderWidth: 1,
+    backgroundColor: '#FFFBF1',
+    borderRadius: 999,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.16,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
   },
   contentRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 10,
+    paddingVertical: 9,
+    gap: 8,
   },
   iconBadge: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
     backgroundColor: 'transparent',
-    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
   messageText: {
     flex: 1,
+    fontFamily: 'Nunito',
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '800',
+    color: '#2B2118',
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.2,
   },
   undoBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-    borderWidth: 1,
-    gap: 5,
+    backgroundColor: '#F9B8C4',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    gap: 4,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 1.5 },
+    shadowOpacity: 0.8,
+    shadowRadius: 0,
+    elevation: 2,
   },
   undoBtnText: {
+    fontFamily: 'Nunito',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
+    color: '#2B2118',
   },
   progressTrack: {
-    height: 2.5,
+    height: 2,
     width: '100%',
+    backgroundColor: 'rgba(43, 33, 24, 0.08)',
   },
   progressBar: {
     height: '100%',
+    backgroundColor: '#F4B93B',
   },
 });

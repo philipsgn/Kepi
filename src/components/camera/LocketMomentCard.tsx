@@ -14,6 +14,7 @@ import { radii, spacing } from '../../theme/tokens';
 import { Transaction } from '../../types/database';
 import { formatVND, maskMoney } from '../../utils/currency';
 import { renderCategoryMonochromeIcon } from '../../constants/categories';
+import { formatCategoryName } from '../../constants/categoryDefaults';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -110,6 +111,15 @@ export const LocketMomentCard: React.FC<LocketMomentCardProps> = ({
             <Text style={styles.skippedText}>Cứu ví</Text>
           </View>
         )}
+
+        {/* Ô MÔ TẢ KÍNH MỜ SÁT ĐÁY TRONG KHUNG ẢNH (CHỐNG CHE ẢNH) */}
+        {Boolean(item.description && item.description.trim() !== '') && (
+          <View style={styles.inPhotoDescPill}>
+            <Text style={styles.inPhotoDescText} numberOfLines={1}>
+              {item.description}
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* 3. LỀ ĐÁY DÀY KIỂU ẢNH POLAROID RỬA PHIM */}
@@ -139,10 +149,10 @@ export const LocketMomentCard: React.FC<LocketMomentCardProps> = ({
           </Text>
         </View>
 
-        {/* Tên món chi tiêu & Con dấu thời gian */}
+        {/* Tên danh mục CÓ DẤU CHUẨN (Right ngoài khung ảnh) & Thời gian */}
         <View style={styles.photoInfoCol}>
           <Text style={styles.photoDescText} numberOfLines={1}>
-            {item.description || item.category || 'Khoảnh khắc chi tiêu'}
+            {formatCategoryName(item.category)}
           </Text>
           <View style={styles.stampDateBadge}>
             <Text style={styles.stampDateText}>
@@ -282,5 +292,25 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: '#2B2118',
+  },
+  inPhotoDescPill: {
+    position: 'absolute',
+    left: 10,
+    right: 10,
+    bottom: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.42)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.28)',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inPhotoDescText: {
+    fontFamily: 'Nunito',
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFBF1',
   },
 });
