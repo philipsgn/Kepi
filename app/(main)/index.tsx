@@ -1284,10 +1284,11 @@ export default function MainAppScreen() {
         <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}>
           <ScrollView
             ref={verticalHistoryScrollRef}
-            pagingEnabled
+            pagingEnabled={Platform.OS === 'android'}
             decelerationRate="fast"
             snapToInterval={SCREEN_HEIGHT}
             snapToAlignment="start"
+            disableIntervalMomentum={true}
             showsVerticalScrollIndicator={false}
             onScroll={handleVerticalScroll}
             scrollEventThrottle={16}
@@ -2781,6 +2782,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6EEDC',
     alignItems: 'center',
     justifyContent: 'space-between',
+    overflow: 'hidden',
   },
   historyCardCentering: {
     flex: 1,
