@@ -3398,7 +3398,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(mascotCode.includes('mascotTouch') && mascotCode.includes('getPigBodyMatrix'), 'Sleeping pig mascot must be retained in corner');
 
   // 3. Translucent Dark Glassy Description Pill & Flat Amount & 1-Row Tags
-  assert.ok(indexCode.includes('camDescGlassyPillInside'), 'Description input must use translucent dark glassy pill inside frame');
+  assert.ok(indexCode.includes('camDescGlassyPillInside') || indexCode.includes('camStoryDraggableContainer'), 'Description input must use translucent dark glassy pill or draggable story container inside frame');
   assert.ok(indexCode.includes('camAmountDisplayFlat'), 'Amount counter must use flat transparent display without SỐ TIỀN label');
   assert.ok(indexCode.includes('camTagsScrollView') && indexCode.includes('camCatChipLarge'), 'Category tags must be a single horizontal scroll row with large chips');
 
@@ -3443,8 +3443,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   // 3. 100vh Full Screen Snap Paging for History
   assert.ok(indexCode.includes('historySnapPage') && indexCode.includes('historyCardCentering'), 'History moments must each occupy a 100vh snap page');
 
-  // 4. LocketMomentCard In-Photo Description Pill & Accented Category Name
-  assert.ok(cardCode.includes('inPhotoDescPill'), 'LocketMomentCard must render description pill at bottom inside photo');
+  // 4. LocketMomentCard In-Photo Description & Accented Category Name
+  assert.ok(cardCode.includes('inPhotoDescPill') || cardCode.includes('inPhotoStoryTextContainer'), 'LocketMomentCard must render description text inside photo');
   assert.ok(cardCode.includes('formatCategoryName') || cardCode.includes('getCategoryDisplayName'), 'LocketMomentCard must use formatCategoryName for accented category');
   assert.ok(catCode.includes('formatCategoryName') && catCode.includes('Ăn uống'), 'formatCategoryName must return accented Vietnamese name');
 
@@ -3475,12 +3475,12 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(indexCode.includes('CameraView') && indexCode.includes('ExpoImage'), 'Camera must keep CameraView mounted and overlay ExpoImage');
   assert.ok(indexCode.includes('optimizedPhotoRef'), 'optimizedPhotoRef must store background optimized WebP without on-screen URI swap');
 
-  // 2. Auto-Expanding Glassy Pill with translucent background (rgba 0.22) & centered alignment
-  assert.ok(indexCode.includes("rgba(0, 0, 0, 0.22)") || indexCode.includes("'rgba(0, 0, 0, 0.22)'"), 'camDescGlassyPillInside must use light translucent background rgba(0,0,0,0.22)');
-  assert.ok(indexCode.includes("alignSelf: 'center'"), 'camDescGlassyPillInside must be centered to expand equally to both sides');
+  // 2. Auto-Expanding Glassy Pill / IG Story Draggable Container
+  assert.ok(indexCode.includes("rgba(0, 0, 0, 0.22)") || indexCode.includes("camStoryDraggableContainer"), 'Must use light translucent background or draggable story container');
+  assert.ok(indexCode.includes("alignSelf: 'center'"), 'Container must be centered to expand equally to both sides');
 
-  // 3. LocketMomentCard description pill updated to light translucent background & centered
-  assert.ok(cardCode.includes("rgba(0, 0, 0, 0.22)") || cardCode.includes("'rgba(0, 0, 0, 0.22)'"), 'LocketMomentCard must use light translucent background rgba(0,0,0,0.22)');
+  // 3. LocketMomentCard description pill updated to light translucent background or story text container
+  assert.ok(cardCode.includes("inPhotoStoryTextContainer") || cardCode.includes("rgba(0, 0, 0, 0.22)"), 'LocketMomentCard must use story text container or translucent background');
 
   // 4. Living Docs Sync (AGENTS.md, 09-CAMERA.md, DECISIONS.md)
   assert.ok(agentsCode.includes('Seamless Freeze-Frame 0ms') || agentsCode.includes('Auto-Expanding Glassy Pill'), 'AGENTS.md must document Quyết định 135');
@@ -3539,4 +3539,44 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 77 Passed: Loại Bỏ Hàm Lật Ảnh & Khôi Phục Tốc Độ Preview 0ms Tức Thì (Quyết định 137) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 77 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (77/77)!');
+// ==============================================================================
+// 🧪 TEST 78: CHỮ MÔ TẢ IG STORY TRONG SUỐT (DRAGGABLE) & TRIỆT TIÊU TAG TỰ SINH (QUYẾT ĐỊNH 138) AUDIT
+// ==============================================================================
+{
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const cardPath = path.join(__dirname, 'src/components/camera/LocketMomentCard.tsx');
+  const cardCode = fs.readFileSync(cardPath, 'utf8');
+  const dbPath = path.join(__dirname, 'src/types/database.ts');
+  const dbCode = fs.readFileSync(dbPath, 'utf8');
+  const txStorePath = path.join(__dirname, 'src/store/transactionStore.ts');
+  const txStoreCode = fs.readFileSync(txStorePath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. Zero Auto-Tag fallback: Must NOT auto-assign effectiveCategory to finalDesc
+  assert.ok(!indexCode.includes('finalDesc = effectiveCategory;'), 'Must not auto-assign effectiveCategory to finalDesc when empty');
+  assert.ok(indexCode.includes('finalDesc = inFrameDescription.trim()'), 'finalDesc must be cleanly trimmed from inFrameDescription');
+
+  // 2. IG Story Transparent Draggable Text & PanResponder
+  assert.ok(indexCode.includes('camStoryDraggableContainer') && indexCode.includes('descPanResponder'), 'Must use PanResponder for draggable IG story text');
+  assert.ok(indexCode.includes('camStoryTextInput'), 'Must have transparent IG story text input');
+  assert.ok(cardCode.includes('inPhotoStoryTextContainer') && cardCode.includes('inPhotoStoryText'), 'LocketMomentCard must render transparent IG story text');
+
+  // 3. Database & Store desc_position support
+  assert.ok(dbCode.includes('desc_position?: { x: number; y: number } | null'), 'Transaction interface must support optional desc_position');
+  assert.ok(txStoreCode.includes('desc_position: data.desc_position || null'), 'transactionStore must persist desc_position');
+
+  // 4. Living Docs Reverse Sync (AGENTS.md, 09-CAMERA.md, DECISIONS.md)
+  assert.ok(agentsCode.includes('Chữ mô tả IG Story trong suốt kéo thả tự do') || agentsCode.includes('Quyết định 138'), 'AGENTS.md must document Quyết định 138');
+  assert.ok(docCode.includes('Quyết định 138') || docCode.includes('Quyáº¿t Ä‘á»‹nh 138'), '09-CAMERA.md must document Quyết định 138');
+  assert.ok(decisionsCode.includes('Quyết định 138') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 138'), 'DECISIONS.md must document Quyết định 138');
+
+  console.log('✅ Test 78 Passed: Chữ Mô Tả IG Story Trong Suốt (Draggable) & Triệt Tiêu Tag Tự Sinh (Quyết định 138) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 78 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (78/78)!');

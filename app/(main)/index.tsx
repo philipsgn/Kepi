@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator,
   Alert,
+  Animated,
   Dimensions,
   Image,
   Keyboard,
@@ -134,6 +135,7 @@ import { formatCompactVND, formatVND } from '../../src/utils/currency';
 import { PaymentMethod, Transaction, TransactionType, MediaType } from '../../src/types/database';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const VIEWFINDER_SIZE = Math.min(SCREEN_WIDTH - 24, 348);
 
 export default function MainAppScreen() {
   const router = useRouter();
@@ -258,6 +260,51 @@ export default function MainAppScreen() {
   const [inFrameCategory, setInFrameCategory] = useState<string>('');
   const [showInFrameCategoryPicker, setShowInFrameCategoryPicker] = useState<boolean>(false);
   const [inFrameDescription, setInFrameDescription] = useState<string>('');
+
+  // Chữ mô tả IG Story trong suốt kéo thả tự do (Quyết định 138)
+  const descPan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const descPanOffset = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const id = descPan.addListener((val) => {
+      descPanOffset.current = val;
+    });
+    return () => {
+      descPan.removeListener(id);
+    };
+  }, [descPan]);
+
+  const resetDescPan = () => {
+    descPan.setValue({ x: 0, y: 0 });
+    descPan.setOffset({ x: 0, y: 0 });
+    descPanOffset.current = { x: 0, y: 0 };
+  };
+
+  const descPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_, gestureState) =>
+          Math.abs(gestureState.dx) > 3 || Math.abs(gestureState.dy) > 3,
+        onPanResponderGrant: () => {
+          descPan.setOffset({
+            x: descPanOffset.current.x,
+            y: descPanOffset.current.y,
+          });
+          descPan.setValue({ x: 0, y: 0 });
+        },
+        onPanResponderMove: Animated.event([null, { dx: descPan.x, dy: descPan.y }], {
+          useNativeDriver: false,
+        }),
+        onPanResponderRelease: () => {
+          descPan.flattenOffset();
+        },
+        onPanResponderTerminate: () => {
+          descPan.flattenOffset();
+        },
+      }),
+    [descPan]
+  );
   const [savedPolaroidItem, setSavedPolaroidItem] = useState<{
     photoUri?: string | null;
     itemName: string;
@@ -300,6 +347,7 @@ export default function MainAppScreen() {
     setInFrameAmount(0);
     setInFrameCategory('');
     setInFrameDescription('');
+    resetDescPan();
     setInFramePaymentMethod('CASH');
     setSavedPolaroidItem(null);
     setCamHintMessage('');
@@ -535,6 +583,7 @@ export default function MainAppScreen() {
               setInFrameCategory('');
               setShowInFrameCategoryPicker(false);
               setInFrameDescription('');
+    resetDescPan();
               setInFramePaymentMethod('CASH');
             }
           })
@@ -689,17 +738,19 @@ export default function MainAppScreen() {
 
     const userId = user?.id || 'demo-user';
     const finalAmount = inFrameAmount;
-    let finalDesc = inFrameDescription.trim();
-    if (!finalDesc) {
-      finalDesc = effectiveCategory;
-    }
+    const finalDesc = inFrameDescription.trim();
+    const finalDescPos = finalDesc ? {
+      x: Math.round(Math.max(10, Math.min(90, 50 + (descPanOffset.current.x / VIEWFINDER_SIZE) * 100))),
+      y: Math.round(Math.max(10, Math.min(90, 72 + (descPanOffset.current.y / VIEWFINDER_SIZE) * 100))),
+    } : null;
 
     const tx = await addTransaction({
       userId,
       amount: finalAmount,
       type: inFrameType,
       category: effectiveCategory,
-      description: finalDesc,
+      description: finalDesc || null,
+      desc_position: finalDescPos,
       photo_url: photoUriToSave,
       thumbnail_url: thumbUriToSave || photoUriToSave,
       payment_method: inFramePaymentMethod,
@@ -789,6 +840,7 @@ export default function MainAppScreen() {
           setInFrameCategory('');
           setShowInFrameCategoryPicker(false);
           setInFrameDescription('');
+    resetDescPan();
           return;
         }
       } else {
@@ -951,11 +1003,14 @@ export default function MainAppScreen() {
       : activeBankSnapshotEvent ? `[${activeBankSnapshotEvent.bankName}]` : '';
 
     let finalDesc = inFrameDescription.trim();
-    if (!finalDesc || finalDesc === bankTag) {
-      finalDesc = effectiveCategory
-        ? (bankTag ? `${bankTag} ${effectiveCategory}` : effectiveCategory)
-        : (inFrameType === 'EXPENSE' ? `${bankTag} Chi tiêu bằng ảnh`.trim() : `${bankTag} Thu nhập`.trim());
+    if (bankTag && (!finalDesc || finalDesc === bankTag)) {
+      finalDesc = bankTag;
     }
+
+    const finalDescPos = finalDesc ? {
+      x: Math.round(Math.max(10, Math.min(90, 50 + (descPanOffset.current.x / VIEWFINDER_SIZE) * 100))),
+      y: Math.round(Math.max(10, Math.min(90, 72 + (descPanOffset.current.y / VIEWFINDER_SIZE) * 100))),
+    } : null;
 
     const savePhotoUri = optimizedPhotoRef.current || capturedPhotoUri;
     const saveThumbUri = optimizedThumbRef.current || capturedThumbUri || savePhotoUri;
@@ -965,7 +1020,8 @@ export default function MainAppScreen() {
       amount: finalAmount,
       type: inFrameType,
       category: effectiveCategory,
-      description: finalDesc,
+      description: finalDesc || null,
+      desc_position: finalDescPos,
       photo_url: savePhotoUri,
       thumbnail_url: saveThumbUri,
       payment_method: inFramePaymentMethod,
@@ -998,6 +1054,7 @@ export default function MainAppScreen() {
     setCapturedThumbUri(null);
     setInFrameAmount(0);
     setInFrameDescription('');
+    resetDescPan();
     setCamHintMessage('Đã lưu khoảnh khắc vào ví!');
 
     // Cuộn xuống đúng 1 màn hình để xem ảnh vừa chụp (Quyết định 134)
@@ -1488,19 +1545,30 @@ export default function MainAppScreen() {
                   </View>
                 )}
 
-                {/* Ô NHẬP MÔ TẢ NỀN KÍNH MỎNG NHẸ TỰ CO GIÃN (AUTO-EXPANDING GLASSY PILL - QUYẾT ĐỊNH 135) */}
-                <View style={styles.camDescGlassyPillInside}>
-                  <PenLine size={13} color="#FFFBF1" strokeWidth={2.4} />
+                {/* CHỮ MÔ TẢ IG STORY TRONG SUỐT KÉO THẢ TỰ DO (QUYẾT ĐỊNH 138) */}
+                <Animated.View
+                  style={[
+                    styles.camStoryDraggableContainer,
+                    {
+                      transform: [
+                        { translateX: descPan.x },
+                        { translateY: descPan.y },
+                      ],
+                    },
+                  ]}
+                  {...descPanResponder.panHandlers}
+                >
                   <TextInput
                     value={inFrameDescription}
                     onChangeText={setInFrameDescription}
-                    placeholder="Ghi mô tả..."
-                    placeholderTextColor="rgba(255, 251, 241, 0.65)"
-                    style={styles.camDescGlassyInput}
-                    maxLength={35}
+                    placeholder="Chạm để viết chữ..."
+                    placeholderTextColor="rgba(255, 255, 255, 0.65)"
+                    style={styles.camStoryTextInput}
+                    maxLength={40}
                     returnKeyType="done"
+                    multiline={false}
                   />
-                </View>
+                </Animated.View>
               </View>
 
               {/* THẺ PHÁT HIỆN MÃ VIETQR TRƯỢT LÊN TRÊN NÚT CHỤP */}
@@ -2053,29 +2121,32 @@ const styles = StyleSheet.create({
     padding: 7,
     backgroundColor: 'rgba(0, 0, 0, 0.35)',
     borderRadius: 999 },
-  camDescGlassyPillInside: {
+  camStoryDraggableContainer: {
     position: 'absolute',
     alignSelf: 'center',
-    bottom: 12,
-    flexDirection: 'row',
+    top: '72%',
+    zIndex: 25,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: 'transparent',
+    maxWidth: Math.min(SCREEN_WIDTH - 24, 348) - 24,
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(0, 0, 0, 0.22)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.32)',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    minWidth: 110,
-    maxWidth: Math.min(SCREEN_WIDTH - 60, 310),
-    zIndex: 20 },
-  camDescGlassyInput: {
+    justifyContent: 'center',
+  },
+  camStoryTextInput: {
     fontFamily: 'Nunito',
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFBF1',
-    paddingVertical: 0,
-    minWidth: 70 },
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1.5 },
+    textShadowRadius: 3,
+    padding: 0,
+    margin: 0,
+    minWidth: 80,
+    backgroundColor: 'transparent',
+  },
   flashToggleButton: {
     width: 44,
     height: 44,

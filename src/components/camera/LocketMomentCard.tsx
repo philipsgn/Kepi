@@ -17,6 +17,7 @@ import { renderCategoryMonochromeIcon } from '../../constants/categories';
 import { formatCategoryName } from '../../constants/categoryDefaults';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const PHOTO_WIDTH = SCREEN_WIDTH - 44;
 
 interface LocketMomentCardProps {
   item: Transaction;
@@ -112,10 +113,25 @@ export const LocketMomentCard: React.FC<LocketMomentCardProps> = ({
           </View>
         )}
 
-        {/* Ô MÔ TẢ KÍNH MỜ SÁT ĐÁY TRONG KHUNG ẢNH (CHỐNG CHE ẢNH) */}
+        {/* CHỮ MÔ TẢ PHONG CÁCH INSTAGRAM STORY TRONG SUỐT (QUYẾT ĐỊNH 138) */}
         {Boolean(item.description && item.description.trim() !== '') && (
-          <View style={styles.inPhotoDescPill}>
-            <Text style={styles.inPhotoDescText} numberOfLines={1}>
+          <View
+            pointerEvents="none"
+            style={[
+              styles.inPhotoStoryTextContainer,
+              {
+                top: `${Math.max(8, Math.min(85, item.desc_position?.y ?? 72))}%`,
+                transform: [
+                  {
+                    translateX: item.desc_position
+                      ? ((item.desc_position.x - 50) / 100) * (PHOTO_WIDTH * 0.7)
+                      : 0,
+                  },
+                ],
+              },
+            ]}
+          >
+            <Text style={styles.inPhotoStoryText} numberOfLines={2}>
               {item.description}
             </Text>
           </View>
@@ -293,24 +309,23 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#2B2118',
   },
-  inPhotoDescPill: {
+  inPhotoStoryTextContainer: {
     position: 'absolute',
-    alignSelf: 'center',
-    bottom: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.22)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.32)',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    maxWidth: '85%',
+    left: 12,
+    right: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 10,
+    backgroundColor: 'transparent',
   },
-  inPhotoDescText: {
+  inPhotoStoryText: {
     fontFamily: 'Nunito',
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFBF1',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1.5 },
+    textShadowRadius: 3,
   },
 });

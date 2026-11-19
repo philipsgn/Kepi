@@ -31,6 +31,7 @@ interface TransactionState {
     pending_expires_at?: string | null;
     media_type?: MediaType;
     is_squad_private?: boolean;
+    desc_position?: { x: number; y: number } | null;
   }) => Promise<Transaction>;
   confirmPendingTransaction: (id: string, updatedAmount?: number) => Promise<void>;
   cancelPendingTransaction: (id: string) => Promise<void>;
@@ -104,6 +105,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
         pending_expires_at: data.pending_expires_at || null,
         media_type: data.media_type || 'PHOTO',
         is_squad_private: Boolean(data.is_squad_private),
+        desc_position: data.desc_position || null,
         occurred_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
       };

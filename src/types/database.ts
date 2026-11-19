@@ -67,6 +67,7 @@ export interface Transaction {
   pending_expires_at?: string | null;
   receipt_data?: ReceiptData | null;
   sentiment_rating?: SentimentRating | null;
+  desc_position?: { x: number; y: number } | null;
   occurred_at: string;
   created_at: string;
 }

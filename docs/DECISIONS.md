@@ -804,6 +804,15 @@
     - *Bối Cảnh & Nguyên Nhân:* Hàm xử lý file `manipulateAsync` lật ảnh gây nghẽn I/O đọc-ghi đĩa từ 300ms–1s khiến màn hình Preview và các nút chọn giá/danh mục bị trễ khựng. Trên iOS (iPhone), việc ảnh chụp camera trước xuất ra unmirrored là hành vi chuẩn mực của Apple (người dùng tự quyết định trong Settings máy).
     - *Giải Pháp Kỹ Thuật:* Gỡ bỏ hoàn toàn hàm xử lý file lật ảnh. Gán trực tiếp `photo.uri` ngay lập tức 0ms, khôi phục tốc độ chụp tức thì 0.0001s, không có bất kỳ khoảng chờ nào.
 
+  - **Quyết định 138 (20/11/2026): Chữ Mô Tả IG Story Trong Suốt (Transparent & Draggable) & Triệt Tiêu Tag Mô Tả Tự Sinh (Zero Auto-Tag):**
+    - *Bối Cảnh & Nguyên Nhân:* Người dùng phản hồi thực tế kèm ảnh chụp mẫu Instagram Story: (1) Khi không nhập mô tả, hệ thống tự động gán tên/ID danh mục (`thu_cung`, `an_uong`) làm mô tả và hiển thị đè lên ảnh; (2) Yêu cầu nếu không nhập mô tả thì ảnh chụp và thẻ ảnh lịch sử phải trơn sạch 100%, không hiện bất kỳ tag hay chữ nào; (3) Kiểu chữ mô tả chuyển sang phong cách Instagram / Facebook Story: nền hoàn toàn trong suốt không viền hộp, chữ trắng tinh khôi viền đổ bóng tối mềm mại (`textShadowColor: 'rgba(0,0,0,0.75)'`, `textShadowRadius: 3`) sắc nét trên mọi nền ảnh; (4) Cho phép người dùng chạm ngón tay kéo di chuyển chữ mô tả tự do (Draggable via `PanResponder`) bất kỳ đâu trong khung ảnh vuông 348×348px; vị trí ban đầu ở 1/3 dưới ảnh; lưu lại tọa độ phần trăm `desc_position` để hiển thị chuẩn xác trên thẻ Polaroid Lịch sử.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Triệt tiêu Bug Tự Gán Danh Mục:** Xóa bỏ triệt để đoạn mã `if (!finalDesc) finalDesc = effectiveCategory;` trong `app/(main)/index.tsx`. Khi `!inFrameDescription.trim()`, `finalDesc = ''`.
+      2. **Ẩn Thẻ Mô Tả Khi Trống:** `LocketMomentCard.tsx` kiểm tra nếu `!item.description || item.description.trim() === ''` thì return `null` (ảnh trơn sạch 100%).
+      3. **IG Story Typography:** Chữ trắng `#FFFBF1` (hoặc `#FFFFFF`), `fontSize: 16`, `fontWeight: '800'`, `textShadowColor: 'rgba(0, 0, 0, 0.75)'`, `textShadowOffset: { width: 0, height: 1.5 }`, `textShadowRadius: 3`, `backgroundColor: 'transparent'`, `borderWidth: 0`.
+      4. **PanResponder Draggable Text:** Tích hợp `PanResponder` và `Animated.ValueXY` cho phép kéo thả chữ mượt mà, giới hạn clamp giữ chữ trong khung 348×348px; lưu `desc_position: { x: number, y: number }` (tọa độ phần trăm 0..100) vào `Transaction`.
+
+
 
 
 
