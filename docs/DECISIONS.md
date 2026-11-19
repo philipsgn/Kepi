@@ -794,6 +794,13 @@
       2. **Không Swap URI khi Nén Ngầm:** Giữ nguyên URI ảnh chụp cục bộ cho bản xem trước on-screen, lưu URI ảnh WebP nén vào `optimizedPhotoRef` để dùng khi bấm Lưu, triệt tiêu 100% hiện tượng flash/reload ảnh trên màn hình.
       3. **Auto-Expanding Glassy Pill:** Ô mô tả căn giữa đáy ảnh (`alignSelf: 'center'`), ban đầu ngắn gọn (~110px), nền kính trong suốt mỏng nhẹ `rgba(0, 0, 0, 0.22)` viền trắng mờ mảnh `rgba(255, 255, 255, 0.32)`, tự động mở rộng đều sang 2 bên khi người dùng gõ chữ (tối đa 310px).
 
+  - **Quyết định 136 (19/11/2026): Tự Động Mirror Selfie Chống Lật Cam & Đồng Bộ Tone Nền Hồng Pastel Theo Theme (`tokens.bg`):**
+    - *Bối Cảnh & Nguyên Nhân:* Khi chụp selfie bằng Camera trước (`facing === 'front'`), khung ngắm hiển thị phản chiếu như gương nhưng ảnh chụp ra bị đảo chiều (không lật) làm lệch mặt/chữ; đồng thời Tab Camera gán cứng màu kem `#F6EEDC` không đồng bộ khi người dùng dùng Theme Hồng Heo.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Tự động Mirror Flip khi Selfie:** Khi `cameraFacing === 'front'`, tự động lật ngang ảnh qua `manipulateAsync(uri, [{ flip: FlipType.Horizontal }])` ngay khi chụp, đảm bảo ảnh chụp và ảnh lưu khớp 100% góc nhìn gương lúc ngắm.
+      2. **Đồng Bộ Nền Động Theo Theme:** Bỏ toàn bộ mã cứng `#F6EEDC` ở `cameraScreenSection`, `historySnapPage`, `verticalScroll`, thay bằng `tokens.bg` từ `useTheme()`. Khi chọn Theme Hồng Heo, toàn bộ Tab Camera tự khoác lên tone hồng dâu sữa pastel dịu mắt (`#FFF5F7`) đồng bộ với các tab khác.
+
+
 
 
 

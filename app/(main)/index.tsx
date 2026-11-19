@@ -23,6 +23,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { Image as ExpoImage } from 'expo-image';
+import { FlipType, manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import {
   Mic,
   Bell,
@@ -584,10 +585,24 @@ export default function MainAppScreen() {
           skipProcessing: false,
         });
         if (photo?.uri) {
-          setCapturedPhotoUri(photo.uri);
-          setCapturedThumbUri(photo.uri);
+          let finalPhotoUri = photo.uri;
+          // Quyết định 136: Tự động lật gương ảnh khi chụp bằng camera trước (Selfie)
+          if (cameraFacing === 'front') {
+            try {
+              const flipped = await manipulateAsync(
+                photo.uri,
+                [{ flip: FlipType.Horizontal }],
+                { compress: 0.95, format: SaveFormat.JPEG }
+              );
+              finalPhotoUri = flipped.uri;
+            } catch (flipErr) {
+              console.warn('Lỗi lật gương camera trước:', flipErr);
+            }
+          }
+          setCapturedPhotoUri(finalPhotoUri);
+          setCapturedThumbUri(finalPhotoUri);
           // Quyết định 135: Lưu kết quả nén vào ref, không swap URI on-screen để triệt tiêu nháy ảnh
-          optimizeExpensePhoto(photo.uri)
+          optimizeExpensePhoto(finalPhotoUri)
             .then((optimized) => {
               optimizedPhotoRef.current = optimized.fullUri;
               optimizedThumbRef.current = optimized.thumbnailUri;
@@ -746,11 +761,25 @@ export default function MainAppScreen() {
             skipProcessing: false,
           });
           if (photo?.uri) {
-            setCapturedPhotoUri(photo.uri);
+            let finalPhotoUri = photo.uri;
+            // Quyết định 136: Tự động lật gương ảnh khi chụp bằng camera trước (Selfie)
+            if (cameraFacing === 'front') {
+              try {
+                const flipped = await manipulateAsync(
+                  photo.uri,
+                  [{ flip: FlipType.Horizontal }],
+                  { compress: 0.95, format: SaveFormat.JPEG }
+                );
+                finalPhotoUri = flipped.uri;
+              } catch (flipErr) {
+                console.warn('Lỗi lật gương camera trước:', flipErr);
+              }
+            }
+            setCapturedPhotoUri(finalPhotoUri);
             setCapturedMediaType('PHOTO');
-            setCapturedThumbUri(photo.uri);
+            setCapturedThumbUri(finalPhotoUri);
             // Quyết định 135: Lưu kết quả nén vào ref, không swap URI on-screen để triệt tiêu nháy ảnh
-            optimizeExpensePhoto(photo.uri)
+            optimizeExpensePhoto(finalPhotoUri)
               .then((optimized) => {
                 optimizedPhotoRef.current = optimized.fullUri;
                 optimizedThumbRef.current = optimized.thumbnailUri;
@@ -801,12 +830,26 @@ export default function MainAppScreen() {
           quality: 0.85,
           skipProcessing: false });
         if (photo?.uri) {
+          let finalPhotoUri = photo.uri;
+          // Quyết định 136: Tự động lật gương ảnh khi chụp bằng camera trước (Selfie)
+          if (cameraFacing === 'front') {
+            try {
+              const flipped = await manipulateAsync(
+                photo.uri,
+                [{ flip: FlipType.Horizontal }],
+                { compress: 0.95, format: SaveFormat.JPEG }
+              );
+              finalPhotoUri = flipped.uri;
+            } catch (flipErr) {
+              console.warn('Lỗi lật gương camera trước:', flipErr);
+            }
+          }
           // 0ms transition: Gán tức thì URI ảnh để chuyển trạng thái không độ trễ
-          setCapturedPhotoUri(photo.uri);
+          setCapturedPhotoUri(finalPhotoUri);
           setCapturedMediaType('PHOTO');
-          setCapturedThumbUri(photo.uri);
+          setCapturedThumbUri(finalPhotoUri);
           // Quyết định 135: Nén WebP dual-res ngầm và lưu vào ref, KHÔNG swap URI on-screen
-          optimizeExpensePhoto(photo.uri)
+          optimizeExpensePhoto(finalPhotoUri)
             .then((optimized) => {
               optimizedPhotoRef.current = optimized.fullUri;
               optimizedThumbRef.current = optimized.thumbnailUri;
@@ -1305,15 +1348,15 @@ export default function MainAppScreen() {
             onScroll={handleVerticalScroll}
             scrollEventThrottle={16}
             scrollEnabled={!showKeyboardModal && !detectedPayload && !detectedWalletPayload}
-            style={[styles.verticalScroll, { backgroundColor: isDark ? '#0E1620' : '#FAF6EC' }]}
+            style={[styles.verticalScroll, { backgroundColor: isDark ? '#0E1620' : (tokens.bg || '#FFF5F7') }]}
           >
-            {/* --- TOP 100vh: CAMERA TINH GỌN CHUẨN LOCKET 1:1 VUÔNG (NỀN KEM #F6EEDC) --- */}
+            {/* --- TOP 100vh: CAMERA TINH GỌN CHUẨN LOCKET 1:1 VUÔNG (ĐỒNG BỘ THEO TOKENS.BG) --- */}
             <View
               style={[
                 styles.cameraScreenSection,
                 {
                   height: SCREEN_HEIGHT,
-                  backgroundColor: '#F6EEDC',
+                  backgroundColor: tokens.bg || '#FFF5F7',
                   paddingTop: Math.max(insets.top, 8),
                   paddingBottom: insets.bottom + 85,
                   justifyContent: 'space-between',
@@ -1668,6 +1711,7 @@ export default function MainAppScreen() {
                   styles.historySnapPage,
                   {
                     height: SCREEN_HEIGHT,
+                    backgroundColor: tokens.bg || '#FFF5F7',
                     paddingTop: insets.top + 6,
                     paddingBottom: insets.bottom + 85,
                   },
@@ -1701,6 +1745,7 @@ export default function MainAppScreen() {
                   styles.historySnapPage,
                   {
                     height: SCREEN_HEIGHT,
+                    backgroundColor: tokens.bg || '#FFF5F7',
                     paddingTop: insets.top + 6,
                     paddingBottom: insets.bottom + 85,
                   },
@@ -1873,7 +1918,7 @@ export default function MainAppScreen() {
       {/* MODAL BÀN PHÍM MAND CASHIER KEYBOARD CHUẨN NEO-BRUTALIST PIXEL ART */}
       <Modal visible={showKeyboardModal} animationType="slide" transparent>
         <View style={styles.camKeyboardModalOverlay}>
-          <View style={styles.camKeyboardModalContent}>
+          <View style={[styles.camKeyboardModalContent, { backgroundColor: tokens.bg || '#FFF5F7' }]}>
             <View style={styles.camKeyboardHeader}>
               <Text style={styles.camKeyboardTitle}>Nhập số tiền chi tiêu</Text>
               <TouchableOpacity
@@ -2577,7 +2622,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
     justifyContent: 'flex-end' },
   camKeyboardModalContent: {
-    backgroundColor: '#F6EEDC',
+    backgroundColor: '#FFF5F7',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderWidth: 3,
@@ -2797,7 +2842,7 @@ const styles = StyleSheet.create({
   historySnapPage: {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    backgroundColor: '#F6EEDC',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'space-between',
     overflow: 'hidden',
