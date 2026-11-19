@@ -3491,7 +3491,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 }
 
 // ==============================================================================
-// 🧪 TEST 76: TỰ ĐỘNG MIRROR SELFIE & ĐỒNG BỘ NỀN THEO THEME TOKENS.BG (QUYẾT ĐỊNH 136) AUDIT
+// 🧪 TEST 76: ĐỒNG BỘ NỀN THEO THEME TOKENS.BG (QUYẾT ĐỊNH 136) AUDIT
 // ==============================================================================
 {
   const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
@@ -3503,19 +3503,40 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
   const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
 
-  // 1. Selfie Auto Mirror Flip via FlipType.Horizontal
-  assert.ok(indexCode.includes('FlipType.Horizontal'), 'Camera must import and use FlipType.Horizontal for selfie mirror');
-  assert.ok(indexCode.includes("cameraFacing === 'front'"), 'Camera must detect front camera to apply horizontal mirror flip');
-
-  // 2. Dynamic tokens.bg for Tab Camera & History Pages
+  // 1. Dynamic tokens.bg for Tab Camera & History Pages
   assert.ok(indexCode.includes('tokens.bg'), 'Camera screen must use tokens.bg for theme background synchronization');
 
-  // 3. Living Docs Sync (AGENTS.md, 09-CAMERA.md, DECISIONS.md)
-  assert.ok(agentsCode.includes('Mirror Selfie') || agentsCode.includes('tokens.bg'), 'AGENTS.md must document Quyết định 136');
+  // 2. Living Docs Sync (AGENTS.md, 09-CAMERA.md, DECISIONS.md)
+  assert.ok(agentsCode.includes('tokens.bg'), 'AGENTS.md must document Quyết định 136');
   assert.ok(docCode.includes('Quyết định 136') || docCode.includes('Quyáº¿t Ä‘á»‹nh 136'), '09-CAMERA.md must document Quyết định 136');
   assert.ok(decisionsCode.includes('Quyết định 136') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 136'), 'DECISIONS.md must document Quyết định 136');
 
-  console.log('✅ Test 76 Passed: Tự Động Mirror Selfie & Đồng Bộ Nền Theo Theme tokens.bg (Quyết định 136) Audit verified cleanly');
+  console.log('✅ Test 76 Passed: Đồng Bộ Nền Theo Theme tokens.bg (Quyết định 136) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 76 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (76/76)!');
+// ==============================================================================
+// 🧪 TEST 77: LOẠI BỎ HÀM LẬT ẢNH & KHÔI PHỤC TỐC ĐỘ PREVIEW 0MS TỨC THÌ (QUYẾT ĐỊNH 137) AUDIT
+// ==============================================================================
+{
+  const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. Zero-delay direct photo.uri assignment without blocking file manipulation
+  assert.ok(indexCode.includes('setCapturedPhotoUri(photo.uri)'), 'Camera must assign photo.uri directly for 0ms preview');
+  assert.ok(!indexCode.includes('manipulateAsync(photo.uri'), 'Camera must not block preview with file manipulation');
+
+  // 2. Living Docs Sync (AGENTS.md, 09-CAMERA.md, DECISIONS.md)
+  assert.ok(agentsCode.includes('Seamless Freeze-Frame 0ms tức thì') || agentsCode.includes('Quyết định 137'), 'AGENTS.md must document Quyết định 137');
+  assert.ok(docCode.includes('Quyết định 137') || docCode.includes('Quyáº¿t Ä‘á»‹nh 137'), '09-CAMERA.md must document Quyết định 137');
+  assert.ok(decisionsCode.includes('Quyết định 137') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 137'), 'DECISIONS.md must document Quyết định 137');
+
+  console.log('✅ Test 77 Passed: Loại Bỏ Hàm Lật Ảnh & Khôi Phục Tốc Độ Preview 0ms Tức Thì (Quyết định 137) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 77 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (77/77)!');

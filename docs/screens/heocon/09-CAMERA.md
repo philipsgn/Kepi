@@ -78,6 +78,7 @@ sequenceDiagram
 - **v7.0 (Quyết định 133):** Khung vuông 1:1 chuẩn Locket (348×348px), Chi/Thu sát trần, Flash nổi trần trong khung, mô tả kính mờ tối trong suốt, số tiền nền trơn, tag 1 hàng trượt ngang chữ to, chụp tức thì 0ms latency.
 - **v8.0 (Quyết định 134):** Hoàn thiện luồng nhập tiền & tag trước/sau khi chụp không bị reset; Cute Toast tự ẩn sau 1.8s; Lịch sử 100vh 1 ảnh 1 khung hình snap paging; Thẻ lịch sử: mô tả kính mờ trong ảnh sát đáy, tên danh mục tiếng Việt có dấu chuẩn bên ngoài.
 - **v9.0 (Quyết định 135):** Khóa tĩnh khung hình chụp 0ms (Seamless Freeze-Frame): Giữ nguyên `CameraView` không unmount, phủ ảnh tĩnh `ExpoImage` tức thì (`transition: 0`, `priority: high`), không swap URI khi nén WebP ngầm để triệt tiêu 100% cảm giác đè khung/chuyển động; Nâng cấp Ô mô tả tự co giãn (Auto-Expanding Glassy Pill) căn giữa đáy ảnh, ngắn gọn ~110px, nền kính mỏng nhẹ `rgba(0,0,0,0.22)`, tự giãn đều sang 2 bên khi gõ chữ.
-- **v10.0 (Hiện tại - Quyết định 136):** Tự động Mirror Selfie: Khi `cameraFacing === 'front'`, tự động lật ảnh ngang qua `FlipType.Horizontal` để ảnh chụp ra giống 100% hình ảnh trong gương khi ngắm; Đồng bộ tone nền Tab Camera theo `tokens.bg` động từ theme (trong Theme Hồng Heo là hồng pastel `#FFF5F7` dâu sữa dịu mát).
+- **v10.0 (Quyết định 136):** Đồng bộ tone nền Tab Camera theo `tokens.bg` động từ theme (trong Theme Hồng Heo là hồng pastel `#FFF5F7` dâu sữa dịu mát).
+- **v11.0 (Hiện tại - Quyết định 137):** Loại bỏ hoàn toàn hàm xử lý file lật ảnh để triệt tiêu 100% độ trễ I/O đĩa, khôi phục tốc độ hiển thị Preview và cụm chọn giá/danh mục đạt mức 0ms tức thì theo chuẩn camera mặc định của iPhone.
 
 

@@ -23,7 +23,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { Image as ExpoImage } from 'expo-image';
-import { FlipType, manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import {
   Mic,
   Bell,
@@ -585,24 +584,11 @@ export default function MainAppScreen() {
           skipProcessing: false,
         });
         if (photo?.uri) {
-          let finalPhotoUri = photo.uri;
-          // Quyết định 136: Tự động lật gương ảnh khi chụp bằng camera trước (Selfie)
-          if (cameraFacing === 'front') {
-            try {
-              const flipped = await manipulateAsync(
-                photo.uri,
-                [{ flip: FlipType.Horizontal }],
-                { compress: 0.95, format: SaveFormat.JPEG }
-              );
-              finalPhotoUri = flipped.uri;
-            } catch (flipErr) {
-              console.warn('Lỗi lật gương camera trước:', flipErr);
-            }
-          }
-          setCapturedPhotoUri(finalPhotoUri);
-          setCapturedThumbUri(finalPhotoUri);
+          // Quyết định 137: Gán trực tiếp 0ms, không xử lý lật file gây trễ
+          setCapturedPhotoUri(photo.uri);
+          setCapturedThumbUri(photo.uri);
           // Quyết định 135: Lưu kết quả nén vào ref, không swap URI on-screen để triệt tiêu nháy ảnh
-          optimizeExpensePhoto(finalPhotoUri)
+          optimizeExpensePhoto(photo.uri)
             .then((optimized) => {
               optimizedPhotoRef.current = optimized.fullUri;
               optimizedThumbRef.current = optimized.thumbnailUri;
@@ -761,25 +747,12 @@ export default function MainAppScreen() {
             skipProcessing: false,
           });
           if (photo?.uri) {
-            let finalPhotoUri = photo.uri;
-            // Quyết định 136: Tự động lật gương ảnh khi chụp bằng camera trước (Selfie)
-            if (cameraFacing === 'front') {
-              try {
-                const flipped = await manipulateAsync(
-                  photo.uri,
-                  [{ flip: FlipType.Horizontal }],
-                  { compress: 0.95, format: SaveFormat.JPEG }
-                );
-                finalPhotoUri = flipped.uri;
-              } catch (flipErr) {
-                console.warn('Lỗi lật gương camera trước:', flipErr);
-              }
-            }
-            setCapturedPhotoUri(finalPhotoUri);
+            // Quyết định 137: Gán trực tiếp 0ms, không xử lý lật file gây trễ
+            setCapturedPhotoUri(photo.uri);
             setCapturedMediaType('PHOTO');
-            setCapturedThumbUri(finalPhotoUri);
+            setCapturedThumbUri(photo.uri);
             // Quyết định 135: Lưu kết quả nén vào ref, không swap URI on-screen để triệt tiêu nháy ảnh
-            optimizeExpensePhoto(finalPhotoUri)
+            optimizeExpensePhoto(photo.uri)
               .then((optimized) => {
                 optimizedPhotoRef.current = optimized.fullUri;
                 optimizedThumbRef.current = optimized.thumbnailUri;
@@ -830,26 +803,12 @@ export default function MainAppScreen() {
           quality: 0.85,
           skipProcessing: false });
         if (photo?.uri) {
-          let finalPhotoUri = photo.uri;
-          // Quyết định 136: Tự động lật gương ảnh khi chụp bằng camera trước (Selfie)
-          if (cameraFacing === 'front') {
-            try {
-              const flipped = await manipulateAsync(
-                photo.uri,
-                [{ flip: FlipType.Horizontal }],
-                { compress: 0.95, format: SaveFormat.JPEG }
-              );
-              finalPhotoUri = flipped.uri;
-            } catch (flipErr) {
-              console.warn('Lỗi lật gương camera trước:', flipErr);
-            }
-          }
-          // 0ms transition: Gán tức thì URI ảnh để chuyển trạng thái không độ trễ
-          setCapturedPhotoUri(finalPhotoUri);
+          // Quyết định 137: 0ms transition - gán tức thì URI ảnh để hiển thị ngay, không xử lý lật file
+          setCapturedPhotoUri(photo.uri);
           setCapturedMediaType('PHOTO');
-          setCapturedThumbUri(finalPhotoUri);
+          setCapturedThumbUri(photo.uri);
           // Quyết định 135: Nén WebP dual-res ngầm và lưu vào ref, KHÔNG swap URI on-screen
-          optimizeExpensePhoto(finalPhotoUri)
+          optimizeExpensePhoto(photo.uri)
             .then((optimized) => {
               optimizedPhotoRef.current = optimized.fullUri;
               optimizedThumbRef.current = optimized.thumbnailUri;

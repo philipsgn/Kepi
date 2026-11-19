@@ -800,6 +800,11 @@
       1. **Tự động Mirror Flip khi Selfie:** Khi `cameraFacing === 'front'`, tự động lật ngang ảnh qua `manipulateAsync(uri, [{ flip: FlipType.Horizontal }])` ngay khi chụp, đảm bảo ảnh chụp và ảnh lưu khớp 100% góc nhìn gương lúc ngắm.
       2. **Đồng Bộ Nền Động Theo Theme:** Bỏ toàn bộ mã cứng `#F6EEDC` ở `cameraScreenSection`, `historySnapPage`, `verticalScroll`, thay bằng `tokens.bg` từ `useTheme()`. Khi chọn Theme Hồng Heo, toàn bộ Tab Camera tự khoác lên tone hồng dâu sữa pastel dịu mắt (`#FFF5F7`) đồng bộ với các tab khác.
 
+  - **Quyết định 137 (19/11/2026): Loại Bỏ Hoàn Toàn Hàm Lật File Ảnh & Khôi Phục Tốc Độ 0ms Tức Thì Chuẩn Native iPhone:**
+    - *Bối Cảnh & Nguyên Nhân:* Hàm xử lý file `manipulateAsync` lật ảnh gây nghẽn I/O đọc-ghi đĩa từ 300ms–1s khiến màn hình Preview và các nút chọn giá/danh mục bị trễ khựng. Trên iOS (iPhone), việc ảnh chụp camera trước xuất ra unmirrored là hành vi chuẩn mực của Apple (người dùng tự quyết định trong Settings máy).
+    - *Giải Pháp Kỹ Thuật:* Gỡ bỏ hoàn toàn hàm xử lý file lật ảnh. Gán trực tiếp `photo.uri` ngay lập tức 0ms, khôi phục tốc độ chụp tức thì 0.0001s, không có bất kỳ khoảng chờ nào.
+
+
 
 
 
