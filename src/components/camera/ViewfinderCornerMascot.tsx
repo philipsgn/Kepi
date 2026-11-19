@@ -175,12 +175,11 @@ export const ViewfinderCornerMascot: React.FC<ViewfinderCornerMascotProps> = ({
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      {/* 1. GÓC TRÊN TRÁI (TOP-LEFT): 4 GÓC PIXEL TRẮNG + REC ĐỎ + TEM NGÀY */}
+      {/* 1. GÓC TRÊN TRÁI (TOP-LEFT): GÓC PIXEL TRẮNG + REC ĐỎ (BỎ NGÀY THÁNG) */}
       <View style={styles.cornerTopLeft}>
         <View style={styles.pixelCornerTL} />
         <View style={styles.recContainer}>
           <Animated.View style={[styles.recDot, { opacity: flashAnim }]} />
-          <Text style={styles.dateStamp}>{formattedDate}</Text>
         </View>
       </View>
 

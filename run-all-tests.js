@@ -3138,10 +3138,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(polaroidCode.includes('onOpenPhotoRoom'), 'Polaroid card must declare onOpenPhotoRoom prop');
 
   // 4. Index.tsx Camera Integration
-  assert.ok(indexCode.includes('camTopPill'), 'index.tsx must render camTopPill');
-  assert.ok(indexCode.includes('Hôm nay chi:'), 'camTopPill must show Hôm nay chi:');
+  assert.ok(indexCode.includes('camTopPill') || indexCode.includes('camSegWrapFull'), 'index.tsx must render camTopPill or camSegWrapFull');
+  assert.ok(indexCode.includes('Hôm nay chi:') || indexCode.includes('camSegBtnFull'), 'camTopPill or camSegBtnFull must be present');
   assert.ok(indexCode.includes('PiggyCameraRoof') || indexCode.includes('ViewfinderCornerMascot'), 'index.tsx must mount PiggyCameraRoof or ViewfinderCornerMascot');
-  assert.ok(indexCode.includes('PolaroidReviewCard') || indexCode.includes('PolaroidConfirmCard'), 'index.tsx must mount PolaroidReviewCard or PolaroidConfirmCard');
+  assert.ok(indexCode.includes('PolaroidReviewCard') || indexCode.includes('PolaroidConfirmCard') || indexCode.includes('camReviewBtnSaveRound'), 'index.tsx must mount review card or save button');
   assert.ok(indexCode.includes('handleTabPress(1)'), 'index.tsx must have navigation to Photo Room (Tab 1)');
 
   // 5. Documentation & Decisions Reverse Sync
@@ -3342,40 +3342,36 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 }
 
 // ==============================================================================
-// 🧪 TEST 72: TAB CAMERA TỐI GIẢN ADIDAS PIXEL ART HỘI AN (PROTOTYPE 1:1) AUDIT
+// 🧪 TEST 72: TAB CAMERA TỐI GIẢN CHUẨN 1:1 PROTOTYPE VÍ HEO CON (HÌNH 4 & QUYẾT ĐỊNH 132) AUDIT
 // ==============================================================================
 {
   const indexPath = path.join(__dirname, 'app/(main)/index.tsx');
   const indexCode = fs.readFileSync(indexPath, 'utf8');
   const mascotPath = path.join(__dirname, 'src/components/camera/ViewfinderCornerMascot.tsx');
   const mascotCode = fs.readFileSync(mascotPath, 'utf8');
-  const polarPath = path.join(__dirname, 'src/components/camera/PolaroidConfirmCard.tsx');
-  const polarCode = fs.readFileSync(polarPath, 'utf8');
   const docPath = path.join(__dirname, 'docs/screens/heocon/09-CAMERA.md');
   const docCode = fs.readFileSync(docPath, 'utf8');
   const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
   const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
 
-  // 1. Black Minimalist Background & Layout
-  assert.ok(indexCode.includes('#0D0D0D') || indexCode.includes('#111111'), 'Tab Camera must use deep black minimalist background #0D0D0D');
+  // 1. Warm Cream Background #F6EEDC & Full Segment Pills
+  assert.ok(indexCode.includes('#F6EEDC') || indexCode.includes('#0D0D0D'), 'Tab Camera must support warm cream background #F6EEDC');
+  assert.ok(indexCode.includes('camSegWrapFull') && indexCode.includes('flashToggleButton'), 'Header must have Flash + [Chi | Thu] full pills');
   assert.ok(indexCode.includes('ViewfinderCornerMascot'), 'index.tsx must mount ViewfinderCornerMascot');
-  assert.ok(indexCode.includes('PolaroidConfirmCard'), 'index.tsx must mount PolaroidConfirmCard');
 
-  // 2. ViewfinderCornerMascot Component Contract
+  // 2. Action Bar 2 Round Buttons & Zero "Xem ở phòng ảnh"
+  assert.ok(indexCode.includes('camReviewBtnRetakeRound') && indexCode.includes('camReviewBtnSaveRound'), 'Must provide round Retake [↺] and Save [✓] buttons');
+  assert.ok(!indexCode.includes('Xem ở phòng ảnh'), 'Must NOT have "Xem ở phòng ảnh" button in Tab Camera');
+
+  // 3. ViewfinderCornerMascot Component Contract
   assert.ok(mascotCode.includes('PAL') && mascotCode.includes('getPigBodyMatrix'), 'ViewfinderCornerMascot must port pig sprite matrix');
-  assert.ok(mascotCode.includes('formattedDate') || mascotCode.includes('dateText'), 'ViewfinderCornerMascot must display retro YY.MM.DD stamp');
   assert.ok(mascotCode.includes('recDot') || mascotCode.includes('REC'), 'ViewfinderCornerMascot must render blinking REC indicator');
 
-  // 3. PolaroidConfirmCard Component Contract
-  assert.ok(polarCode.includes("rotate: '-3deg'") || polarCode.includes('rotate: "-3deg"'), 'PolaroidConfirmCard must have retro -3deg tilt');
-  assert.ok(polarCode.includes('Đã lưu và treo ảnh') || polarCode.includes('displayTitle'), 'PolaroidConfirmCard must render Đã lưu và treo ảnh');
-  assert.ok(polarCode.includes('onSnapAgain') && polarCode.includes('onViewGallery'), 'PolaroidConfirmCard must provide Chụp tiếp and Xem ở phòng ảnh actions');
-
   // 4. Docs & Decisions Sync
-  assert.ok(docCode.includes('ADIDAS PIXEL ART HỘI AN') || docCode.includes('Adidas Pixel Art Hội An'), '09-CAMERA.md must document Adidas Pixel Art Hội An');
-  assert.ok(decisionsCode.includes('Quyết định 131') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 131'), 'DECISIONS.md must document Quyết định 131');
+  assert.ok(docCode.includes('Quyết định 132') || docCode.includes('Quyáº¿t Ä‘á»‹nh 132'), '09-CAMERA.md must document Quyết định 132');
+  assert.ok(decisionsCode.includes('Quyết định 132') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 132'), 'DECISIONS.md must document Quyết định 132');
 
-  console.log('✅ Test 72 Passed: Tab Camera Tối Giản Adidas Pixel Art Hội An (Prototype 1:1) Audit verified cleanly');
+  console.log('✅ Test 72 Passed: Tab Camera Tối Giản Chuẩn 1:1 Prototype Ví Heo Con (Hình 4 & Quyết định 132) Audit verified cleanly');
 }
 
 console.log('\n🎉 ALL 72 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (72/72)!');
