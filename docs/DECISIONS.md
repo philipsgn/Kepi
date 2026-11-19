@@ -749,4 +749,25 @@
          - Khung ảnh Polaroid viền kem dày đáy kiểu ảnh rửa phim cổ điển, viền ngoài 2.5px Nâu Mực, bóng cứng 4px 0-blur.
          - Góc dán miếng băng keo washi pixel art, nhãn giá tiền dạng tem dán góc (Price Stamp) màu Vàng Cám font Baloo 2.
 
+  - **Quyết định 130 (19/11/2026): Mở Rộng Tab 3 Thành Trung Tâm Pixel Hub Đa Năng (Chat, Game Heo Bay, Game Heo Bắn & Bản Đồ Chi Tiêu):**
+    - *Bối Cảnh & Bản Chất:* Tab 3 trước đây chỉ gồm màn hình Chat (AI Coach Anh Minh & Squad). Để gia tăng trải nghiệm giải trí gamification và trực quan hóa chi tiêu theo không gian, toàn bộ source code đồ họa từ `prototype/Game_Heo_Bay.html` (chứa Game Heo Bay, Game Heo Bắn và Bản Đồ Chi Tiêu pixel) được tích hợp trực tiếp vào Tab 3.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Kiến Trúc Menu Thẻ Pixel Hub (Hub Dashboard):**
+         - Màn hình chính của Tab 3 đóng vai trò Hub điều hướng với 4 thẻ lớn Neo-Brutalist sinh động:
+           + Thẻ 1: 💬 **Trò Chuyện & Bạn Bè** (AI Coach Anh Minh & Squad Nuôi Heo).
+           + Thẻ 2: 🪽 **Game Heo Bay** (Flappy Pig kiếm đồ ăn, thanh độ no, vỗ cánh qua 4 biomes).
+           + Thẻ 3: 🎯 **Game Heo Bắn** (Angry Pig slingshot physics, phá vỡ khối gỗ/đá/kính, xếp hạng 3 sao).
+           + Thẻ 4: 🗺️ **Bản Đồ Chi Tiêu** (Bản đồ pixel khu phố, các ghim quán ăn/cafe/chợ, heo đi dạo tới nơi tiêu).
+         - Khi nhấn vào một thẻ, mở toàn màn hình phân hệ đó kèm thanh Header Neo-Brutalist có nút `[← Quay lại Hub]` 1-chạm mượt mà.
+      2. **Engine WebView Canvas Siêu Mượt 60fps:**
+         - Game Heo Bay, Game Heo Bắn và Bản Đồ Chi Tiêu được port 1:1 từ canvas JavaScript thuần trong `prototype/Game_Heo_Bay.html` thông qua `react-native-webview`.
+         - Đảm bảo đồ họa pixel art 100% sắc nét (`image-rendering: pixelated`), chuẩn xác từng tọa độ logic, bảng màu palette và physics gốc mà không gây giật lag React Native render tree.
+      3. **Liên Kết Bản Đồ Chi Tiêu Với `transactionStore` Thực Tế:**
+         - Bản đồ tự động nạp các địa điểm quen thuộc mẫu (Phở Bát Đàn, Cà phê Giảng, Chợ Đồng Xuân...) kết hợp ánh xạ tự động các giao dịch thực tế từ `useTransactionStore` thành các ghim thực tế trên bản đồ pixel.
+         - Tương tác chọn ghim, xem chi tiết lượt ghé / quán quen và bấm "Heo đi tới đây" để chú heo đi dạo tới địa điểm.
+      4. **Bảo Tồn Nguyên Tắc Cốt Lõi:**
+         - Zero điểm ảo FEP (quy về streak ngày và giữ tiền).
+         - Zero-STK (không lưu số tài khoản trên map hay log).
+         - 100% Offline-First và đồng nhất ngôn ngữ thiết kế Neo-Brutalist Heo Con (Kem Sàn `#F6EEDC`, Nâu Mực `#2B2118`, Hồng Heo `#F9B8C4`, Vàng Cám `#F4B93B`, viền 3px, bóng cứng 0-blur).
+
 

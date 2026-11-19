@@ -3282,4 +3282,61 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 70 Passed: Camera Heo Con v4 Dreamy Sky, Snap-on-Release Voice & Polaroid Pixel Moments Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 70 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (70/70)!');
+// ==============================================================================
+// 🧪 TEST 71: TAB 3 PIXEL HUB ĐA NĂNG (CHAT, 2 GAME & BẢN ĐỒ CHI TIÊU) AUDIT
+// ==============================================================================
+{
+  const chatViewPath = path.join(__dirname, 'src/components/views/ChatView.tsx');
+  const chatViewCode = fs.readFileSync(chatViewPath, 'utf8');
+  const hubPath = path.join(__dirname, 'src/components/chat/PixelHubDashboard.tsx');
+  const hubCode = fs.readFileSync(hubPath, 'utf8');
+  const flyPath = path.join(__dirname, 'src/components/chat/PigFlightGameView.tsx');
+  const flyCode = fs.readFileSync(flyPath, 'utf8');
+  const shooterPath = path.join(__dirname, 'src/components/chat/PigShooterGameView.tsx');
+  const shooterCode = fs.readFileSync(shooterPath, 'utf8');
+  const mapPath = path.join(__dirname, 'src/components/chat/PiggySpendMapView.tsx');
+  const mapCode = fs.readFileSync(mapPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/10-CHAT.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. ChatView Coordinates Pixel Hub & 4 Sub-views
+  assert.ok(chatViewCode.includes('PixelHubDashboard'), 'ChatView must import and render PixelHubDashboard');
+  assert.ok(chatViewCode.includes('PigFlightGameView'), 'ChatView must import and render PigFlightGameView');
+  assert.ok(chatViewCode.includes('PigShooterGameView'), 'ChatView must import and render PigShooterGameView');
+  assert.ok(chatViewCode.includes('PiggySpendMapView'), 'ChatView must import and render PiggySpendMapView');
+  assert.ok(chatViewCode.includes('activeSubView'), 'ChatView must maintain activeSubView state');
+  assert.ok(chatViewCode.includes('hubBackButton'), 'ChatView must provide Back to Hub button in chat view');
+
+  // 2. PixelHubDashboard Architecture & Cards
+  assert.ok(hubCode.includes('PixelHubDashboard'), 'Must export PixelHubDashboard component');
+  assert.ok(hubCode.includes("'chat'") && hubCode.includes("'fly'") && hubCode.includes("'shooter'") && hubCode.includes("'map'"), 'Dashboard must configure 4 sub-views');
+  assert.ok(hubCode.includes('cardsGrid') && hubCode.includes('#FFFBF1'), 'Must use Neo-Brutalist card styling');
+
+  // 3. Game Heo Bay (PigFlightGameView)
+  assert.ok(flyCode.includes('SafeWebView'), 'PigFlightGameView must use SafeWebView');
+  assert.ok(flyCode.includes('FW=176') && flyCode.includes('FH=224'), 'Must port 176x224 canvas from prototype');
+  assert.ok(flyCode.includes('flyFlap') && flyCode.includes('flyHunger'), 'Must implement flap physics and hunger mechanics');
+  assert.ok(flyCode.includes('Quay lại Hub'), 'Must render Back to Hub header button');
+
+  // 4. Game Heo Bắn (PigShooterGameView)
+  assert.ok(shooterCode.includes('SafeWebView'), 'PigShooterGameView must use SafeWebView');
+  assert.ok(shooterCode.includes('AW=224') && shooterCode.includes('AH=140'), 'Must port 224x140 canvas from prototype');
+  assert.ok(shooterCode.includes('apImpact') && (shooterCode.includes('slingshot') || shooterCode.includes('drag')), 'Must implement slingshot block destruction physics');
+  assert.ok(shooterCode.includes('Quay lại Hub'), 'Must render Back to Hub header button');
+
+  // 5. Bản Đồ Chi Tiêu Pixel (PiggySpendMapView)
+  assert.ok(mapCode.includes('SafeWebView'), 'PiggySpendMapView must use SafeWebView');
+  assert.ok(mapCode.includes('MW=192') && mapCode.includes('MH=200'), 'Must port 192x200 canvas from prototype');
+  assert.ok(mapCode.includes('useTransactionStore'), 'Must sync real transactions from transactionStore');
+  assert.ok(mapCode.includes('mpGo') && mapCode.includes('Quay lại Hub'), 'Must support pig walking and Back to Hub');
+
+  // 6. Living Docs & Decisions Sync
+  assert.ok(docCode.includes('PIXEL HUB') || docCode.includes('Pixel Hub'), '10-CHAT.md must document Pixel Hub architecture');
+  assert.ok(decisionsCode.includes('Quyết định 130') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 130'), 'DECISIONS.md must document Quyết định 130');
+
+  console.log('✅ Test 71 Passed: Tab 3 Pixel Hub Đa Năng (Chat, 2 Game & Bản Đồ Chi Tiêu) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 71 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (71/71)!');

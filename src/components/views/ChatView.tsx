@@ -29,6 +29,11 @@ import { formatVND } from '../../utils/currency';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { useBottomInset } from '../../hooks/useBottomInset';
+import { ArrowLeft } from 'lucide-react-native';
+import { PixelHubDashboard, SubViewType } from '../chat/PixelHubDashboard';
+import { PigFlightGameView } from '../chat/PigFlightGameView';
+import { PigShooterGameView } from '../chat/PigShooterGameView';
+import { PiggySpendMapView } from '../chat/PiggySpendMapView';
 
 interface ChatViewProps {
   onNavigateToStats?: () => void;
@@ -65,6 +70,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   const insets = useSafeAreaInsets();
   const { tokens } = useTheme();
   const { bottomInset } = useBottomInset();
+  const [activeSubView, setActiveSubView] = useState<SubViewType>('hub');
   const [activeTab, setActiveTab] = useState<'COACH' | 'FRIENDS'>('COACH');
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [isThinking, setIsThinking] = useState(false);
@@ -314,8 +320,55 @@ export const ChatView: React.FC<ChatViewProps> = ({
     handleSendMessage(prompt);
   };
 
+  if (activeSubView === 'hub') {
+    return (
+      <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+        <PixelHubDashboard onSelectSubView={setActiveSubView} />
+      </View>
+    );
+  }
+
+  if (activeSubView === 'fly') {
+    return (
+      <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+        <PigFlightGameView onBack={() => setActiveSubView('hub')} />
+      </View>
+    );
+  }
+
+  if (activeSubView === 'shooter') {
+    return (
+      <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+        <PigShooterGameView onBack={() => setActiveSubView('hub')} />
+      </View>
+    );
+  }
+
+  if (activeSubView === 'map') {
+    return (
+      <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+        <PiggySpendMapView onBack={() => setActiveSubView('hub')} />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+      {/* 0. NÚT QUAY LẠI HUB TRUNG TÂM */}
+      <View style={styles.hubBackRow}>
+        <TouchableOpacity
+          style={styles.hubBackButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setActiveSubView('hub');
+          }}
+          activeOpacity={0.8}
+        >
+          <ArrowLeft size={16} color="#2B2118" strokeWidth={2.8} />
+          <Text style={styles.hubBackButtonText}>Quay lại Hub</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* 1. TOP SEGMENT HEADER [Anh Minh | Bạn bè] */}
       <ChatTopSegmentHeader activeTab={activeTab} onSelectTab={setActiveTab} />
 
@@ -412,6 +465,34 @@ export const ChatView: React.FC<ChatViewProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  hubBackRow: {
+    paddingHorizontal: 16,
+    paddingTop: 6,
+    paddingBottom: 4,
+  },
+  hubBackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  hubBackButtonText: {
+    fontFamily: 'Nunito',
+    fontWeight: '800',
+    fontSize: 12,
+    color: '#2B2118',
   },
   coachContainer: {
     flex: 1,
