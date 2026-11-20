@@ -368,7 +368,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           activeOpacity={0.8}
         >
           <ArrowLeft size={16} color="#2B2118" strokeWidth={2.8} />
-          <Text style={styles.hubBackButtonText}>Quay lại Hub</Text>
+          <Text style={styles.hubBackButtonText}>‹ Giải trí</Text>
         </TouchableOpacity>
       </View>
 

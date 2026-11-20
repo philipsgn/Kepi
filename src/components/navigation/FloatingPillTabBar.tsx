@@ -3,16 +3,16 @@ import {
   Keyboard,
   Platform,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
 import Animated, {
   SharedValue,
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { BarChart2, Camera, Home, MessageSquare, Trees, User } from 'lucide-react-native';
+import { Camera, Gamepad2, Home, Trees, User } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { TAB_BAR_HEIGHT, useBottomInset } from '../../hooks/useBottomInset';
@@ -30,12 +30,13 @@ const TAB_BAR_HORIZONTAL_MARGIN = 16;
 const INNER_PADDING = 4;
 
 /**
- * Thanh điều hướng nổi dạng viên thuốc (Floating Pill Tab Bar) — Phiên bản "Ấm, tĩnh, sang"
- * Tuân thủ mục 1 & 4 của đặc tả:
- * - Kính mờ thích ứng: Bản Sáng dùng kem ngà mờ, bản Tối dùng xám xanh trầm mờ.
- * - Viền mảnh hairline 1px tokens.border, không viền đen dày, không bóng đổ cứng.
- * - Nút Camera chính giữa dạng tròn mềm mại 44px vàng ấm sang trọng.
- * - Chỉ báo trượt viên thuốc animated spring theo vị trí cuộn trang.
+ * Thanh điều hướng nổi dạng viên thuốc (Floating Pill Tab Bar) — Chuẩn Prototype 20/11 & Style Heo Con
+ * - Tone màu nền: Hồng phấn dâu sữa nhạt #FCECEF, viền 3px mực #2B2118, bóng cứng 4px 0-blur.
+ * - Bố cục 5 Tabs (Icon 20px + Chữ nhãn 11px xếp dọc): Vườn — Nhà — Chụp — Giải trí — Hồ sơ.
+ * - Hiệu ứng Active đa sắc theo từng tab:
+ *   + Chụp: Nền Đỏ cam #E0452B, chữ/icon trắng #FFFFFF
+ *   + Giải trí: Nền Vàng cám #F4B93B, chữ/icon mực #2B2118
+ *   + Các tab khác (Vườn, Nhà, Hồ sơ): Nền Nâu mực #2B2118, chữ/icon kem trắng #FFFBF1
  */
 export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
   activeIndex,
@@ -44,7 +45,8 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
   screenWidth,
   isDeepScrolled = false,
 }) => {
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
   const { tabBarBottom } = useBottomInset();
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
@@ -68,7 +70,7 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
   const barWidth = screenWidth - TAB_BAR_HORIZONTAL_MARGIN * 2;
   const tabWidth = (barWidth - INNER_PADDING * 2) / TAB_COUNT;
 
-  // Hiệu ứng trượt của viên thuốc nội suy từ scrollX (ngang)
+  // Hiệu ứng trượt của viên thuốc nội suy từ scrollX (ngang) cho theme non-heocon
   const animatedPillStyle = useAnimatedStyle(() => {
     if (!scrollX || screenWidth === 0) {
       return {
@@ -93,11 +95,11 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
   };
 
   const tabs = [
-    { id: 'home', icon: Trees, label: 'Sân Vườn' },
-    { id: 'stats', icon: Home, label: 'Nhà Heo' },
-    { id: 'camera', icon: Camera, label: 'Camera', isCenter: true },
-    { id: 'chat', icon: MessageSquare, label: 'Nuôi Heo' },
-    { id: 'profile', icon: User, label: 'Hồ Sơ' },
+    { id: 'home', icon: Trees, label: 'Vườn', activeBg: '#2B2118', activeFg: '#FFFBF1' },
+    { id: 'stats', icon: Home, label: 'Nhà', activeBg: '#2B2118', activeFg: '#FFFBF1' },
+    { id: 'camera', icon: Camera, label: 'Chụp', activeBg: '#E0452B', activeFg: '#FFFFFF', isCamera: true },
+    { id: 'chat', icon: Gamepad2, label: 'Giải trí', activeBg: '#F4B93B', activeFg: '#2B2118' },
+    { id: 'profile', icon: User, label: 'Hồ sơ', activeBg: '#2B2118', activeFg: '#FFFBF1' },
   ];
 
   return (
@@ -116,29 +118,32 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
           styles.barContainer,
           {
             width: barWidth,
-            borderColor: tokens.border || '#2B2118',
-            backgroundColor: tokens.surface || '#FFFBF1',
-            shadowColor: tokens.border || '#2B2118',
+            borderColor: isHeocon ? '#2B2118' : tokens.border || '#2B2118',
+            backgroundColor: isHeocon ? '#FCECEF' : tokens.surface || '#FFFBF1',
+            shadowColor: '#2B2118',
             shadowOpacity: 1,
             shadowRadius: 0,
-            shadowOffset: { width: 0, height: 3 },
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 4,
           },
         ]}
       >
-        {/* VIÊN THUỐC TRƯỢT NỘI SUY (SLIDING PILL) - NEO BRUTALIST */}
-        <Animated.View
-          style={[
-            styles.slidingPill,
-            {
-              width: tabWidth,
-              backgroundColor: tokens.primarySoft || 'rgba(244, 185, 59, 0.3)',
-              borderColor: tokens.border || '#2B2118',
-            },
-            animatedPillStyle,
-          ]}
-        />
+        {/* VIÊN THUỐC TRƯỢT NỘI SUY (SLIDING PILL) - Cho chế độ non-heocon */}
+        {!isHeocon && (
+          <Animated.View
+            style={[
+              styles.slidingPill,
+              {
+                width: tabWidth,
+                backgroundColor: tokens.primarySoft || 'rgba(244, 185, 59, 0.3)',
+                borderColor: tokens.border || '#2B2118',
+              },
+              animatedPillStyle,
+            ]}
+          />
+        )}
 
-        {/* 5 NÚT ICON VECTOR */}
+        {/* 5 NÚT TAB (ICON 20px + CHỮ NHÃN 11px) */}
         <View style={styles.tabIconsRow}>
           {tabs.map((tab, idx) => {
             const IconComponent = tab.icon;
@@ -147,36 +152,41 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
             return (
               <TouchableOpacity
                 key={tab.id}
-                style={[styles.tabButton, { width: tabWidth }]}
+                style={[
+                  styles.tabButton,
+                  { width: tabWidth },
+                  isSelected && isHeocon && {
+                    backgroundColor: tab.activeBg,
+                    borderRadius: 22,
+                  },
+                ]}
                 onPress={() => handleTabPress(idx)}
                 activeOpacity={0.75}
                 hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
               >
-                {tab.isCenter ? (
-                  <View
-                    style={[
-                      styles.centerCameraCircle,
-                      {
-                        backgroundColor: tokens.primary || '#F4B93B',
-                        borderColor: tokens.border || '#2B2118',
-                        shadowColor: tokens.border || '#2B2118',
-                      },
-                      isSelected && styles.centerCameraCircleActive,
-                    ]}
-                  >
-                    <IconComponent
-                      size={22}
-                      color="#2B2118"
-                      strokeWidth={2.6}
-                    />
-                  </View>
-                ) : (
-                  <IconComponent
-                    size={20}
-                    color={isSelected ? tokens.text || '#2B2118' : tokens.textMuted || '#7A6852'}
-                    strokeWidth={isSelected ? 2.6 : 2.0}
-                  />
-                )}
+                <IconComponent
+                  size={20}
+                  color={
+                    isSelected
+                      ? (isHeocon ? tab.activeFg : tokens.text || '#2B2118')
+                      : (isHeocon ? '#2B2118' : tokens.textMuted || '#7A6852')
+                  }
+                  strokeWidth={isSelected ? 2.6 : 2.2}
+                />
+                <Text
+                  style={[
+                    styles.tabLabel,
+                    {
+                      color: isSelected
+                        ? (isHeocon ? tab.activeFg : tokens.text || '#2B2118')
+                        : (isHeocon ? '#2B2118' : tokens.textMuted || '#7A6852'),
+                      opacity: isSelected ? 1 : 0.72,
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {tab.label}
+                </Text>
               </TouchableOpacity>
             );
           })}
@@ -217,22 +227,17 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     height: TAB_BAR_HEIGHT - INNER_PADDING * 2,
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 3,
+    paddingHorizontal: 2,
   },
-  centerCameraCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: radii.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 3,
-  },
-  centerCameraCircleActive: {
-    transform: [{ scale: 1.04 }],
+  tabLabel: {
+    fontFamily: 'Nunito',
+    fontWeight: '800',
+    fontSize: 10.5,
+    marginTop: 2,
+    textAlign: 'center',
   },
 });

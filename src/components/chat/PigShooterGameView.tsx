@@ -507,7 +507,7 @@ requestAnimationFrame(loop);
           activeOpacity={0.8}
         >
           <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
-          <Text style={styles.backButtonText}>Quay lại Hub</Text>
+          <Text style={styles.backButtonText}>‹ Giải trí</Text>
         </TouchableOpacity>
 
         <View style={styles.headerTitleWrap}>

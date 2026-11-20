@@ -1,4 +1,4 @@
-export const TAB_BAR_HEIGHT = 58;
+export const TAB_BAR_HEIGHT = 60;
 export const TAB_BAR_BOTTOM_MARGIN = 10;
 export const CONTENT_EXTRA_BREATHING_ROOM = 16;
 

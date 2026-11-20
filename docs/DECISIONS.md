@@ -836,6 +836,24 @@
          - Thanh nhập chat `ChatInputBar`: Nền kem `#F6EEDC`, viền trên 2.5px mực, ô gõ `#FFFBF1` viền 2.5px mực, nút đính kèm & nút Gửi Vàng Cám viền 2.5px mực nổi khối.
          - Chip gợi ý, thẻ MiniMetric và thẻ xác nhận ghi sổ: Viền 2.5px mực, bóng cứng 2px, nút hành động Vàng Cám.
 
+  - **Quyết định 141 (20/11/2026): Tái Thiết Kế Thanh Bottom Bar Chuẩn Prototype 20/11 (Nền Hồng Phấn Nhạt Heo #FCECEF, Bố Cục Icon + Chữ & Active Đa Sắc) & Chuẩn Hóa Tab 3 Thành "Giải Trí":**
+    - *Bối Cảnh & Nguyên Nhân:* Cập nhật theo phiên bản prototype ngày 20/11 (`prototype/Ví Heo Con-20-11.html`). Thanh Bottom Navigation Bar trước đây chỉ hiển thị icon đơn lẻ trên nền kem và tab 3 còn mang tên "Nuôi Heo" / "Chat". Người dùng yêu cầu thanh bottom bar đồng bộ chuẩn 1:1 theo prototype với tone nền Hồng phấn nhạt heo (`#FCECEF`), hiển thị cả Icon và Chữ nhãn cho 5 tabs, đồng thời chính thức chuyển đổi Tab 3 thành Tab "Giải trí" (Tích hợp Chat, Game Heo Bay, Game Heo Bắn và Bản Đồ Chi Tiêu).
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Tone Nền Hồng Phấn Nhạt:** Nền `barContainer` mang màu Hồng phấn dâu sữa nhạt `#FCECEF`, viền 3px mực `#2B2118`, bóng cứng 4px 0-blur (`shadowColor: '#2B2118', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 0, elevation: 4`). Chiều cao chuẩn 60px.
+      2. **Bố Cục 5 Tabs (Icon + Chữ Nhãn Xếp Dọc):** Mỗi tab có cấu trúc `flexDirection: 'column'`, `gap: 2`, gồm Icon vector nổi trần 20px và Chữ nhãn 11px font `Nunito` 800 (`tabular-nums` nếu cần):
+         - Tab 0: Icon `Trees` + Chữ "Vườn"
+         - Tab 1: Icon `Home` + Chữ "Nhà"
+         - Tab 2: Icon `Camera` + Chữ "Chụp"
+         - Tab 3: Icon `Gamepad2` + Chữ "Giải trí"
+         - Tab 4: Icon `User` + Chữ "Hồ sơ"
+      3. **Hiệu Ứng Active Đa Sắc Theo Từng Tab:**
+         - Tab Chụp: Nền Đỏ Cam `#E0452B`, Icon và Chữ chuyển sang Trắng `#FFFFFF`.
+         - Tab Giải trí: Nền Vàng Cám `#F4B93B`, Icon và Chữ chuyển sang Nâu Mực `#2B2118`.
+         - Các tab khác (Vườn, Nhà, Hồ sơ): Nền Nâu Mực `#2B2118`, Icon và Chữ chuyển sang Kem Trắng `#FFFBF1`.
+         - Khi không active: Icon và Chữ mang màu Nâu Mực `#2B2118` (opacity 0.72).
+      4. **Chuẩn Hóa Tab 3 Thành "Giải Trí":** Tab 3 chính thức đóng vai trò Trung Tâm Giải Trí & Khám Phá Heo Con (PIGFLY HUB), mở màn hình Dashboard 4 thẻ lớn chuyển tiếp mượt mà vào Chat AI Coach / Squad, Game Heo Bay, Game Heo Bắn và Bản Đồ Chi Tiêu. Nút quay lại đổi thành "‹ Giải trí".
+
+
 
 
 

@@ -2923,8 +2923,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   // 4. Kiểm tra FloatingPillTabBar: Chuẩn hóa 5 Tab
   const tabBarPath = path.join(__dirname, 'src/components/navigation/FloatingPillTabBar.tsx');
   const tabBarCode = fs.readFileSync(tabBarPath, 'utf8');
-  assert.ok(tabBarCode.includes("label: 'Sân Vườn'") && tabBarCode.includes("Trees"), 'Tab 0 must be Sân Vườn with Trees icon');
-  assert.ok(tabBarCode.includes("label: 'Nhà Heo'") && tabBarCode.includes("Home"), 'Tab 1 must be Nhà Heo with Home icon');
+  assert.ok((tabBarCode.includes("label: 'Sân Vườn'") || tabBarCode.includes("label: 'Vườn'")) && tabBarCode.includes("Trees"), 'Tab 0 must be Sân Vườn or Vườn with Trees icon');
+  assert.ok((tabBarCode.includes("label: 'Nhà Heo'") || tabBarCode.includes("label: 'Nhà'")) && tabBarCode.includes("Home"), 'Tab 1 must be Nhà Heo or Nhà with Home icon');
 
   // 5. Kiểm tra StatsView: Tích hợp PixelHouseWebView & liên kết dữ liệu 6 phòng
   const statsViewPath = path.join(__dirname, 'src/components/views/StatsView.tsx');
@@ -3320,19 +3320,19 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(flyCode.includes('SafeWebView'), 'PigFlightGameView must use SafeWebView');
   assert.ok(flyCode.includes('FW=176') && flyCode.includes('FH=224'), 'Must port 176x224 canvas from prototype');
   assert.ok(flyCode.includes('flyFlap') && flyCode.includes('flyHunger'), 'Must implement flap physics and hunger mechanics');
-  assert.ok(flyCode.includes('Quay lại Hub'), 'Must render Back to Hub header button');
+  assert.ok(flyCode.includes('Quay lại Hub') || flyCode.includes('Giải trí'), 'Must render Back to Hub header button');
 
   // 4. Game Heo Bắn (PigShooterGameView)
   assert.ok(shooterCode.includes('SafeWebView'), 'PigShooterGameView must use SafeWebView');
   assert.ok(shooterCode.includes('AW=224') && shooterCode.includes('AH=140'), 'Must port 224x140 canvas from prototype');
   assert.ok(shooterCode.includes('apImpact') && (shooterCode.includes('slingshot') || shooterCode.includes('drag')), 'Must implement slingshot block destruction physics');
-  assert.ok(shooterCode.includes('Quay lại Hub'), 'Must render Back to Hub header button');
+  assert.ok(shooterCode.includes('Quay lại Hub') || shooterCode.includes('Giải trí'), 'Must render Back to Hub header button');
 
   // 5. Bản Đồ Chi Tiêu Pixel (PiggySpendMapView)
   assert.ok(mapCode.includes('SafeWebView'), 'PiggySpendMapView must use SafeWebView');
   assert.ok(mapCode.includes('MW=192') && mapCode.includes('MH=200'), 'Must port 192x200 canvas from prototype');
   assert.ok(mapCode.includes('useTransactionStore'), 'Must sync real transactions from transactionStore');
-  assert.ok(mapCode.includes('mpGo') && mapCode.includes('Quay lại Hub'), 'Must support pig walking and Back to Hub');
+  assert.ok(mapCode.includes('mpGo') && (mapCode.includes('Quay lại Hub') || mapCode.includes('Giải trí')), 'Must support pig walking and Back to Hub');
 
   // 6. Living Docs & Decisions Sync
   assert.ok(docCode.includes('PIXEL HUB') || docCode.includes('Pixel Hub'), '10-CHAT.md must document Pixel Hub architecture');
@@ -3662,4 +3662,41 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 80 Passed: Khắc Phục Lỗi Render WebView Canvas & Re-skin Subtab Chat Heo Con (Quyết định 140) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 80 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (80/80)!');
+// ==============================================================================
+// 🧪 TEST 81: BOTTOM TAB BAR HỒNG PHẤN NHẠT & CHUẨN HÓA TAB GIẢI TRÍ (QUYẾT ĐỊNH 141) AUDIT
+// ==============================================================================
+{
+  const tabbarPath = path.join(__dirname, 'src/components/navigation/FloatingPillTabBar.tsx');
+  const tabbarCode = fs.readFileSync(tabbarPath, 'utf8');
+  const layoutPath = path.join(__dirname, 'src/utils/layoutUtils.ts');
+  const layoutCode = fs.readFileSync(layoutPath, 'utf8');
+  const chatViewPath = path.join(__dirname, 'src/components/views/ChatView.tsx');
+  const chatViewCode = fs.readFileSync(chatViewPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. Bottom Tab Bar Pink Tone & Neo-brutalist Border
+  assert.ok(tabbarCode.includes('#FCECEF'), 'FloatingPillTabBar must use #FCECEF pink milk tone for Heo Con mode');
+  assert.ok(tabbarCode.includes("shadowOffset: { width: 0, height: 4 }"), 'FloatingPillTabBar must have 4px 0-blur hard shadow');
+  assert.ok(layoutCode.includes('TAB_BAR_HEIGHT = 60'), 'layoutUtils must define TAB_BAR_HEIGHT as 60 for comfortable icon+label layout');
+
+  // 2. 5 Tabs Layout with Vertical Icon + Labels (Vườn, Nhà, Chụp, Giải trí, Hồ sơ)
+  assert.ok(tabbarCode.includes("'Vườn'") && tabbarCode.includes("'Nhà'") && tabbarCode.includes("'Chụp'") && tabbarCode.includes("'Giải trí'") && tabbarCode.includes("'Hồ sơ'"), 'FloatingPillTabBar must render all 5 prototype labels');
+  assert.ok(tabbarCode.includes('Gamepad2'), 'FloatingPillTabBar must use Gamepad2 icon for Tab Giai tri');
+
+  // 3. Multi-color Active Mapping
+  assert.ok(tabbarCode.includes("activeBg: '#E0452B'") && tabbarCode.includes("activeBg: '#F4B93B'") && tabbarCode.includes("activeBg: '#2B2118'"), 'FloatingPillTabBar must map active colors for Camera, Entertainment and others');
+
+  // 4. Sub-view Navigation Back Button label
+  assert.ok(chatViewCode.includes('‹ Giải trí'), 'ChatView back button must display ‹ Giải trí');
+
+  // 5. Living Docs Reverse Sync (AGENTS.md, DECISIONS.md)
+  assert.ok(agentsCode.includes('Quyết định 141') || agentsCode.includes('Tab 3: Giải Trí'), 'AGENTS.md must document Quyết định 141');
+  assert.ok(decisionsCode.includes('Quyết định 141') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 141'), 'DECISIONS.md must document Quyết định 141');
+
+  console.log('✅ Test 81 Passed: Bottom Tab Bar Hồng Phấn Nhạt & Chuẩn Hóa Tab Giải Trí (Quyết định 141) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 81 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (81/81)!');
