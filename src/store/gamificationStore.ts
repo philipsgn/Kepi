@@ -37,12 +37,28 @@ interface GamificationState {
   unlockedAchievements: string[];
   diceRollsLeft: number;
   monopolyPosition: number;
+  gameTickets: number;
+  pigFood: number;
+  pigHunger: number;
+  savedBabies: number;
+  flyBestScore: number;
+  shooterMaxWave: number;
   isLoading: boolean;
 
   // Actions
   loadGamificationState: () => Promise<void>;
   addFep: (amount: number) => Promise<void>;
   setStreakDays: (days: number) => void;
+  addGameTickets: (count: number) => void;
+  useGameTicket: () => boolean;
+  addPigFood: (amount: number) => void;
+  feedPig: () => boolean;
+  updateGameStats: (stats: {
+    flyBestScore?: number;
+    shooterMaxWave?: number;
+    savedBabies?: number;
+    pigHunger?: number;
+  }) => void;
   evaluateRules: (
     ctx: Omit<GamificationContextVariables, 'currentFep' | 'unlockedAchievements'>,
     triggerEvent: 'LOG_TRANSACTION' | 'DAILY_ROLLOVER' | 'MONOPOLY_MOVE' | 'MANUAL_CHECK'
@@ -65,6 +81,12 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
   unlockedAchievements: [],
   diceRollsLeft: 2, // 2 lượt miễn phí mỗi ngày
   monopolyPosition: 0,
+  gameTickets: 3, // 3 vé chơi mỗi ngày
+  pigFood: 10, // 10 đơn vị thức ăn cho heo
+  pigHunger: 75, // Độ no 75%
+  savedBabies: 0,
+  flyBestScore: 0,
+  shooterMaxWave: 1,
   isLoading: false,
 
   loadGamificationState: async () => {
@@ -83,11 +105,75 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
           unlockedAchievements: parsed.unlockedAchievements ?? [],
           diceRollsLeft: parsed.diceRollsLeft ?? 2,
           monopolyPosition: parsed.monopolyPosition ?? 0,
+          gameTickets: parsed.gameTickets ?? 3,
+          pigFood: parsed.pigFood ?? 10,
+          pigHunger: parsed.pigHunger ?? 75,
+          savedBabies: parsed.savedBabies ?? 0,
+          flyBestScore: parsed.flyBestScore ?? 0,
+          shooterMaxWave: parsed.shooterMaxWave ?? 1,
         });
       }
     } catch (e) {
       console.warn('[GamificationStore] Failed to load:', e);
     }
+  },
+
+  addGameTickets: (count: number) => {
+    const next = Math.max(0, get().gameTickets + count);
+    set({ gameTickets: next });
+    AsyncStorage.setItem(
+      STORAGE_KEY_GAMIFICATION,
+      JSON.stringify({ ...get(), gameTickets: next })
+    ).catch(() => {});
+  },
+
+  useGameTicket: () => {
+    const current = get().gameTickets;
+    if (current <= 0) return false;
+    const next = current - 1;
+    set({ gameTickets: next });
+    AsyncStorage.setItem(
+      STORAGE_KEY_GAMIFICATION,
+      JSON.stringify({ ...get(), gameTickets: next })
+    ).catch(() => {});
+    return true;
+  },
+
+  addPigFood: (amount: number) => {
+    const next = Math.max(0, get().pigFood + amount);
+    set({ pigFood: next });
+    AsyncStorage.setItem(
+      STORAGE_KEY_GAMIFICATION,
+      JSON.stringify({ ...get(), pigFood: next })
+    ).catch(() => {});
+  },
+
+  feedPig: () => {
+    const { pigFood, pigHunger } = get();
+    if (pigFood <= 0) return false;
+    const nextFood = pigFood - 1;
+    const nextHunger = Math.min(100, pigHunger + 25);
+    set({ pigFood: nextFood, pigHunger: nextHunger });
+    AsyncStorage.setItem(
+      STORAGE_KEY_GAMIFICATION,
+      JSON.stringify({ ...get(), pigFood: nextFood, pigHunger: nextHunger })
+    ).catch(() => {});
+    return true;
+  },
+
+  updateGameStats: (stats) => {
+    const current = get();
+    const updated = {
+      flyBestScore: Math.max(current.flyBestScore, stats.flyBestScore ?? 0),
+      shooterMaxWave: Math.max(current.shooterMaxWave, stats.shooterMaxWave ?? 0),
+      savedBabies: stats.savedBabies !== undefined ? stats.savedBabies : current.savedBabies,
+      pigHunger: stats.pigHunger !== undefined ? Math.min(100, Math.max(0, stats.pigHunger)) : current.pigHunger,
+    };
+    set(updated);
+    AsyncStorage.setItem(
+      STORAGE_KEY_GAMIFICATION,
+      JSON.stringify({ ...get(), ...updated })
+    ).catch(() => {});
   },
 
   addFep: async (amount: number) => {

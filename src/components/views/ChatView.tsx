@@ -22,6 +22,7 @@ import { UndoToastBar } from '../common/UndoToastBar';
 import { useTransactionStore } from '../../store/transactionStore';
 import { useBudgetStore } from '../../store/budgetStore';
 import { useAuthStore } from '../../store/authStore';
+import { useGamificationStore } from '../../store/gamificationStore';
 import { generateLocalCoachResponse, parseQuickRecordCommand } from '../../utils/chatUtils';
 import * as ImagePicker from 'expo-image-picker';
 import { formatCategoryName } from '../../constants/categoryDefaults';
@@ -95,6 +96,14 @@ export const ChatView: React.FC<ChatViewProps> = ({
   const { user, profile } = useAuthStore();
   const { todayBudget, todaySpent, recordExpense } = useBudgetStore();
   const { transactions, addTransaction, deleteTransaction } = useTransactionStore();
+  const {
+    gameTickets,
+    pigFood,
+    pigHunger,
+    feedPig,
+    updateGameStats,
+    addPigFood,
+  } = useGamificationStore();
 
   const handleSendMessage = (text: string) => {
     const userMsg: ChatMessage = {
@@ -334,7 +343,18 @@ export const ChatView: React.FC<ChatViewProps> = ({
   if (activeSubView === 'fly') {
     return (
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-        <PigFlightGameView onBack={() => setActiveSubView('hub')} />
+        <PigFlightGameView
+          onBack={() => setActiveSubView('hub')}
+          onSwitchGame={(game) => setActiveSubView(game)}
+          tickets={gameTickets}
+          food={pigFood}
+          hunger={pigHunger}
+          onFeedPig={feedPig}
+          onSaveStats={(stats) => {
+            if (stats.foodEarned) addPigFood(stats.foodEarned);
+            updateGameStats({ flyBestScore: stats.flyBestScore });
+          }}
+        />
       </View>
     );
   }
@@ -342,7 +362,21 @@ export const ChatView: React.FC<ChatViewProps> = ({
   if (activeSubView === 'shooter') {
     return (
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-        <PigShooterGameView onBack={() => setActiveSubView('hub')} />
+        <PigShooterGameView
+          onBack={() => setActiveSubView('hub')}
+          onSwitchGame={(game) => setActiveSubView(game)}
+          tickets={gameTickets}
+          food={pigFood}
+          hunger={pigHunger}
+          onFeedPig={feedPig}
+          onSaveStats={(stats) => {
+            if (stats.pigFoodBonus) addPigFood(stats.pigFoodBonus);
+            updateGameStats({
+              shooterMaxWave: stats.shooterMaxWave,
+              savedBabies: stats.savedBabies,
+            });
+          }}
+        />
       </View>
     );
   }

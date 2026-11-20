@@ -3699,4 +3699,58 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 81 Passed: Bottom Tab Bar Hồng Phấn Nhạt & Chuẩn Hóa Tab Giải Trí (Quyết định 141) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 81 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (81/81)!');
+
+// ==============================================================================
+// 🧪 TEST 82: NÂNG CẤP TAB GIẢI TRÍ PROTOTYPE 20/11 & GAME ĐỘ KHÓ CAO (QUYẾT ĐỊNH 142) AUDIT
+// ==============================================================================
+{
+  const hubPath = path.join(__dirname, 'src/components/chat/PixelHubDashboard.tsx');
+  const hubCode = fs.readFileSync(hubPath, 'utf8');
+  const shooterPath = path.join(__dirname, 'src/components/chat/PigShooterGameView.tsx');
+  const shooterCode = fs.readFileSync(shooterPath, 'utf8');
+  const flyPath = path.join(__dirname, 'src/components/chat/PigFlightGameView.tsx');
+  const flyCode = fs.readFileSync(flyPath, 'utf8');
+  const gamificationPath = path.join(__dirname, 'src/store/gamificationStore.ts');
+  const gamificationCode = fs.readFileSync(gamificationPath, 'utf8');
+  const txPath = path.join(__dirname, 'src/store/transactionStore.ts');
+  const txCode = fs.readFileSync(txPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/10-CHAT.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. PIGFLY HUB (v-fun) Mascot & Chores Care
+  assert.ok(hubCode.includes('PixelPigAvatar'), 'PixelHubDashboard must display 16x16 PixelPigAvatar mascot');
+  assert.ok(hubCode.includes('PIGFLY HUB'), 'PixelHubDashboard must feature PIGFLY HUB badge');
+  assert.ok(hubCode.includes('gameTickets') && hubCode.includes('pigFood'), 'PixelHubDashboard must display tickets and food chips');
+  assert.ok(hubCode.includes('CHĂM SÓC HEO CƯNG') && hubCode.includes('feedPig'), 'PixelHubDashboard must have mini-pet care card with feed action');
+
+  // 2. Game Heo Bắn (Angry Pig) Endless Waves & Dynamic Wind
+  assert.ok(shooterCode.includes('generateWave'), 'PigShooterGameView must implement Endless Waves procedural generator');
+  assert.ok(shooterCode.includes('ap.wind'), 'PigShooterGameView must implement dynamic wind vector physics');
+  assert.ok(shooterCode.includes('savedBabies') && shooterCode.includes('totalRescued'), 'PigShooterGameView must support cage rescuing baby pigs');
+  assert.ok(shooterCode.includes('wing') && shooterCode.includes('coin'), 'PigShooterGameView must support Wing Pig & Coin Bomb Pig abilities');
+  assert.ok(shooterCode.includes('tabFly') && shooterCode.includes('SWITCH_GAME'), 'PigShooterGameView must include top quick game switcher');
+
+  // 3. Game Heo Bay (Flappy Pig) Dynamic Obstacles & Storm Weather
+  assert.ok(flyCode.includes('enemyBirds'), 'PigFlightGameView must feature incoming enemy bird obstacles');
+  assert.ok(flyCode.includes('whirlwinds'), 'PigFlightGameView must feature dynamic whirlwind gusts');
+  assert.ok(flyCode.includes('storm') && flyCode.includes('rainDrops'), 'PigFlightGameView must feature storm weather and rain particles');
+  assert.ok(flyCode.includes('hunger') && flyCode.includes('flyHungerT'), 'PigFlightGameView must feature hunger bar consumption and eating foods');
+  assert.ok(flyCode.includes('tabShoot') && flyCode.includes('SWITCH_GAME'), 'PigFlightGameView must include top quick game switcher');
+
+  // 4. Retention Loop & Gamification Store
+  assert.ok(gamificationCode.includes('gameTickets') && gamificationCode.includes('feedPig'), 'gamificationStore must maintain tickets, food and feeding logic');
+  assert.ok(txCode.includes('addGameTickets'), 'transactionStore must reward +1 game ticket upon confirmed logging');
+
+  // 5. Living Documentation Sync
+  assert.ok(decisionsCode.includes('142'), 'DECISIONS.md must document Quyết định 142');
+  assert.ok(docCode.includes('142'), '10-CHAT.md must document Quyết định 142');
+  assert.ok(agentsCode.includes('142'), 'AGENTS.md must document Quyết định 142');
+
+  console.log('✅ Test 82 Passed: Nâng Cấp Tab Giải Trí Prototype 20/11 & Game Độ Khó Cao (Quyết định 142) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 82 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (82/82)!');

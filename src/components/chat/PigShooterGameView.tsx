@@ -9,15 +9,29 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
-import { ArrowLeft, RefreshCw } from 'lucide-react-native';
+import { ArrowLeft, RefreshCw, Feather, Target, Ticket } from 'lucide-react-native';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
 interface PigShooterGameViewProps {
   onBack: () => void;
+  onSwitchGame?: (game: 'fly' | 'shooter') => void;
+  tickets?: number;
+  food?: number;
+  hunger?: number;
+  onFeedPig?: () => void;
+  onSaveStats?: (stats: { shooterMaxWave?: number; savedBabies?: number; pigFoodBonus?: number }) => void;
 }
 
-export const PigShooterGameView: React.FC<PigShooterGameViewProps> = ({ onBack }) => {
+export const PigShooterGameView: React.FC<PigShooterGameViewProps> = ({
+  onBack,
+  onSwitchGame,
+  tickets = 3,
+  food = 10,
+  hunger = 75,
+  onFeedPig,
+  onSaveStats,
+}) => {
   const webViewRef = useRef<any>(null);
   const { width: winWidth, height: winHeight } = useWindowDimensions();
   const [contentHeight, setContentHeight] = useState<number>(winHeight - 65);
@@ -41,6 +55,17 @@ export const PigShooterGameView: React.FC<PigShooterGameViewProps> = ({ onBack }
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else if (data.type === 'HAPTIC_FAIL') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      } else if (data.type === 'SWITCH_GAME') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        if (onSwitchGame) onSwitchGame(data.game);
+      } else if (data.type === 'SAVE_STATS') {
+        if (onSaveStats) {
+          onSaveStats({
+            shooterMaxWave: data.wave,
+            savedBabies: data.savedBabies,
+            pigFoodBonus: data.foodEarned,
+          });
+        }
       }
     } catch (e) {
       // ignore
@@ -72,13 +97,55 @@ export const PigShooterGameView: React.FC<PigShooterGameViewProps> = ({ onBack }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0;
-  padding: 12px 14px 40px;
+  padding: 10px 14px 40px;
   background: var(--page);
   color: var(--ink);
   font: 600 14px/1.4 var(--f-body);
   user-select: none;
   -webkit-user-select: none;
 }
+
+/* Top game switch bar */
+.gbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.gseg {
+  display: flex;
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 2px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.gseg button {
+  font: 800 12px/1.2 var(--f-body);
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.gseg button.active {
+  background: var(--ink);
+  color: var(--page);
+}
+.gtix {
+  font: 800 12px/1.2 var(--f-body);
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 5px 10px;
+  box-shadow: 0 3px 0 var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .btn {
   font: 800 13px/1.2 var(--f-body);
   color: var(--ink);
@@ -94,7 +161,8 @@ body {
 }
 .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 .btn.gold { background: var(--gold); }
-.btn[aria-pressed="true"] { background: var(--ink); color: var(--screen); }
+.btn.small { padding: 4px 10px; font-size: 11px; }
+
 .card {
   background: var(--card);
   border: 2.5px solid var(--ink);
@@ -110,7 +178,7 @@ body {
 .flytop {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 .flytop .who {
   flex: 1;
@@ -128,31 +196,26 @@ body {
 }
 .fscore {
   flex: none;
-  min-width: 60px;
+  min-width: 54px;
   text-align: center;
-  padding: 4px 8px 6px;
+  padding: 4px 6px 5px;
   background: var(--card);
   border: 2.5px solid var(--ink);
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow: 0 3px 0 var(--ink);
 }
 .fscore b {
   display: block;
-  font: 800 20px/1.1 var(--f-display);
+  font: 800 18px/1.1 var(--f-display);
   font-variant-numeric: tabular-nums;
 }
-.camchips {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  overflow-x: auto;
-}
+
 .scene.apwrap {
   position: relative;
   margin-top: 10px;
   background: #BFE6F6;
   border: 3px solid var(--ink);
-  border-radius: 24px;
+  border-radius: 22px;
   box-shadow: 0 4px 0 var(--ink);
   overflow: hidden;
   touch-action: none;
@@ -171,13 +234,13 @@ body {
   position: absolute;
   left: 12px;
   right: 12px;
-  top: 10px;
+  top: 8px;
   text-align: center;
   pointer-events: none;
   opacity: 0;
   transform: translateY(-6px);
   transition: opacity .2s, transform .2s;
-  font: 800 13px/1.25 var(--f-body);
+  font: 800 12.5px/1.25 var(--f-body);
   padding: 6px 10px;
   background: var(--card);
   border: 2.5px solid var(--ink);
@@ -193,7 +256,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 10px;
-  background: rgba(43,33,24,.55);
+  background: rgba(43,33,24,.6);
   z-index: 3;
 }
 .flyover .fo {
@@ -208,7 +271,7 @@ body {
 .flyover .fo>b { font: 800 20px/1.1 var(--f-display); }
 .stars { display: flex; justify-content: center; gap: 8px; margin: 4px 0; }
 .stars i {
-  width: 26px; height: 26px; background: var(--line); border: 2.5px solid var(--ink);
+  width: 24px; height: 24px; background: var(--line); border: 2px solid var(--ink);
   clip-path: polygon(50% 0, 62% 36%, 100% 38%, 70% 60%, 80% 100%, 50% 76%, 20% 100%, 30% 60%, 0 38%, 38% 36%);
 }
 .stars i.on { background: var(--gold); }
@@ -219,20 +282,28 @@ body {
   flex-direction: column;
   gap: 2px;
 }
-.apinfo b { font: 800 14px/1.3 var(--f-body); }
-.apinfo span { font-size: 12px; color: var(--muted); font-weight: 700; }
+.apinfo b { font: 800 13.5px/1.3 var(--f-body); }
+.apinfo span { font-size: 11.5px; color: var(--muted); font-weight: 700; }
 .pact { display: flex; gap: 8px; justify-content: center; margin-top: 6px; }
 </style>
 </head>
 <body>
 
-  <div class="flytop">
-    <div class="who"><b>Heo bắn</b><span id="apLvT">Màn 1: Ổ chim nhỏ</span></div>
-    <div class="fscore"><span class="label">Chim</span><b id="apBirds">0</b></div>
-    <div class="fscore"><span class="label">Sao</span><b id="apStars">0</b></div>
+  <!-- Top switcher -->
+  <div class="gbar">
+    <div class="gseg">
+      <button type="button" id="tabFly">Heo bay</button>
+      <button type="button" id="tabShoot" class="active">Heo bắn</button>
+    </div>
+    <div class="gtix"><i>🎫</i><b id="uiTix">${tickets}</b> vé</div>
   </div>
 
-  <div class="camchips" id="apLv" role="group"></div>
+  <div class="flytop">
+    <div class="who"><b id="waveHeading">Heo Bắn · Vô Tận</b><span id="apLvT">Màn 1: Ổ chim nhỏ</span></div>
+    <div class="fscore"><span class="label">Màn</span><b id="apWave">1</b></div>
+    <div class="fscore"><span class="label">Chim</span><b id="apBirds">0</b></div>
+    <div class="fscore"><span class="label">Cứu</span><b id="apRescued">0</b></div>
+  </div>
 
   <div class="scene apwrap" id="apWrap">
     <canvas id="apCv" width="224" height="140"></canvas>
@@ -242,20 +313,23 @@ body {
 
   <div class="card apinfo">
     <b id="apPigs">Đang chờ ngắm bắn</b>
-    <span id="apBonus">Kéo heo trên ná về sau rồi thả để bắn phá khối!</span>
+    <span id="apBonus">Kéo heo trên ná về sau rồi thả để bắn phá khối! Chạm màn hình giữa không trung để kích hoạt kỹ năng.</span>
   </div>
 
 <script>
 (function(){
 'use strict';
 const $ = id => document.getElementById(id);
-function notify(type) {
+function notify(type, data) {
   if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type }));
+    window.ReactNativeWebView.postMessage(JSON.stringify(Object.assign({ type }, data || {})));
   }
 }
 
-const AW=224,AH=140,AG=118,SX=36,SY=92,MAXD=28,AGR=230;
+// Chuyển game
+$('tabFly').addEventListener('click', () => notify('SWITCH_GAME', { game: 'fly' }));
+
+const AW=224,AH=140,AG=118,SX=36,SY=92,MAXD=30,AGR=230;
 const BLK={
   wood:{c:'#C49A6E',d:'#8A5A34',hp:45,dn:1},
   stone:{c:'#B9B2A6',d:'#7A7468',hp:110,dn:1.7},
@@ -263,15 +337,29 @@ const BLK={
   cage:{c:'#CFCFD8',d:'#5A5A66',hp:42,dn:1.2}
 };
 
-const APL=[
- {n:'Ổ chim nhỏ',it:[['wood',150,96,6,22],['wood',166,96,6,22],['wood',146,91,30,5],['bird',153,77,14,14],['bird',178,104,14,14],['cage',192,98,22,20]]},
- {n:'Tháp gỗ đá',it:[['stone',140,98,8,20],['stone',170,98,8,20],['wood',136,93,46,5],['cage',144,73,22,20],['bird',167,79,14,14],['bird',186,104,14,14],['cage',200,98,22,20]]},
- {n:'Cổng thành chim',it:[['wood',124,90,6,28],['wood',146,90,6,28],['wood',168,90,6,28],['wood',120,85,34,5],['wood',164,85,22,5],['cage',126,65,22,20],['bird',152,104,14,14],['bird',172,71,14,14],['cage',196,98,22,20]]}
-];
-
 const ap={
-  lv:0,last:0,t:0,acc:0,blocks:[],queue:[],pig:null,drag:null,st:'aim',
-  parts:[],floats:[],kills:0,settle:0,over:null,cur:'pig',free:[],cages:0,rescued:0,winT:0,birds0:0
+  wave:1,
+  wind:0,
+  last:0,
+  t:0,
+  acc:0,
+  blocks:[],
+  queue:[],
+  pig:null,
+  drag:null,
+  st:'aim',
+  parts:[],
+  floats:[],
+  kills:0,
+  settle:0,
+  over:null,
+  cur:'pig',
+  free:[],
+  cages:0,
+  rescued:0,
+  totalRescued:0,
+  winT:0,
+  birds0:0
 };
 
 function apNote(t){
@@ -280,278 +368,439 @@ function apNote(t){
   setTimeout(()=>e.classList.remove('on'),2200);
 }
 
-function apLoad(i){
-  ap.lv=i;const L=APL[i];
-  ap.blocks=L.it.map(([k,x,y,w,h])=>{
-    const o={k,x,y,w,h,vx:0,vy:0,fl:0};
-    if(k==='bird'){o.hp=1;o.m=5}
-    else if(k==='cage'){o.hp=BLK.cage.hp;o.m=Math.max(1,w*h*BLK.cage.dn/25)}
-    else{o.hp=BLK[k].hp;o.m=Math.max(1,w*h*BLK[k].dn/25)}
+// Sinh màn chơi theo thuật toán Procedural Generation
+function generateWave(wave) {
+  const titles = [
+    'Ổ chim nhỏ', 'Tháp gỗ đá', 'Cổng thành chim', 'Pháo đài kiên cố',
+    'Tháp đôi hiểm hóc', 'Lồng sắt ngục tối', 'Vương quốc chim bão'
+  ];
+  const title = titles[(wave - 1) % titles.length] + ' (Màn ' + wave + ')';
+  const it = [];
+  
+  // Tính toán gió biến thiên
+  ap.wind = Math.round((Math.random() - 0.48) * Math.min(80, 20 + wave * 6));
+
+  const stoneRatio = Math.min(0.65, 0.2 + wave * 0.08);
+  const mainMaterial = () => (Math.random() < stoneRatio ? 'stone' : 'wood');
+
+  // Tháp 1
+  const t1x = 135;
+  const h1 = 20 + Math.min(18, wave * 3);
+  it.push([mainMaterial(), t1x, AG - h1, 7, h1]);
+  it.push([mainMaterial(), t1x + 22, AG - h1, 7, h1]);
+  it.push(['wood', t1x - 3, AG - h1 - 5, 34, 5]);
+  it.push(['bird', t1x + 8, AG - h1 - 18, 14, 14]);
+
+  // Lồng heo con
+  it.push(['cage', t1x + 28, AG - 20, 20, 20]);
+
+  // Tháp 2 (xuất hiện từ màn 2 trở lên)
+  if (wave >= 2) {
+    const t2x = 180;
+    const h2 = 24 + Math.min(22, wave * 2);
+    it.push([mainMaterial(), t2x, AG - h2, 7, h2]);
+    it.push(['glass', t2x - 4, AG - h2 - 5, 26, 5]);
+    it.push(['bird', t2x + 2, AG - h2 - 18, 14, 14]);
+    if (wave >= 4) {
+      it.push(['cage', t2x + 14, AG - 20, 20, 20]);
+    }
+  }
+
+  // Chim lính canh gác mặt đất
+  if (wave >= 3) {
+    it.push(['bird', 115, AG - 14, 14, 14]);
+  }
+
+  return { n: title, it };
+}
+
+function apLoad(w){
+  ap.wave = w;
+  const L = generateWave(w);
+  $('apLvT').textContent = L.n;
+  $('apWave').textContent = String(w);
+
+  ap.blocks = L.it.map(([k,x,y,w,h])=>{
+    const o = {k,x,y,w,h,vx:0,vy:0,fl:0};
+    if(k==='bird'){ o.hp=1; o.m=5; }
+    else if(k==='cage'){ o.hp=BLK.cage.hp; o.m=Math.max(1,w*h*BLK.cage.dn/25); }
+    else{ o.hp=BLK[k].hp; o.m=Math.max(1,w*h*BLK[k].dn/25); }
     return o;
   });
-  ap.queue=['pig','pig','pig','pig'];
-  ap.free=[];ap.cages=L.it.filter(a=>a[0]==='cage').length;ap.rescued=0;ap.winT=0;
-  ap.birds0=L.it.filter(a=>a[0]==='bird').length;
-  ap.pig=null;ap.drag=null;ap.parts=[];ap.floats=[];ap.kills=0;ap.over=null;ap.settle=0;ap.acc=0;
+
+  // Hàng đợi đạn heo: 4-5 heo
+  let shots = ['pig', 'pig', 'pig', 'pig'];
+  if (ap.totalRescued >= 1) shots.push('wing'); // Mở khóa Heo Cánh
+  if (ap.totalRescued >= 3) shots.push('coin'); // Mở khóa Heo Bom Cám
+  ap.queue = shots;
+
+  ap.free = [];
+  ap.cages = L.it.filter(a=>a[0]==='cage').length;
+  ap.rescued = 0;
+  ap.winT = 0;
+  ap.birds0 = L.it.filter(a=>a[0]==='bird').length;
+  ap.pig = null;
+  ap.drag = null;
+  ap.parts = [];
+  ap.floats = [];
+  ap.kills = 0;
+  ap.over = null;
+  ap.settle = 0;
+  ap.acc = 0;
+
   apNextPig();
+  apNote('Màn ' + w + ': Gió ' + (ap.wind >= 0 ? '+' : '') + ap.wind + ' px/s');
 }
 
 function apNextPig(){
-  ap.cur=ap.queue.shift()||null;
-  ap.st=ap.cur?'aim':'end';
-  ap.settle=0;
+  ap.cur = ap.queue.shift() || null;
+  ap.st = ap.cur ? 'aim' : 'end';
+  ap.settle = 0;
 }
 
 function apKill(b){
-  const idx=ap.blocks.indexOf(b);if(idx<0)return;
-  ap.blocks.splice(idx,1);
+  const idx = ap.blocks.indexOf(b); if(idx < 0) return;
+  ap.blocks.splice(idx, 1);
   if(b.k==='bird'){
-    ap.kills++;notify('HAPTIC_SUCCESS');
-    ap.floats.push({x:b.x+7,y:b.y,txt:'+1 chim',col:'#C98A12'});
+    ap.kills++;
+    notify('HAPTIC_SUCCESS');
+    ap.floats.push({x:b.x+7, y:b.y, txt:'+1 Chim', col:'#C98A12'});
   } else if(b.k==='cage'){
-    ap.rescued++;notify('HAPTIC_SUCCESS');
-    ap.floats.push({x:b.x+8,y:b.y-4,txt:'+Cứu Heo!',col:'#3E7A3A'});
+    ap.rescued++;
+    ap.totalRescued++;
+    $('apRescued').textContent = String(ap.totalRescued);
+    notify('HAPTIC_SUCCESS');
+    ap.free.push({x:b.x+10, y:b.y+10, vx:-30, vy:-35, t:0});
+    ap.floats.push({x:b.x+8, y:b.y-4, txt:'+Cứu Heo!', col:'#3E7A3A'});
   }
 }
 
-function apImpact(b,spd){
-  if(spd<35)return;
-  b.fl=.15;
-  if(b.k==='bird'){if(spd>32)apKill(b)}
-  else{b.hp-=(spd-35)*1.1;if(b.hp<=0)apKill(b)}
+function apImpact(b, spd){
+  if(spd < 32) return;
+  b.fl = .15;
+  if(b.k==='bird'){ if(spd > 28) apKill(b); }
+  else {
+    b.hp -= (spd - 32) * 1.1;
+    if(b.hp <= 0) apKill(b);
+  }
+}
+
+// Kỹ năng đặc biệt khi chạm vào giữa trời
+function apTriggerAbility() {
+  const p = ap.pig;
+  if (!p || p.used) return;
+  p.used = true;
+  if (p.type === 'wing') {
+    p.vx = p.vx * 1.6;
+    p.vy = p.vy * 0.4;
+    notify('HAPTIC_LIGHT');
+    ap.floats.push({x: p.x, y: p.y - 10, txt: 'TĂNG TỐC!', col: '#F4B93B'});
+  } else if (p.type === 'coin') {
+    notify('HAPTIC_SUCCESS');
+    ap.floats.push({x: p.x, y: p.y - 10, txt: 'BÙM!', col: '#E0452B'});
+    // Sóng nổ xung quanh
+    ap.blocks.slice().forEach(b => {
+      const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+      const d = Math.hypot(cx - p.x, cy - p.y);
+      if (d < 36) {
+        b.hp -= 65 * (1 - d / 36);
+        b.vx += (cx - p.x) * 2;
+        b.vy -= 40;
+        if (b.hp <= 0) apKill(b);
+      }
+    });
+    ap.pig = null;
+    apNextPig();
+  }
 }
 
 function apStep(dt){
-  const bl=ap.blocks;
+  const bl = ap.blocks;
   bl.forEach(b=>{
-    b.vy+=AGR*dt;b.y+=b.vy*dt;b.x+=b.vx*dt;b.vx*=.99;if(b.fl>0)b.fl-=dt;
-    if(b.y+b.h>AG){const s=Math.abs(b.vy);b.y=AG-b.h;b.vy=0;b.vx*=.9;apImpact(b,s)}
+    b.vy += AGR * dt;
+    b.y += b.vy * dt;
+    b.x += b.vx * dt;
+    b.vx *= .985;
+    if(b.fl > 0) b.fl -= dt;
+    if(b.y + b.h > AG){
+      const s = Math.abs(b.vy);
+      b.y = AG - b.h;
+      b.vy = 0;
+      b.vx *= .9;
+      apImpact(b, s);
+    }
   });
 
-  const p=ap.pig;
+  // Heo con được giải cứu chạy thoát
+  ap.free.forEach(f => {
+    f.t += dt;
+    f.vy += AGR * dt;
+    f.y += f.vy * dt;
+    f.x += f.vx * dt;
+    if (f.y > AG - 10) { f.y = AG - 10; f.vy = -30; }
+  });
+
+  const p = ap.pig;
   if(p){
-    p.t+=dt;p.vy+=AGR*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
-    const R=7;
-    if(p.y+R>AG){p.y=AG-R;p.vy=-p.vy*.3;p.vx*=.82;if(Math.abs(p.vy)<14)p.vy=0}
+    p.t += dt;
+    // Tác động của gió
+    p.vx += ap.wind * dt;
+    p.vy += AGR * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    const R = 7;
+    if(p.y + R > AG){
+      p.y = AG - R;
+      p.vy = -p.vy * .3;
+      p.vx *= .82;
+      if(Math.abs(p.vy) < 14) p.vy = 0;
+    }
     for(const b of ap.blocks.slice()){
-      const cx=Math.max(b.x,Math.min(p.x,b.x+b.w)),cy=Math.max(b.y,Math.min(p.y,b.y+b.h)),dx=p.x-cx,dy=p.y-cy,d=Math.hypot(dx,dy);
-      if(d>=R)continue;
-      const nx=d>0?dx/d:0,ny=d>0?dy/d:-1,vn=-(p.vx*nx+p.vy*ny);
-      p.x+=nx*(R-d);p.y+=ny*(R-d);
-      if(vn<=0)continue;
-      if(b.k==='bird'){if(vn>18){apKill(b);p.vx*=.8;continue}}
-      const j=1.3*vn*8*b.m/(8+b.m);
-      p.vx+=nx*j/8;p.vy+=ny*j/8;b.vx-=nx*j/b.m;b.vy-=ny*j/b.m*.4;
-      apImpact(b,vn);
+      const cx = Math.max(b.x, Math.min(p.x, b.x + b.w));
+      const cy = Math.max(b.y, Math.min(p.y, b.y + b.h));
+      const dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy);
+      if(d >= R) continue;
+      const nx = d > 0 ? dx / d : 0, ny = d > 0 ? dy / d : -1;
+      const vn = -(p.vx * nx + p.vy * ny);
+      p.x += nx * (R - d); p.y += ny * (R - d);
+      if(vn <= 0) continue;
+      if(b.k === 'bird'){
+        if(vn > 18){ apKill(b); p.vx *= .8; continue; }
+      }
+      const j = 1.3 * vn * 8 * b.m / (8 + b.m);
+      p.vx += nx * j / 8; p.vy += ny * j / 8;
+      b.vx -= nx * j / b.m; b.vy -= ny * j / b.m * .4;
+      apImpact(b, vn);
     }
-    if(p.x>AW+20||p.x<-20||(Math.hypot(p.vx,p.vy)<8&&p.y>=AG-R-1)){
-      ap.settle+=dt;if(ap.settle>.8){ap.pig=null;apNextPig()}
+    if(p.x > AW + 20 || p.x < -20 || (Math.hypot(p.vx, p.vy) < 8 && p.y >= AG - R - 1)){
+      ap.settle += dt;
+      if(ap.settle > .75){ ap.pig = null; apNextPig(); }
     }
   }
 
-  const birdsLeft=ap.blocks.filter(b=>b.k==='bird').length;
-  if(birdsLeft===0&&!ap.over){
-    ap.winT+=dt;
-    if(ap.winT>.8){
-      const stars=ap.queue.length>=2?3:ap.queue.length===1?2:1;
-      apOverShow(true,stars);
+  const birdsLeft = ap.blocks.filter(b => b.k === 'bird').length;
+  if(birdsLeft === 0 && !ap.over){
+    ap.winT += dt;
+    if(ap.winT > .8){
+      const stars = ap.queue.length >= 2 ? 3 : ap.queue.length === 1 ? 2 : 1;
+      apOverShow(true, stars);
     }
-  } else if(!ap.pig&&!ap.cur&&birdsLeft>0&&!ap.over){
-    apOverShow(false,0);
+  } else if(!ap.pig && !ap.cur && birdsLeft > 0 && !ap.over){
+    apOverShow(false, 0);
   }
 
-  ap.floats.forEach(f=>{f.y-=14*dt});
+  ap.floats.forEach(f => { f.y -= 14 * dt; });
 }
 
-const apC=$('apCv'),apX=apC.getContext('2d');
+const apC = $('apCv'), apX = apC.getContext('2d');
 
 function apDraw(){
-  const c=apX;c.imageSmoothingEnabled=false;
-  c.fillStyle='#BFE6F6';c.fillRect(0,0,AW,AH);
-  c.fillStyle='#86B866';c.fillRect(0,AG,AW,AH-AG);
-  c.fillStyle='#2B2118';c.fillRect(0,AG,AW,2);
+  const c = apX; c.imageSmoothingEnabled = false;
+  c.fillStyle = '#BFE6F6'; c.fillRect(0, 0, AW, AH);
 
-  /* Nỏ bắn */
-  c.fillStyle='#6B4426';c.fillRect(SX-2,SY,4,AG-SY);
-  c.fillRect(SX-6,SY-10,4,12);c.fillRect(SX+2,SY-10,4,12);
+  // Mây trôi
+  c.fillStyle = '#FFFFFF';
+  c.fillRect(20, 16, 26, 8); c.fillRect(26, 12, 14, 6);
+  c.fillRect(140, 22, 32, 9); c.fillRect(150, 18, 16, 6);
+
+  // Đất & cỏ
+  c.fillStyle = '#86B866'; c.fillRect(0, AG, AW, AH - AG);
+  c.fillStyle = '#2B2118'; c.fillRect(0, AG, AW, 2);
+
+  // Hiển thị gió
+  c.font = 'bold 8.5px sans-serif';
+  c.fillStyle = '#2B2118';
+  const windDir = ap.wind > 0 ? '➡ Gió: +' + ap.wind : ap.wind < 0 ? '⬅ Gió: ' + ap.wind : 'Gió lặng';
+  c.fillText(windDir + ' px/s', AW - 72, 14);
+
+  /* Bệ ná bắn */
+  c.fillStyle = '#6B4426'; c.fillRect(SX - 2, SY, 4, AG - SY);
+  c.fillRect(SX - 6, SY - 10, 4, 12); c.fillRect(SX + 2, SY - 10, 4, 12);
 
   /* Khối & chim */
-  ap.blocks.forEach(b=>{
-    if(b.k==='bird'){
-      c.fillStyle='#E0452B';c.beginPath();c.arc(b.x+7,b.y+7,6,0,6.28);c.fill();
-      c.fillStyle='#2B2118';c.stroke();
-      c.fillStyle='#F4B93B';c.fillRect(b.x+6,b.y+6,4,2);
-    } else if(b.k==='cage'){
-      c.fillStyle='#CFCFD8';c.fillRect(b.x,b.y,b.w,b.h);
-      c.strokeStyle='#2B2118';c.strokeRect(b.x,b.y,b.w,b.h);
-      for(let x=b.x+4;x<b.x+b.w;x+=5){c.strokeRect(x,b.y,1,b.h)}
+  ap.blocks.forEach(b => {
+    if(b.k === 'bird'){
+      c.fillStyle = '#E0452B'; c.beginPath(); c.arc(b.x + 7, b.y + 7, 6, 0, 6.28); c.fill();
+      c.strokeStyle = '#2B2118'; c.stroke();
+      c.fillStyle = '#F4B93B'; c.fillRect(b.x + 6, b.y + 6, 4, 2);
+    } else if(b.k === 'cage'){
+      c.fillStyle = '#CFCFD8'; c.fillRect(b.x, b.y, b.w, b.h);
+      c.strokeStyle = '#2B2118'; c.strokeRect(b.x, b.y, b.w, b.h);
+      for(let x = b.x + 4; x < b.x + b.w; x += 5){ c.strokeRect(x, b.y, 1, b.h); }
+      // Heo con bên trong lồng
+      c.fillStyle = '#F9B8C4'; c.fillRect(b.x + 5, b.y + b.h - 9, 8, 7);
     } else {
-      c.fillStyle=BLK[b.k].c;c.fillRect(b.x,b.y,b.w,b.h);
-      c.strokeStyle='#2B2118';c.strokeRect(b.x,b.y,b.w,b.h);
+      c.fillStyle = BLK[b.k].c; c.fillRect(b.x, b.y, b.w, b.h);
+      c.strokeStyle = '#2B2118'; c.strokeRect(b.x, b.y, b.w, b.h);
     }
+  });
+
+  // Heo con chạy thoát
+  ap.free.forEach(f => {
+    c.fillStyle = '#F9B8C4'; c.beginPath(); c.arc(f.x, f.y, 4.5, 0, 6.28); c.fill();
+    c.strokeStyle = '#2B2118'; c.stroke();
   });
 
   /* Dây ná & heo kéo */
-  const drag=ap.drag;
-  const hx=drag?drag.x:SX,hy=drag?drag.y:SY-4;
-  c.strokeStyle='#2B2118';c.lineWidth=2;
-  c.beginPath();c.moveTo(SX-4,SY-6);c.lineTo(hx,hy);c.lineTo(SX+4,SY-6);c.stroke();
-  c.lineWidth=1;
+  const drag = ap.drag;
+  const hx = drag ? drag.x : SX, hy = drag ? drag.y : SY - 4;
+  c.strokeStyle = '#2B2118'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(SX - 4, SY - 6); c.lineTo(hx, hy); c.lineTo(SX + 4, SY - 6); c.stroke();
+  c.lineWidth = 1;
 
-  if(ap.st==='aim'&&ap.cur){
-    c.fillStyle='#F9B8C4';c.beginPath();c.arc(hx,hy,6,0,6.28);c.fill();
-    c.fillStyle='#2B2118';c.stroke();
+  if(ap.st === 'aim' && ap.cur){
+    const col = ap.cur === 'wing' ? '#F4B93B' : ap.cur === 'coin' ? '#E0452B' : '#F9B8C4';
+    c.fillStyle = col; c.beginPath(); c.arc(hx, hy, 6, 0, 6.28); c.fill();
+    c.strokeStyle = '#2B2118'; c.stroke();
   }
 
-  const p=ap.pig;
+  const p = ap.pig;
   if(p){
-    c.fillStyle='#F9B8C4';c.beginPath();c.arc(p.x,p.y,6.5,0,6.28);c.fill();
-    c.fillStyle='#2B2118';c.stroke();
+    const col = p.type === 'wing' ? '#F4B93B' : p.type === 'coin' ? '#E0452B' : '#F9B8C4';
+    c.fillStyle = col; c.beginPath(); c.arc(p.x, p.y, 6.5, 0, 6.28); c.fill();
+    c.strokeStyle = '#2B2118'; c.stroke();
   }
 
-  ap.floats.forEach(f=>{
-    c.font='bold 9px sans-serif';c.fillStyle=f.col;
-    c.fillText(f.txt,Math.round(f.x),Math.round(f.y));
+  ap.floats.forEach(f => {
+    c.font = 'bold 9px sans-serif'; c.fillStyle = f.col;
+    c.fillText(f.txt, Math.round(f.x), Math.round(f.y));
   });
 }
 
 function apUI(){
-  const birdsLeft=ap.blocks.filter(b=>b.k==='bird').length;
-  $('apBirds').textContent=String(birdsLeft);
-  $('apStars').textContent=String(ap.kills);
-  $('apPigs').textContent='Đạn heo còn: '+(ap.queue.length+(ap.cur?1:0));
+  const birdsLeft = ap.blocks.filter(b => b.k === 'bird').length;
+  $('apBirds').textContent = String(birdsLeft);
+  $('apRescued').textContent = String(ap.totalRescued);
+  $('apPigs').textContent = 'Đạn heo còn: ' + (ap.queue.length + (ap.cur ? 1 : 0)) + (ap.cur ? ' (Loại: ' + ap.cur + ')' : '');
 }
 
-function apOverShow(win,stars){
-  ap.over={win,stars};
-  notify(win?'HAPTIC_SUCCESS':'HAPTIC_FAIL');
-  const o=$('apOver');o.hidden=false;
-  o.innerHTML='<div class="card fo"><b>'+(win?'Thắng rồi!':'Hết đạn rồi!')+'</b>'+
-  '<div class="stars">'+[1,2,3].map(i=>'<i class="'+(i<=stars?'on':'')+'"></i>').join('')+'</div>'+
-  '<p>'+(win?'Giải cứu thành công đàn heo con!':'Thử lại để bắn chuẩn xác hơn nhé!')+'</p>'+
-  '<div class="pact"><button class="btn" type="button" id="apRetry">Chơi lại</button>'+
-  (win&&ap.lv<2?'<button class="btn gold" type="button" id="apNext">Màn kế</button>':'')+
-  '</div></div>';
-  $('apRetry').addEventListener('click',()=>{o.hidden=true;apLoad(ap.lv)});
-  if($('apNext'))$('apNext').addEventListener('click',()=>{o.hidden=true;apLoad(ap.lv+1);apBuildChips()});
+function apOverShow(win, stars){
+  ap.over = { win, stars };
+  notify(win ? 'HAPTIC_SUCCESS' : 'HAPTIC_FAIL');
+  if (win) {
+    notify('SAVE_STATS', { wave: ap.wave + 1, savedBabies: ap.totalRescued, foodEarned: 3 });
+  }
+  const o = $('apOver'); o.hidden = false;
+  o.innerHTML = '<div class="card fo"><b>' + (win ? 'VƯỢT MÀN ' + ap.wave + ' THÀNH CÔNG!' : 'HẾT ĐẠN RỒI!') + '</b>' +
+    '<div class="stars">' + [1, 2, 3].map(i => '<i class="' + (i <= stars ? 'on' : '') + '"></i>').join('') + '</div>' +
+    '<p>' + (win ? 'Giải cứu thêm đàn heo con (+3 thức ăn)!' : 'Gió đổi chiều hoặc căn góc chưa chuẩn. Thử lại nhé!') + '</p>' +
+    '<div class="pact"><button class="btn gold" id="apBtnNext">' + (win ? 'Tiếp Màn ' + (ap.wave + 1) : 'Chơi Lại Màn Này') + '</button></div></div>';
+
+  $('apBtnNext').onclick = () => {
+    o.hidden = true;
+    if (win) apLoad(ap.wave + 1);
+    else apLoad(ap.wave);
+  };
 }
 
-function apBuildChips(){
-  const el=$('apLv');el.innerHTML='';
-  APL.forEach((L,i)=>{
-    const b=document.createElement('button');b.className='btn small';
-    b.textContent='Màn '+(i+1);b.setAttribute('aria-pressed',String(i===ap.lv));
-    b.onclick=()=>{apLoad(i);apBuildChips();$('apLvT').textContent='Màn '+(i+1)+': '+L.n};
-    el.appendChild(b);
-  });
+let lastT = performance.now();
+function apLoop(now){
+  const dt = Math.min(.04, (now - lastT) / 1000);
+  lastT = now;
+  apStep(dt);
+  apDraw();
+  apUI();
+  requestAnimationFrame(apLoop);
 }
 
-function toLocal(e){
-  const r=apC.getBoundingClientRect();
-  const scaleX=AW/r.width,scaleY=AH/r.height;
-  return{x:(e.clientX-r.left)*scaleX,y:(e.clientY-r.top)*scaleY};
+// Bắt sự kiện kéo ná cảm ứng
+function getPos(e){
+  const r = apC.getBoundingClientRect();
+  const t = (e.touches && e.touches[0]) || e;
+  return {
+    x: (t.clientX - r.left) * (AW / r.width),
+    y: (t.clientY - r.top) * (AH / r.height)
+  };
 }
 
-apC.addEventListener('pointerdown',e=>{
-  if(ap.st!=='aim'||!ap.cur)return;
-  const p=toLocal(e);
-  if(Math.hypot(p.x-SX,p.y-SY)<24){
-    ap.drag={x:p.x,y:p.y};
+apC.addEventListener('pointerdown', e => {
+  if(ap.over) return;
+  // Nếu đang bay -> bấm để kích hoạt kỹ năng đặc biệt
+  if(ap.pig){
+    apTriggerAbility();
+    return;
+  }
+  if(ap.st !== 'aim' || !ap.cur) return;
+  const p = getPos(e);
+  if(Math.hypot(p.x - SX, p.y - SY) < 26){
+    ap.drag = { x: SX, y: SY };
     notify('HAPTIC_LIGHT');
   }
 });
 
-window.addEventListener('pointermove',e=>{
-  if(!ap.drag)return;
-  const p=toLocal(e);
-  const dx=p.x-SX,dy=p.y-SY,d=Math.hypot(dx,dy);
-  if(d>MAXD){ap.drag={x:SX+dx/d*MAXD,y:SY+dy/d*MAXD}}else{ap.drag={x:p.x,y:p.y}}
-});
-
-window.addEventListener('pointerup',()=>{
-  if(!ap.drag)return;
-  const d=ap.drag;ap.drag=null;
-  const dx=SX-d.x,dy=SY-d.y,spd=Math.hypot(dx,dy)*8.5;
-  if(spd>30){
-    ap.pig={x:d.x,y:d.y,vx:dx/Math.hypot(dx,dy)*spd,vy:dy/Math.hypot(dx,dy)*spd,t:0};
-    ap.st='flying';ap.cur=null;
-    notify('HAPTIC_LIGHT');
+window.addEventListener('pointermove', e => {
+  if(!ap.drag) return;
+  const p = getPos(e);
+  const dx = p.x - SX, dy = p.y - SY;
+  const d = Math.hypot(dx, dy);
+  if(d > MAXD){
+    ap.drag.x = SX + (dx / d) * MAXD;
+    ap.drag.y = SY + (dy / d) * MAXD;
+  } else {
+    ap.drag.x = p.x;
+    ap.drag.y = p.y;
   }
 });
 
-let lastT=performance.now();
-function loop(now){
-  const dt=Math.min(.05,(now-lastT)/1000);lastT=now;
-  apStep(dt);apDraw();apUI();
-  requestAnimationFrame(loop);
-}
+window.addEventListener('pointerup', () => {
+  if(!ap.drag) return;
+  const dx = ap.drag.x - SX, dy = ap.drag.y - SY;
+  ap.drag = null;
+  if(Math.hypot(dx, dy) > 6){
+    const f = 5.8;
+    ap.pig = {
+      x: SX, y: SY - 4,
+      vx: -dx * f,
+      vy: -dy * f,
+      type: ap.cur,
+      t: 0,
+      used: false
+    };
+    notify('HAPTIC_LIGHT');
+    ap.st = 'fly';
+  }
+});
 
-apBuildChips();
-apLoad(0);
-requestAnimationFrame(loop);
+// Khởi chạy
+apLoad(1);
+requestAnimationFrame(apLoop);
+
 })();
 </script>
 </body>
 </html>
-  `;
+`;
 
-  const memoizedSource = useMemo(() => ({ html: htmlContent, baseUrl: '' }), []);
+  const memoizedSource = useMemo(() => ({ html: htmlContent, baseUrl: '' }), [htmlContent]);
 
   return (
     <View style={styles.container}>
-      {/* HEADER QUAY LẠI NEO-BRUTALIST */}
+      {/* Top Header bar */}
       <View style={styles.topHeader}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-          activeOpacity={0.8}
-        >
-          <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
-          <Text style={styles.backButtonText}>‹ Giải trí</Text>
+        <TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={0.8}>
+          <ArrowLeft size={16} color="#2B2118" strokeWidth={2.8} />
+          <Text style={styles.backButtonText}>‹ Quay lại Hub</Text>
         </TouchableOpacity>
 
-        <View style={styles.headerTitleWrap}>
-          <Text style={styles.headerTitle}>🎯 Heo Bắn</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.iconAction}
-          onPress={handleReload}
-          activeOpacity={0.8}
-        >
-          <RefreshCw size={18} color="#2B2118" strokeWidth={2.4} />
+        <TouchableOpacity style={styles.reloadButton} onPress={handleReload} activeOpacity={0.8}>
+          <RefreshCw size={15} color="#2B2118" strokeWidth={2.6} />
         </TouchableOpacity>
       </View>
 
-      {/* WEBVIEW CANVAS SIÊU MƯỢT 60FPS (EXPLICIT DIMENSIONS + BASEURL) */}
-      <View
-        style={styles.webContainer}
-        onLayout={(e) => {
-          const h = e.nativeEvent.layout.height;
-          if (h > 50) setContentHeight(h);
-        }}
-      >
-        {Platform.OS === 'web' ? (
-          <iframe
-            srcDoc={htmlContent}
-            style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#F6EEDC' } as any}
-          />
-        ) : (
-          <SafeWebView
-            ref={webViewRef}
-            originWhitelist={['*']}
-            source={memoizedSource}
-            containerStyle={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
-            style={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
-            scrollEnabled={false}
-            scalesPageToFit={false}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            automaticallyAdjustContentInsets={false}
-            contentInsetAdjustmentBehavior="never"
-            onMessage={handleMessage}
-          />
-        )}
+      {/* Webview Game Canvas */}
+      <View style={[styles.webViewWrapper, { height: contentHeight }]}>
+        <SafeWebView
+          ref={webViewRef}
+          source={memoizedSource}
+          containerStyle={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
+          style={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
+          scrollEnabled={false}
+          bounces={false}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          originWhitelist={['*']}
+          onMessage={handleMessage}
+        />
       </View>
     </View>
   );
@@ -564,12 +813,12 @@ const styles = StyleSheet.create({
   },
   topHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 14,
+    alignItems: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: '#F6EEDC',
-    borderBottomWidth: 2.5,
+    borderBottomWidth: 2,
     borderBottomColor: '#2B2118',
   },
   backButton: {
@@ -577,7 +826,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: '#FFFBF1',
-    borderWidth: 2.5,
+    borderWidth: 2,
     borderColor: '#2B2118',
     borderRadius: 999,
     paddingHorizontal: 12,
@@ -591,40 +840,27 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontFamily: 'Nunito',
     fontWeight: '800',
-    fontSize: 13,
+    fontSize: 12,
     color: '#2B2118',
   },
-  headerTitleWrap: {
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
-    fontSize: 18,
-    color: '#2B2118',
-  },
-  iconAction: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  reloadButton: {
     backgroundColor: '#FFFBF1',
-    borderWidth: 2.5,
+    borderWidth: 2,
     borderColor: '#2B2118',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 999,
+    padding: 7,
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 2,
   },
-  webContainer: {
+  webViewWrapper: {
     flex: 1,
-    width: '100%',
     backgroundColor: '#F6EEDC',
-    overflow: 'hidden',
   },
   webView: {
+    flex: 1,
     backgroundColor: '#F6EEDC',
   },
 });

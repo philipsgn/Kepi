@@ -853,6 +853,27 @@
          - Khi không active: Icon và Chữ mang màu Nâu Mực `#2B2118` (opacity 0.72).
       4. **Chuẩn Hóa Tab 3 Thành "Giải Trí":** Tab 3 chính thức đóng vai trò Trung Tâm Giải Trí & Khám Phá Heo Con (PIGFLY HUB), mở màn hình Dashboard 4 thẻ lớn chuyển tiếp mượt mà vào Chat AI Coach / Squad, Game Heo Bay, Game Heo Bắn và Bản Đồ Chi Tiêu. Nút quay lại đổi thành "‹ Giải trí".
 
+  - **Quyết định 142 (20/11/2026): Nâng Cấp Toàn Diện Tab Giải Trí Chuẩn HTML Prototype 20/11 (PIGFLY HUB, Endless Waves Heo Bắn, Dynamic Obstacles Heo Bay, Retention Loop & Mini-Pet System):**
+    - *Bối Cảnh & Nguyên Nhân:* Người dùng yêu cầu Tab Giải trí phải bám sát 1:1 theo bản prototype mới nhất ngày 20/11 (`prototype/Ví Heo Con-20-11.html`). Đồng thời, các mini-game phải có độ khó cao, có chiều sâu cơ chế và gắn kết mật thiết với kỷ luật tài chính hàng ngày để tạo sự kích thích, níu chân người dùng quay lại app trong thời gian dài mà không vi phạm quy tắc Zero-FEP (Quyết định 112 & 115).
+    - *Giải Pháp Kỹ Thuật:*
+      1. **PIGFLY HUB (`v-fun`):**
+         - Header badge neo-pill: `● PIGFLY HUB` + Streak `X ngày`.
+         - Mascot banner: Avatar pixel 16×16 vẽ trực tiếp khuôn mặt Heo Con cử động mắt/mũi + lời chào *"Trung Tâm Heo Con — Chào [Tên]! Khám phá giải trí & bản đồ khu phố"*.
+         - Status Chips: Vé chơi `🎫 X vé` + Thức ăn `🌽 X thức ăn`.
+         - 4 Thẻ Trung Tâm chuẩn Neo-Brutalist (viền 3px mực, bóng cứng 4px 0-blur): Trò Chuyện & Bạn Bè (AI Coach/Squad), Game Heo Bay (Flappy Pig), Game Heo Bắn (Angry Pig), Bản Đồ Chi Tiêu (GPS Pixel & Real Map).
+      2. **Game Heo Bắn (Angry Pig) — Endless Waves & Gió Biến Thiên:**
+         - Cơ chế Endless Waves (Màn vô tận): Thuật toán Procedural Generation tự động sinh tháp, tăng tỉ lệ đá kiên cố HP 110, kính dễ vỡ, lồng sắt và chim lính bảo vệ.
+         - Vector gió biến thiên (Dynamic Wind): Gió đổi hướng và cường độ ngẫu nhiên qua các đợt gió, buộc người chơi tính toán quỹ đạo bù trừ.
+         - Cứu Heo Con trong lồng sắt: Bắn vỡ lồng giải cứu heo con (`ap.free`), tích lũy mở khóa Heo Cánh (`wing` lao nhanh x1.6) và Heo Bom Cám (`coin` kích nổ diện rộng).
+         - Liên kết ngân sách: Tiêu $< 50\%$ hạn mức tặng $+1$ lượt bắn; chi lố $> 100\%$ phạt $-1$ lượt; heo đói giảm lực bắn.
+      3. **Game Heo Bay (Flappy Pig) — Chướng Ngại Vật Động:**
+         - Gió lốc (Whirlwinds) đẩy trôi bất ngờ; Chim đối thủ bay ngược chiều; Thời tiết mưa bão làm giảm tầm nhìn.
+         - Thanh đói (Hunger Bar) tiêu hao năng lượng đòi hỏi người chơi ăn thức ăn giữa các khe chướng ngại vật; tích lũy thức ăn đem về cho Heo cưng.
+         - Thanh chuyển nhanh `[Heo bay] [Heo bắn]` trên đỉnh màn hình cho phép chuyển đổi 1 chạm tức thì giữa 2 trò chơi.
+      4. **Vòng Lặp Giữ Chân Người Dùng & Chăm Sóc Heo Cưng (Retention Loop):**
+         - Tặng 3 vé chơi/ngày khi mở app + 1 vé mỗi khi ghi chép/chụp ảnh chi tiêu ở Tab Chụp.
+         - Thẻ "Chăm sóc Heo cưng": Thanh no/đói (0-100%) quyết định trạng thái thể lực của Heo trong game.
+
 
 
 

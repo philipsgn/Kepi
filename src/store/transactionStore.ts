@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Transaction, CalendarDaySummary, TransactionType, PaymentMethod, TransactionSource, MediaType } from '../types/database';
 import { useBudgetStore } from './budgetStore';
+import { useGamificationStore } from './gamificationStore';
 import { syncBudgetToLockScreen } from '../services/lockScreenService';
 
 const STORAGE_KEY = 'vi_locket_transactions_data';
@@ -120,6 +121,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       // Tự động tính toán lại ngân sách trực tiếp từ mảng giao dịch
       if (txStatus === 'CONFIRMED') {
         useBudgetStore.getState().recalculateFromTransactions(updated);
+        useGamificationStore.getState().addGameTickets(1);
         syncBudgetToLockScreen().catch(() => {});
       }
 
@@ -144,6 +146,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
 
       // SINGLE SOURCE OF TRUTH: Tự động đồng bộ toàn bộ ngân sách và số dư
       useBudgetStore.getState().recalculateFromTransactions(updated);
+      useGamificationStore.getState().addGameTickets(1);
       syncBudgetToLockScreen().catch(() => {});
     },
 
