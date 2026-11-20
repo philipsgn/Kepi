@@ -65,6 +65,8 @@ export const PigFlightGameView: React.FC<PigFlightGameViewProps> = ({
             foodEarned: data.foodEarned,
           });
         }
+      } else if (data.type === 'GO_HOME') {
+        handleBack();
       }
     } catch (e) {
       // ignore
@@ -160,6 +162,7 @@ body {
 }
 .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 .btn.big { flex: 2 1 120px; background: var(--pig); font-size: 15px; }
+.btn.gold { background: var(--gold); }
 .btn.small { padding: 5px 10px; font-size: 12px; }
 .card {
   background: var(--card);
@@ -339,6 +342,12 @@ body {
   color: var(--muted);
   font-weight: 700;
 }
+.pact {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 4px;
+}
 .flystats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -370,6 +379,37 @@ body {
   min-width: 0;
   justify-content: center;
   min-height: 40px;
+}
+.flyfood-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.fd {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 8px;
+  background: var(--screen);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  min-width: 58px;
+}
+.fd canvas {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.fd b {
+  font: 800 11px/1.2 var(--f-body);
+  margin-top: 2px;
+}
+.fd span {
+  font: 700 10px/1.1 var(--f-body);
+  color: var(--muted);
 }
 </style>
 </head>
@@ -404,14 +444,19 @@ body {
 
   <div class="flystats">
     <div><span class="label">Đã ăn</span><b id="flyEaten">0</b></div>
-    <div><span class="label">Thức ăn</span><b id="flyCoin">0</b></div>
-    <div><span class="label">Thời tiết</span><b id="flyWeather">Trời quang</b></div>
+    <div><span class="label">Đồng cám</span><b id="flyCoin">0</b></div>
+    <div><span class="label">Thời tiết</span><b id="flyWx">Trời quang</b></div>
   </div>
 
   <div class="flyctl">
     <button class="btn big" type="button" id="flyBtn">Vỗ cánh</button>
     <button class="btn" type="button" id="flyPause">Tạm dừng</button>
-    <button class="btn" type="button" id="flyWx">Đổi bão</button>
+    <button class="btn" type="button" id="flyWxBtn">Đổi trời</button>
+  </div>
+
+  <div class="card" style="margin-top:10px;padding:8px 10px;">
+    <div class="label" style="margin-bottom:6px">Món ăn tiếp sức & Độ no</div>
+    <div class="flyfood-scroll" id="flyFood"></div>
   </div>
 
 <script>
@@ -427,6 +472,7 @@ function notify(type, data) {
 // Chuyển game
 $('tabShoot').addEventListener('click', () => notify('SWITCH_GAME', { game: 'shooter' }));
 
+/* ====== HEO BAY 1:1 TỪ PROTOTYPE VÍ HEO CON ====== */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',k:'#2B2118',w:'#FFFFFF'};
 const R=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
@@ -436,6 +482,16 @@ function shape(c,rows,fill,ox,oy){
   c.fillStyle=fill;for(const [y,x0,x1] of rows)c.fillRect(ox+x0,oy+y,x1-x0+1,1);
 }
 function mk(w,h,fn){const cv=document.createElement('canvas');cv.width=w;cv.height=h;fn(cv.getContext('2d'));return cv}
+
+const HEART=[[0,1,0,1,0],[1,1,1,1,1],[0,1,1,1,0],[0,0,1,0,0]];
+function heart(c,x,y,col){c.fillStyle=col;HEART.forEach((r,j)=>r.forEach((v,i)=>{if(v)c.fillRect(x+i,y+j,1,1)}))}
+
+const DIG={
+  '0':'111101101101111','1':'010110010010111','2':'111001111100111','3':'111001111001111',
+  '4':'101101111001001','5':'111100111001111','6':'111100111101111','7':'111001001001001',
+  '8':'111101111101111','9':'111101111001111','.':'000000000000010','+':'000010111010000'
+};
+function stamp(c,s,x,y,col){[...s].forEach((ch,k)=>{const p=DIG[ch];if(!p)return;for(let i=0;i<15;i++)if(p[i]==='1')R(c,x+k*4+(i%3),y+((i/3)|0),1,1,col)})}
 
 /* Sprite heo 24x20 */
 function drawPigSprite(c,o){
@@ -449,112 +505,217 @@ function drawPigSprite(c,o){
   else{R(c,6,8,2,2,P.k);R(c,16,8,2,2,P.k);R(c,6,8,1,1,P.w);R(c,16,8,1,1,P.w)}
   if(o.happy){R(c,11,14,2,1,P.k)}
   R(c,4,11,2,1,P.s);R(c,18,11,2,1,P.s);
-  R(c,6,17,3,2,P.s);R(c,15,17,3,2,P.s);
+  if(o.pose==='sit'){R(c,7,17,3,2,P.s);R(c,14,17,3,2,P.s)}
+  else{R(c,6,17,3,2,P.s);R(c,15,17,3,2,P.s)}
+  if(o.tail){R(c,21,10,2,1,P.s);R(c,22,9,1,1,P.s)}
+  else{R(c,21,11,2,1,P.s);R(c,22,12,1,1,P.s)}
 }
 const hp=mk(24,20,c=>drawPigSprite(c,{blink:false}));
+const hpx=hp.getContext('2d');
 
-/* Heo bay constants */
-const FW=176,FH=224,GY=198,BLEN=900,OW=16;
+/* Biomes, trời, parallax */
+const FW=176,FH=224,GY=198,BLEN=900,TR=140,OW=16;
 const BIOMES=[
-  {id:'vuon',n:'Vườn nhà',bg:'#BFE6F6'},
-  {id:'ruong',n:'Đồng lúa',bg:'#D8EBD4'},
-  {id:'pho',n:'Phố chợ',bg:'#E2EAF4'},
-  {id:'ao',n:'Hồ sen',bg:'#F6DCE2'}
+  {id:'vuon',n:'Vườn nhà',skin:'bamboo'},
+  {id:'ruong',n:'Ruộng lúa',skin:'post'},
+  {id:'pho',n:'Phố nhà',skin:'pole'},
+  {id:'ao',n:'Ao sen',skin:'lotus'}
 ];
+const toHex=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t))};
+const SKY=[[0,'#F7B6A0','#FBE3B8'],[.14,'#8FD0F2','#E3F3F8'],[.4,'#58B6EE','#C3E9F8'],[.58,'#F29A62','#FFD9A0'],[.7,'#6B4A86','#EE9A74'],[.8,'#1D2A4F','#3A4C80'],[.94,'#1D2A4F','#3A4C80'],[1,'#F7B6A0','#FBE3B8']];
+function skyAt(u){let i=0;while(i<SKY.length-2&&u>SKY[i+1][0])i++;const a=SKY[i],b=SKY[i+1],t=Math.max(0,Math.min(1,(u-a[0])/(b[0]-a[0])));return[mix(a[1],b[1],t),mix(a[2],b[2],t)]}
+const nightness=u=>u<.68?0:u<.8?(u-.68)/.12:u<.94?1:Math.max(0,(1-u)/.06);
+const SR=mulberry32(99);
+const STARS=Array.from({length:36},()=>[(SR()*FW)|0,(SR()*130)|0,SR()]);
 
-function pillar(c,x,y0,y1,top){
+/* Cảnh nền Far, Mid, Ground */
+const SKYL=[[0,16,58],[17,12,40],[30,18,74],[49,14,52],[64,20,66],[85,12,44],[98,18,80],[117,14,56],[132,20,62],[153,12,48],[166,10,36]];
+function skyline(c,lit){
+  const rd=mulberry32(5),pal=['#BAB6CC','#CDB9B2','#ACBCC8','#C8C4B2'];
+  SKYL.forEach(([x,w,h],i)=>{const y=110-h;
+    if(!lit){R(c,x,y,w,h,pal[i%4]);R(c,x,y,w,2,'rgba(255,255,255,.35)');R(c,x+w-2,y,2,h,'rgba(60,50,80,.18)')}
+    for(let wy=y+6;wy<104;wy+=6)for(let wx=x+3;wx<x+w-3;wx+=5){const on=rd()<.55;if(lit){if(on)R(c,wx,wy,2,3,'#FFD76A')}else R(c,wx,wy,2,3,'#8C88A6')}});
+}
+function mkFar(b,lit){return mk(FW,110,(c)=>{
+  const s=x=>x/FW*Math.PI*2;
+  if(b===0){for(let x=0;x<FW;x++){const h=34+Math.round(12*Math.sin(s(x)*2)+7*Math.sin(s(x)*5));R(c,x,110-h,1,h,'#B5DB9A');const h2=20+Math.round(9*Math.sin(s(x)*3+1));R(c,x,110-h2,1,h2,'#9AC97E')}}
+  else if(b===1){for(let x=0;x<FW;x++){const h=26+Math.round(42*Math.pow(Math.abs(Math.sin(s(x))),1.3));R(c,x,110-h,1,h,'#B4C6D6');const h2=14+Math.round(10*Math.sin(s(x)*4));R(c,x,110-h2,1,h2,'#9FB5C4')}}
+  else if(b===2)skyline(c,lit);
+  else{for(let x=0;x<FW;x++){const h=30+Math.round(14*Math.sin(s(x)*2+2)+6*Math.sin(s(x)*7));R(c,x,110-h,1,h,'#D3E4E0');const h2=14+Math.round(8*Math.sin(s(x)*3));R(c,x,110-h2,1,h2,'#BFD8D3')}}
+})}
+function wire(c,x0,x1,y,sag){for(let x=x0;x<=x1;x++){const t=(x-x0)/(x1-x0);R(c,x,Math.round(y+4*sag*t*(1-t)),1,1,'#2B2118')}}
+function mkMid(b,lit){return mk(FW,96,(c)=>{
+  const B=96;
+  if(b===0){
+    [14,58,102,146].forEach((x,i)=>{R(c,x-1,B-26,3,26,'#6B4426');E(c,x,B-36,11,10,i%2?'#4E9A47':'#5DAA52');E(c,x-3,B-40,6,5,'#78C25F');if(i===1)[[x-4,B-40],[x+3,B-34]].forEach(([a,d])=>R(c,a,d,2,2,'#F2B23A'))});
+    [34,38,42].forEach((x,i)=>{const h=54+i*6;R(c,x,B-h,3,h,'#6DB85A');R(c,x,B-h,1,h,'#8ED070');for(let y=B-14;y>B-h;y-=14)R(c,x,y,3,1,'#3E8139');R(c,x+3,B-h+8,5,2,'#4E9A47')});
+    R(c,120,B-16,22,16,'#F2DFA8');R(c,118,B-20,26,5,'#C4603A');R(c,122,B-12,6,12,'#8A5A34');R(c,132,B-12,6,6,'#7FB5A6');
+  }else if(b===1){
+    [28,120].forEach((x,k)=>{const H=58+k*6;for(let i=0;i<H;i+=2){const dx=Math.round(2*Math.sin(i/18+k));R(c,x+dx,B-i-2,3,2,i%8<4?'#8A6A44':'#6B5030')}
+      const tx=x+Math.round(2*Math.sin(H/18+k)),ty=B-H;
+      [-170,-140,-110,-70,-40,-10].forEach(deg=>{const a=deg*Math.PI/180;for(let s=0;s<13;s++)R(c,Math.round(tx+1+Math.cos(a)*s*1.1),Math.round(ty+Math.sin(a)*s*.7+s*s*.045),2,2,s%4===3?'#3E8139':'#4E9A47')});
+      E(c,tx+1,ty+1,2,2,'#6B4426')});
+    R(c,70,B-14,2,14,'#8A5A34');R(c,86,B-14,2,14,'#8A5A34');R(c,66,B-20,26,6,'#D9B45A');R(c,70,B-24,18,5,'#E5C676');R(c,72,B-8,14,2,'#B8935A');
+  }else if(b===2){
+    [[0,24,50,'#E9B8A0'],[26,20,42,'#F2DFA8'],[48,26,58,'#B9D3C8'],[76,22,46,'#F4C6C0'],[100,24,54,'#D9C9A8'],[126,22,40,'#C6D6E8'],[150,26,52,'#F2DFA8']].forEach(([x,w,h,col])=>{
+      const y=B-h;
+      if(!lit){R(c,x,y,w,h,col);R(c,x-1,y-3,w+2,3,'#C4603A');R(c,x,B-10,w,10,'rgba(60,40,30,.12)');R(c,x+((w/2)|0)-3,B-9,6,9,'#8A5A34')}
+      for(let wy=y+5;wy<B-14;wy+=12)for(let wx=x+3;wx<x+w-4;wx+=9){
+        if(lit){if(((wx*7+wy*3)%5)<3)R(c,wx,wy,5,6,'#FFD76A')}
+        else{R(c,wx,wy,5,6,'#7FB5C8');R(c,wx-1,wy,1,6,'#4E9A6B');R(c,wx+5,wy,1,6,'#4E9A6B')}}});
+    if(!lit){[44,132].forEach(x=>{R(c,x,B-72,2,72,'#4B4B52');R(c,x-5,B-70,12,2,'#4B4B52')});wire(c,44,132,B-68,6);wire(c,132,220,B-68,6);wire(c,-44,44,B-68,6)}
+  }else{
+    [30,112].forEach((x,k)=>{R(c,x-1,B-40,4,40,'#6B5030');E(c,x+1,B-46,16,9,'#7DB868');E(c,x-4,B-50,9,5,'#98CE80');
+      for(let d=-14;d<=14;d+=2){const L=18+((d*7)&7);R(c,x+1+d,B-44+Math.round(Math.abs(d)/3),1,L,k?'#6DAA58':'#7DB868')}});
+    for(let x=62;x<100;x+=5){R(c,x,B-26-((x*3)%9),1,26,'#7D9A52');R(c,x-1,B-30-((x*3)%9),3,6,'#6B4426')}
+    [[8,B-3,12],[52,B-2,10],[150,B-3,14],[100,B-2,9]].forEach(([x,y,w])=>E(c,x,y,w,2,'#4F9A4F'));
+  }
+})}
+function mkGround(b){return mk(FW,FH-GY,(c)=>{
+  const rd=mulberry32(b+40),GH=FH-GY;
+  if(b===0){R(c,0,0,FW,GH,'#8A5A34');R(c,0,0,FW,6,'#86B866');R(c,0,0,FW,1,'#4B7A38');R(c,0,6,FW,2,'#6B8F44');
+    for(let i=0;i<46;i++)R(c,(rd()*FW)|0,1+((rd()*4)|0),1,2,rd()<.5?'#5E9A57':'#A5D67E');
+    for(let i=0;i<22;i++)R(c,(rd()*FW)|0,9+((rd()*15)|0),2,1,rd()<.5?'#6B4426':'#A87650');
+    [12,70,128].forEach((x,i)=>R(c,x,1,2,2,['#F59BB0','#FFF4D6','#F4B93B'][i]))}
+  else if(b===1){R(c,0,0,FW,GH,'#7FB6B0');R(c,0,0,FW,5,'#6BA83A');for(let x=0;x<FW;x+=3)R(c,x,(x*7)%3,2,3+((x*5)%3),(x%2)?'#8CC84A':'#6BA83A');
+    for(let i=0;i<20;i++)R(c,(rd()*FW)|0,8+((rd()*14)|0),4,1,'#B5DEDA');R(c,0,GH-5,FW,5,'#6B5030')}
+  else if(b===2){R(c,0,0,FW,GH,'#5A5A63');R(c,0,0,FW,4,'#D8CEB8');R(c,0,4,FW,2,'#A99F87');for(let x=0;x<FW;x+=22){R(c,x+3,15,11,2,'#F2DFA8');R(c,x,0,1,4,'#BFB59F')}
+    for(let i=0;i<30;i++)R(c,(rd()*FW)|0,8+((rd()*16)|0),2,1,'#6B6B74')}
+  else{R(c,0,0,FW,GH,'#6DB7C9');R(c,0,GH-8,FW,8,'#4E97AE');for(let i=0;i<24;i++)R(c,(rd()*FW)|0,2+((rd()*18)|0),5,1,'#A5D8E4');
+    [20,66,118,150].forEach((x,i)=>{E(c,x,3,6,2,'#4F9A4F');R(c,x+1,2,3,1,'#6DC06D');if(i%2===0){R(c,x-1,0,3,2,'#F59BB0');R(c,x,0,1,1,'#FFD1DC')}})}
+})}
+const FAR=[0,1,2,3].map(b=>mkFar(b,false)),FAR_LIT=mkFar(2,true);
+const MID=[0,1,2,3].map(b=>mkMid(b,false)),MID_LIT=mkMid(2,true);
+const GROUND=[0,1,2,3].map(mkGround);
+
+/* Cột vật cản 4 skins */
+function pillar(c,x,y0,y1,skin,top){
   const h=y1-y0;if(h<=0)return;
-  R(c,x,y0,OW,h,'#2B2118');
-  R(c,x+2,y0,OW-4,h,'#8A5A34');
-  R(c,x+3,y0,3,h,'#B07A48');
-  const ey=top?y1-5:y0;
-  R(c,x-2,ey,OW+4,5,'#2B2118');
-  R(c,x-1,ey+1,OW+2,3,'#F4B93B');
+  if(skin==='bamboo'){
+    R(c,x,y0,OW,h,'#2B2118');R(c,x+1,y0,OW-2,h,'#6DB85A');R(c,x+1,y0,4,h,'#8ED070');R(c,x+OW-5,y0,3,h,'#4E9A47');
+    for(let k=1;;k++){const ny=top?y1-k*22:y0+k*22;if(ny<y0||ny>y1-1)break;R(c,x-1,ny,OW+2,3,'#2B2118');R(c,x,ny+1,OW,1,'#8ED070');if(k%2)R(c,x+OW+1,ny-2,6,2,'#4E9A47')}
+    const ey=top?y1-4:y0;R(c,x-2,ey,OW+4,4,'#2B2118');R(c,x-1,ey+1,OW+2,2,'#8ED070');
+  }else if(skin==='post'){
+    R(c,x,y0,OW,h,'#2B2118');R(c,x+1,y0,OW-2,h,'#A87650');R(c,x+6,y0,1,h,'#8A5A34');R(c,x+11,y0,1,h,'#8A5A34');R(c,x+1,y0,3,h,'#C49A6E');
+    for(let k=1;;k++){const ny=top?y1-k*24:y0+k*24;if(ny<y0||ny>y1-2)break;R(c,x,ny,OW,3,'#E8D6B4');R(c,x,ny+3,OW,1,'#2B2118')}
+    const ey=top?y1-4:y0;R(c,x-2,ey,OW+4,4,'#2B2118');R(c,x-1,ey+1,OW+2,2,'#6B4426');
+    const fy=top?y1-14:y0+4;R(c,x+OW,fy,9,6,'#2B2118');R(c,x+OW,fy+1,8,4,'#E0452B');R(c,x+OW,fy+2,5,2,'#F4B93B');
+  }else if(skin==='pole'){
+    R(c,x,y0,OW,h,'#2B2118');R(c,x+1,y0,OW-2,h,'#B9B2A6');R(c,x+1,y0,4,h,'#D4CEC2');R(c,x+OW-4,y0,3,h,'#948D80');
+    for(let k=1;;k++){const ny=top?y1-k*28:y0+k*28;if(ny<y0||ny>y1-2)break;R(c,x+1,ny,OW-2,1,'#8F887C')}
+    const ey=top?y1-3:y0;R(c,x-8,ey,OW+16,3,'#4B2B21');R(c,x-6,top?ey+3:ey-2,2,2,'#7FB5A6');R(c,x+OW+4,top?ey+3:ey-2,2,2,'#7FB5A6');R(c,x+7,top?ey+3:ey-2,2,2,'#7FB5A6');
+  }else{
+    R(c,x+2,y0,OW-4,h,'#2B2118');R(c,x+3,y0,OW-6,h,'#5E9A57');R(c,x+3,y0,3,h,'#7DBA6D');
+    for(let k=0;;k++){const ny=y0+8+k*13;if(ny>y1-2)break;R(c,x+1,ny,2,1,'#2B2118');R(c,x+OW-3,ny+5,2,1,'#2B2118')}
+    const ly=top?y1-2:y0-1;E(c,x+8,ly,13,4,'#2B2118');E(c,x+8,ly,12,3,'#4F9A4F');R(c,x+3,ly-1,10,1,'#6DC06D');
+    const by=top?y1+4:y0-7;E(c,x+8,by,5,6,'#2B2118');E(c,x+8,by,4,5,'#F08DA4');R(c,x+6,by-2,2,3,'#FFD1DC');
+  }
 }
 
-const FOODS=[{k:'carrot',v:14},{k:'corn',v:16},{k:'apple',v:20},{k:'melon',v:26}];
-function drawFood(c,k,x,y){
-  if(k==='apple'){E(c,x,y,5,5,'#2B2118');E(c,x,y,4,4,'#E0452B');R(c,x-2,y-2,2,2,'#FF8A6B');}
-  else if(k==='corn'){E(c,x,y,4,6,'#2B2118');E(c,x,y,3,5,'#F4D03F');}
-  else if(k==='melon'){shape(c,[[-2,-5,5],[-1,-5,5],[0,-4,4],[1,-3,3]],'#5EA04C',x,y);}
-  else{E(c,x,y,5,5,'#2B2118');E(c,x,y,4,4,'#F4B93B');R(c,x-1,y-2,1,4,'#FFF08A');}
+/* Đồ ăn pixel */
+const FOODS=[{k:'carrot',v:14,w:70,n:'Cà rốt'},{k:'corn',v:16,w:60,n:'Bắp'},{k:'banana',v:15,w:60,n:'Chuối'},{k:'apple',v:20,w:45,n:'Táo'},{k:'melon',v:26,w:20,n:'Dưa hấu'}];
+function pickFood(r){let t=FOODS.reduce((a,f)=>a+f.w,0)*r;for(const f of FOODS){t-=f.w;if(t<=0)return f}return FOODS[0]}
+function drawFood(c,k,x,y,t){
+  if(k==='carrot'){shape(c,[[-3,-2,2],[-2,-2,2],[-1,-1,1],[0,-1,1],[1,-1,1],[2,0,0],[3,0,0]],'#F28C28',x,y);R(c,x-1,y-1,2,1,'#D8741C');R(c,x-2,y-6,1,3,'#5EA04C');R(c,x,y-7,1,4,'#78B65C');R(c,x+2,y-6,1,3,'#5EA04C')}
+  else if(k==='corn'){shape(c,[[-5,-1,1],[-4,-2,2],[-3,-2,2],[-2,-2,2],[-1,-2,2],[0,-2,2],[1,-2,2],[2,-1,1],[3,-1,1]],'#F4D03F',x,y);
+    for(let j=-4;j<3;j+=2)for(let i=-1;i<2;i+=2)R(c,x+i,y+j,1,1,'#E0A82E');R(c,x-3,y+1,2,5,'#5EA04C');R(c,x+2,y+1,2,5,'#78B65C')}
+  else if(k==='banana'){shape(c,[[-4,2,3],[-3,1,3],[-2,0,2],[-1,-1,2],[0,-3,1],[1,-4,0],[2,-4,-2]],'#F4D03F',x,y);R(c,x+2,y-5,2,1,'#6B4426');R(c,x-4,y+3,2,1,'#6B4426')}
+  else if(k==='apple'){E(c,x,y,5,5,'#2B2118');E(c,x,y,4,4,'#E0452B');R(c,x-2,y-2,2,2,'#FF8A6B');R(c,x,y-7,1,3,'#6B4426');R(c,x+1,y-6,3,2,'#5EA04C')}
+  else if(k==='melon'){shape(c,[[-2,-6,6],[-1,-6,6],[0,-5,5],[1,-4,4],[2,-3,3],[3,-2,2],[4,-1,1]],'#5EA04C',x,y);
+    [[-2,-5,5],[-1,-5,5],[0,-4,4],[1,-3,3],[2,-2,2]].forEach(([dy,a,b])=>R(c,x+a,y+dy,b-a+1,1,'#E0452B'));R(c,x-2,y-1,1,1,'#2B2118');R(c,x+1,y,1,1,'#2B2118');R(c,x+3,y-1,1,1,'#2B2118')}
+  else{const rx=Math.round(Math.abs(Math.cos((t||0)*4+x*.05))*3)+1;E(c,x,y,rx+1,5,'#2B2118');E(c,x,y,rx,4,'#F4B93B');if(rx>2)R(c,x-1,y-2,1,4,'#FFF08A')}
 }
 
-const GRAV=560,FLAP=-172,PX=44;
+/* Sinh vật nền */
+const INK='#2B2118';
+function sBird(c,x,y,f){const k='#3B3B4A';R(c,x-1,y,3,1,k);if(f){R(c,x-3,y+1,2,1,k);R(c,x+2,y+1,2,1,k)}else{R(c,x-3,y-1,2,1,k);R(c,x+2,y-1,2,1,k)}}
+function sKite(c,x,y,col,t){for(let dy=-6;dy<=6;dy++){const hw=Math.round((6-Math.abs(dy))*.7);R(c,x-hw,y+dy,hw*2+1,1,col)}
+  R(c,x,y-6,1,13,'#FFFBF1');R(c,x-4,y,9,1,'#FFFBF1');for(let i=0;i<8;i++)R(c,x+Math.round(Math.sin(i*.9+t*3)*2),y+7+i*2,2,1,i%2?'#E0452B':'#F4B93B')}
+function sButterfly(c,x,y,f,col){R(c,x-2,y-1+f,2,2,col);R(c,x+1,y-1+f,2,2,col);R(c,x,y,1,2,INK)}
+function sEgret(c,x,y,dir,mode,f){c.save();c.translate(x,y);c.scale(dir,1);
+  if(mode==='stand'){R(c,-1,-9,1,9,'#4B4B52');R(c,2,-9,1,9,'#4B4B52');E(c,0,-12,5,3,'#FFFFFF');R(c,3,-19,2,8,'#FFFFFF');R(c,3,-20,3,2,'#FFFFFF');R(c,6,-20,4,1,'#F4B93B');R(c,-7,-13,3,2,'#FFFFFF');R(c,4,-20,1,1,INK)}
+  else{E(c,0,-12,5,2,'#FFFFFF');R(c,3,-16,2,5,'#FFFFFF');R(c,4,-17,3,2,'#FFFFFF');R(c,7,-17,4,1,'#F4B93B');R(c,-9,-11,6,1,'#4B4B52');
+    if(f){R(c,-8,-8,9,2,'#FFFFFF');R(c,-12,-5,5,2,'#EDEDED')}else{R(c,-8,-19,9,2,'#FFFFFF');R(c,-12,-22,5,2,'#EDEDED')}}
+  c.restore()}
+function sMoto(c,x,y,dir,col,f){c.save();c.translate(x,y);c.scale(dir,1);
+  E(c,-7,-3,3,3,INK);E(c,7,-3,3,3,INK);E(c,-7,-3,1,1,'#B9B2A6');E(c,7,-3,1,1,'#B9B2A6');
+  R(c,-6,-9,13,3,col);R(c,-8,-10,5,2,'#2B2118');R(c,6,-12,2,9,'#8B8B93');R(c,4,-13,5,1,INK);
+  R(c,-2,-16+f,4,7,'#4B6FA5');R(c,2,-14+f,4,2,'#4B6FA5');E(c,0,-19+f,3,3,'#F2C9A0');R(c,-3,-23+f,7,3,'#E0452B');c.restore()}
+function sFish(c,x,y,dir,f){c.save();c.translate(x,y);c.scale(dir,1);E(c,0,0,5,3,INK);E(c,0,0,4,2,'#F28C28');R(c,-8,-3+f,3,6-2*f,'#F28C28');R(c,2,-1,1,1,INK);R(c,-2,0,3,1,'#FFD1A8');c.restore()}
+function sCloud(c,x,y,s,col){E(c,x,y,9*s,3*s,col);E(c,x-6*s,y+1,6*s,2*s,col);E(c,x+7*s,y+1,6*s,2*s,col);E(c,x+1,y-2*s,5*s,2*s+1,col)}
+
+/* Hằng số vật lý và trạng thái heo bay */
+const GRAV=560,FLAP=-172,VMAX=250,PX=44;
 const fly={
-  mode:'ready',y:96,vy:0,flapT:0,eatT:0,
-  dist:0,speed:62,score:0,eaten:0,hunger:78,best:0,
-  weather:'clear',rainDrops:[],
-  whirlwinds:[],enemyBirds:[],
-  pillars:[],items:[],floats:[],shake:0,msg:'',msgT:0,cause:'',paused:false
+  mode:'ready',run:true,last:0,t:0,y:96,vy:0,ang:0,flapT:0,eatT:0,blink:0,
+  dist:0,speed:58,sp:0,score:0,coins:0,eaten:0,hunger:78,best:0,earned:0,
+  u:.2,weather:'clear',wnext:28,rain:0,wind:0,
+  pillars:[],items:[],crit:[],parts:[],floats:[],shake:0,msg:'',msgT:0,cause:'',paused:false,
+  hungryAt:0,lastBi:0,spacing:94
 };
 
 try{fly.best=+localStorage.getItem('vhc-fly-best')||0}catch(e){}
 $('flyBest').textContent=String(fly.best);
 
+const biomeAt=d=>((d/BLEN)|0)%4;
+const gapNow=()=>Math.max(52,62-Math.floor(fly.score/6));
 let lastGy=100;
 const rnd=(a,b)=>a+Math.random()*(b-a);
 
-function flyMsg(t,s){fly.msg=t;fly.msgT=s||2;const e=$('flyToast');if(e){e.textContent=t;e.classList.add('on');clearTimeout(fly.toTimer);fly.toTimer=setTimeout(()=>e.classList.remove('on'),(s||2)*1000);}}
+function flyMsg(t,s){
+  fly.msg=t;fly.msgT=s||2;
+  const tt=$('flyToast');
+  if(tt){tt.textContent=t;tt.classList.toggle('on',!!t)}
+}
 
 function flyReset(){
   Object.assign(fly,{
-    mode:'ready',y:96,vy:0,flapT:0,eatT:0,dist:0,speed:62,score:0,eaten:0,hunger:78,
-    pillars:[],items:[],floats:[],whirlwinds:[],enemyBirds:[],shake:0,cause:'',paused:false
+    mode:'ready',y:96,vy:0,ang:0,flapT:0,eatT:0,dist:0,speed:58,sp:60,score:0,coins:0,eaten:0,hunger:78,earned:0,
+    pillars:[],items:[],parts:[],floats:[],shake:0,cause:'',lastBi:0,paused:false
   });
   lastGy=100;
-  flyMsg('Chạm để vỗ cánh',99);
+  flyMsg('Chạm hoặc bấm Vỗ cánh để bay',99);
+}
+
+function puff(x,y,n,col,spd,life,kind){
+  for(let i=0;i<n&&fly.parts.length<200;i++){
+    const a=Math.random()*6.283,s=rnd(.3,1)*spd;
+    fly.parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-(kind==='crumb'?18:0),life:life,max:life,col,kind:kind||'sq'});
+  }
 }
 
 function spawnPillar(){
-  const gap=Math.max(50, 64 - Math.floor(fly.score / 5));
-  const lo=24+gap/2, hi=GY-24-gap/2;
-  let gy=rnd(lo,hi);
-  gy=Math.max(lo,Math.min(hi,lastGy+Math.max(-56,Math.min(56,gy-lastGy))));
-  const x=FW+OW+4;lastGy=gy;
-  fly.pillars.push({x,gy,gap,passed:false});
-
-  // Đồ ăn hái tiếp sức
-  if(Math.random()<.8){
-    const f=FOODS[Math.floor(Math.random()*FOODS.length)];
-    fly.items.push({k:f.k,v:f.v,x:x+OW/2,y:gy});
+  const gap=gapNow(),lo=22+gap/2,hi=GY-22-gap/2;
+  let gy=rnd(lo,hi);gy=Math.max(lo,Math.min(hi,lastGy+Math.max(-62,Math.min(62,gy-lastGy))));
+  const x=FW+OW+4,prev=lastGy;lastGy=gy;
+  fly.pillars.push({x,gy,gap,skin:BIOMES[biomeAt(fly.dist+x)].skin,passed:false});
+  if(Math.random()<.86){const f=pickFood(Math.random());fly.items.push({k:f.k,v:f.v,x:x+OW/2,y:gy,t:rnd(0,6)})}
+  if(fly.pillars.length>1&&Math.random()<.8){
+    const mx=x+OW/2-fly.spacing/2,my=(prev+gy)/2;
+    for(let i=-1;i<=1;i++)fly.items.push({k:'coin',v:1,x:mx+i*11,y:my-(1-Math.abs(i))*7,t:i});
   }
-
-  // Chướng ngại vật động: Chim đối thủ bay ngược chiều
-  if(fly.score >= 3 && Math.random() < 0.45){
-    fly.enemyBirds.push({
-      x: FW + 40,
-      y: rnd(30, GY - 30),
-      vx: -(rnd(60, 95)),
-      t: 0
-    });
-  }
-
-  // Chướng ngại vật động: Gió lốc đẩy trôi
-  if(fly.score >= 5 && Math.random() < 0.35){
-    fly.whirlwinds.push({
-      x: FW + 50,
-      y: rnd(50, GY - 50),
-      dir: Math.random() > 0.5 ? 1 : -1,
-      t: 0
-    });
-  }
+  if(Math.random()<.12)fly.items.push({k:'melon',v:26,x:x+fly.spacing/2+OW/2,y:15,t:0});
 }
 
 function flyFlap(){
   if(fly.mode==='dead'||fly.paused)return;
   if(fly.mode==='ready'){
     fly.mode='play';fly.msgT=0;fly.hunger=78;
-    $('flyHint').style.display='none';
-    flyMsg('Né chim đối thủ & hái thức ăn!',2);
+    $('flyHint').hidden=true;
+    flyMsg('Hái đồ ăn mang về cho cá và hoa hồng',3);
   }
   fly.vy=FLAP;fly.flapT=.2;
+  puff(PX-8,fly.y+4,3,'#FFFBF1',22,.35);
   notify('HAPTIC_LIGHT');
 }
 
 function flyDie(cause){
   if(fly.mode==='dead')return;
   fly.mode='dead';fly.cause=cause;fly.vy=cause==='starve'?-40:-120;fly.shake=.3;
+  puff(PX,fly.y,14,'#F9B8C4',60,.7);
+  fly.earned=fly.coins+fly.score;
   if(fly.score>fly.best){
     fly.best=fly.score;
     $('flyBest').textContent=String(fly.best);
@@ -563,237 +724,323 @@ function flyDie(cause){
   notify('HAPTIC_FAIL');
   notify('SAVE_STATS', { score: fly.score, foodEarned: fly.eaten });
 
-  const msgs = {
-    pillar:'Đụng phải cột chi tiêu rồi!',
-    ground:'Chạm đất rồi!',
-    starve:'Đói lả, hết sức bay!',
-    bird:'Bị chim đối thủ húc trúng!'
-  };
-  flyMsg(msgs[cause] || 'Hết lượt bay!', 99);
-  setTimeout(flyShowOver, 600);
+  const whyMap={pillar:'Ối, đụng cột rồi!',ground:'Heo chạm đất rồi!',starve:'Heo đói lả, không bay nổi nữa'};
+  flyMsg(whyMap[cause]||'Hết lượt bay!',99);
+  setTimeout(flyShowOver,650);
 }
 
 function flyShowOver(){
-  const o=$('flyOver');o.hidden=false;
-  o.innerHTML='<div class="card fo"><b>HẾT LƯỢT BAY!</b>'+
-  '<p>'+(fly.cause==='bird'?'Bị chim đối thủ tấn công!':'Kỷ luật thép để bay xa hơn nhé!')+'</p>'+
-  '<div class="fgrid">'+
-    '<div><span>Điểm</span><b>'+fly.score+'</b></div>'+
-    '<div><span>Thức ăn</span><b>'+fly.eaten+'</b></div>'+
-    '<div><span>Kỷ lục</span><b>'+fly.best+'</b></div>'+
-  '</div>'+
-  '<div style="margin-top:6px"><button class="btn gold" id="flyBtnRetry">Bay lại</button></div></div>';
+  const o=$('flyOver');
+  const why={pillar:'Đụng cột',ground:'Chạm đất',starve:'Đói lả'}[fly.cause]||'Hết lượt bay';
+  o.hidden=false;
+  o.innerHTML='<div class="card fo"><b>'+why+'</b><span class="label">Chuyến bay vừa rồi</span>'+
+  '<div class="fgrid"><div><b>'+fly.score+'</b><span>Cột qua</span></div><div><b>'+fly.eaten+'</b><span>Món đã ăn</span></div><div><b>'+fly.coins+'</b><span>Đồng cám</span></div></div>'+
+  '<p>Nhận <b>+'+fly.earned+' cám</b> vào ví'+(fly.score>0&&fly.score>=fly.best?' · Kỷ lục mới!':'')+'</p>'+
+  '<div class="pact"><button class="btn" type="button" id="flyHome">Về vườn</button><button class="btn gold" type="button" id="flyAgain">Bay lại</button></div></div>';
 
-  $('flyBtnRetry').onclick = () => {
+  $('flyAgain').onclick=()=>{
     o.hidden=true;
-    $('flyHint').style.display='block';
+    $('flyHint').hidden=false;
     flyReset();
+  };
+  $('flyHome').onclick=()=>{
+    notify('GO_HOME');
   };
 }
 
 function flyEat(it){
-  fly.hunger=Math.min(100,fly.hunger+it.v);
-  fly.eaten++;fly.eatT=.4;
+  const was=fly.hunger;
+  if(it.k==='coin'){
+    fly.coins++;puff(it.x,it.y,4,'#F4B93B',34,.35);
+    fly.floats.push({x:it.x,y:it.y-6,txt:'+1',life:.7,col:'#C98A12'});
+    notify('HAPTIC_SUCCESS');
+    return;
+  }
+  fly.hunger=Math.min(100,fly.hunger+it.v);fly.eaten++;fly.eatT=.4;
+  if(was>=94){fly.coins++;fly.floats.push({x:PX+8,y:fly.y-22,txt:'+1',life:.8,col:'#C98A12'})}
+  puff(it.x,it.y,8,it.k==='apple'?'#E0452B':it.k==='melon'?'#E0452B':'#F4B93B',48,.5,'crumb');
+  fly.floats.push({x:it.x,y:it.y-8,txt:'+'+it.v,life:.9,col:'#3E7A3A'});
+  puff(PX+4,fly.y-12,2,'#E0452B',16,.7,'heart');
   notify('HAPTIC_SUCCESS');
-  fly.floats.push({x:it.x,y:it.y-8,txt:'+'+it.v+'% no',col:'#3E7A3A'});
+  if(was<25)flyMsg('Phù, suýt đói rồi!',1.8);else if(Math.random()<.3)flyMsg(['Ngon quá!','Ủn ỉn, no bụng!','Hái thêm nữa!'][(Math.random()*3)|0],1.2);
 }
 
+/* Quản lý sinh vật nền */
+const CAP={cloud:4,bird:2,bf:3,kite:1,egret:2,moto:1,fish:1,ff:10};
+const cnt=t=>fly.crit.reduce((a,c)=>a+(c.t===t?1:0),0);
+function addCrit(t,o){if(cnt(t)<CAP[t])fly.crit.push(Object.assign({t,x:FW+20,y:50,k:1,vx:0,ph:Math.random()*9,s:1,age:0},o))}
+function spawnCrit(dt){
+  const bi=biomeAt(fly.dist),night=nightness(fly.u),day=night<.3,r=Math.random()/dt;
+  if(cnt('cloud')<CAP.cloud&&r<.5)addCrit('cloud',{x:FW+16,y:rnd(8,60),k:.08,vx:-2,s:rnd(.7,1.3)});
+  if(day&&r<.12)addCrit('bird',{x:FW+8,y:rnd(14,70),k:.1,vx:-rnd(12,22)});
+  if(day&&(bi===0||bi===3)&&r<.25)addCrit('bf',{x:FW+6,y:rnd(110,170),k:.6,col:['#F59BB0','#FFD84A','#9CD6F0'][(Math.random()*3)|0]});
+  if(day&&(bi===0||bi===2)&&r<.05)addCrit('kite',{x:FW+10,y:rnd(24,60),k:.3,col:['#E0452B','#4B9BD8','#F4B93B'][(Math.random()*3)|0]});
+  if(bi===1||bi===3){if(r<.15)addCrit('egret',{x:FW+14,y:GY+2,k:1,mode:'stand',dir:-1})}
+  if(bi===2&&r<.18){const d=Math.random()<.5?1:-1;addCrit('moto',{x:d>0?-14:FW+14,y:GY+13,k:1,dir:d,vx:d*46,col:['#E0452B','#4B9BD8','#5E9A57'][(Math.random()*3)|0]})}
+  if(bi===3&&r<.2)addCrit('fish',{x:rnd(30,150),y:GY+14,k:1,ph:0,dir:Math.random()<.5?1:-1});
+  if(night>.5&&(bi===0||bi===3)&&r<.9)addCrit('ff',{x:FW+4,y:rnd(110,185),k:.5,vx:-rnd(0,10)});
+}
+function updCrit(dt,sc){
+  fly.crit.forEach(c=>{c.age+=dt;
+    if(c.t==='egret'&&c.mode==='stand'&&fly.mode==='play'&&Math.abs(c.x-PX)<48){c.mode='fly';c.vy=-26;c.k=.7;c.vx=30;c.dir=1}
+    if(c.t==='egret'&&c.mode==='fly'){c.y+=c.vy*dt;c.vy=Math.max(-40,c.vy-8*dt)}
+    if(c.t==='fish'){c.ph+=dt;const u=c.ph/1.1;if(u>1){c.dead=true}else c.y=GY+16-Math.sin(u*Math.PI)*34;c.vx=c.dir*10}
+    if(c.t==='bf'){c.vx=Math.sin(c.age*3+c.ph)*14;c.y+=Math.cos(c.age*4+c.ph)*9*dt}
+    if(c.t==='ff'){c.vx=Math.sin(c.age*1.7+c.ph)*9;c.y+=Math.cos(c.age*1.3+c.ph)*8*dt}
+    c.x+=(-sc*c.k+c.vx)*dt;
+    if(c.x<-40||c.x>FW+48)c.dead=true});
+  fly.crit=fly.crit.filter(c=>!c.dead);
+}
+
+/* Vòng cập nhật */
 function flyUpdate(dt){
   if(fly.paused)return;
-  if(fly.flapT>0)fly.flapT-=dt;
-  if(fly.eatT>0)fly.eatT-=dt;
-  if(fly.shake>0)fly.shake-=dt;
+  fly.t+=dt;if(fly.flapT>0)fly.flapT-=dt;if(fly.eatT>0)fly.eatT-=dt;if(fly.shake>0)fly.shake-=dt;
+  if(fly.msgT>0&&fly.msgT<90){fly.msgT-=dt}
+  fly.u=(fly.u+dt/110)%1;
+  fly.blink=(fly.t%3.4)<.12?1:0;
 
-  const dx=fly.speed*dt;
+  fly.wnext-=dt;
+  if(fly.wnext<=0){
+    fly.wnext=rnd(24,42);const r=Math.random();fly.weather=r<.45?'clear':r<.72?'rain':'wind';
+    if(fly.weather==='rain')flyMsg('Trời đổ mưa rồi, đồ ăn ướt nhẹp',2.2);else if(fly.weather==='wind')flyMsg('Gió lá bay khắp nơi',2);
+  }
+  fly.rain+=((fly.weather==='rain'?1:0)-fly.rain)*Math.min(1,dt*.7);
+  fly.wind+=((fly.weather==='wind'?1:0)-fly.wind)*Math.min(1,dt*.7);
+
+  const mult=fly.mode==='play'?1:fly.mode==='ready'?.45:.15,sc=fly.speed*mult,dx=sc*dt;
   fly.dist+=dx;
+  const bi=biomeAt(fly.dist);
+  if(bi!==fly.lastBi){fly.lastBi=bi;if(fly.mode==='play')flyMsg('Tới '+BIOMES[bi].n+' rồi!',2.2)}
+
+  if(fly.mode==='ready'){fly.y=96+Math.sin(fly.t*3.4)*4;fly.vy=0;fly.ang=0}
+  if(fly.mode==='play'||fly.mode==='dead'){
+    fly.vy=Math.min(VMAX,fly.vy+GRAV*dt);fly.y+=fly.vy*dt;
+    fly.ang=Math.max(-.45,Math.min(1,fly.vy/260));
+    if(fly.y<5){fly.y=5;if(fly.vy<0)fly.vy=0}
+  }
 
   if(fly.mode==='play'){
-    // Tiêu hao thanh đói
-    fly.hunger-=dt*3.2;
-    if(fly.hunger<=0){flyDie('starve');return;}
+    fly.hunger-=(3.1+Math.min(2.2,fly.dist/2000))*dt;
+    if(fly.hunger<28&&fly.t-fly.hungryAt>6){fly.hungryAt=fly.t;flyMsg('Bụng sôi ùng ục, hái đồ ăn đi!',2)}
+    if(fly.hunger<=0){fly.hunger=0;flyDie('starve')}
 
-    // Tốc độ tăng dần
-    fly.speed=Math.min(105, 62 + fly.score * 1.5);
-
-    // Trọng lực
-    fly.vy+=GRAV*dt;
-    fly.y+=fly.vy*dt;
-
-    if(fly.y>=GY-12){fly.y=GY-12;flyDie('ground');return;}
-    if(fly.y<10){fly.y=10;fly.vy=0;}
-
-    // Cập nhật chướng ngại vật cột
-    if(fly.pillars.length===0 || fly.pillars[fly.pillars.length-1].x < FW - 75){
-      spawnPillar();
-    }
-
+    fly.sp-=dx;if(fly.sp<=0){spawnPillar();fly.sp+=fly.spacing}
     fly.pillars.forEach(p=>{
       p.x-=dx;
-      // Va chạm cột
-      if(p.x<PX+10 && p.x+OW>PX-10){
-        if(fly.y-8 < p.gy - p.gap/2 || fly.y+8 > p.gy + p.gap/2){
-          flyDie('pillar');
-        }
-      }
-      if(!p.passed && p.x+OW < PX){
-        p.passed=true;
-        fly.score++;
+      if(!p.passed&&p.x+OW<PX-7){
+        p.passed=true;fly.score++;
+        if(fly.score%5===0)fly.speed=Math.min(88,fly.speed+2.5);
         $('flyScore').textContent=String(fly.score);
         notify('HAPTIC_LIGHT');
       }
+      if(PX+7>p.x&&PX-7<p.x+OW&&(fly.y-5<p.gy-p.gap/2||fly.y+5>p.gy+p.gap/2))flyDie('pillar');
     });
-    fly.pillars=fly.pillars.filter(p=>p.x>-OW-10);
 
-    // Cập nhật thức ăn
     fly.items.forEach(it=>{
       it.x-=dx;
-      if(Math.hypot(it.x-PX, it.y-fly.y)<16){
-        flyEat(it);
-        it.eaten=true;
-      }
+      const d=Math.hypot(it.x-PX,it.y-fly.y);
+      if(d<(it.k==='coin'?9:11)){it.dead=true;flyEat(it)}
     });
-    fly.items=fly.items.filter(it=>!it.eaten && it.x>-20);
 
-    // Cập nhật chim đối thủ bay ngược chiều
-    fly.enemyBirds.forEach(b=>{
-      b.x+=b.vx*dt;
-      b.t+=dt;
-      b.y+=Math.sin(b.t*6)*1.2;
-      // Va chạm với chim
-      if(Math.hypot(b.x-PX, b.y-fly.y)<14){
-        flyDie('bird');
-      }
-    });
-    fly.enemyBirds=fly.enemyBirds.filter(b=>b.x>-30);
+    if(fly.y+7>=GY){fly.y=GY-7;flyDie('ground')}
+  }else if(fly.mode==='dead'){
+    if(fly.y+7>=GY){fly.y=GY-7;fly.vy=0}
+  }else fly.items.forEach(it=>it.x-=dx);
 
-    // Cập nhật gió lốc
-    fly.whirlwinds.forEach(w=>{
-      w.x-=dx*1.1;
-      w.t+=dt;
-      // Hút/đẩy heo khi chạm gió lốc
-      if(Math.hypot(w.x-PX, w.y-fly.y)<22){
-        fly.vy += w.dir * 180 * dt;
-        fly.shake = 0.1;
-        fly.floats.push({x:PX, y:fly.y-10, txt:'GIÓ LỐC!', col:'#E0452B'});
-      }
-    });
-    fly.whirlwinds=fly.whirlwinds.filter(w=>w.x>-30);
+  fly.pillars=fly.pillars.filter(p=>p.x>-OW-6);
+  fly.items=fly.items.filter(it=>!it.dead&&it.x>-20);
+  spawnCrit(dt);updCrit(dt,sc);
 
-    // Hạt mưa
-    if(fly.weather==='storm'){
-      if(fly.rainDrops.length<40){
-        fly.rainDrops.push({x:rnd(0,FW), y:rnd(-10,FH), v:rnd(140,220)});
-      }
-      fly.rainDrops.forEach(r=>{
-        r.y+=r.v*dt;
-        r.x-=35*dt;
-        if(r.y>FH){r.y=-5; r.x=rnd(0,FW+30);}
-      });
-    }
+  if(fly.rain>.05&&Math.random()<fly.rain*dt*70)fly.parts.push({x:rnd(0,FW+30),y:-4,vx:-26,vy:170,life:1.2,max:1.2,col:'#9CC8E6',kind:'rain'});
+  if(fly.wind>.05&&Math.random()<fly.wind*dt*7)fly.parts.push({x:FW+4,y:rnd(10,170),vx:-rnd(60,90),vy:rnd(-8,14),life:3,max:3,col:biomeAt(fly.dist)===3?'#FFD1DC':'#7DB868',kind:'leaf'});
+  fly.parts.forEach(p=>{
+    p.life-=dt;p.x+=(p.vx-(p.kind==='rain'?0:sc*.5))*dt;p.y+=p.vy*dt;
+    if(p.kind==='crumb')p.vy+=160*dt;else if(p.kind==='heart')p.vy=-16;
+    if(p.kind==='rain'&&p.y>GY)p.life=0;
+  });
+  fly.parts=fly.parts.filter(p=>p.life>0&&p.x>-10);
+  fly.floats.forEach(f=>{f.life-=dt;f.y-=14*dt});fly.floats=fly.floats.filter(f=>f.life>0);
+}
+
+/* Vẽ khung cảnh đồ họa 1:1 */
+const flyC=$('flyCv'),flyX=flyC.getContext('2d');
+const PERIOD=u=>u<.14?'Bình minh':u<.58?'Ban ngày':u<.7?'Hoàng hôn':u<.94?'Ban đêm':'Bình minh';
+const WXN={clear:'Trời quang',rain:'Mưa',wind:'Có gió'};
+function bgAlphas(){const bi=biomeAt(fly.dist),fr=fly.dist%BLEN,a=fr>BLEN-TR?(fr-(BLEN-TR))/TR:0;return{bi,nx:(bi+1)%4,a}}
+function tileDraw(c,tile,k,y){const o=Math.floor((fly.dist*k)%FW);c.drawImage(tile,-o,y);c.drawImage(tile,FW-o,y)}
+function layer(c,set,k,y,al){
+  tileDraw(c,set[al.bi],k,y);
+  if(al.a>0){c.globalAlpha=al.a;tileDraw(c,set[al.nx],k,y);c.globalAlpha=1}
+}
+
+function drawSky(c){
+  const [top,hor]=skyAt(fly.u),g=fly.rain*.45,T=g?mix(top,'#8E9AA6',g):top,H=g?mix(hor,'#B9C2C8',g):hor,n=nightness(fly.u);
+  const bands=14,bh=Math.ceil(GY/bands);
+  for(let i=0;i<bands;i++)R(c,0,i*bh,FW,bh+1,mix(T,H,i/(bands-1)));
+  if(n>0)STARS.forEach(([x,y,s])=>{c.globalAlpha=n*(.45+.55*Math.sin(fly.t*2.4+s*9))*(1-fly.rain*.8);R(c,x,y,s>.85?2:1,s>.85?2:1,'#FFFBF1')});
+  c.globalAlpha=1;
+  const u=fly.u;
+  if(u>.02&&u<.66){
+    const t=(u-.02)/.64,s=Math.sin(t*Math.PI),x=Math.round(12+t*(FW-24)),y=Math.round(170-s*130);
+    c.globalAlpha=1-fly.rain*.7;E(c,x,y,9,9,'rgba(255,226,122,.35)');E(c,x,y,7,7,'#2B2118');E(c,x,y,6,6,mix('#FFE27A','#FF9A52',1-s));c.globalAlpha=1;
   }
-
-  // Cập nhật thanh đói HUD
-  $('flyHungerT').textContent=fly.hunger>75?'No bụng':fly.hunger>35?'Vừa bụng':'Đói lả (-15% lực)';
-  const barEl=$('flyBar');
-  if(barEl){
-    const segs=Math.max(1, Math.min(10, Math.round(fly.hunger/10)));
-    barEl.innerHTML=Array.from({length:10},(_,i)=>'<i style="background:'+(i<segs?(segs<4?'#E0452B':'#5E9A57'):'#D9C9A4')+'"></i>').join('');
+  if(u>.7&&u<.98){
+    const t=(u-.7)/.28,s=Math.sin(t*Math.PI),x=Math.round(12+t*(FW-24)),y=Math.round(170-s*120);
+    c.globalAlpha=1-fly.rain*.7;E(c,x,y,7,7,'#2B2118');E(c,x,y,6,6,'#FFF6D6');R(c,x-3,y-2,2,2,'#E6D9A8');R(c,x+1,y+2,2,2,'#E6D9A8');c.globalAlpha=1;
   }
 }
 
-const cv=$('flyCv'), cx=cv.getContext('2d');
+function drawCrit(c,pass){
+  const n=nightness(fly.u),cc=mix('#FFFFFF','#5A6890',n);
+  fly.crit.forEach(k=>{
+    const sky=k.t==='cloud'||k.t==='bird'||k.t==='kite';if(sky!==(pass===0))return;
+    const x=Math.round(k.x),y=Math.round(k.y),f=Math.floor(fly.t*6+k.ph)%2;
+    if(k.t==='cloud')sCloud(c,x,y,k.s,fly.rain>.4?mix(cc,'#9AA4B0',.5):cc);
+    else if(k.t==='bird')sBird(c,x,y,f);
+    else if(k.t==='kite')sKite(c,x,y,k.col,fly.t);
+    else if(k.t==='bf')sButterfly(c,x,y,f,k.col);
+    else if(k.t==='egret')sEgret(c,x,y,k.dir,k.mode,f);
+    else if(k.t==='moto')sMoto(c,x,y,k.dir,k.col,f);
+    else if(k.t==='fish')sFish(c,x,y,k.dir,f);
+    else if(k.t==='ff'){c.globalAlpha=.5+.5*Math.sin(fly.t*5+k.ph);R(c,x,y,2,2,'#FFF08A');R(c,x-1,y,4,2,'rgba(255,240,138,.35)');c.globalAlpha=1}
+  });
+}
 
-function flyDraw(){
-  cx.imageSmoothingEnabled=false;
+const WING=[
+  [[-4,-6,-3],[-3,-8,-3],[-2,-9,-3],[-1,-8,-3],[0,-6,-3]],
+  [[-1,-9,-3],[0,-10,-3],[1,-9,-3],[2,-7,-3]],
+  [[1,-6,-3],[2,-8,-3],[3,-9,-4],[4,-9,-5],[5,-7,-5]]
+];
 
-  // Nền trời
-  const isStorm = fly.weather === 'storm';
-  cx.fillStyle = isStorm ? '#7C93A4' : '#BFE6F6';
-  cx.fillRect(0,0,FW,FH);
+function drawPigFly(c){
+  const dead=fly.mode==='dead',hungry=fly.hunger<28||fly.cause==='starve';
+  const o={pose:'stand',frame:0,mood:(hungry||dead)?'sad':'ok',happy:fly.eatT>0&&!dead,blink:fly.blink===1||dead,tail:Math.floor(fly.t*6)%2===1};
+  hpx.clearRect(0,0,24,20);drawPigSprite(hpx,o);
+  const sh=Math.max(3,8-(GY-fly.y)/18);if(!dead||fly.y<GY-8)E(c,PX,GY+3,Math.round(sh),1,'rgba(40,25,10,.22)');
+  c.save();c.translate(PX,Math.round(fly.y));c.rotate(Math.round((dead?1.2:fly.ang)*5)/5);
+  c.drawImage(hp,-11,-10);
+  const wf=fly.mode==='dead'?2:fly.flapT>.12?0:fly.flapT>.04?1:(fly.mode==='ready'?(Math.floor(fly.t*8)%2?1:2):2);
+  shape(c,WING[wf],'#FFFBF1',-1,-1);
+  c.restore();
+}
 
-  // Mây hoặc mây đen
-  cx.fillStyle = isStorm ? '#5A6E7D' : '#FFFFFF';
-  cx.fillRect(15,20,32,10); cx.fillRect(100,16,40,12);
+function drawFlyScene(c,t){
+  c.imageSmoothingEnabled=false;
+  c.save();
+  if(fly.shake>0)c.translate(Math.round(Math.sin(t*90)*2),Math.round(Math.cos(t*70)*2));
+  drawSky(c);drawCrit(c,0);
+  const al=bgAlphas(),n=nightness(fly.u);
+  layer(c,FAR,.15,GY-110,al);
+  layer(c,MID,.4,GY-96,al);
+  layer(c,GROUND,1,GY,al);
+  const pa=al.bi===2?1-al.a:al.nx===2?al.a:0;
+  if(n>0)R(c,0,0,FW,FH,'rgba(18,24,60,'+(.36*n).toFixed(2)+')');
+  if(n>0&&pa>0){
+    c.globalAlpha=n*pa;
+    c.drawImage(FAR_LIT,Math.floor(-((fly.dist*.15)%FW)),GY-110);c.drawImage(FAR_LIT,Math.floor(FW-((fly.dist*.15)%FW)),GY-110);
+    c.drawImage(MID_LIT,Math.floor(-((fly.dist*.4)%FW)),GY-96);c.drawImage(MID_LIT,Math.floor(FW-((fly.dist*.4)%FW)),GY-96);
+    c.globalAlpha=1;
+  }
+  if(fly.rain>.02)R(c,0,0,FW,FH,'rgba(110,128,146,'+(.2*fly.rain).toFixed(2)+')');
+  drawCrit(c,1);
 
-  // Vẽ các cột
+  /* Cột vật cản */
   fly.pillars.forEach(p=>{
-    pillar(cx, p.x, 0, p.gy - p.gap/2, true);
-    pillar(cx, p.x, p.gy + p.gap/2, GY, false);
+    const x=Math.round(p.x);
+    pillar(c,x,0,Math.round(p.gy-p.gap/2),p.skin,true);
+    pillar(c,x,Math.round(p.gy+p.gap/2),GY,p.skin,false);
   });
 
-  // Vẽ thức ăn
+  /* Đồ ăn */
   fly.items.forEach(it=>{
-    drawFood(cx, it.k, it.x, it.y);
+    const y=Math.round(it.y+Math.sin(fly.t*4+it.t)*2);
+    if(it.k!=='coin'){c.globalAlpha=.28+.12*Math.sin(fly.t*5+it.t);E(c,Math.round(it.x),y,10,10,'#FFF08A');c.globalAlpha=1}
+    drawFood(c,it.k,Math.round(it.x),y,fly.t);
   });
 
-  // Vẽ chim đối thủ
-  fly.enemyBirds.forEach(b=>{
-    cx.fillStyle='#E0452B'; cx.beginPath(); cx.arc(b.x, b.y, 6, 0, 6.28); cx.fill();
-    cx.strokeStyle='#2B2118'; cx.stroke();
-    // Mắt dữ
-    cx.fillStyle='#2B2118'; cx.fillRect(b.x-4, b.y-2, 2, 2);
-    cx.fillStyle='#F4B93B'; cx.fillRect(b.x-7, b.y, 4, 2);
+  drawPigFly(c);
+
+  /* Hạt */
+  fly.parts.forEach(p=>{
+    const a=Math.min(1,p.life/p.max*1.6);c.globalAlpha=a;
+    if(p.kind==='rain')R(c,Math.round(p.x),Math.round(p.y),1,4,p.col);
+    else if(p.kind==='heart')heart(c,Math.round(p.x),Math.round(p.y),p.col);
+    else if(p.kind==='leaf'){R(c,Math.round(p.x),Math.round(p.y),3,1,p.col);R(c,Math.round(p.x)+1,Math.round(p.y)+1,2,1,p.col)}
+    else R(c,Math.round(p.x),Math.round(p.y),2,2,p.col);
+    c.globalAlpha=1;
   });
 
-  // Vẽ gió lốc
-  fly.whirlwinds.forEach(w=>{
-    cx.fillStyle='rgba(255,255,255,0.7)';
-    for(let i=0; i<4; i++){
-      const oy = Math.sin(w.t*8 + i) * 12;
-      cx.fillRect(w.x + (i%2?3:-3), w.y + oy, 4, 3);
-    }
-  });
-
-  // Mặt đất
-  cx.fillStyle='#86B866'; cx.fillRect(0,GY,FW,FH-GY);
-  cx.fillStyle='#2B2118'; cx.fillRect(0,GY,FW,2);
-
-  // Vẽ heo bay
-  cx.drawImage(hp, 0, 0, 24, 20, Math.round(PX-12), Math.round(fly.y-10), 24, 20);
-
-  // Mưa rơi nếu bão
-  if(isStorm){
-    cx.fillStyle='#C9E4F5';
-    fly.rainDrops.forEach(r=>{
-      cx.fillRect(r.x, r.y, 1, 4);
-    });
-  }
-
-  // Floating text
+  /* Chữ nổi stamp */
   fly.floats.forEach(f=>{
-    f.y-=0.4;
-    cx.font='bold 9px sans-serif'; cx.fillStyle=f.col;
-    cx.fillText(f.txt, Math.round(f.x), Math.round(f.y));
+    c.globalAlpha=Math.min(1,f.life*2);
+    stamp(c,f.txt,Math.round(f.x)-f.txt.length*2+1,Math.round(f.y)+1,'#FFFBF1');
+    stamp(c,f.txt,Math.round(f.x)-f.txt.length*2,Math.round(f.y),f.col);
+    c.globalAlpha=1;
   });
-  fly.floats=fly.floats.filter(f=>f.y>10);
+
+  /* Viền đỏ khi đói */
+  if(fly.mode==='play'&&fly.hunger<28){
+    c.globalAlpha=.22+.2*Math.sin(t*8);
+    R(c,0,0,FW,3,'#E0452B');R(c,0,FH-3,FW,3,'#E0452B');R(c,0,0,3,FH,'#E0452B');R(c,FW-3,0,3,FH,'#E0452B');
+    c.globalAlpha=1;
+  }
+  c.restore();
 }
 
-let lastT=performance.now();
-function flyLoop(now){
-  const dt=Math.min(0.04, (now-lastT)/1000);
-  lastT=now;
+/* Cập nhật HUD */
+const hudC={};
+const flyBarEl=$('flyBar');
+for(let i=0;i<10;i++){const b=document.createElement('i');flyBarEl.appendChild(b)}
+function setT(id,v){if(hudC[id]!==v){hudC[id]=v;const el=$(id);if(el)el.textContent=v}}
+
+function flyHud(){
+  const h=Math.max(0,Math.ceil(fly.hunger/10)),col=fly.hunger>50?'var(--green)':fly.hunger>25?'var(--gold)':'var(--red)',key=h+col;
+  if(hudC.bar!==key){hudC.bar=key;[...flyBarEl.children].forEach((b,i)=>{b.style.background=i<h?col:'transparent'})}
+  setT('flyHungerT',fly.hunger>66?'No căng':fly.hunger>40?'Vừa bụng':fly.hunger>25?'Hơi đói':'Đói lả, hái gấp!');
+  setT('flyScore',String(fly.score));setT('flyBest',String(fly.best));setT('flyEaten',String(fly.eaten));setT('flyCoin',String(fly.coins));
+  setT('flyZone',BIOMES[biomeAt(fly.dist)].n);
+  setT('flyWx',WXN[fly.weather]);
+}
+
+/* Vòng lặp chính */
+function flyFrame(now){
+  const dt=Math.min(.05,(now-fly.last)/1000);fly.last=now;
   flyUpdate(dt);
-  flyDraw();
-  requestAnimationFrame(flyLoop);
+  drawFlyScene(flyX,now/1000);
+  flyHud();
+  requestAnimationFrame(flyFrame);
 }
 
-// Bắt sự kiện chạm vỗ cánh
-$('flyWrap').addEventListener('pointerdown', flyFlap);
-$('flyBtn').addEventListener('click', flyFlap);
+/* Bắt sự kiện */
+$('flyWrap').addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;e.preventDefault();flyFlap()});
+$('flyBtn').addEventListener('pointerdown',e=>{e.preventDefault();flyFlap()});
+$('flyBtn').addEventListener('click',e=>{if(e.detail===0)flyFlap()});
 
-$('flyPause').addEventListener('click', () => {
-  fly.paused = !fly.paused;
-  $('flyPause').textContent = fly.paused ? 'Tiếp tục' : 'Tạm dừng';
+$('flyPause').addEventListener('click',()=>{
+  fly.paused=!fly.paused;
+  $('flyPause').textContent=fly.paused?'Tiếp tục':'Tạm dừng';
+  flyMsg(fly.paused?'Đã tạm dừng':'Tiếp tục bay',1.5);
 });
 
-$('flyWx').addEventListener('click', () => {
-  fly.weather = fly.weather === 'clear' ? 'storm' : 'clear';
-  $('flyWeather').textContent = fly.weather === 'storm' ? 'Mưa bão ⛈' : 'Trời quang ☀';
-  flyMsg(fly.weather === 'storm' ? 'Bão gió đến rồi, cẩn thận!' : 'Trời quang mây tạnh', 2);
+$('flyWxBtn').addEventListener('click',()=>{
+  fly.weather=fly.weather==='clear'?'rain':fly.weather==='rain'?'wind':'clear';
+  fly.wnext=rnd(24,42);
+  flyMsg(WXN[fly.weather],1.4);
+});
+
+/* Khởi tạo danh sách đồ ăn ở footer */
+FOODS.concat([{k:'coin',v:1,n:'Đồng cám'}]).forEach(f=>{
+  const d=document.createElement('div');d.className='fd';
+  d.innerHTML='<canvas width="24" height="24"></canvas><b>'+f.n+'</b><span>'+(f.k==='coin'?'+1 cám':'+'+f.v+'% no')+'</span>';
+  const cv=d.querySelector('canvas'),cx=cv.getContext('2d');
+  drawFood(cx,f.k,12,f.k==='melon'?15:13,0.1);
+  $('flyFood').appendChild(d);
 });
 
 flyReset();
-requestAnimationFrame(flyLoop);
+fly.last=performance.now();
+requestAnimationFrame(flyFrame);
 
 })();
 </script>

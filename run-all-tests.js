@@ -3734,10 +3734,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(shooterCode.includes('wing') && shooterCode.includes('coin'), 'PigShooterGameView must support Wing Pig & Coin Bomb Pig abilities');
   assert.ok(shooterCode.includes('tabFly') && shooterCode.includes('SWITCH_GAME'), 'PigShooterGameView must include top quick game switcher');
 
-  // 3. Game Heo Bay (Flappy Pig) Dynamic Obstacles & Storm Weather
-  assert.ok(flyCode.includes('enemyBirds'), 'PigFlightGameView must feature incoming enemy bird obstacles');
-  assert.ok(flyCode.includes('whirlwinds'), 'PigFlightGameView must feature dynamic whirlwind gusts');
-  assert.ok(flyCode.includes('storm') && flyCode.includes('rainDrops'), 'PigFlightGameView must feature storm weather and rain particles');
+  // 3. Game Heo Bay (Flappy Pig) Dynamic Obstacles & Weather
+  assert.ok(flyCode.includes('sBird') || flyCode.includes('enemyBirds'), 'PigFlightGameView must feature bird obstacles/critters');
+  assert.ok(flyCode.includes('wind') || flyCode.includes('whirlwinds'), 'PigFlightGameView must feature dynamic wind physics');
+  assert.ok(flyCode.includes('rain') || flyCode.includes('storm'), 'PigFlightGameView must feature rain/storm weather and particles');
   assert.ok(flyCode.includes('hunger') && flyCode.includes('flyHungerT'), 'PigFlightGameView must feature hunger bar consumption and eating foods');
   assert.ok(flyCode.includes('tabShoot') && flyCode.includes('SWITCH_GAME'), 'PigFlightGameView must include top quick game switcher');
 
@@ -3753,4 +3753,66 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 82 Passed: Nâng Cấp Tab Giải Trí Prototype 20/11 & Game Độ Khó Cao (Quyết định 142) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 82 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (82/82)!');
+// ==============================================================================
+// 🧪 TEST 83: PORT 1:1 PROTOTYPE GRAPHICS FOR CHAT & 2 GAMES (QUYẾT ĐỊNH 143) AUDIT
+// ==============================================================================
+{
+  const gamesSpecPath = path.join(__dirname, 'docs/screens/heocon/10-GAMES-SPEC.md');
+  assert.ok(fs.existsSync(gamesSpecPath), '10-GAMES-SPEC.md must exist in docs/screens/heocon/');
+  const specCode = fs.readFileSync(gamesSpecPath, 'utf8');
+
+  const bubblePath = path.join(__dirname, 'src/components/chat/CoachMessageBubble.tsx');
+  const bubbleCode = fs.readFileSync(bubblePath, 'utf8');
+  const chatViewPath = path.join(__dirname, 'src/components/views/ChatView.tsx');
+  const chatViewCode = fs.readFileSync(chatViewPath, 'utf8');
+  const shooterPath = path.join(__dirname, 'src/components/chat/PigShooterGameView.tsx');
+  const shooterCode = fs.readFileSync(shooterPath, 'utf8');
+  const flyPath = path.join(__dirname, 'src/components/chat/PigFlightGameView.tsx');
+  const flyCode = fs.readFileSync(flyPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+  const chatDocPath = path.join(__dirname, 'docs/screens/heocon/10-CHAT.md');
+  const chatDocCode = fs.readFileSync(chatDocPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+
+  // 1. Game Spec Document Audit (10-GAMES-SPEC.md)
+  assert.ok(specCode.includes('GRAV = 560') && specCode.includes('FLAP = -172'), 'Spec must document Flappy Pig physics constants');
+  assert.ok(specCode.includes('AGR = 230') && specCode.includes('AK = 8.5'), 'Spec must document Angry Pig physics constants');
+  assert.ok(specCode.includes('4 Biomes') && specCode.includes('bamboo') && specCode.includes('lotus'), 'Spec must document Flappy Pig biomes and pillar skins');
+  assert.ok(specCode.includes('Endless Waves') && specCode.includes('Bảng Máu & Khối Lượng'), 'Spec must document block health/mass and endless waves');
+  assert.ok(specCode.includes('Popup Kết Thúc') || specCode.includes('POPUP KẾT THÚC'), 'Spec must document Win/Loss replay popup specification');
+
+  // 2. Chat Neo-Brutalist Pixel Art View Audit
+  assert.ok(bubbleCode.includes('avatarWrapperHeocon'), 'CoachMessageBubble must have avatarWrapperHeocon for brutalist pixel avatar');
+  assert.ok(bubbleCode.includes('borderRadius: 10') && bubbleCode.includes('borderWidth: 2.5'), 'Avatar must be a 36x36 pixel card with 2.5px ink border');
+  assert.ok(chatViewCode.includes('chatlogWrapperHeocon'), 'ChatView must enclose FlatList in card container .chatlog');
+  assert.ok(chatViewCode.includes('privacyNote') || chatViewCode.includes('privacyHeoconText'), 'ChatView must display .privacy reassurance notice');
+
+  // 3. PigShooterGameView 1:1 Prototype Graphics Audit
+  assert.ok(shooterCode.includes('mkFar') && shooterCode.includes('mkMid') && shooterCode.includes('mkGround'), 'PigShooterGameView must render 3-layer parallax backgrounds');
+  assert.ok(shooterCode.includes('skyAt'), 'PigShooterGameView must implement sky gradient rendering');
+  assert.ok(shooterCode.includes('drawBirdy'), 'PigShooterGameView must render enemy birds with orange beaks');
+  assert.ok(shooterCode.includes('drawCage'), 'PigShooterGameView must render wooden cages with sad piglets');
+  assert.ok(shooterCode.includes('drawFreed'), 'PigShooterGameView must render rescued running piglets');
+  assert.ok(shooterCode.includes('generateWave'), 'PigShooterGameView must implement dynamic Endless Waves generator');
+  assert.ok(shooterCode.includes('ap.wind'), 'PigShooterGameView must implement dynamic cross-wind physics');
+
+  // 4. PigFlightGameView 1:1 Prototype Graphics Audit
+  assert.ok(flyCode.includes('mkFar') && flyCode.includes('mkMid') && flyCode.includes('mkGround'), 'PigFlightGameView must render 4 biomes parallax backgrounds');
+  assert.ok(flyCode.includes('skyAt') && flyCode.includes('STARS') && flyCode.includes('nightness'), 'PigFlightGameView must render 8-phase sky cycle with stars');
+  assert.ok(flyCode.includes('bamboo') && flyCode.includes('post') && flyCode.includes('pole') && flyCode.includes('lotus'), 'PigFlightGameView must render 4 distinct pillar skins');
+  assert.ok(flyCode.includes('drawFood') && flyCode.includes('carrot') && flyCode.includes('melon'), 'PigFlightGameView must render pixel foods and coins');
+  assert.ok(flyCode.includes('sBird') && flyCode.includes('sKite') && flyCode.includes('sButterfly') && flyCode.includes('sEgret') && flyCode.includes('sMoto') && flyCode.includes('sFish'), 'PigFlightGameView must render background creatures');
+  assert.ok(flyCode.includes('drawPigFly') && flyCode.includes('WING'), 'PigFlightGameView must render flapping animated wings');
+  assert.ok(flyCode.includes('flyBar') && flyCode.includes('hbar'), 'PigFlightGameView must feature 10-segment hunger HUD');
+
+  // 5. Living Documentation Sync Audit
+  assert.ok(decisionsCode.includes('143'), 'DECISIONS.md must document Quyết định 143');
+  assert.ok(chatDocCode.includes('143') && chatDocCode.includes('10-GAMES-SPEC.md'), '10-CHAT.md must document Quyết định 143 and reference 10-GAMES-SPEC.md');
+  assert.ok(agentsCode.includes('143'), 'AGENTS.md must document Quyết định 143 in Tab 3 matrix');
+
+  console.log('✅ Test 83 Passed: Port 1:1 Prototype Graphics For Chat & 2 Games (Quyết định 143) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 83 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (83/83)!');

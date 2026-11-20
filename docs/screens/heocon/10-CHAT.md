@@ -1,6 +1,7 @@
 # 🎮 10 — PIGFLY HUB & PIXEL HUB (TAB GIẢI TRÍ): CHAT, 2 GAME ĐỘ KHÓ CAO & BẢN ĐỒ CHI TIÊU
 
-> **Screen-unit:** Tab 3. **PIGFLY HUB (Trung Tâm Giải Trí & Khám Phá Heo Con)** kết hợp Chat AI Coach / Squad, 2 Game Pixel Art Độ Khó Cao (Heo Bay & Heo Bắn) và Bản Đồ Chi Tiêu Pixel port 1:1 từ `prototype/Ví Heo Con-20-11.html` (Quyết định 130, 140, 141 & 142).
+> **Screen-unit:** Tab 3. **PIGFLY HUB (Trung Tâm Giải Trí & Khám Phá Heo Con)** kết hợp Chat AI Coach / Squad, 2 Game Pixel Art Độ Khó Cao (Heo Bay & Heo Bắn) và Bản Đồ Chi Tiêu Pixel port 1:1 từ `prototype/Ví Heo Con-20-11.html` (Quyết định 130, Quyết định 140, Quyết định 141, Quyết định 142 & Quyết định 143).
+> **Tài liệu đặc tả chi tiết 2 mini-game:** Xem riêng tại [10-GAMES-SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-GAMES-SPEC.md).
 
 ---
 
@@ -15,9 +16,9 @@ Màn hình Tab 3 mặc định hiển thị **PIGFLY HUB (`v-fun`)** gồm:
 
 | Thẻ Phân Hệ | Biểu Tượng & Tông Màu | Chức Năng Cốt Lõi |
 |---|---|---|
-| **1. Trò Chuyện & Bạn Bè** | 💬 Hồng Heo `#F9B8C4` | Chat với AI Coach Anh Minh & Squad Locket Nuôi Heo 2–4 người. |
-| **2. Game Heo Bay** | 🪽 Vàng Cám `#F4B93B` | Flappy Pig 60fps chướng ngại vật động (Gió lốc, chim ngược chiều, bão mưa), hái đồ ăn tiếp sức cho vườn nhà. |
-| **3. Game Heo Bắn** | 🎯 Đỏ Cam `#E0452B` | Angry Pig Endless Waves (Màn vô tận, gió biến thiên, cứu heo con lồng sắt, heo cánh, heo bom). |
+| **1. Trò Chuyện & Bạn Bè** | 💬 Hồng Heo `#F9B8C4` | Khung `.chatlog` Neo-Brutalist viền 3px mực: Chat với AI Coach Anh Minh & Squad Nuôi Heo 2.0. |
+| **2. Game Heo Bay** | 🪽 Vàng Cám `#F4B93B` | Flappy Pig 60fps port 1:1 parallax 4 biomes, chu kỳ ngày/đêm 8 pha, chướng ngại vật động và độ hở co hẹp lũy tiến. |
+| **3. Game Heo Bắn** | 🎯 Đỏ Cam `#E0452B` | Angry Pig port 1:1 ná gỗ 3D, 14 chấm quỹ đạo, texture khối nứt, chim lính drawBirdy, lồng cứu heo con, Endless Waves & gió biến thiên. |
 | **4. Bản Đồ Chi Tiêu** | 🗺️ Xanh Lá `#5E9A57` | Bản đồ pixel khu phố & Bản đồ thật, thống kê Lượt ghé, Quán quen, Chi có ghim. |
 
 ---
@@ -25,35 +26,24 @@ Màn hình Tab 3 mặc định hiển thị **PIGFLY HUB (`v-fun`)** gồm:
 ## 2. Đặc Tả Chi Tiết Các Phân Hệ & Game Độ Khó Cao
 
 ### 2.1. Phân Hệ 1: Trò Chuyện & Squad Bạn Thân (`ChatView`)
-- **Giao diện Chat Neo-Brutalist (Quyết định 140)**:
-  - Header segment: Track viền 3px mực `#2B2118`, nền `#FFFBF1`, bóng cứng 3px 0-blur; tab active Vàng Cám `#F4B93B` viền 2px mực.
-  - Bong bóng tin nhắn AI Coach: Nền kem `#FFFBF1`, viền 3px mực, bóng cứng 3px 0-blur, avatar Heo Con pixel 36px.
-  - Bong bóng tin nhắn người dùng: Nền Vàng Cám `#F4B93B`, viền 3px mực, bóng cứng 3px 0-blur.
-  - Thanh nhập chat `ChatInputBar`: Nền kem `#F6EEDC`, viền trên 2.5px mực, ô gõ `#FFFBF1`, nút gửi Vàng Cám.
-  - Thẻ xác nhận ghi sổ 1-chạm & MiniMetric: Viền 2.5px mực, bóng cứng 2px.
+- **Giao diện Chat Neo-Brutalist Pixel Art (Quyết định 143)**:
+  - Header: Nút `‹ Quay lại Hub` và tiêu đề *"Trò chuyện · Heo-Coach và hội bạn thân"*.
+  - Header segment: Track viền 3px mực `#2B2118`, nền `#FFFBF1`, bóng cứng 3px 0-blur; tab active Vàng Cám `#F4B93B` viền 2px mực, chữ font Baloo 2.
+  - **Khung bao `.chatlog`:** Khối thẻ màu kem `#FFFBF1`, viền 3px mực `#2B2118`, bo góc 22px, bóng cứng 4px 0-blur.
+  - **Bong bóng tin nhắn `.msg`:**
+    - AI Coach: Avatar vuông pixel 30×30px `PixelPigAvatar` viền 3px mực, nền hồng `#F9B8C4`; bong bóng màu kem sàn `#F6EEDC` viền 3px mực, bo góc brutalist 16px.
+    - Người dùng (`.msg.me`): Bong bóng nền hồng phấn heo `#F9B8C4` viền 3px mực, chữ Nâu Mực `#2B2118`, căn sát lề phải.
+  - **Dải Quick Chips (`.quick`):** Hàng nút chip hình viên thuốc pill viền 2px mực, bóng 2px để chạm hỏi nhanh không cần gõ phím.
+  - **Thanh nhập chat `.chatin`:** Nền kem `#F6EEDC`, ô gõ `#FFFBF1` cao 44px viền 3px mực, nút `[Gửi]` Vàng Cám viền 2.5px mực nổi khối.
+  - **Dòng quyền riêng tư (`.privacy`):** "Heo-Coach đọc số liệu tổng hợp trong app. Ảnh và vị trí không được gửi đi."
 
-### 2.2. Phân Hệ 2: Game Heo Bay (`PigFlightGameView`) — Chướng Ngại Vật Động & Khắc Nghiệt
-- **Thanh Chuyển Nhanh Top Segment:** `[Heo bay] [Heo bắn]` chuyển đổi 1 chạm trực tiếp giữa 2 game, kèm chip Vé và nút `‹ Quay lại Hub`.
-- **Thẻ Chăm Sóc Heo Cưng:** Thanh no/đói 0-100% của Heo, nút `[Cho heo ăn (-1 thức ăn)]`. Heo đói ($<25\%$) bị suy nhược lực bay và lực bắn; Heo no ($>75\%$) được buff lực.
-- **Chướng Ngại Vật Động Đột Biến:**
-  - *Gió Lốc (Whirlwinds):* Luồng gió xoáy di chuyển ngẫu nhiên hất văng hoặc hút heo lên/xuống.
-  - *Chim Ngược Chiều (Incoming Birds):* Chim đối thủ bay ngược chiều từ phải sang trái đòi hỏi phản xạ né tránh.
-  - *Thời Tiết Mưa Bão & Sấm Chớp:* Mưa rào làm tối khung cảnh, giảm tầm nhìn, hạt mưa rơi dồn dập.
-  - *Thanh No Đói (Hunger Bar):* Tụt dần khi bay, phải ăn thức ăn (bắp, táo, cà rốt, dưa hấu) để duy trì.
+### 2.2. Phân Hệ 2 & 3: Game Heo Bay & Game Heo Bắn
+*(Xem đặc tả chi tiết toàn diện về đồ họa, công thức vật lý, độ khó và popup tại [10-GAMES-SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-GAMES-SPEC.md))*.
 
-### 2.3. Phân Hệ 3: Game Heo Bắn (`PigShooterGameView`) — Endless Waves Tháp Vô Tận
-- **Thanh Chuyển Nhanh Top Segment:** `[Heo bay] [Heo bắn]`, chip Vé, nút `‹ Quay lại Hub`.
-- **Chế Độ Endless Waves (Tháp Vô Tận):**
-  - Vượt màn tự động sinh màn mới với cấu trúc tháp ngẫu nhiên (Procedural Generation).
-  - Tỉ lệ khối đá kiên cố (`stone` HP 110) tăng dần, khối kính (`glass`), khối gỗ (`wood`), và lồng sắt (`cage` HP 42).
-- **Gió Thổi Biến Thiên (Dynamic Wind Vector):**
-  - Mũi tên chỉ hướng gió và tốc độ gió ($\pm 50$ px/s) đổi chiều theo từng đợt gió, buộc người chơi căn góc bù gió.
-- **Cứu Heo Con & Kỹ Năng Đặc Biệt:**
-  - Bắn vỡ lồng sắt giải cứu heo con (`ap.free`), tích lũy số lượng heo con giải cứu vĩnh viễn.
-  - Mở khóa *Heo Cánh (`wing`)* chạm giữa trời để phóng nhanh x1.6 và *Heo Bom Cám (`coin`)* chạm giữa trời để kích nổ xung lực.
-- **Ràng Buộc Kỷ Luật Ngân Sách Ngày:**
-  - Chi tiêu $< 50\%$ hạn mức: `+1 lượt bay vì tiêu ít`.
-  - Chi tiêu lố $> 100\%$ hạn mức: `-1 lượt bay vì chi lố`.
+### 2.4. Phân Hệ 4: Bản Đồ Chi Tiêu Pixel (`PiggySpendMapView`)
+- Chế độ xem: `[Pixel] [Bản đồ thật]`.
+- 3 Chỉ số tài chính định vị: `Lượt ghé`, `Quán quen`, `Chi có ghim`.
+- Ghim vị trí thực tế khi chụp/lưu chi từ Tab Chụp; heo đi dạo tới các quán; lưu chi trực tiếp tại tọa độ hiện tại.
 
 ### 2.4. Phân Hệ 4: Bản Đồ Chi Tiêu Pixel (`PiggySpendMapView`)
 - Chế độ xem: `[Pixel] [Bản đồ thật]`.

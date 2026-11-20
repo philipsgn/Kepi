@@ -874,6 +874,25 @@
          - Tặng 3 vé chơi/ngày khi mở app + 1 vé mỗi khi ghi chép/chụp ảnh chi tiêu ở Tab Chụp.
          - Thẻ "Chăm sóc Heo cưng": Thanh no/đói (0-100%) quyết định trạng thái thể lực của Heo trong game.
 
+  - **Quyết định 143 (20/11/2026): Tái Hiện 100% Đồ Họa Prototype Cho 2 Game Pixel Art & Chuyển Đổi Khung Chat Sang Neo-Brutalist:**
+    - *Bối Cảnh & Nguyên Nhân:* Người dùng phản ánh 2 mini-game (Heo Bay & Heo Bắn) bị lỗi hiển thị và chưa đạt được độ đẹp tinh xảo như bản HTML prototype (mất cảnh parallax núi/rừng/đất, mất chu kỳ bầu trời ngày/đêm 8 pha `skyAt`, mất texture vân gỗ/đá/kính/lồng nan sắt có heo con buồn bã, mất chim non mỏ cam `drawBirdy`, mất 14 chấm quỹ đạo ngắm bắn). Đồng thời, khung chat AI Coach & Squad vẫn mang phong cách bo tròn hiện đại mềm mại, chưa chuyển hẳn sang phong cách Neo-Brutalist Pixel Art.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Tài Liệu Đặc Tả Chi Tiết Màn Chơi (`docs/screens/heocon/10-GAMES-SPEC.md`):** Đặc tả toàn diện bảng màu `PAL` và `C`, hằng số vật lý (`GRAV=560`, `FLAP=-172`, `AGR=230`, `AK=8.5`), công thức độ khó màn chơi lũy tiến, và cấu trúc popup Chơi lại / Màn tiếp theo.
+      2. **Khung Chat Neo-Brutalist Pixel Art (`ChatView.tsx`, `CoachMessageBubble.tsx`, `UserMessageBubble.tsx`, `ChatInputBar.tsx`):** Port 1:1 theo prototype với khung `.chatlog` hộp thẻ viền 3px mực `#2B2118`, avatar pixel vuông 30×30 `PixelPigAvatar`, bong bóng brutalist góc cạnh (Coach: kem `#F6EEDC` viền 3px mực; User: hồng heo `#F9B8C4` viền 3px mực), dải `quick chips` dạng viên thuốc nổi bật, ô nhập liệu `.chatin` 44px viền 3px mực cùng nút `[Gửi]` Vàng Cám.
+      3. **Game Heo Bắn (Angry Pig — `PigShooterGameView.tsx`) Port 1:1 Đồ Họa Prototype:**
+         - Khôi phục Parallax 3 tầng `FAR[0]`, `MID[0]`, `GROUND[0]`, bầu trời ngày/đêm `skyAt(.3)` pha trộn 8 dải màu.
+         - Ná gỗ 3D với 14 chấm quỹ đạo ngắm bắn parabol xen kẽ `#FFFBF1` và `#2B2118`, dây cao su co giãn 2 phía.
+         - Texture khối chi tiết: Gỗ vân sọc, Đá chấm nứt, Kính specular shine, Lồng sắt nan xám có heo con buồn bã bên trong.
+         - Sprite chim lính `drawBirdy`: Mỏ cam, băng đô 3 màu (`an`: đỏ, `di`: xanh, `mua`: hồng), chỏm lông trên đầu, nhấp nhô sin.
+         - Khói nổ `apPuff`, chữ số bay đổ bóng `stamp`, rung màn hình, heo con giải cứu `drawFreed` chạy thoát.
+         - Tích hợp Endless Waves và Gió biến thiên trên nền engine gốc chuẩn xác.
+      4. **Game Heo Bay (Flappy Pig — `PigFlightGameView.tsx`) Port 1:1 Đồ Họa Prototype:**
+         - Khôi phục Parallax 4 Biomes (Vườn nhà, Ruộng lúa, Phố nhà, Ao sen), chu kỳ bầu trời 8 pha `skyAt(u)` mượt mà kèm sao đêm `STARS`.
+         - Sprite chú heo `hp` 24×20 vỗ cánh đập lên xuống chân thực, chớp mắt, vẫy đuôi, cười tươi khi ăn thức ăn.
+         - Texture cột chướng ngại vật: Tre trúc, cọc gỗ, trụ đèn, đài sen.
+         - Đồ ăn pixel: Cà rốt, bắp vàng, táo đỏ, dưa hấu xanh; thanh HUD 10 ô segmented `.hbar`.
+         - Tốc độ tăng dần $\min(110, 58 + \text{score} \times 1.8)$, khoảng hở cột co hẹp $\max(48, 64 - \lfloor \text{score}/5 \rfloor)$, đói nhanh hơn $3.2\%$/s.
+
 
 
 

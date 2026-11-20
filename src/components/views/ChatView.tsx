@@ -471,63 +471,70 @@ export const ChatView: React.FC<ChatViewProps> = ({
             </ScrollView>
           </View>
 
-          {/* DANH SÁCH TIN NHẮN */}
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={[
-              styles.messagesContent,
-              { paddingBottom: 16 },
+          {/* DANH SÁCH TIN NHẮN TRONG KHUNG .CHATLOG */}
+          <View
+            style={[
+              styles.chatlogWrapper,
+              isHeocon && styles.chatlogWrapperHeocon,
             ]}
-            renderItem={({ item }) => {
-              if (item.sender === 'USER') {
-                return <UserMessageBubble message={item} />;
-              }
-              return (
-                <CoachMessageBubble
-                  message={item}
-                  onNavigateToStats={onNavigateToStats}
-                  onConfirmRecord={handleConfirmRecord}
-                />
-              );
-            }}
-            ListFooterComponent={
-              isThinking ? (
-                <View
-                  style={[
-                    styles.thinkingBubble,
-                    isHeocon
-                      ? {
-                          backgroundColor: '#FFFBF1',
-                          borderColor: '#2B2118',
-                          borderWidth: 2.5,
-                          borderRadius: 16,
-                          shadowColor: '#2B2118',
-                          shadowOffset: { width: 0, height: 2 },
-                          shadowOpacity: 1,
-                          shadowRadius: 0,
-                          elevation: 2,
-                        }
-                      : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
-                  ]}
-                >
-                  <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary }]} />
-                  <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary, opacity: 0.7 }]} />
-                  <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary, opacity: 0.4 }]} />
-                  <Text
+          >
+            <FlatList
+              ref={flatListRef}
+              data={messages}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={[
+                styles.messagesContent,
+                { paddingBottom: 16 },
+              ]}
+              renderItem={({ item }) => {
+                if (item.sender === 'USER') {
+                  return <UserMessageBubble message={item} />;
+                }
+                return (
+                  <CoachMessageBubble
+                    message={item}
+                    onNavigateToStats={onNavigateToStats}
+                    onConfirmRecord={handleConfirmRecord}
+                  />
+                );
+              }}
+              ListFooterComponent={
+                isThinking ? (
+                  <View
                     style={[
-                      styles.thinkingText,
-                      { color: isHeocon ? '#2B2118' : tokens.textMuted },
-                      isHeocon && { fontFamily: 'Nunito', fontWeight: '700' },
+                      styles.thinkingBubble,
+                      isHeocon
+                        ? {
+                            backgroundColor: '#FFFBF1',
+                            borderColor: '#2B2118',
+                            borderWidth: 2.5,
+                            borderRadius: 16,
+                            shadowColor: '#2B2118',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 1,
+                            shadowRadius: 0,
+                            elevation: 2,
+                          }
+                        : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
                     ]}
                   >
-                    Anh Minh đang tính toán...
-                  </Text>
-                </View>
-              ) : undefined
-            }
-          />
+                    <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary }]} />
+                    <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary, opacity: 0.7 }]} />
+                    <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary, opacity: 0.4 }]} />
+                    <Text
+                      style={[
+                        styles.thinkingText,
+                        { color: isHeocon ? '#2B2118' : tokens.textMuted },
+                        isHeocon && { fontFamily: 'Nunito', fontWeight: '700' },
+                      ]}
+                    >
+                      Anh Minh đang tính toán...
+                    </Text>
+                  </View>
+                ) : undefined
+              }
+            />
+          </View>
 
           {/* THANH NHẬP LIỆU CHAT */}
           <ChatInputBar
@@ -535,6 +542,13 @@ export const ChatView: React.FC<ChatViewProps> = ({
             onPickImage={handlePickImage}
             isThinking={isThinking}
           />
+
+          {/* DÒNG CAM KẾT RIÊNG TƯ .PRIVACY */}
+          {isHeocon && (
+            <Text style={styles.privacyNote}>
+              Heo-Coach đọc số liệu tổng hợp trong app. Ảnh và vị trí không được gửi đi.
+            </Text>
+          )}
 
           {/* THANH HOÀN TÁC 5 GIÂY NẾU VỪA LƯU */}
           <UndoToastBar
@@ -584,6 +598,34 @@ const styles = StyleSheet.create({
   },
   coachContainer: {
     flex: 1,
+  },
+  chatlogWrapper: {
+    flex: 1,
+  },
+  chatlogWrapperHeocon: {
+    marginHorizontal: 14,
+    marginVertical: 6,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 3,
+    borderColor: '#2B2118',
+    borderRadius: 22,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  privacyNote: {
+    fontFamily: 'Nunito',
+    fontWeight: '700',
+    fontSize: 11.5,
+    color: '#85735E',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 6,
+    backgroundColor: '#F6EEDC',
   },
   chipsContainer: {
     paddingVertical: 8,
