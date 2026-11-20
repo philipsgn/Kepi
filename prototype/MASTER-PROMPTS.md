@@ -513,8 +513,89 @@ GIAO DIỆN
 
 ---
 
+## PLAN 13: Heo bắn (AngryPig, cứu heo con) + việc nhà + kinh tế chung
+
+````
+Dựng game "Heo bắn" (ná cao su kiểu Angry Birds, đảo vai) trong tab Giải trí của {APP_NAME}. Dùng chung nhân vật, vé và cám với Heo bay.
+
+LUẬT CHƠI
+- Màn 1 chỉ có 1 heo mẹ trên ná. Bên phải là Ổ Chim: Chim Non canh giữ các lồng sắt nhốt heo con. Heo mẹ phải bay qua phá lồng để cứu heo con; hạ chim chỉ là phụ.
+- Kéo heo về sau rồi thả. Đạn: heo thường; heo cánh (chạm khi bay để lao tới); heo cám (chạm để nổ).
+- Ba màn: Ổ chim nhỏ, Tháp ổ chim, Cổng ổ chim. Khối gỗ, đá, kính, lồng có máu và khối lượng khác nhau; cột cao có thể đổ.
+- Chim Non đội băng theo danh mục chi: ăn uống đỏ, đi lại xanh, mua sắm hồng.
+- Thưởng: hạ 1 chim +2 cám, phá 1 lồng +5 cám, thắng màn +3 cám mỗi sao (tối đa 3 sao, 9 sao cho 3 màn).
+- Heo con đã cứu vào đội: con thứ nhất mang cánh, con thứ hai mang cám nổ ở các ván sau, và heo nhà no thêm.
+
+LIÊN KẾT BẮT BUỘC
+- Ngân sách: đã chi dưới 50% hạn mức hôm nay thì +1 lượt bay; chi vượt hạn mức thì -1. Heo nhà đói (<25%) thì bắn yếu (x0.85).
+- Vé dùng chung hai game: mỗi ván mất 1 vé; ghi một khoản chi (từ Chụp, Bản đồ, Chat, Hồ sơ) +1 vé; 10 cám đổi 1 vé; tối đa 99.
+- Việc nhà: ba chỉ số heo, cá ao, hoa hồng (0 đến 100%) giảm theo thời gian thật (heo 1.2, cá 0.8, hoa 0.6 điểm mỗi phút, tối đa 12 giờ bù). Đồ ăn hái ở Heo bay mang về: bắp +10 và cà rốt +8 cho cá; chuối +9, táo +10, dưa hấu +14 cho hoa hồng. Cho heo ăn cám +25 cho heo, mất 1 cám. Dưới 25% thì heo ngoài Vườn buồn và nói nhắc.
+- Dùng chung sprite heo, cánh, đồ ăn, nền cảnh với Heo bay.
+
+KỸ THUẬT: canvas 224x140, vật lý khối AABB (đạn là hình tròn), giảm chuyển động khi bật reduced-motion. Kiểm thử: màn không tự xê dịch khi chưa bắn; mỗi màn có ít nhất một cú bắn phá được lồng; hết vé thì báo cách có vé, không tự chạy.
+````
+
+---
+
+## PLAN 14: Tab Giải trí (Trung Tâm Heo Con): hub, Chat, 2 game, Bản đồ
+
+Tab Giải trí là tab thứ 4 trong thanh 5 tab: Vườn, Nhà, Chụp (giữa), Giải trí, Hồ sơ. Prototype đối chiếu: file `ve-heo-con.html`. Gửi kèm prototype và MASTER-PROMPTS.md cho agent.
+
+### 14.1 Prompt chính cho agent thiết kế
+
+````
+Bạn là Art Director kiêm UI engineer. Thiết kế và dựng tab "Giải trí" (Trung Tâm Heo Con) của {APP_NAME}, giống prototype đính kèm `ve-heo-con.html` về cấu trúc, luồng và phong cách. Đồng bộ với MASTER-PROMPTS.md: Plan 1 đến 4 (style, màu, font, UI), 5 đến 7 (pixel, heo, hành vi), 8 (giọng văn), 12 (bản đồ thật), 13 (Heo bắn). Mọi giá trị khác với tài liệu thì ghi rõ chỗ lệch và lý do, không tự đổi.
+
+1) CẤU TRÚC
+- Tab Giải trí = hub. Chat, Heo bay, Heo bắn, Bản đồ là bốn màn con, mỗi màn có nút "‹ Trung tâm Heo Con" ở đầu. Khi ở màn con, tab Giải trí vẫn sáng.
+- Hub gồm: pill "PIGFLY HUB" (chấm đỏ), chip chuỗi ngày (vàng), avatar mặt heo, tiêu đề "Trung Tâm Heo Con", lời chào "Chào {TÊN}! Khám phá giải trí & bản đồ khu phố", hai chip Vé và Cám, rồi 4 thẻ xếp dọc.
+- Mỗi thẻ: ô icon pixel 64px nền màu (viền 3px mực, bo 18px, bóng cứng 3px), tag pill chữ hoa, tên (Baloo 2 ExtraBold), dòng số liệu thật màu xanh, mô tả 1 đến 2 dòng, "Khám phá ngay ›".
+  - Trò Chuyện & Bạn Bè · AI COACH & SQUAD · số tin mới.
+  - Game Heo Bay · FLAPPY PIG · 60FPS · kỷ lục.
+  - Game Heo Bắn · ANGRY PIG · 3 SAO · sao đã được trên 9.
+  - Bản Đồ Chi Tiêu · GPS PIXEL · QUÁN QUEN · số ghim hôm nay.
+- Thanh tab: 5 nút, icon trên chữ dưới, nút Chụp ở giữa màu đỏ khi chọn, nút Giải trí màu vàng khi chọn, icon bong bóng chat.
+
+2) CHAT (hai ngăn)
+- Heo-Coach: trả lời từ số liệu thật của app (hạn mức hôm nay, danh mục chi nhiều nhất tháng, phản biện khoản gần nhất bằng 3 câu hỏi "cần hay muốn, có rẻ hơn không, tuần sau còn xứng đáng không", trạng thái heo nhà, vé và cám). Có gợi ý bấm nhanh. Prototype dùng luật có sẵn; bản chính thức gọi LLM theo 14.2.
+- Hội bạn thân: bảng xếp hạng (điểm = chuỗi ngày x10 + kỷ lục Heo bay x2 + sao x15), thử thách tuần "ghi chi 5 ngày liền" (thưởng 3 cám), khung chat riêng với từng bạn, tặng 1 cám, thách Heo bay, nhắc ghi chi, mã mời có nút sao chép.
+- Quyền riêng tư: bạn bè chỉ thấy chuỗi ngày, điểm game và sao. Không bao giờ thấy số tiền, ảnh, danh mục hay vị trí.
+
+3) LIÊN KẾT VỚI PHẦN CÒN LẠI CỦA APP
+- Vé, cám, việc nhà, ngân sách: theo Plan 13. Ghi chi ở bất cứ đâu +1 vé.
+- Bản đồ: nút chuyển Pixel / Bản đồ thật (Plan 12). Lưu chi ở bản đồ hoặc ở tab Chụp thì lấy GPS đúng lúc đó, ghim vào máy; tên nơi lấy từ Nominatim (tối đa 1 yêu cầu/giây, có cache, lỗi thì dùng tên người dùng gõ).
+- Cổng phòng trong tab Nhà: Sảnh sang Hồ sơ; Phòng ngủ (tay cầm) sang game; Phòng làm việc sang Bản đồ; Phòng khách sang Chat.
+- Hồ sơ đặt hạn mức hôm nay, ảnh hưởng số lượt bay của Heo bắn và câu trả lời của Heo-Coach.
+
+4) PHONG CÁCH
+Token, font, bo góc, bóng cứng, nút 44px, nhãn chữ hoa theo Plan 1 đến 3. Icon pixel 16x16 vẽ bằng fillRect, không dùng ảnh. Không sao chép nhân vật hay cảnh của app khác. Hỗ trợ prefers-reduced-motion, :focus-visible, aria-live cho khung chat.
+
+5) KẾT QUẢ CẦN GIAO
+(a) Bản thiết kế hub, chat, các màn con ở khung 390x844; (b) bảng token và component mới; (c) luồng điều hướng; (d) danh sách lệch so với tài liệu hiện có; (e) checklist kiểm thử bên dưới.
+
+6) KIỂM THỬ
+Bấm đủ bốn thẻ và quay lại; tab Giải trí sáng ở mọi màn con; không cuộn ngang ở 360px; Coach trả lời đúng khi đổi hạn mức; chuyển sang "Bản đồ thật" khi mất mạng thì hiện thông báo và vẫn lưu được ghim; từ chối quyền vị trí thì vẫn ghi được chi, không ghim; bạn bè không bao giờ nhận số tiền.
+````
+
+### 14.2 Prompt hệ thống cho Heo-Coach (LLM thật)
+
+````
+Bạn là Heo-Coach trong {APP_NAME}: một chú heo thân thiện, nói tiếng Việt ngắn gọn (tối đa 4 câu), không phán xét. Bạn chỉ nhận số liệu tổng hợp dạng JSON (hạn mức hôm nay, đã chi, tổng theo danh mục tháng này, khoản gần nhất gồm tên và số tiền, chuỗi ngày, vé, cám, độ no heo, cá, hoa). Không nhận ảnh, vị trí, tên người khác.
+Việc của bạn: trả lời về ngân sách; khi người dùng xin phản biện, hỏi 3 câu "cần hay muốn, có cách rẻ hơn không, tuần sau còn xứng đáng không" rồi gợi ý một hành động nhỏ; nhắc chăm heo, cá, hoa hồng khi dưới 25%.
+Không đưa lời khuyên đầu tư hay vay mượn, không hứa chắc kết quả tài chính; nếu hỏi ngoài phạm vi thì nói nhẹ nhàng là bạn chỉ giúp về chi tiêu và chăm heo. Không bịa số liệu: thiếu dữ liệu thì nói thiếu. Nếu người dùng có dấu hiệu khủng hoảng, ngừng chủ đề tiền và gợi ý họ liên hệ người thân hoặc đường dây hỗ trợ.
+````
+
+### 14.3 Prompt phụ: tab Hồ sơ (liên kết với Giải trí)
+
+````
+Giữ tab Hồ sơ là nơi đặt kế hoạch cá nhân: hạn mức mỗi ngày, mục tiêu, danh mục thu chi, giao diện. Thêm một thẻ lối tắt "Trung Tâm Heo Con" dẫn sang tab Giải trí, hiện vé, cám và chuỗi ngày. Khi người dùng đổi hạn mức, hub, Heo bắn (số lượt bay) và Heo-Coach cập nhật ngay. Giữ phong cách pixel như các tab khác.
+````
+
+---
+
 ## Gợi ý cuối
 
+- Plan 14 (tab Giải trí) dùng cùng prototype `ve-heo-con.html`: gửi file đó kèm prompt 14.1.
 - Plan 12 (Map) là bộ prompt riêng: dán Prompt A trước, rồi B cho prototype web hoặc C cho app Flutter, sau đó D và E.
 - Chạy Plan 5 và Plan 6 sớm, vì khu vườn và sprite heo quyết định bản sắc cả app.
 - Prototype tương tác của mình có thể làm điểm đối chiếu cho Plan 5, 6, 7 (heo, ao, bát cám, thời điểm trong ngày đều khớp mô tả ở trên).

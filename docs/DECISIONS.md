@@ -901,6 +901,20 @@
       3. **Sửa Lỗi Heo Bay Chết Sớm & Tối Ưu Canvas Responsive:** Heo duy trì trạng thái lơ lửng an toàn (`ready` hover), chỉ kích hoạt rơi tự do khi người chơi chủ động bấm `[Vỗ cánh]`. Giữ nguyên độ khó gốc theo yêu cầu người dùng (`FLAP = -172`, `GRAV = 560`).
       4. **Căn Chỉnh Dàn Đạn Heo Bắn 1:1 Prototype:** Dàn đạn heo chờ xếp tại $x = 10 + i \times 15, y = AG - 8$ ở góc trái dưới mặt đất (chuẩn line 2480 prototype), bệ ná gỗ 3D và 14 chấm ngắm parabol rõ nét, thẻ thông tin đạn hiển thị trọn vẹn.
 
+  - **Quyết định 145 (20/11/2026): Đồng Bộ Toàn Diện Tab Giải Trí Chuẩn 100% Masterprompts (3 Thẻ Hub, Game Arcade Zero-Scroll & Bản Đồ Dual-Engine):**
+    - *Bối Cảnh & Vấn Đề Thực Tế:* Đối chiếu ảnh chụp người dùng với `prototype/Ví Heo Con-20-11.html` và `prototype/MASTER-PROMPTS.md` (Plan 12, 13, 14): (1) Canvas Game Heo Bay bị co ép méo tỉ lệ từ $176\times 224$ portrait thành landscape bởi `max-height: 275px`, màu trời bị xám mù, hạt pixel bị kéo giãn mờ; (2) Màn hình game bị nhồi nhét quá nhiều thẻ dài (5 thẻ thức ăn) gây tràn màn hình, cuộn trang vướng víu, popup "Bay lại" bị lẹm không thấy đường bấm; (3) Hub Giải Trí phân tán nhiều thẻ rời rạc; (4) Bản đồ chi tiêu chưa có cơ chế Dual-Engine [Pixel] / [Bản đồ thật].
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Tái Thiết Kế Hub Thành 3 Thẻ Trọng Tâm Cốt Lõi (Plan 14):**
+         - *Thẻ 1: Trò Chuyện & Bạn Bè* (`AI COACH & SQUAD`): Tích hợp Chat Heo-Coach Anh Minh (phản biện 3 câu hỏi chi tiêu) và Squad Hội Bạn Thân.
+         - *Thẻ 2: Game Vui Heo Con* (`FLAPPY & ANGRY PIG · 60FPS`): Tích hợp 2 mini-game Heo Bay & Heo Bắn, có thanh gạt chuyển game tức thì, quản lý vé 🎫 và cám.
+         - *Thẻ 3: Bản Đồ Chi Tiêu* (`GPS PIXEL & BẢN ĐỒ THẬT`): Quản lý vị trí ghim chi tiêu.
+      2. **Chuẩn Hóa Màn Hình Game Arcade Chuyên Biệt (Zero-Scroll & 100% Sắc Nét Pixel):**
+         - Game Heo Bay khôi phục tỉ lệ Portrait $176\times 224$ nguyên bản, loại bỏ hoàn toàn `max-height: 275px` gây méo ảnh. Canvas scale linh hoạt theo chiều cao viewport với `image-rendering: pixelated; crisp-edges;`.
+         - Bầu trời ban ngày mặc định rực rỡ nắng vàng (`#8FD0F2` tới `#58B6EE`), nút "CHẠM ĐỂ VỖ CÁNH" Vàng Cám `#F4B93B` nổi bồng bềnh giữa canvas.
+         - Loại bỏ các card phụ dài dòng bên dưới canvas, biến màn chơi thành 1 màn hình Arcade duy nhất không cần cuộn trang; nút "Vỗ cánh" to rõ và popup "Bay lại" nằm ngay giữa màn hình trong tầm ngón tay cái.
+      3. **Bản Đồ Chi Tiêu Dual-Engine (Plan 12):** Nút chuyển [Pixel] (khu phố retro $192\times 200$) và [Bản đồ thật] (MapLibre OpenFreeMap 0 đồng) hoạt động trơn tru ngoại tuyến lẫn trực tuyến.
+
+
 
 
 

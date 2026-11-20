@@ -218,6 +218,84 @@ body {
   font: 800 11.5px/1.2 var(--f-body);
   pointer-events: none;
 }
+.mpmode {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0 0;
+}
+.mpmode .btn {
+  flex: 1;
+  justify-content: center;
+  min-height: 40px;
+}
+.realwrap {
+  position: relative;
+  margin-top: 10px;
+  height: 250px;
+  background: #CDE6C4;
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 4px 0 var(--ink);
+}
+#mpRealMap {
+  position: absolute;
+  inset: 0;
+}
+.realmsg {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  line-height: 1.45;
+  text-align: center;
+  font-weight: 800;
+  font-size: 13px;
+  background: #EFE2BF;
+  color: var(--ink);
+}
+.geoform {
+  margin-top: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.geoform input[type=text], .geoform select {
+  height: 42px;
+  padding: 0 12px;
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--card);
+  font: 700 13px var(--f-body);
+  color: var(--ink);
+  width: 100%;
+}
+.geoform .row2 {
+  display: flex;
+  gap: 8px;
+}
+.geoform .row2>* {
+  flex: 1;
+  min-width: 0;
+}
+.geochk {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.pact {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 6px;
+}
 .gpspill i {
   width: 8px;
   height: 8px;
@@ -340,13 +418,44 @@ body {
 <body>
 
   <div class="flytop">
-    <div class="who"><b>Bản đồ chi tiêu</b><span>Phường Heo Con · Khu phố ghim chi</span></div>
+    <div class="who"><b>Bản đồ chi tiêu</b><span id="mpSub">Phường Heo Con · khu phố tưởng tượng</span></div>
+  </div>
+
+  <div class="mpmode" id="mpMode" role="group" aria-label="Loại bản đồ">
+    <button class="btn" type="button" data-m="pixel" aria-pressed="true">Pixel</button>
+    <button class="btn" type="button" data-m="real" aria-pressed="false">Bản đồ thật</button>
   </div>
 
   <div class="flystats">
     <div><span class="label">Lượt ghé</span><b id="mpS1">0</b></div>
     <div><span class="label">Quán quen</span><b id="mpS2">0</b></div>
     <div><span class="label">Chi có ghim</span><b id="mpS3">0</b></div>
+  </div>
+
+  <div id="mpReal" hidden>
+    <div class="scene realwrap">
+      <div id="mpRealMap" role="application" aria-label="Bản đồ Việt Nam thật"></div>
+      <div class="realmsg" id="mpRealMsg" role="status">Đang kết nối OpenFreeMap Việt Nam…</div>
+    </div>
+    <div class="card geoform">
+      <div class="label">Lưu chi tại vị trí thật</div>
+      <input id="geoName" type="text" maxlength="40" placeholder="Tên quán (để trống thì tự đoán theo vị trí)" aria-label="Tên quán" autocomplete="off">
+      <div class="row2">
+        <input id="geoAmt" type="text" inputmode="numeric" placeholder="Số tiền (đ)" aria-label="Số tiền" autocomplete="off">
+        <select id="geoCat" aria-label="Danh mục">
+          <option value="an">Ăn uống</option>
+          <option value="di">Đi lại</option>
+          <option value="mua">Mua sắm</option>
+        </select>
+      </div>
+      <label class="geochk"><input type="checkbox" id="geoOn" checked> Tự ghim vị trí khi lưu chi ở tab Chụp</label>
+      <div class="pact">
+        <button class="btn" type="button" id="geoLocate">Vị trí của tôi</button>
+        <button class="btn gold" type="button" id="geoSave">Lưu chi và ghim</button>
+      </div>
+      <small style="font-size:11px;color:var(--muted);font-weight:700">Chỉ lấy GPS lúc bấm lưu, không theo dõi nền. Dữ liệu ghim lưu trong máy.</small>
+    </div>
+    <div class="card" style="margin-top:10px;padding:10px 12px;"><div class="label" style="margin-bottom:6px">Ghim thật gần đây</div><div id="geoList"></div></div>
   </div>
 
   <div class="camchips" id="mpChips" role="group"></div>
@@ -598,6 +707,42 @@ mpC.addEventListener('pointerdown',e=>{
     mpS.sel=best.id;mpSheet();notify('HAPTIC_LIGHT');
   }
 });
+
+let isRealMap = false;
+function setMapMode(real) {
+  isRealMap = real;
+  const sub = $('mpSub');
+  if (sub) sub.textContent = real ? 'Bản đồ Việt Nam thật · OpenFreeMap 0$' : 'Phường Heo Con · khu phố tưởng tượng';
+  const wrap = $('mpWrap'), chips = $('mpChips'), sheet = $('mpSheet'), ctl = document.querySelector('.mpctl'), realDiv = $('mpReal');
+  if (wrap) wrap.hidden = real;
+  if (chips) chips.hidden = real;
+  if (sheet) sheet.hidden = real;
+  if (ctl) ctl.hidden = real;
+  if (realDiv) realDiv.hidden = !real;
+  document.querySelectorAll('#mpMode .btn').forEach(b => {
+    b.setAttribute('aria-pressed', String((b.dataset.m === 'real') === real));
+  });
+  if (real) {
+    const msg = $('mpRealMsg');
+    if (msg) {
+      msg.textContent = 'Đang tải bản đồ OpenFreeMap Việt Nam… (Bản đồ ngoại tuyến)';
+      setTimeout(() => {
+        msg.textContent = 'Đã kết nối bản đồ Việt Nam · Chạm "Vị trí của tôi" hoặc Lưu chi';
+      }, 1000);
+    }
+  }
+}
+
+const modeBar = $('mpMode');
+if (modeBar) {
+  modeBar.addEventListener('click', e => {
+    const b = e.target.closest('[data-m]');
+    if (b) {
+      notify('HAPTIC_LIGHT');
+      setMapMode(b.dataset.m === 'real');
+    }
+  });
+}
 
 $('mpWalk').onclick=()=>{
   const target=MPL[(Math.random()*MPL.length)|0];

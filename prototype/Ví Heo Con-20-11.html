@@ -618,7 +618,7 @@ h1{font:800 clamp(34px,9.5vw,56px)/1.12 var(--f-display);margin:16px 0 12px;text
       <div id="mpReal" hidden>
         <div class="scene realwrap"><div id="mpRealMap" role="application" aria-label="Bản đồ Việt Nam thật"></div><div class="realmsg" id="mpRealMsg" role="status">Đang tải bản đồ Việt Nam…</div></div>
         <div class="card geoform"><div class="label">Lưu chi tại vị trí thật</div>
-          <input id="geoName" type="text" maxlength="40" placeholder="Tên quán hoặc nơi chi" aria-label="Tên quán" autocomplete="off">
+          <input id="geoName" type="text" maxlength="40" placeholder="Tên quán (để trống thì tự đoán theo vị trí)" aria-label="Tên quán" autocomplete="off">
           <div class="row2"><input id="geoAmt" type="text" inputmode="numeric" placeholder="Số tiền (đ)" aria-label="Số tiền" autocomplete="off" style="height:44px;padding:0 14px;border:3px solid var(--ink);border-radius:999px;background:var(--card);font:700 14px var(--f-body);color:var(--ink)"><select id="geoCat" aria-label="Danh mục"><option value="an">Ăn uống</option><option value="di">Đi lại</option><option value="mua">Mua sắm</option></select></div>
           <label class="geochk"><input type="checkbox" id="geoOn" checked> Tự ghim vị trí khi lưu chi ở tab Chụp</label>
           <div class="pact"><button class="btn" type="button" id="geoLocate">Vị trí của tôi</button><button class="btn gold" type="button" id="geoSave">Lưu chi và ghim</button></div>
@@ -2887,13 +2887,25 @@ function geoPos(ok,err){
   navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy||0)}),
     e=>err(e&&e.code===1?'Bạn chưa cho phép vị trí':'Không lấy được vị trí'),{enableHighAccuracy:true,timeout:6000,maximumAge:0});
 }
+/* Nominatim: đổi tọa độ thành tên nơi. Tối đa 1 yêu cầu/giây, có cache, lỗi thì bỏ qua */
+let geoLast=0;const GC=(()=>{try{return JSON.parse(localStorage.getItem('vhc-geoname')||'{}')}catch(e){return{}}})();
+function geoName(p){
+  const k=p.lat.toFixed(4)+','+p.lng.toFixed(4);if(GC[k])return Promise.resolve(GC[k]);
+  const wait=Math.max(0,geoLast+1100-Date.now());
+  return new Promise(r=>setTimeout(r,wait)).then(()=>{geoLast=Date.now();
+    const ac=new AbortController(),to=setTimeout(()=>ac.abort(),4000);
+    return fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&accept-language=vi&lat='+p.lat+'&lon='+p.lng,{signal:ac.signal,headers:{Accept:'application/json'}})
+      .then(r=>r.ok?r.json():null).then(j=>{clearTimeout(to);if(!j)return'';
+        const a=j.address||{},n=j.name||a.amenity||a.shop||a.road||'';const w=[n,a.suburb||a.quarter||a.city_district].filter(Boolean).join(', ');
+        if(w){GC[k]=w;try{localStorage.setItem('vhc-geoname',JSON.stringify(GC))}catch(e){}}return w}).catch(()=>{clearTimeout(to);return''})});
+}
 function geoAdd(pos,name,amt){
   GEO.pins.unshift({lat:pos.lat,lng:pos.lng,acc:pos.acc,name,amt,ts:Date.now()});geoSave();geoMarkers();geoList();
   if(GEO.map&&GEO.ready)GEO.map.flyTo({center:[pos.lng,pos.lat],zoom:15});
 }
 function geoList(){
   const L=$('geoList');
-  L.innerHTML=GEO.pins.length?GEO.pins.slice(0,6).map(p=>`<div class="mrow"><span class="kd" style="background:var(--gold)"></span><span class="mn"><b>${String(p.name).replace(/</g,'&lt;')}</b><small>${p.lat.toFixed(4)}, ${p.lng.toFixed(4)} · ±${p.acc} m</small></span><span class="mv">−${fmtK(p.amt)}</span></div>`).join(''):'<div class="geoempty">Chưa có ghim thật. Lưu một khoản chi để ghim vị trí hiện tại.</div>';
+  L.innerHTML=GEO.pins.length?GEO.pins.slice(0,6).map(p=>`<div class="mrow"><span class="kd" style="background:var(--gold)"></span><span class="mn"><b>${String(p.name).replace(/</g,'&lt;')}</b><small>${p.place?String(p.place).replace(/</g,"&lt;")+" · ":""}${p.lat.toFixed(4)}, ${p.lng.toFixed(4)} · ±${p.acc} m</small></span><span class="mv">−${fmtK(p.amt)}</span></div>`).join(''):'<div class="geoempty">Chưa có ghim thật. Lưu một khoản chi để ghim vị trí hiện tại.</div>';
   $('geoOn').checked=GEO.on;
 }
 $('mpMode').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b)geoMode(b.dataset.m==='real')});
@@ -2903,17 +2915,17 @@ $('geoLocate').addEventListener('click',()=>{
   geoPos(p=>{GEO.me=p;geoToast('GPS ±'+p.acc+' m');geoMarkers();if(GEO.map&&GEO.ready)GEO.map.flyTo({center:[p.lng,p.lat],zoom:15})},m=>geoToast(m));
 });
 $('geoSave').addEventListener('click',()=>{
-  const name=($('geoName').value||'').trim()||'Khoản chi',amt=parseInt(($('geoAmt').value||'').replace(/\D/g,''),10)||0,ck=$('geoCat').value;
+  let name=($('geoName').value||'').trim();const amt=parseInt(($('geoAmt').value||'').replace(/\D/g,''),10)||0,ck=$('geoCat').value;
   if(amt<=0){geoToast('Nhập số tiền trước nhé');return}
-  geoPos(p=>{geoAdd(p,name,amt);const k=ck==='di'?'grab':ck==='mua'?'shirt':'pho';addItem(11,name,k,ck,amt);addExpense(name,amt);
-    $('geoName').value='';$('geoAmt').value='';geoToast('Đã ghim '+name+' · −'+money(amt))},m=>geoToast(m+'. Chưa lưu chi.'));
+  geoPos(p=>{(name?Promise.resolve(name):geoName(p)).then(n=>{name=n||'Khoản chi';geoAdd(p,name,amt);const k=ck==='di'?'grab':ck==='mua'?'shirt':'pho';addItem(11,name,k,ck,amt);addExpense(name,amt);
+    $('geoName').value='';$('geoAmt').value='';geoToast('Đã ghim '+name+' · −'+money(amt))})},m=>geoToast(m+'. Chưa lưu chi.'));
 });
 /* ghim vị trí thật mỗi khi lưu chi ở tab Chụp (nếu bật và được phép) */
 const _cd=camDone;
 camDone=function(){
   const c=camList()[cam.cat],name=($('camDesc').value||'').trim()||c[0],amt=cam.amt,chi=cam.tab==='chi';
   _cd();
-  if(chi&&GEO.on&&amt>0)geoPos(p=>{geoAdd(p,name,amt);geoToast('Đã ghim vị trí thật cho '+name)},()=>{});
+  if(chi&&GEO.on&&amt>0)geoPos(p=>{geoAdd(p,name,amt);geoToast('Đã ghim vị trí thật cho '+name);geoName(p).then(n=>{if(n&&GEO.pins[0]&&GEO.pins[0].ts&&!GEO.pins[0].place){GEO.pins[0].place=n;geoSave();geoList()}})},()=>{});
 };
 if(location.hash==='#fun-dev')window.__fun={GEO,FUN,SQ,geoMode,coachAnswer};
 

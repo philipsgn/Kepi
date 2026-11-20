@@ -426,16 +426,68 @@ export const ChatView: React.FC<ChatViewProps> = ({
         </TouchableOpacity>
 
         <View style={styles.chatTitleCol}>
-          <Text style={styles.chatTitleText}>Heo-Coach Anh Minh</Text>
-          <Text style={styles.chatSubtitleText}>Gợi ý theo số liệu sổ chi</Text>
+          <Text style={styles.chatTitleText}>
+            {activeTab === 'COACH' ? 'Heo-Coach Anh Minh' : 'Hội Bạn Thân (Squad)'}
+          </Text>
+          <Text style={styles.chatSubtitleText}>
+            {activeTab === 'COACH' ? 'Gợi ý theo số liệu sổ chi' : 'Nuôi heo & chia sẻ chi tiêu'}
+          </Text>
         </View>
       </View>
 
-      <KeyboardAvoidingView
-        style={styles.coachContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-      >
+      {/* SEGMENT SWITCHER: HEO-COACH & HỘI BẠN THÂN */}
+      <View style={styles.chatSegmentRow}>
+        <TouchableOpacity
+          style={[
+            styles.chatSegmentBtn,
+            activeTab === 'COACH' && styles.chatSegmentBtnActive,
+          ]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setActiveTab('COACH');
+          }}
+          activeOpacity={0.8}
+        >
+          <Text
+            style={[
+              styles.chatSegmentBtnText,
+              activeTab === 'COACH' && styles.chatSegmentBtnTextActive,
+            ]}
+          >
+            🐷 Heo-Coach
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.chatSegmentBtn,
+            activeTab === 'FRIENDS' && styles.chatSegmentBtnActive,
+          ]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setActiveTab('FRIENDS');
+          }}
+          activeOpacity={0.8}
+        >
+          <Text
+            style={[
+              styles.chatSegmentBtnText,
+              activeTab === 'FRIENDS' && styles.chatSegmentBtnTextActive,
+            ]}
+          >
+            👥 Hội Bạn Thân
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {activeTab === 'FRIENDS' ? (
+        <SquadLocketView onBack={() => setActiveSubView('hub')} />
+      ) : (
+        <KeyboardAvoidingView
+          style={styles.coachContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
           {/* PROMPT CHIPS GỢI Ý NHANH */}
           <View
             style={[
@@ -576,6 +628,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
             bottomOffset={bottomInset + 65}
           />
         </KeyboardAvoidingView>
+      )}
     </View>
   );
 };
@@ -606,6 +659,42 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 11.5,
     color: '#85735E',
+  },
+  chatSegmentRow: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    borderRadius: 999,
+    padding: 3,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  chatSegmentBtn: {
+    flex: 1,
+    paddingVertical: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+  },
+  chatSegmentBtnActive: {
+    backgroundColor: '#F4B93B',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+  },
+  chatSegmentBtnText: {
+    fontFamily: 'Nunito',
+    fontWeight: '800',
+    fontSize: 13,
+    color: '#85735E',
+  },
+  chatSegmentBtnTextActive: {
+    color: '#2B2118',
   },
   hubBackRow: {
     paddingHorizontal: 16,

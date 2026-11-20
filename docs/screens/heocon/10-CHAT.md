@@ -1,27 +1,28 @@
 # 🎮 10 — PIGFLY HUB & PIXEL HUB (TAB GIẢI TRÍ): CHAT, 2 GAME ĐỘ KHÓ CAO & BẢN ĐỒ CHI TIÊU
 
-> **Screen-unit:** Tab 3. **PIGFLY HUB (Trung Tâm Giải Trí & Khám Phá Heo Con)** kết hợp Chat AI Coach / Squad, 2 Game Pixel Art Độ Khó Cao (Heo Bay & Heo Bắn) và Bản Đồ Chi Tiêu Pixel port 1:1 từ `prototype/Ví Heo Con-20-11.html` (Quyết định 130, Quyết định 140, Quyết định 141, Quyết định 142, Quyết định 143 & Quyết định 144).
+> **Screen-unit:** Tab 3. **PIGFLY HUB (Trung Tâm Giải Trí & Khám Phá Heo Con)** kết hợp Chat AI Coach / Squad, 2 Game Pixel Art Độ Khó Cao (Heo Bay & Heo Bắn) và Bản Đồ Chi Tiêu Pixel port 1:1 từ `prototype/Ví Heo Con-20-11.html` (Quyết định 130, Quyết định 140, Quyết định 141, Quyết định 142, Quyết định 143, Quyết định 144 & Quyết định 145).
+> **Cấu trúc 3 Thẻ Trọng Tâm Cốt Lõi (Quyết định 145 & Masterprompts Plan 14):** Hub gồm đúng 3 thẻ lớn: (1) Trò Chuyện & Bạn Bè (AI Coach & Squad), (2) Game Vui Heo Con (Arcade Heo Bay & Heo Bắn 60fps), (3) Bản Đồ Chi Tiêu (GPS Pixel & Bản Đồ Thật).
+> **Chế độ Arcade Game Zero-Scroll (Quyết định 145):** Khắc phục triệt để lỗi méo canvas, canvas Portrait $176\times 224$ nguyên bản, bầu trời xanh biếc rực rỡ, vừa vặn 1 màn hình duy nhất không cuộn trang, nút bấm và popup "Bay lại" nằm ngay giữa màn hình trong tầm ngón tay cái.
 > **Chế độ Toàn Màn Hình (Fullscreen Game Mode):** Tự động ẩn Floating Bottom Tab Bar khi vào chơi Heo Bay / Heo Bắn để mở rộng 100% không gian điều khiển chân trang (Quyết định 144).
 > **Cố định Khung Chat Neo-Brutalist Pixel Art:** Luôn dùng nền kem `#F6EEDC`, khung thẻ `.chatlog` viền 3px mực, avatar vuông $36\times 36$px độc lập với Theme máy (Quyết định 144).
 > **Tài liệu đặc tả chi tiết 2 mini-game:** Xem riêng tại [10-GAMES-SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-GAMES-SPEC.md).
 
 ---
 
-## 1. Kiến Trúc Điều Hướng Hub Chuẩn `v-fun` Prototype 20/11
+## 1. Kiến Trúc Điều Hướng Hub Chuẩn `v-fun` Prototype 20/11 & Masterprompts Plan 14
 Màn hình Tab 3 mặc định hiển thị **PIGFLY HUB (`v-fun`)** gồm:
 1. **Header:** Badge Neo-pill `● PIGFLY HUB` viền 3px mực + Badge Chuỗi Streak `🔥 X ngày`.
 2. **Banner Mascot Chào Hỏi:** Avatar pixel 16×16 vẽ động khuôn mặt Heo Con cử động mắt/mũi + lời chào cá nhân hóa *"Trung Tâm Heo Con — Chào [Tên]! Khám phá giải trí & bản đồ khu phố"*.
 3. **Status Chips:**
    - Vé chơi: `🎫 X vé` (Đăng nhập mỗi ngày tặng 3 vé + mỗi lần ghi chi tiêu/chụp ảnh ở Tab Chụp tặng +1 vé).
    - Thức ăn dự trữ: `🌽 X thức ăn` (Thu hoạch từ Heo Bay & giải cứu heo con từ Heo Bắn, dùng cho Heo ăn).
-4. **4 Thẻ Khám Phá Neo-Brutalist (Viền 3px mực, bóng cứng 4px 0-blur):**
+4. **3 Thẻ Trọng Tâm Cốt Lõi (Viền 3px mực, bóng cứng 4px 0-blur):**
 
 | Thẻ Phân Hệ | Biểu Tượng & Tông Màu | Chức Năng Cốt Lõi |
 |---|---|---|
 | **1. Trò Chuyện & Bạn Bè** | 💬 Hồng Heo `#F9B8C4` | Khung `.chatlog` Neo-Brutalist viền 3px mực: Chat với AI Coach Anh Minh & Squad Nuôi Heo 2.0. |
-| **2. Game Heo Bay** | 🪽 Vàng Cám `#F4B93B` | Flappy Pig 60fps port 1:1 parallax 4 biomes, chu kỳ ngày/đêm 8 pha, chướng ngại vật động và độ hở co hẹp lũy tiến. |
-| **3. Game Heo Bắn** | 🎯 Đỏ Cam `#E0452B` | Angry Pig port 1:1 ná gỗ 3D, 14 chấm quỹ đạo, texture khối nứt, chim lính drawBirdy, lồng cứu heo con, Endless Waves & gió biến thiên. |
-| **4. Bản Đồ Chi Tiêu** | 🗺️ Xanh Lá `#5E9A57` | Bản đồ pixel khu phố & Bản đồ thật, thống kê Lượt ghé, Quán quen, Chi có ghim. |
+| **2. Game Vui Heo Con** | 🎮 Vàng Cám `#F4B93B` | Màn hình Arcade chuyên biệt 100vh: Nút chuyển [Heo bay] / [Heo bắn], Flappy Pig 60fps canvas Portrait 176×224 sắc nét & Angry Pig bệ ná 3D. |
+| **3. Bản Đồ Chi Tiêu** | 🗺️ Xanh Lá `#5E9A57` | Bản đồ Dual-Engine: [Pixel] khu phố retro 192×200 & [Bản đồ thật] OpenFreeMap 0 đồng theo Plan 12. |
 
 ---
 

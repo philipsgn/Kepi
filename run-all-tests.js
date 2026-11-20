@@ -3880,4 +3880,57 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 84 Passed: Fullscreen Game Mode, Unblocked Controls & Always-Neo-Brutalist Chat (Quyết định 144) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 84 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (84/84)!');
+// ==============================================================================
+// 🧪 TEST 85: MASTERPROMPTS ALIGNMENT (3-CARD HUB, ZERO-SCROLL ARCADE & DUAL-ENGINE MAP) (QUYẾT ĐỊNH 145) AUDIT
+// ==============================================================================
+{
+  const hubPath = path.join(__dirname, 'src/components/chat/PixelHubDashboard.tsx');
+  const hubCode = fs.readFileSync(hubPath, 'utf8');
+  const chatViewPath = path.join(__dirname, 'src/components/views/ChatView.tsx');
+  const chatViewCode = fs.readFileSync(chatViewPath, 'utf8');
+  const flyPath = path.join(__dirname, 'src/components/chat/PigFlightGameView.tsx');
+  const flyCode = fs.readFileSync(flyPath, 'utf8');
+  const shooterPath = path.join(__dirname, 'src/components/chat/PigShooterGameView.tsx');
+  const shooterCode = fs.readFileSync(shooterPath, 'utf8');
+  const mapPath = path.join(__dirname, 'src/components/chat/PiggySpendMapView.tsx');
+  const mapCode = fs.readFileSync(mapPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+  const chatDocPath = path.join(__dirname, 'docs/screens/heocon/10-CHAT.md');
+  const chatDocCode = fs.readFileSync(chatDocPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+
+  // 1. Hub 3-Card Architecture (Masterprompts Plan 14)
+  assert.ok(hubCode.includes("'AI COACH & SQUAD'") && hubCode.includes("'Trò Chuyện & Bạn Bè'"), 'Hub must feature Card 1: Trò Chuyện & Bạn Bè');
+  assert.ok(hubCode.includes("'FLAPPY & ANGRY PIG · 60FPS'") && hubCode.includes("'Game Vui Heo Con'"), 'Hub must feature Card 2: Game Vui Heo Con');
+  assert.ok(hubCode.includes("'GPS PIXEL & BẢN ĐỒ THẬT'") && hubCode.includes("'Bản Đồ Chi Tiêu'"), 'Hub must feature Card 3: Bản Đồ Chi Tiêu');
+  assert.ok(!hubCode.includes("id: 'squad',") && !hubCode.includes("id: 'shooter',"), 'Hub must strictly consolidate into 3 cards without duplicate squad or shooter cards');
+
+  // 2. Chat 2-Segment Switcher (Heo-Coach & Hội Bạn Thân)
+  assert.ok(chatViewCode.includes('chatSegmentRow') && chatViewCode.includes('Heo-Coach') && chatViewCode.includes('Hội Bạn Thân'), 'ChatView must provide 2-segment switcher for Heo-Coach and Hoi Ban Than');
+  assert.ok(chatViewCode.includes("activeTab === 'FRIENDS'") && chatViewCode.includes('SquadLocketView'), 'ChatView must render SquadLocketView when FRIENDS tab is active');
+
+  // 3. Flappy Pig 176x224 Portrait Aspect Ratio & Sharp Pixel Rendering (Hình 1 Alignment)
+  assert.ok(flyCode.includes('aspect-ratio: 176 / 224') || flyCode.includes('aspect-ratio:176/224'), 'PigFlightGameView must enforce 176/224 portrait aspect ratio');
+  assert.ok(!flyCode.includes('max-height: 275px'), 'PigFlightGameView must remove 275px max-height to avoid pixel squashing and distortion');
+  assert.ok(flyCode.includes('CHẠM ĐỂ VỖ CÁNH'), 'PigFlightGameView must feature bouncing CHẠM ĐỂ VỖ CÁNH yellow pill button');
+  assert.ok(flyCode.includes('u:.28') || flyCode.includes('u: .28'), 'PigFlightGameView must initialize with vibrant sunny blue sky');
+  assert.ok(flyCode.includes('<b>Heo bay</b>'), 'PigFlightGameView must use clean prototype title Heo bay');
+
+  // 4. Angry Pig 224x140 Landscape Aspect Ratio
+  assert.ok(shooterCode.includes('aspect-ratio: 224 / 140') || shooterCode.includes('aspect-ratio:224/140'), 'PigShooterGameView must enforce 224/140 aspect ratio');
+
+  // 5. Dual-Engine Map (Masterprompts Plan 12)
+  assert.ok(mapCode.includes('mpMode') && mapCode.includes('data-m="pixel"') && mapCode.includes('data-m="real"'), 'PiggySpendMapView must implement [Pixel] and [Bản đồ thật] switcher');
+  assert.ok(mapCode.includes('mpReal') && mapCode.includes('OpenFreeMap'), 'PiggySpendMapView must provide OpenFreeMap real map container');
+
+  // 6. Living Documentation Sync Audit
+  assert.ok(decisionsCode.includes('145'), 'DECISIONS.md must document Quyết định 145');
+  assert.ok(chatDocCode.includes('145'), '10-CHAT.md must document Quyết định 145');
+  assert.ok(agentsCode.includes('145'), 'AGENTS.md must document Quyết định 145 in Tab 3 matrix');
+
+  console.log('✅ Test 85 Passed: Masterprompts Alignment (3-Card Hub, Zero-Scroll Arcade & Dual-Engine Map) (Quyết định 145) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 85 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (85/85)!');

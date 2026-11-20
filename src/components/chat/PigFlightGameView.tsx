@@ -240,23 +240,24 @@ body {
 }
 .scene.flywrap {
   position: relative;
-  margin-top: 8px;
+  margin-top: 6px;
   background: #BFE6F6;
   border: 3px solid var(--ink);
-  border-radius: 20px;
+  border-radius: 22px;
   box-shadow: 0 4px 0 var(--ink);
   overflow: hidden;
   touch-action: manipulation;
   text-align: center;
-  max-width: 320px;
+  width: 100%;
+  max-width: 290px;
+  aspect-ratio: 176 / 224;
   margin-left: auto;
   margin-right: auto;
 }
 .scene.flywrap canvas {
   display: block;
   width: 100%;
-  max-height: 275px;
-  height: auto;
+  height: 100%;
   margin: 0 auto;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
@@ -285,25 +286,26 @@ body {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 76px;
+  top: 50%;
+  transform: translateY(-50%);
   text-align: center;
   pointer-events: none;
-  font: 800 11.5px/1.2 var(--f-body);
-  letter-spacing: .1em;
+  font: 800 12px/1.2 var(--f-body);
+  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--ink);
   z-index: 2;
 }
 .flyhint span {
   display: inline-block;
-  padding: 5px 12px;
+  padding: 8px 18px;
   background: var(--gold);
-  border: 2.5px solid var(--ink);
+  border: 3px solid var(--ink);
   border-radius: 999px;
   box-shadow: 0 3px 0 var(--ink);
   animation: fbob 1s ease-in-out infinite alternate;
 }
-@keyframes fbob { to { transform: translateY(-4px); } }
+@keyframes fbob { to { transform: translateY(-5px); } }
 .flyover {
   position: absolute;
   inset: 0;
@@ -429,7 +431,7 @@ body {
   </div>
 
   <div class="flytop">
-    <div class="who"><b>Heo Bay · Bão Gió</b><span id="flyZone">Vườn nhà</span></div>
+    <div class="who"><b>Heo bay</b><span id="flyZone">Vườn nhà</span></div>
     <div class="fscore"><span class="label">Điểm</span><b id="flyScore">0</b></div>
     <div class="fscore"><span class="label">Kỷ lục</span><b id="flyBest">0</b></div>
   </div>
@@ -442,7 +444,7 @@ body {
   <div class="scene flywrap" id="flyWrap">
     <canvas id="flyCv" width="176" height="224"></canvas>
     <div class="flytoast" id="flyToast"></div>
-    <div class="flyhint" id="flyHint"><span>Chạm để vỗ cánh</span></div>
+    <div class="flyhint" id="flyHint"><span>CHẠM ĐỂ VỖ CÁNH</span></div>
     <div class="flyover" id="flyOver" hidden></div>
   </div>
 
@@ -456,11 +458,6 @@ body {
     <button class="btn big" type="button" id="flyBtn">Vỗ cánh</button>
     <button class="btn" type="button" id="flyPause">Tạm dừng</button>
     <button class="btn" type="button" id="flyWxBtn">Đổi trời</button>
-  </div>
-
-  <div class="card" style="margin-top:10px;padding:8px 10px;">
-    <div class="label" style="margin-bottom:6px">Món ăn tiếp sức & Độ no</div>
-    <div class="flyfood-scroll" id="flyFood"></div>
   </div>
 
 <script>
@@ -677,7 +674,8 @@ function flyMsg(t,s){
 function flyReset(){
   Object.assign(fly,{
     mode:'ready',y:96,vy:0,ang:0,flapT:0,eatT:0,dist:0,speed:58,sp:60,score:0,coins:0,eaten:0,hunger:78,earned:0,
-    pillars:[],items:[],parts:[],floats:[],shake:0,cause:'',lastBi:0,paused:false
+    pillars:[],items:[],parts:[],floats:[],shake:0,cause:'',lastBi:0,paused:false,
+    u:.28,weather:'clear',rain:0,wind:0
   });
   lastGy=100;
   flyMsg('Chạm hoặc bấm Vỗ cánh để bay',99);
@@ -1050,14 +1048,17 @@ $('flyWxBtn').addEventListener('click',()=>{
   flyMsg(WXN[fly.weather],1.4);
 });
 
-/* Khởi tạo danh sách đồ ăn ở footer */
-FOODS.concat([{k:'coin',v:1,n:'Đồng cám'}]).forEach(f=>{
-  const d=document.createElement('div');d.className='fd';
-  d.innerHTML='<canvas width="24" height="24"></canvas><b>'+f.n+'</b><span>'+(f.k==='coin'?'+1 cám':'+'+f.v+'% no')+'</span>';
-  const cv=d.querySelector('canvas'),cx=cv.getContext('2d');
-  drawFood(cx,f.k,12,f.k==='melon'?15:13,0.1);
-  $('flyFood').appendChild(d);
-});
+/* Khởi tạo danh sách đồ ăn nếu có */
+const ff=$('flyFood');
+if(ff){
+  FOODS.concat([{k:'coin',v:1,n:'Đồng cám'}]).forEach(f=>{
+    const d=document.createElement('div');d.className='fd';
+    d.innerHTML='<canvas width="24" height="24"></canvas><b>'+f.n+'</b><span>'+(f.k==='coin'?'+1 cám':'+'+f.v+'% no')+'</span>';
+    const cv=d.querySelector('canvas'),cx=cv.getContext('2d');
+    drawFood(cx,f.k,12,f.k==='melon'?15:13,0.1);
+    ff.appendChild(d);
+  });
+}
 
 flyReset();
 fly.last=performance.now();

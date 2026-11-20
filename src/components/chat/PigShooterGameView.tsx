@@ -234,12 +234,16 @@ body {
   box-shadow: 0 4px 0 var(--ink);
   overflow: hidden;
   touch-action: none;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 224 / 140;
+  margin-left: auto;
+  margin-right: auto;
 }
 .scene.apwrap canvas {
   display: block;
   width: 100%;
-  max-width: 380px;
-  height: auto;
+  height: 100%;
   margin: 0 auto;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
