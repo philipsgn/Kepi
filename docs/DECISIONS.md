@@ -819,6 +819,24 @@
       2. **Phân Biệt Thông Minh Tap vs Drag:** Trong `onPanResponderRelease`, nếu độ dịch chuyển `|dx| < 5 && |dy| < 5` (chạm nhẹ), kích hoạt `isEditingStoryText = true` và `focus()` vào `storyInputRef` để mở bàn phím gõ chữ; nếu `|dx| >= 5 || |dy| >= 5`, thực hiện kéo di chuyển vị trí.
       3. **Zero Placeholder (Vùng Chạm Tàng Hình):** Bỏ 100% chữ "Chạm để viết chữ...". Khi rỗng, khung ảnh trơn sạch hoàn toàn; tại vị trí 1/3 dưới ảnh bố trí vùng chạm tàng hình `camStoryInvisibleTouchArea` ($220 \times 44$px) để người dùng chạm vào là bàn phím mở lên tự nhiên.
 
+  - **Quyết định 140 (20/11/2026): Khắc Phục Lỗi Render WebView (Game Heo Bay, Game Heo Bắn, Bản Đồ Chi Tiêu) & Re-skin Toàn Bộ Subtab Chat Sang Neo-Brutalist Pixel Art:**
+    - *Bối Cảnh & Nguyên Nhân:* Khi người dùng bấm "Khám phá ngay" vào Game Heo Bay, Game Heo Bắn hoặc Bản Đồ Chi Tiêu ở Tab 3, màn hình bị trắng tinh không hiển thị. Nguyên nhân kỹ thuật do:
+      1. WKWebView sandbox trên iOS chặn chạy JS/canvas khi `source={{ html }}` thiếu thuộc tính `baseUrl: ''`.
+      2. Kích thước WebView bị co cụm về 0x0 px (layout collapse) do dùng `flex: 1` bên trong layout scroll mà không cung cấp kích thước pixel tuyệt đối tường minh (`width`, `height`).
+      3. Đối tượng `source` không được memoize gây vòng lặp render/reloading.
+      4. Tên font `Baloo2` không hợp lệ (font nạp hệ thống là `Baloo2_800ExtraBold`) và viền `borderStyle: 'dashed'` đơn lẻ gây lỗi render trên Android.
+      5. Đồng thời Subtab Chat (AI Coach Anh Minh & Squad) vẫn mang thiết kế cũ bo tròn mềm, chưa theo chuẩn Style Heo Con (viền 3px mực, bóng cứng 0-blur, kem sàn `#F6EEDC`, vàng cám `#F4B93B`).
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Explicit Dimensions & WKWebView Config:** Gán kích thước tuyệt đối tường minh `width: SCREEN_WIDTH, height: gameHeight, flex: 0` cho cả `containerStyle` và `style` của `SafeWebView`; bọc `memoizedSource = useMemo(() => ({ html: htmlContent, baseUrl: '' }), [htmlContent])`; cấu hình `originWhitelist={['*']}`, `javaScriptEnabled={true}`, `domStorageEnabled={true}`, `scrollEnabled={false}`, `automaticallyAdjustContentInsets={false}`.
+      2. **Chuẩn Hóa Font & Border Hub Dashboard:** Sửa font chữ thành `Baloo2_800ExtraBold`, `Nunito_700Bold`/`Nunito_800ExtraBold`, đổi border dashed sang solid chuẩn mực.
+      3. **Re-skin Subtab Chat Đồng Bộ Neo-Brutalist Heo Con:**
+         - Header segment: Track viền 3px mực `#2B2118`, nền `#FFFBF1`, bóng cứng 3px 0-blur; tab active nền Vàng Cám `#F4B93B` viền 2px mực.
+         - Bong bóng tin nhắn AI Coach: Nền kem `#FFFBF1` viền 3px mực, bóng cứng 3px 0-blur, avatar Heo Con pixel 36px.
+         - Bong bóng người dùng: Nền Vàng Cám `#F4B93B` viền 3px mực, bóng cứng 3px 0-blur, chữ Nâu Mực `#2B2118`.
+         - Thanh nhập chat `ChatInputBar`: Nền kem `#F6EEDC`, viền trên 2.5px mực, ô gõ `#FFFBF1` viền 2.5px mực, nút đính kèm & nút Gửi Vàng Cám viền 2.5px mực nổi khối.
+         - Chip gợi ý, thẻ MiniMetric và thẻ xác nhận ghi sổ: Viền 2.5px mực, bóng cứng 2px, nút hành động Vàng Cám.
+
+
 
 
 

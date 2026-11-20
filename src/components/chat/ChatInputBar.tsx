@@ -31,7 +31,8 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   onPickImage,
   isThinking = false,
 }) => {
-  const { tokens } = useTheme();
+  const { tokens, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
   const { bottomInset } = useBottomInset();
   const [inputText, setInputText] = useState('');
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -70,26 +71,48 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
     <View
       style={[
         styles.container,
-        {
-          backgroundColor: tokens.surface,
-          borderTopColor: tokens.border,
-          paddingBottom: currentBottomPadding,
-        },
+        isHeocon
+          ? {
+              backgroundColor: '#F6EEDC',
+              borderTopColor: '#2B2118',
+              borderTopWidth: 2.5,
+              paddingBottom: currentBottomPadding,
+            }
+          : {
+              backgroundColor: tokens.surface,
+              borderTopColor: tokens.border,
+              paddingBottom: currentBottomPadding,
+            },
       ]}
     >
       <View style={styles.inputRow}>
         {/* NÚT ĐÍNH KÈM ẢNH HÓA ĐƠN / MÓN ĐỒ */}
         {onPickImage && (
           <TouchableOpacity
-            style={styles.attachButton}
+            style={[
+              styles.attachButton,
+              isHeocon && {
+                backgroundColor: '#FFFBF1',
+                borderWidth: 2,
+                borderColor: '#2B2118',
+                borderRadius: 999,
+                width: 42,
+                height: 42,
+                shadowColor: '#2B2118',
+                shadowOffset: { width: 0, height: 1.5 },
+                shadowOpacity: 1,
+                shadowRadius: 0,
+                elevation: 2,
+              },
+            ]}
             onPress={onPickImage}
             activeOpacity={0.75}
             disabled={isThinking}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <ImagePlus
-              size={22}
-              color={tokens.primary}
+              size={20}
+              color={isHeocon ? '#2B2118' : tokens.primary}
               strokeWidth={2.4}
             />
           </TouchableOpacity>
@@ -99,14 +122,23 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         <TextInput
           style={[
             styles.textInput,
-            {
-              backgroundColor: tokens.surfaceAlt,
-              borderColor: tokens.border,
-              color: tokens.text,
-            },
+            isHeocon
+              ? {
+                  backgroundColor: '#FFFBF1',
+                  borderColor: '#2B2118',
+                  borderWidth: 2.5,
+                  color: '#2B2118',
+                  fontFamily: 'Nunito',
+                  fontWeight: '700',
+                }
+              : {
+                  backgroundColor: tokens.surfaceAlt,
+                  borderColor: tokens.border,
+                  color: tokens.text,
+                },
           ]}
           placeholder={Strings.chat.inputPlaceholder}
-          placeholderTextColor={tokens.textMuted}
+          placeholderTextColor={isHeocon ? '#85735E' : tokens.textMuted}
           value={inputText}
           onChangeText={setInputText}
           multiline={false}
@@ -119,10 +151,21 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         <TouchableOpacity
           style={[
             styles.actionButton,
-            {
-              backgroundColor: hasText ? tokens.primary : tokens.surfaceAlt,
-              borderColor: tokens.border,
-            },
+            isHeocon
+              ? {
+                  backgroundColor: hasText ? '#F4B93B' : '#EADFC7',
+                  borderColor: '#2B2118',
+                  borderWidth: 2.5,
+                  shadowColor: '#2B2118',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: hasText ? 1 : 0,
+                  shadowRadius: 0,
+                  elevation: hasText ? 2 : 0,
+                }
+              : {
+                  backgroundColor: hasText ? tokens.primary : tokens.surfaceAlt,
+                  borderColor: tokens.border,
+                },
             (!hasText || isThinking) && styles.buttonDisabled,
           ]}
           onPress={handleSend}
@@ -131,8 +174,8 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         >
           <Send
             size={18}
-            color={hasText ? '#1B2733' : tokens.textMuted}
-            strokeWidth={2.2}
+            color={isHeocon ? '#2B2118' : (hasText ? '#1B2733' : tokens.textMuted)}
+            strokeWidth={2.6}
           />
         </TouchableOpacity>
       </View>

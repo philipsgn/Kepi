@@ -3612,4 +3612,54 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 79 Passed: Kéo Thả Text IG Story Siêu Mượt & Zero Placeholder (Quyết định 139) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 79 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (79/79)!');
+// ==============================================================================
+// 🧪 TEST 80: KHẮC PHỤC LỖI RENDER WEBVIEW CANVAS & RE-SKIN SUBTAB CHAT HEO CON (QUYẾT ĐỊNH 140) AUDIT
+// ==============================================================================
+{
+  const flyPath = path.join(__dirname, 'src/components/chat/PigFlightGameView.tsx');
+  const flyCode = fs.readFileSync(flyPath, 'utf8');
+  const shooterPath = path.join(__dirname, 'src/components/chat/PigShooterGameView.tsx');
+  const shooterCode = fs.readFileSync(shooterPath, 'utf8');
+  const mapPath = path.join(__dirname, 'src/components/chat/PiggySpendMapView.tsx');
+  const mapCode = fs.readFileSync(mapPath, 'utf8');
+  const hubPath = path.join(__dirname, 'src/components/chat/PixelHubDashboard.tsx');
+  const hubCode = fs.readFileSync(hubPath, 'utf8');
+  const chatViewPath = path.join(__dirname, 'src/components/views/ChatView.tsx');
+  const chatViewCode = fs.readFileSync(chatViewPath, 'utf8');
+  const coachBubblePath = path.join(__dirname, 'src/components/chat/CoachMessageBubble.tsx');
+  const coachBubbleCode = fs.readFileSync(coachBubblePath, 'utf8');
+  const userBubblePath = path.join(__dirname, 'src/components/chat/UserMessageBubble.tsx');
+  const userBubbleCode = fs.readFileSync(userBubblePath, 'utf8');
+  const chatInputPath = path.join(__dirname, 'src/components/chat/ChatInputBar.tsx');
+  const chatInputCode = fs.readFileSync(chatInputPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+  const docPath = path.join(__dirname, 'docs/screens/heocon/10-CHAT.md');
+  const docCode = fs.readFileSync(docPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  // 1. SafeWebView explicit dimensions, baseUrl: '' & web fallback in all 3 Game/Map views
+  assert.ok(flyCode.includes("baseUrl: ''") && flyCode.includes('containerStyle={{ width: winWidth'), 'PigFlightGameView must have baseUrl and explicit dimensions');
+  assert.ok(shooterCode.includes("baseUrl: ''") && shooterCode.includes('containerStyle={{ width: winWidth'), 'PigShooterGameView must have baseUrl and explicit dimensions');
+  assert.ok(mapCode.includes("baseUrl: ''") && mapCode.includes('containerStyle={{ width: winWidth'), 'PiggySpendMapView must have baseUrl and explicit dimensions');
+
+  // 2. Hub Dashboard typography and border fixes
+  assert.ok(hubCode.includes("'Baloo2_800ExtraBold'"), 'PixelHubDashboard must use valid Baloo2_800ExtraBold font');
+  assert.ok(!hubCode.includes("borderStyle: 'dashed'"), 'PixelHubDashboard must not use crash-prone single dashed border');
+
+  // 3. Subtab Chat Neo-Brutalist Re-skin
+  assert.ok(chatViewCode.includes("screenBg = isHeocon ? '#F6EEDC' : tokens.bg"), 'ChatView must support #F6EEDC theme background');
+  assert.ok(coachBubbleCode.includes('avatarWrapperHeocon') && coachBubbleCode.includes("backgroundColor: '#FFFBF1'"), 'CoachMessageBubble must have Heo Con neo-brutalist avatar and card');
+  assert.ok(userBubbleCode.includes("backgroundColor: '#F4B93B'") && userBubbleCode.includes('borderWidth: 3'), 'UserMessageBubble must have Vang Cam 3px ink border');
+  assert.ok(chatInputCode.includes("backgroundColor: '#F6EEDC'") && chatInputCode.includes('borderTopWidth: 2.5'), 'ChatInputBar must have Heo Con neo-brutalist theme');
+
+  // 4. Living Docs Reverse Sync (AGENTS.md, 10-CHAT.md, DECISIONS.md)
+  assert.ok(agentsCode.includes('Quyết định 140') || agentsCode.includes('Pixel Hub Đa Năng 4 Thẻ'), 'AGENTS.md must document Quyết định 140');
+  assert.ok(docCode.includes('Quyết định 140') || docCode.includes('Quyáº¿t Ä‘á»‹nh 140'), '10-CHAT.md must document Quyết định 140');
+  assert.ok(decisionsCode.includes('Quyết định 140') || decisionsCode.includes('Quyáº¿t Ä‘á»‹nh 140'), 'DECISIONS.md must document Quyết định 140');
+
+  console.log('✅ Test 80 Passed: Khắc Phục Lỗi Render WebView Canvas & Re-skin Subtab Chat Heo Con (Quyết định 140) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 80 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (80/80)!');

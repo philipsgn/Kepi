@@ -33,6 +33,8 @@ export const UserMessageBubble: React.FC<UserMessageBubbleProps> = ({ message })
                   backgroundColor: '#F4B93B',
                   borderWidth: 3,
                   borderColor: '#2B2118',
+                  borderRadius: 18,
+                  borderBottomRightRadius: 4,
                   shadowColor: '#2B2118',
                   shadowOffset: { width: 0, height: 3 },
                   shadowOpacity: 1,
@@ -47,7 +49,7 @@ export const UserMessageBubble: React.FC<UserMessageBubbleProps> = ({ message })
               source={{ uri: message.photoUrl }}
               style={[
                 styles.attachedPhoto,
-                isHeocon && { borderWidth: 2, borderColor: '#2B2118' },
+                isHeocon && { borderWidth: 2.5, borderColor: '#2B2118', borderRadius: 12 },
               ]}
               contentFit="cover"
               cachePolicy="disk"
@@ -58,7 +60,7 @@ export const UserMessageBubble: React.FC<UserMessageBubbleProps> = ({ message })
             <Text
               style={[
                 styles.messageText,
-                isHeocon && { color: '#2B2118', fontWeight: '700' },
+                isHeocon && { color: '#2B2118', fontFamily: 'Nunito', fontWeight: '800', fontSize: 14.5 },
               ]}
             >
               {message.text}

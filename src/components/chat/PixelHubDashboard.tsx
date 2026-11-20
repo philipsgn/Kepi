@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   mainHeading: {
-    fontFamily: 'Baloo2',
+    fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
     fontSize: 26,
     lineHeight: 32,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   streakText: {
-    fontFamily: 'Baloo2',
+    fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
     fontSize: 13,
     color: '#2B2118',
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardTitle: {
-    fontFamily: 'Baloo2',
+    fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
     fontSize: 20,
     lineHeight: 24,
@@ -321,7 +321,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     borderTopWidth: 2,
     borderTopColor: '#EADFC7',
-    borderStyle: 'dashed',
   },
   actionText: {
     fontFamily: 'Nunito',

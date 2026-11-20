@@ -33,7 +33,8 @@ export const MiniMetricCard: React.FC<MiniMetricCardProps> = ({
   category,
   onPress,
 }) => {
-  const { tokens } = useTheme();
+  const { tokens, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -46,29 +47,86 @@ export const MiniMetricCard: React.FC<MiniMetricCardProps> = ({
       onPress={handlePress}
       style={[
         styles.card,
-        {
-          backgroundColor: tokens.surfaceAlt,
-          borderColor: tokens.border,
-        },
+        isHeocon
+          ? {
+              backgroundColor: '#FAF6EC',
+              borderColor: '#2B2118',
+              borderWidth: 2.5,
+              borderRadius: 14,
+              shadowColor: '#2B2118',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 1,
+              shadowRadius: 0,
+              elevation: 2,
+            }
+          : {
+              backgroundColor: tokens.surfaceAlt,
+              borderColor: tokens.border,
+            },
       ]}
     >
       <View style={styles.topRow}>
         <View style={styles.titleWithIcon}>
-          <PieChart size={14} color={tokens.primary} strokeWidth={2.2} />
-          <Text style={[styles.titleText, { color: tokens.text }]}>{title}</Text>
+          <PieChart size={14} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.4} />
+          <Text
+            style={[
+              styles.titleText,
+              { color: isHeocon ? '#2B2118' : tokens.text },
+              isHeocon && { fontFamily: 'Nunito', fontWeight: '800' },
+            ]}
+          >
+            {title}
+          </Text>
         </View>
         {percentage !== undefined && (
-          <View style={[styles.percentBadge, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
-            <Text style={[styles.percentText, { color: tokens.primary }]}>{percentage}% chi tháng</Text>
+          <View
+            style={[
+              styles.percentBadge,
+              isHeocon
+                ? { backgroundColor: '#F4B93B', borderWidth: 1.5, borderColor: '#2B2118' }
+                : { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            <Text
+              style={[
+                styles.percentText,
+                { color: isHeocon ? '#2B2118' : tokens.primary },
+                isHeocon && { fontWeight: '800' },
+              ]}
+            >
+              {percentage}% chi tháng
+            </Text>
           </View>
         )}
       </View>
 
-      <Text style={[styles.amountText, { color: tokens.text }]}>{formatVND(amount)}</Text>
+      <Text
+        style={[
+          styles.amountText,
+          { color: isHeocon ? '#2B2118' : tokens.text },
+          isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 18 },
+        ]}
+      >
+        {formatVND(amount)}
+      </Text>
 
-      <View style={[styles.footerRow, { borderTopColor: tokens.border }]}>
-        <Text style={[styles.footerLinkText, { color: tokens.primary }]}>{Strings.chat.viewInStats}</Text>
-        <ArrowRight size={13} color={tokens.primary} strokeWidth={2.4} />
+      <View
+        style={[
+          styles.footerRow,
+          { borderTopColor: isHeocon ? '#2B2118' : tokens.border },
+          isHeocon && { borderTopWidth: 1.5 },
+        ]}
+      >
+        <Text
+          style={[
+            styles.footerLinkText,
+            { color: isHeocon ? '#2B2118' : tokens.primary },
+            isHeocon && { fontFamily: 'Nunito', fontWeight: '800' },
+          ]}
+        >
+          {Strings.chat.viewInStats}
+        </Text>
+        <ArrowRight size={13} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.4} />
       </View>
     </TouchableOpacity>
   );

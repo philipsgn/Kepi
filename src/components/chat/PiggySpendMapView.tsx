@@ -1,9 +1,11 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
@@ -18,6 +20,8 @@ interface PiggySpendMapViewProps {
 
 export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) => {
   const webViewRef = useRef<any>(null);
+  const { width: winWidth, height: winHeight } = useWindowDimensions();
+  const [contentHeight, setContentHeight] = useState<number>(winHeight - 65);
   const { transactions } = useTransactionStore();
 
   const handleBack = () => {
@@ -621,6 +625,8 @@ requestAnimationFrame(loop);
 </html>
   `;
 
+  const memoizedSource = useMemo(() => ({ html: htmlContent, baseUrl: '' }), [htmlContent]);
+
   return (
     <View style={styles.container}>
       {/* HEADER QUAY LẠI NEO-BRUTALIST */}
@@ -647,17 +653,36 @@ requestAnimationFrame(loop);
         </TouchableOpacity>
       </View>
 
-      {/* WEBVIEW CANVAS SIÊU MƯỢT 60FPS */}
-      <SafeWebView
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ html: htmlContent }}
-        style={styles.webView}
-        scrollEnabled={true}
-        scalesPageToFit={false}
-        javaScriptEnabled={true}
-        onMessage={handleMessage}
-      />
+      {/* WEBVIEW CANVAS SIÊU MƯỢT 60FPS (EXPLICIT DIMENSIONS + BASEURL) */}
+      <View
+        style={styles.webContainer}
+        onLayout={(e) => {
+          const h = e.nativeEvent.layout.height;
+          if (h > 50) setContentHeight(h);
+        }}
+      >
+        {Platform.OS === 'web' ? (
+          <iframe
+            srcDoc={htmlContent}
+            style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#F6EEDC' } as any}
+          />
+        ) : (
+          <SafeWebView
+            ref={webViewRef}
+            originWhitelist={['*']}
+            source={memoizedSource}
+            containerStyle={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
+            style={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
+            scrollEnabled={true}
+            scalesPageToFit={false}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            automaticallyAdjustContentInsets={false}
+            contentInsetAdjustmentBehavior="never"
+            onMessage={handleMessage}
+          />
+        )}
+      </View>
     </View>
   );
 };
@@ -703,7 +728,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontFamily: 'Baloo2',
+    fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
     fontSize: 18,
     color: '#2B2118',
@@ -723,8 +748,13 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 2,
   },
-  webView: {
+  webContainer: {
     flex: 1,
+    width: '100%',
+    backgroundColor: '#F6EEDC',
+    overflow: 'hidden',
+  },
+  webView: {
     backgroundColor: '#F6EEDC',
   },
 });

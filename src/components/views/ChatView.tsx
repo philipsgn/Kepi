@@ -68,7 +68,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
   onNavigateToCamera,
 }) => {
   const insets = useSafeAreaInsets();
-  const { tokens } = useTheme();
+  const { tokens, mode } = useTheme();
+  const isHeocon = mode === 'heocon' || !mode;
   const { bottomInset } = useBottomInset();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('hub');
   const [activeTab, setActiveTab] = useState<'COACH' | 'FRIENDS'>('COACH');
@@ -320,9 +321,11 @@ export const ChatView: React.FC<ChatViewProps> = ({
     handleSendMessage(prompt);
   };
 
+  const screenBg = isHeocon ? '#F6EEDC' : tokens.bg;
+
   if (activeSubView === 'hub') {
     return (
-      <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
         <PixelHubDashboard onSelectSubView={setActiveSubView} />
       </View>
     );
@@ -330,7 +333,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
   if (activeSubView === 'fly') {
     return (
-      <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
         <PigFlightGameView onBack={() => setActiveSubView('hub')} />
       </View>
     );
@@ -338,7 +341,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
   if (activeSubView === 'shooter') {
     return (
-      <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
         <PigShooterGameView onBack={() => setActiveSubView('hub')} />
       </View>
     );
@@ -346,14 +349,14 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
   if (activeSubView === 'map') {
     return (
-      <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
         <PiggySpendMapView onBack={() => setActiveSubView('hub')} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top }]}>
+    <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
       {/* 0. NÚT QUAY LẠI HUB TRUNG TÂM */}
       <View style={styles.hubBackRow}>
         <TouchableOpacity
@@ -383,7 +386,14 @@ export const ChatView: React.FC<ChatViewProps> = ({
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
           {/* PROMPT CHIPS GỢI Ý NHANH */}
-          <View style={[styles.chipsContainer, { backgroundColor: tokens.bg, borderBottomColor: tokens.border }]}>
+          <View
+            style={[
+              styles.chipsContainer,
+              isHeocon
+                ? { backgroundColor: '#F6EEDC', borderBottomColor: '#2B2118', borderBottomWidth: 2 }
+                : { backgroundColor: tokens.bg, borderBottomColor: tokens.border, borderBottomWidth: 1 },
+            ]}
+          >
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -394,15 +404,34 @@ export const ChatView: React.FC<ChatViewProps> = ({
                   key={`chip-${idx}`}
                   style={[
                     styles.chipButton,
-                    {
-                      backgroundColor: tokens.surfaceAlt,
-                      borderColor: tokens.border,
-                    },
+                    isHeocon
+                      ? {
+                          backgroundColor: '#FFFBF1',
+                          borderColor: '#2B2118',
+                          borderWidth: 2,
+                          shadowColor: '#2B2118',
+                          shadowOffset: { width: 0, height: 1.5 },
+                          shadowOpacity: 1,
+                          shadowRadius: 0,
+                          elevation: 1,
+                        }
+                      : {
+                          backgroundColor: tokens.surfaceAlt,
+                          borderColor: tokens.border,
+                        },
                   ]}
                   onPress={() => handlePromptChipPress(chip)}
                   activeOpacity={0.75}
                 >
-                  <Text style={[styles.chipText, { color: tokens.text }]}>{chip}</Text>
+                  <Text
+                    style={[
+                      styles.chipText,
+                      { color: isHeocon ? '#2B2118' : tokens.text },
+                      isHeocon && { fontFamily: 'Nunito', fontWeight: '800' },
+                    ]}
+                  >
+                    {chip}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -431,11 +460,36 @@ export const ChatView: React.FC<ChatViewProps> = ({
             }}
             ListFooterComponent={
               isThinking ? (
-                <View style={[styles.thinkingBubble, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
-                  <View style={[styles.thinkingDot, { backgroundColor: tokens.primary }]} />
-                  <View style={[styles.thinkingDot, { backgroundColor: tokens.primary, opacity: 0.7 }]} />
-                  <View style={[styles.thinkingDot, { backgroundColor: tokens.primary, opacity: 0.4 }]} />
-                  <Text style={[styles.thinkingText, { color: tokens.textMuted }]}>Anh Minh đang tính toán...</Text>
+                <View
+                  style={[
+                    styles.thinkingBubble,
+                    isHeocon
+                      ? {
+                          backgroundColor: '#FFFBF1',
+                          borderColor: '#2B2118',
+                          borderWidth: 2.5,
+                          borderRadius: 16,
+                          shadowColor: '#2B2118',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 0,
+                          elevation: 2,
+                        }
+                      : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                  ]}
+                >
+                  <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary }]} />
+                  <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary, opacity: 0.7 }]} />
+                  <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary, opacity: 0.4 }]} />
+                  <Text
+                    style={[
+                      styles.thinkingText,
+                      { color: isHeocon ? '#2B2118' : tokens.textMuted },
+                      isHeocon && { fontFamily: 'Nunito', fontWeight: '700' },
+                    ]}
+                  >
+                    Anh Minh đang tính toán...
+                  </Text>
                 </View>
               ) : undefined
             }

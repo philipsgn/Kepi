@@ -37,8 +37,8 @@ export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
   return (
     <View style={styles.wrapper}>
       {/* 1. AVATAR CHÚ HEO PIXEL */}
-      <View style={styles.avatarWrapper}>
-        <PixelPigAvatar size={32} mood="idle" borderless />
+      <View style={[styles.avatarWrapper, isHeocon && styles.avatarWrapperHeocon]}>
+        <PixelPigAvatar size={isHeocon ? 30 : 32} mood="idle" borderless />
       </View>
 
       <View style={styles.bubbleCol}>
@@ -46,6 +46,7 @@ export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
           style={[
             styles.senderName,
             { color: isHeocon ? '#6E5D4F' : tokens.textMuted },
+            isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
           ]}
         >
           Anh Minh
@@ -59,6 +60,8 @@ export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
                   backgroundColor: '#FFFBF1',
                   borderColor: '#2B2118',
                   borderWidth: 3,
+                  borderRadius: 18,
+                  borderTopLeftRadius: 4,
                   shadowColor: '#2B2118',
                   shadowOffset: { width: 0, height: 3 },
                   shadowOpacity: 1,
@@ -72,6 +75,7 @@ export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
             style={[
               styles.messageText,
               { color: isHeocon ? '#2B2118' : tokens.text },
+              isHeocon && { fontFamily: 'Nunito', fontWeight: '700', fontSize: 14.5 },
             ]}
           >
             {message.text}
@@ -132,6 +136,21 @@ const styles = StyleSheet.create({
     marginTop: 2,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  avatarWrapperHeocon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 1.5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
   },
   avatarBox: {
     width: 32,
