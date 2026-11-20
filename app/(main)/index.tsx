@@ -164,6 +164,7 @@ export default function MainAppScreen() {
 
   // Tab & Scroll State
   const [activeTabIndex, setActiveTabIndex] = useState<number>(2); // Default to Camera (Index 2 - Trang trung tâm)
+  const [isGameActive, setIsGameActive] = useState<boolean>(false); // Quyết định 144: Fullscreen mode ẩn tab bar khi chơi Game
   const horizontalPagerRef = useRef<ScrollViewInstance | null>(null);
   const verticalHistoryScrollRef = useRef<ScrollViewInstance | null>(null);
 
@@ -1848,6 +1849,7 @@ export default function MainAppScreen() {
           <ChatView
             onNavigateToStats={() => handleTabPress(1)}
             onNavigateToCamera={() => handleTabPress(2)}
+            onToggleTabBar={(visible) => setIsGameActive(!visible)}
           />
         </View>
 
@@ -1863,12 +1865,14 @@ export default function MainAppScreen() {
         </View>
       </ScrollView>
 
-      {/* FLOATING PILL TAB BAR ACROSS ALL 5 PAGES */}
-      <FloatingPillTabBar
-        activeIndex={activeTabIndex}
-        onSelectTab={handleTabPress}
-        screenWidth={SCREEN_WIDTH}
-      />
+      {/* FLOATING PILL TAB BAR ACROSS ALL 5 PAGES (Ẩn khi vào Fullscreen Game Mode - Quyết định 144) */}
+      {!isGameActive && (
+        <FloatingPillTabBar
+          activeIndex={activeTabIndex}
+          onSelectTab={handleTabPress}
+          screenWidth={SCREEN_WIDTH}
+        />
+      )}
 
       {/* CONFIRMATION SHEET (POLAROID REVIEW AFTER CAPTURE) */}
       <ConfirmationSheet

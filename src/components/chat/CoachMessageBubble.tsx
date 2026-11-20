@@ -32,7 +32,8 @@ export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
   onCancelRecord,
 }) => {
   const { tokens, mode } = useTheme();
-  const isHeocon = mode === 'heocon' || !mode;
+  // Quyết định 144: Cố định 100% Neo-Brutalist Pixel Art cho Tab Giải Trí độc lập với Theme máy
+  const isHeocon = true;
 
   return (
     <View style={styles.wrapper}>

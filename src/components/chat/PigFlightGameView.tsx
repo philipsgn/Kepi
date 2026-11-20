@@ -34,7 +34,8 @@ export const PigFlightGameView: React.FC<PigFlightGameViewProps> = ({
 }) => {
   const webViewRef = useRef<any>(null);
   const { width: winWidth, height: winHeight } = useWindowDimensions();
-  const [contentHeight, setContentHeight] = useState<number>(winHeight - 65);
+  // Quyết định 144: Toàn màn hình khi chơi Game (Fullscreen Mode)
+  const [contentHeight, setContentHeight] = useState<number>(winHeight - 48);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -239,19 +240,22 @@ body {
 }
 .scene.flywrap {
   position: relative;
-  margin-top: 10px;
+  margin-top: 8px;
   background: #BFE6F6;
   border: 3px solid var(--ink);
-  border-radius: 22px;
+  border-radius: 20px;
   box-shadow: 0 4px 0 var(--ink);
   overflow: hidden;
   touch-action: manipulation;
   text-align: center;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .scene.flywrap canvas {
   display: block;
   width: 100%;
-  max-width: 360px;
+  max-height: 275px;
   height: auto;
   margin: 0 auto;
   image-rendering: pixelated;
@@ -1012,10 +1016,27 @@ function flyFrame(now){
   requestAnimationFrame(flyFrame);
 }
 
-/* Bắt sự kiện */
-$('flyWrap').addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;e.preventDefault();flyFlap()});
-$('flyBtn').addEventListener('pointerdown',e=>{e.preventDefault();flyFlap()});
-$('flyBtn').addEventListener('click',e=>{if(e.detail===0)flyFlap()});
+/* Bắt sự kiện chạm vỗ cánh an toàn, chống chết sớm */
+let tapStartX = 0, tapStartY = 0, tapStartT = 0;
+$('flyWrap').addEventListener('pointerdown', e => {
+  if (e.target.closest('button')) return;
+  tapStartX = e.clientX;
+  tapStartY = e.clientY;
+  tapStartT = Date.now();
+});
+$('flyWrap').addEventListener('pointerup', e => {
+  if (e.target.closest('button')) return;
+  const dist = Math.hypot(e.clientX - tapStartX, e.clientY - tapStartY);
+  const dur = Date.now() - tapStartT;
+  if (dist < 18 && dur < 450) {
+    e.preventDefault();
+    flyFlap();
+  }
+});
+$('flyBtn').addEventListener('click', e => {
+  e.preventDefault();
+  flyFlap();
+});
 
 $('flyPause').addEventListener('click',()=>{
   fly.paused=!fly.paused;

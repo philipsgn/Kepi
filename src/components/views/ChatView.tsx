@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -39,6 +39,7 @@ import { PiggySpendMapView } from '../chat/PiggySpendMapView';
 interface ChatViewProps {
   onNavigateToStats?: () => void;
   onNavigateToCamera?: () => void;
+  onToggleTabBar?: (visible: boolean) => void;
 }
 
 const INITIAL_MESSAGES: ChatMessage[] = [
@@ -67,12 +68,24 @@ const PROMPT_CHIPS = [
 export const ChatView: React.FC<ChatViewProps> = ({
   onNavigateToStats,
   onNavigateToCamera,
+  onToggleTabBar,
 }) => {
   const insets = useSafeAreaInsets();
   const { tokens, mode } = useTheme();
-  const isHeocon = mode === 'heocon' || !mode;
+  // Quyết định 144: Cố định 100% phong cách Neo-Brutalist Pixel Art cho Tab Giải Trí
+  const isHeocon = true;
+  const screenBg = isHeocon ? '#F6EEDC' : tokens.bg;
   const { bottomInset } = useBottomInset();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('hub');
+
+  // Quyết định 144: Tự động ẩn Bottom Tab Bar khi vào Fullscreen Game Mode
+  useEffect(() => {
+    if (activeSubView === 'fly' || activeSubView === 'shooter') {
+      onToggleTabBar?.(false);
+    } else {
+      onToggleTabBar?.(true);
+    }
+  }, [activeSubView, onToggleTabBar]);
   const [activeTab, setActiveTab] = useState<'COACH' | 'FRIENDS'>('COACH');
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [isThinking, setIsThinking] = useState(false);
@@ -330,8 +343,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
     handleSendMessage(prompt);
   };
 
-  const screenBg = isHeocon ? '#F6EEDC' : tokens.bg;
-
   if (activeSubView === 'hub') {
     return (
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
@@ -389,12 +400,21 @@ export const ChatView: React.FC<ChatViewProps> = ({
     );
   }
 
+  if (activeSubView === 'squad') {
+    return (
+      <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
+        <SquadLocketView onBack={() => setActiveSubView('hub')} />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-      {/* 0. NÚT QUAY LẠI HUB TRUNG TÂM */}
-      <View style={styles.hubBackRow}>
+      {/* 0. HEADER NEO-BRUTALIST CHUẨN PROTOTYPE */}
+      <View style={styles.chatHeaderRow}>
         <TouchableOpacity
           style={styles.hubBackButton}
+          accessibilityLabel="‹ Giải trí"
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setActiveSubView('hub');
@@ -402,23 +422,20 @@ export const ChatView: React.FC<ChatViewProps> = ({
           activeOpacity={0.8}
         >
           <ArrowLeft size={16} color="#2B2118" strokeWidth={2.8} />
-          <Text style={styles.hubBackButtonText}>‹ Giải trí</Text>
+          <Text style={styles.hubBackButtonText}>‹ Quay lại Hub</Text>
         </TouchableOpacity>
+
+        <View style={styles.chatTitleCol}>
+          <Text style={styles.chatTitleText}>Heo-Coach Anh Minh</Text>
+          <Text style={styles.chatSubtitleText}>Gợi ý theo số liệu sổ chi</Text>
+        </View>
       </View>
 
-      {/* 1. TOP SEGMENT HEADER [Anh Minh | Bạn bè] */}
-      <ChatTopSegmentHeader activeTab={activeTab} onSelectTab={setActiveTab} />
-
-      {activeTab === 'FRIENDS' ? (
-        /* 2. NGĂN BẠN BÈ: SẮP RA MẮT */
-        <SquadLocketView />
-      ) : (
-        /* 3. NGĂN ANH MINH: TRÒ CHUYỆN VỚI CỐ VẤN TĨNH TÂM */
-        <KeyboardAvoidingView
-          style={styles.coachContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-        >
+      <KeyboardAvoidingView
+        style={styles.coachContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
           {/* PROMPT CHIPS GỢI Ý NHANH */}
           <View
             style={[
@@ -559,7 +576,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
             bottomOffset={bottomInset + 65}
           />
         </KeyboardAvoidingView>
-      )}
     </View>
   );
 };
@@ -567,6 +583,29 @@ export const ChatView: React.FC<ChatViewProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  chatHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+    gap: 12,
+  },
+  chatTitleCol: {
+    flex: 1,
+  },
+  chatTitleText: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontSize: 18,
+    color: '#2B2118',
+    lineHeight: 22,
+  },
+  chatSubtitleText: {
+    fontFamily: 'Nunito',
+    fontWeight: '700',
+    fontSize: 11.5,
+    color: '#85735E',
   },
   hubBackRow: {
     paddingHorizontal: 16,

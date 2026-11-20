@@ -3690,7 +3690,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(tabbarCode.includes("activeBg: '#E0452B'") && tabbarCode.includes("activeBg: '#F4B93B'") && tabbarCode.includes("activeBg: '#2B2118'"), 'FloatingPillTabBar must map active colors for Camera, Entertainment and others');
 
   // 4. Sub-view Navigation Back Button label
-  assert.ok(chatViewCode.includes('‹ Giải trí'), 'ChatView back button must display ‹ Giải trí');
+  assert.ok(chatViewCode.includes('‹ Giải trí') || chatViewCode.includes('‹ Quay lại Hub'), 'ChatView back button must display navigation back button');
 
   // 5. Living Docs Reverse Sync (AGENTS.md, DECISIONS.md)
   assert.ok(agentsCode.includes('Quyết định 141') || agentsCode.includes('Tab 3: Giải Trí'), 'AGENTS.md must document Quyết định 141');
@@ -3815,4 +3815,69 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 83 Passed: Port 1:1 Prototype Graphics For Chat & 2 Games (Quyết định 143) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 83 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (83/83)!');
+// ==============================================================================
+// 🧪 TEST 84: FULLSCREEN GAME MODE, UNBLOCKED CONTROLS & ALWAYS-NEO-BRUTALIST CHAT (QUYẾT ĐỊNH 144) AUDIT
+// ==============================================================================
+{
+  const mainIndexPath = path.join(__dirname, 'app/(main)/index.tsx');
+  const mainIndexCode = fs.readFileSync(mainIndexPath, 'utf8');
+  const chatViewPath = path.join(__dirname, 'src/components/views/ChatView.tsx');
+  const chatViewCode = fs.readFileSync(chatViewPath, 'utf8');
+  const coachBubblePath = path.join(__dirname, 'src/components/chat/CoachMessageBubble.tsx');
+  const coachBubbleCode = fs.readFileSync(coachBubblePath, 'utf8');
+  const userBubblePath = path.join(__dirname, 'src/components/chat/UserMessageBubble.tsx');
+  const userBubbleCode = fs.readFileSync(userBubblePath, 'utf8');
+  const chatInputPath = path.join(__dirname, 'src/components/chat/ChatInputBar.tsx');
+  const chatInputCode = fs.readFileSync(chatInputPath, 'utf8');
+  const flyGamePath = path.join(__dirname, 'src/components/chat/PigFlightGameView.tsx');
+  const flyGameCode = fs.readFileSync(flyGamePath, 'utf8');
+  const shooterGamePath = path.join(__dirname, 'src/components/chat/PigShooterGameView.tsx');
+  const shooterGameCode = fs.readFileSync(shooterGamePath, 'utf8');
+  const hubPath = path.join(__dirname, 'src/components/chat/PixelHubDashboard.tsx');
+  const hubCode = fs.readFileSync(hubPath, 'utf8');
+  const squadPath = path.join(__dirname, 'src/components/chat/SquadLocketView.tsx');
+  const squadCode = fs.readFileSync(squadPath, 'utf8');
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+  const chatDocPath = path.join(__dirname, 'docs/screens/heocon/10-CHAT.md');
+  const chatDocCode = fs.readFileSync(chatDocPath, 'utf8');
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+
+  // 1. Fullscreen Game Mode in app/(main)/index.tsx
+  assert.ok(mainIndexCode.includes('isGameActive'), 'main index must maintain isGameActive state');
+  assert.ok(mainIndexCode.includes('onToggleTabBar'), 'main index must pass onToggleTabBar to ChatView');
+  assert.ok(mainIndexCode.includes('!isGameActive &&') && mainIndexCode.includes('FloatingPillTabBar'), 'FloatingPillTabBar must be hidden when isGameActive is true');
+
+  // 2. ChatView Fullscreen & Hub Integration
+  assert.ok(chatViewCode.includes('onToggleTabBar?.(false)'), 'ChatView must request hiding tab bar when entering games');
+  assert.ok(chatViewCode.includes('onToggleTabBar?.(true)'), 'ChatView must request showing tab bar when exiting games');
+  assert.ok(chatViewCode.includes("const isHeocon = true;"), 'ChatView must fix isHeocon to true for Tab Giai Tri');
+  assert.ok(chatViewCode.includes("screenBg = isHeocon ? '#F6EEDC' : tokens.bg"), 'ChatView must fix screenBg to #F6EEDC');
+  assert.ok(chatViewCode.includes('‹ Quay lại Hub'), 'ChatView must feature Neo-Brutalist back to hub button in Coach chat');
+  assert.ok(chatViewCode.includes('SquadLocketView'), 'ChatView must support separate squad subview');
+
+  // 3. Independent Neo-Brutalist Chat Components
+  assert.ok(coachBubbleCode.includes('const isHeocon = true;'), 'CoachMessageBubble must always use Neo-Brutalist styling');
+  assert.ok(userBubbleCode.includes('const isHeocon = true;'), 'UserMessageBubble must always use Neo-Brutalist styling');
+  assert.ok(chatInputCode.includes('const isHeocon = true;'), 'ChatInputBar must always use Neo-Brutalist styling');
+
+  // 4. Fullscreen Games Unblocked Viewport & Touch Protection
+  assert.ok(flyGameCode.includes('winHeight - 48'), 'PigFlightGameView must use fullscreen content height');
+  assert.ok(flyGameCode.includes('tapStartX') && flyGameCode.includes('Math.hypot'), 'PigFlightGameView must filter touch taps to prevent instant crash');
+  assert.ok(shooterGameCode.includes('winHeight - 48'), 'PigShooterGameView must use fullscreen content height');
+  assert.ok(shooterGameCode.includes('qStep') && shooterGameCode.includes('drawPigAP'), 'PigShooterGameView must arrange waiting pigs cleanly without overlapping slingshot');
+
+  // 5. Hub Navigation & Squad Back Button
+  assert.ok(hubCode.includes("'squad'") && hubCode.includes('Users'), 'PixelHubDashboard must provide dedicated Squad Nuoi Heo 2.0 card');
+  assert.ok(squadCode.includes('onBack') && squadCode.includes('‹ Quay lại Hub'), 'SquadLocketView must feature back to hub button');
+
+  // 6. Living Documentation Sync Audit
+  assert.ok(decisionsCode.includes('144'), 'DECISIONS.md must document Quyết định 144');
+  assert.ok(chatDocCode.includes('144'), '10-CHAT.md must document Quyết định 144');
+  assert.ok(agentsCode.includes('144'), 'AGENTS.md must document Quyết định 144 in Tab 3 matrix');
+
+  console.log('✅ Test 84 Passed: Fullscreen Game Mode, Unblocked Controls & Always-Neo-Brutalist Chat (Quyết định 144) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 84 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (84/84)!');

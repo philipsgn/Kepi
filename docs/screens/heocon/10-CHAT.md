@@ -1,6 +1,8 @@
 # 🎮 10 — PIGFLY HUB & PIXEL HUB (TAB GIẢI TRÍ): CHAT, 2 GAME ĐỘ KHÓ CAO & BẢN ĐỒ CHI TIÊU
 
-> **Screen-unit:** Tab 3. **PIGFLY HUB (Trung Tâm Giải Trí & Khám Phá Heo Con)** kết hợp Chat AI Coach / Squad, 2 Game Pixel Art Độ Khó Cao (Heo Bay & Heo Bắn) và Bản Đồ Chi Tiêu Pixel port 1:1 từ `prototype/Ví Heo Con-20-11.html` (Quyết định 130, Quyết định 140, Quyết định 141, Quyết định 142 & Quyết định 143).
+> **Screen-unit:** Tab 3. **PIGFLY HUB (Trung Tâm Giải Trí & Khám Phá Heo Con)** kết hợp Chat AI Coach / Squad, 2 Game Pixel Art Độ Khó Cao (Heo Bay & Heo Bắn) và Bản Đồ Chi Tiêu Pixel port 1:1 từ `prototype/Ví Heo Con-20-11.html` (Quyết định 130, Quyết định 140, Quyết định 141, Quyết định 142, Quyết định 143 & Quyết định 144).
+> **Chế độ Toàn Màn Hình (Fullscreen Game Mode):** Tự động ẩn Floating Bottom Tab Bar khi vào chơi Heo Bay / Heo Bắn để mở rộng 100% không gian điều khiển chân trang (Quyết định 144).
+> **Cố định Khung Chat Neo-Brutalist Pixel Art:** Luôn dùng nền kem `#F6EEDC`, khung thẻ `.chatlog` viền 3px mực, avatar vuông $36\times 36$px độc lập với Theme máy (Quyết định 144).
 > **Tài liệu đặc tả chi tiết 2 mini-game:** Xem riêng tại [10-GAMES-SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-GAMES-SPEC.md).
 
 ---

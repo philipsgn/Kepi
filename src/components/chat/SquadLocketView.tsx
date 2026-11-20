@@ -16,6 +16,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
 import {
+  ArrowLeft,
   Copy,
   Dices,
   Flame,
@@ -41,7 +42,11 @@ import { PigFly3DFlightModal } from '../game/PigFly3DFlightModal';
 import { formatVND } from '../../utils/currency';
 import { useBottomInset } from '../../hooks/useBottomInset';
 
-export const SquadLocketView: React.FC = () => {
+export interface SquadLocketViewProps {
+  onBack?: () => void;
+}
+
+export const SquadLocketView: React.FC<SquadLocketViewProps> = ({ onBack }) => {
   const { tokens, isDark, mode } = useTheme();
   const isHeocon = mode === 'heocon' || !mode;
   const { contentBottomPadding } = useBottomInset();
@@ -159,6 +164,22 @@ export const SquadLocketView: React.FC = () => {
         contentContainerStyle={[styles.emptyContainer, { paddingBottom: contentBottomPadding + 24 }]}
         showsVerticalScrollIndicator={false}
       >
+        {onBack && (
+          <View style={styles.hubBackRow}>
+            <TouchableOpacity
+              style={styles.hubBackButton}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onBack();
+              }}
+              activeOpacity={0.8}
+            >
+              <ArrowLeft size={16} color="#2B2118" strokeWidth={2.8} />
+              <Text style={styles.hubBackButtonText}>‹ Quay lại Hub</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <View style={styles.emptyHero}>
           <PigBoMascot pose="happy" size={96} />
           <Text style={[styles.emptyTitle, { color: tokens.text }]}>Squad Nuôi Heo PigFly (2–4 Bạn)</Text>
@@ -832,5 +853,33 @@ const styles = StyleSheet.create({
   },
   sendBtn: {
     padding: 8,
+  },
+  hubBackRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
+  hubBackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  hubBackButtonText: {
+    fontFamily: 'Nunito',
+    fontWeight: '800',
+    fontSize: 12,
+    color: '#2B2118',
   },
 });

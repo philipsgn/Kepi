@@ -9,6 +9,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import {
   MessageCircle,
+  Users,
   Feather,
   Target,
   MapPin,
@@ -23,7 +24,7 @@ import { useGamificationStore } from '../../store/gamificationStore';
 import { useAuthStore } from '../../store/authStore';
 import { PixelPigAvatar } from '../pixel/PixelPigAvatar';
 
-export type SubViewType = 'hub' | 'chat' | 'fly' | 'shooter' | 'map';
+export type SubViewType = 'hub' | 'chat' | 'squad' | 'fly' | 'shooter' | 'map';
 
 interface PixelHubDashboardProps {
   onSelectSubView: (view: SubViewType) => void;
@@ -86,10 +87,20 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
       title: 'Trò Chuyện & Bạn Bè',
       badge: 'AI COACH & SQUAD',
       tagline: 'Anh Minh Giữ Ví & Squad Nuôi Heo',
-      desc: 'Hỏi đáp ngân sách, xin phản biện chi tiêu và chăm sóc heo cùng hội bạn thân.',
+      desc: 'Hỏi đáp ngân sách, xin phản biện chi tiêu và tâm sự tài chính cùng Heo-Coach.',
       accentBg: '#BFDDF2',
       icon: <MessageCircle size={24} color="#2B2118" strokeWidth={2.6} />,
       statusText: 'Heo-Coach đang online',
+    },
+    {
+      id: 'squad',
+      title: 'Squad Nuôi Heo 2.0',
+      badge: 'BẠN THÂN · PHÒNG KÍN',
+      tagline: 'Nuôi Heo Chung & Locket Feed',
+      desc: 'Cùng hội bạn thân nuôi heo chung, chia sẻ khoảnh khắc chi tiêu ẩn danh và cứu ví.',
+      accentBg: '#FCECEF',
+      icon: <Users size={24} color="#2B2118" strokeWidth={2.6} />,
+      statusText: 'Phòng riêng 2-4 bạn',
     },
     {
       id: 'fly',

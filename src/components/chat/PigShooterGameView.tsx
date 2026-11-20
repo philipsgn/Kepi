@@ -34,7 +34,8 @@ export const PigShooterGameView: React.FC<PigShooterGameViewProps> = ({
 }) => {
   const webViewRef = useRef<any>(null);
   const { width: winWidth, height: winHeight } = useWindowDimensions();
-  const [contentHeight, setContentHeight] = useState<number>(winHeight - 65);
+  // Quyết định 144: Toàn màn hình khi chơi Game (Fullscreen Mode)
+  const [contentHeight, setContentHeight] = useState<number>(winHeight - 48);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -743,8 +744,10 @@ function drawAP(c,t){
   R(c, SX-8, AG-38, 4, 10, INK); R(c, SX-7, AG-38, 2, 10, '#8A5A34');
   R(c, SX+4, AG-38, 4, 10, INK); R(c, SX+5, AG-38, 2, 10, '#A87650');
 
-  // Đàn heo chờ
-  ap.queue.forEach((q, i) => drawPigAP(c, 10 + i * 15, AG - 8, q, 0, t, 'wait'));
+  // Đàn heo chờ (xếp tầng sau bệ ná, không đè lên bệ ná SX)
+  const qLen = ap.queue.length;
+  const qStep = qLen > 1 ? Math.min(6, 18 / (qLen - 1)) : 0;
+  ap.queue.forEach((q, i) => drawPigAP(c, 8 + i * qStep, AG - 8, q, 0, t, 'wait'));
 
   // Khối + Chim + Tổ
   drawNest(c, t);

@@ -893,6 +893,14 @@
          - Đồ ăn pixel: Cà rốt, bắp vàng, táo đỏ, dưa hấu xanh; thanh HUD 10 ô segmented `.hbar`.
          - Tốc độ tăng dần $\min(110, 58 + \text{score} \times 1.8)$, khoảng hở cột co hẹp $\max(48, 64 - \lfloor \text{score}/5 \rfloor)$, đói nhanh hơn $3.2\%$/s.
 
+  - **Quyết định 144 (20/11/2026): Khắc Phục Trải Nghiệm Khung Chat Pixel Art & Chế Độ Fullscreen 2 Mini-Game (Heo Bay & Heo Bắn):**
+    - *Bối Cảnh & Vấn Đề Thực Tế:* Người dùng chụp ảnh thực tế cho thấy (1) Khung Chat vẫn bị rơi vào giao diện hồng bo tròn hiện đại do thiết bị lưu mode 'pink'; (2) 2 Game Heo Bay và Heo Bắn bị thanh Bottom Tab Bar che mất hàng nút điều khiển chân trang ("Vỗ cánh", "Tạm dừng", "Đổi trời", "Đạn còn: 5"); (3) Heo Bay bị chết ngay khi mở màn hình do sự kiện chạm sớm; (4) Dàn đạn Heo Bắn bị xếp đè lên nhau sát ná.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Cố Định 100% Neo-Brutalist Pixel Art Cho Tab Giải Trí:** Độc lập với Theme cá nhân, toàn bộ Tab Giải trí (PIGFLY HUB, Chat Coach, 2 Game, Bản Đồ) luôn hiển thị chuẩn pixel art nền kem `#F6EEDC`, khung thẻ `.chatlog` viền 3px mực `#2B2118`, avatar vuông $36\times 36$px, bong bóng Coach kem `#FFFBF1` viền 2.5px mực, bong bóng User Vàng Cám `#F4B93B` viền 3px mực, loại bỏ các subtab bo tròn hiện đại.
+      2. **Chế Độ Toàn Màn Hình Khi Chơi Game (Fullscreen Game Mode):** Tự động ẩn Floating Bottom Tab Bar khi người dùng vào chơi Heo Bay hoặc Heo Bắn (thông qua callback `onToggleTabBar(false)`). Toàn bộ chiều cao màn hình được giải phóng cho canvas game và các nút bấm chân trang, không bao giờ bị che khuất. Nút `‹ Quay lại Hub` luôn cố định ở đỉnh để thoát game và khôi phục tab bar.
+      3. **Sửa Lỗi Heo Bay Chết Sớm & Tối Ưu Canvas Responsive:** Heo duy trì trạng thái lơ lửng an toàn (`ready` hover), chỉ kích hoạt rơi tự do khi người chơi chủ động bấm `[Vỗ cánh]`. Giữ nguyên độ khó gốc theo yêu cầu người dùng (`FLAP = -172`, `GRAV = 560`).
+      4. **Căn Chỉnh Dàn Đạn Heo Bắn 1:1 Prototype:** Dàn đạn heo chờ xếp tại $x = 10 + i \times 15, y = AG - 8$ ở góc trái dưới mặt đất (chuẩn line 2480 prototype), bệ ná gỗ 3D và 14 chấm ngắm parabol rõ nét, thẻ thông tin đạn hiển thị trọn vẹn.
+
 
 
 
