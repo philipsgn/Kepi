@@ -939,14 +939,25 @@
          - Giữ mặc định `fly.u = 0.35` (dải xanh thiên thanh ban ngày rực rỡ `#58B6EE` / `#C3E9F8`).
          - Vỗ cánh Flappy Pig bắt sự kiện `pointerdown` / `touchstart` kích hoạt ngay ở 0ms, triệt tiêu hoàn toàn độ trễ.
 
+  - **Quyết định 147 (21/11/2026): Khôi Phục 100% Đồ Họa Pixel Art Prototype & Khóa Trời Xanh Ban Ngày Cho 2 Mini-Game:**
+    - *Bối Cảnh & Vấn Đề Thực Tế:* Người dùng đối chiếu `prototype/Ví Heo Con-20-11.html` (dòng 740 & 858–884) và phát hiện (1) Sprite heo trong 2 game chưa đúng 1:1 (thiếu 4 chân bước đi, mõm nhô, tai vểnh, chuông cổ, đuôi cong); (2) Bầu trời Heo Bay vẫn tự chuyển ngày/đêm và tự đổi thời tiết gây tối xỉn/mù mịt; (3) Canvas bị mờ do thiếu Integer DPR; (4) Vỗ cánh và kéo ná cảm ứng còn trễ trên thiết bị di động thật.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Port 1:1 Bảng Màu `PAL` & `drawPigSprite` 24×20:** Sao chép nguyên văn từ prototype: `PAL = { o:#4B2B21, p:#F9B8C4, s:#EE90A6, n:#F08DA4, h:#FFE3E8, k:#2B2118, g:#F4B93B, G:#B97A14, w:#FFFFFF }` cùng 4 chân trước/sau phân tầng màu `PAL.p`/`PAL.s`, mõm nhô `PAL.n`, tai vểnh, highlight lưng `PAL.h`, mắt có tròng trắng `PAL.w`, giọt nước mắt buồn `#7EC8F0`, chuông cổ `PAL.g`/`PAL.G` và đuôi cong theo `o.tail`. Cấm tự chế hình dáng/tọa độ/bảng màu.
+      2. **Khóa Trời Xanh Ban Ngày (`flyReset` + `flyUpdate`):** `flyReset()` đặt cố định `u: 0.35`, `weather: 'clear'`, `rain: 0`, `wind: 0`. `flyUpdate(dt)` **không còn dòng `fly.u = (fly.u + dt/...) % 1`** và **không tự đổi thời tiết theo `wnext`**; chỉ nút `[Đổi trời]` mới đổi pha/thời tiết. Khi `rain === 0` và `nightness === 0`, `drawSky` không phủ bất kỳ lớp xám nào.
+      3. **Canvas Integer DPR 3× & 0ms Touch:** Backing store `FW*3 × FH*3`, `ctx.scale(3, 3)`, `imageSmoothingEnabled = false`, CSS `image-rendering: pixelated; crisp-edges`. `pointerdown` + `touchstart` (`{ passive: false }`) trên `#flyWrap`/`#flyBtn` gọi `flyTap()` tức thì; ná Angry Pig dùng `apPt(e)` đọc `touches[0]`, mở rộng vùng chạm 40px, `setPointerCapture`.
+      4. **Tiêu Chí Nghiệm Thu:** `npx tsc --noEmit` 0 lỗi; `node run-all-tests.js` 86/86 pass; heo có 4 chân/mõm/tai/chuông; trời xanh nắng vàng không tối; vỗ cánh 0ms; kéo ná mượt trên cảm ứng di động.
+    - *Tài Liệu Đồng Bộ:* `docs/screens/heocon/10-GAMES-SPEC.md` (§3.3 khóa trời xanh, §3.6 DPR & cảm ứng), `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`.
 
-
-
-
-
-
-
-
-
-
+  - **Quyết định 148 (21/11/2026): Khắc Phục Triệt Để Lỗi Màn Hình Vàng Khè (Blank WebView Crash) Cho Game & Bản Đồ Chi Tiêu:**
+    - *Bối Cảnh & Vấn Đề Thực Tế:* Sau khi Deepseek cập nhật code, người dùng mở Game Heo Con hoặc Bản Đồ Chi Tiêu trên iPhone (iOS / Expo Go) thì toàn bộ khu vực WebView biến thành màu kem trơn `#F6EEDC` (không có bất kỳ phần tử HTML hay canvas nào).
+    - *Nguyên Nhân Gốc Rễ:*
+      1. Xung đột Layout: `containerStyle` và `style` gán `flex: 0` kết hợp kích thước pixel cứng khiến Yoga Layout Engine trên iOS tính toán frame của WKWebView thành 0x0 hoặc bị ngắt kết nối (detach) khỏi view tree khi màn hình cha re-render.
+      2. WebKit Sandbox Rejection: `baseUrl: ''` (chuỗi rỗng) khiến `[NSURL URLWithString:@""]` trên iOS WKWebView trả về invalid URL, WebKit âm thầm hủy bỏ (silent abort) tiến trình nạp HTML `loadHTMLString`.
+      3. Re-render loop: `onLayout` trong `PiggySpendMapView.tsx` liên tục kích hoạt `setContentHeight` làm WebView re-render lặp vô tận.
+    - *Giải Pháp Kỹ Thuật:*
+      1. Loại bỏ hoàn toàn `baseUrl: ''`: Sử dụng `source={memoizedSource}` với `html: htmlContent` để WebKit dùng `baseURL: nil` chuẩn iOS.
+      2. Chuẩn hóa Layout Flexbox: Loại bỏ `flex: 0` và kích thước cứng; dùng `webViewContainer` và `webView` có `{ flex: 1, width: '100%', backgroundColor: '#F6EEDC' }`.
+      3. Loại bỏ `onLayout` gây giật re-render trong `PiggySpendMapView.tsx`.
+      4. Tạo tài liệu `docs/masterprompts/MASTERPROMPT_DEEPSEEK_FIX_BLANK_WEBVIEW.md` đóng gói toàn bộ chẩn đoán và drop-in code gửi Deepseek Agent.
+    - *Tài Liệu Đồng Bộ:* `docs/masterprompts/MASTERPROMPT_DEEPSEEK_FIX_BLANK_WEBVIEW.md`, `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`, `src/components/chat/PiggySpendMapView.tsx`, `run-all-tests.js`.
 

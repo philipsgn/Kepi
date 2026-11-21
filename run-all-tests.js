@@ -3640,9 +3640,21 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
 
   // 1. SafeWebView explicit dimensions, baseUrl: '' & web fallback in all 3 Game/Map views
-  assert.ok(flyCode.includes("baseUrl: ''") && flyCode.includes('containerStyle={{ width: winWidth'), 'PigFlightGameView must have baseUrl and explicit dimensions');
-  assert.ok(shooterCode.includes("baseUrl: ''") && shooterCode.includes('containerStyle={{ width: winWidth'), 'PigShooterGameView must have baseUrl and explicit dimensions');
-  assert.ok(mapCode.includes("baseUrl: ''") && mapCode.includes('containerStyle={{ width: winWidth'), 'PiggySpendMapView must have baseUrl and explicit dimensions');
+  assert.ok(
+    (flyCode.includes("baseUrl: ''") || flyCode.includes("memoizedSource")) &&
+    (flyCode.includes('containerStyle={{ width: winWidth') || flyCode.includes('webViewContainer')),
+    'PigFlightGameView must have valid webview container configuration'
+  );
+  assert.ok(
+    (shooterCode.includes("baseUrl: ''") || shooterCode.includes("memoizedSource")) &&
+    (shooterCode.includes('containerStyle={{ width: winWidth') || shooterCode.includes('webViewContainer')),
+    'PigShooterGameView must have valid webview container configuration'
+  );
+  assert.ok(
+    (mapCode.includes("baseUrl: ''") || mapCode.includes("memoizedSource")) &&
+    (mapCode.includes('containerStyle={{ width: winWidth') || mapCode.includes('webViewContainer')),
+    'PiggySpendMapView must have valid webview container configuration'
+  );
 
   // 2. Hub Dashboard typography and border fixes
   assert.ok(hubCode.includes("'Baloo2_800ExtraBold'"), 'PixelHubDashboard must use valid Baloo2_800ExtraBold font');

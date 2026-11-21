@@ -119,13 +119,18 @@ Mỗi chu kỳ $BLEN = 900$px đường bay sẽ chuyển đổi sang Biome ti�
 3. **Biome 2 — Phố Nhà (`pho`):** Trụ đèn phố gạch xám (`pole`), núi xa xanh lam `#ACBCC8`.
 4. **Biome 3 — Ao Sen (`ao`):** Đài sen và cuống sen ngọc (`lotus`), mặt nước ao `#6DB7C9`.
 
-### 3.3. Chu Kỳ Bầu Trời Ngày/Đêm 8 Pha (`skyAt(u)`)
-Biến số thời gian $u \in [0, 1]$ thay đổi chậm theo nhịp bay:
-- $u = 0.00$: Bình minh ửng hồng (`#F7B6A0` $\to$ `#FBE3B8`).
-- $u = 0.40$: Ban ngày nắng trong (`#58B6EE` $\to$ `#C3E9F8`).
-- $u = 0.58$: Hoàng hôn rực rỡ (`#F29A62` $\to$ `#FFD9A0`).
-- $u = 0.70$: Chập tối tím thẫm (`#6B4A86` $\to$ `#EE9A74`).
-- $u = 0.80 \to 0.94$: Đêm đen sâu thẳm (`#1D2A4F` $\to$ `#3A4C80`) hiện **36 ngôi sao nhấp nháy `STARS`**.
+### 3.3. Khóa Bầu Trời Xanh Ban Ngày (`skyAt(u)` — Quyết định 147)
+Biến số thời gian $u$ **được khóa cố định $u = 0.35$** ngay trong `flyReset()` và **không tự tăng trong `flyUpdate(dt)`** (chỉ đổi khi người dùng bấm nút `[Đổi trời]`). Tại $u = 0.35$, `skyAt(u)` trả về dải xanh thiên thanh ban ngày rực rỡ (`#8FD0F2` $\to$ `#58B6EE` ở đỉnh trời, `#E3F3F8` $\to$ `#C3E9F8` ở chân trời) và mặt trời vàng hiện giữa khung hình.
+
+- Bảng màu `SKY` 8 pha vẫn giữ nguyên 1:1 từ prototype để nút `[Đổi trời]` có thể chuyển pha khi người dùng chủ động yêu cầu:
+  - $u = 0.00$: Bình minh ửng hồng (`#F7B6A0` $\to$ `#FBE3B8`).
+  - $u = 0.40$: Ban ngày nắng trong (`#58B6EE` $\to$ `#C3E9F8`).
+  - $u = 0.58$: Hoàng hôn rực rỡ (`#F29A62` $\to$ `#FFD9A0`).
+  - $u = 0.70$: Chập tối tím thẫm (`#6B4A86` $\to$ `#EE9A74`).
+  - $u = 0.80 \to 0.94$: Đêm đen sâu thẳm (`#1D2A4F` $\to$ `#3A4C80`) hiện **36 ngôi sao nhấp nháy `STARS`**.
+- Tại $u = 0.35$: `nightness(u) = 0`, toàn bộ lớp sao, lớp phủ đêm xanh thẫm và hiệu ứng chuyển biome ban đêm đều bằng 0.
+- **Cấm phủ lớp xám đục:** Khi `fly.rain === 0` và `nightness === 0`, `drawSky(c)` tuyệt đối không được phủ bất kỳ lớp xám/mờ nào lên canvas. Chỉ khi `rain > 0` mới pha xám `#8E9AA6`/`#B9C2C8` với hệ số `rain * 0.45`.
+- Thời tiết mặc định `weather: 'clear'`, `rain: 0`, `wind: 0`; **không tự đổi thời tiết theo thời gian** — chỉ đổi qua nút `[Đổi trời]` để bầu trời luôn xanh sáng rực rỡ.
 
 ### 3.4. Thức Ăn & Thanh Độ No (`flyHunger`)
 - **Tốc độ tiêu hao năng lượng:** Giảm $3.2\%$/s khi đang bay.
@@ -150,6 +155,13 @@ Biến số thời gian $u \in [0, 1]$ thay đổi chậm theo nhịp bay:
 3. **Chướng ngại vật động:**
    - Khi điểm $\ge 3$: Chim đối thủ bay ngược chiều với tốc độ $60 \dots 95$ px/s.
    - Khi điểm $\ge 5$: Gió lốc xoáy xuất hiện đẩy trôi độ cao heo.
+
+### 3.6. Chuẩn Canvas Integer DPR 3× & Cảm Ứng Vỗ Cánh 0ms (Quyết định 147)
+- **Bộ đệm canvas logic:** $FW = 176$, $FH = 224$; backing store $176 \times 3 = 528$ × $224 \times 3 = 672$ (`DPR = 3`), `flyX.imageSmoothingEnabled = false`.
+- **Vẽ:** `drawFlyScene(c, t)` bọc `c.save(); c.scale(DPR, DPR); ... c.restore();` để mọi tọa độ logic vẫn là pixel gốc prototype.
+- **CSS:** `width: 100%; height: 100%; image-rendering: -webkit-optimize-contrast; -moz-crisp-edges; pixelated; crisp-edges; touch-action: manipulation;`.
+- **Chạm 0ms:** `pointerdown` + `touchstart` (`{ passive: false }`) trên `#flyWrap` và `#flyBtn` gọi `flyTap()` ngay lập tức; nếu game đang `paused` thì chạm chỉ để tiếp tục, ngược lại gọi `flyFlap()`.
+- **Ná bắn Angry Pig:** `apPt(e)` đọc `e.touches[0]` / `e.changedTouches[0]` / `e.clientX|pageX`; vùng chạm ná mở rộng bán kính 40px hoặc `x < 85 && y > 45 && y < 135`; `setPointerCapture` + `preventDefault()` với `{ passive: false }`.
 
 ---
 

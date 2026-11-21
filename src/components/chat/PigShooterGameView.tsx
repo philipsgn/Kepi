@@ -994,7 +994,7 @@ requestAnimationFrame(apFrame);
 </html>
 `;
 
-  const memoizedSource = useMemo(() => ({ html: htmlContent, baseUrl: '' }), [htmlContent]);
+  const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
 
   return (
     <View style={styles.container}>
@@ -1011,12 +1011,12 @@ requestAnimationFrame(apFrame);
       </View>
 
       {/* Webview Game Canvas */}
-      <View style={[styles.webViewWrapper, { height: contentHeight }]}>
+      <View style={styles.webViewWrapper}>
         <SafeWebView
           ref={webViewRef}
           source={memoizedSource}
-          containerStyle={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
-          style={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
+          containerStyle={styles.webViewContainer}
+          style={styles.webView}
           scrollEnabled={false}
           bounces={false}
           javaScriptEnabled={true}
@@ -1080,10 +1080,17 @@ const styles = StyleSheet.create({
   },
   webViewWrapper: {
     flex: 1,
+    width: '100%',
+    backgroundColor: '#F6EEDC',
+  },
+  webViewContainer: {
+    flex: 1,
+    width: '100%',
     backgroundColor: '#F6EEDC',
   },
   webView: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#F6EEDC',
   },
 });

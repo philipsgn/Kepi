@@ -666,7 +666,7 @@ const GRAV=560,FLAP=-172,VMAX=250,PX=44;
 const fly={
   mode:'ready',run:true,last:0,t:0,y:96,vy:0,ang:0,flapT:0,eatT:0,blink:0,
   dist:0,speed:58,sp:0,score:0,coins:0,eaten:0,hunger:78,best:0,earned:0,
-  u:.2,weather:'clear',wnext:28,rain:0,wind:0,
+  u:.35,weather:'clear',rain:0,wind:0,
   pillars:[],items:[],crit:[],parts:[],floats:[],shake:0,msg:'',msgT:0,cause:'',paused:false,
   hungryAt:0,lastBi:0,spacing:94
 };
@@ -813,14 +813,13 @@ function flyUpdate(dt){
   if(fly.paused)return;
   fly.t+=dt;if(fly.flapT>0)fly.flapT-=dt;if(fly.eatT>0)fly.eatT-=dt;if(fly.shake>0)fly.shake-=dt;
   if(fly.msgT>0&&fly.msgT<90){fly.msgT-=dt}
-  fly.u=(fly.u+dt/600)%1; // Giữ dải ban ngày ổn định sáng rõ
+  /* KHÓA TRỜI XANH BAN NGÀY (Quyết định 147):
+     Không tự tăng fly.u gây chuyển đêm. Chỉ đổi khi bấm nút [Đổi trời].
+     fly.u đã được cố định u = 0.35 trong flyReset(). */
   fly.blink=(fly.t%3.4)<.12?1:0;
 
-  fly.wnext-=dt;
-  if(fly.wnext<=0){
-    fly.wnext=rnd(45,80);const r=Math.random();fly.weather=r<.6?'clear':r<.8?'wind':'rain';
-    if(fly.weather==='rain')flyMsg('Trời đổ mưa rồi, đồ ăn ướt nhẹp',2.2);else if(fly.weather==='wind')flyMsg('Gió lá bay khắp nơi',2);
-  }
+  /* Thời tiết giữ 'clear' để bầu trời luôn xanh sáng rực rỡ.
+     Mưa/gió chỉ bật khi người dùng bấm [Đổi trời]. */
   fly.rain+=((fly.weather==='rain'?1:0)-fly.rain)*Math.min(1,dt*.7);
   fly.wind+=((fly.weather==='wind'?1:0)-fly.wind)*Math.min(1,dt*.7);
 
@@ -1078,7 +1077,6 @@ $('flyPause').addEventListener('click',()=>{
 $('flyWxBtn').addEventListener('click',()=>{
   fly.weather=fly.weather==='clear'?'rain':fly.weather==='rain'?'wind':'clear';
   fly.u=(fly.u+0.18)%1;
-  fly.wnext=rnd(35,70);
   flyMsg(WXN[fly.weather]+' · '+PERIOD(fly.u),1.5);
 });
 
@@ -1104,7 +1102,7 @@ requestAnimationFrame(flyFrame);
 </html>
 `;
 
-  const memoizedSource = useMemo(() => ({ html: htmlContent, baseUrl: '' }), [htmlContent]);
+  const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
 
   return (
     <View style={styles.container}>
@@ -1121,12 +1119,12 @@ requestAnimationFrame(flyFrame);
       </View>
 
       {/* Webview Game Canvas */}
-      <View style={[styles.webViewWrapper, { height: contentHeight }]}>
+      <View style={styles.webViewWrapper}>
         <SafeWebView
           ref={webViewRef}
           source={memoizedSource}
-          containerStyle={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
-          style={{ width: winWidth, height: contentHeight, backgroundColor: '#F6EEDC', flex: 0 }}
+          containerStyle={styles.webViewContainer}
+          style={styles.webView}
           scrollEnabled={false}
           bounces={false}
           javaScriptEnabled={true}
@@ -1190,10 +1188,17 @@ const styles = StyleSheet.create({
   },
   webViewWrapper: {
     flex: 1,
+    width: '100%',
+    backgroundColor: '#F6EEDC',
+  },
+  webViewContainer: {
+    flex: 1,
+    width: '100%',
     backgroundColor: '#F6EEDC',
   },
   webView: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#F6EEDC',
   },
 });
