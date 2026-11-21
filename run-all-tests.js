@@ -3915,7 +3915,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(flyCode.includes('aspect-ratio: 176 / 224') || flyCode.includes('aspect-ratio:176/224'), 'PigFlightGameView must enforce 176/224 portrait aspect ratio');
   assert.ok(!flyCode.includes('max-height: 275px'), 'PigFlightGameView must remove 275px max-height to avoid pixel squashing and distortion');
   assert.ok(flyCode.includes('CHẠM ĐỂ VỖ CÁNH'), 'PigFlightGameView must feature bouncing CHẠM ĐỂ VỖ CÁNH yellow pill button');
-  assert.ok(flyCode.includes('u:.28') || flyCode.includes('u: .28'), 'PigFlightGameView must initialize with vibrant sunny blue sky');
+  assert.ok(flyCode.includes('u:.28') || flyCode.includes('u: .28') || flyCode.includes('u:.35') || flyCode.includes('u: .35'), 'PigFlightGameView must initialize with vibrant sunny blue sky');
   assert.ok(flyCode.includes('<b>Heo bay</b>'), 'PigFlightGameView must use clean prototype title Heo bay');
 
   // 4. Angry Pig 224x140 Landscape Aspect Ratio
@@ -3933,4 +3933,74 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 85 Passed: Masterprompts Alignment (3-Card Hub, Zero-Scroll Arcade & Dual-Engine Map) (Quyết định 145) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 85 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (85/85)!');
+// ==============================================================================
+// 🧪 TEST 86: PIXEL MASCOT SYNC, COMPACT NEO-CARDS, PIXEL ICONS & TOUCH DRAG AUDIT (QUYẾT ĐỊNH 146)
+// ==============================================================================
+{
+  const pixelIconsPath = path.join(__dirname, 'src/components/pixel/PixelIcons.tsx');
+  assert.ok(fs.existsSync(pixelIconsPath), 'PixelIcons.tsx must exist');
+  const pixelIconsCode = fs.readFileSync(pixelIconsPath, 'utf8');
+
+  const hubPath = path.join(__dirname, 'src/components/chat/PixelHubDashboard.tsx');
+  const hubCode = fs.readFileSync(hubPath, 'utf8');
+
+  const chatHeaderPath = path.join(__dirname, 'src/components/chat/ChatTopSegmentHeader.tsx');
+  const chatHeaderCode = fs.readFileSync(chatHeaderPath, 'utf8');
+
+  const squadPath = path.join(__dirname, 'src/components/chat/SquadLocketView.tsx');
+  const squadCode = fs.readFileSync(squadPath, 'utf8');
+
+  const shooterPath = path.join(__dirname, 'src/components/chat/PigShooterGameView.tsx');
+  const shooterCode = fs.readFileSync(shooterPath, 'utf8');
+
+  const flyPath = path.join(__dirname, 'src/components/chat/PigFlightGameView.tsx');
+  const flyCode = fs.readFileSync(flyPath, 'utf8');
+
+  const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
+  const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
+
+  const chatDocPath = path.join(__dirname, 'docs/screens/heocon/10-CHAT.md');
+  const chatDocCode = fs.readFileSync(chatDocPath, 'utf8');
+
+  const agentsPath = path.join(__dirname, 'AGENTS.md');
+  const agentsCode = fs.readFileSync(agentsPath, 'utf8');
+
+  // 1. PixelIcons Verification (Prototype 16x16 Matrices)
+  assert.ok(pixelIconsCode.includes('PixelIconChat'), 'PixelIcons must export PixelIconChat');
+  assert.ok(pixelIconsCode.includes('PixelIconPigCoach'), 'PixelIcons must export PixelIconPigCoach');
+  assert.ok(pixelIconsCode.includes('PixelIconSquad'), 'PixelIcons must export PixelIconSquad');
+  assert.ok(pixelIconsCode.includes('PixelIconGamepad'), 'PixelIcons must export PixelIconGamepad');
+  assert.ok(pixelIconsCode.includes('PixelIconMapPin'), 'PixelIcons must export PixelIconMapPin');
+  assert.ok(pixelIconsCode.includes('PixelIconSlingshot'), 'PixelIcons must export PixelIconSlingshot');
+
+  // 2. Compact Neo-Cards Hub Verification
+  assert.ok(hubCode.includes('compactCard') && hubCode.includes('compactIconBox') && hubCode.includes('compactInfoCol'), 'Hub must use compact horizontal row Neo-Card layout');
+  assert.ok(hubCode.includes('PixelIconChat') && hubCode.includes('PixelIconGamepad') && hubCode.includes('PixelIconMapPin'), 'Hub cards must use PixelIcons');
+  assert.ok(!hubCode.includes('Hỏi đáp ngân sách, xin phản biện chi tiêu và nuôi heo cùng hội bạn thân'), 'Hub must remove verbose 3-line descriptions');
+
+  // 3. Chat Segment Pixel Icons Verification
+  assert.ok(chatHeaderCode.includes('PixelIconPigCoach') && chatHeaderCode.includes('PixelIconSquad'), 'ChatTopSegmentHeader must use PixelIconPigCoach and PixelIconSquad in heocon mode');
+
+  // 4. Mascot Pixel Art 100% Sync (No PigBoMascot in SquadLocketView)
+  assert.ok(!squadCode.includes('PigBoMascot'), 'SquadLocketView must completely eliminate PigBoMascot in favor of PixelPigAvatar');
+  assert.ok(squadCode.includes('PixelPigAvatar'), 'SquadLocketView must use PixelPigAvatar');
+
+  // 5. Angry Pig Touch Dragging & Integer DPR Scaling Verification
+  assert.ok(shooterCode.includes("touchstart") && shooterCode.includes("touchmove") && shooterCode.includes("touchend"), 'PigShooterGameView must register native touch events with passive:false');
+  assert.ok(shooterCode.includes('DPR = 3') && shooterCode.includes('apC.width = AW * DPR'), 'PigShooterGameView must implement Integer DPR 3x canvas buffer scaling');
+  assert.ok(shooterCode.includes('Math.hypot(x - SX, y - SY) < 40'), 'PigShooterGameView must provide widened touch area for smooth mobile slingshot dragging');
+
+  // 6. Flappy Pig Sharpness & 0ms Flap Verification
+  assert.ok(flyCode.includes('DPR = 3') && flyCode.includes('flyC.width = FW * DPR'), 'PigFlightGameView must implement Integer DPR 3x canvas buffer scaling');
+  assert.ok(flyCode.includes('u:.35') || flyCode.includes('u: .35'), 'PigFlightGameView must initialize with stable vibrant sunny blue sky');
+  assert.ok(flyCode.includes('flyTap') && flyCode.includes('touchstart'), 'PigFlightGameView must trigger flap instantly on touchstart/pointerdown without delay');
+
+  // 7. Living Docs Sync Audit
+  assert.ok(decisionsCode.includes('146'), 'DECISIONS.md must document Quyết định 146');
+  assert.ok(chatDocCode.includes('146'), '10-CHAT.md must document Quyết định 146');
+  assert.ok(agentsCode.includes('146'), 'AGENTS.md must document Quyết định 146');
+
+  console.log('✅ Test 86 Passed: Pixel Mascot Sync, Compact Neo-Cards, Pixel Icons & Touch Drag (Quyết định 146) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 86 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (86/86)!');

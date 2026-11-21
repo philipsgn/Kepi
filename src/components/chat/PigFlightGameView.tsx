@@ -259,9 +259,12 @@ body {
   width: 100%;
   height: 100%;
   margin: 0 auto;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -moz-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   cursor: pointer;
+  touch-action: manipulation;
 }
 .flytoast {
   position: absolute;
@@ -675,7 +678,7 @@ function flyReset(){
   Object.assign(fly,{
     mode:'ready',y:96,vy:0,ang:0,flapT:0,eatT:0,dist:0,speed:58,sp:60,score:0,coins:0,eaten:0,hunger:78,earned:0,
     pillars:[],items:[],parts:[],floats:[],shake:0,cause:'',lastBi:0,paused:false,
-    u:.28,weather:'clear',rain:0,wind:0
+    u:.35,weather:'clear',rain:0,wind:0
   });
   lastGy=100;
   flyMsg('Chạm hoặc bấm Vỗ cánh để bay',99);
@@ -799,12 +802,12 @@ function flyUpdate(dt){
   if(fly.paused)return;
   fly.t+=dt;if(fly.flapT>0)fly.flapT-=dt;if(fly.eatT>0)fly.eatT-=dt;if(fly.shake>0)fly.shake-=dt;
   if(fly.msgT>0&&fly.msgT<90){fly.msgT-=dt}
-  fly.u=(fly.u+dt/110)%1;
+  fly.u=(fly.u+dt/600)%1; // Giữ dải ban ngày ổn định sáng rõ
   fly.blink=(fly.t%3.4)<.12?1:0;
 
   fly.wnext-=dt;
   if(fly.wnext<=0){
-    fly.wnext=rnd(24,42);const r=Math.random();fly.weather=r<.45?'clear':r<.72?'rain':'wind';
+    fly.wnext=rnd(45,80);const r=Math.random();fly.weather=r<.6?'clear':r<.8?'wind':'rain';
     if(fly.weather==='rain')flyMsg('Trời đổ mưa rồi, đồ ăn ướt nhẹp',2.2);else if(fly.weather==='wind')flyMsg('Gió lá bay khắp nơi',2);
   }
   fly.rain+=((fly.weather==='rain'?1:0)-fly.rain)*Math.min(1,dt*.7);
@@ -867,6 +870,12 @@ function flyUpdate(dt){
 
 /* Vẽ khung cảnh đồ họa 1:1 */
 const flyC=$('flyCv'),flyX=flyC.getContext('2d');
+const DPR = 3;
+flyC.width = FW * DPR;
+flyC.height = FH * DPR;
+flyC.style.width = '100%';
+flyC.style.height = '100%';
+flyX.imageSmoothingEnabled = false;
 const PERIOD=u=>u<.14?'Bình minh':u<.58?'Ban ngày':u<.7?'Hoàng hôn':u<.94?'Ban đêm':'Bình minh';
 const WXN={clear:'Trời quang',rain:'Mưa',wind:'Có gió'};
 function bgAlphas(){const bi=biomeAt(fly.dist),fr=fly.dist%BLEN,a=fr>BLEN-TR?(fr-(BLEN-TR))/TR:0;return{bi,nx:(bi+1)%4,a}}
@@ -930,6 +939,7 @@ function drawPigFly(c){
 function drawFlyScene(c,t){
   c.imageSmoothingEnabled=false;
   c.save();
+  c.scale(DPR, DPR);
   if(fly.shake>0)c.translate(Math.round(Math.sin(t*90)*2),Math.round(Math.cos(t*70)*2));
   drawSky(c);drawCrit(c,0);
   const al=bgAlphas(),n=nightness(fly.u);
@@ -1014,26 +1024,38 @@ function flyFrame(now){
   requestAnimationFrame(flyFrame);
 }
 
-/* Bắt sự kiện chạm vỗ cánh an toàn, chống chết sớm */
-let tapStartX = 0, tapStartY = 0, tapStartT = 0;
+/* Bắt sự kiện chạm vỗ cánh tức thì 0ms (Chuẩn prototype) */
+let tapStartX = 0, tapStartY = 0;
+function flyTap(e){
+  if(e){
+    tapStartX = e.clientX || 0;
+    tapStartY = e.clientY || 0;
+  }
+  if(fly.paused){ fly.paused = false; return; }
+  flyFlap();
+}
+
 $('flyWrap').addEventListener('pointerdown', e => {
   if (e.target.closest('button')) return;
-  tapStartX = e.clientX;
-  tapStartY = e.clientY;
-  tapStartT = Date.now();
-});
-$('flyWrap').addEventListener('pointerup', e => {
-  if (e.target.closest('button')) return;
-  const dist = Math.hypot(e.clientX - tapStartX, e.clientY - tapStartY);
-  const dur = Date.now() - tapStartT;
-  if (dist < 18 && dur < 450) {
-    e.preventDefault();
-    flyFlap();
-  }
-});
-$('flyBtn').addEventListener('click', e => {
   e.preventDefault();
-  flyFlap();
+  flyTap();
+});
+$('flyWrap').addEventListener('touchstart', e => {
+  if (e.target.closest('button')) return;
+  if (e.cancelable) e.preventDefault();
+  flyTap();
+}, { passive: false });
+
+$('flyBtn').addEventListener('pointerdown', e => {
+  e.preventDefault();
+  flyTap();
+});
+$('flyBtn').addEventListener('touchstart', e => {
+  if (e.cancelable) e.preventDefault();
+  flyTap();
+}, { passive: false });
+$('flyBtn').addEventListener('click', e => {
+  if (e.detail === 0) flyTap();
 });
 
 $('flyPause').addEventListener('click',()=>{
@@ -1044,8 +1066,9 @@ $('flyPause').addEventListener('click',()=>{
 
 $('flyWxBtn').addEventListener('click',()=>{
   fly.weather=fly.weather==='clear'?'rain':fly.weather==='rain'?'wind':'clear';
-  fly.wnext=rnd(24,42);
-  flyMsg(WXN[fly.weather],1.4);
+  fly.u=(fly.u+0.18)%1;
+  fly.wnext=rnd(35,70);
+  flyMsg(WXN[fly.weather]+' · '+PERIOD(fly.u),1.5);
 });
 
 /* Khởi tạo danh sách đồ ăn nếu có */

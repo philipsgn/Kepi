@@ -245,9 +245,12 @@ body {
   width: 100%;
   height: 100%;
   margin: 0 auto;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -moz-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   cursor: grab;
+  touch-action: none;
 }
 .flytoast {
   position: absolute;
@@ -660,6 +663,12 @@ function apAbility(){
 
 /* Vẽ chi tiết canvas */
 const apC = $('apCv'), apX = apC.getContext('2d');
+const DPR = 3;
+apC.width = AW * DPR;
+apC.height = AH * DPR;
+apC.style.width = '100%';
+apC.style.height = '100%';
+apX.imageSmoothingEnabled = false;
 
 function drawBirdy(c,b,t){
   const x = Math.round(b.x+7), y = Math.round(b.y+7+(b.fl>0?0:Math.sin(t*3+b.ph)*.6)), fl = b.fl>0;
@@ -719,6 +728,7 @@ function drawPigAP(c,x,y,type,rot,t,pose){
 
 function drawAP(c,t){
   c.imageSmoothingEnabled = false; c.save();
+  c.scale(DPR, DPR);
   if(ap.shake > 0) c.translate(Math.round(Math.sin(t*90)*1.5), Math.round(Math.cos(t*70)*1.5));
 
   // Bầu trời pha màu 8 dải
@@ -894,36 +904,49 @@ for(let i=0; i<6; i++){
   $('apLv').appendChild(b);
 }
 
-// Bắt cảm ứng kéo ná
+// Bắt cảm ứng kéo ná (Hỗ trợ Touch di động + Pointer Capture + Mở rộng vùng chạm)
 function apPt(e){
   const r = apC.getBoundingClientRect();
-  const t = (e.touches && e.touches[0]) || e;
-  return [(t.clientX - r.left)/r.width * AW, (t.clientY - r.top)/r.height * AH];
+  const touch = (e.touches && e.touches.length > 0) ? e.touches[0]
+              : (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0]
+              : e;
+  const clientX = touch.clientX !== undefined ? touch.clientX : (touch.pageX || 0);
+  const clientY = touch.clientY !== undefined ? touch.clientY : (touch.pageY || 0);
+  return [(clientX - r.left) / r.width * AW, (clientY - r.top) / r.height * AH];
 }
 
-apC.addEventListener('pointerdown', e => {
-  e.preventDefault();
+function handleStart(e){
   if(ap.over) return;
   if(ap.pig){ apAbility(); return; }
   if(ap.st !== 'aim' || !ap.cur) return;
   const [x, y] = apPt(e);
-  if(Math.hypot(x - SX, y - SY) < 24){
-    ap.drag = { dx: 0, dy: 0 };
+  // Mở rộng vùng chạm ná (bán kính 40px hoặc toàn bộ khu vực ná bên trái)
+  if(Math.hypot(x - SX, y - SY) < 40 || (x < 85 && y > 45 && y < 135)){
+    if(e && e.cancelable) e.preventDefault();
+    if(e.pointerId && apC.setPointerCapture){
+      try { apC.setPointerCapture(e.pointerId); } catch(err){}
+    }
+    let dx = x - SX, dy = y - SY;
+    const d = Math.hypot(dx, dy);
+    if(d > MAXD){ dx = dx / d * MAXD; dy = dy / d * MAXD; }
+    ap.drag = { dx, dy };
     notify('HAPTIC_LIGHT');
   }
-});
+}
 
-window.addEventListener('pointermove', e => {
+function handleMove(e){
   if(!ap.drag) return;
+  if(e && e.cancelable) e.preventDefault();
   const [x, y] = apPt(e);
   let dx = x - SX, dy = y - SY;
   const d = Math.hypot(dx, dy);
   if(d > MAXD){ dx = dx / d * MAXD; dy = dy / d * MAXD; }
   ap.drag = { dx, dy };
-});
+}
 
-window.addEventListener('pointerup', () => {
+function handleEnd(e){
   if(!ap.drag) return;
+  if(e && e.cancelable) e.preventDefault();
   const { dx, dy } = ap.drag;
   ap.drag = null;
   if(Math.hypot(dx, dy) > 5){
@@ -936,7 +959,17 @@ window.addEventListener('pointerup', () => {
     ap.st = 'fly';
     notify('HAPTIC_LIGHT');
   }
-});
+}
+
+apC.addEventListener('pointerdown', handleStart);
+window.addEventListener('pointermove', handleMove);
+window.addEventListener('pointerup', handleEnd);
+window.addEventListener('pointercancel', handleEnd);
+
+apC.addEventListener('touchstart', handleStart, { passive: false });
+window.addEventListener('touchmove', handleMove, { passive: false });
+window.addEventListener('touchend', handleEnd, { passive: false });
+window.addEventListener('touchcancel', handleEnd, { passive: false });
 
 apLoad(0);
 requestAnimationFrame(apFrame);

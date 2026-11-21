@@ -37,7 +37,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useTransactionStore } from '../../store/transactionStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useTheme } from '../../theme/ThemeContext';
-import { PigBoMascot } from '../mascot/PigBoMascot';
+import { PixelPigAvatar } from '../pixel/PixelPigAvatar';
 import { PigFly3DFlightModal } from '../game/PigFly3DFlightModal';
 import { formatVND } from '../../utils/currency';
 import { useBottomInset } from '../../hooks/useBottomInset';
@@ -181,7 +181,7 @@ export const SquadLocketView: React.FC<SquadLocketViewProps> = ({ onBack }) => {
         )}
 
         <View style={styles.emptyHero}>
-          <PigBoMascot pose="happy" size={96} />
+          <PixelPigAvatar mood="happy" size={72} />
           <Text style={[styles.emptyTitle, { color: tokens.text }]}>Squad Nuôi Heo PigFly (2–4 Bạn)</Text>
           <Text style={[styles.emptyDesc, { color: tokens.textMuted }]}>
             Cùng nhau nuôi heo, xem Locket Feed khoảnh khắc chi tiêu của bạn bè, nhắc nhở tiết kiệm mỗi ngày mà không sợ lộ khoản chi riêng tư.
@@ -417,7 +417,7 @@ export const SquadLocketView: React.FC<SquadLocketViewProps> = ({ onBack }) => {
                     : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
                 ]}
               >
-                <PigBoMascot pose={member.avatarPose} size={48} />
+                <PixelPigAvatar mood={member.hasFedPigToday ? 'happy' : 'sad'} size={44} />
                 <Text style={[styles.memberName, { color: tokens.text }]} numberOfLines={1}>
                   {member.name}
                 </Text>
@@ -477,7 +477,7 @@ export const SquadLocketView: React.FC<SquadLocketViewProps> = ({ onBack }) => {
               >
                 <View style={styles.feedHeader}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <PigBoMascot pose="welcome" size={32} />
+                    <PixelPigAvatar mood="happy" size={28} />
                     <View style={{ marginLeft: 8 }}>
                       <Text style={[styles.feedUserName, { color: tokens.text }]}>{item.userName}</Text>
                       <Text style={[styles.feedTime, { color: tokens.textMuted }]}>

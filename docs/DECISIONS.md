@@ -914,6 +914,31 @@
          - Loại bỏ các card phụ dài dòng bên dưới canvas, biến màn chơi thành 1 màn hình Arcade duy nhất không cần cuộn trang; nút "Vỗ cánh" to rõ và popup "Bay lại" nằm ngay giữa màn hình trong tầm ngón tay cái.
       3. **Bản Đồ Chi Tiêu Dual-Engine (Plan 12):** Nút chuyển [Pixel] (khu phố retro $192\times 200$) và [Bản đồ thật] (MapLibre OpenFreeMap 0 đồng) hoạt động trơn tru ngoại tuyến lẫn trực tuyến.
 
+  - **Quyết định 146 (21/11/2026): Đồng Bộ Mascot Pixel Art Toàn Diện, Hub Siêu Gọn (Compact Neo-Card), Icon Pixel 16×16 Chuẩn Prototype & Sửa Lỗi Kéo Ná Angry Pig:**
+    - *Bối Cảnh & Vấn Đề Thực Tế:* Người dùng phản hồi qua 7 ảnh chụp thực tế:
+      1. Mascot chú heo pixel art ở Tab Giải Trí chưa đồng bộ với Tab Vườn và Tab Nhà; màn hình Squad Locket vẫn dùng hình ảnh 3D cartoon cũ (`PigBoMascot`).
+      2. Hub Giải Trí phình to, chữ rườm rà (5 tầng text mỗi card), khoảng cách thẻ quá lớn khiến người dùng phải cuộn dài.
+      3. Vùng icon ở Hub và Header thanh Segment Chat đang dùng icon vector tròn mỏng, chưa phải icon Pixel Art.
+      4. Màn hình game bị mờ trên điện thoại Retina/OLED, màu trời Flappy Pig bị xỉn tối (`u: .2` dusk/grey), vỗ cánh có độ trễ.
+      5. Game Angry Pig (Heo Bắn) không thể trượt kéo ná ném heo trên điện thoại do sự kiện pointer bị WebView chặn/nuốt và bán kính chạm quá nhỏ.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Đồng Bộ Mascot Pixel Art 1:1 (`PixelPigAvatar`):** Thay thế toàn bộ `PigBoMascot` ở `SquadLocketView` và mọi màn con bằng `PixelPigAvatar` (pixel art 16×16 chuẩn palette từ prototype).
+      2. **Hub Siêu Gọn Bố Cục Ngang (Compact Neo-Cards):**
+         - Thiết kế dạng hàng (Row layout): Hộp Icon Pixel `hubic` 46×46px viền 2.5px mực bên trái trên nền pastel đặc (`#BFDDF2`, `#FBD3DC`, `#D4ECC6`).
+         - Cột thông tin bên phải: Tag pill siêu nhỏ + Tiêu đề in đậm + 1 dòng trạng thái ngắn gọn súc tích. Lược bỏ hoàn toàn đoạn văn mô tả 3 dòng.
+         - Giảm padding thẻ còn 10px, margin còn 8px, cả 3 thẻ nằm gọn gàng 100% trong 1 màn hình không cần cuộn.
+      3. **Bộ Icon Pixel Art 16×16 Chuẩn Prototype (`PixelIcons.tsx`):**
+         - Port 1:1 ma trận pixel 16×16 từ prototype `Ví Heo Con-20-11.html` (`ICONS` và `drawFace`): `PixelIconChat`, `PixelIconPigCoach`, `PixelIconSquad`, `PixelIconGamepad`, `PixelIconMapPin`, `PixelIconSlingshot`.
+         - Áp dụng vào: Header thanh Segment Chat (`PigCoach` và `Hội Bạn Thân`), 3 thẻ Hub Giải Trí.
+      4. **Khắc Phục Cảm Ứng Ná Bắn Angry Pig (`PigShooterGameView.tsx`):**
+         - Bổ sung song song `touchstart`, `touchmove`, `touchend`, `touchcancel` với `{ passive: false }` và `e.preventDefault()`.
+         - Gọi `apC.setPointerCapture` khi có pointer event.
+         - Mở rộng vùng chạm ná lên bán kính 40px (hoặc toàn bộ vùng `x < 85 && y > 45 && y < 135`) để ngón tay chạm và kéo ná mượt mà 100% trên thiết bị thật.
+      5. **Khắc Phục Canvas Mờ & Bầu Trời Sáng Rực Rỡ (`PigFlightGameView.tsx` & `PigShooterGameView.tsx`):**
+         - Áp dụng Integer DPR Scaling (3x): Bộ đệm canvas nhân 3 (`width = FW * 3, height = FH * 3`), `ctx.scale(3, 3)` và `imageSmoothingEnabled = false`, kết hợp CSS `image-rendering: -webkit-optimize-contrast; pixelated; crisp-edges;` đảm bảo từng hạt pixel sắc cạnh tuyệt đối trên màn Retina/OLED.
+         - Giữ mặc định `fly.u = 0.35` (dải xanh thiên thanh ban ngày rực rỡ `#58B6EE` / `#C3E9F8`).
+         - Vỗ cánh Flappy Pig bắt sự kiện `pointerdown` / `touchstart` kích hoạt ngay ở 0ms, triệt tiêu hoàn toàn độ trễ.
+
 
 
 

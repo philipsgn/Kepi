@@ -29,9 +29,10 @@ Màn hình Tab 3 mặc định hiển thị **PIGFLY HUB (`v-fun`)** gồm:
 ## 2. Đặc Tả Chi Tiết Các Phân Hệ & Game Độ Khó Cao
 
 ### 2.1. Phân Hệ 1: Trò Chuyện & Squad Bạn Thân (`ChatView`)
-- **Giao diện Chat Neo-Brutalist Pixel Art (Quyết định 143)**:
+- **Giao diện Chat Neo-Brutalist Pixel Art (Quyết định 143, 145 & 146)**:
   - Header: Nút `‹ Quay lại Hub` và tiêu đề *"Trò chuyện · Heo-Coach và hội bạn thân"*.
-  - Header segment: Track viền 3px mực `#2B2118`, nền `#FFFBF1`, bóng cứng 3px 0-blur; tab active Vàng Cám `#F4B93B` viền 2px mực, chữ font Baloo 2.
+  - Header segment: Track viền 3px mực `#2B2118`, nền `#FFFBF1`, bóng cứng 3px 0-blur; tab active Vàng Cám `#F4B93B` viền 2px mực, chữ font Baloo 2; **Icon Pixel Art 16×16**: `PixelIconPigCoach` (Heo-Coach) và `PixelIconSquad` (Hội Bạn Thân), tuyệt đối không dùng icon vector mỏng.
+  - **Mascot Pixel Art đồng bộ 100%:** Trong `SquadLocketView`, thay thế hoàn toàn `PigBoMascot` bằng `PixelPigAvatar` 16×16 chuẩn palette prototype.
   - **Khung bao `.chatlog`:** Khối thẻ màu kem `#FFFBF1`, viền 3px mực `#2B2118`, bo góc 22px, bóng cứng 4px 0-blur.
   - **Bong bóng tin nhắn `.msg`:**
     - AI Coach: Avatar vuông pixel 30×30px `PixelPigAvatar` viền 3px mực, nền hồng `#F9B8C4`; bong bóng màu kem sàn `#F6EEDC` viền 3px mực, bo góc brutalist 16px.
@@ -42,6 +43,17 @@ Màn hình Tab 3 mặc định hiển thị **PIGFLY HUB (`v-fun`)** gồm:
 
 ### 2.2. Phân Hệ 2 & 3: Game Heo Bay & Game Heo Bắn
 *(Xem đặc tả chi tiết toàn diện về đồ họa, công thức vật lý, độ khó và popup tại [10-GAMES-SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-GAMES-SPEC.md))*.
+- **Chuẩn hiển thị Canvas siêu nét Integer DPR Scaling (3x) (Quyết định 146):**
+  - Kích thước buffer nhân 3 (`FW*3`, `FH*3` hoặc `AW*3`, `AH*3`), `ctx.scale(3, 3)` và `imageSmoothingEnabled = false`, kết hợp CSS `image-rendering: -webkit-optimize-contrast; pixelated; crisp-edges;` triệt tiêu 100% hiện tượng mờ trên màn hình Retina/OLED.
+  - Bầu trời ban ngày mặc định rực rỡ nắng vàng `#58B6EE` / `#C3E9F8`.
+  - Vỗ cánh Flappy Pig bắt sự kiện tức thì 0ms ở `touchstart` / `pointerdown`.
+- **Cảm ứng kéo ná Angry Pig di động:** Bắt đồng thời TouchEvent (`touchstart`, `touchmove`, `touchend`, `touchcancel`) với `e.preventDefault()` và `setPointerCapture`, mở rộng vùng chạm ná bán kính 40px để trượt kéo thả mượt mà trên thiết bị thật.
+
+### 2.3. Hub Giải Trí Siêu Gọn (Compact Neo-Cards - Quyết định 146)
+- **Bố cục ngang tối giản:**
+  - Hộp Icon Pixel `hubic` 46×46px bên trái trên nền pastel đặc (`#BFDDF2`, `#FBD3DC`, `#D4ECC6`) viền 2.5px mực, chứa icon pixel 16×16 tương ứng (`PixelIconChat`, `PixelIconGamepad`, `PixelIconMapPin`).
+  - Cột thông tin bên phải: Tag pill viền mực + Tiêu đề in đậm Baloo 2 + 1 dòng trạng thái súc tích. Lược bỏ hoàn toàn đoạn văn mô tả 3 dòng.
+  - Thu gọn padding còn 10px, margin còn 8px để cả 3 thẻ nằm gọn gàng trên 1 màn hình không cần cuộn.
 
 ### 2.4. Phân Hệ 4: Bản Đồ Chi Tiêu Pixel (`PiggySpendMapView`)
 - Chế độ xem: `[Pixel] [Bản đồ thật]`.

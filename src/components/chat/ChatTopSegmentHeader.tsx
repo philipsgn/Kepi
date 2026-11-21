@@ -10,6 +10,7 @@ import { Sparkles, Users } from 'lucide-react-native';
 import { Strings } from '../../constants/strings';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
+import { PixelIconPigCoach, PixelIconSquad } from '../pixel/PixelIcons';
 
 export type ChatTab = 'COACH' | 'FRIENDS';
 
@@ -84,11 +85,15 @@ export const ChatTopSegmentHeader: React.FC<ChatTopSegmentHeaderProps> = ({
                 : [styles.segmentBtnActive, { backgroundColor: tokens.primary }]),
           ]}
         >
-          <Sparkles
-            size={14}
-            color={isHeocon ? '#2B2118' : activeTab === 'COACH' ? '#1B2733' : tokens.textMuted}
-            strokeWidth={2.4}
-          />
+          {isHeocon ? (
+            <PixelIconPigCoach size={18} />
+          ) : (
+            <Sparkles
+              size={14}
+              color={activeTab === 'COACH' ? '#1B2733' : tokens.textMuted}
+              strokeWidth={2.4}
+            />
+          )}
           <Text
             style={[
               styles.segmentText,
@@ -119,11 +124,15 @@ export const ChatTopSegmentHeader: React.FC<ChatTopSegmentHeaderProps> = ({
                 : [styles.segmentBtnActive, { backgroundColor: tokens.primary }]),
           ]}
         >
-          <Users
-            size={14}
-            color={isHeocon ? '#2B2118' : activeTab === 'FRIENDS' ? '#1B2733' : tokens.textMuted}
-            strokeWidth={2.2}
-          />
+          {isHeocon ? (
+            <PixelIconSquad size={18} />
+          ) : (
+            <Users
+              size={14}
+              color={activeTab === 'FRIENDS' ? '#1B2733' : tokens.textMuted}
+              strokeWidth={2.2}
+            />
+          )}
           <Text
             style={[
               styles.segmentText,

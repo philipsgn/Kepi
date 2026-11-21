@@ -8,22 +8,22 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import {
-  MessageCircle,
-  Users,
-  Feather,
-  Target,
-  Gamepad2,
-  MapPin,
   ChevronRight,
   Flame,
   Ticket,
   Wheat,
   Utensils,
+  Users,
 } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useAuthStore } from '../../store/authStore';
 import { PixelPigAvatar } from '../pixel/PixelPigAvatar';
+import {
+  PixelIconChat,
+  PixelIconGamepad,
+  PixelIconMapPin,
+} from '../pixel/PixelIcons';
 
 export type SubViewType = 'hub' | 'chat' | 'squad' | 'fly' | 'shooter' | 'map';
 
@@ -35,8 +35,6 @@ interface HubCardItem {
   id: SubViewType;
   title: string;
   badge: string;
-  tagline: string;
-  desc: string;
   accentBg: string;
   icon: React.ReactNode;
   statusText: string;
@@ -82,36 +80,31 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
     return 'Heo đói · Bay và bắn yếu (-15%)';
   };
 
+  // 3 Thẻ Hub cốt lõi - Tối giản súc tích (Quyết định 145 & 146)
   const CARDS: HubCardItem[] = [
     {
       id: 'chat',
       title: 'Trò Chuyện & Bạn Bè',
       badge: 'AI COACH & SQUAD',
-      tagline: 'Heo-Coach Anh Minh & Hội Bạn Thân',
-      desc: 'Hỏi đáp ngân sách, xin phản biện chi tiêu và nuôi heo cùng hội bạn thân.',
       accentBg: '#BFDDF2',
-      icon: <MessageCircle size={26} color="#2B2118" strokeWidth={2.6} />,
+      icon: <PixelIconChat size={28} />,
       statusText: 'Heo-Coach & Squad đang online',
     },
     {
       id: 'fly',
       title: 'Game Vui Heo Con',
       badge: 'FLAPPY & ANGRY PIG · 60FPS',
-      tagline: 'Heo Bay Vượt Ải & Heo Bắn Ná 3D',
-      desc: 'Vỗ cánh hái đồ ăn, bắn ná phá tháp giải cứu heo con. Tích lũy vé và kiếm cám!',
       accentBg: '#FBD3DC',
-      icon: <Gamepad2 size={26} color="#2B2118" strokeWidth={2.6} />,
+      icon: <PixelIconGamepad size={28} />,
       statusText: `Heo Bay: ${flyBestScore || 0}đ · Heo Bắn: Màn ${shooterMaxWave || 1}`,
     },
     {
       id: 'map',
       title: 'Bản Đồ Chi Tiêu',
       badge: 'GPS PIXEL & BẢN ĐỒ THẬT',
-      tagline: 'Khu phố chi tiêu & Heo đi dạo',
-      desc: 'Tự động ghim nơi bạn đã tiêu tiền, theo dõi quán quen trên bản đồ Pixel hoặc Bản đồ thật.',
       accentBg: '#D4ECC6',
-      icon: <MapPin size={26} color="#2B2118" strokeWidth={2.6} />,
-      statusText: 'Dual-Engine Pixel & Thật',
+      icon: <PixelIconMapPin size={28} />,
+      statusText: 'Dual-Engine Pixel & Bản đồ thật',
     },
   ];
 
@@ -131,18 +124,18 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
 
           {/* Huy hiệu chuỗi ngày */}
           <View style={styles.streakBadge}>
-            <Flame size={16} color="#E0452B" strokeWidth={2.8} />
+            <Flame size={15} color="#E0452B" strokeWidth={2.8} />
             <Text style={styles.streakText}>{streakDays || 1} ngày</Text>
           </View>
         </View>
 
-        {/* Banner Mascot chào hỏi */}
+        {/* Banner Mascot chào hỏi đồng bộ 100% */}
         <View style={styles.bannerRow}>
-          <PixelPigAvatar size={48} mood={pigHunger >= 60 ? 'happy' : 'idle'} />
+          <PixelPigAvatar size={42} mood={pigHunger >= 60 ? 'happy' : 'idle'} />
           <View style={styles.bannerInfo}>
             <Text style={styles.mainHeading}>Trung Tâm Heo Con</Text>
-            <Text style={styles.subHeading} numberOfLines={2}>
-              Chào {profile?.full_name || 'bạn'}! Khám phá giải trí & bản đồ khu phố
+            <Text style={styles.subHeading} numberOfLines={1}>
+              Chào {profile?.full_name || 'bạn'}! Khám phá giải trí & khu phố
             </Text>
           </View>
         </View>
@@ -150,7 +143,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
         {/* Chips Vé & Thức ăn */}
         <View style={styles.chipsRow}>
           <View style={styles.metricChip}>
-            <Ticket size={18} color="#E0452B" strokeWidth={2.6} />
+            <Ticket size={16} color="#E0452B" strokeWidth={2.6} />
             <View>
               <Text style={styles.chipLabel}>Vé Chơi</Text>
               <Text style={styles.chipValue}>{gameTickets} vé</Text>
@@ -158,7 +151,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
           </View>
 
           <View style={styles.metricChip}>
-            <Wheat size={18} color="#F4B93B" strokeWidth={2.6} />
+            <Wheat size={16} color="#F4B93B" strokeWidth={2.6} />
             <View>
               <Text style={styles.chipLabel}>Thức Ăn</Text>
               <Text style={styles.chipValue}>{pigFood} phần</Text>
@@ -179,7 +172,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
             onPress={handleFeed}
             activeOpacity={0.82}
           >
-            <Utensils size={14} color="#2B2118" strokeWidth={2.6} />
+            <Utensils size={13} color="#2B2118" strokeWidth={2.6} />
             <Text style={styles.feedButtonText}>Cho ăn (-1)</Text>
           </TouchableOpacity>
         </View>
@@ -202,38 +195,37 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
         )}
       </View>
 
-      {/* 3. LƯỚI 4 THẺ NEO-BRUTALIST */}
+      {/* 3. LƯỚI 3 THẺ COMPACT NEO-CARDS (Quyết định 146: Bố cục ngang, gọn gàng, 0 cuộn) */}
       <View style={styles.cardsGrid}>
         {CARDS.map((card) => (
           <TouchableOpacity
             key={card.id}
-            style={[styles.card, { backgroundColor: '#FFFBF1' }]}
-            activeOpacity={0.88}
+            style={styles.compactCard}
+            activeOpacity={0.85}
             onPress={() => handlePressCard(card.id)}
           >
-            {/* Top row of card */}
-            <View style={styles.cardHeader}>
-              <View style={[styles.iconBox, { backgroundColor: card.accentBg }]}>
-                {card.icon}
-              </View>
-              <View style={styles.badgePill}>
-                <Text style={styles.badgePillText}>{card.badge}</Text>
-              </View>
+            {/* Khối vuông Icon Pixel 16×16 bên trái */}
+            <View style={[styles.compactIconBox, { backgroundColor: card.accentBg }]}>
+              {card.icon}
             </View>
 
-            {/* Content */}
-            <View style={styles.cardBody}>
-              <Text style={styles.cardTitle}>{card.title}</Text>
-              <Text style={styles.cardTagline}>{card.tagline}</Text>
-              <Text style={styles.cardDesc}>{card.desc}</Text>
-            </View>
+            {/* Cột thông tin súc tích bên phải */}
+            <View style={styles.compactInfoCol}>
+              <View style={styles.compactTopRow}>
+                <Text style={styles.compactTitle} numberOfLines={1}>{card.title}</Text>
+                <View style={styles.compactBadgePill}>
+                  <Text style={styles.compactBadgeText}>{card.badge}</Text>
+                </View>
+              </View>
 
-            {/* Footer action bar */}
-            <View style={styles.cardFooter}>
-              <Text style={styles.statusText}>{card.statusText}</Text>
-              <View style={styles.actionBtn}>
-                <Text style={styles.actionText}>Khám phá</Text>
-                <ChevronRight size={14} color="#2B2118" strokeWidth={2.8} />
+              <View style={styles.compactBottomRow}>
+                <Text style={styles.compactStatusText} numberOfLines={1}>
+                  {card.statusText}
+                </Text>
+                <View style={styles.compactActionBtn}>
+                  <Text style={styles.compactActionText}>Khám phá</Text>
+                  <ChevronRight size={13} color="#2B2118" strokeWidth={2.8} />
+                </View>
               </View>
             </View>
           </TouchableOpacity>
@@ -250,18 +242,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 40,
+    paddingHorizontal: 14,
+    paddingTop: 4,
+    paddingBottom: 24,
   },
   header: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
   headerTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 6,
   },
   brandBadge: {
     flexDirection: 'row',
@@ -271,8 +263,8 @@ const styles = StyleSheet.create({
     borderWidth: 2.5,
     borderColor: '#2B2118',
     borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
@@ -280,15 +272,15 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   brandDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     backgroundColor: '#E0452B',
   },
   brandBadgeText: {
     fontFamily: 'Nunito',
     fontWeight: '800',
-    fontSize: 12,
+    fontSize: 11,
     color: '#2B2118',
     letterSpacing: 0.8,
   },
@@ -300,8 +292,8 @@ const styles = StyleSheet.create({
     borderWidth: 2.5,
     borderColor: '#2B2118',
     borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
@@ -311,16 +303,16 @@ const styles = StyleSheet.create({
   streakText: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 13,
+    fontSize: 12.5,
     color: '#2B2118',
     fontVariant: ['tabular-nums'],
   },
   bannerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginTop: 6,
-    marginBottom: 12,
+    gap: 10,
+    marginTop: 2,
+    marginBottom: 8,
   },
   bannerInfo: {
     flex: 1,
@@ -328,22 +320,22 @@ const styles = StyleSheet.create({
   mainHeading: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 24,
-    lineHeight: 28,
+    fontSize: 21,
+    lineHeight: 25,
     color: '#2B2118',
   },
   subHeading: {
     fontFamily: 'Nunito',
     fontWeight: '700',
-    fontSize: 12.5,
+    fontSize: 11.5,
     color: '#85735E',
-    marginTop: 2,
-    lineHeight: 16,
+    marginTop: 1,
+    lineHeight: 15,
   },
   chipsRow: {
     flexDirection: 'row',
-    gap: 10,
-    marginBottom: 6,
+    gap: 8,
+    marginBottom: 4,
   },
   metricChip: {
     flex: 1,
@@ -351,11 +343,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     backgroundColor: '#FFFBF1',
-    borderWidth: 2.5,
+    borderWidth: 2,
     borderColor: '#2B2118',
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
@@ -365,15 +357,16 @@ const styles = StyleSheet.create({
   chipLabel: {
     fontFamily: 'Nunito',
     fontWeight: '700',
-    fontSize: 10.5,
+    fontSize: 10,
     color: '#85735E',
-    textTransform: 'uppercase',
+    lineHeight: 12,
   },
   chipValue: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 15,
+    fontSize: 13,
     color: '#2B2118',
+    lineHeight: 16,
     fontVariant: ['tabular-nums'],
   },
   careCard: {
@@ -381,8 +374,8 @@ const styles = StyleSheet.create({
     borderWidth: 2.5,
     borderColor: '#2B2118',
     borderRadius: 18,
-    padding: 12,
-    marginBottom: 14,
+    padding: 10,
+    marginBottom: 10,
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
@@ -393,19 +386,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   careTitle: {
     fontFamily: 'Nunito',
     fontWeight: '800',
-    fontSize: 11,
+    fontSize: 10.5,
     letterSpacing: 0.6,
     color: '#85735E',
   },
   careSub: {
     fontFamily: 'Nunito',
     fontWeight: '700',
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#2B2118',
     marginTop: 1,
   },
@@ -417,8 +410,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#2B2118',
     borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
@@ -428,11 +421,11 @@ const styles = StyleSheet.create({
   feedButtonText: {
     fontFamily: 'Nunito',
     fontWeight: '800',
-    fontSize: 11.5,
+    fontSize: 11,
     color: '#2B2118',
   },
   progressBarTrack: {
-    height: 10,
+    height: 9,
     backgroundColor: '#F6EEDC',
     borderRadius: 999,
     borderWidth: 2,
@@ -446,116 +439,112 @@ const styles = StyleSheet.create({
   feedToastText: {
     fontFamily: 'Nunito',
     fontWeight: '700',
-    fontSize: 11,
+    fontSize: 10.5,
     color: '#E0452B',
-    marginTop: 6,
+    marginTop: 4,
     textAlign: 'center',
   },
   cardsGrid: {
-    gap: 12,
+    gap: 8,
   },
-  card: {
-    borderRadius: 20,
-    borderWidth: 3,
+  // Compact Neo-Card Styles
+  compactCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2.5,
     borderColor: '#2B2118',
-    padding: 14,
+    borderRadius: 18,
+    padding: 9,
     shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 4,
+    elevation: 3,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  iconBox: {
-    width: 44,
-    height: 44,
+  compactIconBox: {
+    width: 48,
+    height: 48,
     borderRadius: 14,
     borderWidth: 2.5,
     borderColor: '#2B2118',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
-  badgePill: {
+  compactInfoCol: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+  },
+  compactTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 6,
+  },
+  compactTitle: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 15,
+    color: '#2B2118',
+    flex: 1,
+  },
+  compactBadgePill: {
     backgroundColor: '#F6EEDC',
+    borderWidth: 1.5,
+    borderColor: '#2B2118',
+    borderRadius: 999,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    flexShrink: 0,
+  },
+  compactBadgeText: {
+    fontFamily: 'Nunito',
+    fontWeight: '800',
+    fontSize: 9.5,
+    color: '#85735E',
+    letterSpacing: 0.4,
+  },
+  compactBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+    gap: 6,
+  },
+  compactStatusText: {
+    fontFamily: 'Nunito',
+    fontWeight: '700',
+    fontSize: 11.5,
+    color: '#5E9A57',
+    flex: 1,
+  },
+  compactActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: '#F4B93B',
     borderWidth: 2,
     borderColor: '#2B2118',
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 3,
-  },
-  badgePillText: {
-    fontFamily: 'Nunito',
-    fontWeight: '800',
-    fontSize: 10,
-    color: '#2B2118',
-    letterSpacing: 0.5,
-  },
-  cardBody: {
-    marginBottom: 10,
-  },
-  cardTitle: {
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
-    fontSize: 18,
-    color: '#2B2118',
-    marginBottom: 2,
-  },
-  cardTagline: {
-    fontFamily: 'Nunito',
-    fontWeight: '800',
-    fontSize: 12,
-    color: '#E0452B',
-    marginBottom: 4,
-  },
-  cardDesc: {
-    fontFamily: 'Nunito',
-    fontWeight: '600',
-    fontSize: 12,
-    lineHeight: 16,
-    color: '#85735E',
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 2,
-    borderTopColor: '#F6EEDC',
-    paddingTop: 8,
-  },
-  statusText: {
-    fontFamily: 'Nunito',
-    fontWeight: '700',
-    fontSize: 11.5,
-    color: '#85735E',
-  },
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#F4B93B',
-    borderWidth: 2,
-    borderColor: '#2B2118',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
     shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1.5 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 2,
+    flexShrink: 0,
   },
-  actionText: {
+  compactActionText: {
     fontFamily: 'Nunito',
     fontWeight: '800',
-    fontSize: 11,
+    fontSize: 10.5,
     color: '#2B2118',
   },
   bottomSpacer: {
-    height: 20,
+    height: 16,
   },
 });
