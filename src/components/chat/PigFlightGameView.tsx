@@ -478,11 +478,11 @@ $('tabShoot').addEventListener('click', () => notify('SWITCH_GAME', { game: 'sho
 
 /* ====== HEO BAY 1:1 TỪ PROTOTYPE VÍ HEO CON ====== */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-const PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',k:'#2B2118',w:'#FFFFFF'};
+const PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',h:'#FFE3E8',k:'#2B2118',g:'#F4B93B',G:'#B97A14',w:'#FFFFFF'};
 const R=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
 const E=(c,cx,cy,rx,ry,col)=>{c.fillStyle=col;for(let y=-ry;y<=ry;y++)for(let x=-rx;x<=rx;x++)if(x*x/(rx*rx)+y*y/(ry*ry)<=1)c.fillRect(cx+x,cy+y,1,1)};
-function shape(c,rows,fill,ox,oy){
-  c.fillStyle=PAL.o;for(const [ax,ay] of [[-1,0],[1,0],[0,-1],[0,1]])for(const [y,x0,x1] of rows)c.fillRect(ox+x0+ax,oy+y+ay,x1-x0+1,1);
+function shape(c,rows,fill,ox,oy,outline=true){
+  if(outline){c.fillStyle=PAL.o;for(const [ax,ay] of [[-1,0],[1,0],[0,-1],[0,1]])for(const [y,x0,x1] of rows)c.fillRect(ox+x0+ax,oy+y+ay,x1-x0+1,1)}
   c.fillStyle=fill;for(const [y,x0,x1] of rows)c.fillRect(ox+x0,oy+y,x1-x0+1,1);
 }
 function mk(w,h,fn){const cv=document.createElement('canvas');cv.width=w;cv.height=h;fn(cv.getContext('2d'));return cv}
@@ -497,22 +497,33 @@ const DIG={
 };
 function stamp(c,s,x,y,col){[...s].forEach((ch,k)=>{const p=DIG[ch];if(!p)return;for(let i=0;i<15;i++)if(p[i]==='1')R(c,x+k*4+(i%3),y+((i/3)|0),1,1,col)})}
 
-/* Sprite heo 24x20 */
+/* Sprite heo 24x20 chuẩn 1:1 prototype (Có 4 chân, mõm nhô, tai vểnh, chuông cổ, đuôi cong) */
 function drawPigSprite(c,o){
-  const P=PAL;
-  shape(c,[[0,6,17],[1,5,18],[2,4,19],[3,3,20],[4,3,20],[5,2,21],[6,2,21],[7,2,21],[8,2,21],[9,2,21],[10,2,21],[11,3,20],[12,3,20],[13,4,19],[14,5,18]],P.p,0,2);
-  shape(c,[[0,4,7],[1,3,7],[2,3,6]],P.s,0,0);
-  shape(c,[[0,13,16],[1,13,17],[2,14,17]],P.s,0,0);
-  shape(c,[[0,9,14],[1,8,15],[2,8,15],[3,9,14]],P.n,0,10);
-  R(c,10,11,1,2,P.k);R(c,13,11,1,2,P.k);
-  if(o.blink){R(c,6,9,3,1,P.k);R(c,16,9,3,1,P.k)}
-  else{R(c,6,8,2,2,P.k);R(c,16,8,2,2,P.k);R(c,6,8,1,1,P.w);R(c,16,8,1,1,P.w)}
-  if(o.happy){R(c,11,14,2,1,P.k)}
-  R(c,4,11,2,1,P.s);R(c,18,11,2,1,P.s);
-  if(o.pose==='sit'){R(c,7,17,3,2,P.s);R(c,14,17,3,2,P.s)}
-  else{R(c,6,17,3,2,P.s);R(c,15,17,3,2,P.s)}
-  if(o.tail){R(c,21,10,2,1,P.s);R(c,22,9,1,1,P.s)}
-  else{R(c,21,11,2,1,P.s);R(c,22,12,1,1,P.s)}
+  const ox=1,oy=3,sleep=o.pose==='sleep',eat=o.pose==='eat',walk=o.pose==='walk',sad=o.mood==='sad'&&!o.happy;
+  const bob=(walk&&o.frame===1)?-1:0;
+  const bodyDy=sleep?3:bob,headDy=sleep?5:eat?4:sad?1:bob,headDx=sleep?-1:eat?1:0;
+  if(!sleep){
+    const raised=i=>walk&&(o.frame===0?(i===1||i===2):(i===0||i===3));
+    const legs=[[3,PAL.p],[9,PAL.p],[6,PAL.s],[12,PAL.s]];
+    [2,3,0,1].forEach(i=>{const x=legs[i][0];
+      const rows=[[11,x,x+1],[12,x,x+1],[13,x,x+1]];if(!raised(i))rows.push([14,x,x+1]);
+      shape(c,rows,legs[i][1],ox,oy)});
+  }
+  shape(c,[[4,0,1],[5,0,0],[6,0,1]],PAL.p,ox,oy+bodyDy+(o.tail?1:0));
+  shape(c,[[4,4,12],[5,3,13],[6,2,14],[7,2,14],[8,2,14],[9,2,14],[10,2,14],[11,3,13]],PAL.p,ox,oy+bodyDy);
+  R(c,ox+5,oy+bodyDy+5,3,1,PAL.h);
+  const hx=ox+headDx,hy=oy+headDy,hp=(x,y,col)=>R(c,hx+x,hy+y,1,1,col);
+  shape(c,[[6,20,21],[7,20,21],[8,20,21]],PAL.n,hx,hy);
+  shape(c,[[3,14,18],[4,13,19],[5,13,19],[6,13,19],[7,13,19],[8,13,19],[9,14,18]],PAL.p,hx,hy);
+  shape(c,[[1,15,16],[2,14,17]],PAL.p,hx,hy);R(c,hx+14,hy+3,5,1,PAL.p);hp(16,2,PAL.s);
+  R(c,hx+14,hy+4,2,1,PAL.h);
+  hp(21,6,PAL.k);hp(21,8,PAL.k);
+  if(o.happy){hp(16,6,PAL.k);hp(17,5,PAL.k);hp(18,6,PAL.k)}
+  else if(o.blink||sleep||eat){hp(16,6,PAL.k);hp(17,6,PAL.k)}
+  else{R(c,hx+16,hy+5,2,2,PAL.k);hp(16,5,PAL.w)}
+  if(sad){hp(16,4,PAL.k);hp(17,3,PAL.k);hp(18,7,'#7EC8F0');hp(18,8,'#7EC8F0')}
+  else{hp(17,8,PAL.s);hp(18,8,PAL.s)}
+  R(c,ox+11,oy+bodyDy+9,2,1,PAL.g);R(c,ox+11,oy+bodyDy+10,2,1,PAL.G);
 }
 const hp=mk(24,20,c=>drawPigSprite(c,{blink:false}));
 const hpx=hp.getContext('2d');
