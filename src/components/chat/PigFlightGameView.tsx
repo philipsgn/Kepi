@@ -1,11 +1,9 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
-  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  useWindowDimensions,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
@@ -33,9 +31,8 @@ export const PigFlightGameView: React.FC<PigFlightGameViewProps> = ({
   onSaveStats,
 }) => {
   const webViewRef = useRef<any>(null);
-  const { width: winWidth, height: winHeight } = useWindowDimensions();
-  // Quyết định 144: Toàn màn hình khi chơi Game (Fullscreen Mode)
-  const [contentHeight, setContentHeight] = useState<number>(winHeight - 48);
+  // Quyết định 148: Toàn màn hình bằng Flexbox tự nhiên (flex: 1),
+  // không dùng kích thước cứng/onLayout để WebView không bị collapse 0×0.
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -68,6 +65,9 @@ export const PigFlightGameView: React.FC<PigFlightGameViewProps> = ({
         }
       } else if (data.type === 'GO_HOME') {
         handleBack();
+      } else if (data.type === 'JS_ERROR') {
+        // Quyết định 148: Cầu nối bắt lỗi JS trong WebView, không để lỗi chết âm thầm.
+        console.warn('[PigFlightGameView] WebView JS error:', data.message, 'line', data.line, 'col', data.col);
       }
     } catch (e) {
       // ignore
@@ -80,6 +80,17 @@ export const PigFlightGameView: React.FC<PigFlightGameViewProps> = ({
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<script>
+/* Quyết định 148: cầu nối bắt lỗi JS — bắn về React Native thay vì chết âm thầm */
+window.onerror = function (msg, src, line, col) {
+  try {
+    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'JS_ERROR', message: String(msg), line: line || 0, col: col || 0 }));
+    }
+  } catch (e) {}
+  return false;
+};
+</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800&display=swap">
 <style>
 :root {

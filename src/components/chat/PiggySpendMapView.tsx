@@ -1,11 +1,10 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  useWindowDimensions,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
@@ -20,8 +19,7 @@ interface PiggySpendMapViewProps {
 
 export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) => {
   const webViewRef = useRef<any>(null);
-  const { width: winWidth, height: winHeight } = useWindowDimensions();
-  const [contentHeight, setContentHeight] = useState<number>(winHeight - 65);
+  // Quyết định 148: WebView chiếm trọn bằng flex: 1 (không onLayout/kích thước cứng).
   const { transactions } = useTransactionStore();
 
   const handleBack = () => {
@@ -41,6 +39,9 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } else if (data.type === 'HAPTIC_SUCCESS') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else if (data.type === 'JS_ERROR') {
+        // Quyết định 148: Cầu nối bắt lỗi JS trong WebView, không để lỗi chết âm thầm.
+        console.warn('[PiggySpendMapView] WebView JS error:', data.message, 'line', data.line, 'col', data.col);
       }
     } catch (e) {
       // ignore
@@ -80,6 +81,17 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<script>
+/* Quyết định 148: cầu nối bắt lỗi JS — bắn về React Native thay vì chết âm thầm */
+window.onerror = function (msg, src, line, col) {
+  try {
+    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'JS_ERROR', message: String(msg), line: line || 0, col: col || 0 }));
+    }
+  } catch (e) {}
+  return false;
+};
+</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800&display=swap">
 <style>
 :root {
@@ -798,7 +810,7 @@ requestAnimationFrame(loop);
         </TouchableOpacity>
       </View>
 
-      {/* WEBVIEW CANVAS SIÊU MƯỢT 60FPS (EXPLICIT DIMENSIONS + BASEURL) */}
+      {/* WEBVIEW CANVAS SIÊU MƯỢT 60FPS (FLEX: 1 — KHÔNG BASEURL RỖNG, KHÔNG onLayout RE-RENDER) */}
       <View style={styles.webContainer}>
         {Platform.OS === 'web' ? (
           <iframe

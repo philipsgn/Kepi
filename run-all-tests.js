@@ -3639,21 +3639,18 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsPath = path.join(__dirname, 'docs/DECISIONS.md');
   const decisionsCode = fs.readFileSync(decisionsPath, 'utf8');
 
-  // 1. SafeWebView explicit dimensions, baseUrl: '' & web fallback in all 3 Game/Map views
+  // 1. SafeWebView flex:1 & NO empty baseUrl (Quyết định 148 — chống màn hình vàng iOS)
   assert.ok(
-    (flyCode.includes("baseUrl: ''") || flyCode.includes("memoizedSource")) &&
-    (flyCode.includes('containerStyle={{ width: winWidth') || flyCode.includes('webViewContainer')),
-    'PigFlightGameView must have valid webview container configuration'
+    flyCode.includes('memoizedSource') && !flyCode.includes("baseUrl: ''") && flyCode.includes('webViewContainer'),
+    'PigFlightGameView must use flex:1 webview container without empty baseUrl'
   );
   assert.ok(
-    (shooterCode.includes("baseUrl: ''") || shooterCode.includes("memoizedSource")) &&
-    (shooterCode.includes('containerStyle={{ width: winWidth') || shooterCode.includes('webViewContainer')),
-    'PigShooterGameView must have valid webview container configuration'
+    shooterCode.includes('memoizedSource') && !shooterCode.includes("baseUrl: ''") && shooterCode.includes('webViewContainer'),
+    'PigShooterGameView must use flex:1 webview container without empty baseUrl'
   );
   assert.ok(
-    (mapCode.includes("baseUrl: ''") || mapCode.includes("memoizedSource")) &&
-    (mapCode.includes('containerStyle={{ width: winWidth') || mapCode.includes('webViewContainer')),
-    'PiggySpendMapView must have valid webview container configuration'
+    mapCode.includes('memoizedSource') && !mapCode.includes("baseUrl: ''") && mapCode.includes('webViewContainer'),
+    'PiggySpendMapView must use flex:1 webview container without empty baseUrl'
   );
 
   // 2. Hub Dashboard typography and border fixes
@@ -3874,10 +3871,24 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(userBubbleCode.includes('const isHeocon = true;'), 'UserMessageBubble must always use Neo-Brutalist styling');
   assert.ok(chatInputCode.includes('const isHeocon = true;'), 'ChatInputBar must always use Neo-Brutalist styling');
 
-  // 4. Fullscreen Games Unblocked Viewport & Touch Protection
-  assert.ok(flyGameCode.includes('winHeight - 48'), 'PigFlightGameView must use fullscreen content height');
+  // 4. Fullscreen Games Unblocked Viewport & Touch Protection (Quyết định 148: flex:1, không baseUrl rỗng)
+  assert.ok(
+    flyGameCode.includes('styles.webViewContainer') && !flyGameCode.includes("baseUrl: ''"),
+    'PigFlightGameView must use flex:1 webview container and never an empty baseUrl'
+  );
+  assert.ok(
+    flyGameCode.includes('window.onerror') && flyGameCode.includes("type: 'JS_ERROR'"),
+    'PigFlightGameView must bridge WebView JS errors to React Native'
+  );
   assert.ok(flyGameCode.includes('tapStartX') && flyGameCode.includes('Math.hypot'), 'PigFlightGameView must filter touch taps to prevent instant crash');
-  assert.ok(shooterGameCode.includes('winHeight - 48'), 'PigShooterGameView must use fullscreen content height');
+  assert.ok(
+    shooterGameCode.includes('styles.webViewContainer') && !shooterGameCode.includes("baseUrl: ''"),
+    'PigShooterGameView must use flex:1 webview container and never an empty baseUrl'
+  );
+  assert.ok(
+    shooterGameCode.includes('window.onerror') && shooterGameCode.includes("type: 'JS_ERROR'"),
+    'PigShooterGameView must bridge WebView JS errors to React Native'
+  );
   assert.ok(shooterGameCode.includes('qStep') && shooterGameCode.includes('drawPigAP'), 'PigShooterGameView must arrange waiting pigs cleanly without overlapping slingshot');
 
   // 5. Hub Navigation & Squad Back Button
@@ -3936,6 +3947,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   // 5. Dual-Engine Map (Masterprompts Plan 12)
   assert.ok(mapCode.includes('mpMode') && mapCode.includes('data-m="pixel"') && mapCode.includes('data-m="real"'), 'PiggySpendMapView must implement [Pixel] and [Bản đồ thật] switcher');
   assert.ok(mapCode.includes('mpReal') && mapCode.includes('OpenFreeMap'), 'PiggySpendMapView must provide OpenFreeMap real map container');
+  assert.ok(
+    mapCode.includes('window.onerror') && mapCode.includes("type: 'JS_ERROR'") && !mapCode.includes('setContentHeight'),
+    'PiggySpendMapView must bridge WebView JS errors and avoid onLayout re-render loop'
+  );
 
   // 6. Living Documentation Sync Audit
   assert.ok(decisionsCode.includes('145'), 'DECISIONS.md must document Quyết định 145');

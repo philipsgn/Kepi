@@ -176,3 +176,24 @@ Biến số thời gian $u$ **được khóa cố định $u = 0.35$** ngay tron
   - Ô gõ cao 44px, viền 3px mực `#2B2118`, nút `[Gửi]` Vàng Cám `#F4B93B` viền 2.5px mực.
 - **Cam kết riêng tư `.privacy`:**
   - "Heo-Coach đọc số liệu tổng hợp trong app. Ảnh và vị trí không được gửi đi."
+
+---
+
+## 📱 5. CHUẨN TÍCH HỢP WEBVIEW CHO GAME & BẢN ĐỒ (QUYẾT ĐỊNH 148)
+
+Áp dụng bắt buộc cho `PigFlightGameView.tsx`, `PigShooterGameView.tsx` và `PiggySpendMapView.tsx` để chống lỗi **màn hình vàng kem `#F6EEDC`** trên iOS / Expo Go:
+
+1. **Không bao giờ truyền `baseUrl: ''`:** `const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);` — để WebKit dùng `baseURL: nil` theo chuẩn Apple. `baseUrl` rỗng bị iOS coi là URL không hợp lệ và hủy tải HTML trong im lặng.
+2. **Layout Flexbox tự nhiên:** `container` / `webViewWrapper` (hoặc `webContainer`) / `webViewContainer` / `webView` đều dùng `{ flex: 1, width: '100%', backgroundColor: '#F6EEDC' }`. Cấm `flex: 0`, cấm truyền `height` pixel cứng từ `useWindowDimensions`.
+3. **Cấm `onLayout` + `setContentHeight`:** Không đo lại chiều cao bằng `onLayout` (gây re-render loop làm WKWebView treo). Toàn màn hình do `flex: 1` của cây View đảm nhiệm (Tab Bar đã được ẩn qua `onToggleTabBar`).
+4. **Cầu nối bắt lỗi JS (`window.onerror`):** Mỗi HTML nhúng script:
+   ```js
+   window.onerror = function (msg, src, line, col) {
+     try {
+       window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'JS_ERROR', message: String(msg), line: line || 0, col: col || 0 }));
+     } catch (e) {}
+     return false;
+   };
+   ```
+   Phía React Native bắt nhánh `data.type === 'JS_ERROR'` và `console.warn('[TênView] WebView JS error:', ...)` để lỗi runtime không chết âm thầm.
+5. **Tiêu chí nghiệm thu:** `npx tsc --noEmit` 0 lỗi; `node run-all-tests.js` 100% pass với assertion cấm `baseUrl: ''`, yêu cầu `webViewContainer` flex và `window.onerror` + `type: 'JS_ERROR'` ở cả 3 view.

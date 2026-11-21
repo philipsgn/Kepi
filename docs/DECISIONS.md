@@ -959,5 +959,6 @@
       2. Chuẩn hóa Layout Flexbox: Loại bỏ `flex: 0` và kích thước cứng; dùng `webViewContainer` và `webView` có `{ flex: 1, width: '100%', backgroundColor: '#F6EEDC' }`.
       3. Loại bỏ `onLayout` gây giật re-render trong `PiggySpendMapView.tsx`.
       4. Tạo tài liệu `docs/masterprompts/MASTERPROMPT_DEEPSEEK_FIX_BLANK_WEBVIEW.md` đóng gói toàn bộ chẩn đoán và drop-in code gửi Deepseek Agent.
-    - *Tài Liệu Đồng Bộ:* `docs/masterprompts/MASTERPROMPT_DEEPSEEK_FIX_BLANK_WEBVIEW.md`, `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`, `src/components/chat/PiggySpendMapView.tsx`, `run-all-tests.js`.
+      5. **Cầu Nối Bắt Lỗi JS (`window.onerror`) & Dọn State Chết:** Mỗi HTML nhúng bridge `window.onerror` bắn `postMessage({ type: 'JS_ERROR', message, line, col })`; React Native log `console.warn` để lỗi không chết âm thầm. Đồng thời xóa `useWindowDimensions`, `useState`, `contentHeight`/`setContentHeight` không còn dùng ở cả 3 view; siết assertion Test 80/84/85 để cấm `baseUrl: ''` và yêu cầu `flex: 1` + bridge.
+    - *Tài Liệu Đồng Bộ:* `docs/masterprompts/MASTERPROMPT_DEEPSEEK_FIX_BLANK_WEBVIEW.md`, `docs/screens/heocon/10-GAMES-SPEC.md` (§5), `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`, `src/components/chat/PiggySpendMapView.tsx`, `run-all-tests.js`.
 
