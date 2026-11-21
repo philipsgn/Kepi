@@ -1,5 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import {
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -1023,18 +1024,25 @@ requestAnimationFrame(apFrame);
 
       {/* Webview Game Canvas */}
       <View style={styles.webViewWrapper}>
-        <SafeWebView
-          ref={webViewRef}
-          source={memoizedSource}
-          containerStyle={styles.webViewContainer}
-          style={styles.webView}
-          scrollEnabled={false}
-          bounces={false}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          originWhitelist={['*']}
-          onMessage={handleMessage}
-        />
+        {Platform.OS === 'web' ? (
+          <iframe
+            srcDoc={htmlContent}
+            style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#F6EEDC' } as any}
+          />
+        ) : (
+          <SafeWebView
+            ref={webViewRef}
+            source={memoizedSource}
+            containerStyle={styles.webViewContainer}
+            style={styles.webView}
+            scrollEnabled={false}
+            bounces={false}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            originWhitelist={['*']}
+            onMessage={handleMessage}
+          />
+        )}
       </View>
     </View>
   );

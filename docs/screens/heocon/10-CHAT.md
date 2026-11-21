@@ -1,10 +1,11 @@
 # 🎮 10 — PIGFLY HUB & PIXEL HUB (TAB GIẢI TRÍ): CHAT, 2 GAME ĐỘ KHÓ CAO & BẢN ĐỒ CHI TIÊU
 
-> **Screen-unit:** Tab 3. **PIGFLY HUB (Trung Tâm Giải Trí & Khám Phá Heo Con)** kết hợp Chat AI Coach / Squad, 2 Game Pixel Art Độ Khó Cao (Heo Bay & Heo Bắn) và Bản Đồ Chi Tiêu Pixel port 1:1 từ `prototype/Ví Heo Con-20-11.html` (Quyết định 130, Quyết định 140, Quyết định 141, Quyết định 142, Quyết định 143, Quyết định 144 & Quyết định 145).
+> **Screen-unit:** Tab 3. **PIGFLY HUB (Trung Tâm Giải Trí & Khám Phá Heo Con)** kết hợp Chat AI Coach / Squad, 2 Game Pixel Art Độ Khó Cao (Heo Bay & Heo Bắn) và Bản Đồ Chi Tiêu Pixel port 1:1 từ `prototype/Ví Heo Con-20-11.html` (Quyết định 130, Quyết định 140, Quyết định 141, Quyết định 142, Quyết định 143, Quyết định 144, Quyết định 145, Quyết định 146, Quyết định 147 & Quyết định 148).
 > **Cấu trúc 3 Thẻ Trọng Tâm Cốt Lõi (Quyết định 145 & Masterprompts Plan 14):** Hub gồm đúng 3 thẻ lớn: (1) Trò Chuyện & Bạn Bè (AI Coach & Squad), (2) Game Vui Heo Con (Arcade Heo Bay & Heo Bắn 60fps), (3) Bản Đồ Chi Tiêu (GPS Pixel & Bản Đồ Thật).
 > **Chế độ Arcade Game Zero-Scroll (Quyết định 145):** Khắc phục triệt để lỗi méo canvas, canvas Portrait $176\times 224$ nguyên bản, bầu trời xanh biếc rực rỡ, vừa vặn 1 màn hình duy nhất không cuộn trang, nút bấm và popup "Bay lại" nằm ngay giữa màn hình trong tầm ngón tay cái.
 > **Chế độ Toàn Màn Hình (Fullscreen Game Mode):** Tự động ẩn Floating Bottom Tab Bar khi vào chơi Heo Bay / Heo Bắn để mở rộng 100% không gian điều khiển chân trang (Quyết định 144).
 > **Cố định Khung Chat Neo-Brutalist Pixel Art:** Luôn dùng nền kem `#F6EEDC`, khung thẻ `.chatlog` viền 3px mực, avatar vuông $36\times 36$px độc lập với Theme máy (Quyết định 144).
+> **Khắc Phục Lỗi Màn Hình Vàng Khè (Blank WebView Crash — Quyết định 148):** Loại bỏ hoàn toàn `baseUrl: ''`, `flex: 0` và kích thước cứng; sử dụng Flexbox tự nhiên `{ flex: 1, width: '100%', backgroundColor: '#F6EEDC' }`, tích hợp Web Fallback `<iframe>` và cầu nối bắt lỗi JavaScript `window.onerror`.
 > **Tài liệu đặc tả chi tiết 2 mini-game:** Xem riêng tại [10-GAMES-SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-GAMES-SPEC.md).
 
 ---
