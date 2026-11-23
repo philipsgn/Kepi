@@ -962,3 +962,198 @@
       5. **Cầu Nối Bắt Lỗi JS (`window.onerror`) & Dọn State Chết:** Mỗi HTML nhúng bridge `window.onerror` bắn `postMessage({ type: 'JS_ERROR', message, line, col })`; React Native log `console.warn` để lỗi không chết âm thầm. Đồng thời xóa `useWindowDimensions`, `useState`, `contentHeight`/`setContentHeight` không còn dùng ở cả 3 view; siết assertion Test 80/84/85 để cấm `baseUrl: ''` và yêu cầu `flex: 1` + bridge.
     - *Tài Liệu Đồng Bộ:* `docs/masterprompts/MASTERPROMPT_DEEPSEEK_FIX_BLANK_WEBVIEW.md`, `docs/screens/heocon/10-GAMES-SPEC.md` (§5), `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`, `src/components/chat/PiggySpendMapView.tsx`, `run-all-tests.js`.
 
+
+  - **Quyết định 149 & 151 (21/11/2026): Tinh Chỉnh Sắc Nét Pixel Art WebKit, CSS Modal [hidden] & Ná Bắn 1:1:**
+    - Khắc phục triệt để mờ pixel trên Canvas bằng bộ đệm chuẩn 176×224 và 224×140 không nhân DPR; bổ sung CSS `[hidden] { display: none !important; }`; hoàn thiện cơ chế ná bắn Angry Pig 1:1.
+
+  - **Quyết định 152 (21/11/2026): Tab Hồ Sơ 1:1 Prototype (Pixel Desk Banner, Split Bar 10 Ô & SegmentBar10):**
+    - Tái tạo bàn làm việc pixel, Split Bar 10 ô 3 màu và thanh tiến độ phân đoạn `SegmentBar10`.
+
+  - **Quyết định 153 (21/11/2026): Tab Giải Trí & Hồ Sơ 1:1 Prototype 21/11 & Masterprompts Plan 14:**
+    - Đồng bộ avatar pixel 16×16, nút Back thống nhất `‹ Quay lại Hub` và liên kết Tab Hồ Sơ với Game Arcade.
+
+  - **Quyết định 154 (21/11/2026): Tab Hồ Sơ Neo-Brutalist Perfection:**
+    - Áp dụng triệt để viền 3px mực `#2B2118`, bóng cứng 0-blur 4px, font `Baloo2_800ExtraBold` và `Nunito`.
+
+  - **Quyết định 155 (21/11/2026): Banner Chú Heo Pixel Mascot 24×20 & Cửa Sổ Bitexco Theo Giờ Thực Tế:**
+    - Cửa sổ Bitexco thay đổi cảnh bầu trời theo giờ thực tế (Bình minh, Trưa, Hoàng hôn, Đêm) với tháp Bitexco 16×40.
+
+  - **Quyết định 156 (21/11/2026): Đồng Bộ UI/UX Tab Hồ Sơ, Heo Đất Trên Bàn, Dải 2 Ô & Global Skills:**
+    - Chỉnh sửa tọa độ heo đất nằm khít mặt bàn $y=54$, tổ chức dải 2 ô chỉ số cân đối.
+
+  - **Quyết định 157 (21/11/2026): Bỏ Hoàn Toàn Thoại Khi Chạm Cửa Sổ Bitexco Tab Hồ Sơ:**
+    - Loại bỏ bóng thoại che khuất cửa sổ, giữ nguyên phản hồi xúc giác nhẹ (Haptics).
+
+  - **Quyết định 158 (21/11/2026): Nâng Cấp Toàn Diện Subtab & Modal Tab Hồ Sơ Sang Neo-Brutalist Heo Con:**
+    - Nâng cấp `BudgetSettingsCard`, `GoalSectionCard`, `CategorySettingsCard` và các modal sang viền 3px, bóng cứng 0-blur.
+
+  - **Quyết định 159 (22/11/2026): Khắc Phục Triệt Để Lỗi Màn Hình Xanh Camera Sau Trên iOS:**
+    - Bổ sung `key={cameraFacing}`, mount delay 200ms `isPagerSettled`, cô lập torch và cố định barcode settings.
+
+  - **Quyết định 160 (22/11/2026): Hệ Thống Theme 2.0 PigFly — Loại Bỏ Xanh Mint, Chuẩn Hóa Hệ 2 Theme "Heo Con Vàng Nâu" & "Hồng Heo Pastel":**
+    - Loại bỏ hoàn toàn xanh mint, quy hoạch hệ 2 Theme chính thức kết hợp gradient pastel nhẹ.
+
+  - **Quyết định 161 (22/11/2026): Đồng Bộ Triệt Để 100% Hệ Thống Theme 2.0 Trên Toàn Bộ 5 Tab & Thanh Floating Tab Bar:**
+    - Đồng bộ màu nền, viền và bóng đổ trên cả 5 Tab và thanh Floating Tab Bar.
+
+  - **Quyết định 162 (22/11/2026): Khắc Phục Triệt Để 3 Vấn Đề Đồng Bộ Theme (Tab Nhà, Tab PigFly Hub & Typography Tab Hồ Sơ):**
+    - Nền Tab Nhà thích ứng linh hoạt theo mode; Tab PigFly Hub dùng nền hồng nhưng giữ điểm nhấn Vàng Cám `#F4B93B`; Tab Hồ Sơ áp dụng vĩnh viễn font `Baloo2_800ExtraBold` + `Nunito` và Neo-Brutalist cho cả 2 Theme. Tách `CameraView` khỏi `Pressable` chống kẹt bounds layout trên iOS.
+
+  - **Quyết định 163 (22/11/2026): Tối Giản Toàn Diện Tab Hồ Sơ & Chuẩn Hóa Subtab Neo-Pills Pixel Art:**
+    - Xóa bỏ dòng phụ "Heo chủ nhân" trong `ProfileIdentityCard.tsx`.
+    - Xóa bỏ nút "Trung Tâm Heo Con ›" khỏi `ProfileQuickJumpBar.tsx`.
+    - Nâng cấp 4 Subtab pills trong `ProfileQuickJumpBar.tsx` sang chuẩn Neo-Pills Pixel Art có icon vector pixel (`Coins`, `Target`, `FolderTree`, `Palette`), viền 2px, bóng cứng 2px.
+    - Xóa bỏ dòng chú thích công thức tính toán `(Thu nhập − Cố định − Tích lũy)...` trong `BudgetSettingsCard.tsx`.
+    - Bỏ chữ "đang hoạt động" trong `CategorySettingsCard.tsx`, rút gọn thành `{activeExpense} mục Chi · {activeIncome} mục Thu`.
+    - Đổi tiêu đề `MÀU CỦA APP` thành `GIAO DIỆN` trong `ThemeSettingsCard.tsx`.
+
+  - **Quyết định 164 (22/11/2026): Nâng Cấp Pixel Art Đổi Tên & Tinh Giản Mục Giao Diện Tab Hồ Sơ:**
+    - *Bối Cảnh & Phản Hồi Người Dùng:* (1) Mục Giao diện còn dòng mô tả phụ dài dòng "Hệ 2 giao diện PigFly..." và tên 2 theme "Heo Con Vàng Nâu", "Hồng Heo Pastel" quá dài; (2) Phần Đổi tên (Change Name) ở khối đầu tiên dưới Banner chưa được nâng cấp sang phong cách Pixel Art đồng bộ với Goals và Spend; (3) Modal đổi tên `NameEditModal` vẫn giữ phong cách phẳng cũ viền 1px mờ.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Mục Giao Diện (`ThemeSettingsCard.tsx`):**
+         - Xóa bỏ hoàn toàn thẻ mô tả phụ đề `Hệ 2 giao diện PigFly:...`.
+         - Rút gọn nhãn của 2 theme thành siêu ngắn gọn, tối giản: **`Kem`** (`heocon`) và **`Hồng`** (`pink`).
+      2. **Nút Bút Chì Đổi Tên (`ProfileIdentityCard.tsx`):**
+         - Nâng cấp nút bút chì góc trên phải thành Neo-Badge tròn 30×30px, bo tròn 15px, viền 2px mực (`tokens.border`), nền pastel (`#FFF4CC` khi Kem, `#FCE7F3` khi Hồng), icon `Edit2` 14px nổi bật đồng bộ 1:1 với nút `[+]` ở Goals.
+      3. **Modal Đổi Biệt Danh (`NameEditModal.tsx`):**
+         - Thay da đổi thịt 100% sang chuẩn **Neo-Brutalist Pixel Art**: Card bo 22px viền đặc 3px mực, bóng cứng 0-blur 4px, tiêu đề `Baloo2_800ExtraBold`, ô nhập liệu viền 2.5px mực font `Nunito` 700, nút Hủy viền 2px và nút Lưu Vàng Cám `#F4B93B` viền 2.5px mực font `Baloo2_800ExtraBold`.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/11-PROFILE-SETTINGS.md`, `src/components/profile/ThemeSettingsCard.tsx`, `src/components/profile/ProfileIdentityCard.tsx`, `src/components/profile/NameEditModal.tsx`, `run-all-tests.js`.
+
+  - **Quyết định 165 (22/11/2026): Tối Ưu Hóa & Đồng Bộ Toàn Diện Tab Hồ Sơ (Person) Và Màn Cài Đặt (Setting) Chuẩn Neo-Brutalist PigFly v4.5:**
+    - *Bối Cảnh & Quyết Định Thiết Kế:* Rà soát toàn bộ Dataflow, Frontend, Backend Stores (`authStore`, `budgetStore`, `transactionStore`, `categoryStore`) và CSDL Supabase. Người dùng quyết định: (1) Tập trung quản lý Giao diện về Cài Đặt, loại bỏ thẻ Giao diện tĩnh ở cuối Tab Hồ Sơ; (2) Khi chạm pill `[ 🎨 Giao diện ]` trên thanh Quick Jump, lập tức chuyển hướng sang Cài Đặt; (3) Nâng cấp toàn diện `SettingsView` sang chuẩn 100% Neo-Brutalist Pixel Art (viền đặc 3px mực, bóng cứng 0-blur 4px, font Baloo 2 + Nunito, nút Back Neo-Badge tròn 36×36px, Universal Bottom Sheet bo 28px viền 3px mực, footer PigFly v4.5).
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Tab Hồ Sơ (`ProfileView.tsx`):**
+         - Loại bỏ `<ThemeSettingsCard />` ở đáy ScrollView.
+         - Xử lý `handleJumpToSection('theme')`: Gọi `router.push('/(main)/settings')` để dẫn người dùng mượt mà sang Cài Đặt.
+      2. **Tab Cài Đặt (`SettingsView.tsx`):**
+         - Nâng cấp Nút Back [←] thành Neo-Badge tròn 36×36px viền 2px mực nền pastel.
+         - Cập nhật tiêu đề màn hình và tiêu đề Sheet sang `Baloo2_800ExtraBold`, các dòng cài đặt sang `Nunito` 700.
+         - Toàn bộ Grouped Cards bo 22px viền đặc 3px mực (`#2B2118` / `#3B0713`), bóng đổ cứng 4px 0-blur.
+         - Nhãn tóm tắt theme hiển thị chuẩn `'Kem'` / `'Hồng'`.
+         - Universal Bottom Sheet: Bo trên 28px viền đặc 3px mực, nút đóng `[X]` Neo-Badge 30×30px, nút `Xong` bo 16px viền 2.5px mực nền Vàng Cám `#F4B93B` (hoặc `#F43F5E`) font `Baloo2_800ExtraBold`.
+         - Footer: Cập nhật nhận diện `PigFly v4.5 (Build 54) • Heo Con Neo-Brutalist`.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/11-PROFILE-SETTINGS.md`, `src/components/views/ProfileView.tsx`, `src/components/views/SettingsView.tsx`, `run-all-tests.js`.
+
+  - **Quyết định 166 (22/11/2026): Nâng Cấp Toàn Diện Tab Giải Trí (ChillGame Tab) Chuẩn Prototype Ngày 22 & MASTER-PROMPTS.md:**
+    - *Bối Cảnh & Phản Hồi Người Dùng:* (1) Tab Giải trí còn các từ kỹ thuật khô cứng như "HUB", "FPS60", "60FPS", "Trung tâm"; (2) Cần cập nhật banner động anime đầu trang chuẩn ngày 22 (hoàng hôn Sài Gòn, máy bay Vietnam Airlines, skyline Chợ Bến Thành, Nhà thờ Đức Bà, Bitexco, Landmark 81, Dinh Độc Lập, heo chạy xe máy đỏ đội mũ vàng và 14 hạt lấp lánh khi chạm); (3) Tích hợp trò chơi thứ 3 `VietNamCrossRoadwithPig` (Heo Qua Đường Sài Gòn 2.5D); (4) Tối giản hóa bố cục thành 2 nhóm thẻ tinh gọn [Kết nối & Địa điểm] và [Trò chơi Heo Con]; (5) Gắn kết gamification loop: Chi tiêu đúng hạn mức tặng Vé chơi (`gameTickets`) $\rightarrow$ Tiêu vé chơi 3 game $\rightarrow$ Nhặt cám/bánh mì thưởng `pigFood` $\rightarrow$ Cho Heo ăn (`feedPig`) tăng độ no bụng (`pigHunger`).
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Bổ Sung Icon Pixel:** Thêm `PixelIconCrossRoad` (16×16 pixel) vào `src/components/pixel/PixelIcons.tsx`.
+      2. **Banner Anime Sài Gòn Ngày 22 (`EntertainmentBannerWebView.tsx`):** Canvas 192×88, 8 dải dither caro 1px, 2 máy bay Vietnam Airlines, 5 địa danh Sài Gòn, đèn beacon nhấp nháy, xe máy đỏ và heo đội mũ bảo hiểm vàng, chạm heo nhảy tung 14 hạt lấp lánh.
+      3. **Trò Chơi Heo Qua Đường (`PigCrossRoadGameView.tsx`):** Canvas 192×256 góc nhìn 2.5D, 4 ải địa danh, lách xe máy, giơ tay xin đường làm ô tô phanh lại, liên kết vé chơi và thưởng cám nuôi heo.
+      4. **Bố Cục 2 Nhóm Thẻ Tinh Gọn (`PixelHubDashboard.tsx`):** Loại bỏ triệt để chữ "HUB", "FPS60", "Trung tâm". Nhóm 1 [Trò Chuyện AI & Bạn Bè, Bản Đồ Chi Tiêu]; Nhóm 2 [Heo Bay, Heo Bắn, Heo Qua Đường].
+      5. **Gamification Store (`gamificationStore.ts`):** Quản lý `crossRoadStars`, `crossRoadMaxLevel`, vé chơi và cám nuôi heo.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `docs/screens/heocon/10-GAMES-SPEC.md`, `src/components/pixel/PixelIcons.tsx`, `src/components/chat/EntertainmentBannerWebView.tsx`, `src/components/chat/PigCrossRoadGameView.tsx`, `src/components/chat/PixelHubDashboard.tsx`, `src/components/views/ChatView.tsx`, `src/store/gamificationStore.ts`, `run-all-tests.js`.
+
+  - **Quyết định 167 (23/11/2026): Tối Giản Hóa Tab Giải Trí Thành 2 Khung Siêu Gọn (2 Cột Kết Nối + 3 Cột Game), Sửa Lỗi Pixel Banner & Khắc Phục Triệt Để Game Heo Qua Đường + Nâng Cấp Cảnh Thiên Nhiên Việt Nam Cho 3 Game:**
+    - *Bối Cảnh & Phản Hồi Người Dùng:* (1) Dashboard Tab Giải Trí cần gọn gàng hơn để vừa khít màn hình: gộp Chat & Bản Đồ vào 1 khung 2 cột, gộp 3 game (Heo Bay, Heo Bắn, Heo Qua Đường) vào 1 khung 1 hàng 3 cột; (2) Banner Giải Trí (`EntertainmentBannerWebView.tsx`) bị lỗi sai lệch pixel ở máy bay Vietnam Airlines và chú heo lái xe máy so với prototype; (3) Game Heo Qua Đường (`PigCrossRoadGameView.tsx`) không thao tác được như prototype (do chiều cao WebView vượt khung `scrollEnabled={false}` đẩy D-pad ra ngoài màn hình và xung đột sự kiện touch/pointer); (4) Cả 3 game cần đồ họa pixel art mang hơi thở cảnh thiên nhiên & đời sống Việt Nam chân thực (tre xanh, ao sen, núi đá vôi, ruộng bậc thang, đàn cò).
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Dashboard 2 Khung Siêu Gọn (`PixelHubDashboard.tsx`):**
+         - Khung 1 (`KẾT NỐI & ĐỊA ĐIỂM`): 1 Neo-Card duy nhất chia 2 cột ngang: `Trò chuyện` (AI & Bạn bè) và `Bản đồ` (Bản đồ chi tiêu).
+         - Khung 2 (`TRÒ CHƠI HEO CON`): 1 Neo-Card duy nhất chia 1 hàng 3 cột đều: `Heo Bay` | `Heo Bắn` | `Qua Đường` (Icon Pixel + Tên ngắn + Kỷ lục/Sao, bỏ mô tả dài).
+      2. **Sửa Lỗi Pixel Banner (`EntertainmentBannerWebView.tsx`):**
+         - Port 1:1 hàm `drawPigSprite(c, opts)` ($24\times 20$) từ `prototype/Ví Heo Con ngày 22.html`, kết hợp `fbPlane` (có viền mực `#2B2118`, cánh, cửa sổ, đuôi `#0B5F8A`, hoa sen `#F4B93B`) và `fbRider` (bánh xe nan xoay, mũ bảo hiểm vàng kính xanh `#8EC9E8`, xe máy bạn ngược chiều).
+      3. **Khắc Phục Triệt Để Game Heo Qua Đường (`PigCrossRoadGameView.tsx` & `ChatView.tsx`):**
+         - Dùng layout `100vh` Flexbox (`display: flex; flex-direction: column;`) với `.scene` có `flex: 1; min-height: 0;` để canvas $192\times 256$ tự co vừa khít khoảng trống còn lại, đảm bảo D-pad (`#crPad`) và nút `Giơ tay` (`#crHand`) luôn hiển thị 100% không bị cắt mất.
+         - Tách riêng sự kiện chạm cho D-pad (`pointerdown`/`pointerup`/`pointercancel` trên từng nút `[data-d]`) và lắng nghe 0ms (`touchstart` + `click` với `e.stopPropagation()`) cho `#crHand` & modal `[data-cr]`.
+         - Bổ sung nút đổi `10 cám = 1 vé` (`BUY_TICKET`) khi hết vé chơi.
+      4. **Nâng Cấp Cảnh Thiên Nhiên Việt Nam Cho 3 Game (`PigFlightGameView.tsx`, `PigShooterGameView.tsx`, `PigCrossRoadGameView.tsx`):**
+         - Heo Bay: Bổ sung khóm tre nhiều đốt, ao sen hồng lá xanh, núi đá vôi mờ xa, ruộng bậc thang vàng óng, đàn cò trắng, phố cổ đèn lồng.
+         - Heo Bắn: Nâng cấp nền `drawBgAP` thành đồng quê Việt Nam với núi đá vôi Ninh Bình nhiều lớp, lũy tre xanh hai bên, đồng lúa và đàn cò trắng bay ngang.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `docs/screens/heocon/10-GAMES-SPEC.md`, `src/components/chat/EntertainmentBannerWebView.tsx`, `src/components/chat/PixelHubDashboard.tsx`, `src/components/chat/PigCrossRoadGameView.tsx`, `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`, `src/components/views/ChatView.tsx`, `src/store/gamificationStore.ts`, `run-all-tests.js`.
+
+  - **Quyết định 168 (23/11/2026): Kiểm Toán Toàn Diện Tab Hub (Giải Trí), Đồng Bộ Kinh Tế Vé/Cám 3 Game, Re-Skin Hội Bạn Thân & Luồng Dữ Liệu 5 Tab Chuẩn LocketApp:**
+    - *Bối Cảnh & Phản Hồi Người Dùng:* (1) Rà soát toàn bộ các khung (sections), thanh trạng thái (bars), thẻ (boxes) của Tab Hub để đảm bảo hoàn thiện frontend & backend; (2) Chu trình kinh tế vé và cám phải đồng bộ 1:1 trên cả 3 game Pixel (`Heo Bay`, `Heo Bắn`, `Heo Qua Đường`) thay vì chỉ có ở Heo Qua Đường; (3) Màn hình Hội Bạn Thân (`SquadLocketView`) cần được Re-skin toàn diện sang phong cách Neo-Brutalist Heo Con và loại bỏ nút back kép lặp lại khi nhúng trong `ChatView`; (4) Luồng dữ liệu 2 chiều phản hồi tức thì giữa 5 Tab của ứng dụng phải hoạt động mượt mà như LocketApp trong Production (Ghi chi tiêu $\to$ Thưởng 1 vé $\to$ Tăng ghim quán trên Bản đồ $\to$ Tăng độ đông xe Sài Gòn $\to$ Nuôi heo $\to$ Cập nhật Pixel Garden).
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Đồng Bộ Kinh Tế Vé/Cám Trên Cả 3 Game Pixel:**
+         - `PigFlightGameView.tsx`: Thêm thanh `.gbar` chứa `🎫 X vé` + nút `10 cám = 1 vé`. Khi bấm cất cánh bay (`flyFlap` lúc `ready`), kiểm tra và trừ 1 vé (`USE_TICKET`). Khi hết vé (`tickets <= 0`), ngăn bay và hiện toast `"Hết vé chơi hôm nay!"`. Trong modal kết thúc (`flyShowOver`), thêm nút đổi `10 cám = 1 vé` (`BUY_TICKET`).
+         - `PigShooterGameView.tsx`: Thêm thanh `.gbar` chứa `🎫 X vé` + nút `10 cám = 1 vé`. Khi kéo ná bắn phát đầu tiên, kiểm tra và trừ 1 vé (`USE_TICKET`). Khi hết vé, ngăn kéo ná và hiện toast `"Hết vé chơi hôm nay!"`. Trong modal kết thúc (`apFinish`), thêm nút đổi `10 cám = 1 vé` (`BUY_TICKET`).
+         - `ChatView.tsx`: Truyền `onUseTicket={useGameTicket}` và `onBuyTicket={buyTicketWithFood}` vào cả `<PigFlightGameView />`, `<PigShooterGameView />` và `<PigCrossRoadGameView />`.
+      2. **Re-Skin Neo-Brutalist Cho Hội Bạn Thân (`SquadLocketView.tsx`):**
+         - Loại bỏ nút back kép `‹ Giải trí` khi nhúng trong `ChatView` (chỉ hiển thị khi chạy độc lập).
+         - Áp dụng triệt để Neo-Brutalist Heo Con: Viền 3px mực in `#2B2118`, bóng cứng 0-blur góc 45° (`shadowOffset: { width: 0, height: 3 }`), góc bo 20px, nền kem sáng `#FFFBF1`.
+         - Typography: Tiêu đề dùng `Baloo2_800ExtraBold`, số tiền dùng `fontVariant: ['tabular-nums']`, nội dung dùng `Nunito_700Bold`.
+         - Locket Feed: Khung ảnh 1:1 vuông chuẩn Locket viền 3px, badge số tiền pill nền mực chữ vàng cám.
+      3. **Luồng Dữ Liệu 2 Chiều Phản Hồi Tức Thì 5 Tab:**
+         - Thưởng vé: `addTransaction` và `confirmPendingTransaction` tự động gọi `useGamificationStore.getState().addGameTickets(1)`.
+         - Độ khó giao thông: `PigCrossRoadGameView` nhận tỷ lệ chi tiêu thời gian thực qua `cr.pct = todaySpent / todayBudget`.
+         - Ghim bản đồ: `PiggySpendMapView` ánh xạ trực tiếp các giao dịch `CONFIRMED` gần nhất từ `useTransactionStore` thành các ghim quán quen.
+         - Nuôi heo: Dùng cám kiếm được từ game để cho heo ăn (`feedPig`), tăng độ no (`pigHunger`) và cập nhật trạng thái heo trong Pixel Garden (Tab 0) và Dashboard (Tab 3).
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `docs/screens/heocon/10-GAMES-SPEC.md`, `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`, `src/components/chat/SquadLocketView.tsx`, `src/components/views/ChatView.tsx`, `run-all-tests.js`.
+
+  - **Quyết định 169 (23/11/2026): Tối Giản Tab Hub, Nút Back Icon-Only, Mở Rộng Khung 3 Game, Triệt Tiêu Nút Thừa & Kiến Trúc Keep-Alive Chống Lag 0ms:**
+    - *Bối Cảnh & Phản Hồi Người Dùng:* (1) Nút Back chứa chuỗi chữ dài thừa thãi (`‹ Trung tâm Heo Con`, `Quay lại`, `‹ Giải trí`) gây chật chội màn hình; (2) Khung canvas của cả 3 game bị bóp nghẹt quá nhỏ bởi quá nhiều nút tính năng ảo và thẻ chữ giải thích dài dòng (`Vỗ cánh`, `Tạm dừng`, `Đổi trời`, `Độ no` 10 ô ở Heo Bay; hộp văn bản mô tả ở Heo Bắn; modal tutorial che kín màn hình ở Heo Qua Đường); (3) Khi người dùng bấm chuyển đổi qua lại giữa 3 game thì bị giật lag và chớp màn hình do cơ chế unmount/remount liên tục của native WKWebView.
+    - *Giải Pháp Kỹ Thuật:*
+      1. **Nút Back Icon-Only Chuẩn Neo-Brutalist:** Loại bỏ toàn bộ text chữ dài ở thanh header của cả 5 màn hình (`PigFlightGameView`, `PigShooterGameView`, `PigCrossRoadGameView`, `PiggySpendMapView`, `ChatView`, `SquadLocketView`), thay bằng nút tròn 38×38px viền 2.5px `#2B2118`, nền kem `#FFFBF1` chứa icon `ArrowLeft` nổi trần duy nhất.
+      2. **Mở Rộng Khung Canvas 3 Game Tối Đa (Large Game Frames):**
+         - Heo Bay: Bỏ `.card.flyhud` (độ no), bỏ hàng card `.flystats`, bỏ cụm 3 nút `.flyctl` (`[Vỗ cánh] [Tạm dừng] [Đổi trời]`). Mở rộng `.flywrap` lên 100% chiều rộng (max 380px) và chiều cao tối đa. Người chơi chạm trực tiếp màn hình để bay.
+         - Heo Bắn: Bỏ hộp thoại chữ dài bên dưới canvas. Tăng chiều rộng `.apwrap` lên 100% và chiều cao lên 260px; ná bắn to rõ và dễ kéo hơn.
+         - Heo Qua Đường: Bỏ hoàn toàn modal tutorial dài dòng ở trạng thái `cr.st === 'ready'`. Bỏ đoạn text `.privacy` ở chân trang. Mở rộng `.scene` chiếm trọn không gian, D-pad và nút Giơ tay công thái học ngay dưới canvas.
+      3. **Kiến Trúc Giữ Ấm Arcade Multi-Slot (Keep-Alive Anti-Lag 0ms):**
+         - Trong `ChatView.tsx`, khi người dùng vào chế độ chơi game bất kỳ (`activeSubView === 'fly' || 'shooter' || 'cross'`), cả 3 Game WebViews được nạp sẵn trong cùng 1 container với `{ position: 'absolute', width: '100%', height: '100%' }`.
+         - Slot game đang chơi nhận `{ opacity: 1, zIndex: 10, pointerEvents: 'auto' }`. Hai slot còn lại nhận `{ opacity: 0, zIndex: -1, pointerEvents: 'none' }`.
+         - Tuân thủ tuyệt đối Rule 4 (Fabric iOS): Giữ nguyên kích thước thực tế, không dùng `flex: 0` hay `display: none` tránh lỗi `CGRectZero`.
+         - Chuyển đổi giữa 3 game tức thì 0ms, không flash, không giật lag. Khi bấm nút `←` về lại Hub chính, cả 3 game unmount đồng thời để giải phóng bộ nhớ.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `docs/screens/heocon/10-GAMES-SPEC.md`, `src/components/views/ChatView.tsx`, `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`, `src/components/chat/PigCrossRoadGameView.tsx`, `src/components/chat/PiggySpendMapView.tsx`, `src/components/chat/SquadLocketView.tsx`, `run-all-tests.js`.
+- **Quyết định 170 (2026-11-23):** **Chuẩn Hóa Khung Game Pixel Arcade Việt Nam (356px), Sửa Dứt Điểm Lỗi Touch Heo Bay, Single-Active WebView Engine Chống Lag 100% & Bổ Sung Visual Pixel Art Góc:**
+    - *Vấn Đề:* (1) Khối lệnh lặp thừa `});` ở dòng 1204-1207 trong `PigFlightGameView.tsx` gây `SyntaxError: Unexpected token ')'` khiến script WebView ngừng chạy và không nhận sự kiện chạm vỗ cánh (Cannot touch to play Fly). (2) Chạy song song 3 WKWebView với 3 vòng lặp 60fps `requestAnimationFrame` cùng lúc gây quá tải CPU/GPU và cảnh báo lag warning trên di động. (3) Khung game 3 trò chơi chưa đồng nhất kích thước chuẩn và thiếu điểm nhấn đồ họa pixel art trang trí góc khung.
+    - *Giải Pháp:*
+      1. **Sửa dứt điểm lỗi chạm Heo Bay:** Xóa bỏ hoàn toàn khối lệnh lặp thừa ở cuối script `PigFlightGameView.tsx`, kiểm chứng sạch 100% qua Acorn AST parser; gắn listener `pointerdown` / `touchstart` (`{ passive: false }`) / `click` phủ trọn khung game & canvas để vỗ cánh tức thì 0ms.
+      2. **Single-Active Game WebView Engine (0 Lag Warning):** Thay thế cơ chế chạy đồng thời 3 WebView trong `ChatView.tsx` bằng việc chỉ render duy nhất 1 WebView của game đang mở (`activeSubView`), giải phóng 66% tài nguyên RAM/GPU cho máy chạy mượt 60FPS tuyệt đối. Toàn bộ điểm số, vé, cám, độ no được đồng bộ tức thì qua Zustand Store (`gamificationStore`).
+      3. **Chuẩn Hóa Khung Game Pixel Arcade Việt Nam (356px):** Cả 3 game đều sử dụng khung ngoài chuẩn `width: 356px; max-width: 100%; border: 3px solid #2B2118; border-radius: 20px; box-shadow: 0 4px 0 #2B2118;`, giữ nguyên tỷ lệ buffer canvas 1:1 sắc nét (`176×224`, `224×140`, `192×256`), đồng thời bổ sung họa tiết trang trí Pixel Art góc khung (mái ngói đình làng, rặng tre xanh, mây trắng pixel, đèn đường Sài Gòn) tạo cảm giác máy Arcade Việt Nam đồng bộ.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `docs/screens/heocon/10-GAMES-SPEC.md`, `src/components/views/ChatView.tsx`, `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`, `src/components/chat/PigCrossRoadGameView.tsx`, `run-all-tests.js`.
+- **Quyết định 171 (2026-11-23):** **Nâng Cấp 3 Game Toàn Màn Hình Chuẩn iOS/Samsung (100% Screenplay Focus), Xóa Sạch Khoảng Trống Đáy & AI-Slop, Điều Khiển Chạm/Vuốt Trực Tiếp Heo Qua Đường & Nâng Tầm Cảnh Sắc Văn Hóa Việt Nam:**
+    - *Vấn Đề:* (1) Cả 3 game còn quá nhiều thanh điều khiển chồng lớp ở trên và khoảng trống màu kem lớn ở đáy (25%–45% màn hình), làm mất tập trung. (2) Các sticker góc SVG `.px-corner` nổi lạc quẻ trên viền khung gây cảm giác AI-slop. (3) Canvas Heo Qua Đường bị co nhỏ giữa khung do `width: auto; height: auto;` và vẫn dùng cụm nút D-pad cồng kềnh dưới đáy thay vì chạm/vuốt trực tiếp trên màn hình.
+    - *Giải Pháp:*
+      1. **1 Thanh TopBar Siêu Mỏng Duy Nhất (~46px):** Gộp `[←]`, `[🪽 | 🎯 | 🚦]`, `[🎫 X]` (bấm đổi 10 cám = 1 vé) và `[↻]` vào 1 dòng duy nhất ở tầng React Native; loại bỏ toàn bộ thanh thừa trong HTML để màn hình chơi kéo dài 100% sát đáy.
+      2. **Bộ Đệm Pixel Dọc Toàn Màn Hình (Zero Dead Space, Zero AI-Slop):** Gỡ bỏ 100% sticker `.px-corner` SVG; mở rộng bộ đệm logic dọc sắc nét `width: 100%; height: 100%; image-rendering: pixelated;` — Heo Bay (`176×310`, `GY=278`), Heo Bắn (`224×320`, `AG=256`, `SX=42, SY=224`), Heo Qua Đường (`192×340`, `RD0=92, RD1=276`).
+      3. **Điều Khiển Chạm/Vuốt Trực Tiếp Chuẩn Crossy Road iOS/Samsung (Heo Qua Đường):** Xóa bỏ hoàn toàn cụm nút D-pad `.dpad` dưới đáy; chạm/giữ màn hình để tiến lên, vuốt Trái/Phải/Xuống trực tiếp trên canvas để né xe, kèm 1 nút tròn nổi `✋` gọn ở góc dưới phải để giơ tay chặn ô tô.
+      4. **Cảnh Sắc Văn Hóa Việt Nam Đậm Nét Trong Canvas:** Làng quê mái đình cong + lũy tre, Ruộng bậc thang Tây Bắc + cò trắng + diều sáo, Phố cổ Hội An đèn lồng, Đầm sen Đồng Tháp, Núi đá vôi Ninh Bình + cột cờ đỏ sao vàng, và 4 địa danh Sài Gòn (Bưu điện TP, Chợ Bến Thành, Nhà thờ Đức Bà, Dinh Độc Lập) với vỉa hè trà đá ghế nhựa.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `docs/screens/heocon/10-GAMES-SPEC.md`, `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigShooterGameView.tsx`, `src/components/chat/PigCrossRoadGameView.tsx`, `run-all-tests.js`.
+- **Quyết định 172 (2026-11-23):** **Tái Cấu Trúc Kiến Trúc 2 Game Dọc 9:16 (Gỡ Bỏ Hoàn Toàn Heo Bắn), Header Banner 16-bit Warm Stone & Brass Bevel, Bộ Icon Pixel 16×16 Thống Nhất & Tài Nguyên Đô Thị Sài Gòn + 4 Loại Phương Tiện Thực Tế 16-bit:**
+    - *Phạm Vi & Kiến Trúc:* Xóa hoàn toàn `src/components/chat/PigShooterGameView.tsx`, gỡ sạch `'shooter'` và `PixelIconSlingshot` khỏi `ChatView.tsx`, `PixelHubDashboard.tsx`, `PixelIcons.tsx` và thanh TopBar. Tập trung toàn lực vào 2 game dọc 9:16 chuẩn một tay: **Heo Bay (`176×312`)** và **Heo Qua Đường (`192×342`)** (lưới Game Hub chuyển sang 2 thẻ lớn cân đối).
+    - *UI 16-bit & Iconography:* Thiết kế khung Header Banner (`PixelHubBanner.tsx`) và thanh TopBar 2 game theo phong cách 16-bit Warm Stone & Brass Bevel (viền nổi vát cạnh `#FFFBF1`/`#F4B93B` trên-trái, bóng `#85735E` dưới-phải, viền ngoài 1px `#2B2118`, đinh tán đồng pixel, zero anti-aliasing). Thay toàn bộ emoji/icon cũ bằng bộ Custom 16×16 Pixel Art Icons (`PixelIconBack`, `PixelIconReload`, `PixelIconTicket`, `PixelIconWing`, `PixelIconTraffic`).
+    - *Đồ Họa Đô Thị Sài Gòn & 4 Loại Phương Tiện 16-bit:* Nâng cấp kiến trúc Sài Gòn (Bitexco, Landmark 81, 4 địa danh Sài Gòn, chung cư/nhà ống có ô cửa sổ sáng-tối, ban công, cục nóng máy lạnh, bồn nước Inox, mái hiên sọc tiệm phố, bóng ambient occlusion) và bộ 4 phương tiện tỷ lệ thật (`bike`, `car`, `bus`, `truck`) có kính chắn gió phản sáng, đèn pha/hậu, mâm bánh xe và bóng đổ bám mặt nhựa.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `docs/screens/heocon/10-GAMES-SPEC.md`, `src/components/pixel/PixelIcons.tsx`, `src/components/chat/PixelHubBanner.tsx`, `src/components/chat/PixelHubDashboard.tsx`, `src/components/views/ChatView.tsx`, `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigCrossRoadGameView.tsx`, `run-all-tests.js`.
+- **Quyết định 173 (2026-11-23):** **Sửa Triệt Để Lỗi Xe Chạy Ngược & Khói Xe Cùng Chiều Trên Banner Tab Giải Trí, Bổ Sung Đội Xe Việt Nam Đúng 2 Chiều & Khôi Phục Khung Banner Tối Giản:**
+    - *Vấn Đề:* Xe làn trên trong `EntertainmentBannerWebView.tsx` di chuyển từ phải sang trái nhưng hàm `fbRider` không lật ngang khiến xe bị chạy lùi, đèn pha chiếu về sau còn khói xe phụt về phía trước cùng hướng di chuyển; đồng thời banner còn thiếu đội xe Việt Nam (xe buýt xanh, taxi, xe máy nón lá) và khung đá vát cạnh + 4 đinh tán gây nặng nề hơn các tab khác.
+    - *Giải Pháp:*
+      1. Bổ sung tham số `dir` (`1` / `-1`) kèm lật ngang chuẩn xác `x.scale(-1, 1)` trong `fbRider`, `fbBus` và `fbTaxi` để mọi phương tiện luôn quay đầu + đèn pha đúng chiều chạy và phụt khói ra sau đuôi (ngược chiều di chuyển).
+      2. Bổ sung đội xe đặc trưng Sài Gòn 2 chiều: Làn trên (đi Trái $\leftarrow$) có **Xe buýt xanh TP.HCM (`fbBus`)** + **Xe máy Việt Nam đội nón lá (`fbRider`, `hat = true`)**; Làn dưới (đi Phải $\rightarrow$) có **Heo lái xe máy / đi bộ** + **Ô tô Taxi Sài Gòn (`fbTaxi`)**.
+      3. Khôi phục khung banner Neo-Brutalist tối giản, nhẹ nhàng (`borderRadius: 22, borderWidth: 3, borderColor: '#2B2118', shadowOffset: { width: 0, height: 4 }`) đồng bộ 100% với Tab Vườn & Tab Hồ Sơ.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `src/components/chat/EntertainmentBannerWebView.tsx`, `run-all-tests.js`.
+- **Quyết định 174 (2026-11-23):** **Sửa Triệt Để Lỗi Trừ Vé Làm WebView Tự Reload (Heo Đứng Yên Không Chơi Được) Trên Cả 2 Game & Khắc Phục 100% Chồng Đè Thẻ/Toast:**
+    - *Nguyên Nhân Gốc:* `PigFlightGameView.tsx` và `PigCrossRoadGameView.tsx` nhúng trực tiếp `${tickets}` vào `htmlContent`. Mỗi lần chạm chơi gửi `USE_TICKET` làm `tickets` trong `gamificationStore` giảm 1, khiến prop `source` của `SafeWebView` thay đổi và **reload lại toàn bộ trang HTML từ đầu** (`flyReset()` / `crNew(0)`), làm mất 1 vé mà heo vẫn đứng yên. Đồng thời `.flytoast` (`top: 8px`/`10px`) đè lên HUD điểm, và `PixelHubDashboard.tsx` thiếu khoảng đệm đáy cho Floating Pill Tab Bar.
+    - *Giải Pháp:*
+      1. **Immutable WebView Source (`useRef` + `useMemo(..., [])`):** Khóa cứng `htmlContent` và `memoizedSource` chỉ khởi tạo đúng 1 lần khi mount trên cả `PigFlightGameView.tsx` và `PigCrossRoadGameView.tsx`.
+      2. **Zero-Reload Ticket Sync (`window.__syncTickets` + `injectJavaScript`):** Đồng bộ số vé hai chiều qua `useEffect([tickets])` bắn `injectJavaScript` vào WebView đang chạy mà không bao giờ làm reload hay reset ván chơi.
+      3. **Chống Chồng Đè 100%:** Đẩy `.flytoast` xuống `top: 48px` (Heo Bay) / `top: 46px` (Heo Qua Đường) nằm gọn dưới HUD; tăng `paddingBottom: 110` và `marginBottom: 12` cho các section box trên `PixelHubDashboard.tsx`.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-GAMES-SPEC.md`, `src/components/chat/PigFlightGameView.tsx`, `src/components/chat/PigCrossRoadGameView.tsx`, `src/components/chat/PixelHubDashboard.tsx`, `run-all-tests.js`.
+- **Quyết định 175 (2026-11-23):** **Bản Đồ Việt Nam Thật Chuẩn Production (MapLibre GL JS + OpenFreeMap · 0 Đồng), Loại Bỏ Bản Đồ Giả Lập & Khung 'Lưu Chi Tại Vị Trí Thật', Tối Giản Header Không Đường Kẻ Ngang & Focus Icon:**
+    - *Phạm Vi (Theo PLAN 12 `MASTER-PROMPTS.md`):*
+      1. Xóa bỏ hoàn toàn bản đồ pixel giả lập (`Phường Heo Con`), nút chuyển `Pixel / Bản đồ thật`, và toàn bộ form ghi chi (`LƯU CHI TẠI VỊ TRÍ THẬT`). Tab Bản đồ chỉ tập trung khám phá và trực quan hóa điểm chi tiêu thật từ `transactionStore` (gom cụm bán kính 40m theo Haversine).
+      2. Tích hợp **MapLibre GL JS v4.7.1 + OpenFreeMap (`https://tiles.openfreemap.org/styles/positron`)** (0 đồng, không API key), tùy biến bảng màu Heo Con (`#F6EEDC` kem, `#9AD3E6` nước, `#B5DB9A` công viên, `#FFFBF1` đường), ưu tiên nhãn tiếng Việt (`name:vi`), gắn lớp GeoJSON chủ quyền **`Quần đảo Hoàng Sa (Việt Nam)`** & **`Quần đảo Trường Sa (Việt Nam)`**, dòng ghi nguồn `© OpenStreetMap · OpenFreeMap`, và cơ chế fallback nền kem + ghim khi mất mạng sau 4 giây.
+      3. Ghim địa điểm vẽ canvas **9×12 pixel** (`image-rendering: pixelated`) phân màu theo danh mục + marker vị trí người dùng là **mặt heo 16×16 pixel**; hỗ trợ nút `🎯` lấy GPS 1 lần (không theo dõi nền) và thẻ Place Card mini kèm nút `🧭` mở Google Maps / Apple Maps qua `Linking.openURL`.
+      4. Tối giản UI: Header bỏ đường kẻ ngang (`borderBottomWidth: 0`), dùng bộ icon pixel 16×16 (`PixelIconBack`, `PixelIconMapPin`, `PixelIconReload`), 4 chip lọc 1 hàng (`🔥 14N`, `⭐ Quen`, `📍 Gần`, `🏆 Top`), danh sách quán rút gọn có `padding-bottom: 110px` không bị Tab Bar che.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `src/components/chat/PiggySpendMapView.tsx`, `run-all-tests.js`.
+- **Quyết định 176 (2026-11-23):** **Chữa Dứt Điểm Màn Hình Vàng Khè Tab Bản Đồ Chi Tiêu Bằng Self-Contained Vietnam Slippy Tile Engine (0KB CDN Blocking · 0ms Render Trên iOS WKWebView):**
+    - *Nguyên Nhân Gốc:* Thẻ `<script src="https://unpkg.com/maplibre-gl...">` đồng bộ trong `<head>` chặn toàn bộ quá trình parse/paint của iOS `WKWebView`, cộng với lỗi WebGL/Blob Worker/CORS trong `about:blank` khiến màn hình Bản đồ bị vàng khè `#F6EEDC`.
+    - *Giải Pháp:*
+      1. Xóa bỏ 100% thẻ `<script src="http...">` và CSS CDN ngoài trong `<head>` của `PiggySpendMapView.tsx` — giao diện hiển thị tức thì 0ms, tuyệt đối không bao giờ bị màn hình vàng khè.
+      2. Xây dựng **Self-Contained Vietnam Slippy Tile Engine** thuần HTML5 + Web Mercator (`lngLatToWorld`) nạp gạch bản đồ thật 256×256 (`basemaps.cartocdn.com/rastertiles/voyager`, fallback `tile.openstreetmap.org`) bằng thẻ `<img>` (0 CORS, 0 WebGL, 0 Web Worker), pha màu ấm Heo Con qua CSS filter, giới hạn vùng Việt Nam.
+      3. Hỗ trợ kéo thả (pan) mượt 60FPS, nút Zoom `+`/`−`, nút `🎯` GPS 1 chạm, `flyTo`, lớp SVG đường nối nét đứt (`📍 Gần`) & vòng nhiệt heatmap (`🏆 Top`), nhãn chủ quyền **Quần đảo Hoàng Sa (Việt Nam)** & **Quần đảo Trường Sa (Việt Nam)**, ghim pixel 9×12, mặt heo 16×16 và nền lưới kem ngoại tuyến tức thì.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `src/components/chat/PiggySpendMapView.tsx`, `run-all-tests.js`.
+- **Quyết định 177 (2026-11-23):** **Native Tile Fetcher Bridge Nạp StreetMap Việt Nam Thực Tế Vào iOS WKWebView (`about:blank`), Xóa Bỏ Nền Lưới Ô Vuông Giả Lập 24×24px & Xóa Sạch 100% Quán Ăn Hardcode (`SEED_VN`):**
+    - *Nguyên Nhân Gốc:* Khi `SafeWebView` nạp HTML nội bộ (`source={{ html }}` không `baseUrl`), iOS `WKWebView` đặt trang ở origin rỗng `about:blank` (`null`). Các thẻ `<img src="https://...">` gọi trực tiếp tới server bản đồ từ `about:blank` bị WebKit sandbox hoặc chính sách `Referer`/`User-Agent` chặn, làm lộ nền CSS kẻ ô vuông 24×24px giống bản đồ giả lập. Đồng thời mảng `SEED_VN` đang hardcode 4 quán mẫu (`Phở Hòa Pasteur`, `Cà Phê Vợt Phan Đình Phùng`, `Chợ Bến Thành`, `Bánh Mì Huỳnh Hoa`).
+    - *Giải Pháp:*
+      1. **Native Tile Fetcher Bridge (`FETCH_TILE` $\to$ React Native `NSURLSession` `fetch` $\to$ Base64 Data URI Injection):** WebView gửi yêu cầu `FETCH_TILE` (`z, x, y`) ra tầng React Native. React Native dùng `fetch()` native (có toàn quyền mạng & header chuẩn) tải gạch bản đồ đường phố Việt Nam từ chuỗi 4 nguồn dự phòng (CARTO Voyager $\to$ Google StreetMap VN `hl=vi` $\to$ OpenStreetMap $\to$ Esri World Street Map), mã hóa PNG `ArrayBuffer` sang `data:image/png;base64,...` lưu vào `TILE_BASE64_CACHE`, rồi bơm ngược vào WebView qua `window.__onTileData(key, dataUri)`.
+      2. **Xóa Nền Lưới Ô Vuông Giả Lập:** Gỡ bỏ hoàn toàn `background-image: linear-gradient(...)` và `background-size: 24px 24px` khỏi `.map-shell`.
+      3. **Zero-Hardcode Places:** Xóa vĩnh viễn mảng `SEED_VN`; chỉ hiển thị và đồng bộ thời gian thực (`window.__syncExpenses`) các khoản chi tiêu thật từ `useTransactionStore`. Khi sổ chi tiêu chưa có khoản chi nào, hiển thị bản đồ đường phố Việt Nam thật kèm vị trí `"Bạn"` và thẻ trạng thái trống tối giản.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `src/components/chat/PiggySpendMapView.tsx`, `run-all-tests.js`.
+- **Quyết định 178 (2026-11-23):** **Chuyển Đổi Hoàn Toàn Màn Hình Bản Đồ Chi Tiêu Sang 100% Native React Native Slippy Map Engine (`<View>` + Native `<Image>` Multi-CDN StreetMap + `<Svg>` Vector Đường Phố/Sông Sài Gòn + `PanResponder` — Loại Bỏ Hoàn Toàn WebView Ở Màn Bản Đồ):**
+    - *Nguyên Nhân Gốc:* Trên iOS Fabric, thành phần `WKWebView` nội bộ (`about:blank`) chặn tải ảnh tile ngoại tuyến và nghẽn khi bơm hàng loạt chuỗi Base64 qua bridge `injectJavaScript`, khiến lớp gạch bản đồ trong WebView vẫn không hiển thị.
+    - *Giải Pháp:*
+      1. **100% Native React Native Slippy Map Engine:** Loại bỏ hoàn toàn `WebView` khỏi cây giao diện hiển thị của `PiggySpendMapView.tsx`. Toàn bộ khung bản đồ, chip lọc, danh sách khoản chi, thẻ chỉ đường và ghim pixel được dựng trực tiếp bằng React Native `<View>`, `<Image>`, `<PanResponder>`, và `react-native-svg` (`<Svg>`, `<Path>`, `<Polyline>`, `<Circle>`, `<Rect>`).
+      2. **Native `<Image>` Multi-CDN Vietnam StreetMap Tiles:** Mỗi ô gạch bản đồ 256×256 được nạp trực tiếp bằng `<Image>` native của iOS/Android (`RCTImageLoader` / `NSURLSession`) với chuỗi 4 nguồn dự phòng tự động khi `onError`: **Google StreetMap Việt Nam (`mt1.google.com/vt/lyrs=m&hl=vi`)** $\to$ **CARTO Voyager (`basemaps.cartocdn.com`)** $\to$ **Esri World Street Map (`server.arcgisonline.com`)** $\to$ **OpenStreetMap (`tile.openstreetmap.org`)**.
+      3. **Lớp Nền Vector Địa Lý Thật Bằng `<Svg>` (0ms Instant Underlay):** Ngay dưới lớp gạch `<Image>`, dựng lớp Vector `<Svg>` theo đúng phép chiếu Web Mercator (`lngLatToWorld`) gồm Sông Sài Gòn, Kênh Nhiêu Lộc, Kênh Tàu Hủ, công viên (Tao Đàn, Thảo Cầm Viên, Bến Thành), các đại lộ trục chính (Võ Văn Kiệt, Điện Biên Phủ, Nam Kỳ Khởi Nghĩa, Lê Lợi, Nguyễn Huệ, Cách Mạng Tháng Tám, Pasteur), đường bờ biển Việt Nam và nhãn chủ quyền **Quần đảo Hoàng Sa (Việt Nam)** & **Quần đảo Trường Sa (Việt Nam)**. Đảm bảo ở 0ms đầu tiên hoặc khi mất mạng, bản đồ vẫn hiển thị rõ đường phố và sông ngòi thực tế.
+      4. **Ghim Pixel 9×12 & Mặt Heo 16×16 Bằng Vector SVG Crisp-Edges:** Vẽ trực tiếp bằng `<Svg shapeRendering="crispEdges"><Rect ... /></Svg>` sắc nét tuyệt đối trên mọi màn hình Retina.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `docs/screens/heocon/10-CHAT.md`, `src/components/chat/PiggySpendMapView.tsx`, `run-all-tests.js`.

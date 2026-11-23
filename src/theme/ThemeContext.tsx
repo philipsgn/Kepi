@@ -6,7 +6,6 @@ import {
   ResolvedTheme,
   ThemeMode,
   heoconTokens,
-  mintTokens,
   pinkTokens,
 } from './tokens';
 
@@ -41,10 +40,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     (async () => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY_THEME);
-        if (saved === 'heocon' || saved === 'pink' || saved === 'mint') {
+        if (saved === 'heocon' || saved === 'pink') {
           setModeState(saved as ThemeMode);
         } else {
-          // Mặc định luôn là heocon
+          // Mặc định luôn là heocon (kể cả khi trước đó là 'mint' cũ)
           setModeState('heocon');
           await AsyncStorage.setItem(STORAGE_KEY_THEME, 'heocon');
         }
@@ -66,12 +65,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Xác định theme thực tế (resolved)
-  // 'heocon' => Neo-brutalist Pixel (Mặc định)
-  // 'pink' => Hồng Heo
-  // 'mint' => Xanh Mint Gradient
-  const activeTheme: ResolvedTheme = mode === 'mint' ? 'mint' : mode === 'pink' ? 'pink' : 'heocon';
+  // 'heocon' => Neo-brutalist Pixel Vàng Nâu (Mặc định)
+  // 'pink' => Hồng Heo Pastel Prototype
+  const activeTheme: ResolvedTheme = mode === 'pink' ? 'pink' : 'heocon';
   const isDark = false;
-  const tokens = activeTheme === 'mint' ? mintTokens : activeTheme === 'pink' ? pinkTokens : heoconTokens;
+  const tokens = activeTheme === 'pink' ? pinkTokens : heoconTokens;
 
   return (
     <ThemeContext.Provider

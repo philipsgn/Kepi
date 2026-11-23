@@ -9,7 +9,7 @@ import { CategoryManagementSheet } from './CategoryManagementSheet';
 
 export const CategorySettingsCard: React.FC = () => {
   const { tokens, mode } = useTheme();
-  const isHeocon = mode === 'heocon' || !mode;
+  const isPink = mode === 'pink';
   const { categories } = useCategoryStore();
   const [sheetVisible, setSheetVisible] = useState<boolean>(false);
 
@@ -26,39 +26,49 @@ export const CategorySettingsCard: React.FC = () => {
       <TouchableOpacity
         style={[
           styles.container,
-          isHeocon
-            ? {
-                backgroundColor: '#FFFBF1',
-                borderColor: '#2B2118',
-                borderWidth: 3,
-                shadowColor: '#2B2118',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 1,
-                shadowRadius: 0,
-                elevation: 4,
-              }
-            : {
-                backgroundColor: tokens.surface,
-                borderColor: tokens.border,
-              },
+          {
+            backgroundColor: isPink ? '#FFFFFF' : '#FFFBF1',
+            borderColor: isPink ? '#3B0713' : '#2B2118',
+            borderWidth: 3,
+            borderRadius: 22,
+            shadowColor: isPink ? '#3B0713' : '#2B2118',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            elevation: 4,
+          },
         ]}
         onPress={handleOpen}
         activeOpacity={0.85}
       >
-        <View style={styles.iconBox}>
-          <FolderTree size={20} color={isHeocon ? '#E0452B' : tokens.primary} strokeWidth={2.6} />
+        <View
+          style={[
+            styles.iconBox,
+            {
+              width: 48,
+              height: 48,
+              borderRadius: 14,
+              backgroundColor: isPink ? '#FCE7F3' : '#FFE8D6',
+              borderWidth: 2.5,
+              borderColor: isPink ? '#3B0713' : '#2B2118',
+              alignItems: 'center',
+              justifyContent: 'center',
+            },
+          ]}
+        >
+          <FolderTree size={20} color={isPink ? '#F43F5E' : '#E0452B'} strokeWidth={2.6} />
         </View>
 
         <View style={styles.contentCol}>
-          <Text style={[styles.title, { color: isHeocon ? '#2B2118' : tokens.text }]}>
+          <Text style={[styles.title, { color: isPink ? '#3B0713' : '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
             DANH MỤC THU & CHI
           </Text>
-          <Text style={[styles.subtitle, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
-            {activeExpense} mục Chi · {activeIncome} mục Thu đang hoạt động
+          <Text style={[styles.subtitle, { color: isPink ? '#834758' : '#6E5D4F', fontFamily: 'Nunito', fontWeight: '700' }]}>
+            {activeExpense} mục Chi · {activeIncome} mục Thu
           </Text>
         </View>
 
-        <ChevronRight size={18} color={isHeocon ? '#2B2118' : tokens.textMuted} strokeWidth={2.6} />
+        <ChevronRight size={18} color={isPink ? '#3B0713' : '#2B2118'} strokeWidth={2.6} />
       </TouchableOpacity>
 
       <CategoryManagementSheet

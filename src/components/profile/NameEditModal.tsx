@@ -13,7 +13,6 @@ import { Check, User, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Strings } from '../../constants/strings';
 import { useTheme } from '../../theme/ThemeContext';
-import { radii } from '../../theme/tokens';
 
 interface NameEditModalProps {
   visible: boolean;
@@ -28,7 +27,15 @@ export const NameEditModal: React.FC<NameEditModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const { tokens } = useTheme();
+  const { mode } = useTheme();
+  const isPink = mode === 'pink';
+  const inkBorder = isPink ? '#3B0713' : '#2B2118';
+  const cardBg = isPink ? '#FFF5F7' : '#F6EEDC';
+  const badgeBg = isPink ? '#FCE7F3' : '#FFF4CC';
+  const inputBg = isPink ? '#FFFFFF' : '#FFFBF1';
+  const saveBtnBg = isPink ? '#F43F5E' : '#F4B93B';
+  const saveBtnText = isPink ? '#FFFFFF' : '#2B2118';
+
   const [name, setName] = useState(currentName);
 
   React.useEffect(() => {
@@ -56,21 +63,65 @@ export const NameEditModal: React.FC<NameEditModalProps> = ({
         style={styles.modalOverlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={[styles.modalCard, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
+        <View
+          style={[
+            styles.modalCard,
+            {
+              backgroundColor: cardBg,
+              borderColor: inkBorder,
+              borderWidth: 3,
+              borderRadius: 22,
+              shadowColor: inkBorder,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 1,
+              shadowRadius: 0,
+              elevation: 4,
+            },
+          ]}
+        >
           <View style={styles.headerRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <View style={styles.iconBox}>
-                <User size={20} color={tokens.primary} strokeWidth={2.6} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    backgroundColor: badgeBg,
+                    borderColor: inkBorder,
+                    borderWidth: 2,
+                  },
+                ]}
+              >
+                <User size={18} color={inkBorder} strokeWidth={2.6} />
               </View>
-              <Text style={[styles.modalTitle, { color: tokens.text }]}>{Strings.profile.editNameTitle}</Text>
+              <Text
+                style={[
+                  styles.modalTitle,
+                  {
+                    color: inkBorder,
+                    fontFamily: 'Baloo2_800ExtraBold',
+                    fontWeight: '800',
+                  },
+                ]}
+              >
+                {Strings.profile.editNameTitle}
+              </Text>
             </View>
 
             <TouchableOpacity
-              style={styles.closeBtn}
+              style={[
+                styles.closeBtn,
+                {
+                  backgroundColor: badgeBg,
+                  borderColor: inkBorder,
+                  borderWidth: 2,
+                },
+              ]}
               onPress={onClose}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              activeOpacity={0.7}
+              accessibilityLabel="Đóng modal"
             >
-              <X size={18} color={tokens.textMuted} strokeWidth={2.6} />
+              <X size={16} color={inkBorder} strokeWidth={2.6} />
             </TouchableOpacity>
           </View>
 
@@ -78,39 +129,83 @@ export const NameEditModal: React.FC<NameEditModalProps> = ({
             style={[
               styles.input,
               {
-                backgroundColor: tokens.surfaceAlt,
-                borderColor: tokens.border,
-                color: tokens.text,
+                backgroundColor: inputBg,
+                borderColor: inkBorder,
+                borderWidth: 2.5,
+                borderRadius: 14,
+                color: inkBorder,
+                fontFamily: 'Nunito',
+                fontWeight: '700',
               },
             ]}
             value={name}
             onChangeText={setName}
             placeholder={Strings.profile.namePlaceholder}
-            placeholderTextColor={tokens.textMuted}
+            placeholderTextColor={isPink ? '#9D7B84' : '#8C7A6B'}
             autoFocus
           />
 
           <View style={styles.btnRow}>
             <TouchableOpacity
-              style={[styles.cancelBtn, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}
+              style={[
+                styles.cancelBtn,
+                {
+                  backgroundColor: isPink ? '#FFFFFF' : '#FFFBF1',
+                  borderColor: inkBorder,
+                  borderWidth: 2,
+                  borderRadius: 14,
+                },
+              ]}
               onPress={onClose}
-              activeOpacity={0.8}
+              activeOpacity={0.75}
             >
-              <Text style={[styles.cancelText, { color: tokens.textSub }]}>Hủy</Text>
+              <Text
+                style={[
+                  styles.cancelText,
+                  {
+                    color: inkBorder,
+                    fontFamily: 'Baloo2_800ExtraBold',
+                    fontWeight: '800',
+                  },
+                ]}
+              >
+                Hủy
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.saveBtn,
-                { backgroundColor: tokens.primary },
+                {
+                  backgroundColor: saveBtnBg,
+                  borderColor: inkBorder,
+                  borderWidth: 2.5,
+                  borderRadius: 14,
+                  shadowColor: inkBorder,
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 1,
+                  shadowRadius: 0,
+                  elevation: 2,
+                },
                 !name.trim() && styles.saveBtnDisabled,
               ]}
               onPress={handleSave}
               disabled={!name.trim()}
               activeOpacity={0.8}
             >
-              <Check size={14} color="#1B2733" strokeWidth={2.6} />
-              <Text style={styles.saveText}>Lưu</Text>
+              <Check size={16} color={saveBtnText} strokeWidth={2.8} />
+              <Text
+                style={[
+                  styles.saveText,
+                  {
+                    color: saveBtnText,
+                    fontFamily: 'Baloo2_800ExtraBold',
+                    fontWeight: '800',
+                  },
+                ]}
+              >
+                Lưu
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -129,14 +224,7 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
-    borderRadius: radii.lg,
-    borderWidth: 1,
     padding: 20,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
   },
   headerRow: {
     flexDirection: 'row',
@@ -145,32 +233,26 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   iconBox: {
-    width: 24,
-    height: 24,
-    backgroundColor: 'transparent',
-    borderWidth: 0,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalTitle: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 18,
   },
   closeBtn: {
-    width: 28,
-    height: 28,
-    backgroundColor: 'transparent',
-    borderWidth: 0,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
   input: {
-    height: 44,
-    borderRadius: 8,
-    borderWidth: 1,
+    height: 48,
     paddingHorizontal: 14,
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16,
     marginBottom: 18,
   },
   btnRow: {
@@ -179,30 +261,25 @@ const styles = StyleSheet.create({
   },
   cancelBtn: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
+    paddingVertical: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   cancelText: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 14,
   },
   saveBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 8,
-    gap: 4,
+    paddingVertical: 12,
+    gap: 6,
   },
   saveBtnDisabled: {
     opacity: 0.5,
   },
   saveText: {
-    color: '#1B2733',
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 14,
   },
 });

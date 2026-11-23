@@ -7,10 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Animated, {
-  SharedValue,
-  useAnimatedStyle,
-} from 'react-native-reanimated';
+import type { SharedValue } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Camera, Gamepad2, Home, Trees, User } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
@@ -46,6 +43,7 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
   isDeepScrolled = false,
 }) => {
   const { tokens, isDark, mode } = useTheme();
+  const isPink = mode === 'pink';
   const isHeocon = mode === 'heocon' || !mode;
   const { tabBarBottom } = useBottomInset();
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -70,20 +68,6 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
   const barWidth = screenWidth - TAB_BAR_HORIZONTAL_MARGIN * 2;
   const tabWidth = (barWidth - INNER_PADDING * 2) / TAB_COUNT;
 
-  // Hiệu ứng trượt của viên thuốc nội suy từ scrollX (ngang) cho theme non-heocon
-  const animatedPillStyle = useAnimatedStyle(() => {
-    if (!scrollX || screenWidth === 0) {
-      return {
-        transform: [{ translateX: activeIndex * tabWidth }],
-      };
-    }
-    const progress = scrollX.value / screenWidth;
-    const clampedProgress = Math.max(0, Math.min(TAB_COUNT - 1, progress));
-    return {
-      transform: [{ translateX: clampedProgress * tabWidth }],
-    };
-  }, [screenWidth, tabWidth, activeIndex]);
-
   // Luôn đặt hooks trước điều kiện ẩn bàn phím
   if (isKeyboardVisible) {
     return null;
@@ -102,6 +86,20 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
     { id: 'profile', icon: User, label: 'Hồ sơ', activeBg: '#2B2118', activeFg: '#FFFBF1' },
   ];
 
+  const getTabActiveStyle = (tab: (typeof tabs)[0]) => {
+    if (isPink) {
+      if (tab.isCamera) {
+        return { bg: '#E11D48', fg: '#FFFFFF' };
+      }
+      if (tab.id === 'chat') {
+        return { bg: '#F43F5E', fg: '#FFFFFF' };
+      }
+      return { bg: '#3B0713', fg: '#FFFFFF' };
+    }
+    // heocon (Vàng Nâu)
+    return { bg: tab.activeBg, fg: tab.activeFg };
+  };
+
   return (
     <View
       style={[
@@ -118,9 +116,9 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
           styles.barContainer,
           {
             width: barWidth,
-            borderColor: isHeocon ? '#2B2118' : tokens.border || '#2B2118',
-            backgroundColor: isHeocon ? '#FCECEF' : tokens.surface || '#FFFBF1',
-            shadowColor: '#2B2118',
+            borderColor: tokens.border || '#2B2118',
+            backgroundColor: tokens.surface || '#FFFBF1',
+            shadowColor: tokens.shadowColor || '#2B2118',
             shadowOpacity: 1,
             shadowRadius: 0,
             shadowOffset: { width: 0, height: 4 },
@@ -128,26 +126,12 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
           },
         ]}
       >
-        {/* VIÊN THUỐC TRƯỢT NỘI SUY (SLIDING PILL) - Cho chế độ non-heocon */}
-        {!isHeocon && (
-          <Animated.View
-            style={[
-              styles.slidingPill,
-              {
-                width: tabWidth,
-                backgroundColor: tokens.primarySoft || 'rgba(244, 185, 59, 0.3)',
-                borderColor: tokens.border || '#2B2118',
-              },
-              animatedPillStyle,
-            ]}
-          />
-        )}
-
-        {/* 5 NÚT TAB (ICON 20px + CHỮ NHÃN 11px) */}
+        {/* 5 NÚT TAB (ICON 20px + CHỮ NHÃN 11px) THEO CHUẨN NEO-BRUTALIST ĐỒNG BỘ THEO THEME */}
         <View style={styles.tabIconsRow}>
           {tabs.map((tab, idx) => {
             const IconComponent = tab.icon;
             const isSelected = activeIndex === idx;
+            const activeStyle = getTabActiveStyle(tab);
 
             return (
               <TouchableOpacity
@@ -155,9 +139,11 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
                 style={[
                   styles.tabButton,
                   { width: tabWidth },
-                  isSelected && isHeocon && {
-                    backgroundColor: tab.activeBg,
+                  isSelected && {
+                    backgroundColor: activeStyle.bg,
                     borderRadius: 22,
+                    borderWidth: isPink ? 1.5 : 0,
+                    borderColor: isPink ? tokens.border : 'transparent',
                   },
                 ]}
                 onPress={() => handleTabPress(idx)}
@@ -168,8 +154,8 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
                   size={20}
                   color={
                     isSelected
-                      ? (isHeocon ? tab.activeFg : tokens.text || '#2B2118')
-                      : (isHeocon ? '#2B2118' : tokens.textMuted || '#7A6852')
+                      ? activeStyle.fg
+                      : (tokens.text || '#2B2118')
                   }
                   strokeWidth={isSelected ? 2.6 : 2.2}
                 />
@@ -178,8 +164,8 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
                     styles.tabLabel,
                     {
                       color: isSelected
-                        ? (isHeocon ? tab.activeFg : tokens.text || '#2B2118')
-                        : (isHeocon ? '#2B2118' : tokens.textMuted || '#7A6852'),
+                        ? activeStyle.fg
+                        : (tokens.text || '#2B2118'),
                       opacity: isSelected ? 1 : 0.72,
                     },
                   ]}

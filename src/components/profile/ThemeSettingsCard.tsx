@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Leaf, Palette, Sparkles } from 'lucide-react-native';
+import { Heart, Palette, Sparkles } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
 import { ThemeMode, radii } from '../../theme/tokens';
@@ -28,33 +28,22 @@ export const ThemeSettingsCard: React.FC = () => {
   }[] = [
     {
       mode: 'heocon',
-      label: 'Heo Con',
+      label: 'Kem',
       icon: (active) => (
         <Sparkles
           size={16}
-          color={active ? (isHeocon ? '#2B2118' : tokens.textOnPrimary) : tokens.textMuted}
+          color={active ? '#2B2118' : tokens.textMuted}
           strokeWidth={2.6}
         />
       ),
     },
     {
       mode: 'pink',
-      label: 'Hồng Heo',
+      label: 'Hồng',
       icon: (active) => (
-        <Sparkles
+        <Heart
           size={16}
-          color={active ? (isHeocon ? '#2B2118' : tokens.textOnPrimary) : tokens.textMuted}
-          strokeWidth={2.6}
-        />
-      ),
-    },
-    {
-      mode: 'mint',
-      label: 'Xanh Mint',
-      icon: (active) => (
-        <Leaf
-          size={16}
-          color={active ? (isHeocon ? '#2B2118' : tokens.textOnPrimary) : tokens.textMuted}
+          color={active ? (themeMode === 'pink' ? '#FFFFFF' : '#F43F5E') : tokens.textMuted}
           strokeWidth={2.6}
         />
       ),
@@ -70,21 +59,53 @@ export const ThemeSettingsCard: React.FC = () => {
               backgroundColor: '#FFFBF1',
               borderColor: '#2B2118',
               borderWidth: 3,
+              borderRadius: 22,
               shadowColor: '#2B2118',
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 1,
               shadowRadius: 0,
               elevation: 4,
             }
-          : { backgroundColor: tokens.surface, borderColor: tokens.border },
+          : {
+              backgroundColor: '#FFFFFF',
+              borderColor: '#3B0713',
+              borderWidth: 3,
+              borderRadius: 22,
+              shadowColor: '#3B0713',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 1,
+              shadowRadius: 0,
+              elevation: 4,
+            },
       ]}
     >
       <View style={styles.headerRow}>
-        <Palette size={20} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.6} />
+        <View
+          style={[
+            styles.iconBox,
+            {
+              width: 48,
+              height: 48,
+              borderRadius: 14,
+              backgroundColor: isHeocon ? '#FFF4CC' : '#FCE7F3',
+              borderWidth: 2.5,
+              borderColor: isHeocon ? '#2B2118' : '#3B0713',
+              alignItems: 'center',
+              justifyContent: 'center',
+            },
+          ]}
+        >
+          <Palette size={20} color={isHeocon ? '#2B2118' : '#F43F5E'} strokeWidth={2.6} />
+        </View>
         <View style={styles.titleCol}>
-          <Text style={[styles.title, { color: isHeocon ? '#2B2118' : tokens.text }]}>Màu Sắc Giao Diện</Text>
-          <Text style={[styles.subtitle, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
-            Hệ 3 giao diện PigFly: Heo Con Pixel, Hồng Heo & Xanh Mint
+          <Text
+            style={[
+              styles.title,
+              { color: isHeocon ? '#2B2118' : '#3B0713' },
+              { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+            ]}
+          >
+            GIAO DIỆN
           </Text>
         </View>
       </View>
@@ -92,13 +113,11 @@ export const ThemeSettingsCard: React.FC = () => {
       <View
         style={[
           styles.segmentTrack,
-          isHeocon
-            ? {
-                backgroundColor: '#F6EEDC',
-                borderColor: '#2B2118',
-                borderWidth: 2,
-              }
-            : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+          {
+            backgroundColor: isHeocon ? '#F6EEDC' : '#FFF5F7',
+            borderColor: isHeocon ? '#2B2118' : '#3B0713',
+            borderWidth: 2,
+          },
         ]}
       >
         {options.map((opt) => {
@@ -108,21 +127,17 @@ export const ThemeSettingsCard: React.FC = () => {
               key={opt.mode}
               style={[
                 styles.segmentBtn,
-                isActive &&
-                  (isHeocon
-                    ? {
-                        backgroundColor: '#F4B93B',
-                        borderWidth: 2,
-                        borderColor: '#2B2118',
-                        borderRadius: radii.full,
-                      }
-                    : [
-                        styles.segmentBtnActive,
-                        {
-                          backgroundColor: tokens.primary,
-                          shadowColor: tokens.glowColor,
-                        },
-                      ]),
+                isActive && {
+                  backgroundColor: opt.mode === 'heocon' ? '#F4B93B' : '#F43F5E',
+                  borderWidth: 2,
+                  borderColor: isHeocon ? '#2B2118' : '#3B0713',
+                  borderRadius: radii.full,
+                  shadowColor: isHeocon ? '#2B2118' : '#3B0713',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 1,
+                  shadowRadius: 0,
+                  elevation: 2,
+                },
               ]}
               onPress={() => handleSelectMode(opt.mode)}
               activeOpacity={0.8}
@@ -133,13 +148,14 @@ export const ThemeSettingsCard: React.FC = () => {
                   styles.segmentText,
                   {
                     color: isActive
-                      ? isHeocon
+                      ? opt.mode === 'heocon'
                         ? '#2B2118'
-                        : tokens.textOnPrimary
+                        : '#FFFFFF'
                       : isHeocon
                       ? '#6E5D4F'
-                      : tokens.textMuted,
+                      : '#881337',
                     fontWeight: isActive ? '800' : '600',
+                    fontFamily: isActive ? 'Baloo2_800ExtraBold' : 'Nunito',
                   },
                 ]}
               >
@@ -170,6 +186,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
     gap: 10,
+  },
+  iconBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   titleCol: {
     flex: 1,

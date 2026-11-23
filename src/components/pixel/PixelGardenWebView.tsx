@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback } from 'react';
 import { Platform, StyleSheet, View, ViewStyle, StyleProp, useWindowDimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { useTheme } from '../../theme/ThemeContext';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -25,6 +26,8 @@ export const PixelGardenWebView = forwardRef<
   PixelGardenWebViewRef,
   PixelGardenWebViewProps
 >(({ spent, limit, streak = 24, onPigTap, onEnterHouse, style, isActive }, ref) => {
+  const { mode } = useTheme();
+  const isPink = mode === 'pink';
   const webViewRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   // Guard iOS Fabric offscreen: chỉ mount WebView sau lần đầu tab được active
@@ -67,6 +70,12 @@ export const PixelGardenWebView = forwardRef<
     const code = `if (window.updateStreak) { window.updateStreak(${streak}); }`;
     webViewRef.current?.injectJavaScript(code);
   }, [streak, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const code = `if (window.setTheme) { window.setTheme('${mode}'); }`;
+    webViewRef.current?.injectJavaScript(code);
+  }, [mode, isLoaded]);
 
   useEffect(() => {
     if (Platform.OS !== 'web') return;
@@ -925,7 +934,7 @@ requestAnimationFrame(loop);
       <View
         style={[
           styles.container,
-          { width: winWidth, height: gardenHeight, backgroundColor: '#86B866' },
+          { width: winWidth, height: gardenHeight, backgroundColor: isPink ? '#FFF5F7' : '#86B866' },
           style,
         ]}
       />
@@ -935,7 +944,17 @@ requestAnimationFrame(loop);
   return (
     // Explicit width + height thay vì chỉ dùng aspectRatio
     // Fix canvas collapse trên iOS Fabric khi render offscreen
-    <View style={[styles.container, { width: winWidth, height: gardenHeight }, style]}>
+    <View
+      style={[
+        styles.container,
+        {
+          width: winWidth,
+          height: gardenHeight,
+          backgroundColor: isPink ? '#FFF5F7' : '#86B866',
+        },
+        style,
+      ]}
+    >
       <SafeWebView
         ref={webViewRef}
         source={memoizedSource}

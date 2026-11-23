@@ -32,6 +32,12 @@ export interface FinancialContext {
   topCategoryAmount?: number;
   savingsGoalText?: string;
   nickname?: string;
+  // Prototype 21/11 & Masterprompts Plan 14
+  recentExpenseName?: string;
+  recentExpenseAmount?: number;
+  pigHunger?: number;
+  gameTickets?: number;
+  pigFood?: number;
 }
 
 /**
@@ -253,7 +259,55 @@ export const generateLocalCoachResponse = (
     };
   }
 
-  // 7. Câu trả lời mặc định ấm áp từ anh Minh - bồ
+  // 7. Phản biện khoản vừa ghi (Prototype 21/11 & Masterprompts Plan 14)
+  if (
+    query.includes('phản biện') ||
+    query.includes('vừa ghi') ||
+    query.includes('gần nhất') ||
+    query.includes('khoản vừa')
+  ) {
+    if (context.recentExpenseName && context.recentExpenseAmount) {
+      return {
+        text: `Khoản gần nhất: ${context.recentExpenseName}, ${formatVND(context.recentExpenseAmount)}. Heo hỏi ba câu: (1) cần hay muốn? (2) có cách rẻ hơn không? (3) tuần sau còn thấy xứng đáng không?`,
+        cardType: 'NONE',
+      };
+    }
+    return {
+      text: 'Chưa có khoản chi nào vừa ghi để phản biện. Khi bạn ghi chép một khoản mới, Heo-Coach sẽ giúp bạn cân nhắc 3 câu hỏi tài chính nhé!',
+      cardType: 'NONE',
+    };
+  }
+
+  // 8. Heo nhà đói chưa?
+  if (
+    query.includes('đói') ||
+    query.includes('heo nhà') ||
+    query.includes('cho ăn') ||
+    query.includes('no chưa')
+  ) {
+    const hunger = context.pigHunger !== undefined ? Math.round(context.pigHunger) : 80;
+    return {
+      text: `Độ no của Heo hiện tại là ${hunger}%. ${hunger < 40 ? 'Heo đang đói bụng rồi, bạn nhớ bấm "Cho ăn" hoặc chơi Heo Bay để kiếm thêm thức ăn nhé!' : 'Heo đang no căng bụng và sẵn sàng đồng hành cùng bạn!'}`,
+      cardType: 'NONE',
+    };
+  }
+
+  // 9. Mẹo kiếm vé chơi game & cám
+  if (
+    query.includes('vé') ||
+    query.includes('cám') ||
+    query.includes('mẹo') ||
+    query.includes('kiếm vé')
+  ) {
+    const tix = context.gameTickets || 0;
+    const food = context.pigFood || 0;
+    return {
+      text: `Bạn hiện có ${tix} vé và ${food} cám. Mẹo nhỏ: Mỗi lần ghi một khoản chi ở Tab Chụp hoặc Sổ bạn được tặng +1 vé chơi. Đăng nhập mỗi ngày cũng nhận ngay 3 vé!`,
+      cardType: 'NONE',
+    };
+  }
+
+  // 10. Câu trả lời mặc định ấm áp từ Heo-Coach
   return {
     text: `Anh Minh nghe đây bồ ơi! Bồ cần kiểm tra ngân sách hôm nay, hay muốn gửi ảnh biên lai/món đồ nhờ anh ghi nhanh vào sổ?`,
     cardType: 'NONE',

@@ -22,12 +22,10 @@ import {
   Cloud,
   EyeOff,
   LogOut,
-  Mail,
   Palette,
   QrCode,
   ShieldCheck,
   Smartphone,
-  Sparkles,
   Trash2,
   UserX,
   X,
@@ -42,7 +40,6 @@ import { BankNotificationSettingsCard } from '../profile/BankNotificationSetting
 import { QRPaySettingsCard } from '../profile/QRPaySettingsCard';
 import { useTheme } from '../../theme/ThemeContext';
 import { useBottomInset } from '../../hooks/useBottomInset';
-import { radii } from '../../theme/tokens';
 
 const STORAGE_KEY_MASK_MONEY = 'vi_locket_mask_money';
 
@@ -54,16 +51,25 @@ type ActiveSheetType = 'BACKUP' | 'THEME' | 'WIDGET' | 'BANK' | 'QR' | null;
 
 /**
  * Màn hình Cài Đặt Chuyên Biệt (SettingsView)
- * Thiết kế tinh gọn theo triết lý Progressive Disclosure & Apple Settings:
- * - Hàng tóm tắt cấu hình hiện tại (Grouped Inset Rows)
- * - Chạm vào từng đặc trưng mới mở Bottom Sheet chỉnh sửa chuyên sâu
- * - Loại bỏ hoàn toàn nguy cơ quẹt trúng hoặc bấm nhầm liên tục
+ * Thiết kế chuẩn Neo-Brutalist Pixel Art 100% PigFly v4.5:
+ * - Viền 3px mực đặc, bóng cứng 0-blur 4px, font Baloo 2 + Nunito
+ * - Nút Back [←] chuẩn Neo-Badge tròn 36×36px
+ * - Nhãn Giao diện ngắn gọn 'Kem' / 'Hồng' (QĐ 164 & 165)
+ * - Universal Modal Bottom Sheet bo 28px viền 3px mực
  */
 export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { tokens, isDark, themeMode, mode } = useTheme();
-  const isHeocon = mode === 'heocon' || !mode;
+  const { tokens, mode } = useTheme();
+  const isPink = mode === 'pink';
+  const inkBorder = isPink ? '#3B0713' : '#2B2118';
+  const cardBg = isPink ? '#FFFFFF' : '#FFFBF1';
+  const badgeBg = isPink ? '#FCE7F3' : '#FFF4CC';
+  const sheetBg = isPink ? '#FFF5F7' : '#F6EEDC';
+  const textMutedColor = isPink ? '#881337' : '#6E5D4F';
+  const accentColor = isPink ? '#F43F5E' : '#F4B93B';
+  const accentTextColor = isPink ? '#FFFFFF' : '#2B2118';
+
   const { contentBottomPadding } = useBottomInset();
 
   const { user, updateProfile, signOut } = useAuthStore();
@@ -164,41 +170,53 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
     router.back();
   };
 
-  // Text helpers
-  const themeLabel =
-    themeMode === 'heocon' ? 'Heo Con' : themeMode === 'mint' ? 'Xanh Mint' : 'Hồng Heo';
+  // Text helpers: Siêu ngắn gọn Kem / Hồng (QĐ 164 & 165)
+  const themeLabel = isPink ? 'Hồng' : 'Kem';
 
-  const cardBgStyle = isHeocon
-    ? {
-        backgroundColor: '#FFFBF1',
-        borderColor: '#2B2118',
-        borderWidth: 3,
-        shadowColor: '#2B2118',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-        elevation: 4,
-      }
-    : {
-        backgroundColor: isDark ? '#162231' : '#FFFFFF',
-        borderColor: isDark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(229, 152, 68, 0.16)',
-      };
+  const cardBgStyle = {
+    backgroundColor: cardBg,
+    borderColor: inkBorder,
+    borderWidth: 3,
+    borderRadius: 22,
+    shadowColor: inkBorder,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.bg, paddingTop: insets.top + Spacing.sm }]}>
-      {/* HEADER: NÚT BACK + TIÊU ĐỀ CÀI ĐẶT */}
+      {/* HEADER: NÚT BACK NEO-BADGE + TIÊU ĐỀ CÀI ĐẶT */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={styles.backButtonBorderless}
+          style={[
+            styles.backButtonNeo,
+            {
+              backgroundColor: badgeBg,
+              borderColor: inkBorder,
+            },
+          ]}
           onPress={handleBack}
-          activeOpacity={0.65}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityLabel="Quay lại Hồ sơ"
         >
-          <ArrowLeft size={22} color={tokens.text} strokeWidth={2.8} />
+          <ArrowLeft size={18} color={inkBorder} strokeWidth={2.8} />
         </TouchableOpacity>
 
-        <Text style={[styles.screenTitle, { color: tokens.text }]}>Cài đặt</Text>
+        <Text
+          style={[
+            styles.screenTitle,
+            {
+              color: inkBorder,
+              fontFamily: 'Baloo2_800ExtraBold',
+              fontWeight: '800',
+            },
+          ]}
+        >
+          Cài đặt
+        </Text>
 
         <View style={styles.headerSpacer} />
       </View>
@@ -212,17 +230,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
       >
         {/* ================= NHÓM 1: SAO LƯU & ĐỒNG BỘ ================= */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+          <Text style={[styles.sectionHeaderText, { color: textMutedColor }]}>
             Sao lưu & Đồng bộ
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.groupedCard,
-            cardBgStyle,
-          ]}
-        >
+        <View style={[styles.groupedCard, cardBgStyle]}>
           <TouchableOpacity
             style={styles.settingRow}
             onPress={() => {
@@ -235,29 +248,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               <View style={styles.iconContainerFloating}>
                 <Cloud size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
-              <Text style={[styles.rowTitle, { color: tokens.text }]}>
+              <Text style={[styles.rowTitle, { color: inkBorder }]}>
                 Sao lưu & Khôi phục
               </Text>
             </View>
             <View style={styles.rowRight}>
-              <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
+              <ChevronRight size={17} color={inkBorder} strokeWidth={2.4} />
             </View>
           </TouchableOpacity>
         </View>
 
         {/* ================= NHÓM 2: GIAO DIỆN & CÁ NHÂN HÓA ================= */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+          <Text style={[styles.sectionHeaderText, { color: textMutedColor }]}>
             Giao diện & Cá nhân hóa
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.groupedCard,
-            cardBgStyle,
-          ]}
-        >
+        <View style={[styles.groupedCard, cardBgStyle]}>
           {/* Row: Theme */}
           <TouchableOpacity
             style={styles.settingRow}
@@ -271,40 +279,35 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               <View style={styles.iconContainerFloating}>
                 <Palette size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
-              <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+              <Text style={[styles.rowTitle, { color: inkBorder }]}>
                 Giao diện
               </Text>
             </View>
 
             <View style={styles.rowRight}>
-              <Text style={[styles.valueBadgeText, { color: tokens.textMuted, marginRight: 6 }]}>
+              <Text style={[styles.valueBadgeText, { color: textMutedColor, marginRight: 6 }]}>
                 {themeLabel}
               </Text>
-              <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
+              <ChevronRight size={17} color={inkBorder} strokeWidth={2.4} />
             </View>
           </TouchableOpacity>
         </View>
 
         {/* ================= NHÓM 3: BẢO MẬT & QUYỀN RIÊNG TƯ ================= */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+          <Text style={[styles.sectionHeaderText, { color: textMutedColor }]}>
             Bảo mật & Quyền riêng tư
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.groupedCard,
-            cardBgStyle,
-          ]}
-        >
+        <View style={[styles.groupedCard, cardBgStyle]}>
           {/* Row 1: Ẩn số tiền */}
           <View style={styles.settingRow}>
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
                 <EyeOff size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
-              <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+              <Text style={[styles.rowTitle, { color: inkBorder }]}>
                 Ẩn số tiền
               </Text>
             </View>
@@ -315,25 +318,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 handleToggleMask(val);
               }}
-              trackColor={{ false: isDark ? '#2A3644' : '#E2DCD5', true: tokens.primary }}
-              thumbColor={isDark ? '#FAF6EC' : '#FFFFFF'}
+              trackColor={{ false: isPink ? '#FCE7F3' : '#E8DEC8', true: accentColor }}
+              thumbColor={isMasked ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
             />
           </View>
         </View>
 
         {/* ================= NHÓM 4: TIỆN ÍCH & TÍCH HỢP ================= */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+          <Text style={[styles.sectionHeaderText, { color: textMutedColor }]}>
             Tiện ích & Tích hợp
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.groupedCard,
-            cardBgStyle,
-          ]}
-        >
+        <View style={[styles.groupedCard, cardBgStyle]}>
           {/* Row 1: Lock Screen Widget */}
           <TouchableOpacity
             style={styles.settingRow}
@@ -347,17 +345,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               <View style={styles.iconContainerFloating}>
                 <Smartphone size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
-              <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+              <Text style={[styles.rowTitle, { color: inkBorder }]}>
                 Widget màn hình khóa
               </Text>
             </View>
 
             <View style={styles.rowRight}>
-              <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
+              <ChevronRight size={17} color={inkBorder} strokeWidth={2.4} />
             </View>
           </TouchableOpacity>
 
-          <View style={[styles.rowDivider, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' }]} />
+          <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
 
           {/* Row 2: Bank Notification */}
           <TouchableOpacity
@@ -372,17 +370,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               <View style={styles.iconContainerFloating}>
                 <Bell size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
-              <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+              <Text style={[styles.rowTitle, { color: inkBorder }]}>
                 Thông báo ngân hàng
               </Text>
             </View>
 
             <View style={styles.rowRight}>
-              <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
+              <ChevronRight size={17} color={inkBorder} strokeWidth={2.4} />
             </View>
           </TouchableOpacity>
 
-          <View style={[styles.rowDivider, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' }]} />
+          <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
 
           {/* Row 3: VietQR Pay */}
           <TouchableOpacity
@@ -397,30 +395,25 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               <View style={styles.iconContainerFloating}>
                 <QrCode size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
-              <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+              <Text style={[styles.rowTitle, { color: inkBorder }]}>
                 Quét mã VietQR
               </Text>
             </View>
 
             <View style={styles.rowRight}>
-              <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
+              <ChevronRight size={17} color={inkBorder} strokeWidth={2.4} />
             </View>
           </TouchableOpacity>
         </View>
 
         {/* ================= NHÓM 5: DỮ LIỆU & QUẢN TRỊ TÀI KHOẢN ================= */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+          <Text style={[styles.sectionHeaderText, { color: textMutedColor }]}>
             Dữ liệu & Tài khoản
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.groupedCard,
-            cardBgStyle,
-          ]}
-        >
+        <View style={[styles.groupedCard, cardBgStyle]}>
           {/* Định danh thiết bị & Lưu trữ */}
           <View style={styles.settingRow}>
             <View style={styles.rowLeft}>
@@ -428,10 +421,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
                 <ShieldCheck size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
               <View style={{ flex: 1, paddingRight: 8 }}>
-                <Text style={[styles.rowTitle, { color: tokens.text }]}>
+                <Text style={[styles.rowTitle, { color: inkBorder }]}>
                   Định danh thiết bị
                 </Text>
-                <Text style={{ fontSize: 12, color: tokens.textMuted, marginTop: 1 }} numberOfLines={1}>
+                <Text style={{ fontSize: 12, color: textMutedColor, marginTop: 1, fontFamily: 'Nunito', fontWeight: '600' }} numberOfLines={1}>
                   {user?.full_name ? `Tên: ${user.full_name}` : 'Lưu trữ cục bộ trên máy'}
                 </Text>
               </View>
@@ -442,14 +435,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
                 style={[
                   styles.valueBadge,
                   {
-                    backgroundColor: isDark ? 'rgba(45, 212, 191, 0.12)' : 'rgba(126, 159, 128, 0.15)',
+                    backgroundColor: isPink ? '#FCE7F3' : '#FFF4CC',
+                    borderColor: inkBorder,
+                    borderWidth: 1.5,
                   },
                 ]}
               >
                 <Text
                   style={[
                     styles.valueBadgeText,
-                    { color: tokens.success },
+                    { color: inkBorder },
                   ]}
                 >
                   Bảo mật
@@ -458,7 +453,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
             </View>
           </View>
 
-          <View style={[styles.rowDivider, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' }]} />
+          <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
 
           {/* Action 1: Reset Data */}
           <TouchableOpacity
@@ -475,10 +470,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               </Text>
             </View>
 
-            <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
+            <ChevronRight size={17} color={inkBorder} strokeWidth={2.4} />
           </TouchableOpacity>
 
-          <View style={[styles.rowDivider, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' }]} />
+          <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
 
           {/* Action 2: Delete Account */}
           <TouchableOpacity
@@ -495,10 +490,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               </Text>
             </View>
 
-            <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
+            <ChevronRight size={17} color={inkBorder} strokeWidth={2.4} />
           </TouchableOpacity>
 
-          <View style={[styles.rowDivider, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' }]} />
+          <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
 
           {/* Action 3: Sign Out */}
           <TouchableOpacity
@@ -517,25 +512,31 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               <View style={styles.iconContainerFloating}>
                 <LogOut size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
-              <Text style={[styles.rowTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+              <Text style={[styles.rowTitle, { color: inkBorder }]}>
                 Đăng xuất
               </Text>
             </View>
 
-            <ChevronRight size={17} color={tokens.textMuted} strokeWidth={2.2} />
+            <ChevronRight size={17} color={inkBorder} strokeWidth={2.4} />
           </TouchableOpacity>
         </View>
 
-
         {/* APP VERSION FOOTER */}
         <View style={styles.versionFooter}>
-          <Text style={[styles.versionText, { color: tokens.textMuted }]}>
-            Ví Locket v1.0.0 (Build 54) • Hà Nội Thu Đông
+          <Text
+            style={[
+              styles.versionText,
+              {
+                color: textMutedColor,
+              },
+            ]}
+          >
+            PigFly v4.5 (Build 54) • Heo Con Neo-Brutalist
           </Text>
         </View>
       </ScrollView>
 
-      {/* ================= UNIVERSAL MODAL BOTTOM SHEET ================= */}
+      {/* ================= UNIVERSAL MODAL BOTTOM SHEET NEO-BRUTALIST ================= */}
       <Modal
         visible={activeSheet !== null}
         animationType="slide"
@@ -552,8 +553,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
             style={[
               styles.modalSheetContainer,
               {
-                backgroundColor: isDark ? '#0E1620' : '#FAF6F0',
-                borderTopColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+                backgroundColor: sheetBg,
+                borderTopColor: inkBorder,
+                borderTopWidth: 3,
               },
             ]}
           >
@@ -562,14 +564,23 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               <View
                 style={[
                   styles.dragHandle,
-                  { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)' },
+                  { backgroundColor: inkBorder },
                 ]}
               />
             </View>
 
             {/* SHEET HEADER */}
             <View style={styles.sheetHeader}>
-              <Text style={[styles.sheetTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+              <Text
+                style={[
+                  styles.sheetTitle,
+                  {
+                    color: inkBorder,
+                    fontFamily: 'Baloo2_800ExtraBold',
+                    fontWeight: '800',
+                  },
+                ]}
+              >
                 {activeSheet === 'BACKUP'
                   ? 'Sao lưu & Khôi phục'
                   : activeSheet === 'THEME'
@@ -582,15 +593,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               </Text>
 
               <TouchableOpacity
-                style={styles.sheetCloseButtonBorderless}
+                style={[
+                  styles.sheetCloseButtonNeo,
+                  {
+                    backgroundColor: badgeBg,
+                    borderColor: inkBorder,
+                  },
+                ]}
                 onPress={() => setActiveSheet(null)}
-                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                activeOpacity={0.7}
                 accessibilityLabel="Đóng"
               >
-                <X size={20} color={isDark ? '#FAF6EC' : '#1B2733'} strokeWidth={2.6} />
+                <X size={16} color={inkBorder} strokeWidth={2.8} />
               </TouchableOpacity>
             </View>
-
 
             {/* SHEET CONTENT */}
             <ScrollView
@@ -609,21 +626,39 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               style={[
                 styles.sheetBottomBar,
                 {
-                  backgroundColor: isDark ? '#0E1620' : '#FAF6F0',
-                  borderTopColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+                  backgroundColor: sheetBg,
+                  borderTopColor: inkBorder,
+                  borderTopWidth: 2,
                 },
               ]}
             >
               <TouchableOpacity
-                style={[styles.sheetDoneButton, { backgroundColor: tokens.primary }]}
+                style={[
+                  styles.sheetDoneButton,
+                  {
+                    backgroundColor: accentColor,
+                    borderColor: inkBorder,
+                  },
+                ]}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setActiveSheet(null);
                 }}
                 activeOpacity={0.85}
               >
-                <Check size={18} color="#0E1620" strokeWidth={2.8} />
-                <Text style={styles.sheetDoneButtonText}>Xong</Text>
+                <Check size={18} color={accentTextColor} strokeWidth={2.8} />
+                <Text
+                  style={[
+                    styles.sheetDoneButtonText,
+                    {
+                      color: accentTextColor,
+                      fontFamily: 'Baloo2_800ExtraBold',
+                      fontWeight: '800',
+                    },
+                  ]}
+                >
+                  Xong
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -644,20 +679,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: Spacing.md,
   },
-  backButtonBorderless: {
-    padding: 6,
-    marginLeft: -6,
+  backButtonNeo: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
   screenTitle: {
     fontSize: 20,
     fontWeight: '800',
+    fontFamily: 'Baloo2_800ExtraBold',
     letterSpacing: -0.3,
   },
   headerSpacer: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
   },
   scrollContent: {
     gap: Spacing.sm,
@@ -669,25 +707,19 @@ const styles = StyleSheet.create({
   },
   sectionHeaderText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
+    fontFamily: 'Nunito',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
   groupedCard: {
-    borderRadius: radii.xl,
-    borderWidth: 1,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12.5,
+    paddingVertical: 13,
     paddingHorizontal: 14,
   },
   rowLeft: {
@@ -704,6 +736,7 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 14.5,
     fontWeight: '700',
+    fontFamily: 'Nunito',
     letterSpacing: -0.2,
   },
   rowRight: {
@@ -720,8 +753,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   valueBadgeText: {
-    fontSize: 11.5,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: 'Nunito',
   },
   rowDivider: {
     height: 1,
@@ -729,11 +763,12 @@ const styles = StyleSheet.create({
   },
   versionFooter: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 18,
   },
   versionText: {
-    fontSize: 11.5,
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: 'Nunito',
   },
 
   // ================= MODAL & BOTTOM SHEET =================
@@ -743,13 +778,12 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   modalSheetContainer: {
     height: '75%',
-    borderTopLeftRadius: 26,
-    borderTopRightRadius: 26,
-    borderTopWidth: 1,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     overflow: 'hidden',
   },
   dragHandleWrapper: {
@@ -757,8 +791,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   dragHandle: {
-    width: 40,
-    height: 4.5,
+    width: 44,
+    height: 5,
     borderRadius: 3,
   },
   sheetHeader: {
@@ -769,13 +803,16 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   sheetTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '800',
+    fontFamily: 'Baloo2_800ExtraBold',
     letterSpacing: -0.2,
   },
-  sheetCloseButtonBorderless: {
-    padding: 6,
-    marginRight: -4,
+  sheetCloseButtonNeo: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -787,7 +824,6 @@ const styles = StyleSheet.create({
   sheetBottomBar: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderTopWidth: 1,
   },
   sheetDoneButton: {
     flexDirection: 'row',
@@ -795,17 +831,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     height: 48,
-    borderRadius: 24,
-    shadowColor: '#E59844',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
+    borderRadius: 16,
+    borderWidth: 2.5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
   },
   sheetDoneButtonText: {
-    color: '#0E1620',
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
+    fontFamily: 'Baloo2_800ExtraBold',
     letterSpacing: 0.2,
   },
 });

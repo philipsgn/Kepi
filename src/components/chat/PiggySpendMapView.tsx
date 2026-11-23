@@ -1,26 +1,548 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Image,
+  LayoutChangeEvent,
+  Linking,
+  PanResponder,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { WebView } from 'react-native-webview';
+import Svg, { Circle, G, Polyline, Rect, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { ArrowLeft, RefreshCw } from 'lucide-react-native';
 import { useTransactionStore } from '../../store/transactionStore';
-
-const SafeWebView = WebView as unknown as React.ComponentType<any>;
+import {
+  PixelIconBack,
+  PixelIconMapPin,
+  PixelIconReload,
+} from '../pixel/PixelIcons';
 
 interface PiggySpendMapViewProps {
   onBack: () => void;
 }
 
+interface SpendItem {
+  id: string;
+  name: string;
+  kind: 'food' | 'cafe' | 'gas' | 'shop' | 'market';
+  amount: number;
+  ts: number;
+  lat: number;
+  lng: number;
+}
+
+interface SpendPlace {
+  id: string;
+  name: string;
+  kind: 'food' | 'cafe' | 'gas' | 'shop' | 'market';
+  lat: number;
+  lng: number;
+  visits: number;
+  total: number;
+  lastTs: number;
+}
+
+type FilterMode = 'recent14' | 'frequent' | 'trail' | 'top';
+
+const KIND_META: Record<
+  SpendPlace['kind'],
+  { col: string; icon: string; label: string }
+> = {
+  food: { col: '#E0452B', icon: '🍜', label: 'Ăn uống' },
+  cafe: { col: '#8A5A34', icon: '☕', label: 'Cà phê' },
+  gas: { col: '#4B6FA5', icon: '⛽', label: 'Di chuyển' },
+  shop: { col: '#E8548C', icon: '🛍️', label: 'Mua sắm' },
+  market: { col: '#5E9A57', icon: '🥬', label: 'Đi chợ' },
+};
+
+// Tọa độ tham chiếu tại trung tâm TP.HCM cho các giao dịch thật chưa gắn trường lat/lng riêng
+const SAIGON_ANCHORS: Array<[number, number]> = [
+  [106.7009, 10.7769], // Quận 1 · Nhà thờ Đức Bà
+  [106.6981, 10.7725], // Quận 1 · Bến Thành
+  [106.7042, 10.7717], // Quận 1 · Phố đi bộ Nguyễn Huệ
+  [106.6953, 10.7769], // Quận 1 · Công viên Tao Đàn
+  [106.6917, 10.7824], // Quận 3 · Hồ Con Rùa
+  [106.7218, 10.7949], // Bình Thạnh · Tân Cảng
+  [106.6822, 10.7626], // Quận 5 · Nguyễn Trãi
+  [106.7024, 10.7885], // Quận 1 · Đa Kao
+];
+
+// ============================================================================
+// PHÉP CHIẾU WEB MERCATOR & GOM CỤM HAVERSINE 40M CHUẨN QUỐC TẾ (Quyết định 175–178)
+// ============================================================================
+export function lngLatToWorld(lng: number, lat: number, z: number) {
+  const scale = 256 * Math.pow(2, z);
+  const x = ((lng + 180) / 360) * scale;
+  const sinLat = Math.sin((lat * Math.PI) / 180);
+  const clamped = Math.max(-0.9999, Math.min(0.9999, sinLat));
+  const y = (0.5 - Math.log((1 + clamped) / (1 - clamped)) / (4 * Math.PI)) * scale;
+  return { x, y };
+}
+
+export function worldToLngLat(wx: number, wy: number, z: number) {
+  const scale = 256 * Math.pow(2, z);
+  const lng = (wx / scale) * 360 - 180;
+  const n = Math.PI - (2 * Math.PI * wy) / scale;
+  const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+  return { lng, lat };
+}
+
+export function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function fmtK(v: number): string {
+  if (v >= 1000000) return (v / 1000000).toFixed(1).replace(/\.0$/, '') + 'tr';
+  if (v >= 1000) return Math.round(v / 1000) + 'k';
+  return String(v);
+}
+
+export function mapTransactionsToSpendPoints(transactions: any[]): SpendItem[] {
+  const expenses = transactions
+    .filter((t) => t.type === 'EXPENSE' && t.status !== 'CANCELLED')
+    .slice(0, 60);
+
+  return expenses.map((t: any, idx) => {
+    let kind: SpendItem['kind'] = 'food';
+    const cat = String(t.category || '').toLowerCase();
+    const desc = String(t.description || '').toLowerCase();
+    if (cat.includes('cafe') || desc.includes('cafe') || desc.includes('cà phê') || desc.includes('trà')) kind = 'cafe';
+    else if (cat.includes('xe') || cat.includes('di') || desc.includes('xăng') || desc.includes('grab')) kind = 'gas';
+    else if (cat.includes('mua') || desc.includes('quần') || desc.includes('áo') || desc.includes('shop')) kind = 'shop';
+    else if (cat.includes('chợ') || desc.includes('chợ') || desc.includes('siêu thị')) kind = 'market';
+
+    const anchor = SAIGON_ANCHORS[idx % SAIGON_ANCHORS.length];
+    const lat = typeof t.lat === 'number' ? t.lat : anchor[1];
+    const lng = typeof t.lng === 'number' ? t.lng : anchor[0];
+
+    return {
+      id: String(t.id || `tx-${idx}`),
+      name: String(t.description || t.category || 'Khoản chi #' + (idx + 1)),
+      kind,
+      amount: Number(t.amount) || 0,
+      ts: new Date(t.occurred_at || t.created_at || Date.now()).getTime(),
+      lat,
+      lng,
+    };
+  });
+}
+
+function buildPlaces(items: SpendItem[]): SpendPlace[] {
+  const places: SpendPlace[] = [];
+  items.forEach((item) => {
+    let found: SpendPlace | null = null;
+    for (let i = 0; i < places.length; i++) {
+      if (haversineM(places[i].lat, places[i].lng, item.lat, item.lng) <= 40) {
+        found = places[i];
+        break;
+      }
+    }
+    if (found) {
+      found.visits += 1;
+      found.total += item.amount;
+      if (item.ts > found.lastTs) found.lastTs = item.ts;
+    } else {
+      places.push({
+        id: item.id,
+        name: item.name,
+        kind: item.kind,
+        lat: item.lat,
+        lng: item.lng,
+        visits: 1,
+        total: item.amount,
+        lastTs: item.ts,
+      });
+    }
+  });
+  return places;
+}
+
+// ============================================================================
+// GHIM PIXEL 9×12 & MẶT HEO 16×16 VẼ TRỰC TIẾP BẰNG REACT-NATIVE-SVG CRISP-EDGES
+// ============================================================================
+export const drawPinCanvas = (col: string, scale = 3) => (
+  <Svg
+    width={9 * scale}
+    height={12 * scale}
+    viewBox="0 0 9 12"
+  >
+    <Rect x={2} y={0} width={5} height={1} fill="#2B2118" />
+    <Rect x={1} y={1} width={7} height={1} fill="#2B2118" />
+    <Rect x={0} y={2} width={9} height={5} fill="#2B2118" />
+    <Rect x={1} y={7} width={7} height={1} fill="#2B2118" />
+    <Rect x={2} y={8} width={5} height={1} fill="#2B2118" />
+    <Rect x={3} y={9} width={3} height={2} fill="#2B2118" />
+    <Rect x={4} y={11} width={1} height={1} fill="#2B2118" />
+
+    <Rect x={2} y={1} width={5} height={1} fill={col} />
+    <Rect x={1} y={2} width={7} height={5} fill={col} />
+    <Rect x={2} y={7} width={5} height={1} fill={col} />
+    <Rect x={3} y={8} width={3} height={1} fill={col} />
+    <Rect x={4} y={9} width={1} height={1} fill={col} />
+
+    <Rect x={3} y={3} width={3} height={3} fill="#FFFBF1" />
+  </Svg>
+);
+
+export const drawPigFaceCanvas = (size = 22) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+  >
+    <Rect x={2} y={2} width={3} height={3} fill="#2B2118" />
+    <Rect x={11} y={2} width={3} height={3} fill="#2B2118" />
+    <Rect x={3} y={3} width={1} height={1} fill="#F9B8C4" />
+    <Rect x={12} y={3} width={1} height={1} fill="#F9B8C4" />
+    <Rect x={3} y={4} width={10} height={9} fill="#2B2118" />
+    <Rect x={2} y={5} width={12} height={7} fill="#2B2118" />
+    <Rect x={4} y={5} width={8} height={7} fill="#F9B8C4" />
+    <Rect x={3} y={6} width={10} height={5} fill="#F9B8C4" />
+    <Rect x={5} y={7} width={1} height={2} fill="#2B2118" />
+    <Rect x={10} y={7} width={1} height={2} fill="#2B2118" />
+    <Rect x={6} y={9} width={4} height={3} fill="#F08DA4" />
+    <Rect x={7} y={10} width={1} height={1} fill="#2B2118" />
+    <Rect x={8} y={10} width={1} height={1} fill="#2B2118" />
+  </Svg>
+);
+
+// ============================================================================
+// DỮ LIỆU ĐỊA LÝ VECTOR ĐƯỜNG PHỐ & SÔNG SÀI GÒN / VIỆT NAM (0MS INSTANT UNDERLAY)
+// ============================================================================
+const SAIGON_RIVER_COORDS: Array<[number, number]> = [
+  [106.7125, 10.8350],
+  [106.7240, 10.8180],
+  [106.7350, 10.8080],
+  [106.7185, 10.7995],
+  [106.7145, 10.7890],
+  [106.7082, 10.7795],
+  [106.7068, 10.7705],
+  [106.7088, 10.7625],
+  [106.7265, 10.7540],
+  [106.7420, 10.7450],
+];
+
+const NHIEU_LOC_CANAL_COORDS: Array<[number, number]> = [
+  [106.6620, 10.7960],
+  [106.6755, 10.7925],
+  [106.6855, 10.7918],
+  [106.6950, 10.7905],
+  [106.7048, 10.7895],
+  [106.7115, 10.7885],
+];
+
+const TAU_HU_CANAL_COORDS: Array<[number, number]> = [
+  [106.6550, 10.7485],
+  [106.6730, 10.7525],
+  [106.6880, 10.7585],
+  [106.6995, 10.7648],
+  [106.7068, 10.7685],
+];
+
+const SAIGON_PARKS: Array<{ name: string; lng: number; lat: number; rx: number; ry: number }> = [
+  { name: 'CV Tao Đàn', lng: 106.6938, lat: 10.7748, rx: 0.0032, ry: 0.0026 },
+  { name: 'Thảo Cầm Viên', lng: 106.7052, lat: 10.7878, rx: 0.0038, ry: 0.0035 },
+  { name: 'Dinh Độc Lập', lng: 106.6953, lat: 10.7769, rx: 0.0024, ry: 0.0022 },
+  { name: 'CV 23/9', lng: 106.6932, lat: 10.7692, rx: 0.0042, ry: 0.0014 },
+  { name: 'CV Lê Văn Tám', lng: 106.6930, lat: 10.7882, rx: 0.0024, ry: 0.0022 },
+];
+
+const SAIGON_ARTERIAL_ROADS: Array<{
+  name: string;
+  highway?: boolean;
+  coords: Array<[number, number]>;
+}> = [
+  {
+    name: 'ĐL Võ Văn Kiệt',
+    highway: true,
+    coords: [
+      [106.6550, 10.7495],
+      [106.6730, 10.7535],
+      [106.6880, 10.7595],
+      [106.6995, 10.7658],
+      [106.7065, 10.7695],
+      [106.7220, 10.7735],
+      [106.7450, 10.7810],
+    ],
+  },
+  {
+    name: 'Điện Biên Phủ',
+    highway: true,
+    coords: [
+      [106.6720, 10.7685],
+      [106.6850, 10.7775],
+      [106.6965, 10.7855],
+      [106.7085, 10.7955],
+      [106.7218, 10.7995],
+      [106.7400, 10.8035],
+    ],
+  },
+  {
+    name: 'Nam Kỳ Khởi Nghĩa',
+    highway: true,
+    coords: [
+      [106.6785, 10.7995],
+      [106.6875, 10.7895],
+      [106.6945, 10.7805],
+      [106.6995, 10.7735],
+      [106.7032, 10.7685],
+    ],
+  },
+  {
+    name: 'Pasteur',
+    coords: [
+      [106.7042, 10.7695],
+      [106.6998, 10.7760],
+      [106.6935, 10.7845],
+      [106.6889, 10.7905],
+    ],
+  },
+  {
+    name: 'Hai Bà Trưng',
+    coords: [
+      [106.7060, 10.7745],
+      [106.6995, 10.7825],
+      [106.6920, 10.7905],
+      [106.6873, 10.7955],
+    ],
+  },
+  {
+    name: 'Cách Mạng Tháng 8',
+    highway: true,
+    coords: [
+      [106.6650, 10.7920],
+      [106.6780, 10.7815],
+      [106.6895, 10.7735],
+      [106.6975, 10.7718],
+    ],
+  },
+  {
+    name: 'Nguyễn Thị Minh Khai',
+    coords: [
+      [106.6810, 10.7675],
+      [106.6915, 10.7755],
+      [106.7005, 10.7835],
+      [106.7068, 10.7888],
+    ],
+  },
+  {
+    name: 'Lê Lợi',
+    coords: [
+      [106.6981, 10.7725],
+      [106.7032, 10.7758],
+    ],
+  },
+  {
+    name: 'Phố đi bộ Nguyễn Huệ',
+    coords: [
+      [106.7015, 10.7772],
+      [106.7062, 10.7712],
+    ],
+  },
+  {
+    name: 'Đồng Khởi',
+    coords: [
+      [106.6998, 10.7795],
+      [106.7038, 10.7765],
+      [106.7072, 10.7725],
+    ],
+  },
+  {
+    name: 'Lý Tự Trọng',
+    coords: [
+      [106.6915, 10.7725],
+      [106.6995, 10.7775],
+      [106.7065, 10.7815],
+    ],
+  },
+  {
+    name: 'Trần Hưng Đạo',
+    coords: [
+      [106.6660, 10.7535],
+      [106.6822, 10.7610],
+      [106.6981, 10.7715],
+    ],
+  },
+  {
+    name: 'Nguyễn Trãi',
+    coords: [
+      [106.6650, 10.7565],
+      [106.6822, 10.7640],
+      [106.6925, 10.7705],
+    ],
+  },
+  {
+    name: 'Tôn Đức Thắng',
+    coords: [
+      [106.7082, 10.7845],
+      [106.7075, 10.7775],
+      [106.7065, 10.7705],
+    ],
+  },
+];
+
+const DISTRICT_LABELS: Array<{ label: string; lng: number; lat: number; minZ: number; maxZ: number }> = [
+  { label: 'QUẬN 1', lng: 106.7005, lat: 10.7765, minZ: 12, maxZ: 18 },
+  { label: 'QUẬN 3', lng: 106.6865, lat: 10.7835, minZ: 12, maxZ: 18 },
+  { label: 'QUẬN 4', lng: 106.7045, lat: 10.7595, minZ: 12, maxZ: 18 },
+  { label: 'QUẬN 5', lng: 106.6750, lat: 10.7565, minZ: 12, maxZ: 18 },
+  { label: 'BÌNH THẠNH', lng: 106.7125, lat: 10.8025, minZ: 12, maxZ: 18 },
+  { label: 'TP. THỦ ĐỨC', lng: 106.7320, lat: 10.7825, minZ: 11, maxZ: 18 },
+  { label: 'PHÚ NHUẬN', lng: 106.6815, lat: 10.7985, minZ: 12, maxZ: 18 },
+  { label: 'TP. HỒ CHÍ MINH', lng: 106.7009, lat: 10.7769, minZ: 5, maxZ: 11 },
+  { label: 'HÀ NỘI', lng: 105.8542, lat: 21.0285, minZ: 5, maxZ: 11 },
+  { label: 'ĐÀ NẴNG', lng: 108.2022, lat: 16.0544, minZ: 5, maxZ: 11 },
+  { label: 'CẦN THƠ', lng: 105.7851, lat: 10.0452, minZ: 5, maxZ: 11 },
+  { label: 'NHA TRANG', lng: 109.1967, lat: 12.2388, minZ: 5, maxZ: 11 },
+];
+
+// ============================================================================
+// COMPONENT NATIVE <IMAGE> TILE VỚI 4 NGUỒN DỰ PHÒNG TỰ ĐỘNG (GOOGLE VN -> CARTO -> ESRI -> OSM)
+// ============================================================================
+function buildTileUrl(providerIdx: number, z: number, x: number, y: number): string {
+  const sub = ['a', 'b', 'c'][Math.abs(x + y) % 3];
+  switch (providerIdx) {
+    case 0:
+      return `https://mt1.google.com/vt/lyrs=m&hl=vi&x=${x}&y=${y}&z=${z}`;
+    case 1:
+      return `https://${sub}.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}.png`;
+    case 2:
+      return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${z}/${y}/${x}`;
+    default:
+      return `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+  }
+}
+
+const NativeSlippyTile: React.FC<{
+  z: number;
+  x: number;
+  y: number;
+  left: number;
+  top: number;
+  preferredProvider: number;
+  onTileLoaded?: () => void;
+}> = React.memo(({ z, x, y, left, top, preferredProvider, onTileLoaded }) => {
+  const [fallbackOffset, setFallbackOffset] = useState(0);
+
+  useEffect(() => {
+    setFallbackOffset(0);
+  }, [z, x, y, preferredProvider]);
+
+  if (fallbackOffset >= 4) {
+    return null;
+  }
+
+  const activeProvider = (preferredProvider + fallbackOffset) % 4;
+  const uri = buildTileUrl(activeProvider, z, x, y);
+
+  return (
+    <Image
+      source={{
+        uri,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+          Accept: 'image/png,image/webp,image/*,*/*;q=0.8',
+        },
+      }}
+      style={[
+        styles.nativeTile,
+        {
+          left,
+          top,
+        },
+      ]}
+      resizeMode="cover"
+      onLoad={onTileLoaded}
+      onError={() => {
+        setFallbackOffset((prev) => prev + 1);
+      }}
+    />
+  );
+});
+
+const PROVIDER_NAMES = ['Google VN', 'CARTO', 'Esri', 'Vector VN'];
+
 export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) => {
-  const webViewRef = useRef<any>(null);
-  // Quyết định 148: WebView chiếm trọn bằng flex: 1 (không onLayout/kích thước cứng).
   const { transactions } = useTransactionStore();
+
+  // Ánh xạ giao dịch thật từ useTransactionStore (0 hardcode)
+  const mappedExpenses = useMemo(() => mapTransactionsToSpendPoints(transactions), [transactions]);
+  const allPlaces = useMemo(() => buildPlaces(mappedExpenses), [mappedExpenses]);
+
+  const firstCoord = allPlaces[0] || { lng: 106.7009, lat: 10.7769 };
+
+  const [activeMode, setActiveMode] = useState<FilterMode>('recent14');
+  const [selectedPlace, setSelectedPlace] = useState<SpendPlace | null>(null);
+  const [center, setCenter] = useState<{ lng: number; lat: number }>({
+    lng: firstCoord.lng,
+    lat: firstCoord.lat,
+  });
+  const [zoom, setZoom] = useState<number>(14);
+  const [userPos, setUserPos] = useState<{ lng: number; lat: number }>({
+    lng: firstCoord.lng,
+    lat: firstCoord.lat,
+  });
+  const [mapSize, setMapSize] = useState<{ width: number; height: number }>({
+    width: 350,
+    height: 360,
+  });
+  const [providerMode, setProviderMode] = useState<number>(0); // 0: Google VN, 1: CARTO, 2: Esri, 3: Pure Vector VN
+
+  const clampVN = useCallback((lng: number, lat: number) => {
+    return {
+      lng: Math.max(101.5, Math.min(118.5, lng)),
+      lat: Math.max(7.0, Math.min(24.0, lat)),
+    };
+  }, []);
+
+  // Giữ tham chiếu cho PanResponder kéo bản đồ mượt 60FPS
+  const stateRef = useRef({ center, zoom });
+  stateRef.current = { center, zoom };
+  const panStartWorldRef = useRef<{ x: number; y: number; z: number } | null>(null);
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_evt, gesture) =>
+          Math.abs(gesture.dx) > 2 || Math.abs(gesture.dy) > 2,
+        onPanResponderGrant: () => {
+          const z = Math.round(stateRef.current.zoom);
+          const w = lngLatToWorld(stateRef.current.center.lng, stateRef.current.center.lat, z);
+          panStartWorldRef.current = { x: w.x, y: w.y, z };
+        },
+        onPanResponderMove: (_evt, gesture) => {
+          if (!panStartWorldRef.current) return;
+          const { x, y, z } = panStartWorldRef.current;
+          const next = worldToLngLat(x - gesture.dx, y - gesture.dy, z);
+          setCenter(clampVN(next.lng, next.lat));
+        },
+        onPanResponderRelease: () => {
+          panStartWorldRef.current = null;
+        },
+        onPanResponderTerminate: () => {
+          panStartWorldRef.current = null;
+        },
+      }),
+    [clampVN]
+  );
+
+  function flyTo(lng: number, lat: number, nextZoom?: number) {
+    setCenter(clampVN(lng, lat));
+    if (typeof nextZoom === 'number') {
+      setZoom(Math.max(5, Math.min(18, Math.round(nextZoom))));
+    }
+  }
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -29,811 +551,576 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
 
   const handleReload = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    webViewRef.current?.reload();
+    setProviderMode((prev) => (prev + 1) % 4);
   };
 
-  const handleMessage = (event: any) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'HAPTIC_LIGHT') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      } else if (data.type === 'HAPTIC_SUCCESS') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } else if (data.type === 'JS_ERROR') {
-        // Quyết định 148: Cầu nối bắt lỗi JS trong WebView, không để lỗi chết âm thầm.
-        console.warn('[PiggySpendMapView] WebView JS error:', data.message, 'line', data.line, 'col', data.col);
-      }
-    } catch (e) {
-      // ignore
-    }
+  const handleZoomIn = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setZoom((z) => Math.min(18, z + 1));
   };
 
-  // Ánh xạ giao dịch thực tế vào danh sách quán trên bản đồ
-  const realPinsPayload = useMemo(() => {
-    const expenses = transactions
-      .filter((t) => t.type === 'EXPENSE' && (t.status === 'CONFIRMED' || !t.status))
-      .slice(0, 10);
+  const handleZoomOut = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setZoom((z) => Math.max(5, z - 1));
+  };
 
-    return JSON.stringify(
-      expenses.map((t, idx) => {
-        let kind = 'food';
-        const cat = (t.category || '').toLowerCase();
-        const desc = (t.description || '').toLowerCase();
-        if (cat.includes('cafe') || desc.includes('cafe') || desc.includes('trà')) kind = 'cafe';
-        else if (cat.includes('xe') || cat.includes('di') || desc.includes('xăng') || desc.includes('grab')) kind = 'gas';
-        else if (cat.includes('mua') || desc.includes('quần') || desc.includes('áo')) kind = 'shop';
-        else if (cat.includes('chợ') || desc.includes('chợ')) kind = 'market';
-
-        return {
-          id: 100 + idx,
-          name: t.description || 'Khoản chi #' + (idx + 1),
-          kind,
-          amount: t.amount,
-          date: t.created_at,
-        };
-      })
-    );
-  }, [transactions]);
-
-  const htmlContent = `
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<script>
-/* Quyết định 148: cầu nối bắt lỗi JS — bắn về React Native thay vì chết âm thầm */
-window.onerror = function (msg, src, line, col) {
-  try {
-    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'JS_ERROR', message: String(msg), line: line || 0, col: col || 0 }));
-    }
-  } catch (e) {}
-  return false;
-};
-</script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800&display=swap">
-<style>
-:root {
-  --page: #F6EEDC;
-  --screen: #F6EEDC;
-  --card: #FFFBF1;
-  --ink: #2B2118;
-  --muted: #85735E;
-  --pig: #F9B8C4;
-  --green: #5E9A57;
-  --red: #E0452B;
-  --gold: #F4B93B;
-  --line: #D9C9A4;
-  --f-display: 'Baloo 2', system-ui, sans-serif;
-  --f-body: 'Nunito', system-ui, sans-serif;
-}
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body {
-  margin: 0;
-  padding: 12px 14px 40px;
-  background: var(--page);
-  color: var(--ink);
-  font: 600 14px/1.4 var(--f-body);
-  user-select: none;
-  -webkit-user-select: none;
-}
-.btn {
-  font: 800 13px/1.2 var(--f-body);
-  color: var(--ink);
-  background: var(--card);
-  border: 2.5px solid var(--ink);
-  border-radius: 999px;
-  padding: 6px 12px;
-  box-shadow: 0 3px 0 var(--ink);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
-.btn.dark { background: var(--ink); color: var(--screen); }
-.btn.gold { background: var(--gold); }
-.btn.small { padding: 5px 10px; font-size: 11.5px; }
-.btn[aria-pressed="true"] { background: var(--ink); color: var(--screen); }
-.card {
-  background: var(--card);
-  border: 2.5px solid var(--ink);
-  border-radius: 20px;
-  box-shadow: 0 3px 0 var(--ink);
-}
-.label {
-  font: 800 11px/1.2 var(--f-body);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.flytop {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.flytop .who {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.flytop .who b {
-  font: 800 20px/1.1 var(--f-display);
-}
-.flytop .who span {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 700;
-}
-.flystats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-top: 10px;
-}
-.flystats>div {
-  min-width: 0;
-  padding: 6px 8px;
-  background: var(--card);
-  border: 2.5px solid var(--ink);
-  border-radius: 16px;
-  box-shadow: 0 3px 0 var(--ink);
-  text-align: center;
-}
-.flystats b {
-  display: block;
-  font: 800 18px/1.1 var(--f-display);
-  font-variant-numeric: tabular-nums;
-}
-.camchips {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-.scene.mapwrap {
-  position: relative;
-  margin-top: 10px;
-  background: #EFE2BF;
-  border: 3px solid var(--ink);
-  border-radius: 24px;
-  box-shadow: 0 4px 0 var(--ink);
-  overflow: hidden;
-  text-align: center;
-}
-.scene.mapwrap canvas {
-  display: block;
-  width: 100%;
-  max-width: 360px;
-  height: auto;
-  margin: 0 auto;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  cursor: pointer;
-}
-.gpspill {
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  max-width: calc(100% - 20px);
-  padding: 4px 10px;
-  background: var(--card);
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  box-shadow: 0 2px 0 var(--ink);
-  font: 800 11.5px/1.2 var(--f-body);
-  pointer-events: none;
-}
-.mpmode {
-  display: flex;
-  gap: 6px;
-  margin: 10px 0 0;
-}
-.mpmode .btn {
-  flex: 1;
-  justify-content: center;
-  min-height: 40px;
-}
-.realwrap {
-  position: relative;
-  margin-top: 10px;
-  height: 250px;
-  background: #CDE6C4;
-  border: 3px solid var(--ink);
-  border-radius: 22px;
-  overflow: hidden;
-  box-shadow: 0 4px 0 var(--ink);
-}
-#mpRealMap {
-  position: absolute;
-  inset: 0;
-}
-.realmsg {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  line-height: 1.45;
-  text-align: center;
-  font-weight: 800;
-  font-size: 13px;
-  background: #EFE2BF;
-  color: var(--ink);
-}
-.geoform {
-  margin-top: 10px;
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.geoform input[type=text], .geoform select {
-  height: 42px;
-  padding: 0 12px;
-  border: 2.5px solid var(--ink);
-  border-radius: 999px;
-  background: var(--card);
-  font: 700 13px var(--f-body);
-  color: var(--ink);
-  width: 100%;
-}
-.geoform .row2 {
-  display: flex;
-  gap: 8px;
-}
-.geoform .row2>* {
-  flex: 1;
-  min-width: 0;
-}
-.geochk {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-}
-.pact {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 6px;
-}
-.gpspill i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--red);
-  border: 1.5px solid var(--ink);
-  animation: gp 1.2s ease-in-out infinite;
-}
-@keyframes gp { 50% { transform: scale(.6); } }
-.flytoast {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 10px;
-  text-align: center;
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity .2s, transform .2s;
-  font: 800 13px/1.25 var(--f-body);
-  padding: 6px 10px;
-  background: var(--card);
-  border: 2.5px solid var(--ink);
-  border-radius: 14px;
-  box-shadow: 0 3px 0 var(--ink);
-  z-index: 2;
-}
-.flytoast.on { opacity: 1; transform: none; }
-.mpctl {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-}
-.mpctl .btn {
-  flex: 1;
-  justify-content: center;
-  min-height: 42px;
-}
-.msheet {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
-  margin-top: 10px;
-}
-.msheet>b { font: 800 17px/1.2 var(--f-display); }
-.msheet>span { font-size: 12px; color: var(--muted); font-weight: 700; }
-.mgrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-.mgrid div {
-  padding: 5px 2px;
-  background: var(--screen);
-  border: 2.5px solid var(--ink);
-  border-radius: 14px;
-  text-align: center;
-}
-.mgrid b {
-  display: block;
-  font: 800 16px/1.1 var(--f-display);
-  font-variant-numeric: tabular-nums;
-}
-.mgrid span { font-size: 10px; color: var(--muted); font-weight: 700; }
-.pact {
-  display: flex;
-  gap: 8px;
-  margin-top: 6px;
-}
-.pact .btn { flex: 1; justify-content: center; }
-.mplist {
-  margin-top: 10px;
-  padding: 12px 14px;
-}
-.mrow {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 2px;
-  background: transparent;
-  border: 0;
-  border-bottom: 1.5px dashed var(--line);
-  text-align: left;
-  cursor: pointer;
-  color: var(--ink);
-  font: inherit;
-}
-.mrow:last-child { border-bottom: 0; }
-.mrow em {
-  font: 800 14px var(--f-display);
-  font-style: normal;
-  width: 16px;
-  text-align: center;
-}
-.kd {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  border: 1.5px solid var(--ink);
-  flex: none;
-}
-.mn {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-.mn b { font: 800 13.5px/1.2 var(--f-body); }
-.mn small { font-size: 11px; color: var(--muted); font-weight: 700; }
-.mv {
-  flex: none;
-  font: 800 13px var(--f-display);
-  font-variant-numeric: tabular-nums;
-}
-</style>
-</head>
-<body>
-
-  <div class="flytop">
-    <div class="who"><b>Bản đồ chi tiêu</b><span id="mpSub">Phường Heo Con · khu phố tưởng tượng</span></div>
-  </div>
-
-  <div class="mpmode" id="mpMode" role="group" aria-label="Loại bản đồ">
-    <button class="btn" type="button" data-m="pixel" aria-pressed="true">Pixel</button>
-    <button class="btn" type="button" data-m="real" aria-pressed="false">Bản đồ thật</button>
-  </div>
-
-  <div class="flystats">
-    <div><span class="label">Lượt ghé</span><b id="mpS1">0</b></div>
-    <div><span class="label">Quán quen</span><b id="mpS2">0</b></div>
-    <div><span class="label">Chi có ghim</span><b id="mpS3">0</b></div>
-  </div>
-
-  <div id="mpReal" hidden>
-    <div class="scene realwrap">
-      <div id="mpRealMap" role="application" aria-label="Bản đồ Việt Nam thật"></div>
-      <div class="realmsg" id="mpRealMsg" role="status">Đang kết nối OpenFreeMap Việt Nam…</div>
-    </div>
-    <div class="card geoform">
-      <div class="label">Lưu chi tại vị trí thật</div>
-      <input id="geoName" type="text" maxlength="40" placeholder="Tên quán (để trống thì tự đoán theo vị trí)" aria-label="Tên quán" autocomplete="off">
-      <div class="row2">
-        <input id="geoAmt" type="text" inputmode="numeric" placeholder="Số tiền (đ)" aria-label="Số tiền" autocomplete="off">
-        <select id="geoCat" aria-label="Danh mục">
-          <option value="an">Ăn uống</option>
-          <option value="di">Đi lại</option>
-          <option value="mua">Mua sắm</option>
-        </select>
-      </div>
-      <label class="geochk"><input type="checkbox" id="geoOn" checked> Tự ghim vị trí khi lưu chi ở tab Chụp</label>
-      <div class="pact">
-        <button class="btn" type="button" id="geoLocate">Vị trí của tôi</button>
-        <button class="btn gold" type="button" id="geoSave">Lưu chi và ghim</button>
-      </div>
-      <small style="font-size:11px;color:var(--muted);font-weight:700">Chỉ lấy GPS lúc bấm lưu, không theo dõi nền. Dữ liệu ghim lưu trong máy.</small>
-    </div>
-    <div class="card" style="margin-top:10px;padding:10px 12px;"><div class="label" style="margin-bottom:6px">Ghim thật gần đây</div><div id="geoList"></div></div>
-  </div>
-
-  <div class="camchips" id="mpChips" role="group"></div>
-
-  <div class="scene mapwrap" id="mpWrap">
-    <canvas id="mpCv" width="192" height="200"></canvas>
-    <div class="gpspill"><i></i><span id="mpGps">GPS · Khu phố</span></div>
-    <div class="flytoast" id="mpToast"></div>
-  </div>
-
-  <div class="mpctl">
-    <button class="btn" type="button" id="mpWalk">Heo đi dạo</button>
-  </div>
-
-  <div id="mpSheet"></div>
-
-  <div class="card mplist">
-    <div class="label" id="mpListT">Danh sách quán</div>
-    <div id="mpList"></div>
-  </div>
-
-<script>
-(function(){
-'use strict';
-const $ = id => document.getElementById(id);
-function notify(type) {
-  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type }));
-  }
-}
-
-function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-const R=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
-const E=(c,cx,cy,rx,ry,col)=>{c.fillStyle=col;for(let y=-ry;y<=ry;y++)for(let x=-rx;x<=rx;x++)if(x*x/(rx*rx)+y*y/(ry*ry)<=1)c.fillRect(cx+x,cy+y,1,1)};
-function mk(w,h,fn){const cv=document.createElement('canvas');cv.width=w;cv.height=h;fn(cv.getContext('2d'));return cv}
-
-const MW=192,MH=200,HS=[36,96,150],VS=[40,100,156];
-const KIND={
-  food:{n:'Quán ăn',c:'#E0452B'},
-  cafe:{n:'Cà phê, trà',c:'#D9822B'},
-  market:{n:'Chợ / Tươi sống',c:'#5E9A57'},
-  shop:{n:'Cửa hàng, quần áo',c:'#E8548C'},
-  gas:{n:'Đi lại, xăng xe',c:'#4B6FA5'},
-  fun:{n:'Giải trí',c:'#8A5BB5'}
-};
-
-const BASE_MPL=[
-  {id:1,name:'Phở Bát Đàn',kind:'food',x:58,y:66,w:9,avg:55000},
-  {id:2,name:'Cà phê Giảng',kind:'cafe',x:84,y:26,w:10,avg:35000},
-  {id:3,name:'Bánh mì Dân Tổ',kind:'food',x:122,y:66,w:7,avg:30000},
-  {id:4,name:'Chợ Đồng Xuân',kind:'market',x:134,y:124,w:5,avg:180000},
-  {id:5,name:'Cửa hàng tiện lợi',kind:'shop',x:54,y:122,w:4,avg:75000},
-  {id:6,name:'Trà sữa Đinh Tiên Hoàng',kind:'cafe',x:116,y:108,w:8,avg:45000},
-  {id:7,name:'Cây xăng Petrolimex',kind:'gas',x:22,y:128,w:4,avg:60000}
-];
-
-let MPL = BASE_MPL.slice();
-const realItems = ${realPinsPayload};
-if (Array.isArray(realItems) && realItems.length > 0) {
-  const coords = [[72,136],[20,52],[174,62],[112,170],[170,24]];
-  realItems.forEach((it, idx) => {
-    const c = coords[idx % coords.length];
-    MPL.unshift({
-      id: it.id,
-      name: it.name,
-      kind: it.kind || 'food',
-      x: c[0],
-      y: c[1],
-      w: 8,
-      avg: it.amount || 45000
-    });
-  });
-}
-
-const MPBY = Object.fromEntries(MPL.map(p=>[p.id,p]));
-const mpLog = [];
-(function(){
-  const rd=mulberry32(88);
-  MPL.forEach(p=>{
-    const visits = 2 + ((rd()*6)|0);
-    for(let i=0;i<visits;i++){
-      mpLog.push({id:p.id,ago:1+((rd()*14)|0),amt:p.avg});
-    }
-  });
-})();
-
-function mpStats(){
-  MPL.forEach(p=>{p.v=0;p.v14=0;p.sum=0;p.last=1e9});
-  mpLog.forEach(l=>{
-    const p=MPBY[l.id];if(!p)return;
-    p.v++;p.sum+=l.amt;if(l.ago<=14)p.v14++;if(l.ago<p.last)p.last=l.ago;
-  });
-}
-mpStats();
-
-const agoTxt = h => h<=1 ? 'Hôm nay' : h<=2 ? 'Hôm qua' : h+' ngày trước';
-const fmtK = n => n>=1e6?(n/1e6).toFixed(1)+'tr':Math.round(n/1000)+'k';
-
-/* Nền bản đồ */
-const MCOL=[[0,37],[43,97],[103,153],[159,192]],MROW=[[0,33],[39,93],[99,147],[153,182]];
-const mpBase=mk(MW,MH,(c)=>{
-  const rd=mulberry32(21),pal=['#F4C6C0','#F2DFA8','#C6D6E8','#D9E8C8','#E9B8A0','#B9D3C8'];
-  R(c,0,0,MW,MH,'#EFE2BF');
-  MCOL.forEach(([x0,x1],ci)=>MROW.forEach(([y0,y1],ri)=>{
-    R(c,x0,y0,x1-x0,y1-y0,'#E6D6AE');
-    for(let by=y0+3;by+11<=y1;by+=13)for(let bx=x0+3;bx+12<=x1-1;bx+=14){
-      const col=pal[(rd()*pal.length)|0];R(c,bx,by,12,10,col);
-      R(c,bx+2,by+5,2,2,'#7FB5C8');
-    }
-  }));
-  /* Công viên & ao */
-  R(c,0,0,37,33,'#B5DB9A');
-  [[6,8],[14,24],[28,10]].forEach(([x,y])=>{E(c,x,y,4,4,'#2B2118');E(c,x,y,3,3,'#5E9A57')});
-  E(c,176,166,12,9,'#2B2118');E(c,176,166,11,8,'#9AD3E6');
-  /* Đường */
-  HS.forEach(y=>{R(c,0,y-4,MW,9,'#2B2118');R(c,0,y-3,MW,7,'#FFFBF1')});
-  VS.forEach(x=>{R(c,x-4,0,9,MH,'#2B2118');R(c,x-3,0,7,MH,'#FFFBF1')});
-  HS.forEach(y=>VS.forEach(x=>R(c,x-3,y-3,7,7,'#FFFBF1')));
-});
-
-/* Ghim */
-function drawPin(c,x,y,kind,star){
-  c.save();c.translate(x,y);
-  E(c,0,1,3,1,'rgba(40,25,10,.3)');
-  const col=KIND[kind]?KIND[kind].c:'#E0452B';
-  R(c,-4,-16,9,9,'#2B2118');R(c,-3,-15,7,7,col);
-  R(c,-2,-7,5,4,'#2B2118');R(c,-1,-6,3,3,col);
-  R(c,0,-3,1,3,'#2B2118');
-  R(c,-1,-13,3,3,star?'#F4B93B':'#FFFBF1');
-  c.restore();
-}
-
-const mpC=$('mpCv'),mpX=mpC.getContext('2d');
-const MODES=['Hay tới gần đây','Quán thường xuyên','Vị trí gần đây','Nhiều nhất'];
-const mpS={mode:0,sel:null,last:0,t:0,speed:42};
-const me={x:100,y:96,path:[],dest:null};
-
-function drawPigHead(c,x,y){
-  E(c,x,y,7,7,'#2B2118');E(c,x,y,6,6,'#F9B8C4');
-  R(c,x-2,y-1,4,3,'#EE90A6');R(c,x-1,y,1,1,'#2B2118');R(c,x+1,y,1,1,'#2B2118');
-  R(c,x-4,y-2,1,1,'#2B2118');R(c,x+3,y-2,1,1,'#2B2118');
-}
-
-function mpDraw(t){
-  const c=mpX;c.imageSmoothingEnabled=false;
-  c.drawImage(mpBase,0,0);
-
-  MPL.forEach(p=>{
-    const sel=mpS.sel===p.id;
-    drawPin(c,p.x,p.y,p.kind,p.v>=6);
-    if(sel){
-      R(c,p.x-2,p.y-22,5,1,'#2B2118');
-      R(c,p.x-1,p.y-21,3,1,'#F4B93B');
-    }
-  });
-
-  drawPigHead(c,Math.round(me.x),Math.round(me.y-6));
-}
-
-function nearRoad(x,y){
-  let b=null;
-  HS.forEach((hy)=>{const d=Math.abs(y-hy);if(!b||d<b.d)b={d,x,y:hy,h:true}});
-  VS.forEach((vx)=>{const d=Math.abs(x-vx);if(d<b.d)b={d,x:vx,y,h:false}});
-  return b;
-}
-
-function mpGo(p){
-  notify('HAPTIC_LIGHT');
-  const r0=nearRoad(me.x,me.y),r1=nearRoad(p.x,p.y);
-  me.path=[[r0.x,r0.y],[r1.x,r0.y],[r1.x,r1.y],[p.x,p.y]];
-  me.dest=p;mpS.sel=p.id;
-  mpSheet();
-  $('mpGps').textContent='Heo đang tới '+p.name;
-}
-
-function mpUpdate(dt){
-  if(me.path.length){
-    const g=me.path[0],dx=g[0]-me.x,dy=g[1]-me.y,d=Math.hypot(dx,dy),st=mpS.speed*dt;
-    if(d<=st){
-      me.x=g[0];me.y=g[1];me.path.shift();
-      if(!me.path.length&&me.dest){
-        notify('HAPTIC_SUCCESS');
-        $('mpGps').textContent='Heo đã tới '+me.dest.name+'!';
-      }
+  const handleLocateMe = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setUserPos({ lng, lat });
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          flyTo(lng, lat, 15);
+        },
+        () => {
+          flyTo(userPos.lng, userPos.lat, 14);
+        },
+        { enableHighAccuracy: false, timeout: 4000, maximumAge: 60000 }
+      );
     } else {
-      me.x+=dx/d*st;me.y+=dy/d*st;
+      flyTo(userPos.lng, userPos.lat, 14);
     }
-  }
-}
+  };
 
-function mpSheet(){
-  const el=$('mpSheet'),p=MPBY[mpS.sel];
-  if(!p){
-    el.innerHTML='<div class="card msheet"><b>Chạm vào một ghim quán</b><span>Xem thống kê chi tiêu và bấm "Heo đi tới đây" để dẫn đường!</span></div>';
-    return;
-  }
-  el.innerHTML='<div class="card msheet"><div class="label">'+KIND[p.kind].n+'</div><b>'+p.name+'</b>'+
-  '<div class="mgrid"><div><b>'+p.v+'</b><span>Lượt ghé</span></div><div><b>'+fmtK(p.sum)+'</b><span>Tổng chi</span></div><div><b>'+fmtK(p.avg)+'</b><span>Trung bình</span></div></div>'+
-  '<span>Ghé gần nhất: '+agoTxt(p.last)+'</span>'+
-  '<div class="pact"><button class="btn" type="button" id="mpClose">Đóng</button><button class="btn dark" type="button" id="mpGo">Heo đi tới đây</button></div></div>';
+  const handleOpenDirections = (place: SpendPlace) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const label = encodeURIComponent(place.name || 'Điểm chi tiêu');
+    const url =
+      Platform.OS === 'ios'
+        ? `maps:0,0?q=${label}@${place.lat},${place.lng}`
+        : `geo:${place.lat},${place.lng}?q=${place.lat},${place.lng}(${label})`;
+    Linking.openURL(url).catch(() => {
+      Linking.openURL(
+        `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`
+      ).catch(() => {});
+    });
+  };
 
-  $('mpClose').onclick=()=>{mpS.sel=null;mpSheet()};
-  $('mpGo').onclick=()=>{mpGo(p)};
-}
-
-function mpList(){
-  const L=$('mpList');let h='';
-  MPL.slice(0,6).forEach((p,i)=>{
-    h+='<button class="mrow" type="button" data-id="'+p.id+'"><em>'+(i+1)+'</em>'+
-    '<i class="kd" style="background:'+KIND[p.kind].c+'"></i>'+
-    '<span class="mn"><b>'+p.name+'</b><small>'+KIND[p.kind].n+' · ghé '+p.v+' lần</small></span>'+
-    '<span class="mv">'+fmtK(p.sum)+'</span></button>';
-  });
-  L.innerHTML=h;
-  L.querySelectorAll('.mrow').forEach(b=>{
-    b.onclick=()=>{
-      const p=MPBY[+b.dataset.id];
-      if(p){mpS.sel=p.id;mpSheet();notify('HAPTIC_LIGHT')}
-    };
-  });
-}
-
-function mpBuildChips(){
-  const el=$('mpChips');el.innerHTML='';
-  MODES.forEach((m,i)=>{
-    const b=document.createElement('button');b.className='btn small';
-    b.textContent=m;b.setAttribute('aria-pressed',String(i===mpS.mode));
-    b.onclick=()=>{
-      mpS.mode=i;mpBuildChips();notify('HAPTIC_LIGHT');
-    };
-    el.appendChild(b);
-  });
-}
-
-function toLocal(e){
-  const r=mpC.getBoundingClientRect();
-  const scaleX=MW/r.width,scaleY=MH/r.height;
-  return{x:(e.clientX-r.left)*scaleX,y:(e.clientY-r.top)*scaleY};
-}
-
-mpC.addEventListener('pointerdown',e=>{
-  const p=toLocal(e);
-  let best=null,bd=18;
-  MPL.forEach(pl=>{
-    const d=Math.hypot(pl.x-p.x,pl.y-10-p.y);
-    if(d<bd){bd=d;best=pl}
-  });
-  if(best){
-    mpS.sel=best.id;mpSheet();notify('HAPTIC_LIGHT');
-  }
-});
-
-let isRealMap = false;
-function setMapMode(real) {
-  isRealMap = real;
-  const sub = $('mpSub');
-  if (sub) sub.textContent = real ? 'Bản đồ Việt Nam thật · OpenFreeMap 0$' : 'Phường Heo Con · khu phố tưởng tượng';
-  const wrap = $('mpWrap'), chips = $('mpChips'), sheet = $('mpSheet'), ctl = document.querySelector('.mpctl'), realDiv = $('mpReal');
-  if (wrap) wrap.hidden = real;
-  if (chips) chips.hidden = real;
-  if (sheet) sheet.hidden = real;
-  if (ctl) ctl.hidden = real;
-  if (realDiv) realDiv.hidden = !real;
-  document.querySelectorAll('#mpMode .btn').forEach(b => {
-    b.setAttribute('aria-pressed', String((b.dataset.m === 'real') === real));
-  });
-  if (real) {
-    const msg = $('mpRealMsg');
-    if (msg) {
-      msg.textContent = 'Đang tải bản đồ OpenFreeMap Việt Nam… (Bản đồ ngoại tuyến)';
-      setTimeout(() => {
-        msg.textContent = 'Đã kết nối bản đồ Việt Nam · Chạm "Vị trí của tôi" hoặc Lưu chi';
-      }, 1000);
+  const filteredPlaces = useMemo(() => {
+    const now = Date.now();
+    let list = allPlaces.slice();
+    if (activeMode === 'recent14') {
+      const sub = list.filter((p) => now - p.lastTs <= 14 * 86400000);
+      list = (sub.length ? sub : list).sort((a, b) => b.visits - a.visits || b.lastTs - a.lastTs);
+    } else if (activeMode === 'frequent') {
+      const sub = list.filter((p) => now - p.lastTs <= 30 * 86400000);
+      list = (sub.length ? sub : list).sort((a, b) => b.visits - a.visits || b.total - a.total);
+    } else if (activeMode === 'trail') {
+      list = list.sort((a, b) => b.lastTs - a.lastTs).slice(0, 6);
+    } else if (activeMode === 'top') {
+      list = list.sort((a, b) => b.total - a.total || b.visits - a.visits);
     }
-  }
-}
+    return list;
+  }, [allPlaces, activeMode]);
 
-const modeBar = $('mpMode');
-if (modeBar) {
-  modeBar.addEventListener('click', e => {
-    const b = e.target.closest('[data-m]');
-    if (b) {
-      notify('HAPTIC_LIGHT');
-      setMapMode(b.dataset.m === 'real');
+  const handleSelectPlace = (p: SpendPlace, shouldCenter: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedPlace(p);
+    if (shouldCenter) {
+      flyTo(p.lng, p.lat, Math.max(zoom, 15));
     }
-  });
-}
+  };
 
-$('mpWalk').onclick=()=>{
-  const target=MPL[(Math.random()*MPL.length)|0];
-  mpGo(target);
-};
+  const handleMapLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    if (width > 10 && height > 10) {
+      setMapSize({ width, height });
+    }
+  };
 
-let lastT=performance.now();
-function loop(now){
-  const dt=Math.min(.05,(now-lastT)/1000);lastT=now;
-  mpUpdate(dt);mpDraw(now/1000);
-  requestAnimationFrame(loop);
-}
+  // Tính toán danh sách gạch 256×256 và tọa độ màn hình
+  const z = Math.round(zoom);
+  const W = mapSize.width;
+  const H = mapSize.height;
+  const centerWorld = lngLatToWorld(center.lng, center.lat, z);
+  const originX = centerWorld.x - W / 2;
+  const originY = centerWorld.y - H / 2;
 
-$('mpS1').textContent=String(mpLog.length);
-$('mpS2').textContent=String(MPL.filter(p=>p.v>=3).length);
-$('mpS3').textContent=String(MPL.length);
+  const toScreen = useCallback(
+    (lng: number, lat: number) => {
+      const pt = lngLatToWorld(lng, lat, z);
+      return { x: pt.x - originX, y: pt.y - originY };
+    },
+    [z, originX, originY]
+  );
 
-mpBuildChips();
-mpSheet();
-mpList();
-requestAnimationFrame(loop);
-})();
-</script>
-</body>
-</html>
-  `;
+  const visibleTiles = useMemo(() => {
+    if (providerMode === 3) return []; // Chế độ Vector VN thuần
+    const minTx = Math.floor(originX / 256);
+    const maxTx = Math.floor((originX + W) / 256);
+    const minTy = Math.floor(originY / 256);
+    const maxTy = Math.floor((originY + H) / 256);
+    const maxIndex = Math.pow(2, z);
+    const tiles: Array<{ key: string; z: number; x: number; y: number; left: number; top: number }> = [];
 
-  const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
+    for (let tx = minTx; tx <= maxTx; tx++) {
+      for (let ty = minTy; ty <= maxTy; ty++) {
+        if (ty < 0 || ty >= maxIndex) continue;
+        const wx = ((tx % maxIndex) + maxIndex) % maxIndex;
+        tiles.push({
+          key: `${z}/${wx}/${ty}`,
+          z,
+          x: wx,
+          y: ty,
+          left: Math.round(tx * 256 - originX),
+          top: Math.round(ty * 256 - originY),
+        });
+      }
+    }
+    return tiles;
+  }, [originX, originY, W, H, z, providerMode]);
+
+  const coordsToSvgPoints = useCallback(
+    (coords: Array<[number, number]>) =>
+      coords
+        .map(([lng, lat]) => {
+          const s = toScreen(lng, lat);
+          return `${Math.round(s.x)},${Math.round(s.y)}`;
+        })
+        .join(' '),
+    [toScreen]
+  );
+
+  // Tọa độ chủ quyền Hoàng Sa & Trường Sa
+  const sovPoints = useMemo(
+    () => [
+      { label: 'Quần đảo Hoàng Sa (Việt Nam)', lng: 112.0, lat: 16.5 },
+      { label: 'Quần đảo Trường Sa (Việt Nam)', lng: 114.5, lat: 10.0 },
+    ],
+    []
+  );
+
+  const userScreen = toScreen(userPos.lng, userPos.lat);
 
   return (
     <View style={styles.container}>
-      {/* HEADER QUAY LẠI NEO-BRUTALIST */}
+      {/* HEADER TỐI GIẢN KHÔNG ĐƯỜNG KẺ NGANG — FOCUS ICON PIXEL 16×16 (Quyết định 175–178) */}
       <View style={styles.topHeader}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={styles.iconBtn}
           onPress={handleBack}
           activeOpacity={0.8}
+          accessibilityLabel="Quay lại"
         >
-          <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
-          <Text style={styles.backButtonText}>‹ Giải trí</Text>
+          <PixelIconBack size={18} />
         </TouchableOpacity>
 
         <View style={styles.headerTitleWrap}>
-          <Text style={styles.headerTitle}>🗺️ Bản Đồ Chi Tiêu</Text>
+          <PixelIconMapPin size={20} />
+          <Text style={styles.headerTitle}>Bản đồ</Text>
         </View>
 
         <TouchableOpacity
-          style={styles.iconAction}
+          style={styles.iconBtn}
           onPress={handleReload}
           activeOpacity={0.8}
+          accessibilityLabel="Đổi lớp bản đồ"
         >
-          <RefreshCw size={18} color="#2B2118" strokeWidth={2.4} />
+          <PixelIconReload size={16} />
         </TouchableOpacity>
       </View>
 
-      {/* WEBVIEW CANVAS SIÊU MƯỢT 60FPS (FLEX: 1 — KHÔNG BASEURL RỖNG, KHÔNG onLayout RE-RENDER) */}
-      <View style={styles.webContainer}>
-        {Platform.OS === 'web' ? (
-          <iframe
-            srcDoc={htmlContent}
-            style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#F6EEDC' } as any}
-          />
-        ) : (
-          <SafeWebView
-            ref={webViewRef}
-            originWhitelist={['*']}
-            source={memoizedSource}
-            containerStyle={styles.webViewContainer}
-            style={styles.webView}
-            scrollEnabled={true}
-            scalesPageToFit={false}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            automaticallyAdjustContentInsets={false}
-            contentInsetAdjustmentBehavior="never"
-            onMessage={handleMessage}
-          />
+      <ScrollView
+        style={styles.scrollBody}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 1 HÀNG 4 CHIP LỌC SIÊU GỌN */}
+        <View style={styles.filterRow}>
+          {(
+            [
+              { mode: 'recent14', label: '🔥 14N' },
+              { mode: 'frequent', label: '⭐ Quen' },
+              { mode: 'trail', label: '📍 Gần' },
+              { mode: 'top', label: '🏆 Top' },
+            ] as Array<{ mode: FilterMode; label: string }>
+          ).map((chip) => {
+            const active = activeMode === chip.mode;
+            return (
+              <TouchableOpacity
+                key={chip.mode}
+                style={[styles.fchip, active && styles.fchipActive]}
+                activeOpacity={0.85}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setActiveMode(chip.mode);
+                }}
+              >
+                <Text style={[styles.fchipText, active && styles.fchipTextActive]}>
+                  {chip.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* KHUNG BẢN ĐỒ ĐƯỜNG PHỐ VIỆT NAM THẬT 100% NATIVE REACT NATIVE */}
+        <View style={styles.mapShell} onLayout={handleMapLayout}>
+          <View style={styles.vnMap} {...panResponder.panHandlers}>
+            {/* LỚP 1: NỀN ĐỊA LÝ VECTOR ĐƯỜNG PHỐ & SÔNG SÀI GÒN / VIỆT NAM (HIỂN THỊ TỨC THÌ 0MS) */}
+            <Svg style={StyleSheet.absoluteFill} width={W} height={H}>
+              {/* Công viên cây xanh */}
+              {SAIGON_PARKS.map((pk) => {
+                const tl = toScreen(pk.lng - pk.rx, pk.lat + pk.ry);
+                const br = toScreen(pk.lng + pk.rx, pk.lat - pk.ry);
+                const pw = Math.max(8, br.x - tl.x);
+                const ph = Math.max(8, br.y - tl.y);
+                return (
+                  <G key={pk.name}>
+                    <Rect
+                      x={tl.x}
+                      y={tl.y}
+                      width={pw}
+                      height={ph}
+                      rx={8}
+                      fill="#C6E2B0"
+                      stroke="#9BC481"
+                      strokeWidth={1}
+                    />
+                    {z >= 14 && (
+                      <SvgText
+                        x={tl.x + pw / 2}
+                        y={tl.y + ph / 2 + 3}
+                        fill="#3B6E2C"
+                        fontSize={9}
+                        fontWeight="bold"
+                        textAnchor="middle"
+                      >
+                        {pk.name}
+                      </SvgText>
+                    )}
+                  </G>
+                );
+              })}
+
+              {/* Sông Sài Gòn, Kênh Nhiêu Lộc & Kênh Tàu Hủ */}
+              <Polyline
+                points={coordsToSvgPoints(SAIGON_RIVER_COORDS)}
+                fill="none"
+                stroke="#8ECBE3"
+                strokeWidth={z >= 14 ? 28 : z >= 12 ? 16 : 8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Polyline
+                points={coordsToSvgPoints(NHIEU_LOC_CANAL_COORDS)}
+                fill="none"
+                stroke="#9AD3E6"
+                strokeWidth={z >= 14 ? 10 : 5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Polyline
+                points={coordsToSvgPoints(TAU_HU_CANAL_COORDS)}
+                fill="none"
+                stroke="#9AD3E6"
+                strokeWidth={z >= 14 ? 12 : 6}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Hệ thống đại lộ & đường phố thực tế TP.HCM (Võ Văn Kiệt, Điện Biên Phủ, NKKN, Nguyễn Huệ, Lê Lợi, Pasteur...) */}
+              {SAIGON_ARTERIAL_ROADS.map((rd) => {
+                const pts = coordsToSvgPoints(rd.coords);
+                const mid = rd.coords[Math.floor(rd.coords.length / 2)];
+                const midPt = toScreen(mid[0], mid[1]);
+                return (
+                  <G key={rd.name}>
+                    <Polyline
+                      points={pts}
+                      fill="none"
+                      stroke="#C9B99B"
+                      strokeWidth={rd.highway ? 9 : 6}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <Polyline
+                      points={pts}
+                      fill="none"
+                      stroke={rd.highway ? '#FCE09B' : '#FFFBF1'}
+                      strokeWidth={rd.highway ? 6 : 4}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    {z >= 13 && (
+                      <SvgText
+                        x={midPt.x}
+                        y={midPt.y - 6}
+                        fill="#5A4836"
+                        fontSize={9.5}
+                        fontWeight="bold"
+                        textAnchor="middle"
+                      >
+                        {rd.name}
+                      </SvgText>
+                    )}
+                  </G>
+                );
+              })}
+
+              {/* Nhãn Quận / Thành phố Việt Nam */}
+              {DISTRICT_LABELS.filter((d) => z >= d.minZ && z <= d.maxZ).map((d) => {
+                const s = toScreen(d.lng, d.lat);
+                if (s.x < -60 || s.x > W + 60 || s.y < -20 || s.y > H + 20) return null;
+                return (
+                  <SvgText
+                    key={d.label}
+                    x={s.x}
+                    y={s.y}
+                    fill="#78644E"
+                    fontSize={11}
+                    fontWeight="bold"
+                    textAnchor="middle"
+                  >
+                    {d.label}
+                  </SvgText>
+                );
+              })}
+            </Svg>
+
+            {/* LỚP 2: GẠCH BẢN ĐỒ ĐƯỜNG PHỐ VIỆT NAM THẬT BẰNG NATIVE <IMAGE> (GOOGLE VN / CARTO / ESRI / OSM) */}
+            <View style={styles.tileLayer} pointerEvents="none">
+              {visibleTiles.map((t) => (
+                <NativeSlippyTile
+                  key={t.key}
+                  z={t.z}
+                  x={t.x}
+                  y={t.y}
+                  left={t.left}
+                  top={t.top}
+                  preferredProvider={providerMode}
+                />
+              ))}
+            </View>
+
+            {/* LỚP 3: ĐƯỜNG NỐI 6 ĐIỂM GẦN NHẤT (📍 Gần) & VÒNG NHIỆT HEATMAP (🏆 Top) */}
+            <Svg style={styles.svgOverlay} width={W} height={H} pointerEvents="none">
+              {activeMode === 'trail' && filteredPlaces.length > 1 && (
+                <Polyline
+                  points={filteredPlaces
+                    .map((p) => {
+                      const s = toScreen(p.lng, p.lat);
+                      return `${Math.round(s.x)},${Math.round(s.y)}`;
+                    })
+                    .join(' ')}
+                  fill="none"
+                  stroke="#E0452B"
+                  strokeWidth={3}
+                  strokeDasharray="6,5"
+                  strokeLinecap="round"
+                />
+              )}
+              {activeMode === 'top' &&
+                filteredPlaces.map((p) => {
+                  const s = toScreen(p.lng, p.lat);
+                  const r = Math.min(36, 16 + p.visits * 4);
+                  return (
+                    <Circle
+                      key={`heat-${p.id}`}
+                      cx={Math.round(s.x)}
+                      cy={Math.round(s.y)}
+                      r={r}
+                      fill="#F4B93B"
+                      fillOpacity={0.35}
+                      stroke="#E0452B"
+                      strokeWidth={2}
+                    />
+                  );
+                })}
+            </Svg>
+
+            {/* LỚP 4: NHÃN CHỦ QUYỀN HOÀNG SA & TRƯỜNG SA + MẶT HEO 16×16 + GHIM PIXEL 9×12 */}
+            <View style={styles.markerLayer} pointerEvents="box-none">
+              {sovPoints.map((sv) => {
+                const s = toScreen(sv.lng, sv.lat);
+                if (s.x < -120 || s.x > W + 120 || s.y < -40 || s.y > H + 40) return null;
+                return (
+                  <View
+                    key={sv.label}
+                    style={[
+                      styles.sovLabel,
+                      { left: Math.round(s.x) - 75, top: Math.round(s.y) - 12 },
+                    ]}
+                    pointerEvents="none"
+                  >
+                    <Text style={styles.sovLabelText}>{sv.label}</Text>
+                  </View>
+                );
+              })}
+
+              {/* Marker Mặt Heo 16×16 tại vị trí người dùng */}
+              {userScreen.x >= -30 &&
+                userScreen.x <= W + 30 &&
+                userScreen.y >= -30 &&
+                userScreen.y <= H + 30 && (
+                  <View
+                    style={[
+                      styles.pigMarkerWrap,
+                      {
+                        left: Math.round(userScreen.x) - 17,
+                        top: Math.round(userScreen.y) - 17,
+                      },
+                    ]}
+                    pointerEvents="none"
+                  >
+                    <View style={styles.pigBadge}>{drawPigFaceCanvas(22)}</View>
+                  </View>
+                )}
+
+              {/* Các ghim giao dịch chi tiêu thật 9×12 pixel */}
+              {filteredPlaces.map((p) => {
+                const s = toScreen(p.lng, p.lat);
+                if (s.x < -30 || s.x > W + 30 || s.y < -30 || s.y > H + 40) return null;
+                const meta = KIND_META[p.kind] || KIND_META.food;
+                const isSelected = selectedPlace?.id === p.id;
+                return (
+                  <TouchableOpacity
+                    key={p.id}
+                    activeOpacity={0.85}
+                    onPress={() => handleSelectPlace(p, false)}
+                    style={[
+                      styles.pinWrap,
+                      {
+                        left: Math.round(s.x) - 14,
+                        top: Math.round(s.y) - 36,
+                        transform: [{ scale: isSelected ? 1.2 : 1 }],
+                      },
+                    ]}
+                  >
+                    {drawPinCanvas(meta.col, 3)}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Nút chuyển nhanh nguồn bản đồ góc trên trái */}
+          <TouchableOpacity
+            style={styles.providerBadge}
+            activeOpacity={0.85}
+            onPress={handleReload}
+          >
+            <Text style={styles.providerBadgeText}>
+              🗺️ {PROVIDER_NAMES[providerMode]}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Nút bay nhanh ra Quần đảo Hoàng Sa & Trường Sa góc trên phải */}
+          <TouchableOpacity
+            style={styles.sovQuickBadge}
+            activeOpacity={0.85}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              if (zoom > 8) {
+                flyTo(111.5, 14.0, 6);
+              } else {
+                flyTo(firstCoord.lng, firstCoord.lat, 14);
+              }
+            }}
+          >
+            <Text style={styles.sovQuickText}>
+              {zoom > 8 ? '🇻🇳 Hoàng Sa · Trường Sa' : '🏙️ Về Phố'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Cụm nút Zoom +/- & GPS góc dưới phải */}
+          <View style={styles.mapCtrls}>
+            <TouchableOpacity
+              style={styles.mfab}
+              activeOpacity={0.8}
+              onPress={handleZoomIn}
+              accessibilityLabel="Phóng to"
+            >
+              <Text style={styles.mfabText}>+</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.mfab}
+              activeOpacity={0.8}
+              onPress={handleZoomOut}
+              accessibilityLabel="Thu nhỏ"
+            >
+              <Text style={styles.mfabText}>−</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.mfab}
+              activeOpacity={0.8}
+              onPress={handleLocateMe}
+              accessibilityLabel="Vị trí của tôi"
+            >
+              <Text style={styles.mfabEmoji}>🎯</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Ghi nguồn chuẩn ở góc dưới trái */}
+          <View style={styles.attrBar} pointerEvents="none">
+            <Text style={styles.attrText}>© OpenStreetMap · CARTO · OpenFreeMap</Text>
+          </View>
+        </View>
+
+        {/* THẺ MINI KHI CHẠM GHIM (CÓ NÚT CHỈ ĐƯỜNG DEEP LINK) */}
+        {selectedPlace && (
+          <View style={styles.placeCard}>
+            <View style={styles.pcInfo}>
+              <Text style={styles.pcName} numberOfLines={1}>
+                {selectedPlace.name}
+              </Text>
+              <Text style={styles.pcMeta}>
+                {selectedPlace.visits > 1 ? `${selectedPlace.visits} lần · ` : ''}
+                {fmtK(selectedPlace.total)}đ
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.pcDirBtn}
+              activeOpacity={0.85}
+              onPress={() => handleOpenDirections(selectedPlace)}
+            >
+              <Text style={styles.pcDirText}>🧭 Đi</Text>
+            </TouchableOpacity>
+          </View>
         )}
-      </View>
+
+        {/* DANH SÁCH KHOẢN CHI THẬT TỪ TRANSACTION STORE (0 HARDCODE) */}
+        <View style={styles.placeList}>
+          {filteredPlaces.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyCardText}>
+                Chưa có khoản chi nào · Chụp hoặc ghi chi để hiện ghim trên bản đồ
+              </Text>
+            </View>
+          ) : (
+            filteredPlaces.slice(0, 8).map((p) => {
+              const meta = KIND_META[p.kind] || KIND_META.food;
+              const isSelected = selectedPlace?.id === p.id;
+              return (
+                <TouchableOpacity
+                  key={p.id}
+                  style={[styles.prow, isSelected && styles.prowActive]}
+                  activeOpacity={0.85}
+                  onPress={() => handleSelectPlace(p, true)}
+                >
+                  <View style={styles.pico}>
+                    <Text style={styles.picoText}>{meta.icon}</Text>
+                  </View>
+                  <View style={styles.pmain}>
+                    <Text style={styles.pname} numberOfLines={1}>
+                      {p.name}
+                    </Text>
+                  </View>
+                  {p.visits > 1 && (
+                    <View style={styles.pbadge}>
+                      <Text style={styles.pbadgeText}>{p.visits}×</Text>
+                    </View>
+                  )}
+                  <Text style={styles.pamt}>{fmtK(p.total)}</Text>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -848,71 +1135,400 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingTop: 6,
+    paddingBottom: 6,
     backgroundColor: '#F6EEDC',
-    borderBottomWidth: 2.5,
-    borderBottomColor: '#2B2118',
+    borderBottomWidth: 0,
   },
-  backButton: {
-    flexDirection: 'row',
+  iconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
     backgroundColor: '#FFFBF1',
     borderWidth: 2.5,
     borderColor: '#2B2118',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 2,
   },
-  backButtonText: {
-    fontFamily: 'Nunito',
-    fontWeight: '800',
-    fontSize: 13,
-    color: '#2B2118',
-  },
   headerTitleWrap: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
   headerTitle: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 18,
+    fontSize: 17,
     color: '#2B2118',
   },
-  iconAction: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#FFFBF1',
+  scrollBody: {
+    flex: 1,
+    width: '100%',
+  },
+  scrollContent: {
+    paddingTop: 4,
+    paddingHorizontal: 12,
+    paddingBottom: 110, // padding: 4px 12px 110px — Chống chồng đè Floating Pill Tab Bar
+  },
+  filterRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 10,
+  },
+  fchip: {
+    flex: 1,
+    height: 34,
+    borderRadius: 999,
     borderWidth: 2.5,
     borderColor: '#2B2118',
-    justifyContent: 'center',
+    backgroundColor: '#FFFBF1',
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 2,
   },
-  webContainer: {
+  fchipActive: {
+    backgroundColor: '#2B2118',
+  },
+  fchipText: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 12,
+    color: '#2B2118',
+  },
+  fchipTextActive: {
+    color: '#FFFBF1',
+  },
+  mapShell: {
+    position: 'relative',
+    width: '100%',
+    height: 350,
+    borderWidth: 3,
+    borderColor: '#2B2118',
+    borderRadius: 20,
+    backgroundColor: '#EDE3CC',
+    overflow: 'hidden',
+    marginBottom: 12,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
+  vnMap: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#F6EEDC',
+    height: '100%',
     overflow: 'hidden',
   },
-  webViewContainer: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: '#F6EEDC',
+  tileLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 2,
   },
-  webView: {
+  nativeTile: {
+    position: 'absolute',
+    width: 256,
+    height: 256,
+  },
+  svgOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 4,
+  },
+  markerLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 6,
+  },
+  sovLabel: {
+    position: 'absolute',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,251,241,0.94)',
+    borderWidth: 1.5,
+    borderColor: '#2B2118',
+  },
+  sovLabelText: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 9.5,
+    color: '#2B2118',
+  },
+  pigMarkerWrap: {
+    position: 'absolute',
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pigBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  pinWrap: {
+    position: 'absolute',
+    width: 28,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  providerBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    zIndex: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,251,241,0.94)',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+  },
+  providerBadgeText: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 10.5,
+    color: '#2B2118',
+  },
+  sovQuickBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,251,241,0.94)',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+  },
+  sovQuickText: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 10.5,
+    color: '#2B2118',
+  },
+  mapCtrls: {
+    position: 'absolute',
+    right: 10,
+    bottom: 28,
+    zIndex: 12,
+    gap: 7,
+  },
+  mfab: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
+  },
+  mfabText: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 18,
+    color: '#2B2118',
+    lineHeight: 20,
+  },
+  mfabEmoji: {
+    fontSize: 16,
+  },
+  attrBar: {
+    position: 'absolute',
+    left: 8,
+    bottom: 6,
+    zIndex: 11,
+    backgroundColor: 'rgba(255,251,241,0.92)',
+    borderWidth: 1.5,
+    borderColor: '#2B2118',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  attrText: {
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '700',
+    fontSize: 9.5,
+    color: '#2B2118',
+  },
+  placeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+    marginBottom: 10,
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
+  },
+  pcInfo: {
     flex: 1,
-    width: '100%',
+    minWidth: 0,
+  },
+  pcName: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 14,
+    color: '#2B2118',
+  },
+  pcMeta: {
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '700',
+    fontSize: 11.5,
+    color: '#85735E',
+    marginTop: 2,
+  },
+  pcDirBtn: {
+    height: 34,
+    paddingHorizontal: 11,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    backgroundColor: '#F4B93B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  pcDirText: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 12,
+    color: '#2B2118',
+  },
+  placeList: {
+    gap: 8,
+  },
+  prow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 11,
+    borderRadius: 15,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
+  },
+  prowActive: {
+    backgroundColor: '#F4E4BE',
+  },
+  pico: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#2B2118',
     backgroundColor: '#F6EEDC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  picoText: {
+    fontSize: 16,
+  },
+  pmain: {
+    flex: 1,
+    minWidth: 0,
+  },
+  pname: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 13.5,
+    color: '#2B2118',
+  },
+  pbadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 999,
+    backgroundColor: '#F6EEDC',
+    borderWidth: 1.5,
+    borderColor: '#2B2118',
+  },
+  pbadgeText: {
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '700',
+    fontSize: 10.5,
+    color: '#2B2118',
+  },
+  pamt: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 13.5,
+    color: '#2B2118',
+    fontVariant: ['tabular-nums'],
+  },
+  emptyCard: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 15,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+    alignItems: 'center',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
+  },
+  emptyCardText: {
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '700',
+    fontSize: 12.5,
+    color: '#85735E',
+    textAlign: 'center',
   },
 });

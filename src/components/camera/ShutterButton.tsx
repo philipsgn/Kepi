@@ -39,6 +39,7 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
 }) => {
   const { tokens, mode } = useTheme();
   const isHeocon = mode === 'heocon' || !mode;
+  const isPink = mode === 'pink';
   const [isPressed, setIsPressed] = useState(false);
   const [voiceRecordingInternal, setVoiceRecordingInternal] = useState(false);
   const [recordingActive, setRecordingActive] = useState(false);
@@ -158,7 +159,7 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* VÒNG TRÒN TIẾN ĐỘ QUAY VIDEO 3 GIÂY (SVG AMBER GOLD) */}
+      {/* VÒNG TRÒN TIẾN ĐỘ QUAY VIDEO 3 GIÂY (SVG ĐỒNG BỘ THEO THEME) */}
       <View style={styles.svgOverlay} pointerEvents="none">
         <Svg width={92} height={92} viewBox="0 0 92 92">
           {/* Vòng nền mờ tĩnh */}
@@ -166,7 +167,7 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
             cx="46"
             cy="46"
             r={CIRCLE_RADIUS}
-            stroke={isAnyVoiceActive ? 'rgba(224, 69, 43, 0.45)' : recordingActive ? 'rgba(229, 152, 68, 0.25)' : 'rgba(246, 184, 0, 0.35)'}
+            stroke={isAnyVoiceActive ? (isPink ? 'rgba(225, 29, 72, 0.45)' : 'rgba(224, 69, 43, 0.45)') : recordingActive ? (isPink ? 'rgba(244, 63, 94, 0.25)' : 'rgba(229, 152, 68, 0.25)') : (isPink ? 'rgba(244, 63, 94, 0.35)' : 'rgba(246, 184, 0, 0.35)')}
             strokeWidth="3.5"
             fill="none"
           />
@@ -176,7 +177,7 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
               cx="46"
               cy="46"
               r={CIRCLE_RADIUS}
-              stroke={isAnyVoiceActive ? '#E0452B' : '#E59844'}
+              stroke={isAnyVoiceActive ? (isPink ? '#E11D48' : '#E0452B') : (isPink ? '#F43F5E' : '#E59844')}
               strokeWidth="4"
               strokeDasharray={CIRCUMFERENCE}
               strokeDashoffset={isAnyVoiceActive ? 0 : strokeDashoffset}
@@ -189,7 +190,7 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
         </Svg>
       </View>
 
-      {/* NÚT BẤM SHUTTER CHÍNH (THEO PROTOTYPE CAMERA_HEO_CON NEO-BRUTALIST ĐỎ-VÀNG-MỰC) */}
+      {/* NÚT BẤM SHUTTER CHÍNH (CHUẨN NEO-BRUTALIST ĐỒNG BỘ THEO THEME VÀNG NÂU & HỒNG PASTEL) */}
       <TouchableOpacity
         activeOpacity={0.92}
         disabled={disabled}
@@ -198,37 +199,28 @@ export const ShutterButton: React.FC<ShutterButtonProps> = ({
         onPress={handlePress}
         style={[
           styles.shutterOuterRing,
-          isHeocon
-            ? {
-                borderColor: '#2B2118',
-                backgroundColor: '#F4B93B',
-                shadowColor: '#2B2118',
-                shadowOffset: { width: 0, height: isPressed ? 4 : 8 },
-                shadowOpacity: 1,
-                shadowRadius: 0,
-                elevation: isPressed ? 3 : 8,
-                transform: [{ translateY: isPressed ? 4 : 0 }],
-              }
-            : {
-                borderColor: tokens.primary,
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                shadowColor: tokens.primary,
-                transform: [{ scale: isPressed ? 0.92 : 1 }],
-              },
+          {
+            borderColor: tokens.border || '#2B2118',
+            backgroundColor: tokens.primary || '#F4B93B',
+            shadowColor: tokens.shadowColor || '#2B2118',
+            shadowOffset: { width: 0, height: isPressed ? 4 : 8 },
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            elevation: isPressed ? 3 : 8,
+            transform: [{ translateY: isPressed ? 4 : 0 }],
+          },
         ]}
       >
         <View
           style={[
             styles.shutterCenterCore,
-            isHeocon
-              ? {
-                  backgroundColor: (recordingActive || isAnyVoiceActive) ? '#B93220' : '#E0452B',
-                  borderColor: '#2B2118',
-                  borderWidth: 3.5,
-                }
-              : {
-                  backgroundColor: (recordingActive || isAnyVoiceActive) ? '#C86D51' : tokens.primary,
-                },
+            {
+              backgroundColor: (recordingActive || isAnyVoiceActive)
+                ? (isPink ? '#9F1239' : '#B93220')
+                : (isPink ? '#E11D48' : '#E0452B'),
+              borderColor: tokens.border || '#2B2118',
+              borderWidth: 3.5,
+            },
             (recordingActive || isAnyVoiceActive) && { borderRadius: 18, width: 44, height: 44 },
           ]}
         />

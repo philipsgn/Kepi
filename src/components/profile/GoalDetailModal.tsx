@@ -23,6 +23,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { ProgressBar } from '../common/ProgressBar';
+import { SegmentBar10 } from '../neo/SegmentBar10';
 import {
   calculateWaterfallGoals,
   formatMaskedCurrency,
@@ -89,7 +90,16 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
   goalReason,
   isMasked = false,
 }) => {
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isPink = mode === 'pink';
+  const isHeocon = true; // Cả Heo Con và Pastel Pink đều chuẩn Neo-Brutalist Pixel Art 100%
+  const cardBg = isPink ? '#FFFFFF' : '#FFFBF1';
+  const cardBorder = isPink ? '#3B0713' : '#2B2118';
+  const inkText = isPink ? '#3B0713' : '#2B2118';
+  const inkMuted = isPink ? '#834758' : '#6E5D4F';
+  const pageBg = isPink ? '#FFF5F7' : '#F6EEDC';
+  const chipBg = isPink ? '#FCE7F3' : '#FFF4CC';
+  const accentBtn = isPink ? '#F43F5E' : '#F4B93B';
 
   // 1. Chuẩn hóa danh sách mục tiêu
   const effectiveGoals = React.useMemo<GoalItem[]>(() => {
@@ -181,32 +191,85 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
         <View
           style={[
             styles.modalSheet,
-            { backgroundColor: tokens.surface, borderColor: tokens.border },
+            isHeocon
+              ? {
+                  backgroundColor: pageBg,
+                  borderColor: cardBorder,
+                  borderTopWidth: 3,
+                  borderLeftWidth: 3,
+                  borderRightWidth: 3,
+                  borderTopLeftRadius: 28,
+                  borderTopRightRadius: 28,
+                }
+              : { backgroundColor: tokens.surface, borderColor: tokens.border },
           ]}
         >
           {/* DRAG HANDLE */}
           <View style={styles.handleContainer}>
-            <View style={[styles.handleBar, { backgroundColor: tokens.border }]} />
+            <View
+              style={[
+                styles.handleBar,
+                { backgroundColor: isHeocon ? '#2B2118' : tokens.border },
+              ]}
+            />
           </View>
 
           {/* HEADER */}
-          <View style={[styles.headerRow, { borderBottomColor: tokens.border }]}>
+          <View
+            style={[
+              styles.headerRow,
+              {
+                borderBottomColor: isHeocon ? '#2B2118' : tokens.border,
+                borderBottomWidth: isHeocon ? 2 : 1,
+              },
+            ]}
+          >
             <View style={styles.headerTitleGroup}>
-              <View style={styles.iconBox}>
-                <Target size={20} color={tokens.primary} strokeWidth={2.6} />
+              <View
+                style={[
+                  styles.iconBox,
+                  isHeocon && {
+                    backgroundColor: '#F4B93B',
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: cardBorder,
+                  },
+                ]}
+              >
+                <Target size={18} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.6} />
               </View>
-              <Text style={[styles.sheetTitle, { color: tokens.text }]}>
+              <Text
+                style={[
+                  styles.sheetTitle,
+                  { color: inkText },
+                  isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 18 },
+                ]}
+              >
                 Chi Tiết Kế Hoạch Mục Tiêu
               </Text>
             </View>
 
             <TouchableOpacity
-              style={styles.closeBtn}
+              style={[
+                styles.closeBtn,
+                isHeocon
+                  ? {
+                      backgroundColor: '#FFF4CC',
+                      borderWidth: 2.5,
+                      borderColor: cardBorder,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                    }
+                  : null,
+              ]}
               onPress={onClose}
               activeOpacity={0.75}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <X size={18} color={tokens.textMuted} strokeWidth={2.6} />
+              <X size={18} color={isHeocon ? '#2B2118' : tokens.textMuted} strokeWidth={2.6} />
             </TouchableOpacity>
           </View>
 
@@ -218,20 +281,39 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
             <View
               style={[
                 styles.cardBox,
-                { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                isHeocon
+                  ? {
+                      backgroundColor: cardBg,
+                      borderColor: cardBorder,
+                      borderWidth: 3,
+                      borderRadius: 20,
+                      shadowColor: cardBorder,
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 1,
+                      shadowRadius: 0,
+                      elevation: 4,
+                    }
+                  : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
               ]}
             >
               <View style={styles.cardHeaderBetween}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <TrendingUp size={14} color={tokens.primary} strokeWidth={2.4} />
-                  <Text style={[styles.sectionCaption, { color: tokens.textMuted }]}>
+                  <TrendingUp size={16} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.6} />
+                  <Text
+                    style={[
+                      styles.sectionCaption,
+                      { color: inkMuted },
+                      { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                    ]}
+                  >
                     NỀN TẢNG: TÍCH LŨY THÁNG HIỆN TẠI
                   </Text>
                 </View>
                 <Text
                   style={[
                     styles.percentBadge,
-                    { color: isMonthAchieved ? '#7E9F80' : tokens.primary },
+                    { color: isMonthAchieved ? (isHeocon ? '#2D7A4D' : '#7E9F80') : (isHeocon ? '#B85E1A' : tokens.primary) },
+                    { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
                   ]}
                 >
                   {monthPercentage}%
@@ -239,50 +321,120 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
               </View>
 
               <View style={styles.metricRow}>
-                <Text style={[styles.metricMainAmount, { color: tokens.text }]}>
+                <Text
+                  style={[
+                    styles.metricMainAmount,
+                    { color: inkText },
+                    { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                  ]}
+                >
                   {isMasked ? '••••' : formatCompactVND(actualSavedThisMonth)}
-                  <Text style={[styles.metricTargetAmount, { color: tokens.textMuted }]}>
+                  <Text
+                    style={[
+                      styles.metricTargetAmount,
+                      { color: inkMuted },
+                      { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                    ]}
+                  >
                     {' '}/ {isMasked ? '••••' : formatCompactVND(monthlySavingsGoal)}
                   </Text>
                 </Text>
 
                 {isMonthAchieved ? (
-                  <View style={styles.achievedBadge}>
-                    <CheckCircle2 size={12} color="#7E9F80" />
-                    <Text style={[styles.achievedText, { color: '#7E9F80' }]}>Đã đạt</Text>
+                  <View
+                    style={[
+                      styles.achievedBadge,
+                      isHeocon && {
+                        backgroundColor: '#E8F5E9',
+                        paddingHorizontal: 8,
+                        paddingVertical: 3,
+                        borderRadius: 10,
+                        borderWidth: 1.5,
+                        borderColor: cardBorder,
+                      },
+                    ]}
+                  >
+                    <CheckCircle2 size={12} color={isHeocon ? '#2D7A4D' : '#7E9F80'} strokeWidth={2.4} />
+                    <Text
+                      style={[
+                        styles.achievedText,
+                        { color: isHeocon ? '#2D7A4D' : '#7E9F80' },
+                        { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                      ]}
+                    >
+                      Đã đạt
+                    </Text>
                   </View>
                 ) : null}
               </View>
 
-              <View style={styles.progressBarWrapper}>
-                <ProgressBar
-                  progress={monthPercentage / 100}
-                  height={8}
-                  customColor={isMonthAchieved ? '#7E9F80' : tokens.primary}
+              {isHeocon ? (
+                <SegmentBar10
+                  spent={actualSavedThisMonth}
+                  limit={monthlySavingsGoal}
+                  style={{ marginVertical: 4 }}
                 />
-              </View>
+              ) : (
+                <View style={styles.progressBarWrapper}>
+                  <ProgressBar
+                    progress={monthPercentage / 100}
+                    height={8}
+                    customColor={isMonthAchieved ? '#7E9F80' : tokens.primary}
+                  />
+                </View>
+              )}
 
-              <Text style={[styles.cardNoteText, { color: tokens.textMuted }]}>
+              <Text
+                style={[
+                  styles.cardNoteText,
+                  { color: inkMuted },
+                  { fontFamily: 'Nunito', fontWeight: '600' },
+                ]}
+              >
                 Chốt theo cơ chế bảo toàn hạn mức ngày từ Cân bằng ngân sách. Đây là động cơ tạo tiền để nuôi các mục tiêu dài hạn.
               </Text>
             </View>
 
             {/* ================= KHỐI 2: DANH SÁCH MỤC TIÊU DÀI HẠN (WATERFALL) ================= */}
             <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+              <Text
+                style={[
+                  styles.sectionHeaderText,
+                  { color: inkMuted },
+                  { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                ]}
+              >
                 Mục tiêu dài hạn ({waterfallGoals.length})
               </Text>
 
               <TouchableOpacity
                 style={[
                   styles.addSmallBtn,
-                  { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                  isHeocon
+                    ? {
+                        backgroundColor: '#F4B93B',
+                        borderWidth: 2,
+                        borderColor: cardBorder,
+                        shadowColor: cardBorder,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 2,
+                      }
+                    : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
                 ]}
                 onPress={handleAddGoal}
                 activeOpacity={0.8}
               >
-                <Plus size={13} color={tokens.primary} strokeWidth={2.4} />
-                <Text style={[styles.addSmallBtnText, { color: tokens.primary }]}>Thêm</Text>
+                <Plus size={13} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.6} />
+                <Text
+                  style={[
+                    styles.addSmallBtnText,
+                    isHeocon ? { color: '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' } : { color: tokens.primary },
+                  ]}
+                >
+                  Thêm
+                </Text>
               </TouchableOpacity>
             </View>
 
@@ -297,7 +449,19 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
                     key={item.goal.id || `goal-${index}`}
                     style={[
                       styles.goalCardItem,
-                      { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                      isHeocon
+                        ? {
+                            backgroundColor: cardBg,
+                            borderColor: cardBorder,
+                            borderWidth: 3,
+                            borderRadius: 20,
+                            shadowColor: cardBorder,
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 1,
+                            shadowRadius: 0,
+                            elevation: 4,
+                          }
+                        : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
                     ]}
                   >
                     {/* HÀNG TIÊU ĐỀ MỤC TIÊU & HÀNH ĐỘNG SỬA/XÓA */}
@@ -307,19 +471,45 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
                           <View
                             style={[
                               styles.rankBadge,
-                              { backgroundColor: isDark ? 'rgba(229, 152, 68, 0.2)' : 'rgba(229, 152, 68, 0.12)' },
+                              isHeocon
+                                ? {
+                                    backgroundColor: '#F4B93B',
+                                    borderWidth: 1.5,
+                                    borderColor: cardBorder,
+                                  }
+                                : { backgroundColor: isDark ? 'rgba(229, 152, 68, 0.2)' : 'rgba(229, 152, 68, 0.12)' },
                             ]}
                           >
-                            <Text style={[styles.rankText, { color: tokens.primary }]}>
+                            <Text
+                              style={[
+                                styles.rankText,
+                                { color: inkText },
+                                { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                              ]}
+                            >
                               #{index + 1}
                             </Text>
                           </View>
-                          <Text style={[styles.goalTitleLarge, { color: tokens.text }]} numberOfLines={1}>
+                          <Text
+                            style={[
+                              styles.goalTitleLarge,
+                              { color: inkText },
+                              { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                            ]}
+                            numberOfLines={1}
+                          >
                             {item.goal.name}
                           </Text>
                         </View>
                         {cleanReason ? (
-                          <Text style={[styles.goalReasonQuote, { color: tokens.textSub }]} numberOfLines={2}>
+                          <Text
+                            style={[
+                              styles.goalReasonQuote,
+                              { color: isHeocon ? '#6E5D4F' : tokens.textSub },
+                              { fontFamily: 'Nunito', fontWeight: '600' },
+                            ]}
+                            numberOfLines={2}
+                          >
                             “{cleanReason}”
                           </Text>
                         ) : null}
@@ -327,17 +517,35 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
 
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                         <TouchableOpacity
-                          style={[styles.miniActionBtn, { borderColor: tokens.border }]}
+                          style={[
+                            styles.miniActionBtn,
+                            isHeocon
+                              ? {
+                                  backgroundColor: '#FFF4CC',
+                                  borderWidth: 2,
+                                  borderColor: cardBorder,
+                                }
+                              : { borderColor: tokens.border },
+                          ]}
                           onPress={() => handleEditGoal(item.goal)}
                           hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                           accessibilityLabel="Chỉnh sửa mục tiêu này"
                         >
-                          <Edit3 size={13} color={tokens.textSub} />
+                          <Edit3 size={13} color={isHeocon ? '#2B2118' : tokens.textSub} />
                         </TouchableOpacity>
 
                         {onDeleteGoal && waterfallGoals.length > 1 && (
                           <TouchableOpacity
-                            style={[styles.miniActionBtn, { borderColor: tokens.border }]}
+                            style={[
+                              styles.miniActionBtn,
+                              isHeocon
+                                ? {
+                                    backgroundColor: '#FEE2E2',
+                                    borderWidth: 2,
+                                    borderColor: cardBorder,
+                                  }
+                                : { borderColor: tokens.border },
+                            ]}
                             onPress={() => {
                               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                               onDeleteGoal(item.goal.id);
@@ -353,46 +561,79 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
 
                     {/* TIẾN ĐỘ WATERFALL */}
                     <View style={styles.waterfallProgressRow}>
-                      <Text style={[styles.waterfallAmountText, { color: tokens.text }]}>
+                      <Text
+                        style={[
+                          styles.waterfallAmountText,
+                          { color: inkText },
+                          { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                        ]}
+                      >
                         {formatMaskedCurrency(item.allocatedSavedMoney, isMasked, false)} /{' '}
                         {formatMaskedCurrency(item.goal.targetAmount, isMasked, false)}
                       </Text>
                       <Text
                         style={[
                           styles.waterfallPercentText,
-                          { color: item.isAchieved ? tokens.success : tokens.primary },
+                          { color: item.isAchieved ? (isHeocon ? '#2D7A4D' : tokens.success) : (isHeocon ? '#2B2118' : tokens.primary) },
+                          { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
                         ]}
                       >
                         {item.percentage}%
                       </Text>
                     </View>
 
-                    <View style={styles.progressBarWrapper}>
-                      <ProgressBar
-                        progress={item.percentage / 100}
-                        height={8}
-                        customColor={item.isAchieved ? tokens.success : tokens.primary}
+                    {isHeocon ? (
+                      <SegmentBar10
+                        spent={item.allocatedSavedMoney}
+                        limit={item.goal.targetAmount}
+                        style={{ marginVertical: 4 }}
                       />
-                    </View>
+                    ) : (
+                      <View style={styles.progressBarWrapper}>
+                        <ProgressBar
+                          progress={item.percentage / 100}
+                          height={8}
+                          customColor={item.isAchieved ? tokens.success : tokens.primary}
+                        />
+                      </View>
+                    )}
 
                     {/* DÒNG NGÀY CÓ THỂ ĐẠT (ESTIMATED RUNWAY ETA) */}
                     <View
                       style={[
                         styles.etaBar,
-                        {
-                          backgroundColor: isDark
-                            ? 'rgba(229, 152, 68, 0.08)'
-                            : 'rgba(229, 152, 68, 0.06)',
-                          borderColor: isDark
-                            ? 'rgba(229, 152, 68, 0.2)'
-                            : 'rgba(229, 152, 68, 0.15)',
-                        },
+                        isHeocon
+                          ? {
+                              backgroundColor: '#FFF4CC',
+                              borderWidth: 2,
+                              borderColor: cardBorder,
+                              borderRadius: 12,
+                            }
+                          : {
+                              backgroundColor: isDark
+                                ? 'rgba(229, 152, 68, 0.08)'
+                                : 'rgba(229, 152, 68, 0.06)',
+                              borderColor: isDark
+                                ? 'rgba(229, 152, 68, 0.2)'
+                                : 'rgba(229, 152, 68, 0.15)',
+                            },
                       ]}
                     >
-                      <Clock size={12} color={tokens.primary} strokeWidth={2.4} />
-                      <Text style={[styles.etaLabel, { color: tokens.textMuted }]}>
+                      <Clock size={12} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.4} />
+                      <Text
+                        style={[
+                          styles.etaLabel,
+                          { color: inkMuted },
+                          { fontFamily: 'Nunito', fontWeight: '700' },
+                        ]}
+                      >
                         Ngày có thể đạt:{' '}
-                        <Text style={{ color: tokens.primary, fontWeight: '700' }}>
+                        <Text
+                          style={[
+                            { color: inkText, fontWeight: '700' },
+                            { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                          ]}
+                        >
                           {etaText}
                         </Text>
                       </Text>
@@ -400,8 +641,14 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
 
                     {cleanDeadline ? (
                       <View style={styles.deadlineRow}>
-                        <Calendar size={11} color={tokens.textMuted} />
-                        <Text style={[styles.deadlineText, { color: tokens.textMuted }]}>
+                        <Calendar size={11} color={isHeocon ? '#6E5D4F' : tokens.textMuted} />
+                        <Text
+                          style={[
+                            styles.deadlineText,
+                            { color: inkMuted },
+                            { fontFamily: 'Nunito', fontWeight: '600' },
+                          ]}
+                        >
                           Hạn chót mong muốn: {cleanDeadline}
                         </Text>
                       </View>
@@ -413,47 +660,141 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({
               <View
                 style={[
                   styles.emptyGoalsBox,
-                  { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                  isHeocon
+                    ? {
+                        backgroundColor: cardBg,
+                        borderColor: cardBorder,
+                        borderWidth: 2.5,
+                        borderRadius: 20,
+                      }
+                    : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
                 ]}
               >
-                <Sparkles size={20} color={tokens.primary} />
-                <Text style={[styles.emptyGoalsTitle, { color: tokens.text }]}>
+                <Sparkles size={20} color={isHeocon ? '#2B2118' : tokens.primary} />
+                <Text
+                  style={[
+                    styles.emptyGoalsTitle,
+                    { color: inkText },
+                    { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                  ]}
+                >
                   Chưa có mục tiêu dài hạn nào
                 </Text>
-                <Text style={[styles.emptyGoalsSub, { color: tokens.textMuted }]}>
+                <Text
+                  style={[
+                    styles.emptyGoalsSub,
+                    { color: inkMuted },
+                    { fontFamily: 'Nunito', fontWeight: '600' },
+                  ]}
+                >
                   Hãy đặt mục tiêu lớn như Xe, Laptop, Quỹ dự phòng để Kepi tự động tính ngày về đích cho bạn.
                 </Text>
                 <TouchableOpacity
-                  style={[styles.addFirstGoalBtn, { backgroundColor: tokens.primary }]}
+                  style={[
+                    styles.addFirstGoalBtn,
+                    isHeocon
+                      ? {
+                          backgroundColor: '#F4B93B',
+                          borderWidth: 3,
+                          borderColor: cardBorder,
+                          borderRadius: 22,
+                          shadowColor: cardBorder,
+                          shadowOffset: { width: 0, height: 4 },
+                          shadowOpacity: 1,
+                          shadowRadius: 0,
+                          elevation: 4,
+                        }
+                      : { backgroundColor: tokens.primary },
+                  ]}
                   onPress={handleAddGoal}
                   activeOpacity={0.85}
                 >
-                  <Plus size={14} color="#0E1620" strokeWidth={2.6} />
-                  <Text style={styles.addFirstGoalBtnText}>+ Thêm mục tiêu dài hạn</Text>
+                  <Plus size={14} color={isHeocon ? '#2B2118' : '#0E1620'} strokeWidth={2.8} />
+                  <Text
+                    style={[
+                      styles.addFirstGoalBtnText,
+                      isHeocon && { color: '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                    ]}
+                  >
+                    + Thêm mục tiêu dài hạn
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
           </ScrollView>
 
           {/* ACTIONS FOOTER */}
-          <View style={[styles.footerRow, { borderTopColor: tokens.border }]}>
+          <View
+            style={[
+              styles.footerRow,
+              isHeocon
+                ? {
+                    backgroundColor: pageBg,
+                    borderTopWidth: 2,
+                    borderTopColor: cardBorder,
+                  }
+                : { borderTopColor: tokens.border },
+            ]}
+          >
             <TouchableOpacity
-              style={[styles.closeFooterBtn, { borderColor: tokens.border }]}
+              style={[
+                styles.closeFooterBtn,
+                isHeocon
+                  ? {
+                      backgroundColor: cardBg,
+                      borderWidth: 2.5,
+                      borderColor: cardBorder,
+                      shadowColor: cardBorder,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 1,
+                      shadowRadius: 0,
+                      elevation: 2,
+                    }
+                  : { borderColor: tokens.border },
+              ]}
               onPress={onClose}
               activeOpacity={0.8}
             >
-              <Text style={[styles.closeFooterBtnText, { color: tokens.textSub }]}>
+              <Text
+                style={[
+                  styles.closeFooterBtnText,
+                  { color: inkMuted },
+                  { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                ]}
+              >
                 Đóng
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.addFooterBtn, { backgroundColor: tokens.primary }]}
+              style={[
+                styles.addFooterBtn,
+                isHeocon
+                  ? {
+                      backgroundColor: '#F4B93B',
+                      borderWidth: 3,
+                      borderColor: cardBorder,
+                      borderRadius: 22,
+                      shadowColor: cardBorder,
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 1,
+                      shadowRadius: 0,
+                      elevation: 4,
+                    }
+                  : { backgroundColor: tokens.primary },
+              ]}
               onPress={handleAddGoal}
               activeOpacity={0.85}
             >
-              <Plus size={15} color="#0E1620" strokeWidth={2.6} />
-              <Text style={styles.addFooterBtnText}>+ Thêm mục tiêu khác</Text>
+              <Plus size={15} color={isHeocon ? '#2B2118' : '#0E1620'} strokeWidth={2.8} />
+              <Text
+                style={[
+                  styles.addFooterBtnText,
+                  isHeocon && { color: '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                ]}
+              >
+                + Thêm mục tiêu khác
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

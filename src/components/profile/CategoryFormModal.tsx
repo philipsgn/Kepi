@@ -42,7 +42,16 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isPink = mode === 'pink';
+  const isHeocon = true; // Cả Heo Con và Pastel Pink đều chuẩn Neo-Brutalist Pixel Art 100%
+  const cardBg = isPink ? '#FFFFFF' : '#FFFBF1';
+  const cardBorder = isPink ? '#3B0713' : '#2B2118';
+  const inkText = isPink ? '#3B0713' : '#2B2118';
+  const inkMuted = isPink ? '#834758' : '#6E5D4F';
+  const pageBg = isPink ? '#FFF5F7' : '#F6EEDC';
+  const chipBg = isPink ? '#FCE7F3' : '#FFF4CC';
+  const accentBtn = isPink ? '#F43F5E' : '#F4B93B';
 
   const [type, setType] = useState<CategoryType>(initialType);
   const [name, setName] = useState<string>('');
@@ -124,23 +133,59 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
         <View
           style={[
             styles.sheetContainer,
-            {
-              backgroundColor: tokens.surface,
-              borderColor: tokens.border,
-            },
+            isHeocon
+              ? {
+                  backgroundColor: pageBg,
+                  borderColor: cardBorder,
+                  borderTopWidth: 3,
+                  borderLeftWidth: 3,
+                  borderRightWidth: 3,
+                  borderTopLeftRadius: 28,
+                  borderTopRightRadius: 28,
+                }
+              : {
+                  backgroundColor: tokens.surface,
+                  borderColor: tokens.border,
+                },
           ]}
         >
           {/* Header */}
-          <View style={[styles.headerRow, { borderBottomColor: tokens.border }]}>
-            <Text style={[styles.sheetTitle, { color: tokens.text }]}>
+          <View
+            style={[
+              styles.headerRow,
+              {
+                borderBottomColor: isHeocon ? '#2B2118' : tokens.border,
+                borderBottomWidth: isHeocon ? 2 : 1,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.sheetTitle,
+                { color: inkText },
+                isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 18 },
+              ]}
+            >
               {categoryToEdit ? 'Chỉnh Sửa Danh Mục' : 'Tạo Danh Mục Mới'}
             </Text>
             <TouchableOpacity
               onPress={onClose}
-              style={[styles.closeBtn, { backgroundColor: tokens.surfaceAlt }]}
+              style={[
+                styles.closeBtn,
+                isHeocon
+                  ? {
+                      backgroundColor: '#FFF4CC',
+                      borderWidth: 2,
+                      borderColor: cardBorder,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                    }
+                  : { backgroundColor: tokens.surfaceAlt },
+              ]}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <X size={18} color={tokens.textMuted} />
+              <X size={18} color={isHeocon ? '#2B2118' : tokens.textMuted} strokeWidth={2.6} />
             </TouchableOpacity>
           </View>
 
@@ -149,13 +194,38 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
             contentContainerStyle={styles.scrollContent}
           >
             {/* 1. Chọn Luồng: Chi Tiêu / Thu Nhập */}
-            <View style={[styles.typeSegment, { backgroundColor: tokens.surfaceAlt }]}>
+            <View
+              style={[
+                styles.typeSegment,
+                isHeocon
+                  ? {
+                      backgroundColor: cardBg,
+                      borderColor: cardBorder,
+                      borderWidth: 2.5,
+                      borderRadius: 16,
+                      padding: 4,
+                    }
+                  : { backgroundColor: tokens.surfaceAlt },
+              ]}
+            >
               <TouchableOpacity
                 style={[
                   styles.typeBtn,
                   type === 'EXPENSE' && [
                     styles.typeBtnActive,
-                    { backgroundColor: tokens.primary },
+                    isHeocon
+                      ? {
+                          backgroundColor: '#F4B93B',
+                          borderWidth: 2,
+                          borderColor: cardBorder,
+                          borderRadius: 12,
+                          shadowColor: cardBorder,
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 0,
+                          elevation: 2,
+                        }
+                      : { backgroundColor: tokens.primary },
                   ],
                 ]}
                 onPress={() => handleSelectType('EXPENSE')}
@@ -164,13 +234,19 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                 <Text
                   style={[
                     styles.typeText,
-                    {
-                      color:
-                        type === 'EXPENSE'
-                          ? tokens.textOnPrimary
-                          : tokens.textMuted,
-                      fontWeight: type === 'EXPENSE' ? '700' : '500',
-                    },
+                    isHeocon
+                      ? {
+                          color: '#2B2118',
+                          fontFamily: 'Baloo2_800ExtraBold',
+                          fontWeight: '800',
+                        }
+                      : {
+                          color:
+                            type === 'EXPENSE'
+                              ? tokens.textOnPrimary
+                              : tokens.textMuted,
+                          fontWeight: type === 'EXPENSE' ? '700' : '500',
+                        },
                   ]}
                 >
                   🔴 Chi Tiêu
@@ -182,7 +258,19 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                   styles.typeBtn,
                   type === 'INCOME' && [
                     styles.typeBtnActive,
-                    { backgroundColor: tokens.primary },
+                    isHeocon
+                      ? {
+                          backgroundColor: '#F4B93B',
+                          borderWidth: 2,
+                          borderColor: cardBorder,
+                          borderRadius: 12,
+                          shadowColor: cardBorder,
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 0,
+                          elevation: 2,
+                        }
+                      : { backgroundColor: tokens.primary },
                   ],
                 ]}
                 onPress={() => handleSelectType('INCOME')}
@@ -191,13 +279,19 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                 <Text
                   style={[
                     styles.typeText,
-                    {
-                      color:
-                        type === 'INCOME'
-                          ? tokens.textOnPrimary
-                          : tokens.textMuted,
-                      fontWeight: type === 'INCOME' ? '700' : '500',
-                    },
+                    isHeocon
+                      ? {
+                          color: '#2B2118',
+                          fontFamily: 'Baloo2_800ExtraBold',
+                          fontWeight: '800',
+                        }
+                      : {
+                          color:
+                            type === 'INCOME'
+                              ? tokens.textOnPrimary
+                              : tokens.textMuted,
+                          fontWeight: type === 'INCOME' ? '700' : '500',
+                        },
                   ]}
                 >
                   🟢 Thu Nhập
@@ -207,28 +301,54 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
             {/* 2. Live Preview Badge */}
             <View style={styles.previewBox}>
-              <Text style={[styles.sectionSubtitle, { color: tokens.textMuted }]}>
+              <Text
+                style={[
+                  styles.sectionSubtitle,
+                  { color: inkMuted },
+                  { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                ]}
+              >
                 XEM TRƯỚC HIỂN THỊ
               </Text>
               <View
                 style={[
                   styles.previewPill,
-                  {
-                    backgroundColor: tokens.surfaceAlt,
-                    borderColor: selectedColor,
-                  },
+                  isHeocon
+                    ? {
+                        backgroundColor: cardBg,
+                        borderColor: cardBorder,
+                        borderWidth: 2.5,
+                        borderRadius: 20,
+                        shadowColor: cardBorder,
+                        shadowOffset: { width: 0, height: 3 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 3,
+                      }
+                    : {
+                        backgroundColor: tokens.surfaceAlt,
+                        borderColor: selectedColor,
+                      },
                 ]}
               >
                 <View
                   style={[
                     styles.previewIconCircle,
                     { backgroundColor: selectedColor },
+                    isHeocon && {
+                      borderWidth: 2,
+                      borderColor: cardBorder,
+                    },
                   ]}
                 >
-                  <PreviewIconComp size={16} color="#FFFFFF" strokeWidth={2.2} />
+                  <PreviewIconComp size={16} color="#FFFFFF" strokeWidth={2.4} />
                 </View>
                 <Text
-                  style={[styles.previewName, { color: tokens.text }]}
+                  style={[
+                    styles.previewName,
+                    { color: inkText },
+                    { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                  ]}
                   numberOfLines={1}
                 >
                   {name.trim() || 'Tên danh mục'}
@@ -238,17 +358,34 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
             {/* 3. Tên Danh Mục */}
             <View style={styles.fieldBlock}>
-              <Text style={[styles.fieldLabel, { color: tokens.text }]}>
+              <Text
+                style={[
+                  styles.fieldLabel,
+                  { color: inkText },
+                  isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 13.5 },
+                ]}
+              >
                 Tên Danh Mục *
               </Text>
               <TextInput
                 style={[
                   styles.textInput,
-                  {
-                    backgroundColor: tokens.surfaceAlt,
-                    borderColor: errorMsg ? tokens.danger : tokens.border,
-                    color: tokens.text,
-                  },
+                  isHeocon
+                    ? {
+                        backgroundColor: cardBg,
+                        borderColor: errorMsg ? tokens.danger : '#2B2118',
+                        borderWidth: 2.5,
+                        borderRadius: 14,
+                        color: '#2B2118',
+                        fontFamily: 'Nunito',
+                        fontWeight: '700',
+                        height: 46,
+                      }
+                    : {
+                        backgroundColor: tokens.surfaceAlt,
+                        borderColor: errorMsg ? tokens.danger : tokens.border,
+                        color: tokens.text,
+                      },
                 ]}
                 value={name}
                 onChangeText={(val) => {
@@ -260,12 +397,18 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                     ? 'Ví dụ: Tiền thưởng, Bán đồ cũ, Được cho...'
                     : 'Ví dụ: Cho mẹ, Nuôi mèo, Cà phê, Quần áo...'
                 }
-                placeholderTextColor={tokens.textMuted}
+                placeholderTextColor={isHeocon ? '#8A7A6A' : tokens.textMuted}
                 maxLength={30}
                 returnKeyType="done"
               />
               {errorMsg ? (
-                <Text style={[styles.errorText, { color: tokens.danger }]}>
+                <Text
+                  style={[
+                    styles.errorText,
+                    { color: tokens.danger },
+                    { fontFamily: 'Nunito', fontWeight: '700' },
+                  ]}
+                >
                   {errorMsg}
                 </Text>
               ) : null}
@@ -273,7 +416,13 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
             {/* 4. Chọn Màu Sắc Đại Diện */}
             <View style={styles.fieldBlock}>
-              <Text style={[styles.fieldLabel, { color: tokens.text }]}>
+              <Text
+                style={[
+                  styles.fieldLabel,
+                  { color: inkText },
+                  isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 13.5 },
+                ]}
+              >
                 Màu Sắc Đại Diện
               </Text>
               <View style={styles.paletteRow}>
@@ -285,7 +434,11 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                       style={[
                         styles.colorCircle,
                         { backgroundColor: colorHex },
-                        isSelected && styles.colorCircleSelected,
+                        isHeocon && {
+                          borderWidth: isSelected ? 3 : 2,
+                          borderColor: cardBorder,
+                        },
+                        isSelected && !isHeocon && styles.colorCircleSelected,
                       ]}
                       onPress={() => handleSelectColor(colorHex)}
                       activeOpacity={0.8}
@@ -299,7 +452,13 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
             {/* 5. Chọn Biểu Tượng Vector */}
             <View style={styles.fieldBlock}>
-              <Text style={[styles.fieldLabel, { color: tokens.text }]}>
+              <Text
+                style={[
+                  styles.fieldLabel,
+                  { color: inkText },
+                  isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 13.5 },
+                ]}
+              >
                 Biểu Tượng Vector
               </Text>
               <View style={styles.iconsGrid}>
@@ -311,22 +470,34 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                       key={iconKey}
                       style={[
                         styles.iconGridItem,
-                        {
-                          backgroundColor: isSelected
-                            ? selectedColor
-                            : tokens.surfaceAlt,
-                          borderColor: isSelected
-                            ? selectedColor
-                            : tokens.border,
-                        },
+                        isHeocon
+                          ? {
+                              backgroundColor: isSelected ? selectedColor : '#FFFBF1',
+                              borderColor: cardBorder,
+                              borderWidth: 2,
+                              borderRadius: 12,
+                              shadowColor: cardBorder,
+                              shadowOffset: { width: 0, height: isSelected ? 2 : 1 },
+                              shadowOpacity: 1,
+                              shadowRadius: 0,
+                              elevation: isSelected ? 2 : 1,
+                            }
+                          : {
+                              backgroundColor: isSelected
+                                ? selectedColor
+                                : tokens.surfaceAlt,
+                              borderColor: isSelected
+                                ? selectedColor
+                                : tokens.border,
+                            },
                       ]}
                       onPress={() => handleSelectIcon(iconKey)}
                       activeOpacity={0.7}
                     >
                       <IconComponent
                         size={20}
-                        color={isSelected ? '#FFFFFF' : tokens.text}
-                        strokeWidth={2}
+                        color={isSelected ? '#FFFFFF' : (isHeocon ? '#2B2118' : tokens.text)}
+                        strokeWidth={2.4}
                       />
                     </TouchableOpacity>
                   );
@@ -336,16 +507,44 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
           </ScrollView>
 
           {/* Footer Actions */}
-          <View style={[styles.footerRow, { borderTopColor: tokens.border }]}>
+          <View
+            style={[
+              styles.footerRow,
+              isHeocon
+                ? {
+                    backgroundColor: pageBg,
+                    borderTopWidth: 2,
+                    borderTopColor: cardBorder,
+                  }
+                : { borderTopColor: tokens.border },
+            ]}
+          >
             <TouchableOpacity
               style={[
                 styles.cancelBtn,
-                { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                isHeocon
+                  ? {
+                      backgroundColor: cardBg,
+                      borderWidth: 2.5,
+                      borderColor: cardBorder,
+                      shadowColor: cardBorder,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 1,
+                      shadowRadius: 0,
+                      elevation: 2,
+                    }
+                  : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
               ]}
               onPress={onClose}
               activeOpacity={0.8}
             >
-              <Text style={[styles.cancelBtnText, { color: tokens.textMuted }]}>
+              <Text
+                style={[
+                  styles.cancelBtnText,
+                  { color: inkMuted },
+                  { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                ]}
+              >
                 Hủy
               </Text>
             </TouchableOpacity>
@@ -353,12 +552,31 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
             <TouchableOpacity
               style={[
                 styles.submitBtn,
-                { backgroundColor: tokens.primary, shadowColor: tokens.glowColor },
+                isHeocon
+                  ? {
+                      backgroundColor: '#F4B93B',
+                      borderWidth: 3,
+                      borderColor: cardBorder,
+                      borderRadius: 22,
+                      shadowColor: cardBorder,
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 1,
+                      shadowRadius: 0,
+                      elevation: 4,
+                    }
+                  : { backgroundColor: tokens.primary, shadowColor: tokens.glowColor },
               ]}
               onPress={handleSubmit}
               activeOpacity={0.8}
             >
-              <Text style={[styles.submitBtnText, { color: tokens.textOnPrimary }]}>
+              <Text
+                style={[
+                  styles.submitBtnText,
+                  isHeocon
+                    ? { color: '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 16 }
+                    : { color: tokens.textOnPrimary },
+                ]}
+              >
                 {categoryToEdit ? 'Lưu Thay Đổi' : 'Tạo Danh Mục'}
               </Text>
             </TouchableOpacity>

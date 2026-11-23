@@ -67,7 +67,8 @@ interface RowData {
 export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavigateHome, isActive = true }) => {
   const insets = useSafeAreaInsets();
   const { width: winWidth, height: winHeight } = useWindowDimensions();
-  const { tokens } = useTheme();
+  const { tokens, mode } = useTheme();
+  const isPink = mode === 'pink';
   const { contentBottomPadding } = useBottomInset();
   const houseHeight = Math.max(420, winHeight - insets.top - contentBottomPadding);
   const [showMagazine, setShowMagazine] = useState(false);
@@ -385,7 +386,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavi
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: viewMode === 'HOUSE' ? '#FFF0F3' : tokens.bg, paddingTop: insets.top }]}>
+    <View style={[styles.container, { backgroundColor: viewMode === 'HOUSE' ? (isPink ? '#FFF0F3' : '#F6EEDC') : tokens.bg, paddingTop: insets.top }]}>
       {/* 1. HEADER TRANG THỐNG KÊ (CHỈ HIỂN THỊ KHI Ở CHẾ ĐỘ ALBUM / ANALYTICS / MAGAZINE, LOẠI BỎ Ở CHẾ ĐỘ NHÀ HEO ĐỂ NHÀ SÁT TRẦN) */}
       {viewMode !== 'HOUSE' && (
         <View style={[styles.header, { borderBottomColor: tokens.border }]}>

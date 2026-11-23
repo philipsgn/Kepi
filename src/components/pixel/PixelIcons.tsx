@@ -15,6 +15,7 @@ const ICP: Record<string, string> = {
   y: '#F4B93B',   // Vàng cám
   r: '#E0452B',   // Đỏ cam
   b: '#6DA9D9',   // Xanh dương
+  m: '#4A4658',   // Nhựa đường xám tím
 };
 
 interface PixelIconProps {
@@ -121,23 +122,115 @@ export const PixelIconGamepad: React.FC<PixelIconProps> = ({ size = 24 }) =>
   renderPixelMatrix(PAD_ROWS, ICP, size);
 
 /**
- * Icon Cây Ná Cao Su (Slingshot) Pixel - 1:1 prototype
+ * Icon Quay Lại (Back Arrow) 16×16 Pixel Art — Top-left highlight + 1px ink outline (Quyết định 172)
  */
-const SLING_ROWS = [
-  '..#........#....',
-  '.#n#......#n#...',
-  '.#n#.rrrr.#n#...',
-  '..#n#.rrrr#n#...',
-  '...#n#.##n#.....',
-  '....#n##n#......',
-  '.....#nn#.......',
-  '......nn........',
-  '......nn........',
-  '.....#nn#.......',
+const BACK_16_ROWS = [
+  '................',
+  '.......##.......',
+  '......#w#.......',
+  '.....#ww#.......',
+  '....#wwy#.......',
+  '...#wwyy######..',
+  '..#wwyyyyyyyy#..',
+  '..#wyyyyyyyyy#..',
+  '..#yyynnnnnnn#..',
+  '...#ynnn######..',
+  '....#nn#........',
+  '.....#n#........',
+  '......##........',
+  '................',
 ];
 
-export const PixelIconSlingshot: React.FC<PixelIconProps> = ({ size = 24 }) =>
-  renderPixelMatrix(SLING_ROWS, ICP, size);
+export const PixelIconBack: React.FC<PixelIconProps> = ({ size = 18 }) =>
+  renderPixelMatrix(BACK_16_ROWS, ICP, size);
+
+/**
+ * Icon Tải Lại (Reload) 16×16 Pixel Art — Top-left highlight + 1px ink outline (Quyết định 172)
+ */
+const RELOAD_16_ROWS = [
+  '................',
+  '.....######.....',
+  '...##wwyyyy##...',
+  '..#wwyy##yyyn#..',
+  '..#wy#....#yn##.',
+  '..#w#......#y##.',
+  '..##.......###..',
+  '................',
+  '..###.......##..',
+  '.##y#......#n#..',
+  '.##ny#....#nn#..',
+  '..#nyyy##nnnm#..',
+  '...##nnnnmm##...',
+  '.....######.....',
+];
+
+export const PixelIconReload: React.FC<PixelIconProps> = ({ size = 18 }) =>
+  renderPixelMatrix(RELOAD_16_ROWS, ICP, size);
+
+/**
+ * Icon Vé Chơi (Ticket) 16×16 Pixel Art — Vàng đồng có răng cưa & sao sáng (Quyết định 172)
+ */
+const TICKET_16_ROWS = [
+  '................',
+  '................',
+  '..############..',
+  '.#wwyyyyyyyyy#..',
+  '.#wyyyywyyyyy#..',
+  '..#yyyw#wyyy#...',
+  '..#yyyywyyyy#...',
+  '.#yyyyyyyyyyn#..',
+  '.#ynnnnnnnnnn#..',
+  '..############..',
+  '................',
+  '................',
+];
+
+export const PixelIconTicket: React.FC<PixelIconProps> = ({ size = 18 }) =>
+  renderPixelMatrix(TICKET_16_ROWS, ICP, size);
+
+/**
+ * Icon Cánh Heo Bay (Wing) 16×16 Pixel Art — Top-left shading + 1px ink outline (Quyết định 172)
+ */
+const WING_16_ROWS = [
+  '................',
+  '.......###......',
+  '.....##www#.....',
+  '...##wwwww#.....',
+  '..#wwwwwwp#.....',
+  '.#wwwwppppp##...',
+  '.#wwwpppppppw#..',
+  '..#wpppppppp#...',
+  '...#ppsssss#....',
+  '....##ssss#.....',
+  '......####......',
+  '................',
+];
+
+export const PixelIconWing: React.FC<PixelIconProps> = ({ size = 20 }) =>
+  renderPixelMatrix(WING_16_ROWS, ICP, size);
+
+/**
+ * Icon Đèn Giao Thông (Traffic Light / Crossroad) 16×16 Pixel Art (Quyết định 172)
+ */
+const TRAFFIC_16_ROWS = [
+  '.....######.....',
+  '....#wmmmm#.....',
+  '....#m#rr#m#....',
+  '....#m#rr#m#....',
+  '....#mmmmmm#....',
+  '....#m#yy#m#....',
+  '....#m#yy#m#....',
+  '....#mmmmmm#....',
+  '....#m#gg#m#....',
+  '....#m#gg#m#....',
+  '....#mmmmmm#....',
+  '.....######.....',
+  '......#mm#......',
+  '......#mm#......',
+];
+
+export const PixelIconTraffic: React.FC<PixelIconProps> = ({ size = 20 }) =>
+  renderPixelMatrix(TRAFFIC_16_ROWS, ICP, size);
 
 /**
  * Icon Heo-Coach Pixel (Mặt heo 16×16 viền mực, tai hồng, mõm cam hồng)
@@ -193,3 +286,22 @@ const FLY_WING_ROWS = [
 
 export const PixelIconFlyWing: React.FC<PixelIconProps> = ({ size = 24 }) =>
   renderPixelMatrix(FLY_WING_ROWS, ICP, size);
+
+/**
+ * Icon Heo Qua Đường (Crossroad) Pixel - 1:1 prototype ngày 22
+ */
+const CROSS_ROWS = [
+  '................',
+  '..############..',
+  '.#mmmmmmmmmmmm#.',
+  '.#mwwmmwwmmwwm#.',
+  '.#mwwmmwwmmwwm#.',
+  '.#mwwmmwwmmwwm#.',
+  '.#mwwmmwwmmwwm#.',
+  '.#mmmmmmmmmmmm#.',
+  '..############..',
+  '................',
+];
+
+export const PixelIconCrossRoad: React.FC<PixelIconProps> = ({ size = 24 }) =>
+  renderPixelMatrix(CROSS_ROWS, ICP, size);

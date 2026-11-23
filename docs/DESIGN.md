@@ -28,56 +28,52 @@ PigFly v3.2 kết hợp giữa **Nhật ký ảnh Locket chân thực**, **Phong
 
 ---
 
-## 2. HỆ THỐNG BẢNG MÀU ĐẶC TRƯNG PIGFLY — BỘ ĐÔI "HỒNG HEO" & "XANH MINT GRADIENT"
+## 2. HỆ THỐNG BẢNG MÀU ĐẶC TRƯNG PIGFLY — BỘ ĐÔI "HEO CON VÀNG NÂU" & "HỒNG HEO PASTEL" (QĐ 160)
 
-> **🆕 CẬP NHẬT V3.3 — THEME 3 "HEO CON" & STYLE GUIDE NEO-BRUTALIST (2026-11-14):**
-> Hệ theme chính thức nâng lên thành **3 theme**: `[🐷 Heo Con — heocon: MẶC ĐỊNH]` · `[🌸 Hồng Heo — pink]` · `[🍃 Xanh Mint — mint]`.
-> Toàn bộ **hình ngôn ngữ neo-brutalist** (viền 3px nâu mực `#2B2118`, bóng cứng 0-blur, bo góc lớn 26–28px, nền kem `#F6EEDC`, font Baloo 2 + Nunito, thanh 10 ô, khu vườn pixel heo) được chuẩn hóa trong **[`docs/STYLE_HEOCON.md`](STYLE_HEOCON.md)** — *Nguồn sự thật duy nhất của phong cách, trích xuất 1:1 từ `prototype/Ví Heo Con.html` + `prototype/MASTER-PROMPTS.md`.*
-> Màn chuẩn hóa đầu tiên là **Home** (`docs/screens/HOME.md` v2.0); các màn còn lại theo Phụ lục "Đồng bộ phong cách Heo Con" ở cuối STATS/CAMERA/CHAT/PROFILE. Pink/mint giữ nguyên diện mạo mềm hiện có; các component Neo tự tô màu theo token theme đang chọn.
+> **🆕 CẬP NHẬT 2.0 (22/11/2026 — QĐ 160):**
+> Loại bỏ hoàn toàn Theme Xanh Mint (`mint`) do không phù hợp nhận diện linh vật Heo Hồng của PigFly.
+> Hệ thống theme chính thức chuẩn hóa thành **2 Theme Hòa Quyện**:
+> 1. `[🐷 Heo Con Vàng Nâu — heocon: MẶC ĐỊNH]`: Nền Kem Sàn `#F6EEDC`, Viền Nâu Mực 3px `#2B2118`, Nút Vàng Cám `#F4B93B`, Gradient Pastel Nhẹ `['#F7CA65', '#EEA828']`, điểm nhấn Mascot Hồng Phấn `#F9B8C4`.
+> 2. `[🌸 Hồng Heo Pastel — pink]`: Nền Kem Dâu Sữa `#FFF5F7`, Thẻ Trắng Ngọc `#FFFFFF`, Hồng Đào Heo Bay `#F43F5E`, Gradient Nút `['#FB7185', '#F43F5E']`, Viền Nâu Socola Dâu `#3B0713`.
+> Toàn bộ ngôn ngữ Neo-Brutalist Pixel viền 3px, bóng cứng 0-blur, typography `Baloo2_800ExtraBold` + `Nunito` đạt chuẩn tương phản cao WCAG AAA/AA.
 
-Toàn bộ ứng dụng PigFly được xây dựng xoay quanh linh vật chú heo bay **PigFly**, triệt tiêu toàn bộ bảng màu cũ (Vàng Kem Bơ cũ, Dark Than Chì cũ) để chuyển sang đúng **2 Theme chính thức duy nhất**:
+1. **Theme 1 (Mặc Định): "Heo Con Vàng Nâu" (`heocon`):**
+   - **Cảm hứng thiết kế:** Đồng bộ 100% với Prototype "Ví Heo Con" gốc.
+   - Nền chính: Kem Sàn ấm áp (`#F6EEDC`).
+   - Bề mặt thẻ Card: Kem Trắng Ngọc (`#FFFBF1`), viền đặc 3px Nâu Mực (`#2B2118`), bóng cứng 4px 0-blur.
+   - Nút hành động chính: Vàng Cám (`#F4B93B`) với Gradient Pastel Nhẹ `['#F7CA65', '#EEA828']`.
+   - Điểm nhấn linh vật: Hồng Heo Phấn (`#F9B8C4` / `#F43F5E`).
+   - Chữ & Số tài chính: Nâu Mực (`#2B2118`) đạt tương phản 11.9:1 (PASS AAA).
 
-1. **Theme 1: "Hồng Heo" (`pink` — Mặc Định Hệ Thống):**
-   - **Cảm hứng thiết kế:** Gắn liền trực diện với chú heo bay PigFly: sắc hồng ngọt ngào của tai trong, chiếc mũi tròn và hai má ửng hồng (`#FB7185`), hòa quyện cùng màu lông trắng sứ ngọc trai (`#FFFFFF`).
-   - **Sắc độ:** Phong cách Hồng Dâu Sữa & Hồng Đào Pastel cao cấp:
-     - Nền chính: Kem Dâu Sữa Heo dịu mắt (`#FFF5F7`), không chói lóa, êm ái khi nhìn lâu.
-     - Bề mặt thẻ Card: Trắng Ngọc Trai tinh khiết (`#FFFFFF`).
-     - Bề mặt phụ: Hồng Phấn Mềm mại (`#FCE7F3`) cho input, track slider, chip gợi ý.
-     - Điểm nhấn chính (Primary): Hồng Đào Heo Bay (`#F43F5E`) chuyển tiếp Gradient Hồng San Hô (`['#FB7185', '#F43F5E']`).
-     - Chữ & Số tài chính: Nâu Socola Dâu Thẫm (`#3B0713`) đạt chuẩn tương phản đỉnh cao WCAG AAA (14.2:1), đảm bảo các con số tài chính đọc sắc nét tức thì.
-     - Trạng thái An toàn / Thu nhập: Xanh Lộc Non (`#059669`).
-     - Trạng thái Chi tiêu / Cảnh báo: Đỏ Dâu Rừng (`#E11D48`).
-
-2. **Theme 2: "Xanh Mint" (`mint` — Mint Gradient Đa Tầng):**
-   - **Cảm hứng thiết kế:** Năng lượng xanh tươi mát, biểu trưng cho mầm non tài chính sinh sôi, tích lũy và bay cao bền vững.
-   - **Sắc độ:** Gradient đa tầng kết hợp 3 sắc thái màu xanh mượt mà:
-     - Nền chính: Bạc Hà Sương Mai thanh khiết (`#F0FDF9`).
-     - Bề mặt thẻ Card: Trắng Sứ (`#FFFFFF`).
-     - Bề mặt phụ: Mint Băng Mềm (`#CCFBF1`).
-     - Điểm nhấn Gradient Đa Tầng: Chuyển sắc từ Xanh Bạc Hà Tươi (`#10B981`) ➔ Xanh Ngọc Teal (`#14B8A6`) ➔ Xanh Da Trời Sương Mai (`#06B6D4`), tạo hiệu ứng ánh sáng sâu lắng chuẩn Luxury Tech.
-     - Chữ & Số tài chính: Xanh Rừng Ngọc Bích Thẫm (`#022C22`) đạt chuẩn tương phản đỉnh cao WCAG AAA (15.1:1).
-     - Trạng thái An toàn / Thu nhập: Mint An Toàn (`#10B981`).
-     - Trạng thái Chi tiêu / Cảnh báo: Đỏ San Hô Dịu Mắt (`#EF4444`).
+2. **Theme 2: "Hồng Heo Pastel" (`pink` — Prototype Locket):**
+   - **Cảm hứng thiết kế:** Gắn liền trực diện với chú heo bay PigFly: sắc hồng dâu ngọt ngào, chiếc mũi tròn và đôi má ửng hồng.
+   - Nền chính: Kem Dâu Sữa Heo dịu mắt (`#FFF5F7`).
+   - Bề mặt thẻ Card: Trắng Ngọc Trai tinh khiết (`#FFFFFF`), viền 3px Nâu Socola Dâu (`#3B0713`).
+   - Nút hành động chính: Hồng Đào Heo Bay (`#F43F5E`) với Gradient Pastel Nhẹ `['#FB7185', '#F43F5E']`.
+   - Chữ & Số tài chính: Nâu Socola Dâu Thẫm (`#3B0713`) đạt chuẩn tương phản WCAG AAA (14.2:1).
 
 ---
 
-### BẢNG TRA CỨU TOKENS HỆ THỐNG (COLOR TOKENS MATRIX)
+### BẢNG TRA CỨU TOKENS HỆ THỐNG (COLOR TOKENS MATRIX — QĐ 160)
 
-| Token Name | Theme 1: Hồng Heo (`pink` — Mặc Định) | Theme 2: Xanh Mint (`mint`) | Ứng Dụng Trong Giao Diện |
+| Token Name | Theme 1: Heo Con Vàng Nâu (`heocon` — Mặc Định) | Theme 2: Hồng Heo Pastel (`pink`) | Ứng Dụng Trong Giao Diện |
 |---|---|---|---|
-| `bg` / `background` | `#FFF5F7` (Kem Dâu Sữa Heo) | `#F0FDF9` (Bạc Hà Sương Mai) | Nền chính toàn bộ app |
-| `surface` | `#FFFFFF` (Trắng Ngọc Trai) | `#FFFFFF` (Trắng Sứ) | Nền thẻ Card, Bottom Sheet |
-| `surfaceAlt` | `#FCE7F3` (Hồng Phấn Mềm) | `#CCFBF1` (Mint Băng Mềm) | Nền input, track slider, chip |
-| `border` | `rgba(244, 63, 94, 0.16)` | `rgba(16, 185, 129, 0.18)` | Viền thẻ, viền hairline |
-| `primary` | `#F43F5E` (Hồng Đào Heo Bay) | `#10B981` (Xanh Mint Tươi) | Nút hành động, icon active |
-| `textOnPrimary` | `#FFFFFF` (Trắng Tinh) | `#FFFFFF` (Trắng Tinh) | Chữ / icon trên nút chính |
-| `primarySoft` | `rgba(244, 63, 94, 0.12)` | `rgba(16, 185, 129, 0.14)` | Nền chip chọn nhanh, pill mờ |
-| `primaryGradient` | `['#FB7185', '#F43F5E']` (Đào ➔ San Hô) | `['#10B981', '#06B6D4']` (Mint ➔ Sky) | Nút Shutter, Nút Lưu Sổ, CTA |
-| `glowColor` | `rgba(244, 63, 94, 0.35)` | `rgba(16, 185, 129, 0.35)` | Ánh sáng bóng đổ phát sáng |
-| `text` | `#3B0713` (Nâu Socola Dâu Thẫm) | `#022C22` (Xanh Rừng Thẫm) | Tiêu đề, số tiền chính |
-| `textSub` | `#881337` (Mận Đỏ Trầm) | `#065F46` (Ngọc Bích Trầm) | Nhãn danh mục, chú thích nhóm |
-| `textMuted` | `#9F1239` (Hồng Đất Mờ) | `#047857` (Xanh Lá Mờ) | Ngày tháng, gợi ý phụ |
-| `success` | `#059669` (Xanh Lộc Non) | `#10B981` (Mint An Toàn) | Thu nhập, an toàn ngân sách |
+| `bg` / `background` | `#F6EEDC` (Kem Sàn Ấm) | `#FFF5F7` (Kem Dâu Sữa Heo) | Nền chính toàn bộ app |
+| `surface` | `#FFFBF1` (Kem Trắng Ngọc) | `#FFFFFF` (Trắng Ngọc Trai) | Nền thẻ Card, Bottom Sheet |
+| `surfaceAlt` | `#F6EEDC` (Nền Kem Nhạt) | `#FCE7F3` (Hồng Phấn Mềm) | Nền input, track slider, chip |
+| `border` | `#2B2118` (Nâu Mực Đặc 3px) | `#3B0713` (Nâu Socola Dâu 3px) | Viền thẻ NeoCard, viền sheet |
+| `primary` | `#F4B93B` (Vàng Cám Ấm) | `#F43F5E` (Hồng Đào Heo Bay) | Nút hành động, icon active |
+| `textOnPrimary` | `#2B2118` (Nâu Mực Sắc Nét) | `#FFFFFF` (Trắng Tinh Khiết) | Chữ / icon trên nút chính |
+| `primarySoft` | `rgba(244, 185, 59, 0.18)` | `rgba(244, 63, 94, 0.12)` | Nền chip chọn nhanh, pill mờ |
+| `primaryGradient` | `['#F7CA65', '#EEA828']` (Vàng Kem ➔ Nâu Nướng) | `['#FB7185', '#F43F5E']` (Hồng Phấn ➔ San Hô) | Nút bấm chính, CTA, Shutter |
+| `gradient` | `['#FFFDF8', '#F8F1E2']` (Kem Trắng ➔ Nâu Nhạt) | `['#FFFFFF', '#FFF0F3']` (Trắng ➔ Kem Dâu) | Thẻ Hero ngân sách |
+| `glowColor` | `rgba(43, 33, 24, 0.25)` | `rgba(244, 63, 94, 0.35)` | Ánh sáng bóng đổ phát sáng |
+| `text` | `#2B2118` (Nâu Mực Sắc Nét AAA) | `#3B0713` (Nâu Socola Dâu AAA) | Tiêu đề, số tiền chính |
+| `textSub` | `#6E5C48` (Nâu Vôi Đậm) | `#881337` (Mận Đỏ Trầm) | Nhãn danh mục, chú thích nhóm |
+| `textMuted` | `#7A6852` (Nâu Vôi Dịu) | `#9F1239` (Hồng Đất Mờ) | Ngày tháng, gợi ý phụ |
+| `success` | `#5E9A57` (Xanh Lá Vườn) | `#059669` (Xanh Lộc Non) | Thu nhập, an toàn ngân sách |
+| `danger` | `#E0452B` (Đỏ Cam Lửa) | `#E11D48` (Đỏ San Hô) | Vượt hạn mức, chi tiêu |
+| `accent` | `#F9B8C4` (Hồng Phấn Mascot Heo) | `#FB7185` (Hồng Phấn Má Heo) | Điểm xuyết linh vật |
 | `danger` | `#E11D48` (Đỏ Dâu Rừng) | `#EF4444` (Đỏ San Hô) | Chi tiêu, cảnh báo vượt hạn mức |
 | `warning` | `#F59E0B` (Hổ Phách Sáng) | `#F59E0B` (Hổ Phách Sáng) | Cảnh báo tiệm cận hạn mức |
 

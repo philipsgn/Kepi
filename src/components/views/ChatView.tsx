@@ -33,7 +33,7 @@ import { useBottomInset } from '../../hooks/useBottomInset';
 import { ArrowLeft } from 'lucide-react-native';
 import { PixelHubDashboard, SubViewType } from '../chat/PixelHubDashboard';
 import { PigFlightGameView } from '../chat/PigFlightGameView';
-import { PigShooterGameView } from '../chat/PigShooterGameView';
+import { PigCrossRoadGameView } from '../chat/PigCrossRoadGameView';
 import { PiggySpendMapView } from '../chat/PiggySpendMapView';
 
 interface ChatViewProps {
@@ -52,10 +52,11 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 ];
 
 const PROMPT_CHIPS = [
-  Strings.chat.promptTodayRemaining,
-  Strings.chat.promptCoffeeTotal,
-  Strings.chat.promptShouldIBuy,
-  Strings.chat.promptSetGoal,
+  'Hôm nay còn chi được bao nhiêu?',
+  'Tháng này chi nhiều nhất gì?',
+  'Phản biện khoản vừa ghi',
+  'Heo nhà đói chưa?',
+  'Mẹo kiếm vé chơi',
 ];
 
 /**
@@ -72,15 +73,15 @@ export const ChatView: React.FC<ChatViewProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { tokens, mode } = useTheme();
-  // Quyết định 144: Cố định 100% phong cách Neo-Brutalist Pixel Art cho Tab Giải Trí
-  const isHeocon = true;
-  const screenBg = isHeocon ? '#F6EEDC' : tokens.bg;
+  const isPink = mode === 'pink';
+  const isHeocon = mode === 'heocon' || !mode;
+  const screenBg = isHeocon ? '#F6EEDC' : (tokens.bg || '#FFF5F7');
   const { bottomInset } = useBottomInset();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('hub');
 
-  // Quyết định 144: Tự động ẩn Bottom Tab Bar khi vào Fullscreen Game Mode
+  // Quyết định 144 & 166: Tự động ẩn Bottom Tab Bar khi vào Fullscreen Game Mode
   useEffect(() => {
-    if (activeSubView === 'fly' || activeSubView === 'shooter') {
+    if (activeSubView === 'fly' || activeSubView === 'cross') {
       onToggleTabBar?.(false);
     } else {
       onToggleTabBar?.(true);
@@ -116,6 +117,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
     feedPig,
     updateGameStats,
     addPigFood,
+    useGameTicket,
+    buyTicketWithFood,
   } = useGamificationStore();
 
   const handleSendMessage = (text: string) => {
@@ -188,6 +191,11 @@ export const ChatView: React.FC<ChatViewProps> = ({
         }
       });
 
+      const sortedExpenses = [...confirmedExpenses].sort(
+        (a, b) => new Date(b.occurred_at || b.created_at).getTime() - new Date(a.occurred_at || a.created_at).getTime()
+      );
+      const recentExpense = sortedExpenses[0];
+
       const response = generateLocalCoachResponse(text, {
         todaySpent,
         remainingToday: Math.max(0, todayBudget - todaySpent),
@@ -198,6 +206,11 @@ export const ChatView: React.FC<ChatViewProps> = ({
         transactionsCount: transactions.length,
         savingsGoalText: 'Tích lũy ngân sách an toàn cho quỹ dự phòng',
         nickname: profile?.full_name || undefined,
+        recentExpenseName: recentExpense?.description || recentExpense?.category,
+        recentExpenseAmount: recentExpense?.amount,
+        pigHunger,
+        gameTickets,
+        pigFood,
       });
 
       const coachMsg: ChatMessage = {
@@ -351,6 +364,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
     );
   }
 
+  // Single-Active Game WebView Engine (Quyết định 170): Chỉ render 1 WebView đang chơi để 0 lag, 60FPS tuyệt đối
   if (activeSubView === 'fly') {
     return (
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
@@ -361,6 +375,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
           food={pigFood}
           hunger={pigHunger}
           onFeedPig={feedPig}
+          onUseTicket={useGameTicket}
+          onBuyTicket={buyTicketWithFood}
           onSaveStats={(stats) => {
             if (stats.foodEarned) addPigFood(stats.foodEarned);
             updateGameStats({ flyBestScore: stats.flyBestScore });
@@ -370,21 +386,25 @@ export const ChatView: React.FC<ChatViewProps> = ({
     );
   }
 
-  if (activeSubView === 'shooter') {
+  if (activeSubView === 'cross') {
     return (
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-        <PigShooterGameView
+        <PigCrossRoadGameView
           onBack={() => setActiveSubView('hub')}
           onSwitchGame={(game) => setActiveSubView(game)}
           tickets={gameTickets}
           food={pigFood}
           hunger={pigHunger}
+          todayBudget={todayBudget}
+          todaySpent={todaySpent}
           onFeedPig={feedPig}
+          onUseTicket={useGameTicket}
+          onBuyTicket={buyTicketWithFood}
           onSaveStats={(stats) => {
-            if (stats.pigFoodBonus) addPigFood(stats.pigFoodBonus);
+            if (stats.foodEarned) addPigFood(stats.foodEarned);
             updateGameStats({
-              shooterMaxWave: stats.shooterMaxWave,
-              savedBabies: stats.savedBabies,
+              crossRoadStars: stats.crossRoadStars,
+              crossRoadMaxLevel: stats.crossRoadMaxLevel,
             });
           }}
         />
@@ -414,15 +434,14 @@ export const ChatView: React.FC<ChatViewProps> = ({
       <View style={styles.chatHeaderRow}>
         <TouchableOpacity
           style={styles.hubBackButton}
-          accessibilityLabel="‹ Giải trí"
+          accessibilityLabel="Quay lại"
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setActiveSubView('hub');
           }}
           activeOpacity={0.8}
         >
-          <ArrowLeft size={16} color="#2B2118" strokeWidth={2.8} />
-          <Text style={styles.hubBackButtonText}>‹ Quay lại Hub</Text>
+          <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
         </TouchableOpacity>
 
         <View style={styles.chatTitleCol}>
@@ -481,7 +500,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
       </View>
 
       {activeTab === 'FRIENDS' ? (
-        <SquadLocketView onBack={() => setActiveSubView('hub')} />
+        <SquadLocketView />
       ) : (
         <KeyboardAvoidingView
           style={styles.coachContainer}
@@ -492,9 +511,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           <View
             style={[
               styles.chipsContainer,
-              isHeocon
-                ? { backgroundColor: '#F6EEDC', borderBottomColor: '#2B2118', borderBottomWidth: 2 }
-                : { backgroundColor: tokens.bg, borderBottomColor: tokens.border, borderBottomWidth: 1 },
+              { backgroundColor: tokens.bg, borderBottomColor: tokens.border, borderBottomWidth: 2 },
             ]}
           >
             <ScrollView
@@ -507,21 +524,16 @@ export const ChatView: React.FC<ChatViewProps> = ({
                   key={`chip-${idx}`}
                   style={[
                     styles.chipButton,
-                    isHeocon
-                      ? {
-                          backgroundColor: '#FFFBF1',
-                          borderColor: '#2B2118',
-                          borderWidth: 2,
-                          shadowColor: '#2B2118',
-                          shadowOffset: { width: 0, height: 1.5 },
-                          shadowOpacity: 1,
-                          shadowRadius: 0,
-                          elevation: 1,
-                        }
-                      : {
-                          backgroundColor: tokens.surfaceAlt,
-                          borderColor: tokens.border,
-                        },
+                    {
+                      backgroundColor: tokens.surface,
+                      borderColor: tokens.border,
+                      borderWidth: 2,
+                      shadowColor: tokens.shadowColor,
+                      shadowOffset: { width: 0, height: 1.5 },
+                      shadowOpacity: 1,
+                      shadowRadius: 0,
+                      elevation: 1,
+                    },
                   ]}
                   onPress={() => handlePromptChipPress(chip)}
                   activeOpacity={0.75}
@@ -529,8 +541,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                   <Text
                     style={[
                       styles.chipText,
-                      { color: isHeocon ? '#2B2118' : tokens.text },
-                      isHeocon && { fontFamily: 'Nunito', fontWeight: '800' },
+                      { color: tokens.text, fontFamily: 'Nunito', fontWeight: '800' },
                     ]}
                   >
                     {chip}
@@ -544,7 +555,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           <View
             style={[
               styles.chatlogWrapper,
-              isHeocon && styles.chatlogWrapperHeocon,
+              styles.chatlogWrapperHeocon,
             ]}
           >
             <FlatList
@@ -572,29 +583,26 @@ export const ChatView: React.FC<ChatViewProps> = ({
                   <View
                     style={[
                       styles.thinkingBubble,
-                      isHeocon
-                        ? {
-                            backgroundColor: '#FFFBF1',
-                            borderColor: '#2B2118',
-                            borderWidth: 2.5,
-                            borderRadius: 16,
-                            shadowColor: '#2B2118',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 1,
-                            shadowRadius: 0,
-                            elevation: 2,
-                          }
-                        : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+                      {
+                        backgroundColor: tokens.surface,
+                        borderColor: tokens.border,
+                        borderWidth: 2.5,
+                        borderRadius: 16,
+                        shadowColor: tokens.shadowColor,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 2,
+                      },
                     ]}
                   >
-                    <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary }]} />
-                    <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary, opacity: 0.7 }]} />
-                    <View style={[styles.thinkingDot, { backgroundColor: isHeocon ? '#F4B93B' : tokens.primary, opacity: 0.4 }]} />
+                    <View style={[styles.thinkingDot, { backgroundColor: tokens.primary }]} />
+                    <View style={[styles.thinkingDot, { backgroundColor: tokens.primary, opacity: 0.7 }]} />
+                    <View style={[styles.thinkingDot, { backgroundColor: tokens.primary, opacity: 0.4 }]} />
                     <Text
                       style={[
                         styles.thinkingText,
-                        { color: isHeocon ? '#2B2118' : tokens.textMuted },
-                        isHeocon && { fontFamily: 'Nunito', fontWeight: '700' },
+                        { color: tokens.textMuted, fontFamily: 'Nunito', fontWeight: '700' },
                       ]}
                     >
                       Anh Minh đang tính toán...
@@ -696,33 +704,42 @@ const styles = StyleSheet.create({
   chatSegmentBtnTextActive: {
     color: '#2B2118',
   },
+  gameSlot: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+  },
+  gameSlotActive: {
+    opacity: 1,
+    zIndex: 10,
+  },
+  gameSlotInactive: {
+    opacity: 0,
+    zIndex: -1,
+  },
   hubBackRow: {
     paddingHorizontal: 16,
     paddingTop: 6,
     paddingBottom: 4,
   },
   hubBackButton: {
-    flexDirection: 'row',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
+    justifyContent: 'center',
     backgroundColor: '#FFFBF1',
-    borderWidth: 2,
+    borderWidth: 2.5,
     borderColor: '#2B2118',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 2,
-  },
-  hubBackButtonText: {
-    fontFamily: 'Nunito',
-    fontWeight: '800',
-    fontSize: 12,
-    color: '#2B2118',
   },
   coachContainer: {
     flex: 1,

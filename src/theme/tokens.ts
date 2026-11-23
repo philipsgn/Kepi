@@ -1,16 +1,16 @@
 /**
- * DESIGN TOKENS — PIGFLY (KAWAII NEO-BRUTALIST PIXEL — STYLE HEO CON V4.5)
+ * DESIGN TOKENS — PIGFLY (KAWAII NEO-BRUTALIST PIXEL — STYLE HEO CON 2.0 — QĐ 160)
  *
- * Theme hệ thống:
- * 1. "Heo Con" (`heocon` — MẶC ĐỊNH DUY NHẤT): Phong cách Neo-Brutalist Pixel viền 3px Nâu Mực, bóng cứng 0-blur, nền Kem Sàn #F6EEDC.
- * 2. "Hồng Heo" (`pink`) & "Xanh Mint Gradient" (`mint`): Giữ nguyên tương thích ngược.
+ * Hệ thống 2 Theme Hòa Quyện (Loại bỏ hoàn toàn Xanh Mint):
+ * 1. "Heo Con Vàng Nâu" (`heocon` — MẶC ĐỊNH DUY NHẤT): Phong cách Neo-Brutalist Pixel viền 3px Nâu Mực, bóng cứng 0-blur, nền Kem Sàn #F6EEDC, Gradient Pastel Nhẹ Vàng Cám → Vàng Nâu Nướng.
+ * 2. "Hồng Heo Pastel" (`pink`): Phong cách Locket Prototype linh vật Heo Hồng, nền Kem Dâu Sữa #FFF5F7, viền Nâu Socola Dâu #3B0713, Gradient Hồng Đào → San Hô.
  */
 
-export type ThemeMode = 'heocon' | 'pink' | 'mint';
-export type ResolvedTheme = 'heocon' | 'pink' | 'mint';
+export type ThemeMode = 'heocon' | 'pink';
+export type ResolvedTheme = 'heocon' | 'pink';
 
 // Hỗ trợ tương thích ngược cho các import kiểu cũ nếu có
-export type LegacyThemeMode = 'light' | 'dark' | 'cool' | 'pink' | 'mint' | 'heocon';
+export type LegacyThemeMode = 'light' | 'dark' | 'cool' | 'pink' | 'heocon';
 
 export interface ColorTokens {
   // Nền & Bề mặt
@@ -81,8 +81,8 @@ export const heoconTokens: ColorTokens = {
   dangerSoft: 'rgba(224, 69, 43, 0.14)',
   warning: '#F4B93B',         // Tiệm cận hạn mức dùng chính vàng cám
 
-  gradient: ['#F6EEDC', '#FFFBF1'],
-  primaryGradient: ['#F4B93B', '#E0A93B'], // Vàng Cám → Vàng Ngói
+  gradient: ['#FFFDF8', '#F8F1E2'],        // Kem Trắng Ngọc → Kem Nâu Ấm (Gradient Pastel Nhẹ)
+  primaryGradient: ['#F7CA65', '#EEA828'], // Vàng Cám Nắng → Vàng Nâu Nướng (Gradient Pastel Nhẹ)
   glowColor: 'rgba(43, 33, 24, 0.25)',
 
   shadowColor: '#2B2118',
@@ -90,14 +90,14 @@ export const heoconTokens: ColorTokens = {
 };
 
 /**
- * 1. THEME HỖ TRỢ: "HỒNG HEO" (`pink`) — SẮC HỒNG PASTEL LINH VẬT PIGFLY
+ * 1. THEME HỖ TRỢ: "HỒNG HEO PASTEL" (`pink`) — SẮC HỒNG PASTEL LINH VẬT PIGFLY (PROTOTYPE)
  */
 export const pinkTokens: ColorTokens = {
   bg: '#FFF5F7',            // Kem Dâu Sữa Heo dịu mắt
   background: '#FFF5F7',
   surface: '#FFFFFF',       // Bề mặt thẻ Trắng Ngọc Trai
   surfaceAlt: '#FCE7F3',    // Bề mặt phụ Hồng Phấn mềm mại cho input / chip
-  border: 'rgba(244, 63, 94, 0.16)', // Viền hồng san hô mờ tinh tế
+  border: '#3B0713',        // Viền đặc 3px Nâu Socola Dâu chuẩn Neo-Brutalist
 
   text: '#3B0713',          // Nâu Socola Dâu thẫm, tương phản 14.2:1 trên nền kem dâu (PASS AAA)
   textSub: '#881337',       // Đỏ mận thẫm thanh lịch, tương phản 7.6:1 (PASS AAA)
@@ -116,47 +116,12 @@ export const pinkTokens: ColorTokens = {
   dangerSoft: 'rgba(225, 29, 72, 0.12)',
   warning: '#F59E0B',       // Hổ phách tươi sáng cảnh báo
 
-  gradient: ['#FFF5F7', '#FCE7F3'],
-  primaryGradient: ['#FB7185', '#F43F5E'],
+  gradient: ['#FFFFFF', '#FFF0F3'],        // Trắng Ngọc → Kem Dâu Nhạt (Gradient Pastel Nhẹ)
+  primaryGradient: ['#FB7185', '#F43F5E'], // Hồng Phấn Đào → Hồng San Hô Heo Bay (Gradient Pastel Nhẹ)
   glowColor: 'rgba(244, 63, 94, 0.35)',
 
   shadowColor: '#3B0713',
-  shadowOpacity: 0.06,
-};
-
-/**
- * 2. THEME HỖ TRỢ: "XANH MINT GRADIENT" (`mint`) — MÁT MẺ TƯƠI MỚI ĐA TẦNG
- */
-export const mintTokens: ColorTokens = {
-  bg: '#F0FDF9',            // Sương Bạc Hà mát lành dịu mắt
-  background: '#F0FDF9',
-  surface: '#FFFFFF',       // Trắng tuyết ngọc trai tinh khiết
-  surfaceAlt: '#CCFBF1',    // Bề mặt phụ Xanh Ngọc dịu mát cho input / chip
-  border: 'rgba(16, 185, 129, 0.18)', // Viền ngọc bích sương mai
-
-  text: '#022C22',          // Ngọc Bích Đậm thẫm, tương phản 15.1:1 trên nền sương bạc hà (PASS AAA)
-  textSub: '#065F46',       // Xanh rừng thẫm thanh lịch, tương phản 7.4:1 (PASS AAA)
-  textMuted: '#047857',     // Xanh ngọc chú thích sắc nét, tương phản 6.1:1 (PASS AA)
-
-  primary: '#059669',       // Xanh Mint tươi mát ngọt ngào
-  textOnPrimary: '#FFFFFF', // Chữ trắng tuyết tinh khôi
-  primarySoft: 'rgba(5, 150, 105, 0.14)',
-
-  accent: '#06B6D4',        // Xanh Ngọc Lam / Sky Blue rực rỡ
-  accentSoft: 'rgba(6, 182, 212, 0.15)',
-
-  success: '#10B981',       // Mint an toàn tươi mới
-  successSoft: 'rgba(16, 185, 129, 0.14)',
-  danger: '#EF4444',        // Đỏ cam rực rỡ cảnh báo
-  dangerSoft: 'rgba(239, 68, 68, 0.14)',
-  warning: '#F59E0B',       // Vàng hổ phách cảnh báo
-
-  gradient: ['#F0FDF9', '#CCFBF1'],
-  primaryGradient: ['#10B981', '#06B6D4'],
-  glowColor: 'rgba(16, 185, 129, 0.35)',
-
-  shadowColor: '#022C22',
-  shadowOpacity: 0.06,
+  shadowOpacity: 1,           // bóng CỨNG 0-blur
 };
 
 // Neo-Brutalist design tokens
@@ -173,7 +138,7 @@ export const neoTokens = {
 // Aliases duy trì khả năng tương thích ngược
 export const lightTokens: ColorTokens = heoconTokens;
 export const darkTokens: ColorTokens = heoconTokens;
-export const coolTokens: ColorTokens = mintTokens;
+export const coolTokens: ColorTokens = pinkTokens;
 
 export const Spacing = {
   xs: 4,

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -17,13 +17,14 @@ import { Spacing } from '../../constants/layout';
 import { useAuthStore } from '../../store/authStore';
 import { useBudgetStore } from '../../store/budgetStore';
 import { useTransactionStore } from '../../store/transactionStore';
+import { ProfileDeskBanner } from '../profile/ProfileDeskBanner';
+import { ProfileQuickJumpBar, ProfileSectionKey } from '../profile/ProfileQuickJumpBar';
 import { ProfileIdentityCard } from '../profile/ProfileIdentityCard';
 import { StreakCheckinModal } from '../streak/StreakCheckinModal';
 import { GoalSectionCard } from '../profile/GoalSectionCard';
 import { GoalDetailModal } from '../profile/GoalDetailModal';
 import { BudgetSettingsCard, STORAGE_KEY_SAVINGS_RATIO } from '../profile/BudgetSettingsCard';
 import { CategorySettingsCard } from '../profile/CategorySettingsCard';
-import { ThemeSettingsCard } from '../profile/ThemeSettingsCard';
 import { FixedCostSettingsModal } from '../profile/FixedCostSettingsModal';
 import { GoalEditModal } from '../profile/GoalEditModal';
 import { NameEditModal } from '../profile/NameEditModal';
@@ -40,6 +41,7 @@ import { useBottomInset } from '../../hooks/useBottomInset';
 export interface ProfileViewProps {
   onSignOut?: () => void;
   onOpenLessons?: () => void;
+  onNavigateToHub?: () => void;
 }
 
 const STORAGE_KEY_MASK_MONEY = 'vi_locket_mask_money';
@@ -55,11 +57,29 @@ const STORAGE_KEY_GOAL_REASON = 'vi_locket_goal_reason';
  * - Định mức & Thu chi xúc giác (BudgetSettingsCard: Thu nhập, Cố định, Cân bằng số 0)
  * - Quản lý Danh mục Thu & Chi (CategorySettingsCard)
  */
-export const ProfileView: React.FC<ProfileViewProps> = () => {
+export const ProfileView: React.FC<ProfileViewProps> = ({
+  onSignOut,
+  onOpenLessons,
+  onNavigateToHub,
+}) => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { tokens, isDark } = useTheme();
   const { contentBottomPadding } = useBottomInset();
+  const scrollViewRef = useRef<any>(null);
+  const [sectionOffsets, setSectionOffsets] = useState<{ [key: string]: number }>({});
+
+  const handleJumpToSection = (section: string) => {
+    if (section === 'theme') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      router.push('/(main)/settings' as any);
+      return;
+    }
+    const y = sectionOffsets[section];
+    if (y !== undefined && scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: Math.max(0, y - 10), animated: true });
+    }
+  };
 
   // Stores
   const { user, profile, isGuest, updateProfile } = useAuthStore();
@@ -403,18 +423,27 @@ export const ProfileView: React.FC<ProfileViewProps> = () => {
       </View>
 
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: contentBottomPadding + 20 },
         ]}
       >
-        {/* KHỐI 1: THẺ NGƯỜI ĐỒNG HÀNH */}
+        {/* BANNER PIXEL: GÓC LÀM VIỆC CỦA HEO (PROTOTYPE 1:1 VỚI 6 HOTSPOTS) */}
+        <ProfileDeskBanner onScrollToSection={handleJumpToSection} />
+
+        {/* THANH ĐIỀU HƯỚNG NHANH & LỐI TẮT TRUNG TÂM HEO CON */}
+        <ProfileQuickJumpBar
+          onJumpToSection={handleJumpToSection as any}
+          onNavigateToHub={onNavigateToHub}
+        />
+
+        {/* KHỐI 1: THẺ NGƯỜI ĐỒNG HÀNH (2 Ô CHỈ SỐ CÂN ĐỐI) */}
         <ProfileIdentityCard
           name={displayName}
           email={user?.email}
           streakDays={streakDays}
-          savedMoney={savedMoney}
           entriesCount={transactions.length}
           isMasked={isMasked}
           isGuest={isGuest}
@@ -423,51 +452,69 @@ export const ProfileView: React.FC<ProfileViewProps> = () => {
         />
 
         {/* ================= MỤC TIÊU & KẾ HOẠCH TÀI CHÍNH ================= */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
-            Mục tiêu & Kế hoạch
-          </Text>
+        <View
+          onLayout={(e) => {
+            const y = e.nativeEvent.layout.y;
+            setSectionOffsets((prev) => ({ ...prev, plan: y }));
+          }}
+        >
+          <View style={styles.sectionHeaderRow}>
+            <Text style={[styles.sectionHeaderText, { color: tokens.textMuted }]}>
+              Mục tiêu & Kế hoạch
+            </Text>
+          </View>
+
+          {/* 1.1: ĐỊNH MỨC & THU CHI ĐỊNH KỲ (CÂN BẰNG NGÂN SÁCH - XÁC ĐỊNH THU NHẬP TRƯỚC) */}
+          <BudgetSettingsCard
+            monthlyIncome={monthlyIncome}
+            monthlyFixedCosts={monthlyFixedCosts}
+            baseDailyBudget={baseDailyBudget}
+            favUnit={favUnit}
+            isMasked={isMasked}
+            onSaveBudgetSettings={handleSaveBudgetSettings}
+          />
         </View>
 
-        {/* 1.1: ĐỊNH MỨC & THU CHI ĐỊNH KỲ (CÂN BẰNG NGÂN SÁCH - XÁC ĐỊNH THU NHẬP TRƯỚC) */}
-        <BudgetSettingsCard
-          monthlyIncome={monthlyIncome}
-          monthlyFixedCosts={monthlyFixedCosts}
-          baseDailyBudget={baseDailyBudget}
-          favUnit={favUnit}
-          isMasked={isMasked}
-          onSaveBudgetSettings={handleSaveBudgetSettings}
-        />
-
         {/* 1.2: MỤC TIÊU CỦA BẠN (MỤC TIÊU TÍCH LŨY THÁNG) */}
-        <GoalSectionCard
-          goalName={goalName}
-          goalTargetAmount={goalTargetAmount}
-          savedMoney={savedMoney}
-          goals={goals}
-          goalDeadline={goalDeadline}
-          goalReason={goalReason}
-          isMasked={isMasked}
-          onPressCard={() => setShowGoalDetailModal(true)}
-          onPressAddGoal={handleOpenAddGoal}
-          onPressEdit={handleOpenAddGoal}
-          monthlyIncome={monthlyIncome}
-          monthlyFixedCosts={monthlyFixedCosts}
-          savingsRatio={savingsRatio}
-          currentMonthSpent={currentMonthSpent}
-          favUnit={favUnit}
-          baseDailyBudget={baseDailyBudget}
-          todayBudget={todayBudget}
-          todaySpent={todaySpent}
-          transactions={transactions}
-          currentMonthKey={currentMonthKey}
-        />
+        <View
+          onLayout={(e) => {
+            const y = e.nativeEvent.layout.y;
+            setSectionOffsets((prev) => ({ ...prev, goals: y }));
+          }}
+        >
+          <GoalSectionCard
+            goalName={goalName}
+            goalTargetAmount={goalTargetAmount}
+            savedMoney={savedMoney}
+            goals={goals}
+            goalDeadline={goalDeadline}
+            goalReason={goalReason}
+            isMasked={isMasked}
+            onPressCard={() => setShowGoalDetailModal(true)}
+            onPressAddGoal={handleOpenAddGoal}
+            onPressEdit={handleOpenAddGoal}
+            monthlyIncome={monthlyIncome}
+            monthlyFixedCosts={monthlyFixedCosts}
+            savingsRatio={savingsRatio}
+            currentMonthSpent={currentMonthSpent}
+            favUnit={favUnit}
+            baseDailyBudget={baseDailyBudget}
+            todayBudget={todayBudget}
+            todaySpent={todaySpent}
+            transactions={transactions}
+            currentMonthKey={currentMonthKey}
+          />
+        </View>
 
         {/* 1.3: QUẢN LÝ DANH MỤC THU & CHI */}
-        <CategorySettingsCard />
-
-        {/* 1.4: CHẾ ĐỘ GIAO DIỆN (3 THEME: SÁNG, TỐI, MÁT) */}
-        <ThemeSettingsCard />
+        <View
+          onLayout={(e) => {
+            const y = e.nativeEvent.layout.y;
+            setSectionOffsets((prev) => ({ ...prev, cats: y }));
+          }}
+        >
+          <CategorySettingsCard />
+        </View>
       </ScrollView>
 
       {/* MODAL CẤU HÌNH CHI PHÍ CỐ ĐỊNH CHI TIẾT */}

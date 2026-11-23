@@ -698,7 +698,14 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
   isMasked = false,
   onSaveBudgetSettings }) => {
   const { tokens, isDark, mode } = useTheme();
-  const isHeocon = mode === 'heocon' || !mode;
+  const isPink = mode === 'pink';
+  const isHeocon = true; // Cả Heo Con và Pastel Pink đều chuẩn Neo-Brutalist Pixel Art 100%
+  const cardBg = isPink ? '#FFFFFF' : '#FFFBF1';
+  const cardBorder = isPink ? '#3B0713' : '#2B2118';
+  const inkText = isPink ? '#3B0713' : '#2B2118';
+  const inkMuted = isPink ? '#834758' : '#6E5D4F';
+  const pageBg = isPink ? '#FFF5F7' : '#F6EEDC';
+  const chipBg = isPink ? '#FCE7F3' : '#FFF4CC';
 
   // Local state for income
   const [income, setIncome] = useState<number>(monthlyIncome);
@@ -923,6 +930,13 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
     triggerAutoSave(income, fixedCosts, savingsRatio, unitId);
   };
 
+  // Split Bar 10 ô 3 màu chuẩn Prototype
+  const totalInc = Math.max(1, income);
+  const nFixed = Math.min(10, Math.round((10 * totalFixedCosts) / totalInc));
+  const nSavings = Math.min(10 - nFixed, Math.round((10 * savingsGoalAmount) / totalInc));
+  const nFree = Math.max(0, 10 - nFixed - nSavings);
+  const isBudgetNegative = income > 0 && (income - totalFixedCosts - savingsGoalAmount <= 0);
+
   return (
     <View style={styles.wrapper}>
       {/* ================= THẺ TÓM TẮT CÂN BẰNG NGÂN SÁCH (READ-ONLY SUMMARY CARD) ================= */}
@@ -931,10 +945,11 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           styles.summaryCard,
           isHeocon
             ? {
-                backgroundColor: '#FFFBF1',
-                borderColor: '#2B2118',
+                backgroundColor: cardBg,
+                borderColor: cardBorder,
                 borderWidth: 3,
-                shadowColor: '#2B2118',
+                borderRadius: 22,
+                shadowColor: cardBorder,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 1,
                 shadowRadius: 0,
@@ -957,13 +972,13 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             <View style={styles.summaryIconBadge}>
               <Scale size={20} color={isHeocon ? '#E0452B' : tokens.primary} strokeWidth={2.4} />
             </View>
-            <Text style={[styles.summaryTitle, { color: isHeocon ? '#2B2118' : isDark ? '#FAF6EC' : '#1B2733' }]}>
+            <Text style={[styles.summaryTitle, { color: isHeocon ? '#2B2118' : isDark ? '#FAF6EC' : '#1B2733' }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
               CÂN BẰNG NGÂN SÁCH
             </Text>
           </View>
 
           <View style={styles.summaryEditButton}>
-            <SlidersHorizontal size={19} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.4} />
+            <SlidersHorizontal size={19} color={inkText} strokeWidth={2.4} />
           </View>
         </View>
 
@@ -973,8 +988,8 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             styles.summarySpotlightBox,
             isHeocon
               ? {
-                  backgroundColor: '#F6EEDC',
-                  borderColor: '#2B2118',
+                  backgroundColor: pageBg,
+                  borderColor: isBudgetNegative ? '#E0452B' : '#2B2118',
                   borderWidth: 2,
                 }
               : {
@@ -983,30 +998,66 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           ]}
         >
           <View style={styles.spotlightTopRow}>
-            <Text style={[styles.spotlightLabel, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
+            <Text style={[styles.spotlightLabel, { color: isBudgetNegative ? '#E0452B' : (isHeocon ? '#6E5D4F' : tokens.textMuted) }]}>
               Hôm nay tiêu được
             </Text>
           </View>
 
-          <Text style={[styles.spotlightAmount, { color: isHeocon ? '#2B2118' : tokens.primary }]}>
-            {isMasked ? '•••• đ' : `${formatVND(autoCalculatedDaily || baseDailyBudget)} / ngày`}
+          <Text style={[styles.spotlightAmount, { color: isBudgetNegative ? '#E0452B' : (isHeocon ? '#2B2118' : tokens.primary) }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
+            {isMasked
+              ? '•••• đ'
+              : isBudgetNegative
+              ? 'Kế hoạch đang âm'
+              : `${formatVND(autoCalculatedDaily || baseDailyBudget)} / ngày`}
           </Text>
         </View>
 
-        {/* Bi-color Progress Bar Mini */}
-        <View style={styles.miniBarContainer}>
-          <View
-            style={[
-              styles.miniBarSavings,
-              { width: `${Math.round(savingsRatio * 100)}%`, backgroundColor: '#7E9F80' },
-            ]}
-          />
-          <View
-            style={[
-              styles.miniBarSpend,
-              { width: `${100 - Math.round(savingsRatio * 100)}%`, backgroundColor: tokens.primary },
-            ]}
-          />
+        {/* Thanh Split Bar 10 ô 3 màu chuẩn Prototype */}
+        <View style={styles.splitBarSection}>
+          <View style={styles.splitBarRow}>
+            {Array.from({ length: 10 }).map((_, idx) => {
+              let segColor = '#F9B8C4'; // Được tiêu (hồng heo)
+              if (idx < nFixed) {
+                segColor = '#F28C28'; // Cố định (cam đất)
+              } else if (idx < nFixed + nSavings) {
+                segColor = '#5E9A57'; // Tích lũy (xanh lá)
+              }
+              return (
+                <View
+                  key={`split-cell-${idx}`}
+                  style={[
+                    styles.splitCell,
+                    {
+                      backgroundColor: segColor,
+                      borderColor: isHeocon ? '#2B2118' : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'),
+                    },
+                  ]}
+                />
+              );
+            })}
+          </View>
+
+          {/* Legend 3 màu */}
+          <View style={styles.splitLegendRow}>
+            <View style={styles.splitLegendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#F28C28' }]} />
+              <Text style={[styles.legendText, { color: tokens.textMuted }]}>
+                Cố định ({Math.round((nFixed / 10) * 100)}%)
+              </Text>
+            </View>
+            <View style={styles.splitLegendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#5E9A57' }]} />
+              <Text style={[styles.legendText, { color: tokens.textMuted }]}>
+                Tích lũy ({Math.round((nSavings / 10) * 100)}%)
+              </Text>
+            </View>
+            <View style={styles.splitLegendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#F9B8C4' }]} />
+              <Text style={[styles.legendText, { color: tokens.textMuted }]}>
+                Được tiêu ({Math.round((nFree / 10) * 100)}%)
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* 3 Cột số liệu then chốt */}
@@ -1014,7 +1065,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           {/* Cột 1: Thu nhập */}
           <View style={styles.summaryMetricItem}>
             <Text style={[styles.metricLabel, { color: tokens.textMuted }]}>Thu nhập</Text>
-            <Text style={[styles.metricValue, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+            <Text style={[styles.metricValue, { color: inkText }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
               {isMasked ? '••••' : formatCompactVND(income) || '0đ'}
             </Text>
           </View>
@@ -1026,7 +1077,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             <Text style={[styles.metricLabel, { color: tokens.textMuted }]}>
               Cố định ({fixedCosts.length})
             </Text>
-            <Text style={[styles.metricValue, { color: '#C86D51' }]}>
+            <Text style={[styles.metricValue, { color: isHeocon ? '#E0452B' : '#C86D51' }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
               {isMasked ? '••••' : formatCompactVND(totalFixedCosts) || '0đ'}
             </Text>
           </View>
@@ -1038,7 +1089,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             <Text style={[styles.metricLabel, { color: tokens.textMuted }]}>
               Tích lũy ({Math.round(savingsRatio * 100)}%)
             </Text>
-            <Text style={[styles.metricValue, { color: '#7E9F80' }]}>
+            <Text style={[styles.metricValue, { color: isHeocon ? '#5E9A57' : '#7E9F80' }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
               {isMasked ? '••••' : formatCompactVND(savingsGoalAmount) || '0đ'}
             </Text>
           </View>
@@ -1061,9 +1112,19 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           <View
             style={[
               styles.modalSheetContainer,
-              {
-                backgroundColor: isDark ? '#0E1620' : '#FAF6F0',
-                borderTopColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' },
+              isHeocon
+                ? {
+                    backgroundColor: pageBg,
+                    borderColor: cardBorder,
+                    borderTopWidth: 3,
+                    borderLeftWidth: 3,
+                    borderRightWidth: 3,
+                  }
+                : {
+                    backgroundColor: isDark ? '#121A16' : '#FAF6F0',
+                    borderTopColor: isDark ? '#2D4238' : tokens.border,
+                    borderTopWidth: 2,
+                  },
             ]}
           >
             {/* DRAG HANDLE */}
@@ -1071,7 +1132,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
               <View
                 style={[
                   styles.dragHandle,
-                  { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)' },
+                  { backgroundColor: isHeocon ? '#2B2118' : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)') },
                 ]}
               />
             </View>
@@ -1079,10 +1140,10 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             {/* SHEET HEADER */}
             <View style={styles.sheetHeader}>
               <View>
-                <Text style={[styles.sheetTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+                <Text style={[styles.sheetTitle, { color: inkText }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
                   Thiết lập ngân sách
                 </Text>
-                <Text style={[styles.sheetSubtitle, { color: tokens.textMuted }]}>
+                <Text style={[styles.sheetSubtitle, { color: inkMuted }, { fontFamily: 'Nunito', fontWeight: '700' }]}>
                   Kéo trượt thu nhập & tỷ lệ cân bằng
                 </Text>
               </View>
@@ -1090,14 +1151,21 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
               <TouchableOpacity
                 style={[
                   styles.sheetCloseButton,
-                  {
-                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)' },
+                  isHeocon
+                    ? {
+                        backgroundColor: '#FFF4CC',
+                        borderWidth: 2.5,
+                        borderColor: cardBorder,
+                      }
+                    : {
+                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+                      },
                 ]}
                 onPress={() => setIsEditModalOpen(false)}
                 activeOpacity={0.7}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <X size={18} color={isDark ? '#FAF6EC' : '#1B2733'} strokeWidth={2.4} />
+                <X size={18} color={isHeocon ? '#2B2118' : (isDark ? '#FAF6EC' : '#1B2733')} strokeWidth={2.6} />
               </TouchableOpacity>
             </View>
 
@@ -1111,15 +1179,28 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
       <View
         style={[
           styles.cardSection,
-          {
-            backgroundColor: isDark ? '#162231' : '#FFFFFF',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
+          isHeocon
+            ? {
+                backgroundColor: cardBg,
+                borderColor: cardBorder,
+                borderWidth: 3,
+                borderRadius: 20,
+                shadowColor: cardBorder,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 1,
+                shadowRadius: 0,
+                elevation: 4,
+              }
+            : {
+                backgroundColor: isDark ? '#162231' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+              },
         ]}
       >
         <View style={styles.sectionHeaderBetween}>
           <View style={styles.sectionLabelRow}>
-            <Coins size={17} color={tokens.primary} strokeWidth={2.4} />
-            <Text style={[styles.sectionTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+            <Coins size={18} color={inkText} strokeWidth={2.6} />
+            <Text style={[styles.sectionTitle, { color: inkText }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
               Thu nhập hàng tháng
             </Text>
           </View>
@@ -1129,16 +1210,24 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
         <View
           style={[
             styles.inputRow,
-            {
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
+            isHeocon
+              ? {
+                  backgroundColor: pageBg,
+                  borderColor: cardBorder,
+                  borderWidth: 2,
+                }
+              : {
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FAF6EC',
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+                },
           ]}
         >
           {isMasked ? (
             <Text
               style={[
                 styles.maskedAmountText,
-                { color: isDark ? '#FFFFFF' : '#1B2733' },
+                { color: inkText },
+                { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
               ]}
             >
               •••• đ
@@ -1148,15 +1237,16 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
               <TextInput
                 style={[
                   styles.currencyInput,
-                  { color: isDark ? '#FFFFFF' : '#1B2733' },
+                  { color: inkText },
+                  { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
                 ]}
                 placeholder="0"
-                placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
+                placeholderTextColor={isHeocon ? '#8A7A6A' : (isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF')}
                 keyboardType="numeric"
                 value={incomeStr}
                 onChangeText={handleIncomeTextChange}
               />
-              <Text style={[styles.currencySuffix, { color: tokens.primary }]}>đ</Text>
+              <Text style={[styles.currencySuffix, { color: inkText }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>đ</Text>
             </>
           )}
         </View>
@@ -1176,28 +1266,50 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
       <View
         style={[
           styles.cardSection,
-          {
-            backgroundColor: isDark ? '#162231' : '#FFFFFF',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
+          isHeocon
+            ? {
+                backgroundColor: cardBg,
+                borderColor: cardBorder,
+                borderWidth: 3,
+                borderRadius: 20,
+                shadowColor: cardBorder,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 1,
+                shadowRadius: 0,
+                elevation: 4,
+              }
+            : {
+                backgroundColor: isDark ? '#162231' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+              },
         ]}
       >
         <View style={styles.sectionHeaderBetween}>
           <View style={styles.sectionLabelRow}>
-            <Receipt size={17} color={tokens.primary} strokeWidth={2.4} />
-            <Text style={[styles.sectionTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+            <Receipt size={18} color={inkText} strokeWidth={2.6} />
+            <Text style={[styles.sectionTitle, { color: inkText }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
               Chi phí cố định ({fixedCosts.length})
             </Text>
           </View>
 
           {/* NÚT + THÊM DÒNG MỚI (ICON-ONLY MINIMALIST) */}
           <TouchableOpacity
-            style={[styles.addInlineButton, { backgroundColor: tokens.primary }]}
+            style={[
+              styles.addInlineButton,
+              isHeocon
+                ? {
+                    backgroundColor: '#F4B93B',
+                    borderWidth: 2,
+                    borderColor: cardBorder,
+                  }
+                : { backgroundColor: tokens.primary },
+            ]}
             onPress={handleAddCustomFixedCost}
             activeOpacity={0.8}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessibilityLabel="Thêm chi phí cố định"
           >
-            <Plus size={15} color="#0E1620" strokeWidth={2.8} />
+            <Plus size={15} color={inkText} strokeWidth={2.8} />
           </TouchableOpacity>
         </View>
 
@@ -1221,23 +1333,39 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 key={name}
                 style={[
                   styles.suggestionChip,
-                  {
-                    backgroundColor: isSelected
-                      ? isDark
-                        ? 'rgba(229, 152, 68, 0.25)'
-                        : 'rgba(229, 152, 68, 0.2)'
-                      : hasAmount
-                      ? isDark
-                        ? 'rgba(229, 152, 68, 0.12)'
-                        : 'rgba(229, 152, 68, 0.1)'
-                      : isDark
-                      ? 'rgba(255, 255, 255, 0.05)'
-                      : '#FAF6EC',
-                    borderColor: isSelected
-                      ? tokens.primary
-                      : hasAmount
-                      ? 'rgba(229, 152, 68, 0.5)'
-                      : 'transparent' },
+                  isHeocon
+                    ? {
+                        backgroundColor: isSelected
+                          ? '#F4B93B'
+                          : hasAmount
+                          ? '#FFF4CC'
+                          : '#FFFBF1',
+                        borderColor: cardBorder,
+                        borderWidth: 2,
+                        shadowColor: cardBorder,
+                        shadowOffset: { width: 0, height: isSelected ? 2 : 1 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: isSelected ? 2 : 1,
+                      }
+                    : {
+                        backgroundColor: isSelected
+                          ? isDark
+                            ? 'rgba(229, 152, 68, 0.25)'
+                            : 'rgba(229, 152, 68, 0.2)'
+                          : hasAmount
+                          ? isDark
+                            ? 'rgba(229, 152, 68, 0.12)'
+                            : 'rgba(229, 152, 68, 0.1)'
+                          : isDark
+                          ? 'rgba(255, 255, 255, 0.05)'
+                          : '#FAF6EC',
+                        borderColor: isSelected
+                          ? tokens.primary
+                          : hasAmount
+                          ? 'rgba(229, 152, 68, 0.5)'
+                          : 'transparent',
+                      },
                 ]}
                 onPress={() => handleSelectSuggestedFixedCost(name)}
                 activeOpacity={0.8}
@@ -1245,13 +1373,20 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 <Text
                   style={[
                     styles.suggestionChipText,
-                    {
-                      color: isSelected || hasAmount
-                        ? tokens.primary
-                        : isDark
-                        ? '#FAF6EC'
-                        : '#55606D',
-                      fontWeight: isSelected || hasAmount ? '700' : '500' },
+                    isHeocon
+                      ? {
+                          color: '#2B2118',
+                          fontWeight: isSelected || hasAmount ? '800' : '600',
+                          fontFamily: isSelected || hasAmount ? 'Baloo2_800ExtraBold' : 'Nunito',
+                        }
+                      : {
+                          color: isSelected || hasAmount
+                            ? tokens.primary
+                            : isDark
+                            ? '#FAF6EC'
+                            : '#55606D',
+                          fontWeight: isSelected || hasAmount ? '700' : '500',
+                        },
                   ]}
                 >
                   {chipLabel}
@@ -1277,23 +1412,39 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 key={item.id}
                 style={[
                   styles.suggestionChip,
-                  {
-                    backgroundColor: isSelected
-                      ? isDark
-                        ? 'rgba(229, 152, 68, 0.25)'
-                        : 'rgba(229, 152, 68, 0.2)'
-                      : hasAmount
-                      ? isDark
-                        ? 'rgba(229, 152, 68, 0.12)'
-                        : 'rgba(229, 152, 68, 0.1)'
-                      : isDark
-                      ? 'rgba(255, 255, 255, 0.05)'
-                      : '#FAF6EC',
-                    borderColor: isSelected
-                      ? tokens.primary
-                      : hasAmount
-                      ? 'rgba(229, 152, 68, 0.5)'
-                      : 'transparent' },
+                  isHeocon
+                    ? {
+                        backgroundColor: isSelected
+                          ? '#F4B93B'
+                          : hasAmount
+                          ? '#FFF4CC'
+                          : '#FFFBF1',
+                        borderColor: cardBorder,
+                        borderWidth: 2,
+                        shadowColor: cardBorder,
+                        shadowOffset: { width: 0, height: isSelected ? 2 : 1 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: isSelected ? 2 : 1,
+                      }
+                    : {
+                        backgroundColor: isSelected
+                          ? isDark
+                            ? 'rgba(229, 152, 68, 0.25)'
+                            : 'rgba(229, 152, 68, 0.2)'
+                          : hasAmount
+                          ? isDark
+                            ? 'rgba(229, 152, 68, 0.12)'
+                            : 'rgba(229, 152, 68, 0.1)'
+                          : isDark
+                          ? 'rgba(255, 255, 255, 0.05)'
+                          : '#FAF6EC',
+                        borderColor: isSelected
+                          ? tokens.primary
+                          : hasAmount
+                          ? 'rgba(229, 152, 68, 0.5)'
+                          : 'transparent',
+                      },
                 ]}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1304,13 +1455,20 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 <Text
                   style={[
                     styles.suggestionChipText,
-                    {
-                      color: isSelected || hasAmount
-                        ? tokens.primary
-                        : isDark
-                        ? '#FAF6EC'
-                        : '#55606D',
-                      fontWeight: isSelected || hasAmount ? '700' : '500' },
+                    isHeocon
+                      ? {
+                          color: '#2B2118',
+                          fontWeight: isSelected || hasAmount ? '800' : '600',
+                          fontFamily: isSelected || hasAmount ? 'Baloo2_800ExtraBold' : 'Nunito',
+                        }
+                      : {
+                          color: isSelected || hasAmount
+                            ? tokens.primary
+                            : isDark
+                            ? '#FAF6EC'
+                            : '#55606D',
+                          fontWeight: isSelected || hasAmount ? '700' : '500',
+                        },
                   ]}
                 >
                   {chipLabel}
@@ -1325,21 +1483,28 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           <View
             style={[
               styles.activeEditorBox,
-              {
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : '#FAF6EC',
-                borderColor: isDark ? 'rgba(229, 152, 68, 0.3)' : 'rgba(229, 152, 68, 0.25)' },
+              isHeocon
+                ? {
+                    backgroundColor: cardBg,
+                    borderColor: cardBorder,
+                    borderWidth: 2.5,
+                  }
+                : {
+                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : '#FAF6EC',
+                    borderColor: isDark ? 'rgba(229, 152, 68, 0.3)' : 'rgba(229, 152, 68, 0.25)',
+                  },
             ]}
           >
             <View style={styles.activeEditorHeader}>
               {QUICK_FIXED_SUGGESTIONS.includes(activeItem.name) ? (
-                <Text style={[styles.activeEditorTitle, { color: isDark ? '#FAF6EC' : '#1B2733' }]}>
+                <Text style={[styles.activeEditorTitle, { color: inkText }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
                   {activeItem.name}
                 </Text>
               ) : (
                 <TextInput
-                  style={[styles.activeCustomNameInput, { color: isDark ? '#FFFFFF' : '#1B2733' }]}
+                  style={[styles.activeCustomNameInput, { color: inkText }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}
                   placeholder="Tên khoản..."
-                  placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
+                  placeholderTextColor={isHeocon ? '#8A7A6A' : (isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF')}
                   value={activeItem.name}
                   onChangeText={(val) => handleUpdateFixedCost(activeItem.id, { name: val })}
                   autoFocus={!activeItem.name}
@@ -1360,22 +1525,30 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             <View
               style={[
                 styles.inputRow,
-                {
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                  marginBottom: 0 },
+                isHeocon
+                  ? {
+                      backgroundColor: pageBg,
+                      borderColor: cardBorder,
+                      borderWidth: 2,
+                      marginBottom: 0,
+                    }
+                  : {
+                      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
+                      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+                      marginBottom: 0,
+                    },
               ]}
             >
               {isMasked ? (
-                <Text style={[styles.maskedAmountText, { color: tokens.danger }]}>
+                <Text style={[styles.maskedAmountText, { color: tokens.danger }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
                   •••• đ
                 </Text>
               ) : (
                 <>
                   <TextInput
-                    style={[styles.currencyInput, { color: tokens.danger }]}
+                    style={[styles.currencyInput, { color: tokens.danger }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}
                     placeholder="0"
-                    placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF'}
+                    placeholderTextColor={isHeocon ? '#8A7A6A' : (isDark ? 'rgba(255, 255, 255, 0.35)' : '#99A1AF')}
                     keyboardType="numeric"
                     value={activeItem.amount > 0 ? activeItem.amount.toLocaleString('vi-VN') : ''}
                     onChangeText={(val) => {
@@ -1384,7 +1557,7 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                     }}
                     autoFocus={!!activeItem.name}
                   />
-                  <Text style={[styles.currencySuffix, { color: tokens.danger }]}>đ</Text>
+                  <Text style={[styles.currencySuffix, { color: tokens.danger }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>đ</Text>
                 </>
               )}
             </View>
@@ -1403,10 +1576,10 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
 
         {/* TỔNG CỘNG CHI PHÍ CỐ ĐỊNH */}
         <View style={styles.fixedTotalRow}>
-          <Text style={[styles.fixedTotalLabel, { color: tokens.textMuted }]}>
+          <Text style={[styles.fixedTotalLabel, { color: inkMuted }, { fontFamily: 'Nunito', fontWeight: '700' }]}>
             Tổng cố định:
           </Text>
-          <Text style={[styles.fixedTotalAmount, { color: tokens.danger }]}>
+          <Text style={[styles.fixedTotalAmount, { color: tokens.danger }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
             {formatMaskedCurrency(totalFixedCosts, isMasked)}
           </Text>
         </View>
@@ -1417,28 +1590,42 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
         <View
           style={[
             styles.heroZeroCard,
-            {
-              backgroundColor: isDark ? '#162231' : '#FFFFFF',
-              borderColor: tokens.primary,
-              shadowColor: '#E59844' },
+            isHeocon
+              ? {
+                  backgroundColor: cardBg,
+                  borderColor: cardBorder,
+                  borderWidth: 3,
+                  borderRadius: 20,
+                  shadowColor: cardBorder,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 1,
+                  shadowRadius: 0,
+                  elevation: 4,
+                }
+              : {
+                  backgroundColor: isDark ? '#162231' : '#FFFFFF',
+                  borderColor: tokens.primary,
+                  shadowColor: '#E59844',
+                },
           ]}
         >
           {/* TIÊU ĐỀ CARD & DÒNG PHỤ KHẢ DỤNG XUỐNG DÒNG */}
           <View style={styles.heroZeroHeaderCol}>
             <View style={styles.sectionLabelRow}>
-              <Scale size={17} color={tokens.primary} strokeWidth={2.4} />
+              <Scale size={17} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.4} />
               <Text
                 style={[
                   styles.heroZeroTitle,
-                  { color: isDark ? '#FAF6EC' : '#1B2733' },
+                  { color: inkText },
+                  { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
                 ]}
               >
                 Cân bằng ngân sách
               </Text>
             </View>
-            <Text style={[styles.disposableSubtext, { color: tokens.textMuted }]}>
+            <Text style={[styles.disposableSubtext, { color: inkMuted }, { fontFamily: 'Nunito', fontWeight: '700' }]}>
               Khả dụng:{' '}
-              <Text style={{ color: tokens.primary, fontWeight: '700' }}>
+              <Text style={[{ color: inkText, fontWeight: '800' }, { fontFamily: 'Baloo2_800ExtraBold' }]}>
                 {formatMaskedCurrency(disposableIncome, isMasked)}
               </Text>
             </Text>
@@ -1447,13 +1634,14 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           {/* TẦNG 1: DÒNG TIỀN THÁNG (TÍCH LŨY THÁNG & CHI TIÊU THÁNG) */}
           <View style={styles.pillarsContainer}>
             <View style={styles.borderlessCol}>
-              <Text style={[styles.borderlessLabel, { color: '#7E9F80' }]}>
+              <Text style={[styles.borderlessLabel, { color: isHeocon ? '#2D7A4D' : '#7E9F80' }, { fontFamily: 'Nunito', fontWeight: '800' }]}>
                 Tích lũy {Math.round(savingsRatio * 100)}%
               </Text>
               <Text
                 style={[
                   styles.borderlessAmount,
-                  { color: isDark ? '#FFFFFF' : '#1B2733' },
+                  { color: inkText },
+                  { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
                 ]}
               >
                 {formatMaskedCurrency(savingsGoalAmount, isMasked)}
@@ -1461,13 +1649,14 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             </View>
 
             <View style={[styles.borderlessCol, { alignItems: 'flex-end' }]}>
-              <Text style={[styles.borderlessLabel, { color: '#E59844' }]}>
+              <Text style={[styles.borderlessLabel, { color: isHeocon ? '#B85E1A' : '#E59844' }, { fontFamily: 'Nunito', fontWeight: '800' }]}>
                 Chi tiêu {Math.round((1 - savingsRatio) * 100)}%
               </Text>
               <Text
                 style={[
                   styles.borderlessAmount,
-                  { color: isDark ? '#FFFFFF' : '#1B2733' },
+                  { color: inkText },
+                  { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
                 ]}
               >
                 {formatMaskedCurrency(monthlyDiscretionarySpend, isMasked)}
@@ -1487,20 +1676,29 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
           <View
             style={[
               styles.dailySpotlightBox,
-              {
-                backgroundColor: isDark
-                  ? 'rgba(229, 152, 68, 0.12)'
-                  : 'rgba(229, 152, 68, 0.15)' },
+              isHeocon
+                ? {
+                    backgroundColor: '#FFF4CC',
+                    borderColor: cardBorder,
+                    borderWidth: 2,
+                    borderRadius: 14,
+                  }
+                : {
+                    backgroundColor: isDark
+                      ? 'rgba(229, 152, 68, 0.12)'
+                      : 'rgba(229, 152, 68, 0.15)',
+                  },
             ]}
           >
             <Text
               style={[
                 styles.dailySpotlightTitle,
-                { color: isDark ? '#FAF6EC' : '#1B2733' },
+                { color: inkText },
+                { fontFamily: 'Nunito', fontWeight: '800' },
               ]}
             >
               Hôm nay tiêu được:{' '}
-              <Text style={{ color: tokens.primary, fontWeight: '800' }}>
+              <Text style={[{ color: inkText, fontWeight: '800' }, { fontFamily: 'Baloo2_800ExtraBold' }]}>
                 {formatMaskedCurrency(autoCalculatedDaily, isMasked)}
               </Text>{' '}
               / ngày
@@ -1511,18 +1709,26 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
         <View
           style={[
             styles.placeholderCard,
-            {
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : '#FFFFFF',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' },
+            isHeocon
+              ? {
+                  backgroundColor: cardBg,
+                  borderColor: cardBorder,
+                  borderWidth: 2,
+                  borderRadius: 18,
+                }
+              : {
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : '#FFFFFF',
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)',
+                },
           ]}
         >
           <View style={styles.sectionLabelRow}>
-            <Sparkles size={16} color={tokens.textMuted} strokeWidth={2} />
-            <Text style={[styles.placeholderTitle, { color: tokens.textMuted }]}>
+            <Sparkles size={16} color={isHeocon ? '#2B2118' : tokens.textMuted} strokeWidth={2} />
+            <Text style={[styles.placeholderTitle, { color: isHeocon ? '#2B2118' : tokens.textMuted }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
               Cân bằng ngân sách
             </Text>
           </View>
-          <Text style={[styles.placeholderSub, { color: tokens.textMuted }]}>
+          <Text style={[styles.placeholderSub, { color: inkMuted }, { fontFamily: 'Nunito', fontWeight: '600' }]}>
             {income <= 0
               ? 'Kéo thanh trượt hoặc nhập thu nhập để Kepi tính toán hạn mức ngày cho bạn.'
               : 'Tổng chi phí cố định đang vượt thu nhập. Hãy điều chỉnh lại.'}
@@ -1534,15 +1740,28 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
       <View
         style={[
           styles.cardSection,
-          {
-            backgroundColor: isDark ? '#162231' : '#FFFFFF',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
+          isHeocon
+            ? {
+                backgroundColor: cardBg,
+                borderColor: cardBorder,
+                borderWidth: 3,
+                borderRadius: 20,
+                shadowColor: cardBorder,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 1,
+                shadowRadius: 0,
+                elevation: 4,
+              }
+            : {
+                backgroundColor: isDark ? '#162231' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+              },
         ]}
       >
-        <Text style={[styles.sectionTitle, { color: isDark ? '#FAF6EC' : '#1B2733', marginBottom: 4 }]}>
+        <Text style={[styles.sectionTitle, { color: inkText, marginBottom: 4 }, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
           Đơn vị quy đổi vui vẻ
         </Text>
-        <Text style={[styles.unitSub, { color: tokens.textMuted, marginBottom: 10 }]}>
+        <Text style={[styles.unitSub, { color: inkMuted, marginBottom: 10 }, { fontFamily: 'Nunito', fontWeight: '600' }]}>
           Anh Minh AI sẽ quy đổi các món đồ sang đơn vị quen thuộc này
         </Text>
 
@@ -1554,15 +1773,27 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 key={u.id}
                 style={[
                   styles.unitCard,
-                  {
-                    backgroundColor: isSelected
-                      ? isDark
-                        ? 'rgba(229, 152, 68, 0.2)'
-                        : 'rgba(229, 152, 68, 0.15)'
-                      : isDark
-                      ? 'rgba(255, 255, 255, 0.04)'
-                      : '#FAF6EC',
-                    borderColor: isSelected ? tokens.primary : 'transparent' },
+                  isHeocon
+                    ? {
+                        backgroundColor: isSelected ? '#FFF4CC' : '#FFFBF1',
+                        borderColor: cardBorder,
+                        borderWidth: isSelected ? 2.5 : 1.5,
+                        shadowColor: cardBorder,
+                        shadowOffset: { width: 0, height: isSelected ? 2 : 1 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: isSelected ? 2 : 1,
+                      }
+                    : {
+                        backgroundColor: isSelected
+                          ? isDark
+                            ? 'rgba(229, 152, 68, 0.2)'
+                            : 'rgba(229, 152, 68, 0.15)'
+                          : isDark
+                          ? 'rgba(255, 255, 255, 0.04)'
+                          : '#FAF6EC',
+                        borderColor: isSelected ? tokens.primary : 'transparent',
+                      },
                 ]}
                 onPress={() => handleSelectUnit(u.id)}
                 activeOpacity={0.8}
@@ -1571,14 +1802,21 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 <Text
                   style={[
                     styles.unitLabel,
-                    {
-                      color: isSelected ? tokens.primary : isDark ? '#FAF6EC' : '#1B2733',
-                      fontWeight: isSelected ? '700' : '500' },
+                    isHeocon
+                      ? {
+                          color: '#2B2118',
+                          fontWeight: isSelected ? '800' : '600',
+                          fontFamily: isSelected ? 'Baloo2_800ExtraBold' : 'Nunito',
+                        }
+                      : {
+                          color: isSelected ? tokens.primary : isDark ? '#FAF6EC' : '#1B2733',
+                          fontWeight: isSelected ? '700' : '500',
+                        },
                   ]}
                 >
                   {u.label}
                 </Text>
-                <Text style={[styles.unitPrice, { color: tokens.textMuted }]}>
+                <Text style={[styles.unitPrice, { color: inkMuted }, { fontFamily: 'Nunito', fontWeight: '700' }]}>
                   {formatVND(u.price)}
                 </Text>
               </TouchableOpacity>
@@ -1592,13 +1830,45 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
             <View
               style={[
                 styles.sheetBottomBar,
-                {
-                  backgroundColor: isDark ? '#0E1620' : '#FAF6F0',
-                  borderTopColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)' },
+                isHeocon
+                  ? {
+                      backgroundColor: pageBg,
+                      borderTopColor: cardBorder,
+                      borderTopWidth: 2,
+                    }
+                  : {
+                      backgroundColor: isDark ? '#0E1620' : '#FAF6F0',
+                      borderTopColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+                    },
               ]}
             >
               <TouchableOpacity
-                style={[styles.sheetSaveButton, { backgroundColor: tokens.primary }]}
+                style={[
+                  styles.sheetSaveButton,
+                  isHeocon
+                    ? {
+                        backgroundColor: '#F4B93B',
+                        borderWidth: 3,
+                        borderColor: cardBorder,
+                        borderRadius: 22,
+                        shadowColor: cardBorder,
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 4,
+                      }
+                    : {
+                        backgroundColor: '#F43F5E',
+                        borderWidth: 3,
+                        borderColor: '#3B0713',
+                        borderRadius: 22,
+                        shadowColor: '#3B0713',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 4,
+                      },
+                ]}
                 onPress={() => {
                   triggerAutoSave(income, fixedCosts, savingsRatio, selectedUnit);
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -1606,8 +1876,8 @@ export const BudgetSettingsCard: React.FC<BudgetSettingsCardProps> = ({
                 }}
                 activeOpacity={0.85}
               >
-                <Check size={18} color="#0E1620" strokeWidth={2.8} />
-                <Text style={styles.sheetSaveButtonText}>Lưu thay đổi</Text>
+                <Check size={18} color={isPink ? '#FFFFFF' : '#2B2118'} strokeWidth={2.8} />
+                <Text style={[styles.sheetSaveButtonText, { color: isPink ? '#FFFFFF' : '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>Lưu thay đổi</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -2075,4 +2345,49 @@ const styles = StyleSheet.create({
     color: '#0E1620',
     fontSize: 15,
     fontWeight: '800',
-    letterSpacing: 0.2 } });
+    letterSpacing: 0.2 },
+  splitBarSection: {
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  splitBarRow: {
+    flexDirection: 'row',
+    gap: 4,
+    height: 16,
+    width: '100%',
+  },
+  splitCell: {
+    flex: 1,
+    height: '100%',
+    borderRadius: 4,
+    borderWidth: 1.5,
+  },
+  splitLegendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  splitLegendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  formulaNoteText: {
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 8,
+    lineHeight: 15,
+    fontStyle: 'italic',
+  },
+});

@@ -16,7 +16,7 @@ interface ProfileIdentityCardProps {
   name: string;
   email?: string | null;
   streakDays: number;
-  savedMoney: number;
+  savedMoney?: number;
   entriesCount: number;
   isMasked?: boolean;
   isGuest?: boolean;
@@ -54,6 +54,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
               backgroundColor: '#FFFBF1',
               borderColor: '#2B2118',
               borderWidth: 3,
+              borderRadius: 22,
               shadowColor: '#2B2118',
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 1,
@@ -63,16 +64,22 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
           : { backgroundColor: tokens.surface, borderColor: tokens.border },
       ]}
     >
-      {/* NÚT BÚT CHÌ ĐỔI TÊN NẰM SÁT GÓC TRÊN BÊN PHẢI */}
+      {/* NÚT BÚT CHÌ ĐỔI TÊN NẰM SÁT GÓC TRÊN BÊN PHẢI (NEO-BADGE) */}
       {onEditName && (
         <TouchableOpacity
           onPress={handleEditName}
-          style={styles.editIconBtnTopRight}
-          activeOpacity={0.65}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          style={[
+            styles.editIconBtnTopRight,
+            {
+              backgroundColor: isHeocon ? '#FFF4CC' : '#FCE7F3',
+              borderColor: isHeocon ? '#2B2118' : '#3B0713',
+            },
+          ]}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityLabel="Đổi tên người dùng"
         >
-          <Edit2 size={15} color={isHeocon ? '#2B2118' : tokens.textMuted} strokeWidth={2.2} />
+          <Edit2 size={14} color={isHeocon ? '#2B2118' : '#3B0713'} strokeWidth={2.6} />
         </TouchableOpacity>
       )}
 
@@ -86,8 +93,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
           <Text
             style={[
               styles.nameText,
-              { color: isHeocon ? '#2B2118' : tokens.text },
-              isHeocon && { fontWeight: '800' },
+              { color: tokens.text, fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 18 },
             ]}
             numberOfLines={1}
           >
@@ -96,17 +102,15 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
         </View>
       </View>
 
-      {/* 2. DẢI 3 CHỈ SỐ TÓM TẮT */}
+      {/* 2. DẢI 2 CHỈ SỐ TÓM TẮT */}
       <View
         style={[
           styles.statsRow,
-          isHeocon
-            ? {
-                backgroundColor: '#F6EEDC',
-                borderColor: '#2B2118',
-                borderWidth: 2,
-              }
-            : { backgroundColor: tokens.surfaceAlt },
+          {
+            backgroundColor: tokens.surfaceAlt,
+            borderColor: tokens.border,
+            borderWidth: 2,
+          },
         ]}
       >
         {/* Chỉ số 1: Chuỗi ngày (Bấm mở Modal Điểm Danh) */}
@@ -120,18 +124,17 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
           accessibilityLabel="Xem chi tiết điểm danh chuỗi ngày"
         >
           <View style={styles.statIconBadge}>
-            <Flame size={16} color={isHeocon ? '#E0452B' : tokens.primary} strokeWidth={2.4} />
+            <Flame size={16} color="#E0452B" strokeWidth={2.4} />
           </View>
           <Text
             style={[
               styles.statValue,
-              { color: isHeocon ? '#2B2118' : tokens.text },
-              isHeocon && { fontWeight: '800' },
+              { color: tokens.text, fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
             ]}
           >
             {streakDays} ngày
           </Text>
-          <Text style={[styles.statLabel, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
+          <Text style={[styles.statLabel, { color: tokens.textMuted, fontFamily: 'Nunito', fontWeight: '700' }]}>
             Chuỗi ghi
           </Text>
         </TouchableOpacity>
@@ -139,51 +142,24 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
         <View
           style={[
             styles.statDivider,
-            { backgroundColor: isHeocon ? '#2B2118' : tokens.border },
+            { backgroundColor: tokens.border },
           ]}
         />
 
-        {/* Chỉ số 2: Đã giữ lại */}
+        {/* Chỉ số 2: Món đã ghi */}
         <View style={styles.statCell}>
           <View style={styles.statIconBadge}>
-            <ShieldCheck size={16} color={isHeocon ? '#5E9A57' : tokens.success} strokeWidth={2.4} />
+            <ShoppingBag size={16} color={tokens.primary} strokeWidth={2.4} />
           </View>
           <Text
             style={[
               styles.statValue,
-              { color: isHeocon ? '#2B2118' : tokens.text },
-              isHeocon && { fontWeight: '800' },
-            ]}
-          >
-            {formatMaskedCurrency(savedMoney, isMasked, false)}
-          </Text>
-          <Text style={[styles.statLabel, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
-            Đã giữ lại
-          </Text>
-        </View>
-
-        <View
-          style={[
-            styles.statDivider,
-            { backgroundColor: isHeocon ? '#2B2118' : tokens.border },
-          ]}
-        />
-
-        {/* Chỉ số 3: Món đã ghi */}
-        <View style={styles.statCell}>
-          <View style={styles.statIconBadge}>
-            <ShoppingBag size={16} color={isHeocon ? '#F4B93B' : tokens.accent} strokeWidth={2.4} />
-          </View>
-          <Text
-            style={[
-              styles.statValue,
-              { color: isHeocon ? '#2B2118' : tokens.text },
-              isHeocon && { fontWeight: '800' },
+              { color: tokens.text, fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
             ]}
           >
             {entriesCount} món
           </Text>
-          <Text style={[styles.statLabel, { color: isHeocon ? '#6E5D4F' : tokens.textMuted }]}>
+          <Text style={[styles.statLabel, { color: tokens.textMuted, fontFamily: 'Nunito', fontWeight: '700' }]}>
             Đã lưu
           </Text>
         </View>
@@ -229,16 +205,27 @@ const styles = StyleSheet.create({
   },
   nameCol: {
     flex: 1,
+    justifyContent: 'center',
   },
   nameText: {
     fontSize: 16,
     fontWeight: '700',
   },
+  subRoleText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 2,
+  },
   editIconBtnTopRight: {
     position: 'absolute',
     top: 14,
     right: 14,
-    padding: 6,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 2,
   },
   localBadge: {

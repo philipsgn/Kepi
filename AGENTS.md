@@ -33,6 +33,59 @@
 * **Giữ nguyên 100% tính năng & logic:** re-skin chỉ thay da; không đổi store/data contract/luồng nghiệp vụ.
 * **Không thêm đơn vị điểm ảo ("cám"/FEP)** — phần thưởng quy về Chuỗi Streak + "Đã giữ lại" (Quyết định 112/116).
 
+### 4. QUY TẮC SỐNG CÒN CHO SAFEWEBVIEW TRÊN FABRIC IOS (CHỐNG MÀN HÌNH VÀNG KHÈ, MỜ CANVAS & KẸT POPUP)
+* **CHỮA DỨT ĐIỂM MÀN HÌNH VÀNG KHÈ `#F6EEDC` (CGRectZero & Cancelled Load):**
+  - **1. BỎ HOÀN TOÀN `baseUrl: ''` (Chuỗi Rỗng):** WebKit trên iOS 16/17/18 coi chuỗi rỗng `""` là URL không hợp lệ và hủy tải (`NSURLErrorCancelled`). Luôn chỉ truyền `source={{ html: htmlContent }}`.
+  - **2. TUYỆT ĐỐI CẤM `flex: 0` VÀ KÍCH THƯỚC ÉP CỨNG:** Không truyền `flex: 0` hay tính toán chiều cao số cứng vào `SafeWebView` vì Yoga Layout sẽ co native WKWebView thành `CGRectZero (0×0)`. Luôn dùng Flexbox tự nhiên `{ flex: 1, width: '100%', backgroundColor: '#F6EEDC' }` cho cả container cha, `containerStyle` và `style` của `SafeWebView`.
+  - **3. TUYỆT ĐỐI CẤM `onLayout` setContentHeight re-render loop:** Không được lấy chiều cao từ `onLayout` để `setState` liên tục làm WebView bị unmount/freeze.
+  - **4. Console Error Bridge:** Luôn nhúng `window.onerror` bắn `postMessage` về React Native để bắt mọi cú pháp lỗi JavaScript trong HTML.
+
+* **QUY TẮC PIXEL ART CANVAS SẮC NÉT 100% (CHỐNG MỜ DO GPU DOWNSCALING):**
+  - **Bộ đệm Canvas (Buffer Resolution):** Giữ nguyên tỷ lệ pixel logic 1:1 từ prototype gốc (`176 × 224` cho Heo Bay, `224 × 140` cho Heo Bắn). **TUYỆT ĐỐI KHÔNG NHÂN DPR** vào kích thước bộ đệm canvas (`flyC.width = 176; apC.width = 224;`). Vì vùng hiển thị thực tế trên điện thoại chỉ ~348px, nếu nhân DPR=3 thành 528px/672px rồi bị CSS ép thu nhỏ lại, GPU WebKit sẽ bắt buộc áp bộ lọc bilinear làm nhòe mờ hạt pixel. Giữ nguyên kích thước gốc để WebKit phóng to (upscale 2×) kích hoạt thuật toán Nearest-Neighbor sắc bén từng pixel!
+  - **CSS Image Rendering:** Luôn dùng `image-rendering: pixelated; image-rendering: -webkit-crisp-edges; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;` (CẤM dùng `-webkit-optimize-contrast` vì nó kích hoạt bộ lọc làm mờ bicubic).
+  - **Tắt làm mờ 2D:** Luôn đặt `ctx.imageSmoothingEnabled = false;` trong vòng lặp vẽ.
+
+* **QUY TẮC CSS MODAL POPUP [hidden] & ĐÓNG 0MS (CHỐNG KẸT MÀN HÌNH CHƠI):**
+  - Mọi file HTML có thẻ modal popup (`.flyover`) BẮT BUỘC phải có rule CSS:
+    `[hidden] { display: none !important; }`
+    `.flyover[hidden] { display: none !important; }`
+    (Vì thuộc tính tác giả `.flyover { display: flex; }` có độ ưu tiên cao hơn thuộc tính `[hidden]` của trình duyệt, nếu không có `!important`, modal sau khi gán `hidden = true` vẫn giữ `display: flex` che kín toàn bộ màn hình!).
+  - Trong hàm đóng modal (`flyRestart`, `apStart`): Bắt buộc gán cả `o.style.display = 'none'; o.hidden = true; o.innerHTML = '';`.
+  - Lắng nghe sự kiện đa kênh: Dùng Event Delegation gắn vào modal container với cả `pointerdown`, `touchstart` (`e.stopPropagation()`) lẫn `click` để nút "Bay lại", "Chơi lại", "Về vườn" phản hồi tức thì 0ms.
+
+* **CƠ CHẾ NÁ BẮN ANGRY PIG 1:1 PROTOTYPE:**
+  - Bắt cử chỉ vuốt chạm ná bằng `touchstart`/`pointerdown` trên canvas.
+  - Sự kiện kéo lùi (`touchmove`/`pointermove`) và thả tay (`touchend`/`pointerup`) BẮT BUỘC lắng nghe trên cả `apC` và `window` với `{ passive: false }` và `e.preventDefault()`, để khi người dùng kéo lùi ngón tay sát mép trái màn hình ($x < 36 \to x \approx 8$) cử chỉ không bị `pointercancel` hủy ngang.
+  - Vận tốc phóng đạn theo đúng prototype: $vx = -dx \times AK$ và $vy = -dy \times AK$ (với $AK = 8.5$), vẽ đường đạn 14 chấm quỹ đạo và 2 dây cao su ná co giãn theo ngón tay.
+
+---
+
+## 🧠 NGUYÊN TẮC HỌC TẬP TỪ GLOBAL SKILLS (UI/UX PRO MAX, FRONTEND DESIGN & CODE REVIEW STANDARDS)
+
+Được kế thừa và đúc kết từ bộ kỹ năng đại lý toàn cầu `krishnakanthb13/antigravity_global_skills`:
+
+### 1. QUY CHUẨN NEUBRUTALISM UI/UX PRO MAX (CATEGORY 38 & FRONTEND DESIGN)
+* **Quy tắc Viền & Bóng Đổ 0-Blur:** Mọi Card, Container và Badge theo phong cách Heo Con bắt buộc dùng viền đặc 3px (`#2B2118`), bóng cứng góc 45° độ mờ bằng 0 (`shadowOffset: { width: 0, height: 4 }`, `shadowOpacity: 1, shadowRadius: 0, elevation: 4`).
+* **Thesis Hero & Tránh "Generic AI Aesthetic":** Tuyệt đối không thiết kế các giao diện mặc định nhàm chán kiểu AI (nền trắng nhạt + gradient nhòe). Điểm nhấn độc bản (Signature Element) của mỗi màn hình phải mang linh hồn riêng: Mascot Heo 24×20 sống động và các địa danh biểu tượng của Việt Nam (Tháp Bitexco, Vườn nhà Việt).
+* **Cặp Typography Có Hồn:**
+  - Tiêu đề, số tiền và chỉ số tài chính: Bắt buộc dùng **`Baloo2_800ExtraBold`** kèm `fontVariant: ['tabular-nums']` để số tiền không giật khi đếm.
+  - Nhãn, mô tả và nội dung: Dùng **`Nunito`** (600–700 bold).
+* **Ngôn Ngữ Thiết Kế Từ Góc Nhìn Người Dùng:** Đặt tên phần tử theo những gì người dùng kiểm soát và nhận biết, không dùng thuật ngữ kỹ thuật (Ví dụ: `Heo chủ nhân`, `Hôm nay tiêu được`, `Chuỗi ghi`, `Đã lưu`).
+
+### 2. HIỆU NĂNG REACT NATIVE & TRẢI NGHIỆM CHẠM XÚC GIÁC (REACT NATIVE PRO SPEC)
+* **Vùng Chạm Chuẩn Công Thái Học ($\ge 44 \times 44$px):** Mọi nút bấm, icon và ô tương tác phải có vùng chạm tối thiểu $\ge 44 \times 44$px thông qua `hitSlop`.
+* **Chống Layout Shift Tuyệt Đối:** Mọi hình ảnh, avatar pixel, và WebView Canvas phải khai báo kích thước hoặc tỷ lệ tường minh (`aspectRatio: 176 / 80`).
+* **Tối Ưu Re-render & Bộ Nhớ:** Sử dụng `useMemo` cho các phép tính toán ngân sách phức tạp, `useCallback` cho các sự kiện bấm, và luôn `clearTimeout`/`removeEventListener` khi unmount.
+* **Bắt Đa Sự Kiện Cảm Ứng Mobile:** Đối với các phần tử Canvas tương tác (như Banner bàn làm việc), bắt buộc lắng nghe cả `touchstart` (`{ passive: false }`), `pointerdown` lẫn `click` để phản hồi 0ms trên WebKit iOS/Android.
+
+### 3. QUY TRÌNH REVIEW MÃ NGUỒN & BẢO MẬT (CODE REVIEW & SECURITY AUDIT)
+* **Hệ Thống Phân Cấp Mức Độ (Severity Labels):**
+  - 🔴 `[blocking]`: Lỗi sập app, màn hình vàng/trắng WebView, sai lệch công thức tài chính hoặc rò rỉ STK/PII. Bắt buộc sửa ngay lập tức trước khi merge/proceed.
+  - 🟡 `[important]`: Lệch thiết kế so với prototype, heo lơ lửng, thiếu haptic feedback, hoặc thiếu xử lý edge cases.
+  - 🟢 `[nit]`: Tinh chỉnh khoảng cách, căn chỉnh lề nhẹ.
+* **Zero-PII & Zero-STK Shield (OWASP #1):** Tuyệt đối không lưu số tài khoản người nhận, số dư thực tế thô, hay API keys vào client storage/logs. Mọi dữ liệu telemetry đều phải đi qua `sanitize()`.
+* **Root-Cause Debugging:** Khi gặp lỗi giao diện hay logic, luôn phân tích tận gốc tọa độ và cơ chế render (như kiểm tra mặt bàn $y=54$ so với tâm heo đất $cy=48$), không vá ngọn tạm bợ.
+
 ---
 
 ## 🗺️ MA TRẬN TRA CỨU TÀI LIỆU THEO TÍNH NĂNG (FEATURE-TO-DOC MATRIX)
@@ -49,7 +102,7 @@ Khi thực thi công việc ở bất kỳ danh mục hay tính năng nào, Agen
 | **Tab 0: Sổ Nhật Ký (Home)** | - [docs/screens/HOME.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/HOME.md)<br>- [docs/screens/heocon/03-HOME-HEADER.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/03-HOME-HEADER.md)<br>- [docs/screens/heocon/04-HOME-GARDEN.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/04-HOME-GARDEN.md)<br>- [docs/screens/heocon/05-HOME-SPEND-CARD.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/05-HOME-SPEND-CARD.md)<br>- [docs/screens/heocon/06-HOME-QUICKLOG-JARS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/06-HOME-QUICKLOG-JARS.md)<br>- [docs/screens/heocon/07-HOME-CALENDAR.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/07-HOME-CALENDAR.md) | Lịch ảnh 7 cột, Rollover 100% ngân sách ngày, chuỗi Streak, **Pixel Garden port 1:1 từ prototype** (heo 24×20, vườn 176×132, máy trạng thái), thẻ "Chi hôm nay" đè −22px với 10 ô hạn mức. |
 | **Tab 1: Thống Kê (Stats)** | - [docs/screens/STATS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/STATS.md)<br>- [docs/screens/heocon/08-STATS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/08-STATS.md) | Cuộn Album ảnh tháng 3:4, Hộp Cảm Xúc PigFly, Báo cáo Tạp chí Anime Magazine 3 Chế Độ Xem (Album / Phân Tích / Tạp Chí) & 3 KPI Mới (Runway Score, Impulse Ratio, Savings Velocity). Re-skin Heo Con: viền 3px ink, nhãn giá pill nền mực. |
 | **Tab 2: Camera Quick Hub** | - [docs/screens/CAMERA.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/CAMERA.md)<br>- [docs/screens/heocon/09-CAMERA.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/09-CAMERA.md) | **Khung ngắm vuông 1:1 chuẩn Locket (348×348px)**, nút Chi/Thu áp sát trần, Flash nổi trần trong khung, **Seamless Freeze-Frame 0ms tức thì** (0 xử lý lật file, chuẩn camera native), **Đồng bộ nền theo `tokens.bg`** (hồng pastel `#FFF5F7` trong Theme Hồng Heo), **Chữ mô tả IG Story trong suốt kéo thả tự do (`PanResponder` 2 pha, Zero Placeholder)** (chữ trắng bóng đổ, không hộp viền, không placeholder, chạm nhẹ gõ/kéo di chuyển, không ghi mô tả = ảnh trơn sạch 100%), số tiền nền trơn, tag 1 hàng trượt ngang chữ to, nhập tiền/tag trước hoặc sau khi chụp, Cute Toast tự tắt 1.8s, **Lịch sử 100vh 1 ảnh 1 khung hình** (mô tả sát vị trí đã kéo hoặc ẩn khi rỗng, tên danh mục tiếng Việt có dấu chuẩn bên ngoài). |
-| **Tab 3: Giải Trí (Chat, Game & Map)** | - [docs/screens/CHAT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/CHAT.md)<br>- [docs/screens/heocon/10-CHAT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-CHAT.md)<br>- [docs/screens/heocon/10-GAMES-SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-GAMES-SPEC.md) | **Tab Giải trí (Quyết định 140, 141, 142, 143, 144, 145, 146, 147 & 148)**: Icon Gamepad2, trung tâm PIGFLY HUB 3 thẻ Compact Neo-Card siêu gọn không cuộn trang (Trò chuyện AI & Squad, Game Vui Heo Con Arcade, Bản đồ Dual-Engine). Mascot pixel đồng bộ 100%, bộ PixelIcons 16×16 chuẩn prototype, ná bắn Angry Pig cảm ứng touch mượt mà, canvas 3x DPR integer-scale siêu sắc nét, khắc phục triệt để lỗi Blank WebView màn hình vàng trên iOS. |
+| **Tab 3: Giải Trí (Chat, Game & Map)** | - [docs/screens/CHAT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/CHAT.md)<br>- [docs/screens/heocon/10-CHAT.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-CHAT.md)<br>- [docs/screens/heocon/10-GAMES-SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/10-GAMES-SPEC.md) | **Tab Giải trí (Quyết định 140, 141, 142, 143, 144, 145, 146, 147, 148 & 149)**: Icon Gamepad2, trung tâm PIGFLY HUB 3 thẻ Compact Neo-Card siêu gọn không cuộn trang (Trò chuyện AI & Squad, Game Vui Heo Con Arcade, Bản đồ Dual-Engine). Mascot pixel đồng bộ 100%, bộ PixelIcons 16×16 chuẩn prototype, ná bắn Angry Pig cảm ứng touch mượt mà, canvas 3x DPR integer-scale siêu sắc nét, khắc phục triệt để lỗi Blank WebView màn hình vàng trên iOS bằng kích thước tường minh chuẩn Fabric. |
 | **Tab 4: Hồ Sơ & Cài Đặt (Profile)** | - [docs/screens/PROFILE.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/PROFILE.md)<br>- [docs/screens/heocon/11-PROFILE-SETTINGS.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/11-PROFILE-SETTINGS.md) | Hạn mức ngày `Hôm nay tiêu được` (0 hardcode), Mục tiêu Thác nước, Cài đặt bảo mật Zero-STK minh bạch. Re-skin Heo Con + **Theme 3-way switch (`heocon`/`pink`/`mint`)**. |
 | **Quét Mã VietQR (Luồng 1)** | - [docs/features/QR_PAY.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/features/QR_PAY.md)<br>- [docs/qr/BANK_DEEPLINK_MATRIX.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/qr/BANK_DEEPLINK_MATRIX.md)<br>- [docs/qr/EMV_PARSER_SPEC.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/qr/EMV_PARSER_SPEC.md) | Nhận diện mã VietQR offline, phân luồng Autofill (MB, ICB, BIDV, ACB, OCB), deeplink v2, hỏi "Đã chuyển xong chưa?". |
 | **Login & Onboarding** | - [docs/screens/heocon/12-LOGIN-ONBOARDING.md](file:///c:/Users/Asus/Documents/AI/KEPI/Kepi/docs/screens/heocon/12-LOGIN-ONBOARDING.md) | Luồng 1-chạm Local-First ≤ 0.5s (biệt danh + năm sinh, 0 pre-filled), badge pill "● PIGFLY", nền pastel đơn sắc, Nút Nguồn bừng Vàng Cám. |

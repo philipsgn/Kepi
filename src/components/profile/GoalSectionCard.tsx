@@ -21,6 +21,7 @@ import {
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { ProgressBar } from '../common/ProgressBar';
+import { SegmentBar10 } from '../neo/SegmentBar10';
 import { FavoriteUnit, Transaction } from '../../types/database';
 
 export interface GoalSectionCardProps {
@@ -96,7 +97,8 @@ export const GoalSectionCard: React.FC<GoalSectionCardProps> = ({
   goalReason,
 }) => {
   const { tokens, isDark, mode } = useTheme();
-  const isHeocon = mode === 'heocon' || !mode;
+  const isPink = mode === 'pink';
+  const isHeocon = true; // Cả Heo Con và Pastel Pink đều chuẩn Neo-Brutalist 100%
 
   // 1. Chuẩn hóa danh sách mục tiêu dài hạn (hỗ trợ cả goals array lẫn single goal fallback)
   const effectiveGoals = useMemo<GoalItem[]>(() => {
@@ -186,18 +188,17 @@ export const GoalSectionCard: React.FC<GoalSectionCardProps> = ({
     <TouchableOpacity
       style={[
         styles.container,
-        isHeocon
-          ? {
-              backgroundColor: '#FFFBF1',
-              borderColor: '#2B2118',
-              borderWidth: 3,
-              shadowColor: '#2B2118',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 1,
-              shadowRadius: 0,
-              elevation: 4,
-            }
-          : { backgroundColor: tokens.surface, borderColor: tokens.border },
+        {
+          backgroundColor: isPink ? '#FFFFFF' : '#FFFBF1',
+          borderColor: isPink ? '#3B0713' : '#2B2118',
+          borderWidth: 3,
+          borderRadius: 22,
+          shadowColor: isPink ? '#3B0713' : '#2B2118',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 1,
+          shadowRadius: 0,
+          elevation: 4,
+        },
       ]}
       onPress={handleCardPress}
       activeOpacity={0.88}
@@ -207,53 +208,91 @@ export const GoalSectionCard: React.FC<GoalSectionCardProps> = ({
       <View style={styles.headerRow}>
         <View style={styles.titleGroup}>
           <View style={styles.targetIconBox}>
-            <Target size={19} color={isHeocon ? '#E0452B' : tokens.primary} strokeWidth={2.4} />
+            <Target size={19} color={isPink ? '#F43F5E' : '#E0452B'} strokeWidth={2.4} />
           </View>
-          <Text style={[styles.sectionTitle, { color: isHeocon ? '#2B2118' : tokens.text }]}>
+          <Text style={[styles.sectionTitle, { color: isPink ? '#3B0713' : '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>
             {Strings.profile.goalSectionTitle}
           </Text>
         </View>
 
         <TouchableOpacity
-          style={styles.addIconBtn}
+          style={[
+            styles.addIconBtn,
+            {
+              width: 30,
+              height: 30,
+              borderRadius: 15,
+              backgroundColor: isPink ? '#FCE7F3' : '#F4B93B',
+              borderWidth: 2,
+              borderColor: isPink ? '#3B0713' : '#2B2118',
+              padding: 0,
+            },
+          ]}
           onPress={handleAddPress}
           activeOpacity={0.7}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="Thêm mục tiêu mới"
         >
-          <Plus size={20} color={tokens.primary} strokeWidth={2.4} />
+          <Plus size={18} color={isPink ? '#3B0713' : '#2B2118'} strokeWidth={2.6} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.contentBody}>
-        {/* ================= TIÊU ĐỀ DUY NHẤT: MỤC TIÊU TÍCH LŨY THÁNG ================= */}
+        {/* ================= 1. MỤC TIÊU TÍCH LŨY THÁNG ================= */}
         <View style={styles.subSection}>
           <View style={styles.subHeaderRow}>
-            <Text style={[styles.subTitleText, { color: tokens.text }]} numberOfLines={1}>
+            <Text style={[styles.subTitleText, { color: isPink ? '#3B0713' : '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]} numberOfLines={1}>
               Mục tiêu tích lũy tháng
             </Text>
 
             <Text
               style={[
                 styles.subValueText,
-                { color: isMonthAchieved ? '#7E9F80' : tokens.primary },
+                { color: isMonthAchieved ? '#5E9A57' : (isPink ? '#3B0713' : '#2B2118'), fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
               ]}
             >
               {isMasked
                 ? '••••'
                 : `${formatCompactVND(actualSavedThisMonth)} / ${formatCompactVND(monthlySavingsGoal)}`}{' '}
-              <Text style={styles.percentHighlight}>({monthPercentage}%)</Text>
+              <Text style={[styles.percentHighlight, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>({monthPercentage}%)</Text>
             </Text>
           </View>
 
-          <View style={styles.progressBarWrapper}>
-            <ProgressBar
-              progress={monthPercentage / 100}
-              height={8}
-              customColor={isMonthAchieved ? '#7E9F80' : tokens.primary}
+          <SegmentBar10
+            spent={actualSavedThisMonth}
+            limit={monthlySavingsGoal}
+            style={{ marginVertical: 6 }}
+          />
+        </View>
+
+        {/* ================= 2. MỤC TIÊU CÁ NHÂN (NẾU CÓ) ================= */}
+        {hasPriorityGoal && priorityGoal && (
+          <View style={[styles.subSection, { marginTop: 12, paddingTop: 10, borderTopWidth: 1.5, borderTopColor: isPink ? '#3B0713' : '#2B2118' }]}>
+            <View style={styles.subHeaderRow}>
+              <Text style={[styles.subTitleText, { color: isPink ? '#3B0713' : '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]} numberOfLines={1}>
+                {priorityGoal.goal.name}
+              </Text>
+
+              <Text
+                style={[
+                  styles.subValueText,
+                  { color: priorityGoal.isAchieved ? '#5E9A57' : (isPink ? '#3B0713' : '#2B2118'), fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                ]}
+              >
+                {isMasked
+                  ? '••••'
+                  : `${formatCompactVND(priorityGoal.allocatedSavedMoney)} / ${formatCompactVND(priorityGoal.goal.targetAmount)}`}{' '}
+                <Text style={[styles.percentHighlight, { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' }]}>({priorityGoal.percentage}%)</Text>
+              </Text>
+            </View>
+
+            <SegmentBar10
+              spent={priorityGoal.allocatedSavedMoney}
+              limit={priorityGoal.goal.targetAmount}
+              style={{ marginVertical: 6 }}
             />
           </View>
-        </View>
+        )}
       </View>
     </TouchableOpacity>
   );

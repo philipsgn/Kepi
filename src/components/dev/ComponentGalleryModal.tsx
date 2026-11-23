@@ -22,7 +22,7 @@ import {
   Store,
   Sun,
   Target,
-  Wind,
+  Heart,
   X,
   Zap,
 } from 'lucide-react-native';
@@ -59,34 +59,34 @@ export const ComponentGalleryModal: React.FC<ComponentGalleryModalProps> = ({
   const [toggleState, setToggleState] = useState(true);
 
   const themeSegments = [
-    { key: 'pink', label: 'Hồng Heo', icon: <Sparkles size={18} strokeWidth={2.6} color={tokens.text} /> },
-    { key: 'mint', label: 'Xanh Mint', icon: <Wind size={18} strokeWidth={2.6} color={tokens.text} /> },
+    { key: 'heocon', label: 'Heo Con', icon: <Sparkles size={18} strokeWidth={2.6} color={tokens.text} /> },
+    { key: 'pink', label: 'Hồng Heo', icon: <Heart size={18} strokeWidth={2.6} color={tokens.text} /> },
   ];
 
-  const currentThemeIdx = themeMode === 'mint' ? 1 : 0;
+  const currentThemeIdx = themeMode === 'pink' ? 1 : 0;
 
   const handleThemeChange = (idx: number) => {
-    const modes: ThemeMode[] = ['pink', 'mint'];
+    const modes: ThemeMode[] = ['heocon', 'pink'];
     setThemeMode(modes[idx]);
   };
 
   const getThemeTitle = () => {
     switch (themeMode) {
-      case 'mint':
-        return 'Theme 2: Xanh Mint Gradient (Sương Bạc Hà & Ngọc Bích)';
       case 'pink':
+        return 'Theme 2: Hồng Heo Pastel (Linh vật PigFly 3D)';
+      case 'heocon':
       default:
-        return 'Theme 1: Hồng Heo (Linh vật PigFly 3D)';
+        return 'Theme 1: Heo Con Vàng Nâu (Neo-Brutalist Pixel)';
     }
   };
 
   const getThemeSubtitle = () => {
     switch (themeMode) {
-      case 'mint':
-        return '#F0FDF9 · #10B981 · #06B6D4 · #022C22 (WCAG 2.1 AAA/AA)';
       case 'pink':
-      default:
         return '#FFF5F7 · #F43F5E · #FB7185 · #3B0713 (WCAG 2.1 AAA/AA)';
+      case 'heocon':
+      default:
+        return '#F6EEDC · #F4B93B · #2B2118 · #F9B8C4 (WCAG 2.1 AAA/AA)';
     }
   };
 
@@ -244,9 +244,9 @@ export const ComponentGalleryModal: React.FC<ComponentGalleryModalProps> = ({
                 onPress={() => {}}
                 icon={<CheckCircle2 size={18} color={tokens.textOnPrimary} strokeWidth={2.6} />}
               >
-                {themeMode === 'mint'
-                  ? 'Nút Chính Xanh Mint Gradient (Primary)'
-                  : 'Nút Chính Hồng Heo (Primary)'}
+                {themeMode === 'pink'
+                  ? 'Nút Chính Hồng Heo (Primary)'
+                  : 'Nút Chính Heo Con Vàng Nâu (Primary)'}
               </Button>
 
               <Button

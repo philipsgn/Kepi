@@ -37,7 +37,16 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
   visible,
   onClose,
 }) => {
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isPink = mode === 'pink';
+  const isHeocon = true; // Cả Heo Con và Pastel Pink đều chuẩn Neo-Brutalist Pixel Art 100%
+  const cardBg = isPink ? '#FFFFFF' : '#FFFBF1';
+  const cardBorder = isPink ? '#3B0713' : '#2B2118';
+  const inkText = isPink ? '#3B0713' : '#2B2118';
+  const inkMuted = isPink ? '#834758' : '#6E5D4F';
+  const pageBg = isPink ? '#FFF5F7' : '#F6EEDC';
+  const chipBg = isPink ? '#FCE7F3' : '#FFF4CC';
+  const accentBtn = isPink ? '#F43F5E' : '#F4B93B';
   const {
     categories,
     addCategory,
@@ -134,15 +143,42 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
       onRequestClose={onClose}
     >
       <SafeAreaView
-        style={[styles.container, { backgroundColor: tokens.background }]}
+        style={[
+          styles.container,
+          isHeocon
+            ? {
+                backgroundColor: pageBg,
+              }
+            : { backgroundColor: tokens.background },
+        ]}
       >
         {/* Header */}
-        <View style={[styles.header, { borderBottomColor: tokens.border }]}>
+        <View
+          style={[
+            styles.header,
+            {
+              borderBottomColor: isHeocon ? '#2B2118' : tokens.border,
+              borderBottomWidth: isHeocon ? 2 : 1,
+            },
+          ]}
+        >
           <View style={styles.headerTitleCol}>
-            <Text style={[styles.title, { color: tokens.text }]}>
+            <Text
+              style={[
+                styles.title,
+                { color: inkText },
+                isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 18 },
+              ]}
+            >
               Quản Lý Danh Mục
             </Text>
-            <Text style={[styles.subtitle, { color: tokens.textMuted }]}>
+            <Text
+              style={[
+                styles.subtitle,
+                { color: inkMuted },
+                { fontFamily: 'Nunito', fontWeight: '700' },
+              ]}
+            >
               Tùy biến các khoản Thu và Chi theo lối sống của bạn
             </Text>
           </View>
@@ -150,18 +186,42 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
           <View style={styles.headerActions}>
             <TouchableOpacity
               onPress={handleResetDefaults}
-              style={[styles.iconActionBtn, { backgroundColor: tokens.surfaceAlt }]}
+              style={[
+                styles.iconActionBtn,
+                isHeocon
+                  ? {
+                      backgroundColor: '#FFF4CC',
+                      borderWidth: 2,
+                      borderColor: cardBorder,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                    }
+                  : { backgroundColor: tokens.surfaceAlt },
+              ]}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <RotateCcw size={16} color={tokens.textMuted} />
+              <RotateCcw size={16} color={isHeocon ? '#2B2118' : tokens.textMuted} strokeWidth={2.4} />
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={onClose}
-              style={[styles.iconActionBtn, { backgroundColor: tokens.surfaceAlt }]}
+              style={[
+                styles.iconActionBtn,
+                isHeocon
+                  ? {
+                      backgroundColor: '#FFF4CC',
+                      borderWidth: 2,
+                      borderColor: cardBorder,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                    }
+                  : { backgroundColor: tokens.surfaceAlt },
+              ]}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <X size={18} color={tokens.text} />
+              <X size={18} color={isHeocon ? '#2B2118' : tokens.text} strokeWidth={2.6} />
             </TouchableOpacity>
           </View>
         </View>
@@ -171,7 +231,15 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
           <View
             style={[
               styles.tabTrack,
-              { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+              isHeocon
+                ? {
+                    backgroundColor: cardBg,
+                    borderColor: cardBorder,
+                    borderWidth: 2.5,
+                    borderRadius: 16,
+                    padding: 4,
+                  }
+                : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
             ]}
           >
             <TouchableOpacity
@@ -179,7 +247,19 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
                 styles.tabBtn,
                 activeTab === 'EXPENSE' && [
                   styles.tabBtnActive,
-                  { backgroundColor: tokens.surface },
+                  isHeocon
+                    ? {
+                        backgroundColor: '#F4B93B',
+                        borderWidth: 2,
+                        borderColor: cardBorder,
+                        borderRadius: 12,
+                        shadowColor: cardBorder,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 2,
+                      }
+                    : { backgroundColor: tokens.surface },
                 ],
               ]}
               onPress={() => {
@@ -191,11 +271,17 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
               <Text
                 style={[
                   styles.tabText,
-                  {
-                    color:
-                      activeTab === 'EXPENSE' ? tokens.text : tokens.textMuted,
-                    fontWeight: activeTab === 'EXPENSE' ? '700' : '500',
-                  },
+                  isHeocon
+                    ? {
+                        color: '#2B2118',
+                        fontFamily: 'Baloo2_800ExtraBold',
+                        fontWeight: '800',
+                      }
+                    : {
+                        color:
+                          activeTab === 'EXPENSE' ? tokens.text : tokens.textMuted,
+                        fontWeight: activeTab === 'EXPENSE' ? '700' : '500',
+                      },
                 ]}
               >
                 🔴 Chi Tiêu ({expenseCount})
@@ -207,7 +293,19 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
                 styles.tabBtn,
                 activeTab === 'INCOME' && [
                   styles.tabBtnActive,
-                  { backgroundColor: tokens.surface },
+                  isHeocon
+                    ? {
+                        backgroundColor: '#F4B93B',
+                        borderWidth: 2,
+                        borderColor: cardBorder,
+                        borderRadius: 12,
+                        shadowColor: cardBorder,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 2,
+                      }
+                    : { backgroundColor: tokens.surface },
                 ],
               ]}
               onPress={() => {
@@ -219,11 +317,17 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
               <Text
                 style={[
                   styles.tabText,
-                  {
-                    color:
-                      activeTab === 'INCOME' ? tokens.text : tokens.textMuted,
-                    fontWeight: activeTab === 'INCOME' ? '700' : '500',
-                  },
+                  isHeocon
+                    ? {
+                        color: '#2B2118',
+                        fontFamily: 'Baloo2_800ExtraBold',
+                        fontWeight: '800',
+                      }
+                    : {
+                        color:
+                          activeTab === 'INCOME' ? tokens.text : tokens.textMuted,
+                        fontWeight: activeTab === 'INCOME' ? '700' : '500',
+                      },
                 ]}
               >
                 🟢 Thu Nhập ({incomeCount})
@@ -246,40 +350,85 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
                 key={item.id}
                 style={[
                   styles.catCard,
-                  {
-                    backgroundColor: tokens.surface,
-                    borderColor: tokens.border,
-                    opacity: isItemActive ? 1 : 0.55,
-                  },
+                  isHeocon
+                    ? {
+                        backgroundColor: cardBg,
+                        borderColor: cardBorder,
+                        borderWidth: 2.5,
+                        borderRadius: 18,
+                        shadowColor: cardBorder,
+                        shadowOffset: { width: 0, height: 3 },
+                        shadowOpacity: 1,
+                        shadowRadius: 0,
+                        elevation: 3,
+                        opacity: isItemActive ? 1 : 0.6,
+                      }
+                    : {
+                        backgroundColor: tokens.surface,
+                        borderColor: tokens.border,
+                        opacity: isItemActive ? 1 : 0.55,
+                      },
                 ]}
               >
                 {/* Icon tròn có màu đại diện */}
                 <View
-                  style={[styles.iconCircle, { backgroundColor: item.color }]}
+                  style={[
+                    styles.iconCircle,
+                    { backgroundColor: item.color },
+                    isHeocon && {
+                      borderWidth: 2,
+                      borderColor: cardBorder,
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                    },
+                  ]}
                 >
-                  <IconComp size={18} color="#FFFFFF" strokeWidth={2.2} />
+                  <IconComp size={18} color="#FFFFFF" strokeWidth={2.4} />
                 </View>
 
                 {/* Thông tin tên & badge */}
                 <View style={styles.catInfoCol}>
                   <Text
-                    style={[styles.catName, { color: tokens.text }]}
+                    style={[
+                      styles.catName,
+                      { color: inkText },
+                      { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                    ]}
                     numberOfLines={1}
                   >
                     {item.name}
                   </Text>
                   <View style={styles.tagRow}>
                     {item.isDefault ? (
-                      <Text style={[styles.defaultTag, { color: tokens.textMuted }]}>
+                      <Text
+                        style={[
+                          styles.defaultTag,
+                          { color: inkMuted },
+                          { fontFamily: 'Nunito', fontWeight: '700' },
+                        ]}
+                      >
                         Mặc định
                       </Text>
                     ) : (
-                      <Text style={[styles.customTag, { color: tokens.primary }]}>
+                      <Text
+                        style={[
+                          styles.customTag,
+                          { color: isHeocon ? '#B85E1A' : tokens.primary },
+                          { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                        ]}
+                      >
                         Tùy biến
                       </Text>
                     )}
                     {!isItemActive ? (
-                      <Text style={[styles.hiddenTag, { color: tokens.danger }]}>
+                      <Text
+                        style={[
+                          styles.hiddenTag,
+                          { color: tokens.danger },
+                          { fontFamily: 'Nunito', fontWeight: '800' },
+                        ]}
+                      >
                         · Đã ẩn
                       </Text>
                     ) : null}
@@ -293,11 +442,18 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
                     onPress={() => handleOpenEdit(item)}
                     style={[
                       styles.actionMiniBtn,
-                      { backgroundColor: tokens.surfaceAlt },
+                      isHeocon
+                        ? {
+                            backgroundColor: '#FFF4CC',
+                            borderWidth: 2,
+                            borderColor: cardBorder,
+                            borderRadius: 10,
+                          }
+                        : { backgroundColor: tokens.surfaceAlt },
                     ]}
                     hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                   >
-                    <Edit3 size={15} color={tokens.text} strokeWidth={2} />
+                    <Edit3 size={15} color={isHeocon ? '#2B2118' : tokens.text} strokeWidth={2.4} />
                   </TouchableOpacity>
 
                   {/* Nút Ẩn/Hiện */}
@@ -305,14 +461,21 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
                     onPress={() => handleToggle(item.id)}
                     style={[
                       styles.actionMiniBtn,
-                      { backgroundColor: tokens.surfaceAlt },
+                      isHeocon
+                        ? {
+                            backgroundColor: '#FFF4CC',
+                            borderWidth: 2,
+                            borderColor: cardBorder,
+                            borderRadius: 10,
+                          }
+                        : { backgroundColor: tokens.surfaceAlt },
                     ]}
                     hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                   >
                     {isItemActive ? (
-                      <Eye size={15} color={tokens.primary} strokeWidth={2} />
+                      <Eye size={15} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.4} />
                     ) : (
-                      <EyeOff size={15} color={tokens.textMuted} strokeWidth={2} />
+                      <EyeOff size={15} color={isHeocon ? '#6E5D4F' : tokens.textMuted} strokeWidth={2.4} />
                     )}
                   </TouchableOpacity>
 
@@ -322,11 +485,18 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
                       onPress={() => handleDelete(item)}
                       style={[
                         styles.actionMiniBtn,
-                        { backgroundColor: tokens.surfaceAlt },
+                        isHeocon
+                          ? {
+                              backgroundColor: '#FEE2E2',
+                              borderWidth: 2,
+                              borderColor: cardBorder,
+                              borderRadius: 10,
+                            }
+                          : { backgroundColor: tokens.surfaceAlt },
                       ]}
                       hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                     >
-                      <Trash2 size={15} color={tokens.danger} strokeWidth={2} />
+                      <Trash2 size={15} color={tokens.danger} strokeWidth={2.4} />
                     </TouchableOpacity>
                   ) : null}
                 </View>
@@ -339,25 +509,50 @@ export const CategoryManagementSheet: React.FC<CategoryManagementSheetProps> = (
         <View
           style={[
             styles.bottomBar,
-            {
-              backgroundColor: tokens.surface,
-              borderTopColor: tokens.border,
-            },
+            isHeocon
+              ? {
+                  backgroundColor: pageBg,
+                  borderTopColor: cardBorder,
+                  borderTopWidth: 2,
+                }
+              : {
+                  backgroundColor: tokens.surface,
+                  borderTopColor: tokens.border,
+                },
           ]}
         >
           <TouchableOpacity
             style={[
               styles.addBtn,
-              {
-                backgroundColor: tokens.primary,
-                shadowColor: tokens.glowColor,
-              },
+              isHeocon
+                ? {
+                    backgroundColor: '#F4B93B',
+                    borderWidth: 3,
+                    borderColor: cardBorder,
+                    borderRadius: 22,
+                    shadowColor: cardBorder,
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 1,
+                    shadowRadius: 0,
+                    elevation: 4,
+                  }
+                : {
+                    backgroundColor: tokens.primary,
+                    shadowColor: tokens.glowColor,
+                  },
             ]}
             onPress={handleOpenAdd}
             activeOpacity={0.85}
           >
-            <Plus size={18} color={tokens.textOnPrimary} strokeWidth={2.5} />
-            <Text style={[styles.addBtnText, { color: tokens.textOnPrimary }]}>
+            <Plus size={18} color={isHeocon ? '#2B2118' : tokens.textOnPrimary} strokeWidth={2.8} />
+            <Text
+              style={[
+                styles.addBtnText,
+                isHeocon
+                  ? { color: '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 16 }
+                  : { color: tokens.textOnPrimary },
+              ]}
+            >
               Thêm Danh Mục {activeTab === 'EXPENSE' ? 'Chi Tiêu' : 'Thu Nhập'} Mới
             </Text>
           </TouchableOpacity>

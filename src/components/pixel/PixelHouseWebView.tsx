@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, ViewStyle, StyleProp, Platform, Pressable, Text, useWindowDimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { useTheme } from '../../theme/ThemeContext';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -68,6 +69,8 @@ export const PixelHouseWebView = forwardRef<
   onOpenCamera,
   style
 }, ref) => {
+  const { tokens, mode } = useTheme();
+  const isPink = mode === 'pink';
   const webViewRef = useRef<any>(null);
   const [hasMountedOnce, setHasMountedOnce] = useState(Boolean(isActive));
   const [isLoaded, setIsLoaded] = useState(false);
@@ -149,8 +152,8 @@ export const PixelHouseWebView = forwardRef<
   <!-- System fonts: SF Pro Rounded (iOS) / Nunito / System — 100% Offline-First -->
   <style>
     :root {
-      --page:#FDE8EC; --screen:#FFF0F3; --card:#FFFFFF; --ink:#2B2118; --muted:#85735E;
-      --pig:#F9B8C4; --green:#5E9A57; --red:#E0452B; --gold:#F4B93B; --line:#F4D3DA;
+      --page:${isPink ? '#FFF5F7' : '#F6EEDC'}; --screen:${isPink ? '#FFF0F3' : '#F6EEDC'}; --card:${isPink ? '#FFFFFF' : '#FFFBF1'}; --ink:${isPink ? '#3B0713' : '#2B2118'}; --muted:${isPink ? '#881337' : '#85735E'};
+      --pig:#F9B8C4; --green:#5E9A57; --red:#E0452B; --gold:#F4B93B; --line:${isPink ? '#F4D3DA' : '#D9C9A4'};
       --f-display:'SF Pro Rounded','Nunito','Avenir Next',-apple-system,BlinkMacSystemFont,sans-serif;
       --f-body:'SF Pro Rounded',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
       color-scheme:light;
@@ -184,7 +187,7 @@ export const PixelHouseWebView = forwardRef<
       flex: none;
       border: 3px solid var(--ink);
       border-radius: 50%;
-      background: #FCE3E8;
+      background: ${isPink ? '#FCE3E8' : '#F9B8C4'};
       display: grid;
       place-items: center;
       box-shadow: 0 3px 0 var(--ink);
@@ -1341,9 +1344,9 @@ requestAnimationFrame(hFrame);
 </script>
 </body>
 </html>
-  `, []);
+  `, [isPink]);
 
-  const memoizedSource = useMemo(() => ({ html: initialHtml, baseUrl: '' }), [initialHtml]);
+  const memoizedSource = useMemo(() => ({ html: initialHtml }), [initialHtml]);
 
   // Chưa từng mở Tab 1: render hộp nền nhẹ (0 tốn tài nguyên WebKit)
   if (!hasMountedOnce) {
@@ -1351,7 +1354,7 @@ requestAnimationFrame(hFrame);
       <View
         style={[
           styles.container,
-          { width: boxWidth, height: boxHeight, alignItems: 'center', justifyContent: 'center' },
+          { width: boxWidth, height: boxHeight, alignItems: 'center', justifyContent: 'center', backgroundColor: isPink ? '#FFF0F3' : '#F6EEDC' },
           style,
         ]}
       >
@@ -1362,10 +1365,10 @@ requestAnimationFrame(hFrame);
 
   if (Platform.OS === 'web') {
     return (
-      <View style={[styles.container, style]}>
+      <View style={[styles.container, { backgroundColor: isPink ? '#FFF0F3' : '#F6EEDC' }, style]}>
         <iframe
           srcDoc={initialHtml}
-          style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#FFF0F3' }}
+          style={{ width: '100%', height: '100%', border: 'none', backgroundColor: isPink ? '#FFF0F3' : '#F6EEDC' }}
           title="Pixel House"
         />
       </View>
@@ -1373,9 +1376,9 @@ requestAnimationFrame(hFrame);
   }
 
   return (
-    <View style={[styles.container, { width: boxWidth, height: boxHeight }, style]}>
+    <View style={[styles.container, { width: boxWidth, height: boxHeight, backgroundColor: isPink ? '#FFF0F3' : '#F6EEDC' }, style]}>
       {hasError ? (
-        <View style={styles.errorContainer}>
+        <View style={[styles.errorContainer, { backgroundColor: isPink ? '#FFF0F3' : '#F6EEDC' }]}>
           <Text style={{ fontSize: 36, marginBottom: 12 }}>🏠</Text>
           <Text style={styles.errorTitle}>Nhà của Heo cần mở lại</Text>
           <Text style={styles.errorSub}>Chạm vào nút bên dưới để tải lại</Text>
@@ -1452,7 +1455,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FFF0F3',
+    backgroundColor: '#F6EEDC',
   },
   loadingOverlay: {
     position: 'absolute',
@@ -1462,7 +1465,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFF0F3',
+    backgroundColor: '#F6EEDC',
     zIndex: 2,
   },
   loadingText: {
@@ -1474,7 +1477,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFF0F3',
+    backgroundColor: '#F6EEDC',
     padding: 24,
   },
   errorTitle: {

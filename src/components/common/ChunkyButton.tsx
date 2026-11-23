@@ -16,7 +16,7 @@ interface ChunkyButtonProps {
   title?: string;
   children?: React.ReactNode;
   onPress: () => void;
-  variant?: 'gold' | 'mint' | 'coral' | 'purple' | 'neutral' | 'glass';
+  variant?: 'gold' | 'pink' | 'mint' | 'coral' | 'purple' | 'neutral' | 'glass';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   style?: ViewStyle;
@@ -50,6 +50,12 @@ export const ChunkyButton: React.FC<ChunkyButtonProps> = ({
   // Màu sắc theo biến thể
   const getColors = () => {
     switch (variant) {
+      case 'pink':
+        return {
+          face: '#F43F5E',
+          rim: '#BE123C',
+          text: '#FFFFFF',
+        };
       case 'mint':
         return {
           face: Colors.incomeMint,

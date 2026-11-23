@@ -58,7 +58,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "PigFly cần quyền truy cập camera để bạn chụp lại ảnh khoảnh khắc chi tiêu và nuôi chú heo lớn mỗi ngày."
+          "cameraPermission": "PigFly cần quyền truy cập camera để bạn chụp lại ảnh khoảnh khắc chi tiêu và nuôi chú heo lớn mỗi ngày.",
+          "barcodeScannerEnabled": true
         }
       ],
       [

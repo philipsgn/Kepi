@@ -137,10 +137,16 @@ import { PaymentMethod, Transaction, TransactionType, MediaType } from '../../sr
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const VIEWFINDER_SIZE = Math.min(SCREEN_WIDTH - 24, 348);
 
+// Cố định hằng số cấu hình Barcode Scanner ngoài component để triệt tiêu spam native sessionQueue
+const BARCODE_SCANNER_SETTINGS = {
+  barcodeTypes: ['qr' as const],
+};
+
 export default function MainAppScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isPink = mode === 'pink';
   const { user, profile, isAuthenticated, isLoading: authLoading, signOut } = useAuthStore();
 
   useEffect(() => {
@@ -172,6 +178,7 @@ export default function MainAppScreen() {
   const [cameraFacing, setCameraFacing] = useState<'back' | 'front'>('back');
   const [flashMode, setFlashMode] = useState<'off' | 'on' | 'auto'>('off');
   const [isCameraActive, setIsCameraActive] = useState<boolean>(true);
+  const [isPagerSettled, setIsPagerSettled] = useState<boolean>(false); // Quyết định 159: Chờ Pager ổn định vị trí on-screen mới mount CameraView
   const [cameraZoom, setCameraZoom] = useState<number>(0);
   const [isZoomSliding, setIsZoomSliding] = useState<boolean>(false);
   const zoomSliderTrackWidth = 140;
@@ -499,13 +506,30 @@ export default function MainAppScreen() {
 
   // Set default initial scroll position to Camera (Page 2 - Center)
   useEffect(() => {
-    setTimeout(() => {
+    const scrollTimer = setTimeout(() => {
       horizontalPagerRef.current?.scrollTo({
         x: SCREEN_WIDTH * 2,
         y: 0,
         animated: false });
     }, 50);
+
+    // Quyết định 159: Chờ Pager cuộn xong 200ms đưa khung ngắm 348×348 on-screen mới kết nối AVFoundation session
+    const settleTimer = setTimeout(() => {
+      setIsPagerSettled(true);
+    }, 200);
+
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(settleTimer);
+    };
   }, []);
+
+  // Tự động xin quyền Camera khi mở app nếu chưa cấp và hệ thống cho phép hỏi
+  useEffect(() => {
+    if (!cameraGranted && canAskCameraAgain) {
+      requestCameraPermission().catch(() => {});
+    }
+  }, [cameraGranted, canAskCameraAgain, requestCameraPermission]);
 
   const currentOffsetYRef = useRef<number>(0);
 
@@ -1382,7 +1406,7 @@ export default function MainAppScreen() {
             onScroll={handleVerticalScroll}
             scrollEventThrottle={16}
             scrollEnabled={!showKeyboardModal && !detectedPayload && !detectedWalletPayload}
-            style={[styles.verticalScroll, { backgroundColor: isDark ? '#0E1620' : (tokens.bg || '#FFF5F7') }]}
+            style={[styles.verticalScroll, { backgroundColor: isDark ? '#0E1620' : (tokens.bg || '#F6EEDC') }]}
           >
             {/* --- TOP 100vh: CAMERA TINH GỌN CHUẨN LOCKET 1:1 VUÔNG (ĐỒNG BỘ THEO TOKENS.BG) --- */}
             <View
@@ -1390,7 +1414,7 @@ export default function MainAppScreen() {
                 styles.cameraScreenSection,
                 {
                   height: SCREEN_HEIGHT,
-                  backgroundColor: tokens.bg || '#FFF5F7',
+                  backgroundColor: tokens.bg || '#F6EEDC',
                   paddingTop: Math.max(insets.top, 8),
                   paddingBottom: insets.bottom + 85,
                   justifyContent: 'space-between',
@@ -1402,7 +1426,13 @@ export default function MainAppScreen() {
                 <TouchableOpacity
                   style={[
                     styles.camCeilingSegBtn,
-                    inFrameType === 'EXPENSE' ? styles.camCeilingSegBtnActiveChi : styles.camCeilingSegBtnInactive,
+                    {
+                      borderColor: tokens.border || '#2B2118',
+                      shadowColor: tokens.shadowColor || '#2B2118',
+                    },
+                    inFrameType === 'EXPENSE'
+                      ? { backgroundColor: tokens.danger || '#E0452B' }
+                      : { backgroundColor: tokens.surface || '#FFFBF1' },
                   ]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1414,7 +1444,7 @@ export default function MainAppScreen() {
                   <Text
                     style={[
                       styles.camCeilingSegText,
-                      inFrameType === 'EXPENSE' && styles.camCeilingSegTextActive,
+                      { color: inFrameType === 'EXPENSE' ? '#FFFBF1' : (tokens.text || '#2B2118') },
                     ]}
                   >
                     Chi
@@ -1424,7 +1454,13 @@ export default function MainAppScreen() {
                 <TouchableOpacity
                   style={[
                     styles.camCeilingSegBtn,
-                    inFrameType === 'INCOME' ? styles.camCeilingSegBtnActiveThu : styles.camCeilingSegBtnInactive,
+                    {
+                      borderColor: tokens.border || '#2B2118',
+                      shadowColor: tokens.shadowColor || '#2B2118',
+                    },
+                    inFrameType === 'INCOME'
+                      ? { backgroundColor: tokens.success || '#5E9A57' }
+                      : { backgroundColor: tokens.surface || '#FFFBF1' },
                   ]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1436,7 +1472,7 @@ export default function MainAppScreen() {
                   <Text
                     style={[
                       styles.camCeilingSegText,
-                      inFrameType === 'INCOME' && styles.camCeilingSegTextActive,
+                      { color: inFrameType === 'INCOME' ? '#FFFBF1' : (tokens.text || '#2B2118') },
                     ]}
                   >
                     Thu
@@ -1480,44 +1516,45 @@ export default function MainAppScreen() {
               )}
 
               {/* CAMERA VIEWFINDER (LIVE KHUNG NGẮM LOCKET 1:1 VUÔNG 348x348px) */}
-              <View style={styles.viewfinderContainer}>
+              <View style={[styles.viewfinderContainer, { borderColor: tokens.border || '#2B2118', shadowColor: tokens.shadowColor || '#2B2118' }]}>
                 {/* LỚP 1: LIVE CAMERAVIEW GIỮ NGUYÊN KHÔNG UNMOUNT ĐỂ CHỐNG NHÁY */}
                 <View
                   style={styles.viewfinder}
                   {...pinchPanResponder.panHandlers}
                 >
+                  {cameraGranted && isCameraActive && isPagerSettled ? (
+                    <CameraView
+                      key={cameraFacing}
+                      ref={cameraRef}
+                      style={StyleSheet.absoluteFill}
+                      facing={cameraFacing}
+                      enableTorch={cameraFacing === 'back' && flashMode === 'on'}
+                      zoom={cameraFacing === 'back' ? cameraZoom : 0}
+                      barcodeScannerSettings={BARCODE_SCANNER_SETTINGS}
+                      onBarcodeScanned={capturedPhotoUri ? undefined : handleBarcodeScanned}
+                      onMountError={(e) => console.warn('[CameraView Mount Error]', e)}
+                    />
+                  ) : (
+                    <View style={styles.permissionFallback}>
+                      <Camera size={44} color="#666666" strokeWidth={2} />
+                      <Text style={styles.permissionText}>
+                        {Platform.OS === 'web'
+                          ? 'Chạm nút bên dưới để Chụp hoặc Tải ảnh chi tiêu'
+                          : 'Chạm đúp để kiểm tra hoặc cấp quyền Camera'}
+                      </Text>
+                      <BlockButton
+                        title={Platform.OS === 'web' ? 'Chụp / Tải Ảnh' : 'Mở Cài Đặt'}
+                        onPress={Platform.OS === 'web' ? handlePickImageFromLibrary : openAppSettings}
+                        variant="secondary"
+                        size="sm"
+                      />
+                    </View>
+                  )}
+                  {/* LỚP PHỦ GESTURE NHẬN DIỆN CHẠM ĐÚP LẬT CAMERA */}
                   <Pressable
                     style={StyleSheet.absoluteFill}
                     onPress={handleDoubleTapViewfinder}
-                  >
-                    {cameraGranted && isCameraActive ? (
-                      <CameraView
-                        ref={cameraRef}
-                        style={StyleSheet.absoluteFill}
-                        facing={cameraFacing}
-                        enableTorch={flashMode === 'on'}
-                        zoom={cameraZoom}
-                        barcodeScannerSettings={{
-                          barcodeTypes: ['qr'] }}
-                        onBarcodeScanned={capturedPhotoUri ? undefined : handleBarcodeScanned}
-                      />
-                    ) : (
-                      <View style={styles.permissionFallback}>
-                        <Camera size={44} color="#666666" strokeWidth={2} />
-                        <Text style={styles.permissionText}>
-                          {Platform.OS === 'web'
-                            ? 'Chạm nút bên dưới để Chụp hoặc Tải ảnh chi tiêu'
-                            : 'Chạm đúp để kiểm tra hoặc cấp quyền Camera'}
-                        </Text>
-                        <BlockButton
-                          title={Platform.OS === 'web' ? 'Chụp / Tải Ảnh' : 'Mở Cài Đặt'}
-                          onPress={Platform.OS === 'web' ? handlePickImageFromLibrary : openAppSettings}
-                          variant="secondary"
-                          size="sm"
-                        />
-                      </View>
-                    )}
-                  </Pressable>
+                  />
                 </View>
 
                 {/* LỚP 2: ẢNH CHỤP TĨNH PHỦ LÊN TRÊN (SEAMLESS FREEZE-FRAME, 0 DELAY, KHÔNG CO GIẬT KHUNG) */}
@@ -1654,12 +1691,19 @@ export default function MainAppScreen() {
                 {/* HÀNG 1: BỘ ĐẾM SỐ TIỀN NỀN TRƠN [-] [SỐ TIỀN đ] [+] (BỎ CHỮ "SỐ TIỀN") */}
                 <View style={styles.camBelowAmountRow}>
                   <TouchableOpacity
-                    style={styles.camStepBtn}
+                    style={[
+                      styles.camStepBtn,
+                      {
+                        backgroundColor: tokens.surface || '#FFFBF1',
+                        borderColor: tokens.border || '#2B2118',
+                        shadowColor: tokens.shadowColor || '#2B2118',
+                      },
+                    ]}
                     onPress={() => handleStepInFrameAmount(inFrameType === 'INCOME' ? -500000 : -5000)}
                     activeOpacity={0.8}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Minus size={18} color="#2B2118" strokeWidth={3} />
+                    <Minus size={18} color={tokens.text || '#2B2118'} strokeWidth={3} />
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1667,19 +1711,26 @@ export default function MainAppScreen() {
                     onPress={() => setShowKeyboardModal(true)}
                     activeOpacity={0.85}
                   >
-                    <Text style={styles.camAmountNumberTextFlat}>
+                    <Text style={[styles.camAmountNumberTextFlat, { color: tokens.text || '#2B2118' }]}>
                       {inFrameAmount > 0 ? formatVND(inFrameAmount).replace(/ đ$/, '') : '0'}
                     </Text>
-                    <DongMark size={22} color="#2B2118" />
+                    <DongMark size={22} color={tokens.text || '#2B2118'} />
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={styles.camStepBtn}
+                    style={[
+                      styles.camStepBtn,
+                      {
+                        backgroundColor: tokens.surface || '#FFFBF1',
+                        borderColor: tokens.border || '#2B2118',
+                        shadowColor: tokens.shadowColor || '#2B2118',
+                      },
+                    ]}
                     onPress={() => handleStepInFrameAmount(inFrameType === 'INCOME' ? 500000 : 5000)}
                     activeOpacity={0.8}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Plus size={18} color="#2B2118" strokeWidth={3} />
+                    <Plus size={18} color={tokens.text || '#2B2118'} strokeWidth={3} />
                   </TouchableOpacity>
                 </View>
 
@@ -1692,10 +1743,20 @@ export default function MainAppScreen() {
                 >
                   {activeCameraCategories.map((cat) => {
                     const isSelected = inFrameCategory === cat.id;
+                    const chipBg = isSelected ? tokens.primary : (tokens.surface || '#FFFBF1');
+                    const chipFg = isSelected ? (tokens.textOnPrimary || '#2B2118') : (tokens.text || '#2B2118');
+
                     return (
                       <TouchableOpacity
                         key={cat.id}
-                        style={[styles.camCatChipLarge, isSelected && styles.camCatChipLargeSelected]}
+                        style={[
+                          styles.camCatChipLarge,
+                          {
+                            backgroundColor: chipBg,
+                            borderColor: tokens.border || '#2B2118',
+                            shadowColor: tokens.shadowColor || '#2B2118',
+                          },
+                        ]}
                         onPress={() => {
                           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           setInFrameCategory(cat.id);
@@ -1705,10 +1766,18 @@ export default function MainAppScreen() {
                         {renderCategoryMonochromeIcon({
                           categoryId: cat.id,
                           size: 15,
-                          color: '#2B2118',
+                          color: chipFg,
                           strokeWidth: 2.6,
                         })}
-                        <Text style={[styles.camCatChipTextLarge, isSelected && styles.camCatChipTextLargeSelected]}>
+                        <Text
+                          style={[
+                            styles.camCatChipTextLarge,
+                            {
+                              color: chipFg,
+                              fontWeight: isSelected ? '900' : '800',
+                            },
+                          ]}
+                        >
                           {cat.name}
                         </Text>
                       </TouchableOpacity>
@@ -1728,7 +1797,7 @@ export default function MainAppScreen() {
                         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                         accessibilityLabel="Chọn ảnh từ thư viện"
                       >
-                        <ImagePlus size={24} color="#2B2118" strokeWidth={2.6} />
+                        <ImagePlus size={24} color={tokens.text || '#2B2118'} strokeWidth={2.6} />
                       </TouchableOpacity>
 
                       <ShutterButton
@@ -1745,7 +1814,7 @@ export default function MainAppScreen() {
                         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                         accessibilityLabel="Lật camera"
                       >
-                        <RotateCcw size={24} color="#2B2118" strokeWidth={2.6} />
+                        <RotateCcw size={24} color={tokens.text || '#2B2118'} strokeWidth={2.6} />
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -1782,7 +1851,7 @@ export default function MainAppScreen() {
                   styles.historySnapPage,
                   {
                     height: SCREEN_HEIGHT,
-                    backgroundColor: tokens.bg || '#FFF5F7',
+                    backgroundColor: tokens.bg || '#F6EEDC',
                     paddingTop: insets.top + 6,
                     paddingBottom: insets.bottom + 85,
                   },
@@ -1816,7 +1885,7 @@ export default function MainAppScreen() {
                   styles.historySnapPage,
                   {
                     height: SCREEN_HEIGHT,
-                    backgroundColor: tokens.bg || '#FFF5F7',
+                    backgroundColor: tokens.bg || '#F6EEDC',
                     paddingTop: insets.top + 6,
                     paddingBottom: insets.bottom + 85,
                   },
@@ -1861,6 +1930,7 @@ export default function MainAppScreen() {
               router.replace('/(auth)/login');
             }}
             onOpenLessons={() => setShowLessons(true)}
+            onNavigateToHub={() => handleTabPress(3)}
           />
         </View>
       </ScrollView>
@@ -1992,7 +2062,7 @@ export default function MainAppScreen() {
       {/* MODAL BÀN PHÍM MAND CASHIER KEYBOARD CHUẨN NEO-BRUTALIST PIXEL ART */}
       <Modal visible={showKeyboardModal} animationType="slide" transparent>
         <View style={styles.camKeyboardModalOverlay}>
-          <View style={[styles.camKeyboardModalContent, { backgroundColor: tokens.bg || '#FFF5F7' }]}>
+          <View style={[styles.camKeyboardModalContent, { backgroundColor: tokens.bg || '#F6EEDC', borderColor: tokens.border || '#2B2118' }]}>
             <View style={styles.camKeyboardHeader}>
               <Text style={styles.camKeyboardTitle}>Nhập số tiền chi tiêu</Text>
               <TouchableOpacity
@@ -2120,7 +2190,7 @@ const styles = StyleSheet.create({
     borderColor: '#2B2118',
     overflow: 'hidden',
     position: 'relative',
-    backgroundColor: '#DDEBD9',
+    backgroundColor: '#1C1814',
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
@@ -2596,8 +2666,6 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 2 },
   camCatChipLargeSelected: {
-    backgroundColor: '#F9B8C4',
-    borderColor: '#2B2118',
     borderWidth: 2.5,
     shadowOpacity: 1 },
   camCatChipTextLarge: {

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -8,17 +8,25 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
-import { ArrowLeft, RefreshCw } from 'lucide-react-native';
+import {
+  PixelIconBack,
+  PixelIconReload,
+  PixelIconTicket,
+  PixelIconTraffic,
+  PixelIconWing,
+} from '../pixel/PixelIcons';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
 interface PigFlightGameViewProps {
   onBack: () => void;
-  onSwitchGame?: (game: 'fly' | 'shooter') => void;
+  onSwitchGame?: (game: 'fly' | 'cross') => void;
   tickets?: number;
   food?: number;
   hunger?: number;
   onFeedPig?: () => void;
+  onUseTicket?: () => boolean;
+  onBuyTicket?: () => boolean;
   onSaveStats?: (stats: { flyBestScore?: number; foodEarned?: number }) => void;
 }
 
@@ -29,11 +37,21 @@ export const PigFlightGameView: React.FC<PigFlightGameViewProps> = ({
   food = 10,
   hunger = 75,
   onFeedPig,
+  onUseTicket,
+  onBuyTicket,
   onSaveStats,
 }) => {
   const webViewRef = useRef<any>(null);
-  // Quyết định 148: Toàn màn hình bằng Flexbox tự nhiên (flex: 1),
-  // không dùng kích thước cứng/onLayout để WebView không bị collapse 0×0.
+  const initialTicketsRef = useRef(tickets);
+
+  // Đồng bộ số vé hai chiều vào WebView đang chạy KHÔNG gây reload (Quyết định 174)
+  useEffect(() => {
+    if (webViewRef.current && typeof webViewRef.current.injectJavaScript === 'function') {
+      webViewRef.current.injectJavaScript(
+        `window.__syncTickets && window.__syncTickets(${Number(tickets) || 0}); true;`
+      );
+    }
+  }, [tickets]);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -57,6 +75,10 @@ export const PigFlightGameView: React.FC<PigFlightGameViewProps> = ({
       } else if (data.type === 'SWITCH_GAME') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         if (onSwitchGame) onSwitchGame(data.game);
+      } else if (data.type === 'USE_TICKET') {
+        if (onUseTicket) onUseTicket();
+      } else if (data.type === 'BUY_TICKET') {
+        if (onBuyTicket) onBuyTicket();
       } else if (data.type === 'SAVE_STATS') {
         if (onSaveStats) {
           onSaveStats({
@@ -75,7 +97,8 @@ export const PigFlightGameView: React.FC<PigFlightGameViewProps> = ({
     }
   };
 
-  const htmlContent = `
+  // Immutable WebView HTML (useMemo []) — Tuyệt đối không reload khi trừ/đổi vé (Quyết định 174)
+  const htmlContent = useMemo(() => `
 <!doctype html>
 <html>
 <head>
@@ -92,7 +115,7 @@ window.onerror = function (msg, src, line, col) {
   return false;
 };
 </script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800&display=swap" media="print" onload="this.media='all'">
 <style>
 :root {
   --page: #F6EEDC;
@@ -105,14 +128,19 @@ window.onerror = function (msg, src, line, col) {
   --red: #E0452B;
   --gold: #F4B93B;
   --line: #D9C9A4;
-  --f-display: 'Baloo 2', system-ui, sans-serif;
-  --f-body: 'Nunito', system-ui, sans-serif;
+  --f-display: 'Baloo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --f-body: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
+  height: 100%;
   margin: 0;
-  padding: 10px 14px 40px;
-  background: var(--page);
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #58B6EE;
   color: var(--ink);
   font: 600 14px/1.4 var(--f-body);
   user-select: none;
@@ -223,66 +251,97 @@ body {
   font: 800 18px/1.1 var(--f-display);
   font-variant-numeric: tabular-nums;
 }
-.flyhud {
-  margin-top: 10px;
-  padding: 8px 12px 10px;
-}
-.flyhud .hrow {
+.flyhud-row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto 6px;
+  flex-shrink: 0;
+  gap: 8px;
 }
-.flyhud .hrow b {
-  font: 800 13px/1.2 var(--f-display);
-}
-.hbar {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 3px;
-  margin-top: 6px;
-  padding: 3px;
-  border: 2.5px solid var(--ink);
-  border-radius: 999px;
+.fbadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
   background: var(--card);
-}
-.hbar i {
-  height: 9px;
+  border: 2px solid var(--ink);
   border-radius: 999px;
-  transition: background .2s;
+  box-shadow: 0 2px 0 var(--ink);
+}
+.fbadge.gold {
+  background: var(--gold);
+}
+.fbadge .label {
+  font: 800 11px/1 var(--f-body);
+  letter-spacing: .08em;
+  color: var(--ink);
+}
+.fbadge b {
+  font: 800 16px/1 var(--f-display);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 .scene.flywrap {
   position: relative;
-  margin-top: 6px;
-  background: #BFE6F6;
-  border: 3px solid var(--ink);
-  border-radius: 22px;
-  box-shadow: 0 4px 0 var(--ink);
-  overflow: hidden;
-  touch-action: manipulation;
-  text-align: center;
-  width: 100%;
-  max-width: 290px;
-  aspect-ratio: 176 / 224;
-  margin-left: auto;
-  margin-right: auto;
-}
-.scene.flywrap canvas {
-  display: block;
+  flex: 1;
+  min-height: 0;
   width: 100%;
   height: 100%;
-  margin: 0 auto;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: -moz-crisp-edges;
+  margin: 0;
+  background: #58B6EE;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scene.flywrap canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
   image-rendering: pixelated;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
   cursor: pointer;
   touch-action: manipulation;
+}
+.fly-float-hud {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 8;
+}
+.fly-score-pill {
+  padding: 3px 12px;
+  background: rgba(255, 251, 241, 0.92);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 0 2px 0 var(--ink);
+  font: 800 16px/1.2 var(--f-display);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.fly-score-pill.gold {
+  background: rgba(244, 185, 59, 0.94);
+  font-size: 13px;
 }
 .flytoast {
   position: absolute;
   left: 12px;
   right: 12px;
-  top: 8px;
+  top: 48px;
   text-align: center;
   pointer-events: none;
   opacity: 0;
@@ -321,6 +380,8 @@ body {
   animation: fbob 1s ease-in-out infinite alternate;
 }
 @keyframes fbob { to { transform: translateY(-5px); } }
+[hidden] { display: none !important; }
+.flyover[hidden] { display: none !important; }
 .flyover {
   position: absolute;
   inset: 0;
@@ -436,43 +497,15 @@ body {
 </head>
 <body>
 
-  <!-- Top switcher -->
-  <div class="gbar">
-    <div class="gseg">
-      <button type="button" id="tabFly" class="active">Heo bay</button>
-      <button type="button" id="tabShoot">Heo bắn</button>
-    </div>
-    <div class="gtix"><i>🎫</i><b id="uiTix">${tickets}</b> vé</div>
-  </div>
-
-  <div class="flytop">
-    <div class="who"><b>Heo bay</b><span id="flyZone">Vườn nhà</span></div>
-    <div class="fscore"><span class="label">Điểm</span><b id="flyScore">0</b></div>
-    <div class="fscore"><span class="label">Kỷ lục</span><b id="flyBest">0</b></div>
-  </div>
-
-  <div class="card flyhud">
-    <div class="hrow"><span class="label">Độ no</span><b id="flyHungerT">Vừa bụng</b></div>
-    <div class="hbar" id="flyBar" role="progressbar"></div>
-  </div>
-
   <div class="scene flywrap" id="flyWrap">
-    <canvas id="flyCv" width="176" height="224"></canvas>
+    <canvas id="flyCv" width="176" height="312"></canvas>
+    <div class="fly-float-hud">
+      <div class="fly-score-pill">ĐIỂM <b id="flyScore">0</b></div>
+      <div class="fly-score-pill gold">★ <b id="flyBest">0</b></div>
+    </div>
     <div class="flytoast" id="flyToast"></div>
-    <div class="flyhint" id="flyHint"><span>CHẠM ĐỂ VỖ CÁNH</span></div>
+    <div class="flyhint" id="flyHint"><span>CHẠM ĐỂ BAY</span></div>
     <div class="flyover" id="flyOver" hidden></div>
-  </div>
-
-  <div class="flystats">
-    <div><span class="label">Đã ăn</span><b id="flyEaten">0</b></div>
-    <div><span class="label">Đồng cám</span><b id="flyCoin">0</b></div>
-    <div><span class="label">Thời tiết</span><b id="flyWx">Trời quang</b></div>
-  </div>
-
-  <div class="flyctl">
-    <button class="btn big" type="button" id="flyBtn">Vỗ cánh</button>
-    <button class="btn" type="button" id="flyPause">Tạm dừng</button>
-    <button class="btn" type="button" id="flyWxBtn">Đổi trời</button>
   </div>
 
 <script>
@@ -485,8 +518,8 @@ function notify(type, data) {
   }
 }
 
-// Chuyển game
-$('tabShoot').addEventListener('click', () => notify('SWITCH_GAME', { game: 'shooter' }));
+// Chuyển game (guarded vì đã hợp nhất lên 1-Row 16-bit RN TopBar — Chỉ 2 game dọc 9:16)
+const tabCrossEl = $('tabCross'); if (tabCrossEl) tabCrossEl.addEventListener('click', () => notify('SWITCH_GAME', { game: 'cross' }));
 
 /* ====== HEO BAY 1:1 TỪ PROTOTYPE VÍ HEO CON ====== */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -540,8 +573,8 @@ function drawPigSprite(c,o){
 const hp=mk(24,20,c=>drawPigSprite(c,{blink:false}));
 const hpx=hp.getContext('2d');
 
-/* Biomes, trời, parallax */
-const FW=176,FH=224,GY=198,BLEN=900,TR=140,OW=16;
+/* Biomes, trời, parallax — Toàn màn hình dọc 9:16 (176×312) — Quyết định 172 */
+const FW=176,FH=312,GY=278,BLEN=900,TR=140,OW=16;
 const BIOMES=[
   {id:'vuon',n:'Vườn nhà',skin:'bamboo'},
   {id:'ruong',n:'Ruộng lúa',skin:'post'},
@@ -567,10 +600,62 @@ function skyline(c,lit){
 }
 function mkFar(b,lit){return mk(FW,110,(c)=>{
   const s=x=>x/FW*Math.PI*2;
-  if(b===0){for(let x=0;x<FW;x++){const h=34+Math.round(12*Math.sin(s(x)*2)+7*Math.sin(s(x)*5));R(c,x,110-h,1,h,'#B5DB9A');const h2=20+Math.round(9*Math.sin(s(x)*3+1));R(c,x,110-h2,1,h2,'#9AC97E')}}
-  else if(b===1){for(let x=0;x<FW;x++){const h=26+Math.round(42*Math.pow(Math.abs(Math.sin(s(x))),1.3));R(c,x,110-h,1,h,'#B4C6D6');const h2=14+Math.round(10*Math.sin(s(x)*4));R(c,x,110-h2,1,h2,'#9FB5C4')}}
-  else if(b===2)skyline(c,lit);
-  else{for(let x=0;x<FW;x++){const h=30+Math.round(14*Math.sin(s(x)*2+2)+6*Math.sin(s(x)*7));R(c,x,110-h,1,h,'#D3E4E0');const h2=14+Math.round(8*Math.sin(s(x)*3));R(c,x,110-h2,1,h2,'#BFD8D3')}}
+  if(b===0){
+    for(let x=0;x<FW;x++){
+      const h=34+Math.round(12*Math.sin(s(x)*2)+7*Math.sin(s(x)*5));
+      R(c,x,110-h,1,h,'#B5DB9A');
+      const h2=20+Math.round(9*Math.sin(s(x)*3+1));
+      R(c,x,110-h2,1,h2,'#9AC97E');
+    }
+    // Rặng tre xa xăm
+    [22, 86, 148].forEach(bx => {
+      for(let i=0; i<3; i++) R(c, bx+i*3, 62+i*2, 2, 28, '#7BAF62');
+    });
+  }
+  else if(b===1){
+    // Dãy núi đá vôi Tràng An / Ninh Bình karst peaks
+    for(let x=0;x<FW;x++){
+      const k1 = Math.pow(Math.abs(Math.sin(s(x)*1.5 + .2)), 1.6);
+      const k2 = Math.pow(Math.abs(Math.cos(s(x)*2.5)), 2);
+      const h = 30 + Math.round(46 * k1 + 16 * k2);
+      R(c,x,110-h,1,h,'#8B9EA8');
+      const h2 = 16 + Math.round(24 * Math.pow(Math.abs(Math.sin(s(x)*3 + .8)), 1.4));
+      R(c,x,110-h2,1,h2,'#6C8290');
+    }
+    // Đàn cò trắng bay lượn trên rặng núi
+    [[24, 24], [34, 20], [108, 30], [120, 26]].forEach(([ex, ey]) => {
+      R(c, ex, ey, 3, 1, '#FFFBF1');
+      R(c, ex+1, ey-1, 1, 1, '#FFFBF1');
+    });
+  }
+  else if(b===2){
+    skyline(c,lit);
+    // Landmark 81 (tòa tháp bậc thang cao nhất Sài Gòn)
+    const lx = 58, ly = 12;
+    R(c, lx+4, ly, 2, 98, lit ? '#8AA0C8' : '#7FA0C0');
+    R(c, lx+2, ly+12, 6, 86, lit ? '#5A6E94' : '#6A89A8');
+    R(c, lx, ly+26, 10, 72, lit ? '#465878' : '#587696');
+    if(lit){ for(let wy=ly+16;wy<104;wy+=5) R(c, lx+3, wy, 4, 2, '#FFE08A'); }
+    else { R(c, lx+1, ly+28, 1, 70, 'rgba(255,255,255,.35)'); }
+    // Điểm nhấn Tháp Bitexco đặc trưng Sài Gòn + Sân đỗ trực thăng
+    const bx = 138, by = 24;
+    R(c, bx+3, by, 6, 86, lit ? '#6A789A' : '#7D95AB');
+    R(c, bx+2, by+8, 8, 78, lit ? '#586888' : '#6E859C');
+    R(c, bx-4, by+24, 8, 2, lit ? '#FFD76A' : '#4E5A70');
+    R(c, bx+5, by-4, 2, 5, lit ? '#FF6B6B' : '#3A4455');
+  }
+  else{
+    for(let x=0;x<FW;x++){
+      const h=30+Math.round(14*Math.sin(s(x)*2+2)+6*Math.sin(s(x)*7));
+      R(c,x,110-h,1,h,'#D3E4E0');
+      const h2=14+Math.round(8*Math.sin(s(x)*3));
+      R(c,x,110-h2,1,h2,'#BFD8D3');
+    }
+    [[40, 26], [50, 22], [130, 28]].forEach(([ex, ey]) => {
+      R(c, ex, ey, 3, 1, '#FFFBF1');
+      R(c, ex+1, ey-1, 1, 1, '#FFFBF1');
+    });
+  }
 })}
 function wire(c,x0,x1,y,sag){for(let x=x0;x<=x1;x++){const t=(x-x0)/(x1-x0);R(c,x,Math.round(y+4*sag*t*(1-t)),1,1,'#2B2118')}}
 function mkMid(b,lit){return mk(FW,96,(c)=>{
@@ -579,6 +664,9 @@ function mkMid(b,lit){return mk(FW,96,(c)=>{
     [14,58,102,146].forEach((x,i)=>{R(c,x-1,B-26,3,26,'#6B4426');E(c,x,B-36,11,10,i%2?'#4E9A47':'#5DAA52');E(c,x-3,B-40,6,5,'#78C25F');if(i===1)[[x-4,B-40],[x+3,B-34]].forEach(([a,d])=>R(c,a,d,2,2,'#F2B23A'))});
     [34,38,42].forEach((x,i)=>{const h=54+i*6;R(c,x,B-h,3,h,'#6DB85A');R(c,x,B-h,1,h,'#8ED070');for(let y=B-14;y>B-h;y-=14)R(c,x,y,3,1,'#3E8139');R(c,x+3,B-h+8,5,2,'#4E9A47')});
     R(c,120,B-16,22,16,'#F2DFA8');R(c,118,B-20,26,5,'#C4603A');R(c,122,B-12,6,12,'#8A5A34');R(c,132,B-12,6,6,'#7FB5A6');
+    // Cụm hoa sen vườn nhà
+    [[150, B-4, 8], [162, B-3, 9]].forEach(([x,y,w])=>E(c,x,y,w,2,'#4F9A4F'));
+    R(c, 152, B-7, 3, 3, '#F59BB0'); R(c, 164, B-6, 3, 3, '#F59BB0');
   }else if(b===1){
     [28,120].forEach((x,k)=>{const H=58+k*6;for(let i=0;i<H;i+=2){const dx=Math.round(2*Math.sin(i/18+k));R(c,x+dx,B-i-2,3,2,i%8<4?'#8A6A44':'#6B5030')}
       const tx=x+Math.round(2*Math.sin(H/18+k)),ty=B-H;
@@ -586,18 +674,46 @@ function mkMid(b,lit){return mk(FW,96,(c)=>{
       E(c,tx+1,ty+1,2,2,'#6B4426')});
     R(c,70,B-14,2,14,'#8A5A34');R(c,86,B-14,2,14,'#8A5A34');R(c,66,B-20,26,6,'#D9B45A');R(c,70,B-24,18,5,'#E5C676');R(c,72,B-8,14,2,'#B8935A');
   }else if(b===2){
-    [[0,24,50,'#E9B8A0'],[26,20,42,'#F2DFA8'],[48,26,58,'#B9D3C8'],[76,22,46,'#F4C6C0'],[100,24,54,'#D9C9A8'],[126,22,40,'#C6D6E8'],[150,26,52,'#F2DFA8']].forEach(([x,w,h,col])=>{
+    // Khu nhà phố, chung cư Sài Gòn 16-bit: cửa sổ sáng/tối, ban công, bồn nước Inox, cục nóng máy lạnh, mái hiên sọc & bóng ambient occlusion
+    [[0,24,52,'#E9B8A0','#D8402F'],[24,22,44,'#F2DFA8','#2F8F83'],[46,26,60,'#B9D3C8','#4B6FA5'],[72,24,48,'#F4C6C0','#D8402F'],[96,26,56,'#D9C9A8','#2F8F83'],[122,24,42,'#C6D6E8','#E0452B'],[146,30,54,'#F2DFA8','#2F8F83']].forEach(([x,w,h,col,awn],bi)=>{
       const y=B-h;
-      if(!lit){R(c,x,y,w,h,col);R(c,x-1,y-3,w+2,3,'#C4603A');R(c,x,B-10,w,10,'rgba(60,40,30,.12)');R(c,x+((w/2)|0)-3,B-9,6,9,'#8A5A34')}
-      for(let wy=y+5;wy<B-14;wy+=12)for(let wx=x+3;wx<x+w-4;wx+=9){
+      if(!lit){
+        R(c,x,y,w,h,col);
+        // Bóng đổ ambient occlusion 2px giữa các tòa nhà
+        R(c,x+w-2,y,2,h,'rgba(43,33,24,.22)');
+        // Nóc nhà & bồn nước Inox + cục nóng máy lạnh đặc trưng Việt Nam
+        R(c,x-1,y-2,w+1,2,'#8A5A34');
+        if(bi%2===0){ R(c,x+4,y-7,6,5,'#CFD8E2'); R(c,x+5,y-6,2,3,'#FFFBF1'); R(c,x+4,y-2,1,2,'#2B2118'); R(c,x+9,y-2,1,2,'#2B2118'); }
+        else { R(c,x+w-10,y-6,6,4,'#E4DFD2'); R(c,x+w-9,y-5,3,2,'#85735E'); }
+        // Tầng trệt tiệm phố + mái hiên sọc xanh/đỏ
+        R(c,x,B-12,w-2,12,'rgba(43,33,24,.12)');
+        for(let ax=x;ax<x+w-2;ax+=4){ R(c,ax,B-14,2,3,awn); R(c,ax+2,B-14,2,3,'#FFFBF1'); }
+        R(c,x+((w/2)|0)-4,B-10,7,10,'#6B4426');
+      }
+      for(let wy=y+5;wy<B-18;wy+=12)for(let wx=x+3;wx<x+w-6;wx+=9){
         if(lit){if(((wx*7+wy*3)%5)<3)R(c,wx,wy,5,6,'#FFD76A')}
-        else{R(c,wx,wy,5,6,'#7FB5C8');R(c,wx-1,wy,1,6,'#4E9A6B');R(c,wx+5,wy,1,6,'#4E9A6B')}}});
-    if(!lit){[44,132].forEach(x=>{R(c,x,B-72,2,72,'#4B4B52');R(c,x-5,B-70,12,2,'#4B4B52')});wire(c,44,132,B-68,6);wire(c,132,220,B-68,6);wire(c,-44,44,B-68,6)}
+        else{
+          R(c,wx,wy,5,6,'#5D9BB8'); R(c,wx+1,wy+1,1,2,'#BFE6F6');
+          R(c,wx-1,wy+6,7,2,'#4B3F35'); // Lan can ban công
+          if((wx+wy)%3===0) R(c,wx+2,wy+4,2,2,'#5E9A57'); // Chậu cây ban công
+        }
+      }
+    });
+    // Lồng đèn phố cổ & dây điện Sài Gòn
+    if(!lit){
+      [[54, B-34], [112, B-38]].forEach(([lx, ly]) => { R(c, lx, ly, 4, 6, '#E0452B'); R(c, lx+1, ly+1, 2, 4, '#F4B93B'); });
+      [44,132].forEach(x=>{R(c,x,B-74,2,74,'#4B4B52');R(c,x-5,B-72,12,2,'#4B4B52')});
+      wire(c,44,132,B-70,6);wire(c,132,220,B-70,6);wire(c,-44,44,B-70,6);
+    }
   }else{
     [30,112].forEach((x,k)=>{R(c,x-1,B-40,4,40,'#6B5030');E(c,x+1,B-46,16,9,'#7DB868');E(c,x-4,B-50,9,5,'#98CE80');
       for(let d=-14;d<=14;d+=2){const L=18+((d*7)&7);R(c,x+1+d,B-44+Math.round(Math.abs(d)/3),1,L,k?'#6DAA58':'#7DB868')}});
     for(let x=62;x<100;x+=5){R(c,x,B-26-((x*3)%9),1,26,'#7D9A52');R(c,x-1,B-30-((x*3)%9),3,6,'#6B4426')}
     [[8,B-3,12],[52,B-2,10],[150,B-3,14],[100,B-2,9]].forEach(([x,y,w])=>E(c,x,y,w,2,'#4F9A4F'));
+    // Hoa sen hồng nở rộ
+    [[12, B-6], [56, B-5], [104, B-5], [154, B-6]].forEach(([sx, sy]) => {
+      R(c, sx, sy, 4, 3, '#F59BB0'); R(c, sx+1, sy-1, 2, 1, '#FFD1DC');
+    });
   }
 })}
 function mkGround(b){return mk(FW,FH-GY,(c)=>{
@@ -675,8 +791,26 @@ function sCloud(c,x,y,s,col){E(c,x,y,9*s,3*s,col);E(c,x-6*s,y+1,6*s,2*s,col);E(c
 
 /* Hằng số vật lý và trạng thái heo bay */
 const GRAV=560,FLAP=-172,VMAX=250,PX=44;
+let G_TIX = ${initialTicketsRef.current};
+function updateTixUI() {
+  const el = $('uiTix');
+  if (el) el.textContent = String(G_TIX);
+}
+window.__syncTickets = function(n) {
+  G_TIX = Math.max(0, Number(n) || 0);
+  updateTixUI();
+};
+function doBuyTicket() {
+  notify('BUY_TICKET');
+  G_TIX += 1;
+  updateTixUI();
+  flyMsg('+1 vé chơi!', 2);
+  notify('HAPTIC_SUCCESS');
+  if (fly.mode === 'dead') flyShowOver();
+}
+
 const fly={
-  mode:'ready',run:true,last:0,t:0,y:96,vy:0,ang:0,flapT:0,eatT:0,blink:0,
+  mode:'ready',run:true,last:0,t:0,y:135,vy:0,ang:0,flapT:0,eatT:0,blink:0,
   dist:0,speed:58,sp:0,score:0,coins:0,eaten:0,hunger:78,best:0,earned:0,
   u:.35,weather:'clear',rain:0,wind:0,
   pillars:[],items:[],crit:[],parts:[],floats:[],shake:0,msg:'',msgT:0,cause:'',paused:false,
@@ -687,8 +821,8 @@ try{fly.best=+localStorage.getItem('vhc-fly-best')||0}catch(e){}
 $('flyBest').textContent=String(fly.best);
 
 const biomeAt=d=>((d/BLEN)|0)%4;
-const gapNow=()=>Math.max(52,62-Math.floor(fly.score/6));
-let lastGy=100;
+const gapNow=()=>Math.max(58,68-Math.floor(fly.score/6));
+let lastGy=135;
 const rnd=(a,b)=>a+Math.random()*(b-a);
 
 function flyMsg(t,s){
@@ -699,12 +833,12 @@ function flyMsg(t,s){
 
 function flyReset(){
   Object.assign(fly,{
-    mode:'ready',y:96,vy:0,ang:0,flapT:0,eatT:0,dist:0,speed:58,sp:60,score:0,coins:0,eaten:0,hunger:78,earned:0,
+    mode:'ready',y:135,vy:0,ang:0,flapT:0,eatT:0,dist:0,speed:58,sp:60,score:0,coins:0,eaten:0,hunger:78,earned:0,
     pillars:[],items:[],parts:[],floats:[],shake:0,cause:'',lastBi:0,paused:false,
     u:.35,weather:'clear',rain:0,wind:0
   });
-  lastGy=100;
-  flyMsg('Chạm hoặc bấm Vỗ cánh để bay',99);
+  lastGy=135;
+  flyMsg('',0);
 }
 
 function puff(x,y,n,col,spd,life,kind){
@@ -730,6 +864,14 @@ function spawnPillar(){
 function flyFlap(){
   if(fly.mode==='dead'||fly.paused)return;
   if(fly.mode==='ready'){
+    if(G_TIX <= 0){
+      flyMsg('Hết vé chơi hôm nay! Đổi 10 cám = 1 vé', 2.5);
+      notify('HAPTIC_FAIL');
+      return;
+    }
+    G_TIX = Math.max(0, G_TIX - 1);
+    updateTixUI();
+    notify('USE_TICKET');
     fly.mode='play';fly.msgT=0;fly.hunger=78;
     $('flyHint').hidden=true;
     flyMsg('Hái đồ ăn mang về cho cá và hoa hồng',3);
@@ -757,24 +899,55 @@ function flyDie(cause){
   setTimeout(flyShowOver,650);
 }
 
+function flyRestart(){
+  const o=$('flyOver');
+  o.hidden=true;
+  o.style.display='none';
+  o.innerHTML='';
+  flyReset();
+  fly.hunger=78;
+  fly.paused=false;
+  $('flyHint').hidden=false;
+}
+
 function flyShowOver(){
   const o=$('flyOver');
   const why={pillar:'Đụng cột',ground:'Chạm đất',starve:'Đói lả'}[fly.cause]||'Hết lượt bay';
+  o.style.display='flex';
   o.hidden=false;
   o.innerHTML='<div class="card fo"><b>'+why+'</b><span class="label">Chuyến bay vừa rồi</span>'+
   '<div class="fgrid"><div><b>'+fly.score+'</b><span>Cột qua</span></div><div><b>'+fly.eaten+'</b><span>Món đã ăn</span></div><div><b>'+fly.coins+'</b><span>Đồng cám</span></div></div>'+
   '<p>Nhận <b>+'+fly.earned+' cám</b> vào ví'+(fly.score>0&&fly.score>=fly.best?' · Kỷ lục mới!':'')+'</p>'+
-  '<div class="pact"><button class="btn" type="button" id="flyHome">Về vườn</button><button class="btn gold" type="button" id="flyAgain">Bay lại</button></div></div>';
-
-  $('flyAgain').onclick=()=>{
-    o.hidden=true;
-    $('flyHint').hidden=false;
-    flyReset();
-  };
-  $('flyHome').onclick=()=>{
-    notify('GO_HOME');
-  };
+  '<div class="pact"><button class="btn" type="button" id="flyHome">Về vườn</button>' +
+  (G_TIX <= 0 ? '<button class="btn gold gbuy" type="button" id="flOverBuy">10 cám = 1 vé</button>' : '<button class="btn gold" type="button" id="flyAgain">Bay lại</button>') +
+  '</div></div>';
 }
+
+/* Event delegation cho modal flyOver — chống kẹt màn hình trên mobile */
+const flyOverEl=$('flyOver');
+function handleFlyOverAction(e){
+  const again=e.target.closest('#flyAgain');
+  const home=e.target.closest('#flyHome');
+  const buy=e.target.closest('#flOverBuy');
+  if(again){
+    if(e.cancelable)e.preventDefault();
+    e.stopPropagation();
+    flyRestart();
+  } else if(home){
+    if(e.cancelable)e.preventDefault();
+    e.stopPropagation();
+    notify('GO_HOME');
+  } else if(buy){
+    if(e.cancelable)e.preventDefault();
+    e.stopPropagation();
+    doBuyTicket();
+  }
+}
+flyOverEl.addEventListener('pointerdown', handleFlyOverAction);
+flyOverEl.addEventListener('touchstart', handleFlyOverAction, { passive: false });
+flyOverEl.addEventListener('click', handleFlyOverAction);
+if($('flBuyTix')) $('flBuyTix').addEventListener('click', doBuyTicket);
+flyOverEl.addEventListener('click', handleFlyOverAction);
 
 function flyEat(it){
   const was=fly.hunger;
@@ -890,11 +1063,10 @@ function flyUpdate(dt){
   fly.floats.forEach(f=>{f.life-=dt;f.y-=14*dt});fly.floats=fly.floats.filter(f=>f.life>0);
 }
 
-/* Vẽ khung cảnh đồ họa 1:1 */
+/* Vẽ khung cảnh đồ họa 1:1 (Không nhân DPR để tránh WebKit downscale làm mờ pixel) */
 const flyC=$('flyCv'),flyX=flyC.getContext('2d');
-const DPR = 3;
-flyC.width = FW * DPR;
-flyC.height = FH * DPR;
+flyC.width = FW;
+flyC.height = FH;
 flyC.style.width = '100%';
 flyC.style.height = '100%';
 flyX.imageSmoothingEnabled = false;
@@ -959,9 +1131,8 @@ function drawPigFly(c){
 }
 
 function drawFlyScene(c,t){
-  c.imageSmoothingEnabled=false;
   c.save();
-  c.scale(DPR, DPR);
+  c.imageSmoothingEnabled = false;
   if(fly.shake>0)c.translate(Math.round(Math.sin(t*90)*2),Math.round(Math.cos(t*70)*2));
   drawSky(c);drawCrit(c,0);
   const al=bgAlphas(),n=nightness(fly.u);
@@ -1024,17 +1195,10 @@ function drawFlyScene(c,t){
 
 /* Cập nhật HUD */
 const hudC={};
-const flyBarEl=$('flyBar');
-for(let i=0;i<10;i++){const b=document.createElement('i');flyBarEl.appendChild(b)}
 function setT(id,v){if(hudC[id]!==v){hudC[id]=v;const el=$(id);if(el)el.textContent=v}}
 
 function flyHud(){
-  const h=Math.max(0,Math.ceil(fly.hunger/10)),col=fly.hunger>50?'var(--green)':fly.hunger>25?'var(--gold)':'var(--red)',key=h+col;
-  if(hudC.bar!==key){hudC.bar=key;[...flyBarEl.children].forEach((b,i)=>{b.style.background=i<h?col:'transparent'})}
-  setT('flyHungerT',fly.hunger>66?'No căng':fly.hunger>40?'Vừa bụng':fly.hunger>25?'Hơi đói':'Đói lả, hái gấp!');
-  setT('flyScore',String(fly.score));setT('flyBest',String(fly.best));setT('flyEaten',String(fly.eaten));setT('flyCoin',String(fly.coins));
-  setT('flyZone',BIOMES[biomeAt(fly.dist)].n);
-  setT('flyWx',WXN[fly.weather]);
+  setT('flyScore',String(fly.score));setT('flyBest',String(fly.best));
 }
 
 /* Vòng lặp chính */
@@ -1046,9 +1210,12 @@ function flyFrame(now){
   requestAnimationFrame(flyFrame);
 }
 
-/* Bắt sự kiện chạm vỗ cánh tức thì 0ms (Chuẩn prototype) */
-let tapStartX = 0, tapStartY = 0;
+/* Bắt sự kiện chạm vỗ cánh tức thì 0ms (Chuẩn prototype, chống double-fire touchstart + pointerdown) */
+let tapStartX = 0, tapStartY = 0, lastTapAt = 0;
 function flyTap(e){
+  const now = performance.now();
+  if (now - lastTapAt < 35) return;
+  lastTapAt = now;
   if(e){
     tapStartX = e.clientX || 0;
     tapStartY = e.clientY || 0;
@@ -1060,37 +1227,42 @@ function flyTap(e){
 $('flyWrap').addEventListener('pointerdown', e => {
   if (e.target.closest('button')) return;
   e.preventDefault();
-  flyTap();
+  flyTap(e);
 });
 $('flyWrap').addEventListener('touchstart', e => {
   if (e.target.closest('button')) return;
   if (e.cancelable) e.preventDefault();
-  flyTap();
+  flyTap(e.touches && e.touches[0]);
 }, { passive: false });
-
-$('flyBtn').addEventListener('pointerdown', e => {
-  e.preventDefault();
-  flyTap();
-});
-$('flyBtn').addEventListener('touchstart', e => {
-  if (e.cancelable) e.preventDefault();
-  flyTap();
-}, { passive: false });
-$('flyBtn').addEventListener('click', e => {
-  if (e.detail === 0) flyTap();
+$('flyWrap').addEventListener('click', e => {
+  if (e.target.closest('button')) return;
+  flyTap(e);
 });
 
-$('flyPause').addEventListener('click',()=>{
-  fly.paused=!fly.paused;
-  $('flyPause').textContent=fly.paused?'Tiếp tục':'Tạm dừng';
-  flyMsg(fly.paused?'Đã tạm dừng':'Tiếp tục bay',1.5);
-});
+const fBtn = $('flyBtn');
+if (fBtn) {
+  fBtn.addEventListener('pointerdown', e => { e.preventDefault(); flyTap(e); });
+  fBtn.addEventListener('touchstart', e => { if (e.cancelable) e.preventDefault(); flyTap(e); }, { passive: false });
+  fBtn.addEventListener('click', e => { if (e.detail === 0) flyTap(e); });
+}
 
-$('flyWxBtn').addEventListener('click',()=>{
-  fly.weather=fly.weather==='clear'?'rain':fly.weather==='rain'?'wind':'clear';
-  fly.u=(fly.u+0.18)%1;
-  flyMsg(WXN[fly.weather]+' · '+PERIOD(fly.u),1.5);
-});
+const fPause = $('flyPause');
+if (fPause) {
+  fPause.addEventListener('click',()=>{
+    fly.paused=!fly.paused;
+    fPause.textContent=fly.paused?'Tiếp tục':'Tạm dừng';
+    flyMsg(fly.paused?'Đã tạm dừng':'Tiếp tục bay',1.5);
+  });
+}
+
+const fWx = $('flyWxBtn');
+if (fWx) {
+  fWx.addEventListener('click',()=>{
+    fly.weather=fly.weather==='clear'?'rain':fly.weather==='rain'?'wind':'clear';
+    fly.u=(fly.u+0.18)%1;
+    flyMsg(WXN[fly.weather]+' · '+PERIOD(fly.u),1.5);
+  });
+}
 
 /* Khởi tạo danh sách đồ ăn nếu có */
 const ff=$('flyFood');
@@ -1112,25 +1284,55 @@ requestAnimationFrame(flyFrame);
 </script>
 </body>
 </html>
-`;
+`, []);
 
   const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
 
   return (
     <View style={styles.container}>
-      {/* Top Header bar */}
+      {/* 16-bit Warm Stone & Brass Beveled TopBar — Chỉ 2 game dọc 9:16 + 16×16 Pixel Icons (Quyết định 172) */}
       <View style={styles.topHeader}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={0.8}>
-          <ArrowLeft size={16} color="#2B2118" strokeWidth={2.8} />
-          <Text style={styles.backButtonText}>‹ Quay lại Hub</Text>
+        <TouchableOpacity style={styles.bevelBtn} onPress={handleBack} activeOpacity={0.8} accessibilityLabel="Quay lại">
+          <PixelIconBack size={18} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.reloadButton} onPress={handleReload} activeOpacity={0.8}>
-          <RefreshCw size={15} color="#2B2118" strokeWidth={2.6} />
-        </TouchableOpacity>
+        <View style={styles.switchPill}>
+          <View style={[styles.switchItem, styles.switchItemActive]}>
+            <PixelIconWing size={18} />
+          </View>
+          <TouchableOpacity
+            style={styles.switchItem}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onSwitchGame?.('cross');
+            }}
+            activeOpacity={0.75}
+            accessibilityLabel="Heo qua đường"
+          >
+            <PixelIconTraffic size={18} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.rightControls}>
+          <TouchableOpacity
+            style={styles.ticketChip}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onBuyTicket?.();
+            }}
+            activeOpacity={0.8}
+            accessibilityLabel="Đổi vé chơi"
+          >
+            <PixelIconTicket size={16} />
+            <Text style={styles.ticketText}>{tickets}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bevelBtn} onPress={handleReload} activeOpacity={0.8} accessibilityLabel="Tải lại">
+            <PixelIconReload size={16} />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* Webview Game Canvas */}
+      {/* Webview Game Canvas: Flexbox tự nhiên flex: 1, không dùng flex: 0 hay ép chiều cao cứng */}
       <View style={styles.webViewWrapper}>
         {Platform.OS === 'web' ? (
           <iframe
@@ -1165,45 +1367,80 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#F6EEDC',
-    borderBottomWidth: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: '#D9C9A4',
+    borderTopWidth: 2,
+    borderTopColor: '#FFFBF1',
+    borderBottomWidth: 3,
     borderBottomColor: '#2B2118',
   },
-  backButton: {
+  bevelBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 4,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    borderTopColor: '#FFFBF1',
+    borderLeftColor: '#FFFBF1',
+    borderBottomColor: '#85735E',
+    borderRightColor: '#85735E',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  switchPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#85735E',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    borderRadius: 4,
+    padding: 2,
+    gap: 2,
+  },
+  switchItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderRadius: 2,
+    backgroundColor: '#F6EEDC',
+  },
+  switchItemActive: {
+    backgroundColor: '#F4B93B',
+    borderWidth: 1,
+    borderColor: '#2B2118',
+  },
+  rightControls: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+  },
+  ticketChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 4,
     backgroundColor: '#FFFBF1',
     borderWidth: 2,
     borderColor: '#2B2118',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 2,
   },
-  backButtonText: {
-    fontFamily: 'Nunito',
+  ticketText: {
+    fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 12,
+    fontSize: 13,
     color: '#2B2118',
-  },
-  reloadButton: {
-    backgroundColor: '#FFFBF1',
-    borderWidth: 2,
-    borderColor: '#2B2118',
-    borderRadius: 999,
-    padding: 7,
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
   },
   webViewWrapper: {
     flex: 1,

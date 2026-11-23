@@ -548,7 +548,7 @@ Bạn là Art Director kiêm UI engineer. Thiết kế và dựng tab "Giải tr
 
 1) CẤU TRÚC
 - Tab Giải trí = hub. Chat, Heo bay, Heo bắn, Bản đồ là bốn màn con, mỗi màn có nút "‹ Trung tâm Heo Con" ở đầu. Khi ở màn con, tab Giải trí vẫn sáng.
-- Hub gồm: pill "PIGFLY HUB" (chấm đỏ), chip chuỗi ngày (vàng), avatar mặt heo, tiêu đề "Trung Tâm Heo Con", lời chào "Chào {TÊN}! Khám phá giải trí & bản đồ khu phố", hai chip Vé và Cám, rồi 4 thẻ xếp dọc.
+- Hub gồm: pill "PIGFLY HUB" (chấm đỏ), chip chuỗi ngày (vàng), avatar mặt heo, tiêu đề "Trung Tâm Heo Con", lời chào "Chào {TÊN}! Khám phá giải trí & bản đồ khu phố", hai chip Vé và Cám, rồi các thẻ xếp dọc (4 thẻ gốc, thêm thẻ thứ 5 "Game Heo Qua Đường · SÀI GÒN · LÁCH ĐƯỜNG" theo PLAN 15).
 - Mỗi thẻ: ô icon pixel 64px nền màu (viền 3px mực, bo 18px, bóng cứng 3px), tag pill chữ hoa, tên (Baloo 2 ExtraBold), dòng số liệu thật màu xanh, mô tả 1 đến 2 dòng, "Khám phá ngay ›".
   - Trò Chuyện & Bạn Bè · AI COACH & SQUAD · số tin mới.
   - Game Heo Bay · FLAPPY PIG · 60FPS · kỷ lục.
@@ -589,6 +589,86 @@ Không đưa lời khuyên đầu tư hay vay mượn, không hứa chắc kết
 
 ````
 Giữ tab Hồ sơ là nơi đặt kế hoạch cá nhân: hạn mức mỗi ngày, mục tiêu, danh mục thu chi, giao diện. Thêm một thẻ lối tắt "Trung Tâm Heo Con" dẫn sang tab Giải trí, hiện vé, cám và chuỗi ngày. Khi người dùng đổi hạn mức, hub, Heo bắn (số lượt bay) và Heo-Coach cập nhật ngay. Giữ phong cách pixel như các tab khác.
+````
+
+---
+
+### 14.4 Prompt: Banner pixel anime cho tab Giải trí
+
+Prototype đối chiếu: `ve-heo-con.html` (hàm `fbStatic`, `fbDraw` trong phần banner). Gửi kèm file này.
+
+````
+Dựng banner đầu tab Giải trí của {APP_NAME} theo phong cách pixel art anime, giống banner trong prototype đính kèm. Banner không có chữ tiêu đề; tên màn nằm ở nhãn tiếp theo trong giao diện.
+
+KHUNG: canvas logic 192x88, hiển thị full chiều rộng, bo 24px, viền 3px mực, image-rendering pixelated. Hai dải mực dày 2px ở trên và dưới như khung phim.
+
+LỚP VẼ (từ sau ra trước), chỉ dùng fillRect, vẽ nền tĩnh một lần vào canvas phụ:
+1) Trời hoàng hôn 8 dải: tím #6B5FC0, #8F76CC, #B685CB, hồng #E391BF, #F8A6B0, cam #FFC096, #FFDA9C, #FFEBB8. Chỗ giáp giữa hai dải trộn caro 1px (dither).
+2) Mặt trời #FFF6CF, quầng #FFE9A8, cắt 5 vạch ngang dày dần ở nửa dưới (kiểu anime).
+3) Núi xa #B58FC4, núi gần #9B78B8, thành phố nhà phố #6E5A9E với cửa sổ vàng #FFE08A rải ngẫu nhiên có seed.
+3b) Địa danh TP.HCM vẽ bóng tối hơn lớp phố (#4B3F86), từ trái sang phải: Chợ Bến Thành (khối thấp, tháp đồng hồ có mái chóp), Nhà thờ Đức Bà (gạch đỏ #8A4560, hai tháp chuông nhọn có thánh giá, cửa sổ hoa hồng), Bitexco (tháp thon có sân đáp trực thăng nhô ra ở 2/3 chiều cao, vạch kính), Landmark 81 (tháp cao nhất, bậc thang, cột ăng-ten), Dinh Độc Lập (khối thấp ngang, hàng cột, cờ đỏ trên nóc). Đèn báo đỏ nhấp nháy trên Landmark 81 và Bitexco. Chỉ dùng hình khối nhận diện, không chép ảnh chụp hay logo.
+4) Mặt đất cỏ #5E9A57, mép #8CC46F, chấm cỏ tối #3E7A3A, hoa vàng và hồng rải đều.
+5) Tháp ổ chim bên phải (cột, sàn gỗ, lồng sắt) và hai Chim Non đội băng đỏ nhún nhẹ.
+LỚP ĐỘNG (vòng lặp rAF, dt <= 0.05, dừng khi rời màn):
+- Sao lấp lánh nhấp nháy, vài sao 4 cánh; mây trôi 3 lớp tốc độ khác nhau.
+- Hai máy bay Vietnam Airlines bay ngang trời ở hai độ cao, tốc độ và chiều khác nhau, có vệt khói mờ phía sau. Thân trắng, đuôi xanh lam có chấm vàng (hoa sen cách điệu), hàng cửa sổ xanh. Không chép logo hay chữ hãng.
+- Đường phố ở đáy banner (vỉa hè, mặt đường xám tím, vạch vàng đứt). Heo luân phiên mỗi ~13 giây: (a) chạy xe máy đỏ trên đường, đội mũ bảo hiểm vàng có kính, bánh xe quay, khói xả; (b) đi bộ trên bãi cỏ (sprite walk 2 khung). Có thêm một xe máy khác chạy ngược chiều ở làn trên.
+TƯƠNG TÁC: chạm banner thì heo nhảy, bắn ra 14 hạt lấp lánh trắng, vàng, hồng; cứ 3 lần chạm đổi giữa xe máy và đi bộ. Nếu bật reduced-motion chỉ vẽ một khung tĩnh. Có aria-label mô tả cảnh.
+
+KHÔNG: không dùng ảnh thật hay sprite của app khác, không đặt chữ lên banner. Bản chính thức nhờ họa sĩ vẽ lại trong Aseprite rồi thay vào cùng bố cục và máy trạng thái.
+````
+
+---
+
+### 14.5 Prompt: Banner động tab Hồ sơ ("góc làm việc của heo")
+
+Prototype đối chiếu: `ve-heo-con.html` (phần `mb*` trong tab Hồ sơ). Gửi kèm file này.
+
+````
+Dựng banner đầu tab Hồ sơ của {APP_NAME}: một góc làm việc pixel động, mỗi vật trong cảnh là một lối tắt tới một mục của trang. Phong cách pixel art vui nhộn, cùng token với các tab khác (Plan 1 đến 3).
+
+KHUNG: canvas logic 176x80, full chiều rộng, bo 28px, viền 3px mực, pixelated. Nền tĩnh vẽ một lần vào canvas phụ, vẽ lại khi đổi màu app hoặc sang ngày mới. Vòng lặp rAF (dt <= 0.05) chạy khi tab Hồ sơ đang mở.
+
+VẬT VÀ LIÊN KẾT DỮ LIỆU
+- Tường: màu theo "Màu app" (Hồng Heo #F9E6C9, Xanh Mint #D7F0E4).
+- Cửa sổ: trời đổi theo giờ thật (ngày xanh nhạt có mặt trời di chuyển; chiều hồng; đêm xanh đen có sao nhấp nháy và trăng); mây trôi. Chạm: xoay "theo giờ thật, đêm, ngày".
+- Giấy dán 3 màu theo danh mục (ăn uống, đi lại, mua sắm), nhún nhẹ. Chạm: cuộn tới mục Danh mục.
+- Lịch hiển thị ngày thật, kèm ngọn lửa nhấp nháy và số chuỗi ngày. Chạm: ngọn lửa bùng, hiện câu về chuỗi ngày.
+- Heo đứng trên bàn (sprite 24x20 phóng 2x): chớp mắt, vẫy đuôi 2 khung. Chạm: nhảy, hiện "Hôm nay chi tối đa X, còn Y" (đổi sang lố khi vượt hạn mức).
+- Heo đất: mức vàng bên trong = % tiến độ tổng các mục tiêu. Cứ ~3,6 giây có một xu rơi vào, heo đất nhún 1px và tóe tia sáng. Chạm: xu bắn tung tóe, hiện "Đã giữ A trên B (p%)".
+- Chậu hoa hồng lớn dần theo số khoản đã lưu (mỗi 3 khoản thêm một bậc, bậc 3 nở bông đỏ). Chạm: hạt nước rơi, cây nhô lên.
+- Ly nước có khói bay, các nút vô hình đặt trên từng vật, có aria-label tiếng Việt, tối thiểu 44px khi quy ra màn hình.
+BÓNG THOẠI: một dòng cuối banner, aria-live polite, tự tắt sau 3 giây.
+HÀNG LỐI TẮT dưới banner: Ngân sách, Mục tiêu, Danh mục, Màu app (cuộn tới mục tương ứng) và nút vàng "Trung Tâm Heo Con ›" sang tab Giải trí.
+Reduced-motion: chỉ vẽ một khung tĩnh, các chạm vẫn hiện bóng thoại. Không dùng ảnh thật hay nhân vật của app khác.
+````
+
+---
+
+## PLAN 15: Game Heo Qua Đường (văn hóa đi bộ Sài Gòn)
+
+Prototype đối chiếu: `ve-heo-con.html`, màn "Heo qua đường" trong tab Giải trí. Gửi kèm file này.
+
+````
+Dựng mini game "Heo qua đường" cho {APP_NAME}, nói về văn hóa băng qua đường của người đi bộ Việt Nam: không có đèn dừng chờ, phải đi đều, lích nhích, để xe máy tự lách. Dùng chung vé, cám, heo và việc nhà với Heo bay và Heo bắn (Plan 13).
+
+CẢNH (2.5D pixel, nhìn từ sau lưng heo xuống đường): canvas logic 192x256 dọc, hiển thị pixelated. Tham chiếu phong cách: ảnh chụp game 3D góc nhìn thực của người đi bộ Sài Gòn (người dùng gửi kèm); chỉ lấy bố cục và độ chân thực, không chép nhân vật, mô hình hay tài sản của game đó.
+- Mặt tiền địa danh chiếm ~54px trên cùng, vẽ chi tiết nhìn thẳng: màn 1 Bưu điện Thành phố (tường vàng, trụ trắng, cửa vòm đỏ, đồng hồ, cửa chớp xanh), màn 2 Chợ Bến Thành (tháp đồng hồ giữa, cổng vòm, cửa sổ xanh), màn 3 Nhà thờ Đức Bà (gạch đỏ, hai tháp chuông, hoa hồng), màn 4 Dinh Độc Lập (khối trắng, lưới họa tiết xanh xám, cờ đỏ sao vàng). Cây ở hai góc.
+- Vỉa hè xa lát gạch đỏ với dãy xe máy đỗ thu nhỏ; vỉa hè gần lát gạch đỏ lớn hơn (lớp gạch tăng kích thước theo chiều sâu), có lối xám dẫn tới vạch qua đường, biển báo xanh và hai ghế nhựa đỏ.
+- Phối cảnh: 5 làn đường cao dần 20, 23, 26, 29, 32px với tỉ lệ xe 0,62, 0,72, 0,82, 0,92, 1,0 (làn xa nhỏ và chậm hơn). Vạch kẻ đường chuyển dần: vạch trắng đứt, vạch đôi vàng ở giữa, vạch qua đường hình thang (rộng 48px ở xa đến 92px ở gần), các sọc dày dần theo chiều sâu. Vết nứt, ổ gà, nắp cống vẽ rải ngẫu nhiên có seed.
+- Sắp xếp vẽ theo y (xe xa vẽ trước, xe gần và heo vẽ sau).
+- Heo nhìn chéo từ phía sau (góc 3/4 sau), để thấy nón lá và dáng đi tới địa danh: nón lá hình chóp 7 tầng có sọc vân và quai đỏ hai bên, áo đỏ che lưng, mông hồng có đuôi xoắn, bốn chân (hai chân sau lớn, hai chân trước nhỏ và tối hơn ở xa) bước xen kẽ theo đường chéo cùng thân nhún 1px, một bên tai và mũi heo thò ra cạnh nón. Quay trái hoặc phải theo hướng đi ngang gần nhất bằng cách lật gương. Khi "Giơ tay" thì chân trước xa giơ cao kèm tia sáng. Vòng trắng dưới chân thể hiện vùng va chạm, có đổ bóng. Heo cao ~34px ở làn gần, nhỏ dần ở làn xa (tỉ lệ 0,8 đến 1,1 theo làn). Hai tư thế đổi theo hướng đi: đi lên (hoặc đứng yên) thì nhìn chéo từ phía sau như trên; bấm ◀ hoặc ▶ để lách thì chuyển sang nhìn nghiêng, dùng lại sprite heo 24x20 của các màn khác (thấy rõ mắt, mũi, tai, bốn chân bước xen kẽ), vẫn đội nón lá, lật gương theo hướng đi. Giữ tư thế nghiêng 0,3 giây sau khi thả phím ngang để không nhấp nháy khi đi chéo.
+PHƯƠNG TIỆN (vẽ bằng fillRect, kích thước theo tỉ lệ làn, làm tròn từng khối): xe ga có người lái (mũ bảo hiểm đủ màu, áo màu, một số bịt khẩu trang, một số đội nón lá, một số chở thêm người sau hoặc thùng hàng sau xe), bánh xe có nan quay, đèn pha, đèn hậu; xe hơi (trắng, đỏ, đen, xanh, taxi xanh lá và vàng có đèn mui, không dùng logo); xe buýt trắng sọc xanh lá có hàng cửa sổ. Làn xa nhiều xe hơi, xe buýt hơn; làn gần chủ yếu xe máy.
+LUẬT (quan trọng, đây là cốt lõi văn hóa):
+- Giữ nút ▲ (hoặc phím mũi tên, WASD) để heo đi chậm đều 20px/s; ◀ ▶ ▼ cũng giữ để di chuyển. Không có nút chạy.
+- Xe máy lách: khi heo đang di chuyển và xe máy tới gần (cách ~46px, cùng làn), xe lệch ngang ~10px để tránh. Nếu heo đứng yên hơn 0,9 giây thì xe máy không tránh nữa và có thể tông; hiện dấu "!" đỏ trên xe và thông báo "Bíp bíp! Đừng đứng yên!".
+- Xe hơi, xe buýt không nhường. Nút "Giơ tay" làm xe trước mặt phanh còn ~10% tốc độ trong 1,6 giây. Số lần giơ tay: 2, thêm 1 nếu hôm nay chi dưới 50% hạn mức.
+- 3 mạng. Bị tông: mất 1 mạng, heo về vạch xuất phát, bất tử 1,5 giây (nhấp nháy). Hết mạng thua, mất 2 cám "tiền thuốc" (không âm).
+- Chạm vỉa hè đối diện là thắng: +6 cám, +3 cám mỗi sao (sao = số mạng còn lại, tối đa 3 sao mỗi màn, 12 sao cho 4 màn), nhặt thêm cám trên đường (3 đồng xu mỗi màn), heo no thêm 10%.
+LIÊN KẾT VỚI VÍ: mỗi ván mất 1 vé (vé chung; ghi chi +1 vé; 10 cám đổi 1 vé). Mật độ xe nhân với 0,85 nếu hôm nay chi dưới 50% hạn mức, 1,25 nếu chi vượt hạn mức; màn 1/2/3/4 nhân 0,75/0,95/1,15/1,35. Heo đói (<25%) đi chậm x0,85. Màn kết thúc có một câu bài học: "Đi đều thì xe tự lách, chi tiêu đều đặn cũng thắng hoảng loạn" và "Khoản bất ngờ hay đến lúc bạn đứng yên, nên có quỹ dự phòng".
+GIAO DIỆN: nút ▲ nổi bật màu vàng, nút "Giơ tay" lớn màu hồng, tất cả >= 44px, giữ được bằng pointer events, không bị chọn chữ. Overlay bắt đầu/thắng/thua dùng thẻ kem viền 3px. Có aria-label cho canvas, thông báo trạng thái aria-live.
+KHÔNG: không dùng logo hãng xe, biển hiệu thật, ảnh chụp địa danh; địa danh vẽ bằng khối hình nhận diện. Không khuyến khích băng đường ẩu ngoài đời: thêm dòng nhỏ "Trò chơi mô phỏng. Ngoài đời hãy quan sát kỹ và qua đường ở nơi an toàn."
+KIỂM THỬ: giữ ▲ khoảng 10 giây ở màn 1 thì có thể qua; đứng yên giữa làn xe máy thì bị tông; không giơ tay thì xe hơi tông; hết vé thì không bắt đầu và gợi ý đổi cám; chi vượt hạn mức thì đường đông hơn; cả 4 màn đều có địa danh và mặt tiền khác nhau.
 ````
 
 ---

@@ -43,6 +43,8 @@ interface GamificationState {
   savedBabies: number;
   flyBestScore: number;
   shooterMaxWave: number;
+  crossRoadStars: number;
+  crossRoadMaxLevel: number;
   isLoading: boolean;
 
   // Actions
@@ -51,12 +53,15 @@ interface GamificationState {
   setStreakDays: (days: number) => void;
   addGameTickets: (count: number) => void;
   useGameTicket: () => boolean;
+  buyTicketWithFood: () => boolean;
   addPigFood: (amount: number) => void;
   feedPig: () => boolean;
   updateGameStats: (stats: {
     flyBestScore?: number;
     shooterMaxWave?: number;
     savedBabies?: number;
+    crossRoadStars?: number;
+    crossRoadMaxLevel?: number;
     pigHunger?: number;
   }) => void;
   evaluateRules: (
@@ -87,6 +92,8 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
   savedBabies: 0,
   flyBestScore: 0,
   shooterMaxWave: 1,
+  crossRoadStars: 0,
+  crossRoadMaxLevel: 1,
   isLoading: false,
 
   loadGamificationState: async () => {
@@ -111,6 +118,8 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
           savedBabies: parsed.savedBabies ?? 0,
           flyBestScore: parsed.flyBestScore ?? 0,
           shooterMaxWave: parsed.shooterMaxWave ?? 1,
+          crossRoadStars: parsed.crossRoadStars ?? 0,
+          crossRoadMaxLevel: parsed.crossRoadMaxLevel ?? 1,
         });
       }
     } catch (e) {
@@ -135,6 +144,19 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
     AsyncStorage.setItem(
       STORAGE_KEY_GAMIFICATION,
       JSON.stringify({ ...get(), gameTickets: next })
+    ).catch(() => {});
+    return true;
+  },
+
+  buyTicketWithFood: () => {
+    const { pigFood, gameTickets } = get();
+    if (pigFood < 10) return false;
+    const nextFood = pigFood - 10;
+    const nextTix = gameTickets + 1;
+    set({ pigFood: nextFood, gameTickets: nextTix });
+    AsyncStorage.setItem(
+      STORAGE_KEY_GAMIFICATION,
+      JSON.stringify({ ...get(), pigFood: nextFood, gameTickets: nextTix })
     ).catch(() => {});
     return true;
   },
@@ -167,6 +189,8 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       flyBestScore: Math.max(current.flyBestScore, stats.flyBestScore ?? 0),
       shooterMaxWave: Math.max(current.shooterMaxWave, stats.shooterMaxWave ?? 0),
       savedBabies: stats.savedBabies !== undefined ? stats.savedBabies : current.savedBabies,
+      crossRoadStars: Math.max(current.crossRoadStars, stats.crossRoadStars ?? 0),
+      crossRoadMaxLevel: Math.max(current.crossRoadMaxLevel, stats.crossRoadMaxLevel ?? 1),
       pigHunger: stats.pigHunger !== undefined ? Math.min(100, Math.max(0, stats.pigHunger)) : current.pigHunger,
     };
     set(updated);

@@ -73,10 +73,10 @@ export default function LoginScreen() {
 
   const debounceTimerRef = useRef<any>(null);
 
-  // Đổi Theme xoay vòng 1-chạm: Cool Mint 🌿 ⇄ Light Pink/Cream 🌸 ⇄ Dark Mint 🌙
+  // Đổi Theme xoay vòng 1-chạm: Heo Con Vàng Nâu 🐷 ⇄ Hồng Heo Pastel 🌸
   const handleCycleTheme = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const nextMode = mode === 'pink' ? 'mint' : 'pink';
+    const nextMode = mode === 'pink' ? 'heocon' : 'pink';
     setMode(nextMode);
   };
 
@@ -175,9 +175,9 @@ export default function LoginScreen() {
 
   const calculatedAge = selectedBirthYear ? CURRENT_YEAR - selectedBirthYear : null;
 
-  // Màu gradient nền động theo từng Theme
+  // Màu gradient nền động theo từng Theme (Gradient Pastel Nhẹ)
   const bgGradientColors: [string, string, ...string[]] =
-    mode === 'mint' ? ['#F0FDF9', '#E6FAF3', '#CCFBF1'] : ['#FFF5F7', '#FDF2F8', '#FCE7F3']
+    mode === 'pink' ? ['#FFF5F7', '#FDF2F8', '#FCE7F3'] : ['#F6EEDC', '#FFFDF8', '#F4E8D0'];
 
   return (
     <LinearGradient

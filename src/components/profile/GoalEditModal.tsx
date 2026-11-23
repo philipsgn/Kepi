@@ -70,7 +70,16 @@ export const GoalEditModal: React.FC<GoalEditModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const { tokens, isDark } = useTheme();
+  const { tokens, isDark, mode } = useTheme();
+  const isPink = mode === 'pink';
+  const isHeocon = true; // Cả Heo Con và Pastel Pink đều chuẩn Neo-Brutalist Pixel Art 100%
+  const cardBg = isPink ? '#FFFFFF' : '#FFFBF1';
+  const cardBorder = isPink ? '#3B0713' : '#2B2118';
+  const inkText = isPink ? '#3B0713' : '#2B2118';
+  const inkMuted = isPink ? '#834758' : '#6E5D4F';
+  const pageBg = isPink ? '#FFF5F7' : '#F6EEDC';
+  const chipBg = isPink ? '#FCE7F3' : '#FFF4CC';
+  const accentBtn = isPink ? '#F43F5E' : '#F4B93B';
   const [name, setName] = useState(initialGoalName || '');
   const [amount, setAmount] = useState(initialTargetAmount > 0 ? initialTargetAmount : 10_000_000);
   const [amountStr, setAmountStr] = useState(
@@ -207,50 +216,163 @@ export const GoalEditModal: React.FC<GoalEditModalProps> = ({
         style={styles.modalOverlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={[styles.modalSheet, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
+        <View
+          style={[
+            styles.modalSheet,
+            isHeocon
+              ? {
+                  backgroundColor: pageBg,
+                  borderColor: cardBorder,
+                  borderTopWidth: 3,
+                  borderLeftWidth: 3,
+                  borderRightWidth: 3,
+                  borderTopLeftRadius: 28,
+                  borderTopRightRadius: 28,
+                }
+              : { backgroundColor: tokens.surface, borderColor: tokens.border },
+          ]}
+        >
+          {/* DRAG HANDLE */}
+          {isHeocon && (
+            <View style={{ alignItems: 'center', paddingTop: 10 }}>
+              <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: '#2B2118' }} />
+            </View>
+          )}
+
           {/* HEADER */}
-          <View style={[styles.headerRow, { borderBottomColor: tokens.border }]}>
+          <View
+            style={[
+              styles.headerRow,
+              {
+                borderBottomColor: isHeocon ? '#2B2118' : tokens.border,
+                borderBottomWidth: isHeocon ? 2 : 1,
+              },
+            ]}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <View style={styles.iconBox}>
-                <Target size={20} color={tokens.primary} strokeWidth={2.6} />
+              <View
+                style={[
+                  styles.iconBox,
+                  isHeocon && {
+                    backgroundColor: '#F4B93B',
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: cardBorder,
+                  },
+                ]}
+              >
+                <Target size={18} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.6} />
               </View>
-              <Text style={[styles.sheetTitle, { color: tokens.text }]}>
+              <Text
+                style={[
+                  styles.sheetTitle,
+                  { color: inkText },
+                  isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 18 },
+                ]}
+              >
                 {isEditing ? 'Chỉnh Sửa Mục Tiêu' : 'Thêm Mục Tiêu Mới'}
               </Text>
             </View>
 
             <TouchableOpacity
-              style={styles.closeBtn}
+              style={[
+                styles.closeBtn,
+                isHeocon && {
+                  backgroundColor: '#FFF4CC',
+                  borderWidth: 2.5,
+                  borderColor: cardBorder,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                },
+              ]}
               onPress={onClose}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <X size={18} color={tokens.textMuted} strokeWidth={2.6} />
+              <X size={18} color={isHeocon ? '#2B2118' : tokens.textMuted} strokeWidth={2.6} />
             </TouchableOpacity>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.formContent}>
             {/* TRƯỜNG 1: TÊN MỤC TIÊU */}
-            <Text style={[styles.label, { color: tokens.textSub }]}>{Strings.profile.goalNameLabel}:</Text>
+            <Text
+              style={[
+                styles.label,
+                { color: inkMuted },
+                isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 13.5 },
+              ]}
+            >
+              {Strings.profile.goalNameLabel}:
+            </Text>
             <TextInput
-              style={[styles.input, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border, color: tokens.text }]}
+              style={[
+                styles.input,
+                isHeocon
+                  ? {
+                      backgroundColor: cardBg,
+                      borderColor: cardBorder,
+                      borderWidth: 2.5,
+                      borderRadius: 14,
+                      color: inkText,
+                      fontFamily: 'Nunito',
+                      fontWeight: '700',
+                      height: 46,
+                    }
+                  : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border, color: tokens.text },
+              ]}
               value={name}
               onChangeText={setName}
               placeholder="VD: Xe máy mới, MacBook Pro, Chuyến đi Tây Bắc..."
-              placeholderTextColor={tokens.textMuted}
+              placeholderTextColor={isPink ? '#834758' : '#8A7A6A'}
             />
 
             {/* TRƯỜNG 2: SỐ TIỀN CẦN TÍCH LŨY */}
-            <Text style={[styles.label, { color: tokens.textSub }]}>{Strings.profile.goalTargetLabel}:</Text>
-            <View style={[styles.amountInputRow, { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border }]}>
+            <Text
+              style={[
+                styles.label,
+                { color: inkMuted },
+                isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 13.5 },
+              ]}
+            >
+              {Strings.profile.goalTargetLabel}:
+            </Text>
+            <View
+              style={[
+                styles.amountInputRow,
+                isHeocon
+                  ? {
+                      backgroundColor: cardBg,
+                      borderColor: cardBorder,
+                      borderWidth: 2.5,
+                      borderRadius: 14,
+                      height: 48,
+                    }
+                  : { backgroundColor: tokens.surfaceAlt, borderColor: tokens.border },
+              ]}
+            >
               <TextInput
-                style={[styles.amountTextInput, { color: tokens.text }]}
+                style={[
+                  styles.amountTextInput,
+                  { color: inkText },
+                  isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 18 },
+                ]}
                 keyboardType="numeric"
                 value={amountStr}
                 onChangeText={handleAmountTextChange}
                 placeholder="0"
-                placeholderTextColor={tokens.textMuted}
+                placeholderTextColor={isPink ? '#834758' : '#8A7A6A'}
               />
-              <Text style={[styles.currencySuffix, { color: tokens.textMuted }]}>đ</Text>
+              <Text
+                style={[
+                  styles.currencySuffix,
+                  { color: inkMuted },
+                  { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
+                ]}
+              >
+                đ
+              </Text>
             </View>
 
             {/* THANH TRƯỢT SỐ TIỀN */}
@@ -261,32 +383,70 @@ export const GoalEditModal: React.FC<GoalEditModalProps> = ({
                 {...panResponder.panHandlers}
               >
                 {/* Background track */}
-                <View style={[styles.sliderTrackBg, { backgroundColor: tokens.border }]} />
+                <View
+                  style={[
+                    styles.sliderTrackBg,
+                    { backgroundColor: isHeocon ? '#2B2118' : tokens.border },
+                    isHeocon && { height: 8, borderRadius: 4 },
+                  ]}
+                />
                 {/* Filled track */}
                 <View
                   style={[
                     styles.sliderTrackFilled,
                     {
                       width: thumbLeft + thumbWidth / 2,
-                      backgroundColor: tokens.primary,
+                      backgroundColor: isHeocon ? '#F4B93B' : tokens.primary,
                     },
+                    isHeocon && { height: 8, borderRadius: 4 },
                   ]}
                 />
                 {/* Thumb */}
                 <View
                   style={[
                     styles.sliderThumb,
-                    {
-                      left: thumbLeft,
-                      backgroundColor: '#FFFFFF',
-                      borderColor: tokens.primary,
-                    },
+                    isHeocon
+                      ? {
+                          left: thumbLeft,
+                          backgroundColor: '#F4B93B',
+                          borderColor: cardBorder,
+                          borderWidth: 2.5,
+                          width: 26,
+                          height: 26,
+                          borderRadius: 13,
+                          shadowColor: cardBorder,
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 0,
+                          elevation: 3,
+                        }
+                      : {
+                          left: thumbLeft,
+                          backgroundColor: '#FFFFFF',
+                          borderColor: tokens.primary,
+                        },
                   ]}
                 />
               </View>
               <View style={styles.sliderMinMaxRow}>
-                <Text style={[styles.minMaxText, { color: tokens.textMuted }]}>1 triệu</Text>
-                <Text style={[styles.minMaxText, { color: tokens.textMuted }]}>500 triệu</Text>
+                <Text
+                  style={[
+                    styles.minMaxText,
+                    { color: inkMuted },
+                    { fontFamily: 'Nunito', fontWeight: '700' },
+                  ]}
+                >
+                  1 triệu
+                </Text>
+                <Text
+                  style={[
+                    styles.minMaxText,
+                    { color: inkMuted },
+                    { fontFamily: 'Nunito', fontWeight: '700' },
+                  ]}
+                >
+                  500 triệu
+                </Text>
               </View>
             </View>
 
@@ -295,21 +455,29 @@ export const GoalEditModal: React.FC<GoalEditModalProps> = ({
               <View
                 style={[
                   styles.etaBox,
-                  {
-                    backgroundColor: isDark
-                      ? 'rgba(229, 152, 68, 0.08)'
-                      : 'rgba(229, 152, 68, 0.06)',
-                    borderColor: isDark
-                      ? 'rgba(229, 152, 68, 0.25)'
-                      : 'rgba(229, 152, 68, 0.2)',
-                  },
+                  isHeocon
+                    ? {
+                        backgroundColor: '#FFF4CC',
+                        borderColor: cardBorder,
+                        borderWidth: 2,
+                        borderRadius: 14,
+                      }
+                    : {
+                        backgroundColor: isDark
+                          ? 'rgba(229, 152, 68, 0.08)'
+                          : 'rgba(229, 152, 68, 0.06)',
+                        borderColor: isDark
+                          ? 'rgba(229, 152, 68, 0.25)'
+                          : 'rgba(229, 152, 68, 0.2)',
+                      },
                 ]}
               >
-                <Calendar size={15} color={tokens.primary} strokeWidth={2.4} />
+                <Calendar size={15} color={isHeocon ? '#2B2118' : tokens.primary} strokeWidth={2.4} />
                 <Text
                   style={[
                     styles.etaText,
-                    { color: autoEtaInfo.hasBudget ? tokens.text : tokens.textMuted },
+                    { color: autoEtaInfo.hasBudget ? (isHeocon ? '#2B2118' : tokens.text) : (isHeocon ? '#6E5D4F' : tokens.textMuted) },
+                    { fontFamily: 'Nunito', fontWeight: '700' },
                   ]}
                 >
                   {autoEtaInfo.text}
@@ -321,15 +489,34 @@ export const GoalEditModal: React.FC<GoalEditModalProps> = ({
             <TouchableOpacity
               style={[
                 styles.saveBtn,
-                { backgroundColor: tokens.primary },
+                isHeocon
+                  ? {
+                      backgroundColor: '#F4B93B',
+                      borderWidth: 3,
+                      borderColor: cardBorder,
+                      borderRadius: 22,
+                      shadowColor: cardBorder,
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 1,
+                      shadowRadius: 0,
+                      elevation: 4,
+                    }
+                  : { backgroundColor: tokens.primary },
                 (!name.trim() || amount <= 0) && styles.saveBtnDisabled,
               ]}
               onPress={handleSave}
               disabled={!name.trim() || amount <= 0}
               activeOpacity={0.85}
             >
-              <Check size={16} color="#1B2733" strokeWidth={2.6} />
-              <Text style={styles.saveBtnText}>Lưu Mục Tiêu</Text>
+              <Check size={18} color={isHeocon ? '#2B2118' : '#1B2733'} strokeWidth={2.8} />
+              <Text
+                style={[
+                  styles.saveBtnText,
+                  isHeocon && { color: '#2B2118', fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800', fontSize: 16 },
+                ]}
+              >
+                Lưu Mục Tiêu
+              </Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
