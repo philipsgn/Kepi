@@ -22,6 +22,7 @@ import {
   Cloud,
   EyeOff,
   LogOut,
+  MapPin,
   Palette,
   QrCode,
   ShieldCheck,
@@ -40,6 +41,11 @@ import { BankNotificationSettingsCard } from '../profile/BankNotificationSetting
 import { QRPaySettingsCard } from '../profile/QRPaySettingsCard';
 import { useTheme } from '../../theme/ThemeContext';
 import { useBottomInset } from '../../hooks/useBottomInset';
+import {
+  getLocationPinEnabled,
+  setLocationPinEnabled,
+  STORAGE_KEY_LOCATION_PIN,
+} from '../../services/locationService';
 
 const STORAGE_KEY_MASK_MONEY = 'vi_locket_mask_money';
 
@@ -76,6 +82,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
   const { loadTransactions } = useTransactionStore();
 
   const [isMasked, setIsMasked] = useState(false);
+  const [isLocationPinEnabled, setIsLocationPinEnabledState] = useState(true);
   const [activeSheet, setActiveSheet] = useState<ActiveSheetType>(null);
 
   // Load preferences from AsyncStorage on mount
@@ -84,6 +91,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
       try {
         const savedMask = await AsyncStorage.getItem(STORAGE_KEY_MASK_MONEY);
         if (savedMask !== null) setIsMasked(savedMask === 'true');
+        const pinOptIn = await getLocationPinEnabled();
+        setIsLocationPinEnabledState(pinOptIn);
       } catch (err) {
         console.warn('Failed to load settings preferences:', err);
       }
@@ -97,6 +106,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
       await AsyncStorage.setItem(STORAGE_KEY_MASK_MONEY, String(val));
       await updateProfile({ privacy_mode: val });
     } catch {}
+  };
+
+  // Handler: Toggle Opt-in Location Pin when saving expenses (Quyết định 180)
+  const handleToggleLocationPin = async (val: boolean) => {
+    setIsLocationPinEnabledState(val);
+    await setLocationPinEnabled(val);
   };
 
   // Handler: Reset All Data
@@ -320,6 +335,30 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               }}
               trackColor={{ false: isPink ? '#FCE7F3' : '#E8DEC8', true: accentColor }}
               thumbColor={isMasked ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
+            />
+          </View>
+
+          <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
+
+          {/* Row 2: Ghim vị trí chi tiêu (Opt-In 1 lần lúc lưu chi, 0 theo dõi nền — Quyết định 180) */}
+          <View style={styles.settingRow}>
+            <View style={styles.rowLeft}>
+              <View style={styles.iconContainerFloating}>
+                <MapPin size={22} color={tokens.primary} strokeWidth={2.8} />
+              </View>
+              <Text style={[styles.rowTitle, { color: inkBorder }]}>
+                Ghim vị trí chi tiêu
+              </Text>
+            </View>
+
+            <Switch
+              value={isLocationPinEnabled}
+              onValueChange={(val) => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                handleToggleLocationPin(val);
+              }}
+              trackColor={{ false: isPink ? '#FCE7F3' : '#E8DEC8', true: accentColor }}
+              thumbColor={isLocationPinEnabled ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
             />
           </View>
         </View>

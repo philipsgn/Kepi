@@ -16,6 +16,7 @@
       "infoPlist": {
         "NSCameraUsageDescription": "PigFly sử dụng Camera để bạn chụp lại ảnh khoảnh khắc chi tiêu và nuôi chú heo lớn mỗi ngày.",
         "NSPhotoLibraryUsageDescription": "PigFly cần quyền truy cập ảnh để bạn tải ảnh hóa đơn chi tiêu lên sổ.",
+        "NSLocationWhenInUseUsageDescription": "PigFly chỉ sử dụng vị trí hiện tại 1 lần khi bạn bật Ghim vị trí lúc lưu chi tiêu hoặc bấm định vị trên Bản đồ chi tiêu (tuyệt đối không theo dõi ngầm).",
         "LSApplicationQueriesSchemes": [
           "zalopay",
           "zalopay.api.v2",
@@ -45,7 +46,9 @@
       "permissions": [
         "CAMERA",
         "NOTIFICATIONS",
-        "BIND_NOTIFICATION_LISTENER_SERVICE"
+        "BIND_NOTIFICATION_LISTENER_SERVICE",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -55,6 +58,13 @@
     },
     "plugins": [
       "expo-router",
+      "@maplibre/maplibre-react-native",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "PigFly chỉ sử dụng vị trí hiện tại 1 lần khi bạn bật Ghim vị trí lúc lưu chi tiêu hoặc bấm định vị trên Bản đồ chi tiêu."
+        }
+      ],
       [
         "expo-camera",
         {

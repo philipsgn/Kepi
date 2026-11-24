@@ -33,6 +33,8 @@ interface TransactionState {
     media_type?: MediaType;
     is_squad_private?: boolean;
     desc_position?: { x: number; y: number } | null;
+    lat?: number | null;
+    lng?: number | null;
   }) => Promise<Transaction>;
   confirmPendingTransaction: (id: string, updatedAmount?: number) => Promise<void>;
   cancelPendingTransaction: (id: string) => Promise<void>;
@@ -107,6 +109,8 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
         media_type: data.media_type || 'PHOTO',
         is_squad_private: Boolean(data.is_squad_private),
         desc_position: data.desc_position || null,
+        lat: typeof data.lat === 'number' && Number.isFinite(data.lat) ? data.lat : null,
+        lng: typeof data.lng === 'number' && Number.isFinite(data.lng) ? data.lng : null,
         occurred_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
       };

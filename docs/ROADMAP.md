@@ -89,9 +89,11 @@
 ### 📌 GIAI ĐOẠN 4 (MILESTONE M5): ĐÓNG GÓI NATIVE BUILD EAS & PHÁT HÀNH STORE
 *Trọng tâm: Đưa PigFly lên Google Play Store và Apple App Store.*
 
-- [ ] **4.1. Native Android Plugin & Widget:**
-  - [ ] Đóng gói AppWidget Android vào APK/AAB sản xuất.
-  - [ ] Cấu hình `NotificationListenerService` đọc biến động số dư tự động trong file build.
+- [ ] **4.1. Chiến Lược Android-First (Expo SDK 58 + Dev Client + `@maplibre/maplibre-react-native` + TrackAsia Vietnam):**
+  - [/] **Android Development Build (`expo-dev-client`):** Chuyển dịch trọng tâm sang Custom Native Android Dev Client trên **Expo SDK 58** (`react-native: 0.88` New Architecture mặc định, `compileSdk 37`, AGP 9, API Level $\ge 23$) bằng lệnh `npx expo prebuild --clean` $\to$ `npx expo run:android`.
+  - [/] **Native MapLibre 60fps OpenGL + TrackAsia Vietnam:** Tích hợp `@maplibre/maplibre-react-native` (`^11.5.1+`) kết hợp style URL miễn phí của **TrackAsia Việt Nam** (0đ phí SDK, 200.000 lượt tải tile/tháng miễn phí, chi tiết đường phố & hẻm ngõ Việt Nam), tự động fallback về `NativeSlippyMap` khi mở trên **Expo Go**.
+  - [ ] Đóng gói AppWidget Android (`plugins/withAppWidget.js`) vào APK/AAB sản xuất.
+  - [ ] Cấu hình `NotificationListenerService` (`plugins/withNotificationListener.js`) đọc biến động số dư tự động trong file build Android.
 - [ ] **4.2. Native iOS WidgetKit Extension:**
   - [ ] Xây dựng Swift WidgetKit Extension hiển thị chú heo PigFly và số dư `Hôm nay tiêu được` trên màn hình khóa iOS 16+.
 - [ ] **4.3. Kiểm Toán Bảo Mật & Phát Hành Ứng Dụng:**

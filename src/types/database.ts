@@ -68,6 +68,8 @@ export interface Transaction {
   receipt_data?: ReceiptData | null;
   sentiment_rating?: SentimentRating | null;
   desc_position?: { x: number; y: number } | null;
+  lat?: number | null;
+  lng?: number | null;
   occurred_at: string;
   created_at: string;
 }

@@ -80,6 +80,11 @@ import { BankClipboardToast } from '../../src/components/common/BankClipboardToa
 import { FastCategorySheet } from '../../src/components/cards/FastCategorySheet';
 import { ParsedBankNotification } from '../../src/utils/bankNotificationParser';
 import { groupTransactionsByDay } from '../../src/utils/cameraUtils';
+import {
+  getCachedLocationSync,
+  getQuickPinCoordsIfOptedIn,
+  prewarmLocationAsync,
+} from '../../src/services/locationService';
 
 // Views
 import { JournalView } from '../../src/components/views/JournalView';
@@ -264,6 +269,8 @@ export default function MainAppScreen() {
   const [isRecordingVideo, setIsRecordingVideo] = useState<boolean>(false);
   const [capturedThumbUri, setCapturedThumbUri] = useState<string | null>(null);
   const [inFrameAmount, setInFrameAmount] = useState<number>(0);
+  const inFrameAmountRef = useRef<number>(0);
+  inFrameAmountRef.current = inFrameAmount;
   const [inFrameType, setInFrameType] = useState<'EXPENSE' | 'INCOME'>('EXPENSE');
   const [inFrameCategory, setInFrameCategory] = useState<string>('');
   const [showInFrameCategoryPicker, setShowInFrameCategoryPicker] = useState<boolean>(false);
@@ -348,6 +355,7 @@ export default function MainAppScreen() {
   const [celebrationAmount, setCelebrationAmount] = useState<number>(0);
 
   const [showKeyboardModal, setShowKeyboardModal] = useState<boolean>(false);
+  const [pendingSaveAfterKeyboard, setPendingSaveAfterKeyboard] = useState<boolean>(false);
   const { getExpenseCategories, getIncomeCategories } = useCategoryStore();
   const activeCameraCategories = inFrameType === 'INCOME' ? getIncomeCategories() : getExpenseCategories();
 
@@ -365,6 +373,7 @@ export default function MainAppScreen() {
   const handleRetakeCamera = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setIsPhotoSavedSuccess(false);
+    setPendingSaveAfterKeyboard(false);
     optimizedPhotoRef.current = null;
     optimizedThumbRef.current = null;
     setCapturedPhotoUri(null);
@@ -524,11 +533,12 @@ export default function MainAppScreen() {
     };
   }, []);
 
-  // Tự động xin quyền Camera khi mở app nếu chưa cấp và hệ thống cho phép hỏi
+  // Tự động xin quyền Camera & làm nóng GPS (Quyết định 181) khi mở Tab Camera
   useEffect(() => {
     if (!cameraGranted && canAskCameraAgain) {
       requestCameraPermission().catch(() => {});
     }
+    prewarmLocationAsync().catch(() => {});
   }, [cameraGranted, canAskCameraAgain, requestCameraPermission]);
 
   const currentOffsetYRef = useRef<number>(0);
@@ -786,6 +796,7 @@ export default function MainAppScreen() {
       y: Math.round(Math.max(10, Math.min(90, 72 + (descPanOffset.current.y / VIEWFINDER_SIZE) * 100))),
     } : null;
 
+    const syncCoords = inFrameType === 'EXPENSE' ? getCachedLocationSync() : null;
     const tx = await addTransaction({
       userId,
       amount: finalAmount,
@@ -798,7 +809,22 @@ export default function MainAppScreen() {
       payment_method: inFramePaymentMethod,
       source: 'PHOTO',
       status: 'CONFIRMED',
+      lat: syncCoords ? syncCoords.lat : null,
+      lng: syncCoords ? syncCoords.lng : null,
     });
+
+    if (inFrameType === 'EXPENSE') {
+      getQuickPinCoordsIfOptedIn()
+        .then((coords) => {
+          if (coords) {
+            useTransactionStore.getState().updateTransaction(tx.id, {
+              lat: coords.lat,
+              lng: coords.lng,
+            });
+          }
+        })
+        .catch(() => {});
+    }
 
     if (photoUriToSave) {
       uploadExpensePhotoAsync({
@@ -998,6 +1024,7 @@ export default function MainAppScreen() {
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const userId = user?.id || 'demo-user';
+      const syncCoords = getCachedLocationSync();
       const tx = await addTransaction({
         userId,
         amount: parsed.amount,
@@ -1008,7 +1035,19 @@ export default function MainAppScreen() {
         source: 'VOICE',
         photo_url: null,
         status: 'CONFIRMED',
+        lat: syncCoords.lat,
+        lng: syncCoords.lng,
       });
+      getQuickPinCoordsIfOptedIn()
+        .then((coords) => {
+          if (coords) {
+            useTransactionStore.getState().updateTransaction(tx.id, {
+              lat: coords.lat,
+              lng: coords.lng,
+            });
+          }
+        })
+        .catch(() => {});
       setLastSavedOrDeletedTx({ action: 'ADD', tx });
       checkAndTriggerOverspendingSos(parsed.amount);
       setUndoToastMessage(`Đã ghi giọng nói: ${formatVND(parsed.amount)} (${parsed.category})`);
@@ -1020,7 +1059,7 @@ export default function MainAppScreen() {
     }
   };
 
-  const handleSaveInFramePhoto = async () => {
+  const handleSaveInFramePhoto = async (overrideAmount?: number) => {
     // 1. Nếu chưa có danh mục, mặc định fallback "Ăn uống"
     let effectiveCategory = inFrameCategory;
     if (!effectiveCategory) {
@@ -1028,17 +1067,21 @@ export default function MainAppScreen() {
       setInFrameCategory('Ăn uống');
     }
 
-    // 2. Bắt buộc người dùng phải nhập số tiền > 0
-    if (inFrameAmount <= 0) {
+    // 2. Quy trình bắt buộc: Chụp ảnh -> Nhập tiền -> Lưu -> Ghim Bản đồ (Quyết định 182)
+    // Nếu chưa nhập tiền (> 0), tự động bật bàn phím nhập tiền và lưu ngay sau khi xác nhận
+    const targetAmount = typeof overrideAmount === 'number' ? overrideAmount : inFrameAmountRef.current;
+    if (targetAmount <= 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setUndoToastMessage('Vui lòng nhập số tiền cho món đồ');
-      setUndoToastVisible(true);
+      setPendingSaveAfterKeyboard(true);
+      setCamHintMessage('Nhập số tiền để lưu & ghim bản đồ nhé!');
+      setShowKeyboardModal(true);
       return;
     }
 
+    setPendingSaveAfterKeyboard(false);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const userId = user?.id || 'demo-user';
-    const finalAmount = inFrameAmount;
+    const finalAmount = targetAmount;
     const isBank = Boolean(activeBankSnapshotEvent);
     const bankTag = activeBankSnapshotEvent?.bankCode && activeBankSnapshotEvent.bankCode !== 'OTHER'
       ? `[${activeBankSnapshotEvent.bankCode}]`
@@ -1056,6 +1099,7 @@ export default function MainAppScreen() {
 
     const savePhotoUri = optimizedPhotoRef.current || capturedPhotoUri;
     const saveThumbUri = optimizedThumbRef.current || capturedThumbUri || savePhotoUri;
+    const syncCoords = inFrameType === 'EXPENSE' ? getCachedLocationSync() : null;
 
     const tx = await addTransaction({
       userId,
@@ -1068,7 +1112,23 @@ export default function MainAppScreen() {
       thumbnail_url: saveThumbUri,
       payment_method: inFramePaymentMethod,
       source: 'PHOTO',
-      status: 'CONFIRMED' });
+      status: 'CONFIRMED',
+      lat: syncCoords ? syncCoords.lat : null,
+      lng: syncCoords ? syncCoords.lng : null,
+    });
+
+    if (inFrameType === 'EXPENSE') {
+      getQuickPinCoordsIfOptedIn()
+        .then((coords) => {
+          if (coords) {
+            useTransactionStore.getState().updateTransaction(tx.id, {
+              lat: coords.lat,
+              lng: coords.lng,
+            });
+          }
+        })
+        .catch(() => {});
+    }
 
     if (savePhotoUri) {
       uploadExpensePhotoAsync({
@@ -1173,6 +1233,7 @@ export default function MainAppScreen() {
     paymentMethod: PaymentMethod;
   }) => {
     const userId = user?.id || 'demo-user';
+    const syncCoords = data.type === 'EXPENSE' ? getCachedLocationSync() : null;
 
     const tx = await useTransactionStore.getState().addTransaction({
       userId,
@@ -1183,7 +1244,23 @@ export default function MainAppScreen() {
       photo_url: capturedPhotoUri,
       thumbnail_url: capturedThumbUri || capturedPhotoUri,
       payment_method: data.paymentMethod,
-      source: 'MANUAL' });
+      source: 'MANUAL',
+      lat: syncCoords ? syncCoords.lat : null,
+      lng: syncCoords ? syncCoords.lng : null,
+    });
+
+    if (data.type === 'EXPENSE') {
+      getQuickPinCoordsIfOptedIn()
+        .then((coords) => {
+          if (coords) {
+            useTransactionStore.getState().updateTransaction(tx.id, {
+              lat: coords.lat,
+              lng: coords.lng,
+            });
+          }
+        })
+        .catch(() => {});
+    }
 
     if (capturedPhotoUri) {
       uploadExpensePhotoAsync({
@@ -1240,6 +1317,7 @@ export default function MainAppScreen() {
     const desc = parsedData?.description || 'Món đồ vừa mua';
     const cat = parsedData?.category || 'an_uong';
     const userId = user?.id || 'demo-user';
+    const syncCoords = getCachedLocationSync();
 
     const tx = await useTransactionStore.getState().addTransaction({
       userId,
@@ -1250,7 +1328,21 @@ export default function MainAppScreen() {
       photo_url: capturedPhotoUri,
       thumbnail_url: capturedThumbUri || capturedPhotoUri,
       payment_method: 'BANK',
-      source: 'MANUAL' });
+      source: 'MANUAL',
+      lat: syncCoords.lat,
+      lng: syncCoords.lng,
+    });
+
+    getQuickPinCoordsIfOptedIn()
+      .then((coords) => {
+        if (coords) {
+          useTransactionStore.getState().updateTransaction(tx.id, {
+            lat: coords.lat,
+            lng: coords.lng,
+          });
+        }
+      })
+      .catch(() => {});
 
     if (capturedPhotoUri) {
       uploadExpensePhotoAsync({
@@ -1831,7 +1923,7 @@ export default function MainAppScreen() {
 
                       <TouchableOpacity
                         style={styles.camReviewBtnSaveRound}
-                        onPress={handleSaveInFramePhoto}
+                        onPress={() => handleSaveInFramePhoto()}
                         activeOpacity={0.85}
                         accessibilityLabel="Lưu vào ví"
                       >
@@ -2064,9 +2156,14 @@ export default function MainAppScreen() {
         <View style={styles.camKeyboardModalOverlay}>
           <View style={[styles.camKeyboardModalContent, { backgroundColor: tokens.bg || '#F6EEDC', borderColor: tokens.border || '#2B2118' }]}>
             <View style={styles.camKeyboardHeader}>
-              <Text style={styles.camKeyboardTitle}>Nhập số tiền chi tiêu</Text>
+              <Text style={styles.camKeyboardTitle}>
+                {pendingSaveAfterKeyboard ? 'Nhập số tiền để lưu & ghim bản đồ' : 'Nhập số tiền chi tiêu'}
+              </Text>
               <TouchableOpacity
-                onPress={() => setShowKeyboardModal(false)}
+                onPress={() => {
+                  setPendingSaveAfterKeyboard(false);
+                  setShowKeyboardModal(false);
+                }}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 style={styles.camKeyboardCloseBtn}
               >
@@ -2075,12 +2172,28 @@ export default function MainAppScreen() {
             </View>
             <MandCashierKeyboard
               amount={inFrameAmount}
-              onChangeAmount={setInFrameAmount}
+              onChangeAmount={(val) => {
+                inFrameAmountRef.current = val;
+                setInFrameAmount(val);
+              }}
               category={inFrameCategory}
               onChangeCategory={setInFrameCategory}
               type={inFrameType}
-              onSubmit={() => setShowKeyboardModal(false)}
-              submitText="Xác nhận ✔"
+              onSubmit={() => {
+                const latestAmount = inFrameAmountRef.current;
+                if (pendingSaveAfterKeyboard) {
+                  if (latestAmount <= 0) {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                    return;
+                  }
+                  setShowKeyboardModal(false);
+                  setPendingSaveAfterKeyboard(false);
+                  handleSaveInFramePhoto(latestAmount);
+                } else {
+                  setShowKeyboardModal(false);
+                }
+              }}
+              submitText={pendingSaveAfterKeyboard ? 'Lưu & Ghim ✔' : 'Xác nhận ✔'}
             />
           </View>
         </View>

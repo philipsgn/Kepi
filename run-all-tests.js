@@ -5136,8 +5136,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 2. Bản đồ Việt Nam thật (MapLibre hoặc Slippy Tile Engine) + Chủ quyền Hoàng Sa & Trường Sa + Ghi nguồn
   assert.ok(
-    (mapCode.includes('maplibre-gl') && mapCode.includes('openfreemap.org/styles/positron')) ||
-    (mapCode.includes('lngLatToWorld') && mapCode.includes('basemaps.cartocdn.com')),
+    (mapCode.includes('openfreemap.org')) ||
+    (mapCode.includes('lngLatToWorld') && (mapCode.includes('tile.openstreetmap.org') || mapCode.includes('tiles.track-asia.com/raster-tiles/v2'))),
     'PiggySpendMapView must load real Vietnam map tiles (MapLibre or Slippy Tile Engine)'
   );
   assert.ok(mapCode.includes('Quần đảo Hoàng Sa') && mapCode.includes('Quần đảo Trường Sa'), 'PiggySpendMapView must display Vietnam sovereignty labels for Hoang Sa & Truong Sa');
@@ -5174,7 +5174,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 2. Self-Contained Web Mercator Slippy Tile Engine + Multi Raster Tile Providers
   assert.ok(mapCode.includes('lngLatToWorld') && mapCode.includes('worldToLngLat'), 'PiggySpendMapView must implement Web Mercator projection');
-  assert.ok(mapCode.includes('basemaps.cartocdn.com/rastertiles/voyager') && mapCode.includes('tile.openstreetmap.org'), 'PiggySpendMapView must load CARTO Voyager raster tiles with OSM fallback');
+  assert.ok((mapCode.includes('basemaps.cartocdn.com/rastertiles/voyager') || mapCode.includes('tiles.track-asia.com/raster-tiles/v2')) && mapCode.includes('tile.openstreetmap.org'), 'PiggySpendMapView must load TrackAsia/CARTO raster tiles with OSM fallback');
   assert.ok(mapCode.includes('function flyTo') && (mapCode.includes('zoomIn') || mapCode.includes('handleZoomIn')), 'PiggySpendMapView must support flyTo and zoom controls');
   assert.ok(mapCode.includes('Quần đảo Hoàng Sa') && mapCode.includes('Quần đảo Trường Sa'), 'PiggySpendMapView must render sovereignty labels');
   assert.ok(mapCode.includes('borderBottomWidth: 0') && !mapCode.includes('LƯU CHI TẠI VỊ TRÍ THẬT'), 'PiggySpendMapView must retain minimalist borderless header and no expense form');
@@ -5231,13 +5231,12 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(!mapCode.includes('react-native-webview'), 'PiggySpendMapView must eliminate WebView completely to prevent iOS WKWebView subresource blocking');
   assert.ok(mapCode.includes('NativeSlippyTile') && mapCode.includes('PanResponder.create'), 'PiggySpendMapView must render native <Image> slippy tiles with PanResponder');
 
-  // 2. 4-Provider Multi-CDN Auto-Fallback (Google StreetMap VN hl=vi -> CARTO Voyager -> Esri -> OpenStreetMap)
+  // 2. Multi-CDN Auto-Fallback (TrackAsia Raster v2 -> Esri -> OpenStreetMap)
   assert.ok(
-    mapCode.includes('mt1.google.com/vt/lyrs=m&hl=vi') &&
-      mapCode.includes('basemaps.cartocdn.com/rastertiles/voyager') &&
+    (mapCode.includes('basemaps.cartocdn.com/rastertiles/voyager') || mapCode.includes('tiles.track-asia.com/raster-tiles/v2')) &&
       mapCode.includes('server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map') &&
       mapCode.includes('tile.openstreetmap.org'),
-    'PiggySpendMapView must implement 4-provider auto-fallback native tile loader'
+    'PiggySpendMapView must implement ToS-compliant multi-provider auto-fallback native tile loader'
   );
 
   // 3. 0ms Real Geographic Coordinate <Svg> Vector Street & River Underlay (Sông Sài Gòn, Đại lộ, Công viên, Hoàng Sa & Trường Sa)
@@ -5257,4 +5256,220 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 115 Passed: 100% Native React Native Vietnam Slippy Map Engine (<Image> Multi-CDN + <Svg> Vector Streets/River + PanResponder — Zero WebView Block) (Quyết định 178) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 115 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (115/115)!');
+// ==========================================
+// TEST 116: CHIẾN LƯỢC ANDROID-FIRST EXPO SDK 58 — @MAPLIBRE/MAPLIBRE-REACT-NATIVE V11.5+ & EXPO-DEV-CLIENT + TRACKASIA VIETNAM + DUAL-RUNTIME FALLBACK EXPO GO (QUYẾT ĐỊNH 179)
+// ==========================================
+{
+  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const roadmapCode = fs.readFileSync('docs/ROADMAP.md', 'utf8');
+  const techCode = fs.readFileSync('docs/TECH_ARCHITECTURE.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+
+  // 1. package.json: @maplibre/maplibre-react-native (^11.5.1+) & expo-dev-client installed for SDK 58
+  assert.ok(
+    pkg.dependencies['@maplibre/maplibre-react-native'] && pkg.dependencies['expo-dev-client'],
+    'package.json must declare @maplibre/maplibre-react-native and expo-dev-client'
+  );
+
+  // 2. app.json: "@maplibre/maplibre-react-native" config plugin registered
+  assert.ok(
+    Array.isArray(appJson.expo.plugins) && appJson.expo.plugins.includes('@maplibre/maplibre-react-native'),
+    'app.json expo.plugins must register @maplibre/maplibre-react-native'
+  );
+
+  // 3. PiggySpendMapView.tsx: Dual-Runtime Guard (Expo Go safe fallback + MapLibre v11.5 Map/Camera/Marker + TrackAsia VN [lng, lat])
+  assert.ok(
+    mapCode.includes('loadMapLibreModule') &&
+      mapCode.includes("execEnv === 'storeClient'") &&
+      mapCode.includes('maps.track-asia.com/styles/v2/streets.json'),
+    'PiggySpendMapView must implement safe Dual-Runtime Guard and TrackAsia Vietnam Style URL'
+  );
+  assert.ok(
+    mapCode.includes('MapLibreGL.Map') &&
+      mapCode.includes('MapLibreGL.Camera') &&
+      mapCode.includes('MapLibreGL.Marker') &&
+      mapCode.includes('lngLat={[p.lng, p.lat]}') &&
+      mapCode.includes('NativeSlippyTile'),
+    'PiggySpendMapView must render MapLibre v11.5+ components with [lng, lat] order on Dev Client and NativeSlippyTile fallback on Expo Go'
+  );
+
+  // 4. Living Docs Sync Audit (Android-First + Quyết định 179)
+  assert.ok(roadmapCode.includes('Android-First') && roadmapCode.includes('TrackAsia'), 'ROADMAP.md must document Android-First + TrackAsia strategy');
+  assert.ok(techCode.includes('Android-First') && techCode.includes('EXPO_PUBLIC_TRACKASIA_KEY'), 'TECH_ARCHITECTURE.md must document Android-First SDK 58 + TrackAsia');
+  assert.ok(decisionsCode.includes('179'), 'DECISIONS.md must document Quyết định 179');
+  assert.ok(chatDocCode.includes('179'), '10-CHAT.md must document Quyết định 179');
+
+  console.log('✅ Test 116 Passed: Chiến Lược Android-First Expo SDK 58 — @maplibre/maplibre-react-native v11.5+ & expo-dev-client + TrackAsia Vietnam + Dual-Runtime Fallback Expo Go (Quyết định 179) Audit verified cleanly');
+}
+
+// ==========================================
+// TEST 117: CHUẨN HÓA BẢN ĐỒ CHI TIÊU LÊN CHUẨN PRODUCTION STORE (GOOGLE PLAY & APP STORE) — EXPO-LOCATION OPT-IN, REAL LAT/LNG ON TRANSACTION, ZERO FAKE ANCHORS, ZERO GOOGLE TILE SCRAPING & MAPLIBRE GPU CLUSTERING (QUYẾT ĐỊNH 180)
+// ==========================================
+{
+  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+  const dbCode = fs.readFileSync('src/types/database.ts', 'utf8');
+  const txStoreCode = fs.readFileSync('src/store/transactionStore.ts', 'utf8');
+  const locSvcCode = fs.readFileSync('src/services/locationService.ts', 'utf8');
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const settingsCode = fs.readFileSync('src/components/views/SettingsView.tsx', 'utf8');
+  const privacyDoc = fs.readFileSync('docs/PRIVACY.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  // 1. expo-location + OS Location Permissions in app.json + locationService.ts
+  assert.ok(pkg.dependencies['expo-location'], 'package.json must declare expo-location');
+  assert.ok(
+    appJson.expo.ios.infoPlist.NSLocationWhenInUseUsageDescription &&
+      appJson.expo.android.permissions.includes('ACCESS_FINE_LOCATION') &&
+      appJson.expo.android.permissions.includes('ACCESS_COARSE_LOCATION'),
+    'app.json must declare iOS NSLocationWhenInUseUsageDescription and Android ACCESS_FINE_LOCATION/ACCESS_COARSE_LOCATION'
+  );
+  assert.ok(
+    locSvcCode.includes('getLocationPinEnabled') &&
+      locSvcCode.includes('setLocationPinEnabled') &&
+      locSvcCode.includes('getCurrentPositionSafeAsync') &&
+      locSvcCode.includes('getQuickPinCoordsIfOptedIn'),
+    'locationService.ts must implement Opt-in 1-time foreground location helpers'
+  );
+
+  // 2. Real lat/lng on Transaction & ZERO fake SAIGON_ANCHORS
+  assert.ok(
+    dbCode.includes('lat?: number | null') &&
+      dbCode.includes('lng?: number | null') &&
+      txStoreCode.includes('lat?: number | null') &&
+      txStoreCode.includes('lng?: number | null'),
+    'Transaction schema & store must persist real lat/lng coordinates'
+  );
+  assert.ok(!mapCode.includes('SAIGON_ANCHORS'), 'PiggySpendMapView must eliminate fake SAIGON_ANCHORS coordinate spoofing');
+
+  // 3. ToS Compliance: ZERO unauthorized mt1.google.com tile scraping
+  assert.ok(!mapCode.includes('mt1.google.com'), 'PiggySpendMapView must remove ToS-violating mt1.google.com tile scraping');
+
+  // 4. MapLibre GPU OpenGL Clustering 60fps
+  assert.ok(
+    mapCode.includes('pigfly-places-cluster-src') &&
+      mapCode.includes('cluster={true}') &&
+      mapCode.includes('clusterRadius={40}'),
+    'PiggySpendMapView must enable MapLibre GPU GeoJSONSource clustering'
+  );
+
+  // 5. Opt-in Privacy Switch in SettingsView & Living Docs Sync (Quyết định 180)
+  assert.ok(settingsCode.includes('Ghim vị trí chi tiêu'), 'SettingsView must expose Opt-in "Ghim vị trí chi tiêu" toggle');
+  assert.ok(privacyDoc.includes('Quyết định 180') && decisionsCode.includes('180'), 'PRIVACY.md and DECISIONS.md must document Quyết định 180');
+
+  console.log('✅ Test 117 Passed: Chuẩn Hóa Bản Đồ Chi Tiêu Lên Chuẩn Production Store (expo-location Opt-In, Real lat/lng, Zero Fake Anchors, Zero Google Tile Scraping & MapLibre GPU Clustering — Quyết định 180) Audit verified cleanly');
+}
+
+// ==========================================
+// TEST 118: LIÊN KẾT TỨC THÌ LUỒNG LƯU ẢNH TAB CAMERA -> GHIM ĐIỂM CHI TIÊU KÈM THUMBNAIL LÊN BẢN ĐỒ & THAY THẾ CARTO ("API KEY REQUIRED") BẰNG TRACKASIA RASTER TILES V2 CHÍNH THỨC (QUYẾT ĐỊNH 181)
+// ==========================================
+{
+  const locSvcCode = fs.readFileSync('src/services/locationService.ts', 'utf8');
+  const camIndexCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const camDocCode = fs.readFileSync('docs/screens/heocon/09-CAMERA.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  // 1. TrackAsia Raster Tiles v2 chính thức & xóa bỏ hoàn toàn basemaps.cartocdn.com ("API KEY REQUIRED")
+  assert.ok(
+    mapCode.includes('https://tiles.track-asia.com/raster-tiles/v2/${z}/${x}/${y}.png') &&
+      !mapCode.includes('basemaps.cartocdn.com'),
+    'PiggySpendMapView must replace CARTO ("API KEY REQUIRED") with official TrackAsia Raster Tiles v2'
+  );
+
+  // 2. Pre-warm GPS khi mở Tab Camera & Gắn tọa độ tức thì 0ms khi nhấn Lưu ảnh
+  assert.ok(
+    locSvcCode.includes('prewarmLocationAsync') &&
+      locSvcCode.includes('getCachedLocationSync') &&
+      locSvcCode.includes('STORAGE_KEY_LAST_KNOWN_GPS'),
+    'locationService.ts must implement prewarmLocationAsync, getCachedLocationSync and persistent GPS cache'
+  );
+  assert.ok(
+    camIndexCode.includes('prewarmLocationAsync') &&
+      camIndexCode.includes('getCachedLocationSync') &&
+      camIndexCode.includes('lat: syncCoords ? syncCoords.lat : null'),
+    'Tab Camera (app/(main)/index.tsx) must pre-warm GPS and attach synchronous lat/lng on photo save'
+  );
+
+  // 3. Hiển thị ảnh thumbnail món đồ vừa chụp trên thẻ ghim (Mini Place Card) & danh sách Bản đồ
+  assert.ok(
+    mapCode.includes('photoUrl: t.thumbnail_url || t.photo_url || null') &&
+      mapCode.includes('selectedPlace.photoUrl') &&
+      mapCode.includes('styles.pThumb'),
+    'PiggySpendMapView must display captured photo thumbnails on the Mini Place Card and list rows'
+  );
+
+  // 4. Living Docs Sync Audit (Quyết định 181)
+  assert.ok(camDocCode.includes('181'), '09-CAMERA.md must document Quyết định 181');
+  assert.ok(chatDocCode.includes('181'), '10-CHAT.md must document Quyết định 181');
+  assert.ok(decisionsCode.includes('181'), 'DECISIONS.md must document Quyết định 181');
+
+  console.log('✅ Test 118 Passed: Liên Kết Tức Thì Luồng Lưu Ảnh Tab Camera -> Ghim Điểm Chi Tiêu Kèm Thumbnail Lên Bản Đồ & TrackAsia Raster Tiles v2 Chính Thức (Quyết định 181) Audit verified cleanly');
+}
+
+// ==========================================
+// TEST 119: KIẾN TRÚC BẢN ĐỒ PRODUCTION ANDROID-FIRST 0$ VĨNH VIỄN (MAPLIBRE 13.6.1 + OPENFREEMAP OSM VECTOR + KHE CẮM PMTILES) & LUỒNG CAMERA CHỤP ẢNH -> NHẬP TIỀN -> LƯU -> GHIM BẢN ĐỒ (QUYẾT ĐỊNH 182)
+// ==========================================
+{
+  const metroCode = fs.readFileSync('metro.config.js', 'utf8');
+  const styleCode = fs.readFileSync('src/theme/heoconMapLibreStyle.ts', 'utf8');
+  const pmtilesCode = fs.readFileSync('src/services/pmtilesMapService.ts', 'utf8');
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const camIndexCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+  const techCode = fs.readFileSync('docs/TECH_ARCHITECTURE.md', 'utf8');
+  const camDocCode = fs.readFileSync('docs/screens/heocon/09-CAMERA.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  // 1. Metro bundler hỗ trợ đuôi .pmtiles
+  assert.ok(metroCode.includes("'pmtiles'"), 'metro.config.js must register pmtiles in resolver.assetExts');
+
+  // 2. heoconMapLibreStyle.ts: OpenFreeMap Vector 0$ + Bảng màu Heo Con + Hoàng Sa & Trường Sa
+  assert.ok(
+    styleCode.includes('buildHeoconOsmVectorStyle') &&
+      styleCode.includes('OPENFREEMAP_VECTOR_SOURCE_URL') &&
+      styleCode.includes('Quần đảo Hoàng Sa (Việt Nam)') &&
+      styleCode.includes('Quần đảo Trường Sa (Việt Nam)'),
+    'heoconMapLibreStyle.ts must build Heo Con OSM Vector Style with OpenFreeMap & sovereignty labels'
+  );
+
+  // 3. pmtilesMapService.ts: Khe cắm PMTiles (pmtiles://file:/// & pmtiles://https://) + POI extraction
+  assert.ok(
+    pmtilesCode.includes('resolveActiveVectorSourceUrlAsync') &&
+      pmtilesCode.includes('pmtiles://') &&
+      pmtilesCode.includes('https://tiles.openfreemap.org/planet') &&
+      pmtilesCode.includes('extractNearbyPoiNameFromFeatures'),
+    'pmtilesMapService.ts must implement pmtiles:// resolver, OpenFreeMap 0$ source & POI extraction'
+  );
+
+  // 4. PiggySpendMapView.tsx: Tích hợp Heo Con OSM Style + OpenFreeMap + KHÔNG truyền custom headers vào <Image>
+  assert.ok(
+    mapCode.includes('buildHeoconOsmVectorStyle') &&
+      mapCode.includes('resolveActiveVectorSourceUrlAsync') &&
+      mapCode.includes('https://tiles.openfreemap.org/styles/liberty') &&
+      !mapCode.includes("'User-Agent': 'PigFlyApp"),
+    'PiggySpendMapView must use Heo Con OSM/OpenFreeMap style on MapLibre Native and drop custom Image headers'
+  );
+
+  // 5. Tab Camera (app/(main)/index.tsx): Chụp ảnh -> Bắt buộc nhập tiền nếu 0đ -> Lưu & Ghim ✔ -> Ghim Bản đồ
+  assert.ok(
+    camIndexCode.includes('pendingSaveAfterKeyboard') &&
+      camIndexCode.includes('Lưu & Ghim ✔') &&
+      camIndexCode.includes('setShowKeyboardModal(true)'),
+    'Camera tab must prompt MandCashierKeyboard when saving 0đ photo and pin after amount is confirmed'
+  );
+
+  // 6. Living Docs Sync Audit (Quyết định 182)
+  assert.ok(
+    techCode.includes('182') && camDocCode.includes('182') && chatDocCode.includes('182') && decisionsCode.includes('182'),
+    'TECH_ARCHITECTURE.md, 09-CAMERA.md, 10-CHAT.md and DECISIONS.md must document Quyết định 182'
+  );
+
+  console.log('✅ Test 119 Passed: Kiến Trúc Bản Đồ Production Android-First 0$ Vĩnh Viễn (MapLibre 13.6.1 + OpenFreeMap OSM Vector + PMTiles Slot) & Luồng Camera Chụp -> Nhập Tiền -> Lưu -> Ghim (Quyết định 182) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 119 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (119/119)!');

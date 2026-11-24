@@ -306,6 +306,26 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
 - **Tương thích WebSocket Dual-Interface:** Tự động tiêm `WebSocket.WebSocket = WebSocket` cho `node_modules/ws` và fallback `new (s.WebSocket || s)` trong `@expo/ws-tunnel`.
 - **Đảm bảo tính sẵn sàng:** Cho phép nhà phát triển chạy `npx expo start --tunnel -c` từ mọi mạng ngoài (quán cafe, 4G/5G, văn phòng) mà không phụ thuộc vào cùng mạng LAN Wi-Fi.
 
+### 9.4. Kiến Trúc Android-First Trên Expo SDK 58 (`expo-dev-client` + `@maplibre/maplibre-react-native` v11.5+ + TrackAsia Vietnam)
+- **Ưu Tiên Android Native Dev Build:** Trên Expo SDK 58 (chạy React Native `0.88` với New Architecture mặc định, Android `compileSdk 37`, AGP 9, minSdk $\ge$ API 23), dự án định hướng **Android-First** sử dụng `expo-dev-client` (`npx expo run:android`) để mở khóa toàn bộ module native hiệu năng cao (`@maplibre/maplibre-react-native` OpenGL 60fps, `NotificationListenerService`, `AppWidget`).
+- **Tích Hợp `@maplibre/maplibre-react-native` (^11.5.1+) & TrackAsia Vietnam Style URL:**
+  - Vì MapLibre v11.5+ được xây dựng sẵn cho React Native New Architecture, `app.json` khai báo config plugin `"@maplibre/maplibre-react-native"` để `expo prebuild` tự cấu hình dependencies Android/Gradle. Nếu gặp xung đột Gradle của AGP 9 / `compileSdk 37`, chạy `npx expo prebuild --clean` trước `npx expo run:android`.
+  - Nguồn bản đồ mặc định cho bản Build Native là **TrackAsia Vietnam Style URL** (0đ phí SDK, 200.000 lượt tải tile Việt Nam/tháng miễn phí, hỗ trợ biến môi trường `EXPO_PUBLIC_TRACKASIA_KEY`).
+  - **Quy Tắc Tọa Độ Bắt Buộc:** Toàn bộ component MapLibre (`Camera`, `PointAnnotation`, `ShapeSource`) sử dụng thứ tự **`[longitude, latitude]`** (kinh độ trước, vĩ độ sau — ví dụ TP.HCM `[106.7009, 10.7769]`).
+- **Dual-Runtime Fallback An Toàn Cho Expo Go:** Vì `@maplibre/maplibre-react-native` không nằm trong binary của Expo Go, `PiggySpendMapView.tsx` sử dụng kiểm tra runtime (`Constants.executionEnvironment === 'storeClient'` / dynamic `require` trong `try-catch`) để:
+  1. Chạy **MapLibre Native 60fps OpenGL + TrackAsia Vietnam + GPU `GeoJSONSource` Clustering (`cluster: true`, `clusterRadius: 40`)** khi chạy trên Android/iOS Dev Client hoặc Production APK/AAB.
+  2. Tự động fallback về **`NativeSlippyMap`** (`<Image>` CARTO Voyager / Esri / OSM hợp lệ ToS + `<Svg>` Vector đường phố — **tuyệt đối không gọi `mt1.google.com` cạo tile trái phép**) khi mở trên **Expo Go**, đảm bảo không bao giờ crash.
+- **Chuẩn Hóa Dữ Liệu Vị Trí Thật (`expo-location` & `locationService.ts` — Quyết định 180):**
+  - `Transaction` (`src/types/database.ts`) lưu trường tùy chọn `lat?: number | null` và `lng?: number | null`.
+  - Khi lưu khoản chi, nếu công tắc Opt-in `vi_locket_location_pin_enabled` đang bật, `locationService.getQuickPinCoordsIfOptedIn()` lấy vị trí foreground trong `< 50ms` (`getLastKnownPositionAsync`) hoặc `Accuracy.Balanced` (timeout 1.5s, 0 chặn UI).
+  - Loại bỏ hoàn toàn mảng bịa tọa độ `SAIGON_ANCHORS`: chỉ những giao dịch có `lat`/`lng` thật mới được ghim lên bản đồ; người dùng có thể bấm **"📍 Ghim vị trí hiện tại"** để gắn tọa độ thật cho khoản chi.
+
+### 9.5. Kiến Trúc Bản Đồ Tự Chủ 0$ Trọn Đời Cho Android-First (.apk MapLibre 13.6.1 + OpenFreeMap OSM Vector + Khe Cắm PMTiles — Quyết định 182)
+- **Lý do Expo Go vs Bản Build `.apk` / Dev Client:** Ứng dụng vỏ **Expo Go** từ Store không đóng gói thư viện C++ OpenGL ES `org.maplibre.gl:android-sdk:13.6.1` của `@maplibre/maplibre-react-native`. Khi biên dịch `.apk` / Dev Client bằng `npx expo run:android` hoặc EAS Build, nhân C++ MapLibre `13.6.1` được nhúng trực tiếp giúp render bản đồ Vector 60fps trọn vẹn.
+- **OpenFreeMap OSM Vector (0$ Vĩnh Viễn, 0 API Key, Không Giới Hạn Quota):** Trên Android Dev Build / `.apk`, `PiggySpendMapView.tsx` sử dụng mặc định style tự chủ **`buildHeoconOsmVectorStyle`** (`src/theme/heoconMapLibreStyle.ts`) nạp trực tiếp nguồn OSM Vector **`https://tiles.openfreemap.org/planet`** (kèm font `Noto Sans Regular` / `Noto Sans Bold`, full style `liberty`, và GeoJSON bất biến **Quần đảo Hoàng Sa (Việt Nam)** & **Quần đảo Trường Sa (Việt Nam)**).
+- **Khe Cắm PMTiles Offline / Self-Hosted R2 (`pmtilesMapService.ts` & `metro.config.js`):** Hỗ trợ đuôi `.pmtiles` trong Metro `assetExts` và tự động ưu tiên ghi đè URL nguồn vector bằng `pmtiles://file:///...` (file `maps/vietnam.pmtiles` lưu cục bộ trong `FileSystem.documentDirectory` chạy offline 100%) hoặc `pmtiles://https://...` (`EXPO_PUBLIC_PMTILES_URL` từ Cloudflare R2 0đ băng thông egress), kết hợp `extractNearbyPoiNameFromFeatures()` trích xuất tên POI từ vector tile hoặc mô tả người dùng nhập.
+- **Xóa Custom `headers` Trên `<Image>` Trong Fallback Expo Go:** Tuyệt đối không truyền object `headers` tùy chỉnh vào `<Image source={{ uri }} />` của `NativeSlippyTile` để giữ nguyên HTTP/2 Happy Eyeballs & bộ đệm đĩa native (tránh treo IPv6 Cloudflare 29s/tile), kết hợp vẽ nền đường phố quanh vị trí GPS hiện tại bằng `<Svg>`.
+
 
 ---
 

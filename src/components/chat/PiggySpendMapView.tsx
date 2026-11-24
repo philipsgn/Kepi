@@ -13,7 +13,20 @@ import {
 } from 'react-native';
 import Svg, { Circle, G, Polyline, Rect, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import Constants from 'expo-constants';
 import { useTransactionStore } from '../../store/transactionStore';
+import {
+  getCachedLocationSync,
+  getCurrentPositionSafeAsync,
+  getLocationPinEnabled,
+} from '../../services/locationService';
+import {
+  ActiveVectorSourceResult,
+  extractNearbyPoiNameFromFeatures,
+  OPENFREEMAP_VECTOR_SOURCE_URL,
+  resolveActiveVectorSourceUrlAsync,
+} from '../../services/pmtilesMapService';
+import { buildHeoconOsmVectorStyle } from '../../theme/heoconMapLibreStyle';
 import {
   PixelIconBack,
   PixelIconMapPin,
@@ -32,6 +45,7 @@ interface SpendItem {
   ts: number;
   lat: number;
   lng: number;
+  photoUrl?: string | null;
 }
 
 interface SpendPlace {
@@ -43,6 +57,7 @@ interface SpendPlace {
   visits: number;
   total: number;
   lastTs: number;
+  photoUrl?: string | null;
 }
 
 type FilterMode = 'recent14' | 'frequent' | 'trail' | 'top';
@@ -58,20 +73,8 @@ const KIND_META: Record<
   market: { col: '#5E9A57', icon: '🥬', label: 'Đi chợ' },
 };
 
-// Tọa độ tham chiếu tại trung tâm TP.HCM cho các giao dịch thật chưa gắn trường lat/lng riêng
-const SAIGON_ANCHORS: Array<[number, number]> = [
-  [106.7009, 10.7769], // Quận 1 · Nhà thờ Đức Bà
-  [106.6981, 10.7725], // Quận 1 · Bến Thành
-  [106.7042, 10.7717], // Quận 1 · Phố đi bộ Nguyễn Huệ
-  [106.6953, 10.7769], // Quận 1 · Công viên Tao Đàn
-  [106.6917, 10.7824], // Quận 3 · Hồ Con Rùa
-  [106.7218, 10.7949], // Bình Thạnh · Tân Cảng
-  [106.6822, 10.7626], // Quận 5 · Nguyễn Trãi
-  [106.7024, 10.7885], // Quận 1 · Đa Kao
-];
-
 // ============================================================================
-// PHÉP CHIẾU WEB MERCATOR & GOM CỤM HAVERSINE 40M CHUẨN QUỐC TẾ (Quyết định 175–178)
+// PHÉP CHIẾU WEB MERCATOR & GOM CỤM HAVERSINE 40M CHUẨN QUỐC TẾ (Quyết định 175–180)
 // ============================================================================
 export function lngLatToWorld(lng: number, lat: number, z: number) {
   const scale = 256 * Math.pow(2, z);
@@ -108,11 +111,20 @@ function fmtK(v: number): string {
 }
 
 export function mapTransactionsToSpendPoints(transactions: any[]): SpendItem[] {
-  const expenses = transactions
-    .filter((t) => t.type === 'EXPENSE' && t.status !== 'CANCELLED')
-    .slice(0, 60);
+  // Chuẩn Production Store (Quyết định 180): Chỉ ghim các giao dịch có tọa độ GPS thật (0 bịa tọa độ giả)
+  const pinnedExpenses = transactions
+    .filter(
+      (t) =>
+        t.type === 'EXPENSE' &&
+        t.status !== 'CANCELLED' &&
+        typeof t.lat === 'number' &&
+        typeof t.lng === 'number' &&
+        Number.isFinite(t.lat) &&
+        Number.isFinite(t.lng)
+    )
+    .slice(0, 120);
 
-  return expenses.map((t: any, idx) => {
+  return pinnedExpenses.map((t: any, idx) => {
     let kind: SpendItem['kind'] = 'food';
     const cat = String(t.category || '').toLowerCase();
     const desc = String(t.description || '').toLowerCase();
@@ -121,18 +133,15 @@ export function mapTransactionsToSpendPoints(transactions: any[]): SpendItem[] {
     else if (cat.includes('mua') || desc.includes('quần') || desc.includes('áo') || desc.includes('shop')) kind = 'shop';
     else if (cat.includes('chợ') || desc.includes('chợ') || desc.includes('siêu thị')) kind = 'market';
 
-    const anchor = SAIGON_ANCHORS[idx % SAIGON_ANCHORS.length];
-    const lat = typeof t.lat === 'number' ? t.lat : anchor[1];
-    const lng = typeof t.lng === 'number' ? t.lng : anchor[0];
-
     return {
       id: String(t.id || `tx-${idx}`),
       name: String(t.description || t.category || 'Khoản chi #' + (idx + 1)),
       kind,
       amount: Number(t.amount) || 0,
       ts: new Date(t.occurred_at || t.created_at || Date.now()).getTime(),
-      lat,
-      lng,
+      lat: Number(t.lat),
+      lng: Number(t.lng),
+      photoUrl: t.thumbnail_url || t.photo_url || null,
     };
   });
 }
@@ -150,6 +159,9 @@ function buildPlaces(items: SpendItem[]): SpendPlace[] {
     if (found) {
       found.visits += 1;
       found.total += item.amount;
+      if (item.photoUrl && (!found.photoUrl || item.ts >= found.lastTs)) {
+        found.photoUrl = item.photoUrl;
+      }
       if (item.ts > found.lastTs) found.lastTs = item.ts;
     } else {
       places.push({
@@ -161,6 +173,7 @@ function buildPlaces(items: SpendItem[]): SpendPlace[] {
         visits: 1,
         total: item.amount,
         lastTs: item.ts,
+        photoUrl: item.photoUrl || null,
       });
     }
   });
@@ -407,19 +420,34 @@ const DISTRICT_LABELS: Array<{ label: string; lng: number; lat: number; minZ: nu
 ];
 
 // ============================================================================
-// COMPONENT NATIVE <IMAGE> TILE VỚI 4 NGUỒN DỰ PHÒNG TỰ ĐỘNG (GOOGLE VN -> CARTO -> ESRI -> OSM)
+// COMPONENT NATIVE <IMAGE> TILE CHÍNH THỨC OPENSTREETMAP -> OPENTOPO (0$ COST, 0 WATERMARK)
+// (Xóa bỏ hoàn toàn CARTO "API KEY REQUIRED" & TrackAsia 401/404 — Quyết định 180, 181 & 182)
 // ============================================================================
+const TRACKASIA_KEY = process.env.EXPO_PUBLIC_TRACKASIA_KEY || '';
+const hasTrackAsiaKey = Boolean(TRACKASIA_KEY && TRACKASIA_KEY !== 'public_key');
+const TRACKASIA_STYLE_URLS = [
+  `https://maps.track-asia.com/styles/v2/streets.json?key=${TRACKASIA_KEY || 'public_key'}`,
+  `https://maps.track-asia.com/styles/v2/simple.json?key=${TRACKASIA_KEY || 'public_key'}`,
+];
+
 function buildTileUrl(providerIdx: number, z: number, x: number, y: number): string {
-  const sub = ['a', 'b', 'c'][Math.abs(x + y) % 3];
+  const subdomains = ['a', 'b', 'c'];
+  const s = subdomains[Math.abs(x + y) % 3];
   switch (providerIdx) {
     case 0:
-      return `https://mt1.google.com/vt/lyrs=m&hl=vi&x=${x}&y=${y}&z=${z}`;
+      // OpenStreetMap chính thống toàn cầu — 100% 0$, không cần API key, không watermark
+      return `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
     case 1:
-      return `https://${sub}.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}.png`;
+      // TrackAsia Raster v2 (khi có key thực tế) hoặc OpenTopoMap
+      if (hasTrackAsiaKey) {
+        return `https://tiles.track-asia.com/raster-tiles/v2/${z}/${x}/${y}.png?key=${TRACKASIA_KEY}`;
+      }
+      return `https://a.tile.opentopomap.org/${z}/${x}/${y}.png`;
     case 2:
+      // Esri ArcGIS World Street Map
       return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${z}/${y}/${x}`;
     default:
-      return `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+      return `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
   }
 }
 
@@ -438,22 +466,18 @@ const NativeSlippyTile: React.FC<{
     setFallbackOffset(0);
   }, [z, x, y, preferredProvider]);
 
-  if (fallbackOffset >= 4) {
+  if (fallbackOffset >= 2) {
     return null;
   }
 
-  const activeProvider = (preferredProvider + fallbackOffset) % 4;
+  // Tự động chuyển đổi giữa OpenStreetMap (0) và OpenTopo (1) nếu 1 trong 2 gặp sự cố mạng
+  const activeProvider =
+    fallbackOffset === 0 ? preferredProvider : preferredProvider === 0 ? 1 : 0;
   const uri = buildTileUrl(activeProvider, z, x, y);
 
   return (
     <Image
-      source={{
-        uri,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
-          Accept: 'image/png,image/webp,image/*,*/*;q=0.8',
-        },
-      }}
+      source={{ uri }}
       style={[
         styles.nativeTile,
         {
@@ -470,19 +494,71 @@ const NativeSlippyTile: React.FC<{
   );
 });
 
-const PROVIDER_NAMES = ['Google VN', 'CARTO', 'Esri', 'Vector VN'];
+const PROVIDER_NAMES = ['OSM Việt Nam', 'Địa hình Topo', 'Vector VN'];
+
+function loadMapLibreModule(): typeof import('@maplibre/maplibre-react-native') | null {
+  try {
+    if (Platform.OS === 'web') return null;
+    const execEnv = (Constants as any)?.executionEnvironment;
+    const appOwnership = (Constants as any)?.appOwnership;
+    // Expo Go không đóng gói native C++/OpenGL MapLibre -> dùng NativeSlippyMap fallback
+    if (execEnv === 'storeClient' || appOwnership === 'expo') {
+      return null;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require('@maplibre/maplibre-react-native');
+    if (mod && mod.Map && mod.Camera) {
+      return mod;
+    }
+    return null;
+  } catch (_e) {
+    return null;
+  }
+}
 
 export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) => {
-  const { transactions } = useTransactionStore();
+  const { transactions, updateTransaction } = useTransactionStore();
+  const MapLibreGL = useMemo(() => loadMapLibreModule(), []);
+  const mapRef = useRef<any>(null);
+  const cameraRef = useRef<any>(null);
+  const [forceSlippyFallback, setForceSlippyFallback] = useState(false);
+  const useNativeMapLibre = Boolean(MapLibreGL && !forceSlippyFallback);
+  const [vectorSourceInfo, setVectorSourceInfo] = useState<ActiveVectorSourceResult>({
+    sourceUrl: OPENFREEMAP_VECTOR_SOURCE_URL,
+    isPmtiles: false,
+    modeLabel: 'OSM Vector 0$',
+  });
+  const [nearbyPoiLabel, setNearbyPoiLabel] = useState<string | null>(null);
 
-  // Ánh xạ giao dịch thật từ useTransactionStore (0 hardcode)
+  useEffect(() => {
+    resolveActiveVectorSourceUrlAsync()
+      .then((info) => setVectorSourceInfo(info))
+      .catch(() => {});
+  }, []);
+
+  const heoconOsmStyle = useMemo(
+    () => buildHeoconOsmVectorStyle(vectorSourceInfo.sourceUrl),
+    [vectorSourceInfo.sourceUrl]
+  );
+
+  // Ánh xạ giao dịch thật có tọa độ GPS từ useTransactionStore (0 hardcode, 0 bịa tọa độ)
   const mappedExpenses = useMemo(() => mapTransactionsToSpendPoints(transactions), [transactions]);
   const allPlaces = useMemo(() => buildPlaces(mappedExpenses), [mappedExpenses]);
+  const unpinnedExpenses = useMemo(
+    () =>
+      transactions.filter(
+        (t) =>
+          t.type === 'EXPENSE' &&
+          t.status !== 'CANCELLED' &&
+          (typeof t.lat !== 'number' || typeof t.lng !== 'number')
+      ),
+    [transactions]
+  );
 
-  const firstCoord = allPlaces[0] || { lng: 106.7009, lat: 10.7769 };
+  const firstCoord = allPlaces[0] || getCachedLocationSync();
 
   const [activeMode, setActiveMode] = useState<FilterMode>('recent14');
-  const [selectedPlace, setSelectedPlace] = useState<SpendPlace | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<SpendPlace | null>(allPlaces[0] || null);
   const [center, setCenter] = useState<{ lng: number; lat: number }>({
     lng: firstCoord.lng,
     lat: firstCoord.lat,
@@ -496,7 +572,58 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
     width: 350,
     height: 360,
   });
-  const [providerMode, setProviderMode] = useState<number>(0); // 0: Google VN, 1: CARTO, 2: Esri, 3: Pure Vector VN
+  const [providerMode, setProviderMode] = useState<number>(0); // 0: OSM 0$ / TrackAsia VN, 1: OpenFreeMap / Esri, 2: TrackAsia / OSM, 3: Vector VN
+  const activeMapLibreStyle =
+    providerMode % 3 === 0
+      ? heoconOsmStyle
+      : providerMode % 3 === 1
+      ? 'https://tiles.openfreemap.org/styles/liberty'
+      : TRACKASIA_STYLE_URLS[0];
+  const lastTopPlaceIdRef = useRef<string | null>(allPlaces[0]?.id || null);
+
+  // Khi mở màn Bản đồ hoặc khi có ảnh chụp mới từ Tab Camera: tự động lấy GPS & ghim các ảnh chụp chưa có tọa độ
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const enabled = await getLocationPinEnabled();
+      const coords = await getCurrentPositionSafeAsync(5000);
+      const resolved = coords || getCachedLocationSync();
+      if (!mounted) return;
+      setUserPos({ lng: resolved.lng, lat: resolved.lat });
+
+      // Nếu người dùng vừa chụp ảnh ở Tab Camera mà lúc đó GPS chưa kịp khóa, tự động gắn vị trí hiện tại cho ảnh đó
+      if (enabled && unpinnedExpenses.length > 0) {
+        for (const tx of unpinnedExpenses.slice(0, 10)) {
+          if (tx.source === 'PHOTO' || tx.photo_url) {
+            await updateTransaction(tx.id, {
+              lat: resolved.lat,
+              lng: resolved.lng,
+            });
+          }
+        }
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [unpinnedExpenses.length]);
+
+  // Khi có điểm ghim mới nhất từ Tab Camera, tự động bay tâm bản đồ tới điểm đó và hiện thẻ thông tin kèm ảnh
+  useEffect(() => {
+    const newest = allPlaces[0];
+    if (newest && newest.id !== lastTopPlaceIdRef.current) {
+      lastTopPlaceIdRef.current = newest.id;
+      setSelectedPlace(newest);
+      setCenter({ lng: newest.lng, lat: newest.lat });
+      if (useNativeMapLibre && cameraRef.current?.flyTo) {
+        cameraRef.current.flyTo({
+          center: [newest.lng, newest.lat],
+          zoom: 15,
+          duration: 450,
+        });
+      }
+    }
+  }, [allPlaces, useNativeMapLibre]);
 
   const clampVN = useCallback((lng: number, lat: number) => {
     return {
@@ -538,9 +665,19 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
   );
 
   function flyTo(lng: number, lat: number, nextZoom?: number) {
-    setCenter(clampVN(lng, lat));
+    const clamped = clampVN(lng, lat);
+    const resolvedZoom =
+      typeof nextZoom === 'number' ? Math.max(5, Math.min(18, Math.round(nextZoom))) : zoom;
+    setCenter(clamped);
     if (typeof nextZoom === 'number') {
-      setZoom(Math.max(5, Math.min(18, Math.round(nextZoom))));
+      setZoom(resolvedZoom);
+    }
+    if (useNativeMapLibre && cameraRef.current?.flyTo) {
+      cameraRef.current.flyTo({
+        center: [clamped.lng, clamped.lat], // MapLibre [lng, lat]
+        zoom: resolvedZoom,
+        duration: 450,
+      });
     }
   }
 
@@ -551,38 +688,56 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
 
   const handleReload = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setProviderMode((prev) => (prev + 1) % 4);
+    setProviderMode((prev) => (prev + 1) % (useNativeMapLibre ? 3 : PROVIDER_NAMES.length));
   };
 
   const handleZoomIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setZoom((z) => Math.min(18, z + 1));
+    setZoom((prev) => {
+      const nextZ = Math.min(18, prev + 1);
+      if (useNativeMapLibre && cameraRef.current?.zoomTo) {
+        cameraRef.current.zoomTo(nextZ, { duration: 220 });
+      }
+      return nextZ;
+    });
   };
 
   const handleZoomOut = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setZoom((z) => Math.max(5, z - 1));
+    setZoom((prev) => {
+      const nextZ = Math.max(5, prev - 1);
+      if (useNativeMapLibre && cameraRef.current?.zoomTo) {
+        cameraRef.current.zoomTo(nextZ, { duration: 220 });
+      }
+      return nextZ;
+    });
   };
 
-  const handleLocateMe = () => {
+  const handleLocateMe = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          setUserPos({ lng, lat });
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          flyTo(lng, lat, 15);
-        },
-        () => {
-          flyTo(userPos.lng, userPos.lat, 14);
-        },
-        { enableHighAccuracy: false, timeout: 4000, maximumAge: 60000 }
-      );
+    const coords = await getCurrentPositionSafeAsync();
+    if (coords) {
+      setUserPos({ lng: coords.lng, lat: coords.lat });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      flyTo(coords.lng, coords.lat, 15);
     } else {
       flyTo(userPos.lng, userPos.lat, 14);
     }
+  };
+
+  // Gắn vị trí GPS thật hiện tại cho khoản chi gần nhất chưa có tọa độ (Opt-in 1 chạm)
+  const handlePinLatestUnpinnedExpense = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const targetTx = unpinnedExpenses[0];
+    if (!targetTx) return;
+    const coords = (await getCurrentPositionSafeAsync()) || userPos;
+    await updateTransaction(targetTx.id, {
+      lat: coords.lat,
+      lng: coords.lng,
+    });
+    setUserPos({ lng: coords.lng, lat: coords.lat });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    flyTo(coords.lng, coords.lat, 15);
   };
 
   const handleOpenDirections = (place: SpendPlace) => {
@@ -648,7 +803,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
   );
 
   const visibleTiles = useMemo(() => {
-    if (providerMode === 3) return []; // Chế độ Vector VN thuần
+    if (providerMode % PROVIDER_NAMES.length === 2) return []; // Chế độ Vector VN thuần (SVG)
     const minTx = Math.floor(originX / 256);
     const maxTx = Math.floor((originX + W) / 256);
     const minTy = Math.floor(originY / 256);
@@ -757,9 +912,175 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
           })}
         </View>
 
-        {/* KHUNG BẢN ĐỒ ĐƯỜNG PHỐ VIỆT NAM THẬT 100% NATIVE REACT NATIVE */}
+        {/* KHUNG BẢN ĐỒ VIỆT NAM THẬT DUAL-RUNTIME (ANDROID .APK: MAPLIBRE 13.6.1 0$ OPENFREEMAP/PMTILES | EXPO GO: NATIVE SLIPPY MAP) */}
         <View style={styles.mapShell} onLayout={handleMapLayout}>
-          <View style={styles.vnMap} {...panResponder.panHandlers}>
+          {useNativeMapLibre && MapLibreGL ? (
+            <MapLibreGL.Map
+              ref={mapRef}
+              style={styles.vnMap}
+              mapStyle={activeMapLibreStyle}
+              androidView="texture"
+              logo={false}
+              attribution={false}
+              compass={false}
+              onPress={async () => {
+                try {
+                  if (mapRef.current?.queryRenderedFeatures) {
+                    const features = await mapRef.current.queryRenderedFeatures({
+                      layers: ['poi-label', 'poi_r20', 'poi_r7', 'poi_r1', 'place-label'],
+                    });
+                    const poiName = extractNearbyPoiNameFromFeatures(features);
+                    if (poiName) setNearbyPoiLabel(poiName);
+                  }
+                } catch (_e) {}
+              }}
+              onRegionDidChange={(evt: any) => {
+                const nextZoom = evt?.nativeEvent?.zoom;
+                if (typeof nextZoom === 'number') {
+                  setZoom(Math.round(nextZoom));
+                }
+              }}
+              onDidFailLoadingMap={() => setForceSlippyFallback(true)}
+            >
+              <MapLibreGL.Camera
+                ref={cameraRef}
+                initialViewState={{
+                  center: [firstCoord.lng, firstCoord.lat],
+                  zoom: 14,
+                }}
+                minZoom={5}
+                maxZoom={18}
+              />
+
+              {/* Đường nối 6 điểm gần nhất (📍 Gần) */}
+              {activeMode === 'trail' && filteredPlaces.length > 1 && (
+                <MapLibreGL.GeoJSONSource
+                  id="pigfly-trail-src"
+                  data={{
+                    type: 'Feature',
+                    properties: {},
+                    geometry: {
+                      type: 'LineString',
+                      coordinates: filteredPlaces.map((p) => [p.lng, p.lat]),
+                    },
+                  }}
+                >
+                  <MapLibreGL.Layer
+                    id="pigfly-trail-line"
+                    type="line"
+                    paint={{
+                      'line-color': '#E0452B',
+                      'line-width': 3,
+                      'line-dasharray': [2, 2],
+                    }}
+                  />
+                </MapLibreGL.GeoJSONSource>
+              )}
+
+              {/* Vòng nhiệt Heatmap (🏆 Top) */}
+              {activeMode === 'top' && filteredPlaces.length > 0 && (
+                <MapLibreGL.GeoJSONSource
+                  id="pigfly-heat-src"
+                  data={{
+                    type: 'FeatureCollection',
+                    features: filteredPlaces.map((p) => ({
+                      type: 'Feature',
+                      properties: { visits: p.visits },
+                      geometry: {
+                        type: 'Point',
+                        coordinates: [p.lng, p.lat],
+                      },
+                    })),
+                  }}
+                >
+                  <MapLibreGL.Layer
+                    id="pigfly-heat-circles"
+                    type="circle"
+                    paint={{
+                      'circle-radius': 24,
+                      'circle-color': '#F4B93B',
+                      'circle-opacity': 0.35,
+                      'circle-stroke-color': '#E0452B',
+                      'circle-stroke-width': 2,
+                    }}
+                  />
+                </MapLibreGL.GeoJSONSource>
+              )}
+
+              {/* GPU OpenGL Clustering 60fps cho danh sách điểm chi tiêu lớn (Quyết định 180) */}
+              {filteredPlaces.length > 0 && (
+                <MapLibreGL.GeoJSONSource
+                  id="pigfly-places-cluster-src"
+                  cluster={true}
+                  clusterRadius={40}
+                  clusterMaxZoom={15}
+                  data={{
+                    type: 'FeatureCollection',
+                    features: filteredPlaces.map((p) => ({
+                      type: 'Feature',
+                      properties: { id: p.id, name: p.name, visits: p.visits, total: p.total },
+                      geometry: {
+                        type: 'Point',
+                        coordinates: [p.lng, p.lat],
+                      },
+                    })),
+                  }}
+                >
+                  <MapLibreGL.Layer
+                    id="pigfly-cluster-circles"
+                    type="circle"
+                    filter={['has', 'point_count']}
+                    paint={{
+                      'circle-color': '#F4B93B',
+                      'circle-radius': 18,
+                      'circle-stroke-width': 2.5,
+                      'circle-stroke-color': '#2B2118',
+                    }}
+                  />
+                </MapLibreGL.GeoJSONSource>
+              )}
+
+              {/* Nhãn chủ quyền Việt Nam (Hoàng Sa & Trường Sa) */}
+              {sovPoints.map((sv) => (
+                <MapLibreGL.Marker
+                  key={`ml-${sv.label}`}
+                  id={`ml-${sv.label}`}
+                  lngLat={[sv.lng, sv.lat]}
+                  anchor="center"
+                >
+                  <View style={styles.sovLabelBadge}>
+                    <Text style={styles.sovLabelText}>{sv.label}</Text>
+                  </View>
+                </MapLibreGL.Marker>
+              ))}
+
+              {/* Marker Mặt Heo 16×16 tại vị trí người dùng */}
+              <MapLibreGL.Marker
+                id="ml-user-pig"
+                lngLat={[userPos.lng, userPos.lat]}
+                anchor="center"
+              >
+                <View style={styles.pigBadge}>{drawPigFaceCanvas(22)}</View>
+              </MapLibreGL.Marker>
+
+              {/* Ghim pixel 9×12 của từng khoản chi thật */}
+              {filteredPlaces.map((p) => {
+                const meta = KIND_META[p.kind] || KIND_META.food;
+                return (
+                  <MapLibreGL.Marker
+                    key={`ml-pin-${p.id}`}
+                    id={`ml-pin-${p.id}`}
+                    lngLat={[p.lng, p.lat]}
+                    anchor="bottom"
+                    onPress={() => handleSelectPlace(p, false)}
+                  >
+                    <View>{drawPinCanvas(meta.col, 3)}</View>
+                  </MapLibreGL.Marker>
+                );
+              })}
+            </MapLibreGL.Map>
+          ) : (
+            <View style={styles.vnMap} {...panResponder.panHandlers}>
             {/* LỚP 1: NỀN ĐỊA LÝ VECTOR ĐƯỜNG PHỐ & SÔNG SÀI GÒN / VIỆT NAM (HIỂN THỊ TỨC THÌ 0MS) */}
             <Svg style={StyleSheet.absoluteFill} width={W} height={H}>
               {/* Công viên cây xanh */}
@@ -861,6 +1182,35 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
                 );
               })}
 
+              {/* Nền đường phố khu vực quanh tọa độ GPS hiện tại (tự động bám mọi quận/tỉnh VN khi ở Expo Go) */}
+              {(() => {
+                const baseLng = Math.round(userPos.lng / 0.004) * 0.004;
+                const baseLat = Math.round(userPos.lat / 0.004) * 0.004;
+                const offsets = [-0.012, -0.006, 0, 0.006, 0.012];
+                return offsets.map((off) => (
+                  <G key={`local-road-${off}`}>
+                    <Polyline
+                      points={coordsToSvgPoints([
+                        [baseLng - 0.025, baseLat + off],
+                        [baseLng + 0.025, baseLat + off],
+                      ])}
+                      fill="none"
+                      stroke="#E5D7BC"
+                      strokeWidth={off === 0 ? 5 : 3}
+                    />
+                    <Polyline
+                      points={coordsToSvgPoints([
+                        [baseLng + off, baseLat - 0.025],
+                        [baseLng + off, baseLat + 0.025],
+                      ])}
+                      fill="none"
+                      stroke="#E5D7BC"
+                      strokeWidth={off === 0 ? 5 : 3}
+                    />
+                  </G>
+                ));
+              })()}
+
               {/* Nhãn Quận / Thành phố Việt Nam */}
               {DISTRICT_LABELS.filter((d) => z >= d.minZ && z <= d.maxZ).map((d) => {
                 const s = toScreen(d.lng, d.lat);
@@ -881,11 +1231,11 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
               })}
             </Svg>
 
-            {/* LỚP 2: GẠCH BẢN ĐỒ ĐƯỜNG PHỐ VIỆT NAM THẬT BẰNG NATIVE <IMAGE> (GOOGLE VN / CARTO / ESRI / OSM) */}
+            {/* LỚP 2: GẠCH BẢN ĐỒ ĐƯỜNG PHỐ VIỆT NAM THẬT BẰNG NATIVE <IMAGE> (TRACKASIA RASTER V2 / ESRI / OSM) */}
             <View style={styles.tileLayer} pointerEvents="none">
               {visibleTiles.map((t) => (
                 <NativeSlippyTile
-                  key={t.key}
+                  key={`${providerMode}-${t.key}`}
                   z={t.z}
                   x={t.x}
                   y={t.y}
@@ -996,15 +1346,35 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
               })}
             </View>
           </View>
+          )}
 
           {/* Nút chuyển nhanh nguồn bản đồ góc trên trái */}
           <TouchableOpacity
             style={styles.providerBadge}
             activeOpacity={0.85}
-            onPress={handleReload}
+            onPress={() => {
+              if (MapLibreGL) {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                if (useNativeMapLibre) {
+                  handleReload();
+                } else {
+                  setForceSlippyFallback(false);
+                }
+              } else {
+                handleReload();
+              }
+            }}
           >
             <Text style={styles.providerBadgeText}>
-              🗺️ {PROVIDER_NAMES[providerMode]}
+              {useNativeMapLibre
+                ? `🗺️ ${
+                    providerMode % 3 === 0
+                      ? vectorSourceInfo.modeLabel
+                      : providerMode % 3 === 1
+                      ? 'OpenFreeMap 0$'
+                      : 'TrackAsia'
+                  }`
+                : `🗺️ ${PROVIDER_NAMES[providerMode % PROVIDER_NAMES.length]}`}
             </Text>
           </TouchableOpacity>
 
@@ -1056,13 +1426,30 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
 
           {/* Ghi nguồn chuẩn ở góc dưới trái */}
           <View style={styles.attrBar} pointerEvents="none">
-            <Text style={styles.attrText}>© OpenStreetMap · CARTO · OpenFreeMap</Text>
+            <Text style={styles.attrText}>
+              {nearbyPoiLabel
+                ? `📍 ${nearbyPoiLabel}`
+                : '© OpenStreetMap · OpenFreeMap'}
+            </Text>
           </View>
         </View>
 
-        {/* THẺ MINI KHI CHẠM GHIM (CÓ NÚT CHỈ ĐƯỜNG DEEP LINK) */}
+        {/* THẺ MINI KHI CHẠM GHIM (HIỂN THỊ THUMBNAIL ẢNH VỪA CHỤP TỪ TAB CAMERA + NÚT CHỈ ĐƯỜNG) */}
         {selectedPlace && (
           <View style={styles.placeCard}>
+            {selectedPlace.photoUrl ? (
+              <Image
+                source={{ uri: selectedPlace.photoUrl }}
+                style={styles.pThumb}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.pico}>
+                <Text style={styles.picoText}>
+                  {(KIND_META[selectedPlace.kind] || KIND_META.food).icon}
+                </Text>
+              </View>
+            )}
             <View style={styles.pcInfo}>
               <Text style={styles.pcName} numberOfLines={1}>
                 {selectedPlace.name}
@@ -1082,13 +1469,24 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
           </View>
         )}
 
-        {/* DANH SÁCH KHOẢN CHI THẬT TỪ TRANSACTION STORE (0 HARDCODE) */}
+        {/* DANH SÁCH KHOẢN CHI THẬT TỪ TRANSACTION STORE (KÈM ẢNH THUMBNAIL TỪ TAB CAMERA) */}
         <View style={styles.placeList}>
           {filteredPlaces.length === 0 ? (
             <View style={styles.emptyCard}>
               <Text style={styles.emptyCardText}>
-                Chưa có khoản chi nào · Chụp hoặc ghi chi để hiện ghim trên bản đồ
+                {unpinnedExpenses.length > 0
+                  ? `Có ${unpinnedExpenses.length} khoản chi chưa gắn tọa độ GPS`
+                  : 'Chưa có khoản chi nào · Chụp hoặc ghi chi để hiện ghim trên bản đồ'}
               </Text>
+              {unpinnedExpenses.length > 0 && (
+                <TouchableOpacity
+                  style={[styles.pcDirBtn, { marginTop: 8 }]}
+                  activeOpacity={0.85}
+                  onPress={handlePinLatestUnpinnedExpense}
+                >
+                  <Text style={styles.pcDirText}>📍 Ghim vị trí hiện tại</Text>
+                </TouchableOpacity>
+              )}
             </View>
           ) : (
             filteredPlaces.slice(0, 8).map((p) => {
@@ -1101,9 +1499,17 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
                   activeOpacity={0.85}
                   onPress={() => handleSelectPlace(p, true)}
                 >
-                  <View style={styles.pico}>
-                    <Text style={styles.picoText}>{meta.icon}</Text>
-                  </View>
+                  {p.photoUrl ? (
+                    <Image
+                      source={{ uri: p.photoUrl }}
+                      style={styles.pThumb}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.pico}>
+                      <Text style={styles.picoText}>{meta.icon}</Text>
+                    </View>
+                  )}
                   <View style={styles.pmain}>
                     <Text style={styles.pname} numberOfLines={1}>
                       {p.name}
@@ -1260,6 +1666,14 @@ const styles = StyleSheet.create({
   },
   sovLabel: {
     position: 'absolute',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,251,241,0.94)',
+    borderWidth: 1.5,
+    borderColor: '#2B2118',
+  },
+  sovLabelBadge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
@@ -1467,14 +1881,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4E4BE',
   },
   pico: {
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     borderRadius: 10,
     borderWidth: 2,
     borderColor: '#2B2118',
     backgroundColor: '#F6EEDC',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  pThumb: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    backgroundColor: '#EDE3CC',
   },
   picoText: {
     fontSize: 16,
