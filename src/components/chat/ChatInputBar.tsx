@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { Camera, Send } from 'lucide-react-native';
 import { PixelIconCameraMini, PixelIconSend } from '../pixel/PixelIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
@@ -168,7 +169,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
           disabled={!hasText || isThinking}
           activeOpacity={0.8}
         >
-          <PixelIconSend size={18} />
+          <Send size={18} color="#2B2118" strokeWidth={2.2} />
         </TouchableOpacity>
       </View>
     </View>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { Camera, MapPin } from 'lucide-react-native';
 import { PixelIconCameraMini, PixelIconMapPin, PixelIconPigCoach } from '../pixel/PixelIcons';
 import {
   requestLocationPermissionAsync,
@@ -65,7 +66,7 @@ export const FirstLaunchPermissionsModal: React.FC<FirstLaunchPermissionsModalPr
           <View style={styles.permList}>
             <View style={styles.permRow}>
               <View style={[styles.permIconBox, { backgroundColor: '#F9B8C4' }]}>
-                <PixelIconCameraMini size={20} />
+                <Camera size={20} color="#2B2118" strokeWidth={2.0} />
               </View>
               <View style={styles.permTextCol}>
                 <Text style={styles.permTitle}>Máy ảnh (Camera)</Text>
@@ -77,7 +78,7 @@ export const FirstLaunchPermissionsModal: React.FC<FirstLaunchPermissionsModalPr
 
             <View style={styles.permRow}>
               <View style={[styles.permIconBox, { backgroundColor: '#CDE6C4' }]}>
-                <PixelIconMapPin size={20} />
+                <MapPin size={20} color="#2B2118" strokeWidth={2.0} />
               </View>
               <View style={styles.permTextCol}>
                 <Text style={styles.permTitle}>Vị trí hiện tại (GPS)</Text>

@@ -10,7 +10,23 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ArrowLeft } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  Camera,
+  Clock,
+  Coffee,
+  Coins,
+  Dumbbell,
+  Fuel,
+  LocateFixed,
+  MapPin,
+  Pill,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  Store,
+  Utensils,
+} from 'lucide-react-native';
 import Svg, { Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { useTransactionStore } from '../../store/transactionStore';
@@ -350,6 +366,28 @@ export const drawPigFaceCanvas = (size = 22) => (
   </Svg>
 );
 
+export const renderKindVectorIcon = (kind: SpendKind, iconSize: number, iconColor: string) => {
+  switch (kind) {
+    case 'food':
+      return <Utensils size={iconSize} color={iconColor} strokeWidth={2.0} />;
+    case 'cafe':
+      return <Coffee size={iconSize} color={iconColor} strokeWidth={2.0} />;
+    case 'market':
+      return <ShoppingBag size={iconSize} color={iconColor} strokeWidth={2.0} />;
+    case 'shop':
+      return <Store size={iconSize} color={iconColor} strokeWidth={2.0} />;
+    case 'gym':
+      return <Dumbbell size={iconSize} color={iconColor} strokeWidth={2.0} />;
+    case 'gas':
+      return <Fuel size={iconSize} color={iconColor} strokeWidth={2.0} />;
+    case 'pharm':
+      return <Pill size={iconSize} color={iconColor} strokeWidth={2.0} />;
+    case 'fun':
+    default:
+      return <Sparkles size={iconSize} color={iconColor} strokeWidth={2.0} />;
+  }
+};
+
 export const PixelKindThumb: React.FC<{
   kind: SpendKind;
   size?: number;
@@ -367,28 +405,24 @@ export const PixelKindThumb: React.FC<{
 
   const meta = PIXEL_KINDS[kind] || PIXEL_KINDS.food;
   const col = meta.color;
-  const g = meta.glyph;
 
   return (
-    <View style={[styles.pThumb, { width: size, height: size, overflow: 'hidden' }]}>
-      <Svg width={size} height={size} viewBox="0 0 16 16">
-        <Rect x={0} y={0} width={16} height={16} fill={col} opacity={0.25} />
-        <Rect x={0} y={11} width={16} height={5} fill="#FFFFFF" opacity={0.55} />
-        {g.map((row, r) =>
-          row.split('').map((cell, c) =>
-            cell === '#' ? (
-              <Rect
-                key={`${r}-${c}`}
-                x={3 + c * 2}
-                y={2 + r * 2}
-                width={2}
-                height={2}
-                fill={col}
-              />
-            ) : null
-          )
-        )}
-      </Svg>
+    <View
+      style={[
+        styles.pThumb,
+        {
+          width: size,
+          height: size,
+          backgroundColor: `${col}18`,
+          borderColor: '#2B2118',
+          borderWidth: 2,
+          borderRadius: 12,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+      ]}
+    >
+      {renderKindVectorIcon(kind, Math.round(size * 0.48), col)}
     </View>
   );
 };
@@ -560,7 +594,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
         </TouchableOpacity>
 
         <View style={styles.titleWrap}>
-          <PixelIconMapPin size={20} />
+          <MapPin size={20} color="#2B2118" strokeWidth={2.0} />
           <Text style={styles.titleText}>Quán Quen</Text>
         </View>
 
@@ -631,7 +665,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
             activeOpacity={0.85}
             onPress={handleRetroTagCurrentLocation}
           >
-            <PixelIconCameraMini size={16} />
+            <Camera size={16} color="#2B2118" strokeWidth={2.0} />
             <Text style={styles.retroTagText}>
               Bạn có <Text style={styles.retroTagBold}>{unlocatedPhotoExpenses.length} ảnh</Text> chưa gắn vị trí
             </Text>
@@ -641,13 +675,13 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
           </TouchableOpacity>
         )}
 
-        {/* 5. THANH LỌC 4 NÚT PIXEL ART ICONS (.pschips) */}
+        {/* 5. THANH LỌC 4 NÚT VECTOR MỎNG ĐƠN SẮC (.pschips — QĐ 188) */}
         <View style={styles.filterPillsRow}>
           {[
-            { id: 'recent14', label: 'Gần đây', icon: <PixelIconClock size={14} /> },
-            { id: 'frequent', label: 'Quen', icon: <PixelIconStar size={14} /> },
-            { id: 'trail', label: 'Gần bạn', icon: <PixelIconMapPin size={14} /> },
-            { id: 'top', label: 'Chi nhiều', icon: <PixelIconCoin size={14} /> },
+            { id: 'recent14', label: 'Gần đây', icon: (active: boolean) => <Clock size={14} color={active ? '#FFFBF1' : '#2B2118'} strokeWidth={2.0} /> },
+            { id: 'frequent', label: 'Quen', icon: (active: boolean) => <Star size={14} color={active ? '#FFFBF1' : '#2B2118'} strokeWidth={2.0} /> },
+            { id: 'trail', label: 'Gần bạn', icon: (active: boolean) => <LocateFixed size={14} color={active ? '#FFFBF1' : '#2B2118'} strokeWidth={2.0} /> },
+            { id: 'top', label: 'Chi nhiều', icon: (active: boolean) => <Coins size={14} color={active ? '#FFFBF1' : '#2B2118'} strokeWidth={2.0} /> },
           ].map((tab) => {
             const isActive = activeMode === tab.id;
             return (
@@ -660,7 +694,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
                   setActiveMode(tab.id as FilterMode);
                 }}
               >
-                {tab.icon}
+                {tab.icon(isActive)}
                 <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
                   {tab.label}
                 </Text>
@@ -737,7 +771,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
                     }
                     accessibilityLabel={`Chỉ đường tới ${place.name}`}
                   >
-                    <PixelIconMapPin size={14} />
+                    <MapPin size={14} color="#FFFBF1" strokeWidth={2.0} />
                     <Text style={styles.directionBtnText}>Chỉ đường</Text>
                   </TouchableOpacity>
                 </View>
@@ -1107,6 +1141,11 @@ export const __REGRESSION_META = {
     'PixelIconBack',
     'backButton',
     'PixelIconCrosshair',
+    'PixelIconClock',
+    'PixelIconStar',
+    'PixelIconCoin',
+    'PixelIconMapPin',
+    'PixelIconCameraMini',
     'NativeSlippyTile',
     'PanResponder.create',
     'GeoJSONSource',

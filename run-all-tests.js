@@ -5660,7 +5660,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'ChatView must integrate 144x96 CafeChatBannerWebView with floating bubbles and scrollable FlatList, with zero Squad'
   );
 
-  // 4. Đồng bộ Icon Art (FloatingPillTabBar hỗ trợ QĐ 185 hoặc QĐ 187 Vector Navigation, Hub/Body 100% Pixel Art)
+  // 4. Đồng bộ Icon Art (FloatingPillTabBar hỗ trợ QĐ 185 hoặc QĐ 187 Vector Navigation, Hub hỗ trợ Pixel Art hoặc QĐ 188 Slim Vector)
   assert.ok(
     iconsCode.includes('PixelIconTabGarden') &&
       iconsCode.includes('PixelIconTabCamera') &&
@@ -5669,8 +5669,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       iconsCode.includes('PixelIconRose') &&
       ((tabBarCode.includes('PixelIconTabGarden') && !tabBarCode.includes('lucide-react-native')) ||
         (tabBarCode.includes('Trees') && tabBarCode.includes('lucide-react-native'))) &&
-      !hubCode.includes('lucide-react-native'),
-    'FloatingPillTabBar must use valid design tokens navigation icons and Hub must use Pixel Art'
+      (hubCode.includes('Flame') || hubCode.includes('PixelIconFlame')),
+    'FloatingPillTabBar must use valid design tokens navigation icons and Hub must render valid indicators'
   );
 
   // 5. Đồng bộ Backend Việc nhà 3 chỉ số & Cổng phòng Nhà của Heo
@@ -5817,22 +5817,26 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 2. Nút Quay Lại (Header Back) across sub-views chuyển về Vector ArrowLeft
   assert.ok(
-    chatViewCode.includes("import { ArrowLeft } from 'lucide-react-native'") &&
+    chatViewCode.includes('ArrowLeft') &&
+      chatViewCode.includes("from 'lucide-react-native'") &&
       chatViewCode.includes('<ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />'),
     'ChatView.tsx must use crisp vector ArrowLeft for top back navigation button'
   );
   assert.ok(
-    mapCode.includes("import { ArrowLeft } from 'lucide-react-native'") &&
+    mapCode.includes('ArrowLeft') &&
+      mapCode.includes("from 'lucide-react-native'") &&
       mapCode.includes('<ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />'),
     'PiggySpendMapView.tsx must use crisp vector ArrowLeft for top back navigation button'
   );
   assert.ok(
-    flightCode.includes("import { ArrowLeft } from 'lucide-react-native'") &&
+    flightCode.includes('ArrowLeft') &&
+      flightCode.includes("from 'lucide-react-native'") &&
       flightCode.includes('<ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />'),
     'PigFlightGameView.tsx must use crisp vector ArrowLeft for top back navigation button'
   );
   assert.ok(
-    crossRoadCode.includes("import { ArrowLeft } from 'lucide-react-native'") &&
+    crossRoadCode.includes('ArrowLeft') &&
+      crossRoadCode.includes("from 'lucide-react-native'") &&
       crossRoadCode.includes('<ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />'),
     'PigCrossRoadGameView.tsx must use crisp vector ArrowLeft for top back navigation button'
   );
@@ -5866,4 +5870,85 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 124 Passed: Chuẩn Hóa Phân Tầng Icon Hợp Lý (Hybrid Icon Hierarchy: Vector Navigation Shell & Pixel Art Body/Micro-Items — Quyết định 187) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 124 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (124/124)!');
+// ==========================================
+// TEST 125: CHUẨN HÓA TOÀN BỘ ICON VECTOR MỎNG ĐƠN SẮC CHUẨN THEME (SLIM MONOCHROME VECTOR ICONS — QUYẾT ĐỊNH 188)
+// - lucide-react-native 2.0px viền mỏng sắc nét (No AI Slop)
+// - Subtle Theme Accents (Flame #E0452B, Fish #2563EB, Rose #E11D48, Ticket/Wheat #D97706)
+// - Quán Quen 8 Danh Mục Vector Glyphs & Chip Lọc Chuẩn Lucide
+// - Bảo tồn 100% Mascot Heo Con 24x20 (PixelPigAvatar)
+// - Living Documentation Sync (Quyết định 188)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const iconsCode = fs.readFileSync('src/components/pixel/PixelIcons.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const chatInputCode = fs.readFileSync('src/components/chat/ChatInputBar.tsx', 'utf8');
+  const modalCode = fs.readFileSync('src/components/common/FirstLaunchPermissionsModal.tsx', 'utf8');
+
+  // 1. PixelIcons.tsx đóng vai trò Vector Wrappers mỏng chuẩn lucide-react-native
+  assert.ok(
+    iconsCode.includes("from 'lucide-react-native'") &&
+      iconsCode.includes('strokeWidth') &&
+      iconsCode.includes('Flame') &&
+      iconsCode.includes('Fish') &&
+      iconsCode.includes('Flower2') &&
+      iconsCode.includes('Ticket') &&
+      iconsCode.includes('Wheat') &&
+      iconsCode.includes('UtensilsCrossed'),
+    'PixelIcons.tsx must implement slim vector wrappers via lucide-react-native'
+  );
+
+  // 2. Hub Dashboard sử dụng trực tiếp Vector Icons mỏng với Subtle Theme Accents
+  assert.ok(
+    hubCode.includes('Flame size={15} color="#E0452B"') &&
+      hubCode.includes('Fish size={15} color="#2563EB"') &&
+      hubCode.includes('Flower2 size={15} color="#E11D48"') &&
+      hubCode.includes('Ticket size={18} color="#D97706"') &&
+      hubCode.includes('Wheat size={18} color="#D97706"') &&
+      hubCode.includes('MessageSquare') &&
+      hubCode.includes('MapPin') &&
+      hubCode.includes('Feather') &&
+      hubCode.includes('Car') &&
+      hubCode.includes('PixelPigAvatar'),
+    'PixelHubDashboard must render slim vector icons with theme accents while retaining PixelPigAvatar mascot'
+  );
+
+  // 3. Quán Quen (PiggySpendMapView): 8 Danh Mục Vector Glyphs & Chip Lọc
+  assert.ok(
+    mapCode.includes('renderKindVectorIcon') &&
+      mapCode.includes('Utensils') &&
+      mapCode.includes('Coffee') &&
+      mapCode.includes('ShoppingBag') &&
+      mapCode.includes('Store') &&
+      mapCode.includes('Dumbbell') &&
+      mapCode.includes('Fuel') &&
+      mapCode.includes('Pill') &&
+      mapCode.includes('Sparkles') &&
+      mapCode.includes('LocateFixed'),
+    'PiggySpendMapView must render 8 crisp vector category glyphs and Lucide filter chips'
+  );
+
+  // 4. Khung Nhập Chat & Modal Xin Quyền
+  assert.ok(
+    chatInputCode.includes('Send') &&
+      modalCode.includes('Camera') &&
+      modalCode.includes('MapPin'),
+    'ChatInputBar and FirstLaunchPermissionsModal must use crisp vector icons'
+  );
+
+  // 5. Living Documentation Sync Audit (Quyết định 188)
+  assert.ok(
+    agentsCode.includes('188') &&
+      agentsCode.includes('VECTOR MỎNG ĐƠN SẮC') &&
+      decisionsCode.includes('188') &&
+      chatDocCode.includes('188'),
+    'AGENTS.md, DECISIONS.md, and 10-CHAT.md must document Quyết định 188'
+  );
+
+  console.log('✅ Test 125 Passed: Chuẩn Hóa Toàn Bộ Icon Vector Mỏng Đơn Sắc Chuẩn Theme (Slim Monochrome Vector Icons — Quyết định 188) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 125 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (125/125)!');

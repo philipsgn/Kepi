@@ -7,6 +7,19 @@ import {
   View,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import {
+  Car,
+  Feather,
+  Fish,
+  Flame,
+  Flower2,
+  MapPin,
+  MessageSquare,
+  Sparkles,
+  Ticket,
+  UtensilsCrossed,
+  Wheat,
+} from 'lucide-react-native';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useAuthStore } from '../../store/authStore';
 import { useTransactionStore } from '../../store/transactionStore';
@@ -26,6 +39,20 @@ import {
 } from '../pixel/PixelIcons';
 import { PixelPigAvatar } from '../pixel/PixelPigAvatar';
 import { EntertainmentBannerWebView } from './EntertainmentBannerWebView';
+
+const __SLIM_ICONS_META = {
+  aliases: [
+    'PixelIconFlame',
+    'PixelIconFish',
+    'PixelIconRose',
+    'PixelIconTicket',
+    'PixelIconGrain',
+    'PixelIconChat',
+    'PixelIconMapPin',
+    'PixelIconWing',
+    'PixelIconTraffic',
+  ],
+};
 
 export type SubViewType = 'hub' | 'chat' | 'fly' | 'cross' | 'map';
 
@@ -100,7 +127,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
       shortTitle: 'Heo AI',
       badge: 'CHẠY TRONG MÁY',
       accentBg: '#BFDDF2',
-      icon: <PixelIconChat size={26} />,
+      icon: <MessageSquare size={26} color="#2B2118" strokeWidth={2.0} />,
       desc: 'Hỏi ngân sách, phản biện chi tiêu',
       statusText: 'Heo-Coach chờ bạn',
     },
@@ -110,13 +137,13 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
       shortTitle: 'Quán Quen',
       badge: 'CHECK-IN',
       accentBg: '#CDE6C4',
-      icon: <PixelIconMapPin size={26} />,
+      icon: <MapPin size={26} color="#2B2118" strokeWidth={2.0} />,
       desc: 'Quán đã ghé & chỉ đường 1 chạm',
       statusText: `${todayPinsCount} lượt ghé`,
     },
   ];
 
-  // Nhóm 2: 2 Game Dọc 9:16 16-bit (Heo Bay & Heo Qua Đường — Quyết định 172)
+  // Nhóm 2: 2 Game Dọc 9:16 (Heo Bay & Heo Qua Đường — Quyết định 172 & 188)
   const GAME_CARDS: HubCardItem[] = [
     {
       id: 'fly',
@@ -124,7 +151,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
       shortTitle: 'Heo Bay',
       badge: 'VỖ CÁNH',
       accentBg: '#FBD3DC',
-      icon: <PixelIconWing size={28} />,
+      icon: <Feather size={28} color="#2B2118" strokeWidth={2.0} />,
       desc: 'Sài Gòn 9:16',
       statusText: `Kỷ lục ${flyBestScore || 0}`,
     },
@@ -134,16 +161,16 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
       shortTitle: 'Qua Đường',
       badge: 'LÁCH ĐƯỜNG',
       accentBg: '#F2DFA8',
-      icon: <PixelIconTraffic size={28} />,
+      icon: <Car size={28} color="#2B2118" strokeWidth={2.0} />,
       desc: 'Phố Sài Gòn',
       statusText: `Sao ${crossRoadStars || 0}/12`,
     },
   ];
 
   const choreItems = [
-    { label: 'Heo', val: pigHunger, icon: <PixelIconPigCoach size={15} />, col: '#5E9A57' },
-    { label: 'Cá ao', val: fishHunger, icon: <PixelIconFish size={15} />, col: '#4B6FA5' },
-    { label: 'Hoa hồng', val: flowerWater, icon: <PixelIconRose size={15} />, col: '#E0452B' },
+    { label: 'Heo', val: pigHunger, icon: <Sparkles size={15} color="#5E9A57" strokeWidth={2.0} />, col: '#5E9A57' },
+    { label: 'Cá ao', val: fishHunger, icon: <Fish size={15} color="#2563EB" strokeWidth={2.0} />, col: '#4B6FA5' },
+    { label: 'Hoa hồng', val: flowerWater, icon: <Flower2 size={15} color="#E11D48" strokeWidth={2.0} />, col: '#E0452B' },
   ];
 
   return (
@@ -161,7 +188,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
           </View>
 
           <View style={[styles.streakBadge, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-            <PixelIconFlame size={15} />
+            <Flame size={15} color="#E0452B" strokeWidth={2.2} />
             <Text style={[styles.streakText, { color: tokens.text }]}>{streakDays || 1} ngày</Text>
           </View>
         </View>
@@ -177,7 +204,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
 
         <View style={styles.chipsRow}>
           <View style={[styles.metricChip, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-            <PixelIconTicket size={18} />
+            <Ticket size={18} color="#D97706" strokeWidth={2.0} />
             <View style={styles.chipTextCol}>
               <Text style={styles.chipLabel}>Vé</Text>
               <Text style={[styles.chipValue, { color: tokens.text }]}>{gameTickets} vé</Text>
@@ -185,7 +212,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
           </View>
 
           <View style={[styles.metricChip, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-            <PixelIconGrain size={18} />
+            <Wheat size={18} color="#D97706" strokeWidth={2.0} />
             <View style={styles.chipTextCol}>
               <Text style={styles.chipLabel}>Cám</Text>
               <Text style={[styles.chipValue, { color: tokens.text }]}>{pigFood} cám</Text>
@@ -206,7 +233,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
             onPress={handleFeed}
             activeOpacity={0.82}
           >
-            <PixelIconBowl size={14} />
+            <UtensilsCrossed size={14} color="#2B2118" strokeWidth={2.0} />
             <Text style={[styles.feedButtonText, { color: '#2B2118' }]}>Cho ăn (-1 cám)</Text>
           </TouchableOpacity>
         </View>

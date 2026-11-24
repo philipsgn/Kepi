@@ -219,3 +219,23 @@ Màn hình Tab 3 hiển thị:
   - Nút Back ở TopBar các màn hình (`ChatView`, `Quán Quen`, `Heo Bay`, `Heo Qua Đường`): Icon Vector `ArrowLeft` từ `lucide-react-native` (size 18, viền 2.8px mực `#2B2118`).
 - **Body, Deepbody & Micro-items (Pixel Art Icons):**
   - Giữ nguyên 100% đồ họa Pixel Art SVG cho nội dung: Game Arcade HUD (vé `PixelIconTicket`, cám, cúp, cánh, xe), 3 Việc nhà (Lửa, Cá, Hoa), 8 Glyphs 5×5 ẩm thực, con dấu quận xoay góc, chip lọc vi mô (`PixelIconClock`, `PixelIconStar`, `PixelIconCoin`) và Banner WebViews.
+
+---
+
+## 15. Chuẩn Hóa Toàn Diện Icon Vector Mỏng Đơn Sắc (Slim Monochrome Vector Icons) — Quyết định 188
+
+- **Loại Bỏ Pixel Art Icon Thô Ráp Ở Mọi Màn Hình ("No AI Slop"):**
+  - Toàn bộ icon tính năng, chỉ số, danh mục ẩm thực và nút bấm chuyển sang **Vector Mỏng Đơn Sắc (`lucide-react-native`)** viền đều `strokeWidth = 2.0px`.
+  - Không còn hiện tượng mờ nhòe hạt, biến dạng khi zoom hay vỡ nét trên màn hình Retina / OLED.
+- **Màu Sắc Đơn Sắc Theo Theme (Subtle Theme Accents & Monochrome Ink):**
+  - Ngọn lửa Streak: `Flame` (viền cam đỏ `#E0452B`, strokeWidth 2.2).
+  - Cá ao việc nhà: `Fish` (viền xanh biển `#2563EB`, strokeWidth 2.0).
+  - Hoa hồng việc nhà: `Flower2` (viền hồng đỏ `#E11D48`, strokeWidth 2.0).
+  - Vé Arcade & Cám: `Ticket`, `Wheat` (viền vàng mật `#D97706`, strokeWidth 2.0).
+  - Quán Quen 8 danh mục: `Utensils`, `Coffee`, `ShoppingBag`, `Store`, `Dumbbell`, `Fuel`, `Pill`, `Sparkles` trong khung bo mềm 12px pastel tint.
+  - 4 Chip lọc & Ghim: `Clock`, `Star`, `Coins`, `LocateFixed`, `MapPin`.
+  - Khung nhập Chat & Nút bấm: `Send`, `Camera`, `MessageSquare`, `Feather`, `Car`, `UtensilsCrossed`.
+- **Bảo Tồn Linh Vật Heo Con:**
+  - Giữ nguyên avatar linh vật Heo Con 24×20 (`PixelPigAvatar`) để bảo vệ linh hồn nhận diện thương hiệu của app.
+- **Kiến Trúc Tương Thích Ngược:**
+  - `src/components/pixel/PixelIcons.tsx` đóng vai trò Vector Wrappers mỏng chuẩn `lucide-react-native`, đảm bảo không làm gãy các module hiện có và duy trì 100% kiểm thử hồi quy.
