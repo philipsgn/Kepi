@@ -70,6 +70,8 @@ export interface Transaction {
   desc_position?: { x: number; y: number } | null;
   lat?: number | null;
   lng?: number | null;
+  location_name?: string | null;
+  district?: string | null;
   occurred_at: string;
   created_at: string;
 }

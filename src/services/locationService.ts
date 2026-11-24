@@ -234,3 +234,48 @@ export async function getQuickPinCoordsIfOptedIn(timeoutMs = 8000): Promise<GeoC
   const fresh = await getCurrentPositionSafeAsync(timeoutMs);
   return fresh || lastKnownMemoryCoords || DEFAULT_VN_COORDS;
 }
+
+export interface PlaceAddressResult {
+  fullAddress: string;
+  shortPlaceName: string;
+  district: string;
+  city: string;
+}
+
+/**
+ * Reverse Geocoding miễn phí từ Geocoder tích hợp sẵn của iOS và Android (0$ chi phí, 0 API key).
+ * Tự động chuyển đổi tọa độ GPS thành Tên Đường, Phường, Quận, Thành phố cho Hộ Chiếu Quán Quen.
+ */
+export async function reverseGeocodePlaceAsync(lat: number, lng: number): Promise<PlaceAddressResult> {
+  const ExpoLocation = loadExpoLocation();
+  if (ExpoLocation && typeof ExpoLocation.reverseGeocodeAsync === 'function') {
+    try {
+      const results = await ExpoLocation.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+      if (Array.isArray(results) && results.length > 0) {
+        const item = results[0];
+        const street = item.street || item.name || '';
+        const district = item.district || item.subregion || '';
+        const city = item.city || item.region || 'Việt Nam';
+
+        const shortParts = [street, district].filter(Boolean);
+        const fullParts = [street, district, city].filter(Boolean);
+
+        return {
+          fullAddress: fullParts.join(', ') || 'Việt Nam',
+          shortPlaceName: shortParts.join(', ') || district || city || 'Địa điểm check-in',
+          district: district || city || 'Khu vực quen',
+          city: city || 'Việt Nam',
+        };
+      }
+    } catch (_e) {
+      // ignore geocode error
+    }
+  }
+
+  return {
+    fullAddress: 'Việt Nam',
+    shortPlaceName: 'Địa điểm check-in',
+    district: 'Khu vực quen',
+    city: 'Việt Nam',
+  };
+}

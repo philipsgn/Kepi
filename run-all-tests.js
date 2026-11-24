@@ -3328,11 +3328,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   if (shooterCode) assert.ok(shooterCode.includes('apImpact') && (shooterCode.includes('slingshot') || shooterCode.includes('drag')), 'Must implement slingshot block destruction physics');
   if (shooterCode) assert.ok(shooterCode.includes('Quay lại Hub') || shooterCode.includes('Giải trí') || shooterCode.includes('Trung tâm Heo Con') || shooterCode.includes('accessibilityLabel="Quay lại"'), 'Must render Back to Hub header button');
 
-  // 5. Bản Đồ Chi Tiêu Pixel / Native StreetMap (PiggySpendMapView)
-  assert.ok(mapCode.includes('SafeWebView') || mapCode.includes('NativeSlippyTile'), 'PiggySpendMapView must use SafeWebView or NativeSlippyTile');
-  assert.ok((mapCode.includes('MW=192') && mapCode.includes('MH=200')) || mapCode.includes('maplibregl') || mapCode.includes('lngLatToWorld'), 'Must render Spend Map (canvas, MapLibre, or Slippy Tile Engine)');
+  // 5. Bản Đồ Chi Tiêu Pixel / Native StreetMap / Hộ Chiếu Quán Quen (PiggySpendMapView)
+  assert.ok(mapCode.includes('SafeWebView') || mapCode.includes('NativeSlippyTile') || mapCode.includes('Hộ Chiếu Quán Quen') || mapCode.includes('Place Passport'), 'PiggySpendMapView must use SafeWebView, NativeSlippyTile or Place Passport');
+  assert.ok((mapCode.includes('MW=192') && mapCode.includes('MH=200')) || mapCode.includes('maplibregl') || mapCode.includes('lngLatToWorld'), 'Must render Spend Map / Place Passport (canvas, MapLibre, or Slippy Tile Engine)');
   assert.ok(mapCode.includes('useTransactionStore'), 'Must sync real transactions from transactionStore');
-  assert.ok((mapCode.includes('mpGo') || mapCode.includes('map.flyTo') || mapCode.includes('function flyTo')) && (mapCode.includes('Quay lại Hub') || mapCode.includes('Giải trí') || mapCode.includes('Trung tâm Heo Con') || mapCode.includes('accessibilityLabel="Quay lại"')), 'Must support map navigation and Back to Hub');
+  assert.ok((mapCode.includes('mpGo') || mapCode.includes('map.flyTo') || mapCode.includes('function flyTo') || mapCode.includes('openExternalMapDirections')) && (mapCode.includes('Quay lại Hub') || mapCode.includes('Giải trí') || mapCode.includes('Trung tâm Heo Con') || mapCode.includes('accessibilityLabel="Quay lại"')), 'Must support map navigation and Back to Hub');
 
   // 6. Living Docs & Decisions Sync
   assert.ok(docCode.includes('PIXEL HUB') || docCode.includes('Pixel Hub'), '10-CHAT.md must document Pixel Hub architecture');
@@ -3648,8 +3648,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'PigShooterGameView must use flex:1 webview container without empty baseUrl');
   assert.ok(
     (mapCode.includes('memoizedSource') && !mapCode.includes("baseUrl: ''") && mapCode.includes('webViewContainer')) ||
-      mapCode.includes('NativeSlippyTile'),
-    'PiggySpendMapView must use flex:1 webview container without empty baseUrl or 100% NativeSlippyTile'
+      mapCode.includes('NativeSlippyTile') ||
+      mapCode.includes('Hộ Chiếu Quán Quen') ||
+      mapCode.includes('PlacePassport'),
+    'PiggySpendMapView must use flex:1 webview container without empty baseUrl or 100% Native Place Passport'
   );
 
   // 2. Hub Dashboard typography and border fixes
@@ -3927,7 +3929,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     (hubCode.includes("'VỖ CÁNH'") && hubCode.includes("'Heo Bay'")),
     'Hub must feature Game cards'
   );
-  assert.ok(hubCode.includes('Bản Đồ Chi Tiêu'), 'Hub must feature Bản Đồ Chi Tiêu');
+  assert.ok(hubCode.includes('Bản Đồ Chi Tiêu') || hubCode.includes('Hộ Chiếu Quán Quen'), 'Hub must feature Bản Đồ Chi Tiêu or Hộ Chiếu Quán Quen');
 
   // 2. Chat 2-Segment Switcher (Heo-Coach & Hội Bạn Thân)
   assert.ok(chatViewCode.includes('chatSegmentRow') && chatViewCode.includes('Heo-Coach') && chatViewCode.includes('Hội Bạn Thân'), 'ChatView must provide 2-segment switcher for Heo-Coach and Hoi Ban Than');
@@ -4213,7 +4215,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(hubDashCode.includes('AI COACH & SQUAD') || hubDashCode.includes('KẾT NỐI'), 'PixelHubDashboard must include Card 1: Chat');
   assert.ok(hubDashCode.includes('FLAPPY PIG · 60FPS') || hubDashCode.includes('VỖ CÁNH'), 'PixelHubDashboard must include Card 2: Fly');
   assert.ok(hubDashCode.includes('ANGRY PIG · 3 SAO') || hubDashCode.includes('BẮN NÁ') || hubDashCode.includes('LÁCH ĐƯỜNG'), 'PixelHubDashboard must include game cards');
-  assert.ok(hubDashCode.includes('GPS PIXEL · QUÁN QUEN') || hubDashCode.includes('QUÁN QUEN'), 'PixelHubDashboard must include Card 4: Map');
+  assert.ok(hubDashCode.includes('GPS PIXEL · QUÁN QUEN') || hubDashCode.includes('QUÁN QUEN') || hubDashCode.includes('CHECK-IN'), 'PixelHubDashboard must include Card 4: Map / Place Passport');
 
   // 3. Heo-Coach 5 Prompt Chips & Header Navigation Unification
   assert.ok(chatViewCode.includes('Hôm nay còn chi được bao nhiêu?'), 'ChatView must include prompt chip 1');
@@ -5472,4 +5474,60 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 119 Passed: Kiến Trúc Bản Đồ Production Android-First 0$ Vĩnh Viễn (MapLibre 13.6.1 + OpenFreeMap OSM Vector + PMTiles Slot) & Luồng Camera Chụp -> Nhập Tiền -> Lưu -> Ghim (Quyết định 182) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 119 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (119/119)!');
+// ==========================================
+// TEST 120: HỘ CHIẾU QUÁN QUEN (PLACE PASSPORT & CHECK-IN) — 100% NATIVE REACT NATIVE, REVERSE GEOCODE OS 0$ & NÚT CHỈ ĐƯỜNG 1-CHẠM (QUYẾT ĐỊNH 183)
+// ==========================================
+{
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const locCode = fs.readFileSync('src/services/locationService.ts', 'utf8');
+  const camCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const techCode = fs.readFileSync('docs/TECH_ARCHITECTURE.md', 'utf8');
+
+  // 1. PiggySpendMapView.tsx: 100% Native Place Passport & Check-in
+  assert.ok(
+    mapCode.includes('Hộ Chiếu Quán Quen') &&
+      mapCode.includes('heroPassportCard') &&
+      mapCode.includes('openExternalMapDirections') &&
+      mapCode.includes('buildPlaces') &&
+      mapCode.includes('mapTransactionsToSpendPoints'),
+    'PiggySpendMapView.tsx must implement Native Place Passport UI with Hero Card and direction handoff'
+  );
+
+  // 2. locationService.ts: Reverse Geocoding qua native OS Geocoder (0$ phí, 0 key)
+  assert.ok(
+    locCode.includes('reverseGeocodePlaceAsync') &&
+      locCode.includes('shortPlaceName') &&
+      locCode.includes('district'),
+    'locationService.ts must export reverseGeocodePlaceAsync returning shortPlaceName and district'
+  );
+
+  // 3. PixelHubDashboard.tsx: Thẻ Hộ Chiếu Quán Quen ở sảnh Tab Giải Trí
+  assert.ok(
+    hubCode.includes('Hộ Chiếu Quán Quen') &&
+      hubCode.includes('CHECK-IN') &&
+      hubCode.includes('Check-in quán xá, album ảnh & chỉ đường 1-chạm'),
+    'PixelHubDashboard.tsx must feature Hộ Chiếu Quán Quen card'
+  );
+
+  // 4. Tab Camera (app/(main)/index.tsx): Gắn location_name tự động khi lưu ảnh
+  assert.ok(
+    camCode.includes('reverseGeocodePlaceAsync') &&
+      camCode.includes('location_name: geo.shortPlaceName'),
+    'app/(main)/index.tsx must auto reverse-geocode location_name on photo capture'
+  );
+
+  // 5. Living Docs Sync Audit (Quyết định 183)
+  assert.ok(
+    decisionsCode.includes('183') &&
+      chatDocCode.includes('183') &&
+      techCode.includes('183'),
+    'DECISIONS.md, 10-CHAT.md and TECH_ARCHITECTURE.md must document Quyết định 183'
+  );
+
+  console.log('✅ Test 120 Passed: Hộ Chiếu Quán Quen (Place Passport & Check-in) — 100% Native, OS Geocoder 0$ & Chỉ Đường 1-Chạm (Quyết định 183) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 120 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (120/120)!');

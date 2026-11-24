@@ -326,6 +326,12 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
 - **Khe Cắm PMTiles Offline / Self-Hosted R2 (`pmtilesMapService.ts` & `metro.config.js`):** Hỗ trợ đuôi `.pmtiles` trong Metro `assetExts` và tự động ưu tiên ghi đè URL nguồn vector bằng `pmtiles://file:///...` (file `maps/vietnam.pmtiles` lưu cục bộ trong `FileSystem.documentDirectory` chạy offline 100%) hoặc `pmtiles://https://...` (`EXPO_PUBLIC_PMTILES_URL` từ Cloudflare R2 0đ băng thông egress), kết hợp `extractNearbyPoiNameFromFeatures()` trích xuất tên POI từ vector tile hoặc mô tả người dùng nhập.
 - **Xóa Custom `headers` Trên `<Image>` Trong Fallback Expo Go:** Tuyệt đối không truyền object `headers` tùy chỉnh vào `<Image source={{ uri }} />` của `NativeSlippyTile` để giữ nguyên HTTP/2 Happy Eyeballs & bộ đệm đĩa native (tránh treo IPv6 Cloudflare 29s/tile), kết hợp vẽ nền đường phố quanh vị trí GPS hiện tại bằng `<Svg>`.
 
+### 9.6. Kiến Trúc "Hộ Chiếu Quán Quen" (Place Passport & Check-in) — 100% Native, Reverse Geocode OS & Chỉ Đường 1-Chạm (Quyết định 183)
+- **Loại Bỏ Hoàn Toàn Slippy Tile & WebView:** Thay thế toàn bộ engine tải mảnh gạch bằng kiến trúc 100% Native React Native (`View`, `Text`, `Image`, `ScrollView`). Triệt tiêu vĩnh viễn tình trạng khung vuông rỗng, màn hình vàng khè hoặc lỗi nghẽn tải tile mạng trên cả Expo Go lẫn .APK.
+- **Tự Động Reverse Geocoding Miễn Phí Qua OS Geocoder:** Tích hợp `Location.reverseGeocodeAsync()` khai thác Geocoder của iOS (`CLGeocoder`) và Android (`android.location.Geocoder`) với chi phí **0$ vĩnh viễn, 0 API key**, tự động chuyển đổi tọa độ GPS thành Tên Đường, Phường, Quận, Thành Phố.
+- **Lưu Tên Địa Điểm & Chỉnh Sửa Linh Hoạt:** Trường `location_name` được lưu vào `Transaction`, cho phép người dùng sửa hoặc đặt Tên quán quen thuộc (VD: *Phúc Long*, *Cơm tấm Ba Ghiền*).
+- **Handoff Chỉ Đường 1-Chạm Chuẩn Store:** Tích hợp `Linking.openURL()` tự động điều hướng sang ứng dụng bản đồ gốc của điện thoại (Google Maps trên Android, Apple Maps trên iOS) thông qua giao thức URL chuẩn (`geo:...`, `maps://...`, `https://www.google.com/maps/dir/...`), đem lại trải nghiệm chỉ đường chuyên nghiệp 100% không tốn chi phí phát triển bản đồ riêng.
+
 
 ---
 

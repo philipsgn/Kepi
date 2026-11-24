@@ -159,3 +159,18 @@ Màn hình Tab 3 hiển thị:
   - **Lưu Ảnh Tab Camera $\to$ Bắt Buộc Nhập Tiền $\to$ Lưu $\to$ Ghim Điểm Chi Tiêu Kèm Thumbnail Ảnh (Quyết định 181 & 182):** Chỉ khi người dùng nhập số tiền `> 0` và lưu ở Tab Camera, `locationService.ts` mới gắn tọa độ GPS và ghim ngay điểm chi kèm **ảnh thumbnail món đồ vừa chụp** lên Mini Place Card và danh sách Bản đồ.
 - **Loại Bỏ Form Ghi Chi:** Xóa bỏ hoàn toàn khung `LƯU CHI TẠI VỊ TRÍ THẬT` — màn Bản đồ chỉ dùng để xem điểm chi tiêu thật (gom cụm 40m Haversine), 4 bộ lọc gọn (`🔥 14N`, `⭐ Quen`, `📍 Gần`, `🏆 Top`), marker ghim pixel 9×12 + mặt heo 16×16 bằng `<Svg>` và Place Card mini có nút chỉ đường deep link.
 - **Header Tối Giản Không Kẻ Ngang:** `borderBottomWidth: 0`, dùng `PixelIconBack`, `PixelIconMapPin`, `PixelIconReload`, tối giản chữ và chừa đệm đáy `110px` tránh chồng đè Floating Pill Tab Bar.
+
+---
+
+## 11. Hộ Chiếu Quán Quen (Place Passport & Check-in) — 100% Native React Native (Quyết định 183)
+
+- **Chấm Dứt Cơ Chế Tải Mảnh Gạch (Slippy Tile):** Loại bỏ hoàn toàn nỗi sợ về khung vuông rỗng, màn hình vàng khè hoặc lỗi nghẽn mạng tile trên Expo Go và thiết bị thật. Màn hình được xây dựng 100% bằng Native React Native UI components (`View`, `Text`, `Image`, `ScrollView`).
+- **Tự Động Nhận Diện Tên Địa Điểm & Phường/Quận (OS Geocoder 0$):** Tích hợp `reverseGeocodePlaceAsync` sử dụng native Geocoder của hệ điều hành iOS/Android để lấy thông tin Tên Đường, Phường, Quận, Thành phố tự động khi chụp ảnh ở Tab Camera; cho phép người dùng tùy chỉnh/gõ thêm Tên quán (VD: *Phúc Long*, *Cơm tấm Ba Ghiền*).
+- **Giao Diện Hộ Chiếu Quán Quen (Place Passport Screen):**
+  - **Header Tối Giản:** Nút Back `PixelIconBack`, tiêu đề **Hộ Chiếu Quán Quen** kèm `PixelIconMapPin`, nút làm mới vị trí GPS `PixelIconReload`.
+  - **Hero Passport Card:** Thống kê tổng số quán đã ghé, số quận đã đặt chân, quán ruột ghé nhiều nhất và tổng chi tiêu tại các địa điểm.
+  - **Bộ Lọc Neo-Pills:** `🔥 14N` (Gần đây), `⭐ Quen` (Tần suất cao nhất), `📍 Gần` (Sắp xếp theo khoảng cách GPS từ vị trí hiện tại), `🏆 Top` (Nơi tiêu tốn nhiều tiền nhất).
+  - **Banner Retro-Tag:** Thông báo nhắc nhở nhẹ nếu có ảnh chưa được gắn vị trí để 1-chạm gắn nhanh GPS hiện tại.
+  - **Danh Sách Thẻ Check-in Quán Quen (Place Passport Cards):** Hiển thị ảnh Locket thật chụp tại quán, tên quán, địa chỉ, badge số lần ghé (`🔥 Ghé X lần`), tổng tiền (`💰 ...k`).
+  - **Nút "Chỉ Đường 📍" 1-Chạm:** Tích hợp `Linking.openURL()` mở thẳng ứng dụng bản đồ gốc của máy (Google Maps trên Android / Apple Maps trên iOS) với tọa độ chính xác.
+- **Thẻ Sảnh Tab Giải Trí (Tab 3):** Đổi tên thẻ thành **Hộ Chiếu Quán Quen** với mô tả *"Check-in quán xá, album ảnh Locket & chỉ đường 1-chạm"*.

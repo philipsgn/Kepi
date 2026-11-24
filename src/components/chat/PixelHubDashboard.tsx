@@ -110,13 +110,13 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
     },
     {
       id: 'map',
-      title: 'Bản Đồ Chi Tiêu',
-      shortTitle: 'Bản đồ',
-      badge: 'QUÁN QUEN',
+      title: 'Hộ Chiếu Quán Quen',
+      shortTitle: 'Hộ chiếu',
+      badge: 'CHECK-IN',
       accentBg: '#CDE6C4',
       icon: <PixelIconMapPin size={26} />,
-      desc: 'Quán quen',
-      statusText: `${todayPinsCount} ghim`,
+      desc: 'Check-in quán xá, album ảnh & chỉ đường 1-chạm',
+      statusText: `${todayPinsCount} địa điểm`,
     },
   ];
 
@@ -172,7 +172,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
         <View style={styles.bannerRow}>
           <PixelPigAvatar size={34} mood={pigHunger >= 60 ? 'happy' : 'idle'} />
           <Text style={[styles.greetText, { color: tokens.text }]} numberOfLines={1}>
-            Chào {profile?.full_name || 'Trà Xanh'}! Khám phá giải trí & bản đồ khu phố
+            Chào {profile?.full_name || 'Trà Xanh'}! Khám phá giải trí & hộ chiếu quán quen
           </Text>
         </View>
 

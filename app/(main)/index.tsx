@@ -84,6 +84,7 @@ import {
   getCachedLocationSync,
   getQuickPinCoordsIfOptedIn,
   prewarmLocationAsync,
+  reverseGeocodePlaceAsync,
 } from '../../src/services/locationService';
 
 // Views
@@ -821,6 +822,16 @@ export default function MainAppScreen() {
               lat: coords.lat,
               lng: coords.lng,
             });
+            reverseGeocodePlaceAsync(coords.lat, coords.lng)
+              .then((geo) => {
+                if (geo) {
+                  useTransactionStore.getState().updateTransaction(tx.id, {
+                    location_name: geo.shortPlaceName,
+                    district: geo.district,
+                  });
+                }
+              })
+              .catch(() => {});
           }
         })
         .catch(() => {});
@@ -1125,6 +1136,16 @@ export default function MainAppScreen() {
               lat: coords.lat,
               lng: coords.lng,
             });
+            reverseGeocodePlaceAsync(coords.lat, coords.lng)
+              .then((geo) => {
+                if (geo) {
+                  useTransactionStore.getState().updateTransaction(tx.id, {
+                    location_name: geo.shortPlaceName,
+                    district: geo.district,
+                  });
+                }
+              })
+              .catch(() => {});
           }
         })
         .catch(() => {});
