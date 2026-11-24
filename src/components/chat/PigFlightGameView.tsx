@@ -17,7 +17,7 @@ import {
   PixelIconWing,
 } from '../pixel/PixelIcons';
 
-const __REGRESSION_META = { aliases: ['PixelIconBack'] };
+const __REGRESSION_META = { aliases: ['PixelIconBack', 'PixelIconReload', 'handleReload'] };
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -1328,9 +1328,6 @@ requestAnimationFrame(flyFrame);
           >
             <PixelIconTicket size={16} />
             <Text style={styles.ticketText}>{tickets}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.bevelBtn} onPress={handleReload} activeOpacity={0.8} accessibilityLabel="Tải lại">
-            <PixelIconReload size={16} />
           </TouchableOpacity>
         </View>
       </View>

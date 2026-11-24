@@ -253,3 +253,19 @@ Màn hình Tab 3 hiển thị:
   - Toàn bộ cơ chế chăm sóc heo, cá ao, hoa hồng được tập trung duy nhất ở Tab Vườn (Home), trả lại không gian thoáng đãng cho Tab Giải trí tập trung vào 4 dịch vụ cốt lõi: Trò Chuyện Heo AI, Quán Quen, Heo Bay, Heo Qua Đường.
 - **Icon Heo Bay Lướt Gió (`Wind`):**
   - Chuyển icon game Heo bay từ lông vũ `Feather` sang `Wind` (Làn gió lượn) từ `lucide-react-native` (`strokeWidth = 2.0px`), mang lại cảm giác lượn gió bay bổng mượt mà trên nền trời Sài Gòn.
+
+---
+
+## 17. Icon Heo Qua Đường & TopBar Arcade Game Tinh Gọn (Quyết định 190)
+
+- **Icon Game Heo Qua Đường (`Footprints`):**
+  - Chuyển đổi biểu tượng trò chơi "Heo qua đường" từ icon ô tô (`Car`) sang icon **`Footprints`** (Cặp dấu chân bước đi bộ) từ `lucide-react-native` (`strokeWidth = 2.0px`).
+  - Biểu thị rõ ràng, trực quan hành động cuốc bộ sang đường né xe, tạo sự cân xứng hoàn hảo với icon lướt gió `Wind` của game Heo bay.
+  - Đồng bộ hiển thị tại thẻ game trên `PixelHubDashboard.tsx` và cụm chuyển đổi game (Pill Switcher) tại TopBar 2 game.
+- **TopBar 2 Game Arcade Tinh Gọn (Gỡ Bỏ Nút Reset/Reload Thừa):**
+  - Loại bỏ nút vuông `PixelIconReload` khỏi góc trên bên phải header của cả `PigFlightGameView.tsx` và `PigCrossRoadGameView.tsx`.
+  - Cơ chế khởi động lại / chơi lại đã được xử lý mượt mà và tức thì 0ms qua modal kết thúc in-game (`.flyover` / `.gover`), không cần và không nên reload toàn bộ WebView thô gây chớp trắng và mất lượt chơi.
+  - Cấu trúc thanh TopBar mới tinh giản thành 3 khối công thái học cân bằng:
+    1. **Bên Trái:** Nút Quay lại `[←]` (`ArrowLeft` vector sắc nét).
+    2. **Ở Giữa:** Pill chuyển đổi 2 game (Gió `Wind` ↔ Dấu chân `Footprints`).
+    3. **Bên Phải:** Chip hiển thị số vé `PixelIconTicket` kèm số lượng vé hiện có.

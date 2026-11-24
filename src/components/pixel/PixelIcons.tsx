@@ -9,6 +9,7 @@ import {
   Fish,
   Flame,
   Flower2,
+  Footprints,
   Gamepad2,
   Home,
   LocateFixed,
@@ -72,7 +73,11 @@ export const PixelIconWing: React.FC<PixelIconProps> = ({ size = 20, color = '#2
 );
 
 export const PixelIconTraffic: React.FC<PixelIconProps> = ({ size = 20, color = '#2B2118', strokeWidth = 2.0 }) => (
-  <Car size={size} color={color} strokeWidth={strokeWidth} />
+  <Footprints size={size} color={color} strokeWidth={strokeWidth} />
+);
+
+export const PixelIconFootprints: React.FC<PixelIconProps> = ({ size = 20, color = '#2B2118', strokeWidth = 2.0 }) => (
+  <Footprints size={size} color={color} strokeWidth={strokeWidth} />
 );
 
 export const PixelIconPigCoach: React.FC<PixelIconProps> = ({ size = 24, color = '#5E9A57', strokeWidth = 2.0 }) => (

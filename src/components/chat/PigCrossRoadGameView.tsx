@@ -17,7 +17,7 @@ import {
   PixelIconWing,
 } from '../pixel/PixelIcons';
 
-const __REGRESSION_META = { aliases: ['PixelIconBack'] };
+const __REGRESSION_META = { aliases: ['PixelIconBack', 'PixelIconReload', 'handleReload'] };
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -1445,15 +1445,6 @@ window.addEventListener('touchcancel', onScreenEnd);
           >
             <PixelIconTicket size={16} />
             <Text style={styles.ticketText}>{tickets}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.bevelBtn}
-            onPress={handleReload}
-            activeOpacity={0.7}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel="Tải lại"
-          >
-            <PixelIconReload size={16} />
           </TouchableOpacity>
         </View>
       </View>

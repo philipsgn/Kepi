@@ -5909,7 +5909,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       hubCode.includes('MessageSquare') &&
       hubCode.includes('MapPin') &&
       (hubCode.includes('Wind') || hubCode.includes('Feather')) &&
-      hubCode.includes('Car') &&
+      (hubCode.includes('Footprints') || hubCode.includes('Car')) &&
       hubCode.includes('PixelPigAvatar'),
     'PixelHubDashboard must render slim vector icons with theme accents while retaining PixelPigAvatar mascot'
   );
@@ -5996,4 +5996,49 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 126 Passed: Chuẩn Hóa Trang Main Tab Giải Trí (Tiêu Đề 22px Chuẩn Hồ Sơ, Bỏ Khung Việc Nhà & Icon Heo Bay Sang Wind — Quyết định 189) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 126 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (126/126)!');
+// ==========================================
+// TEST 127: ĐỔI ICON HEO QUA ĐƯỜNG SANG FOOTPRINTS & GỠ BỎ NÚT RESET/RELOAD KHỎI 2 GAME ARCADE (QUYẾT ĐỊNH 190)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const iconsCode = fs.readFileSync('src/components/pixel/PixelIcons.tsx', 'utf8');
+  const flightCode = fs.readFileSync('src/components/chat/PigFlightGameView.tsx', 'utf8');
+  const crossRoadCode = fs.readFileSync('src/components/chat/PigCrossRoadGameView.tsx', 'utf8');
+
+  // 1. Icon Heo qua đường chuyển sang Footprints mỏng 2.0px trong Hub Dashboard
+  assert.ok(
+    hubCode.includes('Footprints') &&
+      hubCode.includes('<Footprints size={28} color="#2B2118" strokeWidth={2.0} />'),
+    'PixelHubDashboard must render Footprints icon for Heo Qua Đường game'
+  );
+
+  // 2. PixelIcons export PixelIconTraffic bọc Footprints và PixelIconFootprints
+  assert.ok(
+    iconsCode.includes('Footprints') &&
+      iconsCode.includes('PixelIconTraffic') &&
+      iconsCode.includes('PixelIconFootprints'),
+    'PixelIcons must wrap Footprints in PixelIconTraffic and PixelIconFootprints'
+  );
+
+  // 3. TopBar 2 Game Arcade gỡ bỏ nút Reset/Reload bevelBtn khỏi JSX
+  assert.ok(
+    !flightCode.includes('<PixelIconReload') &&
+      !crossRoadCode.includes('<PixelIconReload'),
+    'PigFlightGameView and PigCrossRoadGameView must eliminate PixelIconReload button from rendered TopBar'
+  );
+
+  // 4. Living Documentation Sync Audit (Quyết định 190)
+  assert.ok(
+    agentsCode.includes('190') &&
+      decisionsCode.includes('190') &&
+      chatDocCode.includes('190'),
+    'AGENTS.md, DECISIONS.md, and 10-CHAT.md must document Quyết định 190'
+  );
+
+  console.log('✅ Test 127 Passed: Đổi Icon Heo Qua Đường Sang Footprints & Gỡ Bỏ Nút Reset Khỏi 2 Game Arcade (Quyết định 190) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 127 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (127/127)!');
