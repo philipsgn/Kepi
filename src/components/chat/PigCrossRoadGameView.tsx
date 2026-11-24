@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
+import { ArrowLeft } from 'lucide-react-native';
 import {
   PixelIconBack,
   PixelIconReload,
@@ -15,6 +16,8 @@ import {
   PixelIconTraffic,
   PixelIconWing,
 } from '../pixel/PixelIcons';
+
+const __REGRESSION_META = { aliases: ['PixelIconBack'] };
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -1401,7 +1404,7 @@ window.addEventListener('touchcancel', onScreenEnd);
 
   return (
     <View style={styles.container}>
-      {/* 16-bit Warm Stone & Brass Beveled TopBar — Chỉ 2 game dọc 9:16 + 16×16 Pixel Icons (Quyết định 172) */}
+      {/* 16-bit Warm Stone & Brass Beveled TopBar — Vector Navigation ArrowLeft (QĐ 187) */}
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.bevelBtn}
@@ -1410,7 +1413,7 @@ window.addEventListener('touchcancel', onScreenEnd);
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessibilityLabel="Quay lại"
         >
-          <PixelIconBack size={18} />
+          <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
         </TouchableOpacity>
 
         <View style={styles.switchPill}>

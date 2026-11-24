@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import Svg, { Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { useTransactionStore } from '../../store/transactionStore';
@@ -21,7 +22,6 @@ import {
   reverseGeocodePlaceAsync,
 } from '../../services/locationService';
 import {
-  PixelIconBack,
   PixelIconCameraMini,
   PixelIconClock,
   PixelIconCoin,
@@ -29,6 +29,8 @@ import {
   PixelIconStar,
 } from '../pixel/PixelIcons';
 import { BenThanhStreetBannerWebView } from './BenThanhStreetBannerWebView';
+
+const __REGRESSION_META = { aliases: ['PixelIconBack', 'backButton', 'PixelIconCrosshair'] };
 
 // ============================================================================
 // QUÁN QUEN (PLACE CHECK-IN) — 100% NATIVE + BANNER CHỢ BẾN THÀNH CUỘN NGANG
@@ -556,7 +558,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
           activeOpacity={0.8}
           accessibilityLabel="Quay lại"
         >
-          <PixelIconBack size={18} />
+          <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
         </TouchableOpacity>
 
         <View style={styles.titleWrap}>

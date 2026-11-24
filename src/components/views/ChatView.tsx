@@ -26,9 +26,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { formatCategoryName } from '../../constants/categoryDefaults';
 import { formatVND } from '../../utils/currency';
 import { useTheme } from '../../theme/ThemeContext';
+import { ArrowLeft } from 'lucide-react-native';
 import { radii } from '../../theme/tokens';
 import { useBottomInset } from '../../hooks/useBottomInset';
-import { PixelIconBack, PixelIconPigCoach } from '../pixel/PixelIcons';
+import { PixelIconPigCoach } from '../pixel/PixelIcons';
 import { PixelHubDashboard, SubViewType } from '../chat/PixelHubDashboard';
 import { PigFlightGameView } from '../chat/PigFlightGameView';
 import { PigCrossRoadGameView } from '../chat/PigCrossRoadGameView';
@@ -456,7 +457,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           }}
           activeOpacity={0.8}
         >
-          <PixelIconBack size={18} />
+          <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
         </TouchableOpacity>
 
         <View style={styles.chatTitleCol}>

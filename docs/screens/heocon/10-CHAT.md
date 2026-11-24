@@ -206,6 +206,16 @@ Màn hình Tab 3 hiển thị:
 - **Trò Chuyện Heo AI (`ChatView.tsx` + `CafeChatBannerWebView.tsx`):**
   - Bỏ hoàn toàn `"Hội Bạn Thân (Squad)"` khỏi Chat và Hub (PLAN 17).
   - Banner Quán Cà Phê Sài Gòn `144×96` pixelated port 1:1 `cbStatic`/`cbDraw`, 2 bong bóng thoại `.bnb.me` & `.bnb.ai` nổi trên banner, giữ danh sách tin nhắn cuộn bình thường (`FlatList`) bên dưới, 5 chip gợi ý nhanh & giọng văn heo (`"heo"` / `"bạn"`).
-- **100% Icon Pixel Art & Đồng Bộ Đa Tab:**
-  - Chuyển đổi toàn bộ icon trong Hub, Chat, Quán Quen VÀ 5 icon thanh Bottom Tab Bar (`FloatingPillTabBar`) sang SVG Pixel Art (`PixelIcons.tsx`).
+- **100% Icon Pixel Art & Đồng Bộ Đa Tab (QĐ 185):**
+  - Chuyển đổi toàn bộ icon trong Hub, Chat, Quán Quen sang SVG Pixel Art (`PixelIcons.tsx`).
   - Hub hiển thị 3 thanh Việc nhà (`Heo`, `Cá ao`, `Hoa hồng`) đồng bộ Backend `gamificationStore`, Game `Heo Bay` và câu trả lời của Heo AI; 4 Cổng Phòng từ Tab Nhà (`StatsView`) điều hướng thẳng tới Hồ sơ / Game / Quán Quen / Trò chuyện Heo AI.
+
+---
+
+## 14. Phân Tầng Icon Hợp Lý — Hybrid Icon Hierarchy (Quyết định 187)
+
+- **Khung Điều Hướng Hệ Thống (Vector Icons):**
+  - Thanh Tab Bar nổi (`FloatingPillTabBar`): 5 icon Vector Lucide `Trees` (Vườn), `Home` (Nhà), `Camera` (Chụp), `Gamepad2` (Giải trí), `User` (Hồ sơ).
+  - Nút Back ở TopBar các màn hình (`ChatView`, `Quán Quen`, `Heo Bay`, `Heo Qua Đường`): Icon Vector `ArrowLeft` từ `lucide-react-native` (size 18, viền 2.8px mực `#2B2118`).
+- **Body, Deepbody & Micro-items (Pixel Art Icons):**
+  - Giữ nguyên 100% đồ họa Pixel Art SVG cho nội dung: Game Arcade HUD (vé `PixelIconTicket`, cám, cúp, cánh, xe), 3 Việc nhà (Lửa, Cá, Hoa), 8 Glyphs 5×5 ẩm thực, con dấu quận xoay góc, chip lọc vi mô (`PixelIconClock`, `PixelIconStar`, `PixelIconCoin`) và Banner WebViews.

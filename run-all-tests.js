@@ -4229,7 +4229,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(chatViewCode.includes('‹ Trung tâm Heo Con') || chatViewCode.includes('‹ Quay lại Hub') || chatViewCode.includes('‹ Giải trí') || chatViewCode.includes('hubBackButton'), 'ChatView must use back button');
   assert.ok(flightGameCode.includes('‹ Trung tâm Heo Con') || flightGameCode.includes('backButton') || flightGameCode.includes('bevelBtn'), 'PigFlightGameView must use back button');
   if (shooterGameCode) assert.ok(shooterGameCode.includes('‹ Trung tâm Heo Con') || shooterGameCode.includes('backButton'), 'PigShooterGameView must use back button');
-  assert.ok(mapGameCode.includes('‹ Trung tâm Heo Con') || mapGameCode.includes('backButton') || mapGameCode.includes('PixelIconBack'), 'PiggySpendMapView must use back button');
+  assert.ok(mapGameCode.includes('‹ Trung tâm Heo Con') || mapGameCode.includes('backButton') || mapGameCode.includes('PixelIconBack') || mapGameCode.includes('ArrowLeft'), 'PiggySpendMapView must use back button');
 
   // 4. ProfileDeskBanner 6 Hotspots & Quick Jump Bar
   assert.ok(deskBannerCode.includes('hotspot'), 'ProfileDeskBanner must support interactive hotspots');
@@ -4888,7 +4888,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok((flightCode.includes('ArrowLeft') || flightCode.includes('PixelIconBack')) && (flightCode.includes('backButton') || flightCode.includes('bevelBtn')), 'PigFlightGameView must use icon-only back button');
   if (shooterCode) assert.ok(shooterCode.includes('ArrowLeft') && shooterCode.includes('backButton'), 'PigShooterGameView must use icon-only ArrowLeft back button');
   assert.ok((crossRoadCode.includes('ArrowLeft') || crossRoadCode.includes('PixelIconBack')) && (crossRoadCode.includes('backButton') || crossRoadCode.includes('bevelBtn')), 'PigCrossRoadGameView must use icon-only back button');
-  assert.ok((spendMapCode.includes('ArrowLeft') && spendMapCode.includes('backButton')) || (spendMapCode.includes('PixelIconBack') && spendMapCode.includes('iconBtn')), 'PiggySpendMapView must use icon-only back button');
+  assert.ok((spendMapCode.includes('ArrowLeft') || spendMapCode.includes('PixelIconBack')) && (spendMapCode.includes('backButton') || spendMapCode.includes('iconBtn')), 'PiggySpendMapView must use icon-only back button');
   assert.ok((chatViewCode.includes('ArrowLeft') || chatViewCode.includes('PixelIconBack')) && chatViewCode.includes('hubBackButton'), 'ChatView must use icon-only back button');
 
   // 3. Phóng to khung game & Tối giản hoá giao diện trong game:
@@ -5153,7 +5153,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 4. Header tối giản không đường kẻ ngang, focus icon pixel 16×16 & đệm đáy 110px
   assert.ok(mapCode.includes('borderBottomWidth: 0'), 'PiggySpendMapView header must remove horizontal divider line');
-  assert.ok(mapCode.includes('PixelIconBack') && mapCode.includes('PixelIconMapPin') && (mapCode.includes('PixelIconReload') || mapCode.includes('PixelIconCrosshair')), 'PiggySpendMapView header must use 16x16 pixel icons');
+  assert.ok((mapCode.includes('PixelIconBack') || mapCode.includes('ArrowLeft')) && mapCode.includes('PixelIconMapPin') && (mapCode.includes('PixelIconReload') || mapCode.includes('PixelIconCrosshair')), 'PiggySpendMapView header must use 16x16 pixel icons');
   assert.ok(mapCode.includes('padding: 4px 12px 110px') || mapCode.includes('paddingBottom: 110'), 'PiggySpendMapView must reserve 110px bottom padding to prevent Tab Bar overlap');
 
   // 5. Living Documentation Sync Audit (Quyết định 175)
@@ -5660,18 +5660,17 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'ChatView must integrate 144x96 CafeChatBannerWebView with floating bubbles and scrollable FlatList, with zero Squad'
   );
 
-  // 4. Đồng bộ 100% Pixel Art Icons (FloatingPillTabBar, Hub, Chat, Quán Quen)
+  // 4. Đồng bộ Icon Art (FloatingPillTabBar hỗ trợ QĐ 185 hoặc QĐ 187 Vector Navigation, Hub/Body 100% Pixel Art)
   assert.ok(
     iconsCode.includes('PixelIconTabGarden') &&
       iconsCode.includes('PixelIconTabCamera') &&
       iconsCode.includes('PixelIconFlame') &&
       iconsCode.includes('PixelIconFish') &&
       iconsCode.includes('PixelIconRose') &&
-      tabBarCode.includes('PixelIconTabGarden') &&
-      tabBarCode.includes('PixelIconTabFun') &&
-      !tabBarCode.includes('lucide-react-native') &&
+      ((tabBarCode.includes('PixelIconTabGarden') && !tabBarCode.includes('lucide-react-native')) ||
+        (tabBarCode.includes('Trees') && tabBarCode.includes('lucide-react-native'))) &&
       !hubCode.includes('lucide-react-native'),
-    'FloatingPillTabBar, PixelHubDashboard, and Chat/Quán Quen must use 100% Pixel Art SVG icons'
+    'FloatingPillTabBar must use valid design tokens navigation icons and Hub must use Pixel Art'
   );
 
   // 5. Đồng bộ Backend Việc nhà 3 chỉ số & Cổng phòng Nhà của Heo
@@ -5787,4 +5786,84 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 123 Passed: Chuẩn Hóa Production Zero-Hardcode Vị Trí, Xin Quyền Camera & Vị Trí Lần Đầu, Quản Lý Quyền Ở Cài Đặt & Tối Giản Quán Quen (Quyết định 186) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 123 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (123/123)!');
+// ==========================================
+// TEST 124: CHUẨN HÓA PHÂN TẦNG ICON HỢP LÝ (HYBRID ICON HIERARCHY — QUYẾT ĐỊNH 187)
+// - Vỏ Điều Hướng Hệ Thống (Bottom Bar & Nút Back): Vector crisp từ lucide-react-native
+// - Nội Dung Thân (Body, DeepBody, Micro-Items): Pixel Art SVG từ PixelIcons & Canvas
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const tabBarCode = fs.readFileSync('src/components/navigation/FloatingPillTabBar.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const flightCode = fs.readFileSync('src/components/chat/PigFlightGameView.tsx', 'utf8');
+  const crossRoadCode = fs.readFileSync('src/components/chat/PigCrossRoadGameView.tsx', 'utf8');
+  const iconsCode = fs.readFileSync('src/components/pixel/PixelIcons.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+
+  // 1. Bottom Bar chuyển về Vector Icons chuẩn (Trees, Home, Camera, Gamepad2, User) từ lucide-react-native
+  assert.ok(
+    tabBarCode.includes("from 'lucide-react-native'") &&
+      tabBarCode.includes('Trees') &&
+      tabBarCode.includes('Home') &&
+      tabBarCode.includes('Camera') &&
+      tabBarCode.includes('Gamepad2') &&
+      tabBarCode.includes('User') &&
+      !tabBarCode.includes('PixelIconTabGarden'),
+    'FloatingPillTabBar.tsx must use crisp vector navigation icons from lucide-react-native (QĐ 187)'
+  );
+
+  // 2. Nút Quay Lại (Header Back) across sub-views chuyển về Vector ArrowLeft
+  assert.ok(
+    chatViewCode.includes("import { ArrowLeft } from 'lucide-react-native'") &&
+      chatViewCode.includes('<ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />'),
+    'ChatView.tsx must use crisp vector ArrowLeft for top back navigation button'
+  );
+  assert.ok(
+    mapCode.includes("import { ArrowLeft } from 'lucide-react-native'") &&
+      mapCode.includes('<ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />'),
+    'PiggySpendMapView.tsx must use crisp vector ArrowLeft for top back navigation button'
+  );
+  assert.ok(
+    flightCode.includes("import { ArrowLeft } from 'lucide-react-native'") &&
+      flightCode.includes('<ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />'),
+    'PigFlightGameView.tsx must use crisp vector ArrowLeft for top back navigation button'
+  );
+  assert.ok(
+    crossRoadCode.includes("import { ArrowLeft } from 'lucide-react-native'") &&
+      crossRoadCode.includes('<ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />'),
+    'PigCrossRoadGameView.tsx must use crisp vector ArrowLeft for top back navigation button'
+  );
+
+  // 3. Body, DeepBody & Micro-Items giữ trọn vẹn Pixel Art SVG
+  assert.ok(
+    iconsCode.includes('export const PixelIconFlame') &&
+      iconsCode.includes('export const PixelIconFish') &&
+      iconsCode.includes('export const PixelIconRose') &&
+      iconsCode.includes('export const PixelIconTicket') &&
+      iconsCode.includes('export const PixelIconClock') &&
+      hubCode.includes('PixelIconFlame') &&
+      hubCode.includes('PixelIconFish') &&
+      hubCode.includes('PixelIconRose') &&
+      mapCode.includes('PixelIconClock') &&
+      mapCode.includes('PixelIconStar') &&
+      mapCode.includes('PIXEL_KINDS'),
+    'Body, DeepBody, Chores & Micro-items must retain 100% pixel art SVG iconography'
+  );
+
+  // 4. Living Documentation Sync Audit (Quyết định 187 & Hybrid Icon Hierarchy Rule)
+  assert.ok(
+    agentsCode.includes('HYBRID ICON HIERARCHY') &&
+      agentsCode.includes('187') &&
+      decisionsCode.includes('187') &&
+      chatDocCode.includes('187') &&
+      chatDocCode.includes('Phân Tầng Icon Hợp Lý'),
+    'AGENTS.md, DECISIONS.md, and 10-CHAT.md must document Quyết định 187 and Hybrid Icon Hierarchy rule'
+  );
+
+  console.log('✅ Test 124 Passed: Chuẩn Hóa Phân Tầng Icon Hợp Lý (Hybrid Icon Hierarchy: Vector Navigation Shell & Pixel Art Body/Micro-Items — Quyết định 187) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 124 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (124/124)!');
