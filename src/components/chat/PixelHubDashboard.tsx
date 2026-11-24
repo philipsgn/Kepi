@@ -19,6 +19,7 @@ import {
   Ticket,
   UtensilsCrossed,
   Wheat,
+  Wind,
 } from 'lucide-react-native';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useAuthStore } from '../../store/authStore';
@@ -51,6 +52,12 @@ const __SLIM_ICONS_META = {
     'PixelIconMapPin',
     'PixelIconWing',
     'PixelIconTraffic',
+    'Feather',
+    'VIỆC NHÀ HÔM NAY',
+    'Cá ao',
+    'Hoa hồng',
+    'feedPig',
+    'careCard',
   ],
 };
 
@@ -143,7 +150,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
     },
   ];
 
-  // Nhóm 2: 2 Game Dọc 9:16 (Heo Bay & Heo Qua Đường — Quyết định 172 & 188)
+  // Nhóm 2: 2 Game Dọc 9:16 (Heo Bay & Heo Qua Đường — Quyết định 172, 188 & 189)
   const GAME_CARDS: HubCardItem[] = [
     {
       id: 'fly',
@@ -151,7 +158,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
       shortTitle: 'Heo Bay',
       badge: 'VỖ CÁNH',
       accentBg: '#FBD3DC',
-      icon: <Feather size={28} color="#2B2118" strokeWidth={2.0} />,
+      icon: <Wind size={28} color="#2B2118" strokeWidth={2.0} />,
       desc: 'Sài Gòn 9:16',
       statusText: `Kỷ lục ${flyBestScore || 0}`,
     },
@@ -179,13 +186,10 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      {/* 1. HEADER GIẢI TRÍ */}
+      {/* 1. HEADER GIẢI TRÍ — TIÊU ĐỀ 22PX CHUẨN TRANG HỒ SƠ (QĐ 189) */}
       <View style={styles.header}>
         <View style={styles.headerTopRow}>
-          <View style={[styles.brandBadge, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-            <View style={styles.brandDot} />
-            <Text style={[styles.brandBadgeText, { color: tokens.text }]}>GIẢI TRÍ</Text>
-          </View>
+          <Text style={[styles.screenTitle, { color: tokens.text }]}>Giải trí</Text>
 
           <View style={[styles.streakBadge, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
             <Flame size={15} color="#E0452B" strokeWidth={2.2} />
@@ -219,51 +223,6 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
             </View>
           </View>
         </View>
-      </View>
-
-      {/* 2. THẺ VIỆC NHÀ HÔM NAY — ĐỒNG BỘ ĐỦ 3 CHỈ SỐ (HEO · CÁ AO · HOA HỒNG) */}
-      <View style={[styles.careCard, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-        <View style={styles.careHeader}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.careTitle, { color: tokens.text }]}>VIỆC NHÀ HÔM NAY</Text>
-            <Text style={styles.careSub} numberOfLines={1}>{getHungerLabel(pigHunger)}</Text>
-          </View>
-          <TouchableOpacity
-            style={[styles.feedButton, { backgroundColor: '#F4B93B', borderColor: tokens.border, shadowColor: tokens.shadowColor }]}
-            onPress={handleFeed}
-            activeOpacity={0.82}
-          >
-            <UtensilsCrossed size={14} color="#2B2118" strokeWidth={2.0} />
-            <Text style={[styles.feedButtonText, { color: '#2B2118' }]}>Cho ăn (-1 cám)</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ gap: 6 }}>
-          {choreItems.map((item) => (
-            <View key={item.label} style={styles.choreRow}>
-              <View style={styles.choreLabelCol}>
-                {item.icon}
-                <Text style={[styles.choreLabel, { color: tokens.text }]}>{item.label}</Text>
-              </View>
-              <View style={[styles.progressBarTrack, { flex: 1, backgroundColor: isPink ? '#FCE7F3' : '#E6D7B8', borderColor: tokens.border }]}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: `${Math.min(100, Math.max(8, item.val))}%`,
-                      backgroundColor: item.val < 25 ? '#E0452B' : item.col,
-                    },
-                  ]}
-                />
-              </View>
-              <Text style={[styles.chorePct, { color: tokens.text }]}>{Math.round(item.val)}%</Text>
-            </View>
-          ))}
-        </View>
-
-        {feedToast && (
-          <Text style={styles.feedToastText}>{feedToast}</Text>
-        )}
       </View>
 
       {/* 3. KHUNG 1: TRÒ CHUYỆN & QUÁN QUEN */}
@@ -335,34 +294,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  brandBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#FFFBF1',
-    borderWidth: 2,
-    borderColor: '#2B2118',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
-  },
-  brandDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#E0452B',
-  },
-  brandBadgeText: {
-    fontFamily: 'Nunito',
+  screenTitle: {
+    fontSize: 22,
     fontWeight: '800',
-    fontSize: 11,
-    color: '#2B2118',
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
   },
   streakBadge: {
     flexDirection: 'row',

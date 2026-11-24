@@ -5904,13 +5904,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   // 2. Hub Dashboard sử dụng trực tiếp Vector Icons mỏng với Subtle Theme Accents
   assert.ok(
     hubCode.includes('Flame size={15} color="#E0452B"') &&
-      hubCode.includes('Fish size={15} color="#2563EB"') &&
-      hubCode.includes('Flower2 size={15} color="#E11D48"') &&
       hubCode.includes('Ticket size={18} color="#D97706"') &&
       hubCode.includes('Wheat size={18} color="#D97706"') &&
       hubCode.includes('MessageSquare') &&
       hubCode.includes('MapPin') &&
-      hubCode.includes('Feather') &&
+      (hubCode.includes('Wind') || hubCode.includes('Feather')) &&
       hubCode.includes('Car') &&
       hubCode.includes('PixelPigAvatar'),
     'PixelHubDashboard must render slim vector icons with theme accents while retaining PixelPigAvatar mascot'
@@ -5951,4 +5949,51 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 125 Passed: Chuẩn Hóa Toàn Bộ Icon Vector Mỏng Đơn Sắc Chuẩn Theme (Slim Monochrome Vector Icons — Quyết định 188) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 125 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (125/125)!');
+// ==========================================
+// TEST 126: CHUẨN HÓA TRANG MAIN TAB GIẢI TRÍ — TIÊU ĐỀ 22PX CHUẨN HỒ SƠ, BỎ KHUNG VIỆC NHÀ & ICON HEO BAY SANG WIND (QUYẾT ĐỊNH 189)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const iconsCode = fs.readFileSync('src/components/pixel/PixelIcons.tsx', 'utf8');
+
+  // 1. Tiêu đề Giải trí chữ lớn 22px fontWeight 800 chuẩn Hồ Sơ, bỏ brandBadge và brandDot
+  assert.ok(
+    hubCode.includes('styles.screenTitle') &&
+      hubCode.includes('Giải trí') &&
+      hubCode.includes('fontSize: 22') &&
+      hubCode.includes("fontWeight: '800'") &&
+      !hubCode.includes('styles.brandBadge') &&
+      !hubCode.includes('styles.brandDot'),
+    'PixelHubDashboard must render 22px standalone title Giải trí and eliminate brandBadge/brandDot'
+  );
+
+  // 2. Loại bỏ hoàn toàn khung careCard Việc nhà hôm nay khỏi JSX của Hub
+  assert.ok(
+    !hubCode.includes('<View style={[styles.careCard') &&
+      !hubCode.includes('<View style={styles.careCard'),
+    'PixelHubDashboard must eliminate careCard from rendered JSX'
+  );
+
+  // 3. Icon Heo bay chuyển sang Wind (Làn gió lượn) mỏng 2.0px
+  assert.ok(
+    hubCode.includes('Wind') &&
+      iconsCode.includes('Wind') &&
+      iconsCode.includes('PixelIconWing'),
+    'PixelHubDashboard and PixelIcons must use Wind icon for Heo Bay flight game'
+  );
+
+  // 4. Living Documentation Sync Audit (Quyết định 189)
+  assert.ok(
+    agentsCode.includes('189') &&
+      decisionsCode.includes('189') &&
+      chatDocCode.includes('189'),
+    'AGENTS.md, DECISIONS.md, and 10-CHAT.md must document Quyết định 189'
+  );
+
+  console.log('✅ Test 126 Passed: Chuẩn Hóa Trang Main Tab Giải Trí (Tiêu Đề 22px Chuẩn Hồ Sơ, Bỏ Khung Việc Nhà & Icon Heo Bay Sang Wind — Quyết định 189) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 126 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (126/126)!');

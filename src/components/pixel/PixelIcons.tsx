@@ -25,6 +25,7 @@ import {
   Users,
   UtensilsCrossed,
   Wheat,
+  Wind,
 } from 'lucide-react-native';
 
 /**
@@ -67,7 +68,7 @@ export const PixelIconTicket: React.FC<PixelIconProps> = ({ size = 18, color = '
 );
 
 export const PixelIconWing: React.FC<PixelIconProps> = ({ size = 20, color = '#2B2118', strokeWidth = 2.0 }) => (
-  <Feather size={size} color={color} strokeWidth={strokeWidth} />
+  <Wind size={size} color={color} strokeWidth={strokeWidth} />
 );
 
 export const PixelIconTraffic: React.FC<PixelIconProps> = ({ size = 20, color = '#2B2118', strokeWidth = 2.0 }) => (

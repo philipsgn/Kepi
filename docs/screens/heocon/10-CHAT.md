@@ -239,3 +239,17 @@ Màn hình Tab 3 hiển thị:
   - Giữ nguyên avatar linh vật Heo Con 24×20 (`PixelPigAvatar`) để bảo vệ linh hồn nhận diện thương hiệu của app.
 - **Kiến Trúc Tương Thích Ngược:**
   - `src/components/pixel/PixelIcons.tsx` đóng vai trò Vector Wrappers mỏng chuẩn `lucide-react-native`, đảm bảo không làm gãy các module hiện có và duy trì 100% kiểm thử hồi quy.
+
+---
+
+## 16. Chuẩn Hóa Trang Main Tab Giải Trí (Quyết định 189)
+
+- **Tiêu Đề Giải Trí Chuẩn Trang Hồ Sơ:**
+  - Bỏ huy hiệu con nhộng `brandBadge` và dấu chấm `brandDot` trước chữ Giải trí.
+  - Sử dụng tiêu đề `<Text style={styles.screenTitle}>Giải trí</Text>` kích thước 22px, `fontWeight: '800'`, `letterSpacing: 0.5` đồng bộ hoàn toàn với `ProfileView.tsx`.
+  - Phía bên phải giữ nguyên huy hiệu Streak ngọn lửa cam đỏ `Flame` viền 2.2px cân đối.
+- **Loại Bỏ Khung Việc Nhà Khỏi Hub:**
+  - Gỡ bỏ hoàn toàn thẻ `careCard` ("Việc nhà hôm nay") khỏi Tab Giải trí.
+  - Toàn bộ cơ chế chăm sóc heo, cá ao, hoa hồng được tập trung duy nhất ở Tab Vườn (Home), trả lại không gian thoáng đãng cho Tab Giải trí tập trung vào 4 dịch vụ cốt lõi: Trò Chuyện Heo AI, Quán Quen, Heo Bay, Heo Qua Đường.
+- **Icon Heo Bay Lướt Gió (`Wind`):**
+  - Chuyển icon game Heo bay từ lông vũ `Feather` sang `Wind` (Làn gió lượn) từ `lucide-react-native` (`strokeWidth = 2.0px`), mang lại cảm giác lượn gió bay bổng mượt mà trên nền trời Sài Gòn.
