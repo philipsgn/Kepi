@@ -269,3 +269,17 @@ Màn hình Tab 3 hiển thị:
     1. **Bên Trái:** Nút Quay lại `[←]` (`ArrowLeft` vector sắc nét).
     2. **Ở Giữa:** Pill chuyển đổi 2 game (Gió `Wind` ↔ Dấu chân `Footprints`).
     3. **Bên Phải:** Chip hiển thị số vé `PixelIconTicket` kèm số lượng vé hiện có.
+
+---
+
+## 18. Đồng Bộ Sprite Heo 24×20 Chuẩn Tab Vườn & Header Chat Tinh Giản (Quyết định 191)
+
+- **Đồng Bộ Sprite Heo 24×20 (Chữa Dứt Điểm Heo Béo):**
+  - Cả `CafeChatBannerWebView.tsx` (Quán Cà Phê Sài Gòn) và `BenThanhStreetBannerWebView.tsx` (Phố Ẩm Thực Chợ Bến Thành) chuyển sang sử dụng 100% hàm vẽ `drawPigSprite` chuẩn 1:1 từ `PixelGardenWebView.tsx` và `prototype/Ví Heo Con.html`.
+  - Khôi phục tỷ lệ 24×20, 4 chân thon gọn nhấc bước so le (`raised`), thân cong 11-13px, đầu mõm tách biệt và khe tiền vàng trên lưng. Heo AI xanh pastel đội ăng-ten đỉnh đầu và Heo chủ hồng dạo phố/uống cà phê đồng nhất hình ảnh thương hiệu với Tab Vườn.
+- **Header Trò Chuyện Tối Giản:**
+  - Gỡ bỏ hoàn toàn icon ngôi sao tĩnh (`styles.coachBadge`) không có chức năng ở góc trên phải.
+  - Xóa dòng subtitle phụ `"Heo AI ngồi quán cà phê, chạy ngay trong máy"`.
+  - Tiêu đề chữ lớn `Trò chuyện` (22px `Baloo2_800ExtraBold`, màu mực `#2B2118`) đặt ngay cạnh nút Quay lại `[←]`, bên phải để trống thoáng đãng.
+- **Gỡ Bỏ Text Riêng Tư Chân Trang:**
+  - Xóa dòng `"Heo AI chạy ngay trong máy, đọc số liệu tổng hợp. Ảnh và vị trí không được gửi đi."` phía trên khung nhập liệu để tối ưu không gian hiển thị tin nhắn trên màn hình mobile.

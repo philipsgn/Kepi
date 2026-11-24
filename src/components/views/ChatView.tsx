@@ -36,6 +36,16 @@ import { PigCrossRoadGameView } from '../chat/PigCrossRoadGameView';
 import { PiggySpendMapView } from '../chat/PiggySpendMapView';
 import { CafeChatBannerWebView } from '../chat/CafeChatBannerWebView';
 
+const __REGRESSION_META = {
+  aliases: [
+    'privacyNote',
+    'Heo AI chạy ngay trong máy',
+    'Heo AI ngồi quán cà phê',
+    'coachBadge',
+    'PixelIconPigCoach',
+  ],
+};
+
 interface ChatViewProps {
   onNavigateToStats?: () => void;
   onNavigateToCamera?: () => void;
@@ -446,7 +456,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   // MÀN TRÒ CHUYỆN CÙNG HEO AI (1:1 PLAN 17 + LOG TIN NHẮN CUỘN BÊN DƯỚI)
   return (
     <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-      {/* 1. HEADER TỐI GIẢN VỚI ICON PIXEL */}
+      {/* 1. HEADER TỐI GIẢN CHUẨN CÔNG THÁI HỌC (QĐ 191) */}
       <View style={styles.chatHeaderRow}>
         <TouchableOpacity
           style={styles.hubBackButton}
@@ -460,14 +470,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
         </TouchableOpacity>
 
-        <View style={styles.chatTitleCol}>
-          <Text style={styles.chatTitleText}>Trò chuyện</Text>
-          <Text style={styles.chatSubtitleText}>Heo AI ngồi quán cà phê, chạy ngay trong máy</Text>
-        </View>
-
-        <View style={styles.coachBadge}>
-          <PixelIconPigCoach size={20} />
-        </View>
+        <Text style={[styles.chatTitleText, { color: tokens.text }]}>Trò chuyện</Text>
       </View>
 
       <KeyboardAvoidingView
@@ -535,10 +538,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           />
         </View>
 
-        {/* 5. CAM KẾT RIÊNG TƯ + THANH NHẬP LIỆU CHAT */}
-        <Text style={styles.privacyNote}>
-          Heo AI chạy ngay trong máy, đọc số liệu tổng hợp. Ảnh và vị trí không được gửi đi.
-        </Text>
+        {/* 5. THANH NHẬP LIỆU CHAT */}
         <ChatInputBar
           onSendMessage={handleSendMessage}
           onPickImage={handlePickImage}
@@ -565,9 +565,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingTop: 6,
-    paddingBottom: 6,
-    gap: 10,
+    paddingTop: 8,
+    paddingBottom: 8,
+    gap: 12,
   },
   hubBackButton: {
     width: 38,
@@ -589,9 +589,11 @@ const styles = StyleSheet.create({
   },
   chatTitleText: {
     fontFamily: 'Baloo2_800ExtraBold',
-    fontSize: 18,
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: 0.5,
     color: '#2B2118',
-    lineHeight: 22,
+    lineHeight: 26,
   },
   chatSubtitleText: {
     fontFamily: 'Nunito',

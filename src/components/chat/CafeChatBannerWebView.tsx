@@ -179,27 +179,31 @@ function shape(c,rows,fill,ox,oy){
   for(var i=0;i<rows.length;i++)c.fillRect(ox+rows[i][1],oy+rows[i][0],rows[i][2]-rows[i][1]+1,1);
 }
 function drawPigSprite(c,o){
-  var ox=0,oy=0,pose=o.pose||'stand',eat=pose==='eat';
-  var body=eat?[[6,4,15],[7,3,16],[8,3,17],[9,3,17],[10,3,16],[11,4,16],[12,5,15],[13,6,14]]
-    :[[4,5,13],[5,4,15],[6,3,16],[7,3,17],[8,3,17],[9,3,17],[10,3,16],[11,4,15],[12,5,14]];
-  var earB=eat?[[5,12,13],[6,11,13]]:[[2,11,12],[3,10,13],[4,10,13]];
-  var earF=eat?[[5,9,10],[6,8,10]]:[[2,7,9],[3,7,9],[4,7,9]];
-  shape(c,earB,PAL.s,ox,oy);
-  var legB=[[12,6,7],[13,6,7],[14,6,7]], legF=[[12,12,13],[13,12,13],[14,12,13]];
-  shape(c,legB,PAL.s,ox,oy);shape(c,legF,PAL.p,ox,oy);
-  shape(c,body,PAL.p,ox,oy);
-  R(c,ox+7,oy+6,6,1,PAL.h);R(c,ox+8,oy+5,4,1,PAL.h);
-  shape(c,earF,PAL.p,ox,oy);
-  R(c,ox+(eat?9:8),oy+3,1,1,PAL.s);
-  var hy=oy+(eat?2:0);
-  R(c,ox+16,hy+7,2,3,PAL.n);R(c,ox+18,hy+8,1,2,PAL.o);
-  if(eat){R(c,ox+14,hy+8,2,1,PAL.k);}
-  else if(o.happy){R(c,ox+13,hy+6,2,1,PAL.k);R(c,ox+13,hy+7,1,1,PAL.k);R(c,ox+14,hy+7,1,1,PAL.k);}
-  else if(o.blink){R(c,ox+13,hy+7,2,1,PAL.k);}
-  else{R(c,ox+13,hy+6,2,2,PAL.k);R(c,ox+13,hy+6,1,1,PAL.w);}
-  R(c,ox+12,hy+9,2,1,PAL.s);
-  R(c,ox+13,hy+10,2,2,PAL.g);R(c,ox+13,hy+11,1,1,PAL.G);
-  R(c,ox+2,oy+7,2,1,PAL.o);R(c,ox+1,oy+8,2,1,PAL.p);
+  var ox=1,oy=3,sleep=o.pose==='sleep',eat=o.pose==='eat',walk=o.pose==='walk',sad=o.mood==='sad'&&!o.happy;
+  var bob=(walk&&o.frame===1)?-1:0;
+  var bodyDy=sleep?3:bob,headDy=sleep?5:eat?4:sad?1:bob,headDx=sleep?-1:eat?1:0;
+  if(!sleep){
+    var raised=function(i){return walk&&(o.frame===0?(i===1||i===2):(i===0||i===3));};
+    var legs=[[3,PAL.p],[9,PAL.p],[6,PAL.s],[12,PAL.s]];
+    [2,3,0,1].forEach(function(i){var x=legs[i][0];
+      var rows=[[11,x,x+1],[12,x,x+1],[13,x,x+1]];if(!raised(i))rows.push([14,x,x+1]);
+      shape(c,rows,legs[i][1],ox,oy);});
+  }
+  shape(c,[[4,0,1],[5,0,0],[6,0,1]],PAL.p,ox,oy+bodyDy+(o.tail?1:0));
+  shape(c,[[4,4,12],[5,3,13],[6,2,14],[7,2,14],[8,2,14],[9,2,14],[10,2,14],[11,3,13]],PAL.p,ox,oy+bodyDy);
+  R(c,ox+5,oy+bodyDy+5,3,1,PAL.h);
+  var hx=ox+headDx,hy=oy+headDy,hp=function(x,y,col){R(c,hx+x,hy+y,1,1,col);};
+  shape(c,[[6,20,21],[7,20,21],[8,20,21]],PAL.n,hx,hy);
+  shape(c,[[3,14,18],[4,13,19],[5,13,19],[6,13,19],[7,13,19],[8,13,19],[9,14,18]],PAL.p,hx,hy);
+  shape(c,[[1,15,16],[2,14,17]],PAL.p,hx,hy);R(c,hx+14,hy+3,5,1,PAL.p);hp(16,2,PAL.s);
+  R(c,hx+14,hy+4,2,1,PAL.h);
+  hp(21,6,PAL.k);hp(21,8,PAL.k);
+  if(o.happy){hp(16,6,PAL.k);hp(17,5,PAL.k);hp(18,6,PAL.k);}
+  else if(o.blink||sleep||eat){hp(16,6,PAL.k);hp(17,6,PAL.k);}
+  else{R(c,hx+16,hy+5,2,2,PAL.k);hp(16,5,PAL.w);}
+  if(sad){hp(16,4,PAL.k);hp(17,3,PAL.k);hp(18,7,'#7EC8F0');hp(18,8,'#7EC8F0');}
+  else{hp(17,8,PAL.s);hp(18,8,PAL.s);}
+  R(c,ox+11,oy+bodyDy+9,2,1,PAL.g);R(c,ox+11,oy+bodyDy+10,2,1,PAL.G);
 }
 function drawFace(c){
   R(c,3,3,10,10,PAL.p);R(c,2,5,12,6,PAL.p);R(c,3,2,3,2,PAL.p);R(c,10,2,3,2,PAL.p);
@@ -301,14 +305,15 @@ function cbPig(x,px,who,t){
   if(who==='ai'){PAL.p='#BFDDF2';PAL.s='#8FB9DB';PAL.n='#9CC4E2';PAL.h='#EAF6FF';}
   var sip=((t+(who==='ai'?3:0))%7)<1.1 && st.talk<=0 && !(who==='ai'&&CB.think);
   hpx.clearRect(0,0,24,20);
-  drawPigSprite(hpx,{pose:sip?'eat':'stand',happy:(st.talk>0&&(((t*6)|0)%2===0))||st.hop>0,blink:((t+(who==='ai'?1.3:0))%4)<0.15});
+  drawPigSprite(hpx,{pose:sip?'eat':'stand',happy:(st.talk>0&&(((t*6)|0)%2===0))||st.hop>0,blink:((t+(who==='ai'?1.3:0))%4)<0.15,tail:Math.floor(t*3)%2===1});
   PAL.p=sv.p;PAL.s=sv.s;PAL.n=sv.n;PAL.h=sv.h;
   if(who==='ai'){
-    R(hpx,16,2,1,2,PBI);
+    var headDy=sip?4:0, hx=1, hy=3+headDy;
+    R(hpx,hx+15,hy-1,1,2,PBI);
     var on=CB.think?((t*8)|0)%2===0:true;
-    R(hpx,15,0,3,2,on?'#7EC8F0':'#3E7FA6');if(on)R(hpx,16,0,1,1,'#FFFFFF');
-    R(hpx,16,7,4,1,PBI);R(hpx,16,10,4,1,PBI);R(hpx,16,7,1,4,PBI);R(hpx,19,7,1,4,PBI);R(hpx,14,8,2,1,PBI);
-    R(hpx,6,14,2,1,'#4B6FA5');
+    R(hpx,hx+14,hy-3,3,2,on?'#7EC8F0':'#3E7FA6');if(on)R(hpx,hx+15,hy-3,1,1,'#FFFFFF');
+    R(hpx,hx+15,hy+4,4,1,PBI);R(hpx,hx+15,hy+7,4,1,PBI);R(hpx,hx+15,hy+4,1,4,PBI);R(hpx,hx+18,hy+4,1,4,PBI);R(hpx,hx+13,hy+5,2,1,PBI);
+    R(hpx,12,12,2,1,'#4B6FA5');
   }
   var bob=st.talk>0?Math.round(Math.sin(t*12)*0.6):0, jy=st.hop>0?-Math.round(Math.abs(Math.sin(st.hop*9))*5):0, py=CB_PY+jy+bob;
   x.save();

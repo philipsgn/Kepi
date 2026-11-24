@@ -6041,4 +6041,54 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 127 Passed: Đổi Icon Heo Qua Đường Sang Footprints & Gỡ Bỏ Nút Reset Khỏi 2 Game Arcade (Quyết định 190) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 127 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (127/127)!');
+// ==========================================
+// TEST 128: ĐỒNG BỘ SPRITE HEO 24×20 CHUẨN TAB VƯỜN SANG BANNER CHAT & QUÁN QUEN, GỠ BỎ ICON NGÔI SAO TĨNH & DỌN DẸP TEXT THỪA (QUYẾT ĐỊNH 191)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const cafeCode = fs.readFileSync('src/components/chat/CafeChatBannerWebView.tsx', 'utf8');
+  const streetCode = fs.readFileSync('src/components/chat/BenThanhStreetBannerWebView.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+
+  // 1. CafeChatBannerWebView & BenThanhStreetBannerWebView sử dụng drawPigSprite chuẩn 1:1 Tab Vườn (legs=[[3,PAL.p], không còn thân béo [[7,3,17]])
+  assert.ok(
+    cafeCode.includes('[[3,PAL.p],[9,PAL.p],[6,PAL.s],[12,PAL.s]]') &&
+      !cafeCode.includes('[[7,3,17]'),
+    'CafeChatBannerWebView must use authentic 1:1 drawPigSprite from Tab Garden'
+  );
+  assert.ok(
+    streetCode.includes('[[3,PAL.p],[9,PAL.p],[6,PAL.s],[12,PAL.s]]') &&
+      !streetCode.includes('[[7,3,17]'),
+    'BenThanhStreetBannerWebView must use authentic 1:1 drawPigSprite from Tab Garden'
+  );
+
+  // 2. ChatView Header tinh giản: nút Back bên trái cạnh tiêu đề chữ lớn 22px Trò chuyện, không render icon ngôi sao coachBadge hay subtitle
+  assert.ok(
+    chatViewCode.includes('styles.chatTitleText') &&
+      chatViewCode.includes('fontSize: 22') &&
+      chatViewCode.includes("fontWeight: '800'") &&
+      !chatViewCode.includes('<View style={styles.coachBadge}>') &&
+      !chatViewCode.includes('<Text style={styles.chatSubtitleText}>'),
+    'ChatView must render 22px standalone title Trò chuyện next to back button and eliminate star badge and subtitle'
+  );
+
+  // 3. ChatView loại bỏ dòng text privacyNote khỏi rendered JSX
+  assert.ok(
+    !chatViewCode.includes('<Text style={styles.privacyNote}>'),
+    'ChatView must eliminate privacyNote text from rendered JSX'
+  );
+
+  // 4. Living Documentation Sync Audit (Quyết định 191)
+  assert.ok(
+    agentsCode.includes('191') &&
+      decisionsCode.includes('191') &&
+      chatDocCode.includes('191'),
+    'AGENTS.md, DECISIONS.md, and 10-CHAT.md must document Quyết định 191'
+  );
+
+  console.log('✅ Test 128 Passed: Đồng Bộ Sprite Heo 24×20 Chuẩn Tab Vườn, Header Chat Tinh Giản 22px & Dọn Dẹp Text Thừa (Quyết định 191) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 128 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (128/128)!');
