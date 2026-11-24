@@ -30,8 +30,6 @@ import {
 } from '../pixel/PixelIcons';
 import { BenThanhStreetBannerWebView } from './BenThanhStreetBannerWebView';
 
-const __REGRESSION_META = { aliases: ['PixelIconBack', 'backButton', 'PixelIconCrosshair'] };
-
 // ============================================================================
 // QUÁN QUEN (PLACE CHECK-IN) — 100% NATIVE + BANNER CHỢ BẾN THÀNH CUỘN NGANG
 // Chuẩn Production: Zero-Hardcode Vị Trí, Gộp Khung Tóm Tắt, Chỉ Đường Chuẩn Store (QĐ 186)
@@ -1106,6 +1104,8 @@ export const __REGRESSION_META = {
   visaStampsClass: 'psstamps',
   pixelGlyphs: 'PIXEL_KINDS',
   aliases: [
+    'PixelIconBack',
+    'backButton',
     'PixelIconCrosshair',
     'NativeSlippyTile',
     'PanResponder.create',
