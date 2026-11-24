@@ -193,3 +193,19 @@ Màn hình Tab 3 hiển thị:
   - `pharm`: Chữ thập nhà thuốc (`#3FA796`, `['..#..','..#..','#####','..#..','..#..']`)
   - `fun`: Rạp phim / máy chơi game (`#8A5BB5`, `['..#..','#####','.###.','##.##','#...#']`)
 - **Tối Giản Văn Bản (Reduce Text & Focus Icon):** Rút gọn tối đa chữ rườm rà. Mỗi thẻ quán hiển thị ảnh chụp thật Locket hoặc Icon Pixel 5×5 sắc cạnh, tên quán + quận, 2 badge số lần ghé & tổng chi, và nút chỉ đường 1-chạm.
+
+---
+
+## 13. Chuẩn Hóa 1:1 Prototype 24/11 & MASTER-PROMPTS PLAN 13–19: Chat Heo AI, Quán Quen Chợ Bến Thành Mở Rộng & 100% Pixel Icons (Quyết định 185)
+
+- **Gỡ Bỏ Chữ Hình Thức Tự Bịa (Thay Thế Quy Định Hiển Thị Của Mục 12):**
+  - Loại bỏ hoàn toàn `"№ PK-8824-VN"`, `"CỘNG HÒA TIẾT KIỆM HEO CON"`, `"HỘ CHIẾU QUÁN QUEN"` trên thẻ Hero, `"CON DẤU THỊ THỰC CÁC QUẬN"` và tên `"Anh Minh"` khỏi giao diện.
+  - Màn hình địa điểm dùng tiêu đề ngắn **`Quán Quen`** kèm nút **`Định vị`** dùng Pixel Art Icon; thẻ `.pshero` giữ nguyên 1:1 prototype: chỉ gồm lưới 4 ô (`Quán đã ghé`, `Quận đã đến`, `Quán ruột`, `Tổng chi`) + dải con dấu quận xoay `-2.5deg`/`2.5deg` bên dưới.
+- **Banner Chợ Bến Thành Cuộn Ngang Đa Quầy (`BenThanhStreetBannerWebView.tsx`):**
+  - Viewport `192×100` (bo 24px, viền 3px mực), thế giới phố rộng `560×100` với camera `camX` trượt mượt theo chú heo qua 12 gian hàng Chợ Bến Thành (Phở bò, Bún bò, Trà đá vỉa hè, Cà phê bệt, Bánh mì, Cơm tấm, Bánh xèo, Chè Ba Màu, Nón lá & Áo dài, Gốm & Sơn mài, Quà đặc sản, Lồng đèn & Heo đất), kèm thanh chip cuộn ngang chọn quầy.
+- **Trò Chuyện Heo AI (`ChatView.tsx` + `CafeChatBannerWebView.tsx`):**
+  - Bỏ hoàn toàn `"Hội Bạn Thân (Squad)"` khỏi Chat và Hub (PLAN 17).
+  - Banner Quán Cà Phê Sài Gòn `144×96` pixelated port 1:1 `cbStatic`/`cbDraw`, 2 bong bóng thoại `.bnb.me` & `.bnb.ai` nổi trên banner, giữ danh sách tin nhắn cuộn bình thường (`FlatList`) bên dưới, 5 chip gợi ý nhanh & giọng văn heo (`"heo"` / `"bạn"`).
+- **100% Icon Pixel Art & Đồng Bộ Đa Tab:**
+  - Chuyển đổi toàn bộ icon trong Hub, Chat, Quán Quen VÀ 5 icon thanh Bottom Tab Bar (`FloatingPillTabBar`) sang SVG Pixel Art (`PixelIcons.tsx`).
+  - Hub hiển thị 3 thanh Việc nhà (`Heo`, `Cá ao`, `Hoa hồng`) đồng bộ Backend `gamificationStore`, Game `Heo Bay` và câu trả lời của Heo AI; 4 Cổng Phòng từ Tab Nhà (`StatsView`) điều hướng thẳng tới Hồ sơ / Game / Quán Quen / Trò chuyện Heo AI.

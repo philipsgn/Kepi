@@ -7,9 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Send, ImagePlus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Strings } from '../../constants/strings';
+import { PixelIconCameraMini, PixelIconSend } from '../pixel/PixelIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { useBottomInset } from '../../hooks/useBottomInset';
@@ -111,11 +110,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
             disabled={isThinking}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <ImagePlus
-              size={20}
-              color={isHeocon ? '#2B2118' : tokens.primary}
-              strokeWidth={2.4}
-            />
+            <PixelIconCameraMini size={18} />
           </TouchableOpacity>
         )}
 
@@ -138,7 +133,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
                   color: tokens.text,
                 },
           ]}
-          placeholder={Strings.chat.inputPlaceholder}
+          placeholder="Nói chuyện với Heo AI"
           placeholderTextColor={isHeocon ? '#85735E' : tokens.textMuted}
           value={inputText}
           onChangeText={setInputText}
@@ -173,11 +168,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
           disabled={!hasText || isThinking}
           activeOpacity={0.8}
         >
-          <Send
-            size={18}
-            color={isHeocon ? '#2B2118' : (hasText ? '#1B2733' : tokens.textMuted)}
-            strokeWidth={2.6}
-          />
+          <PixelIconSend size={18} />
         </TouchableOpacity>
       </View>
     </View>

@@ -24,6 +24,7 @@ export interface CoachReplyResult {
 
 export interface FinancialContext {
   todaySpent?: number;
+  todayBudget?: number;
   remainingToday: number;
   totalSpentThisMonth: number;
   coffeeSpentThisMonth: number;
@@ -32,10 +33,12 @@ export interface FinancialContext {
   topCategoryAmount?: number;
   savingsGoalText?: string;
   nickname?: string;
-  // Prototype 21/11 & Masterprompts Plan 14
+  // Prototype 24/11 & Masterprompts Plan 13, 14, 17
   recentExpenseName?: string;
   recentExpenseAmount?: number;
   pigHunger?: number;
+  fishHunger?: number;
+  flowerWater?: number;
   gameTickets?: number;
   pigFood?: number;
 }
@@ -157,20 +160,21 @@ export const parseQuickRecordCommand = (input: string): ParsedChatExpense => {
 };
 
 /**
- * Sinh câu trả lời thông minh từ Anh Minh AI dựa trên số liệu thực tế
+ * Sinh câu trả lời thông minh từ Heo-Coach (Heo AI) dựa trên số liệu thực tế trong máy
+ * Giọng văn theo MASTER-PROMPTS.md (PLAN 8, 14.2 & 17): ngắn gọn tối đa 4 câu, xưng "heo"/"mình" và gọi "bạn".
  */
 export const generateLocalCoachResponse = (
   userQuery: string,
   context: FinancialContext
 ): CoachReplyResult => {
   const query = userQuery.toLowerCase().trim();
-  const userGreeting = context.nickname ? `${context.nickname}` : 'bồ';
+  const userGreeting = context.nickname ? `${context.nickname}` : 'bạn';
 
   // 1. Kiểm tra lệnh ghi chép
   const parsed = parseQuickRecordCommand(userQuery);
   if (parsed.isRecordCommand && parsed.amount > 0) {
     return {
-      text: `Anh Minh đã chuẩn bị thẻ ghi ${formatVND(parsed.amount)} cho món "${parsed.description}". Bồ kiểm tra rồi bấm Lưu vào sổ nhé!`,
+      text: `Heo đã chuẩn bị sẵn thẻ ghi ${formatVND(parsed.amount)} cho món "${parsed.description}". Bạn kiểm tra rồi bấm Lưu nhé!`,
       cardType: 'CONFIRMATION',
       cardData: parsed,
     };
@@ -183,19 +187,23 @@ export const generateLocalCoachResponse = (
     query.includes('còn bao nhiêu') ||
     query.includes('ngân sách')
   ) {
+    const spent = context.todaySpent ?? 0;
+    const limit = context.todayBudget ?? (spent + Math.max(0, context.remainingToday));
+    const pct = limit > 0 ? Math.round((spent / limit) * 100) : 0;
+
     if (context.remainingToday > 30000) {
       return {
-        text: `Hôm nay ${userGreeting} còn ${formatVND(context.remainingToday)} để tiêu thoải mái nhé. Cứ thong dong giữ nhịp độ này là bồ đỉnh chóp!`,
+        text: `Hôm nay ${userGreeting} đã chi ${formatVND(spent)} (${pct}% hạn mức). Còn ${formatVND(context.remainingToday)}. ${pct < 50 ? 'Đang rất ổn, đường trong Heo qua đường cũng thưa hơn đó.' : 'Vừa phải, giữ nhịp này nha.'}`,
         cardType: 'NONE',
       };
     } else if (context.remainingToday > 0) {
       return {
-        text: `Hôm nay ví chỉ còn ${formatVND(context.remainingToday)} thôi nhé bồ. Nếu thèm cà phê hay trà sữa thì để mai dàn đều ngân sách rồi tự thưởng nhé!`,
+        text: `Hôm nay chỉ còn ${formatVND(context.remainingToday)} (${pct}% hạn mức) thôi nha ${userGreeting}. Sắp chạm hạn mức rồi, mình cân nhắc khoản tiếp theo xíu nhé.`,
         cardType: 'NONE',
       };
     } else {
       return {
-        text: `Hôm nay ${userGreeting} đã vượt nhẹ định mức ngày rồi đó. Nhưng không sao cả bồ ơi, ngày mai mình cân đối lại một chút là về vùng an toàn ngay!`,
+        text: `Lố rồi... hôm nay ${userGreeting} chi vượt nhẹ hạn mức rồi. Heo buồn xíu, mai mình chi gọn lại để cân lại nhé.`,
         cardType: 'NONE',
       };
     }
@@ -209,13 +217,16 @@ export const generateLocalCoachResponse = (
     query.includes('chi vào đâu')
   ) {
     if (context.topCategoryName && context.topCategoryAmount) {
+      const pct = context.totalSpentThisMonth > 0
+        ? Math.round((context.topCategoryAmount / context.totalSpentThisMonth) * 100)
+        : 0;
       return {
-        text: `Tháng này bồ chi nhiều nhất vào mục "${context.topCategoryName}" với tổng ${formatVND(context.topCategoryAmount)}. Bồ muốn anh Minh phân tích kỹ thêm khoản nào không?`,
+        text: `Tháng này bạn chi tổng ${formatVND(context.totalSpentThisMonth)}. Nhiều nhất là ${context.topCategoryName}: ${formatVND(context.topCategoryAmount)} (${pct}%).`,
         cardType: 'METRIC',
         cardData: {
           title: context.topCategoryName,
           amount: context.topCategoryAmount,
-          percentage: context.totalSpentThisMonth > 0 ? Math.round((context.topCategoryAmount / context.totalSpentThisMonth) * 100) : 0,
+          percentage: pct,
           category: context.topCategoryName,
         },
       };
@@ -226,7 +237,7 @@ export const generateLocalCoachResponse = (
   if (query.includes('mục tiêu') || query.includes('tiết kiệm') || query.includes('tích lũy') || query.includes('đạt được')) {
     if (context.savingsGoalText) {
       return {
-        text: `Về mục tiêu tài chính của bồ: ${context.savingsGoalText}. Anh Minh luôn ở đây đồng hành cùng bồ từng bước nhé!`,
+        text: `Về mục tiêu của ${userGreeting}: ${context.savingsGoalText}. Heo luôn ở đây đồng hành từng bước nha!`,
         cardType: 'NONE',
       };
     }
@@ -240,7 +251,7 @@ export const generateLocalCoachResponse = (
         : 0;
 
     return {
-      text: `Từ đầu tháng đến giờ, ${userGreeting} đã chi ${formatVND(context.coffeeSpentThisMonth)} cho cà phê (khoảng ${pct}% tổng chi tiêu). Anh chuẩn bị thẻ tóm tắt cho bồ xem đây:`,
+      text: `Từ đầu tháng, ${userGreeting} đã chi ${formatVND(context.coffeeSpentThisMonth)} cho cà phê (${pct}% tổng chi). Heo tóm tắt ở thẻ dưới nè:`,
       cardType: 'METRIC',
       cardData: {
         title: 'Cà phê & Đồ uống',
@@ -254,12 +265,12 @@ export const generateLocalCoachResponse = (
   // 6. Hỏi xem có nên mua hay không
   if (query.includes('có nên mua') || query.includes('nên mua') || query.includes('định mua')) {
     return {
-      text: `Món đó có thực sự cần thiết trong 24 giờ tới không ${userGreeting}? Nếu thích quá mà chưa gấp, bồ gửi ảnh vào đây hoặc chọn "Để sau" vào giỏ 24h để nghĩ thêm một đêm nhé!`,
+      text: `Heo hỏi ba câu nhỏ: (1) cần hay muốn? (2) có cách rẻ hơn không? (3) tuần sau còn thấy xứng đáng không? Nếu chưa gấp, thử chờ 24 giờ xem sao nha.`,
       cardType: 'NONE',
     };
   }
 
-  // 7. Phản biện khoản vừa ghi (Prototype 21/11 & Masterprompts Plan 14)
+  // 7. Phản biện khoản vừa ghi (Prototype 24/11 & Masterprompts Plan 14.2 & 17)
   if (
     query.includes('phản biện') ||
     query.includes('vừa ghi') ||
@@ -273,21 +284,32 @@ export const generateLocalCoachResponse = (
       };
     }
     return {
-      text: 'Chưa có khoản chi nào vừa ghi để phản biện. Khi bạn ghi chép một khoản mới, Heo-Coach sẽ giúp bạn cân nhắc 3 câu hỏi tài chính nhé!',
+      text: 'Chưa có khoản nào để phản biện. Khi bạn ghi một khoản mới, heo sẽ giúp bạn cân nhắc ba câu hỏi nhỏ nhé.',
       cardType: 'NONE',
     };
   }
 
-  // 8. Heo nhà đói chưa?
+  // 8. Heo nhà đói chưa? (3 chỉ số Việc nhà: Heo, Cá ao, Hoa hồng — PLAN 13 & 17)
   if (
     query.includes('đói') ||
     query.includes('heo nhà') ||
     query.includes('cho ăn') ||
-    query.includes('no chưa')
+    query.includes('no chưa') ||
+    query.includes('cá') ||
+    query.includes('hoa')
   ) {
-    const hunger = context.pigHunger !== undefined ? Math.round(context.pigHunger) : 80;
+    const pig = context.pigHunger !== undefined ? Math.round(context.pigHunger) : 75;
+    const fish = context.fishHunger !== undefined ? Math.round(context.fishHunger) : 72;
+    const rose = context.flowerWater !== undefined ? Math.round(context.flowerWater) : 68;
+    const hint = pig < 25
+      ? 'Heo đói rồi, cho ăn cám đi!'
+      : fish < 25
+      ? 'Cá đang đói, chơi Heo bay hái bắp và cà rốt nha.'
+      : rose < 25
+      ? 'Hoa hồng khát, chơi Heo bay hái chuối và táo nhé.'
+      : 'Cả nhà đều no, giữ đều vậy là ổn áp!';
     return {
-      text: `Độ no của Heo hiện tại là ${hunger}%. ${hunger < 40 ? 'Heo đang đói bụng rồi, bạn nhớ bấm "Cho ăn" hoặc chơi Heo Bay để kiếm thêm thức ăn nhé!' : 'Heo đang no căng bụng và sẵn sàng đồng hành cùng bạn!'}`,
+      text: `Heo ${pig}%, cá ao ${fish}%, hoa hồng ${rose}%. ${hint}`,
       cardType: 'NONE',
     };
   }
@@ -302,14 +324,22 @@ export const generateLocalCoachResponse = (
     const tix = context.gameTickets || 0;
     const food = context.pigFood || 0;
     return {
-      text: `Bạn hiện có ${tix} vé và ${food} cám. Mẹo nhỏ: Mỗi lần ghi một khoản chi ở Tab Chụp hoặc Sổ bạn được tặng +1 vé chơi. Đăng nhập mỗi ngày cũng nhận ngay 3 vé!`,
+      text: `Bạn có ${tix} vé và ${food} cám. Ghi một khoản chi được tặng +1 vé, 10 cám đổi 1 vé. Chơi Heo bay nhớ mang đồ ăn về cho cá và hoa nhé.`,
       cardType: 'NONE',
     };
   }
 
-  // 10. Câu trả lời mặc định ấm áp từ Heo-Coach
+  // 10. Hỏi về hội bạn thân / squad (PLAN 17 local-first)
+  if (query.includes('bạn') || query.includes('hội') || query.includes('squad')) {
+    return {
+      text: 'Mình chạy ngay trong máy bạn nên không có hội bạn thân. Giờ chỉ có heo với bạn thôi, hỏi heo về hạn mức hay khoản chi nhé.',
+      cardType: 'NONE',
+    };
+  }
+
+  // 11. Câu trả lời mặc định từ Heo-Coach
   return {
-    text: `Anh Minh nghe đây bồ ơi! Bồ cần kiểm tra ngân sách hôm nay, hay muốn gửi ảnh biên lai/món đồ nhờ anh ghi nhanh vào sổ?`,
+    text: `Heo trả lời được về hạn mức hôm nay, danh mục chi nhiều nhất, phản biện khoản gần nhất, heo nhà và vé chơi. Chọn một gợi ý bên dưới nhé.`,
     cardType: 'NONE',
   };
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -13,8 +13,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Strings } from '../../constants/strings';
 import { ChatMessage } from '../../types/chat';
-import { ChatTopSegmentHeader } from '../chat/ChatTopSegmentHeader';
-import { SquadLocketView } from '../chat/SquadLocketView';
 import { CoachMessageBubble } from '../chat/CoachMessageBubble';
 import { UserMessageBubble } from '../chat/UserMessageBubble';
 import { ChatInputBar } from '../chat/ChatInputBar';
@@ -30,23 +28,26 @@ import { formatVND } from '../../utils/currency';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { useBottomInset } from '../../hooks/useBottomInset';
-import { ArrowLeft } from 'lucide-react-native';
+import { PixelIconBack, PixelIconPigCoach } from '../pixel/PixelIcons';
 import { PixelHubDashboard, SubViewType } from '../chat/PixelHubDashboard';
 import { PigFlightGameView } from '../chat/PigFlightGameView';
 import { PigCrossRoadGameView } from '../chat/PigCrossRoadGameView';
 import { PiggySpendMapView } from '../chat/PiggySpendMapView';
+import { CafeChatBannerWebView } from '../chat/CafeChatBannerWebView';
 
 interface ChatViewProps {
   onNavigateToStats?: () => void;
   onNavigateToCamera?: () => void;
   onToggleTabBar?: (visible: boolean) => void;
+  requestedSubView?: SubViewType | null;
+  onClearRequestedSubView?: () => void;
 }
 
 const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-welcome',
     sender: 'COACH',
-    text: 'Chào bạn! PigFly — Chú Heo Béo thông thái đã sẵn sàng đồng hành cùng bạn. Hôm nay bạn muốn kiểm tra ngân sách hay tâm sự chi tiêu gì với PigFly nè?',
+    text: 'Chào bạn! Mình là Heo-Coach. Hỏi mình về ngân sách, hoặc xin mình phản biện một khoản chi nhé.',
     createdAt: new Date().toISOString(),
   },
 ];
@@ -60,26 +61,33 @@ const PROMPT_CHIPS = [
 ];
 
 /**
- * Trang 3: Chat / Bạn Bè & Coach Minh (ChatView) — Phong cách "Ấm, tĩnh, sang"
- * Tuân thủ mục 6 của PROMPT và docs/screens/CHAT.md:
- * - Hỗ trợ Sáng / Tối với tokens từ useTheme().
- * - Persona Cố vấn tĩnh tâm gần gũi, lắng đọng.
- * - Khoảng đệm bàn phím & tab bar nổi mượt mà, không va chạm.
+ * Trang 3: Trung Tâm Giải Trí, Trò Chuyện Heo AI & Quán Quen (Quyết định 185)
+ * - 100% Local-First Heo-Coach (PLAN 17).
+ * - Trò chuyện Heo AI với Banner Quán Cà Phê Sài Gòn 144×96 + danh sách tin nhắn cuộn bên dưới.
+ * - Đồng bộ 100% Pixel Art Icons và đồng bộ Việc nhà 3 chỉ số với Game Heo Bay.
  */
 export const ChatView: React.FC<ChatViewProps> = ({
   onNavigateToStats,
-  onNavigateToCamera,
   onToggleTabBar,
+  requestedSubView,
+  onClearRequestedSubView,
 }) => {
   const insets = useSafeAreaInsets();
   const { tokens, mode } = useTheme();
-  const isPink = mode === 'pink';
   const isHeocon = mode === 'heocon' || !mode;
-  const screenBg = isHeocon ? '#F6EEDC' : (tokens.bg || '#FFF5F7');
-  const { bottomInset } = useBottomInset();
+  const screenBg = isHeocon ? '#F6EEDC' : tokens.bg || '#FFF5F7';
+  const { bottomInset, contentBottomPadding } = useBottomInset();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('hub');
 
-  // Quyết định 144 & 166: Tự động ẩn Bottom Tab Bar khi vào Fullscreen Game Mode
+  // Điều hướng trực tiếp từ Cổng Phòng Tab Nhà hoặc Hồ Sơ
+  useEffect(() => {
+    if (requestedSubView) {
+      setActiveSubView(requestedSubView);
+      onClearRequestedSubView?.();
+    }
+  }, [requestedSubView, onClearRequestedSubView]);
+
+  // Ẩn Bottom Tab Bar khi chơi Game toàn màn hình 9:16
   useEffect(() => {
     if (activeSubView === 'fly' || activeSubView === 'cross') {
       onToggleTabBar?.(false);
@@ -87,11 +95,10 @@ export const ChatView: React.FC<ChatViewProps> = ({
       onToggleTabBar?.(true);
     }
   }, [activeSubView, onToggleTabBar]);
-  const [activeTab, setActiveTab] = useState<'COACH' | 'FRIENDS'>('COACH');
+
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [isThinking, setIsThinking] = useState(false);
 
-  // Undo Toast state
   const [undoToast, setUndoToast] = useState<{
     visible: boolean;
     message: string;
@@ -106,7 +113,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
   const flatListRef = useRef<FlatList<ChatMessage> | null>(null);
 
-  // Store access
   const { user, profile } = useAuthStore();
   const { todayBudget, todaySpent, recordExpense } = useBudgetStore();
   const { transactions, addTransaction, deleteTransaction } = useTransactionStore();
@@ -114,14 +120,28 @@ export const ChatView: React.FC<ChatViewProps> = ({
     gameTickets,
     pigFood,
     pigHunger,
+    fishHunger,
+    flowerWater,
     feedPig,
+    addChoreProgress,
     updateGameStats,
     addPigFood,
     useGameTicket,
     buyTicketWithFood,
   } = useGamificationStore();
 
+  const latestUserText = useMemo(() => {
+    const rev = [...messages].reverse().find((m) => m.sender === 'USER');
+    return rev ? rev.text : null;
+  }, [messages]);
+
+  const latestAiText = useMemo(() => {
+    const rev = [...messages].reverse().find((m) => m.sender === 'COACH');
+    return rev ? rev.text : INITIAL_MESSAGES[0].text;
+  }, [messages]);
+
   const handleSendMessage = (text: string) => {
+    if (isThinking) return;
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       sender: 'USER',
@@ -132,16 +152,13 @@ export const ChatView: React.FC<ChatViewProps> = ({
     setMessages((prev) => [...prev, userMsg]);
     setIsThinking(true);
 
-    // Scroll to bottom after adding user message
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
 
-    // Xử lý phản hồi từ Coach
     setTimeout(() => {
-      // 1. Kiểm tra xem có phải lệnh ghi sổ nhanh
       const quickRecord = parseQuickRecordCommand(text);
-      if (quickRecord) {
+      if (quickRecord && quickRecord.isRecordCommand && quickRecord.amount > 0) {
         const coachMsg: ChatMessage = {
           id: `coach-${Date.now()}`,
           sender: 'COACH',
@@ -163,7 +180,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
         return;
       }
 
-      // 2. Phản hồi thông minh theo số liệu thực tế RAG (CHỈ tính khoản đã CONFIRMED)
       const confirmedExpenses = transactions.filter(
         (t) => t.type === 'EXPENSE' && (t.status === 'CONFIRMED' || !t.status)
       );
@@ -177,7 +193,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
         )
         .reduce((sum, t) => sum + t.amount, 0);
 
-      // Tính danh mục chi nhiều nhất tháng này
       const catSpendMap: { [key: string]: number } = {};
       confirmedExpenses.forEach((t) => {
         catSpendMap[t.category] = (catSpendMap[t.category] || 0) + t.amount;
@@ -198,17 +213,20 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
       const response = generateLocalCoachResponse(text, {
         todaySpent,
+        todayBudget,
         remainingToday: Math.max(0, todayBudget - todaySpent),
         totalSpentThisMonth,
         topCategoryName: topCategoryName || undefined,
         topCategoryAmount: topCategoryAmount || undefined,
-        coffeeSpentThisMonth: coffeeSpentThisMonth || 45000,
+        coffeeSpentThisMonth,
         transactionsCount: transactions.length,
-        savingsGoalText: 'Tích lũy ngân sách an toàn cho quỹ dự phòng',
+        savingsGoalText: 'Tích lũy quỹ dự phòng mỗi ngày cùng heo',
         nickname: profile?.full_name || undefined,
         recentExpenseName: recentExpense?.description || recentExpense?.category,
         recentExpenseAmount: recentExpense?.amount,
         pigHunger,
+        fishHunger,
+        flowerWater,
         gameTickets,
         pigFood,
       });
@@ -228,7 +246,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
-    }, 500);
+    }, 650);
   };
 
   const handlePickImage = async () => {
@@ -246,11 +264,10 @@ export const ChatView: React.FC<ChatViewProps> = ({
         const photoUri = result.assets[0].uri;
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-        // Tin nhắn từ người dùng kèm ảnh
         const userMsg: ChatMessage = {
           id: `user-${Date.now()}`,
           sender: 'USER',
-          text: 'Gửi anh Minh xem món này',
+          text: 'Gửi Heo AI xem món này',
           photoUrl: photoUri,
           createdAt: new Date().toISOString(),
         };
@@ -262,16 +279,15 @@ export const ChatView: React.FC<ChatViewProps> = ({
           flatListRef.current?.scrollToEnd({ animated: true });
         }, 100);
 
-        // Phản hồi từ anh Minh bồ kèm thẻ xác nhận 1 chạm
         setTimeout(() => {
           const coachMsg: ChatMessage = {
             id: `coach-${Date.now()}`,
             sender: 'COACH',
-            text: 'Ảnh nét lắm bồ ơi! Anh chuẩn bị sẵn thẻ ghi chi tiêu cho món này, bồ bấm Lưu vào sổ là xong ngay nhé!',
+            text: 'Ảnh rõ lắm! Heo chuẩn bị sẵn thẻ ghi khoản này, bạn bấm Lưu vào sổ là xong nha.',
             cardType: 'CONFIRMATION',
             cardData: {
               amount: 50000,
-              description: 'Khoản chi bằng ảnh',
+              description: 'Khoản chi từ ảnh',
               category: 'an_uong',
               photoUrl: photoUri,
               isSaved: false,
@@ -311,7 +327,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
       recordExpense(cardData.amount);
 
-      // Cập nhật trạng thái đã lưu vào tin nhắn tương ứng
       setMessages((prev) =>
         prev.map((m) => {
           if (m.cardType === 'CONFIRMATION' && m.cardData?.amount === cardData.amount) {
@@ -327,7 +342,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
         })
       );
 
-      // Hiện thanh Undo Toast
       setUndoToast({
         visible: true,
         message: Strings.camera.undoToast(formatVND(cardData.amount)),
@@ -364,7 +378,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
     );
   }
 
-  // Single-Active Game WebView Engine (Quyết định 170): Chỉ render 1 WebView đang chơi để 0 lag, 60FPS tuyệt đối
   if (activeSubView === 'fly') {
     return (
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
@@ -378,7 +391,13 @@ export const ChatView: React.FC<ChatViewProps> = ({
           onUseTicket={useGameTicket}
           onBuyTicket={buyTicketWithFood}
           onSaveStats={(stats) => {
-            if (stats.foodEarned) addPigFood(stats.foodEarned);
+            if (stats.foodEarned) {
+              addPigFood(stats.foodEarned);
+              addChoreProgress({
+                fish: Math.min(24, stats.foodEarned * 3),
+                rose: Math.min(24, stats.foodEarned * 3),
+              });
+            }
             updateGameStats({ flyBestScore: stats.flyBestScore });
           }}
         />
@@ -401,7 +420,10 @@ export const ChatView: React.FC<ChatViewProps> = ({
           onUseTicket={useGameTicket}
           onBuyTicket={buyTicketWithFood}
           onSaveStats={(stats) => {
-            if (stats.foodEarned) addPigFood(stats.foodEarned);
+            if (stats.foodEarned) {
+              addPigFood(stats.foodEarned);
+              addChoreProgress({ pig: 10, rose: 6 });
+            }
             updateGameStats({
               crossRoadStars: stats.crossRoadStars,
               crossRoadMaxLevel: stats.crossRoadMaxLevel,
@@ -420,223 +442,116 @@ export const ChatView: React.FC<ChatViewProps> = ({
     );
   }
 
-  if (activeSubView === 'squad') {
-    return (
-      <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-        <SquadLocketView onBack={() => setActiveSubView('hub')} />
-      </View>
-    );
-  }
-
+  // MÀN TRÒ CHUYỆN CÙNG HEO AI (1:1 PLAN 17 + LOG TIN NHẮN CUỘN BÊN DƯỚI)
   return (
     <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-      {/* 0. HEADER NEO-BRUTALIST CHUẨN PROTOTYPE */}
+      {/* 1. HEADER TỐI GIẢN VỚI ICON PIXEL */}
       <View style={styles.chatHeaderRow}>
         <TouchableOpacity
           style={styles.hubBackButton}
-          accessibilityLabel="Quay lại"
+          accessibilityLabel="Trung tâm Heo Con"
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setActiveSubView('hub');
           }}
           activeOpacity={0.8}
         >
-          <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
+          <PixelIconBack size={18} />
         </TouchableOpacity>
 
         <View style={styles.chatTitleCol}>
-          <Text style={styles.chatTitleText}>
-            {activeTab === 'COACH' ? 'Heo-Coach Anh Minh' : 'Hội Bạn Thân (Squad)'}
-          </Text>
-          <Text style={styles.chatSubtitleText}>
-            {activeTab === 'COACH' ? 'Gợi ý theo số liệu sổ chi' : 'Nuôi heo & chia sẻ chi tiêu'}
-          </Text>
+          <Text style={styles.chatTitleText}>Trò chuyện</Text>
+          <Text style={styles.chatSubtitleText}>Heo AI ngồi quán cà phê, chạy ngay trong máy</Text>
+        </View>
+
+        <View style={styles.coachBadge}>
+          <PixelIconPigCoach size={20} />
         </View>
       </View>
 
-      {/* SEGMENT SWITCHER: HEO-COACH & HỘI BẠN THÂN */}
-      <View style={styles.chatSegmentRow}>
-        <TouchableOpacity
-          style={[
-            styles.chatSegmentBtn,
-            activeTab === 'COACH' && styles.chatSegmentBtnActive,
-          ]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setActiveTab('COACH');
-          }}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.chatSegmentBtnText,
-              activeTab === 'COACH' && styles.chatSegmentBtnTextActive,
-            ]}
-          >
-            🐷 Heo-Coach
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.chatSegmentBtn,
-            activeTab === 'FRIENDS' && styles.chatSegmentBtnActive,
-          ]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setActiveTab('FRIENDS');
-          }}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.chatSegmentBtnText,
-              activeTab === 'FRIENDS' && styles.chatSegmentBtnTextActive,
-            ]}
-          >
-            👥 Hội Bạn Thân
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {activeTab === 'FRIENDS' ? (
-        <SquadLocketView />
-      ) : (
-        <KeyboardAvoidingView
-          style={styles.coachContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-        >
-          {/* PROMPT CHIPS GỢI Ý NHANH */}
-          <View
-            style={[
-              styles.chipsContainer,
-              { backgroundColor: tokens.bg, borderBottomColor: tokens.border, borderBottomWidth: 2 },
-            ]}
-          >
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.chipsScrollContent}
-            >
-              {PROMPT_CHIPS.map((chip, idx) => (
-                <TouchableOpacity
-                  key={`chip-${idx}`}
-                  style={[
-                    styles.chipButton,
-                    {
-                      backgroundColor: tokens.surface,
-                      borderColor: tokens.border,
-                      borderWidth: 2,
-                      shadowColor: tokens.shadowColor,
-                      shadowOffset: { width: 0, height: 1.5 },
-                      shadowOpacity: 1,
-                      shadowRadius: 0,
-                      elevation: 1,
-                    },
-                  ]}
-                  onPress={() => handlePromptChipPress(chip)}
-                  activeOpacity={0.75}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      { color: tokens.text, fontFamily: 'Nunito', fontWeight: '800' },
-                    ]}
-                  >
-                    {chip}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          {/* DANH SÁCH TIN NHẮN TRONG KHUNG .CHATLOG */}
-          <View
-            style={[
-              styles.chatlogWrapper,
-              styles.chatlogWrapperHeocon,
-            ]}
-          >
-            <FlatList
-              ref={flatListRef}
-              data={messages}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={[
-                styles.messagesContent,
-                { paddingBottom: 16 },
-              ]}
-              renderItem={({ item }) => {
-                if (item.sender === 'USER') {
-                  return <UserMessageBubble message={item} />;
-                }
-                return (
-                  <CoachMessageBubble
-                    message={item}
-                    onNavigateToStats={onNavigateToStats}
-                    onConfirmRecord={handleConfirmRecord}
-                  />
-                );
-              }}
-              ListFooterComponent={
-                isThinking ? (
-                  <View
-                    style={[
-                      styles.thinkingBubble,
-                      {
-                        backgroundColor: tokens.surface,
-                        borderColor: tokens.border,
-                        borderWidth: 2.5,
-                        borderRadius: 16,
-                        shadowColor: tokens.shadowColor,
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 1,
-                        shadowRadius: 0,
-                        elevation: 2,
-                      },
-                    ]}
-                  >
-                    <View style={[styles.thinkingDot, { backgroundColor: tokens.primary }]} />
-                    <View style={[styles.thinkingDot, { backgroundColor: tokens.primary, opacity: 0.7 }]} />
-                    <View style={[styles.thinkingDot, { backgroundColor: tokens.primary, opacity: 0.4 }]} />
-                    <Text
-                      style={[
-                        styles.thinkingText,
-                        { color: tokens.textMuted, fontFamily: 'Nunito', fontWeight: '700' },
-                      ]}
-                    >
-                      Anh Minh đang tính toán...
-                    </Text>
-                  </View>
-                ) : undefined
-              }
-            />
-          </View>
-
-          {/* THANH NHẬP LIỆU CHAT */}
-          <ChatInputBar
-            onSendMessage={handleSendMessage}
-            onPickImage={handlePickImage}
+      <KeyboardAvoidingView
+        style={styles.coachContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={0}
+      >
+        {/* 2. BANNER QUÁN CÀ PHÊ SÀI GÒN 144×96 + BONG BÓNG THOẠI THỰC (.chban & .bnb) */}
+        <View style={styles.cafeBannerWrap}>
+          <CafeChatBannerWebView
+            latestUserText={latestUserText}
+            latestAiText={latestAiText}
             isThinking={isThinking}
+            active={activeSubView === 'chat'}
           />
+        </View>
 
-          {/* DÒNG CAM KẾT RIÊNG TƯ .PRIVACY */}
-          {isHeocon && (
-            <Text style={styles.privacyNote}>
-              Heo-Coach đọc số liệu tổng hợp trong app. Ảnh và vị trí không được gửi đi.
-            </Text>
-          )}
+        {/* 3. HÀNG CHIP GỢI Ý NHANH (5 GỢI Ý CHUẨN PROTOTYPE) */}
+        <View style={styles.chipsContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipsScrollContent}
+          >
+            {PROMPT_CHIPS.map((chip, idx) => (
+              <TouchableOpacity
+                key={`chip-${idx}`}
+                style={styles.chipButton}
+                onPress={() => handlePromptChipPress(chip)}
+                activeOpacity={0.78}
+              >
+                <Text style={styles.chipText}>{chip}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-          {/* THANH HOÀN TÁC 5 GIÂY NẾU VỪA LƯU */}
-          <UndoToastBar
-            visible={undoToast.visible}
-            message={undoToast.message}
-            onUndo={handleUndo}
-            onExpire={handleUndoExpire}
-            bottomOffset={bottomInset + 65}
+        {/* 4. DANH SÁCH TIN NHẮN CUỘN BÌNH THƯỜNG (.chatlog) */}
+        <View style={styles.chatlogWrapperHeocon}>
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.messagesContent}
+            renderItem={({ item }) => {
+              if (item.sender === 'USER') {
+                return <UserMessageBubble message={item} />;
+              }
+              return (
+                <CoachMessageBubble
+                  message={item}
+                  onNavigateToStats={onNavigateToStats}
+                  onConfirmRecord={handleConfirmRecord}
+                />
+              );
+            }}
+            ListFooterComponent={
+              isThinking ? (
+                <View style={styles.thinkingBubble}>
+                  <PixelIconPigCoach size={16} />
+                  <Text style={styles.thinkingText}>Heo AI đang nghĩ...</Text>
+                </View>
+              ) : undefined
+            }
           />
-        </KeyboardAvoidingView>
-      )}
+        </View>
+
+        {/* 5. CAM KẾT RIÊNG TƯ + THANH NHẬP LIỆU CHAT */}
+        <Text style={styles.privacyNote}>
+          Heo AI chạy ngay trong máy, đọc số liệu tổng hợp. Ảnh và vị trí không được gửi đi.
+        </Text>
+        <ChatInputBar
+          onSendMessage={handleSendMessage}
+          onPickImage={handlePickImage}
+          isThinking={isThinking}
+        />
+
+        <UndoToastBar
+          visible={undoToast.visible}
+          message={undoToast.message}
+          onUndo={handleUndo}
+          onExpire={handleUndoExpire}
+          bottomOffset={bottomInset + 65}
+        />
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -648,10 +563,25 @@ const styles = StyleSheet.create({
   chatHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
-    gap: 12,
+    paddingHorizontal: 14,
+    paddingTop: 6,
+    paddingBottom: 6,
+    gap: 10,
+  },
+  hubBackButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
   },
   chatTitleCol: {
     flex: 1,
@@ -665,154 +595,99 @@ const styles = StyleSheet.create({
   chatSubtitleText: {
     fontFamily: 'Nunito',
     fontWeight: '700',
-    fontSize: 11.5,
+    fontSize: 11,
     color: '#85735E',
   },
-  chatSegmentRow: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginBottom: 8,
-    backgroundColor: '#FFFBF1',
+  coachBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#BFDDF2',
     borderWidth: 2.5,
     borderColor: '#2B2118',
-    borderRadius: 999,
-    padding: 3,
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
-  },
-  chatSegmentBtn: {
-    flex: 1,
-    paddingVertical: 7,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 999,
-  },
-  chatSegmentBtnActive: {
-    backgroundColor: '#F4B93B',
-    borderWidth: 2,
-    borderColor: '#2B2118',
-  },
-  chatSegmentBtnText: {
-    fontFamily: 'Nunito',
-    fontWeight: '800',
-    fontSize: 13,
-    color: '#85735E',
-  },
-  chatSegmentBtnTextActive: {
-    color: '#2B2118',
-  },
-  gameSlot: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
-  },
-  gameSlotActive: {
-    opacity: 1,
-    zIndex: 10,
-  },
-  gameSlotInactive: {
-    opacity: 0,
-    zIndex: -1,
-  },
-  hubBackRow: {
-    paddingHorizontal: 16,
-    paddingTop: 6,
-    paddingBottom: 4,
-  },
-  hubBackButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFBF1',
-    borderWidth: 2.5,
-    borderColor: '#2B2118',
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
   },
   coachContainer: {
     flex: 1,
   },
-  chatlogWrapper: {
-    flex: 1,
+  cafeBannerWrap: {
+    paddingHorizontal: 14,
+    marginBottom: 4,
+  },
+  chipsContainer: {
+    paddingVertical: 6,
+  },
+  chipsScrollContent: {
+    paddingHorizontal: 14,
+    gap: 7,
+  },
+  chipButton: {
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: radii.full,
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  chipText: {
+    fontFamily: 'Nunito',
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#2B2118',
   },
   chatlogWrapperHeocon: {
+    flex: 1,
     marginHorizontal: 14,
-    marginVertical: 6,
+    marginBottom: 4,
     backgroundColor: '#FFFBF1',
     borderWidth: 3,
     borderColor: '#2B2118',
     borderRadius: 22,
     shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 4,
+    elevation: 3,
     overflow: 'hidden',
   },
-  privacyNote: {
-    fontFamily: 'Nunito',
-    fontWeight: '700',
-    fontSize: 11.5,
-    color: '#85735E',
-    textAlign: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 4,
-    paddingBottom: 6,
-    backgroundColor: '#F6EEDC',
-  },
-  chipsContainer: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-  },
-  chipsScrollContent: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  chipButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: radii.full,
-    borderWidth: 1,
-  },
-  chipText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
   messagesContent: {
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
   thinkingBubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 58,
-    marginVertical: 8,
+    marginLeft: 18,
+    marginVertical: 6,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: radii.md,
-    borderWidth: 1,
+    paddingVertical: 7,
+    borderRadius: 16,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    backgroundColor: '#DCEEFA',
     alignSelf: 'flex-start',
     gap: 6,
   },
-  thinkingDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
   thinkingText: {
+    fontFamily: 'Nunito',
     fontSize: 12,
-    fontWeight: '500',
-    marginLeft: 4,
+    fontWeight: '800',
+    color: '#2B2118',
+  },
+  privacyNote: {
+    fontFamily: 'Nunito',
+    fontWeight: '700',
+    fontSize: 10.5,
+    color: '#85735E',
+    textAlign: 'center',
+    paddingHorizontal: 14,
+    paddingTop: 2,
+    paddingBottom: 4,
+    backgroundColor: '#F6EEDC',
   },
 });

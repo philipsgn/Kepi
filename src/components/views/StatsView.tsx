@@ -45,6 +45,7 @@ const PREFS_STORAGE_KEY = '@vi_locket_home_preferences';
 interface StatsViewProps {
   onNavigateToCamera?: () => void;
   onNavigateHome?: () => void;
+  onNavigatePortal?: (target: 'me' | 'fly' | 'map' | 'chat') => void;
   isActive?: boolean;
 }
 
@@ -64,7 +65,7 @@ interface RowData {
  * - Danh mục gộp: "Ăn uống".
  * - Khoảng đệm đáy chuẩn xác với useBottomInset().
  */
-export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavigateHome, isActive = true }) => {
+export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavigateHome, onNavigatePortal, isActive = true }) => {
   const insets = useSafeAreaInsets();
   const { width: winWidth, height: winHeight } = useWindowDimensions();
   const { tokens, mode } = useTheme();
@@ -444,6 +445,10 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavi
             }}
             onExitToGarden={onNavigateHome}
             onOpenCamera={onNavigateToCamera}
+            onPortal={(target) => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              onNavigatePortal?.(target);
+            }}
             onOpenMagazine={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setShowMagazine(true);

@@ -1,0 +1,632 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { WebView } from 'react-native-webview';
+import * as Haptics from 'expo-haptics';
+import { PixelIconStar } from '../pixel/PixelIcons';
+
+const SafeWebView = WebView as unknown as React.ComponentType<any>;
+
+export interface StreetStall {
+  name: string;
+  price: string;
+  kind: 'food' | 'souvenir';
+}
+
+export const BEN_THANH_STALLS: StreetStall[] = [
+  { name: 'Phở bò', price: '55k', kind: 'food' },
+  { name: 'Bún bò', price: '50k', kind: 'food' },
+  { name: 'Trà đá vỉa hè', price: '5k', kind: 'food' },
+  { name: 'Cà phê bệt', price: '25k', kind: 'food' },
+  { name: 'Bánh mì', price: '25k', kind: 'food' },
+  { name: 'Cơm tấm', price: '45k', kind: 'food' },
+  { name: 'Bánh xèo', price: '40k', kind: 'food' },
+  { name: 'Chè Ba Màu', price: '20k', kind: 'food' },
+  { name: 'Nón lá & Áo dài', price: '120k', kind: 'souvenir' },
+  { name: 'Gốm & Sơn mài', price: '150k', kind: 'souvenir' },
+  { name: 'Bánh pía & Cà phê', price: '95k', kind: 'souvenir' },
+  { name: 'Lồng đèn & Heo đất', price: '80k', kind: 'souvenir' },
+];
+
+interface BenThanhStreetBannerWebViewProps {
+  active?: boolean;
+}
+
+/**
+ * Banner Phố Ẩm Thực & Đồ Lưu Niệm Chợ Bến Thành Cuộn Ngang (WORLD_W = 584px, Viewport = 192×100)
+ * Port 1:1 tinh thần pbStatic/pbDraw từ prototype Ví Heo Con 24_11.html + MASTER-PROMPTS PLAN 18/19,
+ * mở rộng toàn con phố Chợ Bến Thành: khi heo đi tới mép trái/phải, camera trượt mượt sang các dãy quán khác!
+ */
+export const BenThanhStreetBannerWebView: React.FC<BenThanhStreetBannerWebViewProps> = ({
+  active = true,
+}) => {
+  const webViewRef = useRef<any>(null);
+  const iframeRef = useRef<any>(null);
+  const [selectedStallIdx, setSelectedStallIdx] = useState(0);
+  const [toastText, setToastText] = useState<string>('Heo ghé Phở bò · 55k');
+
+  const sendCommand = (payload: Record<string, any>) => {
+    const js = `window.__pbGo && window.__pbGo(${Number(payload.index) || 0}); true;`;
+    if (Platform.OS === 'web') {
+      try {
+        iframeRef.current?.contentWindow?.postMessage(JSON.stringify(payload), '*');
+      } catch (_e) {}
+      return;
+    }
+    webViewRef.current?.injectJavaScript?.(js);
+  };
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    webViewRef.current?.injectJavaScript?.(
+      `window.__pbSetActive && window.__pbSetActive(${active ? 'true' : 'false'}); true;`
+    );
+  }, [active]);
+
+  const handleSelectChip = (idx: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedStallIdx(idx);
+    const s = BEN_THANH_STALLS[idx];
+    if (s) setToastText(`Heo ghé ${s.name} · ${s.price}`);
+    sendCommand({ type: 'GO_TO', index: idx });
+  };
+
+  const handleMessage = (event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'STALL_VISIT') {
+        if (typeof data.index === 'number') setSelectedStallIdx(data.index);
+        if (data.label) setToastText(data.label);
+      } else if (data.type === 'HAPTIC_LIGHT') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (_e) {}
+  };
+
+  const htmlContent = useMemo(
+    () => `<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#8F76CC;display:flex;align-items:center;justify-content:center}
+#psCv{
+  width:100%;
+  height:100%;
+  display:block;
+  image-rendering:pixelated;
+  image-rendering:-webkit-crisp-edges;
+  image-rendering:-moz-crisp-edges;
+  image-rendering:crisp-edges;
+  touch-action:pan-y;
+  cursor:pointer;
+}
+</style>
+<script>
+window.onerror = function(msg, src, line) {
+  if (window.ReactNativeWebView) {
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'JS_ERROR', msg: String(msg), line: line }));
+  }
+  return false;
+};
+</script>
+</head>
+<body>
+<canvas id="psCv" width="192" height="100" role="img" aria-label="Phố ẩm thực và đồ lưu niệm Chợ Bến Thành"></canvas>
+<script>
+(function(){
+'use strict';
+var VW = 192, VH = 100, WORLD_W = 584;
+var PBI = '#2B2118';
+var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var isActive = true;
+
+function notify(type, data) {
+  var msg = JSON.stringify(Object.assign({ type: type }, data || {}));
+  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+    window.ReactNativeWebView.postMessage(msg);
+  } else if (window.parent && window.parent !== window) {
+    window.parent.postMessage(msg, '*');
+  }
+}
+
+function mulberry32(a){
+  return function(){
+    a|=0; a=a+0x6D2B79F5|0;
+    var t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return((t^t>>>14)>>>0)/4294967296;
+  };
+}
+function R(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(x,y,w,h);}
+function E(c,cx,cy,rx,ry,col){
+  c.fillStyle=col;
+  for(var y=-ry;y<=ry;y++)for(var x=-rx;x<=rx;x++)if((x*x)/(rx*rx)+(y*y)/(ry*ry)<=1)c.fillRect(cx+x,cy+y,1,1);
+}
+function mk(w,h,fn){
+  var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+  var ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;fn(ctx);return cv;
+}
+
+// Sprite Heo 24x20 chuẩn prototype
+var PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',h:'#FFE3E8',k:'#2B2118',g:'#F4B93B',G:'#B97A14',w:'#FFFFFF'};
+function shape(c,rows,fill,ox,oy){
+  c.fillStyle=PAL.o;
+  for(var d=0;d<4;d++){var ax=[[-1,0],[1,0],[0,-1],[0,1]][d][0],ay=[[-1,0],[1,0],[0,-1],[0,1]][d][1];
+    for(var i=0;i<rows.length;i++)c.fillRect(ox+rows[i][1]+ax,oy+rows[i][0]+ay,rows[i][2]-rows[i][1]+1,1);}
+  c.fillStyle=fill;
+  for(var i=0;i<rows.length;i++)c.fillRect(ox+rows[i][1],oy+rows[i][0],rows[i][2]-rows[i][1]+1,1);
+}
+function drawPigSprite(c,o){
+  var ox=0,oy=0,pose=o.pose||'stand',fr=o.frame||0,eat=pose==='eat';
+  var bob=(pose==='walk'&&fr)?-1:0;
+  var body=eat?[[6,4,15],[7,3,16],[8,3,17],[9,3,17],[10,3,16],[11,4,16],[12,5,15],[13,6,14]]
+    :[[4,5,13],[5,4,15],[6,3,16],[7,3,17],[8,3,17],[9,3,17],[10,3,16],[11,4,15],[12,5,14]];
+  var earB=eat?[[5,12,13],[6,11,13]]:[[2,11,12],[3,10,13],[4,10,13]];
+  var earF=eat?[[5,9,10],[6,8,10]]:[[2,7,9],[3,7,9],[4,7,9]];
+  shape(c,earB,PAL.s,ox,oy+bob);
+  var legB=(pose==='walk'&&fr)?[[13,6,7],[14,6,7]]:[[12,6,7],[13,6,7],[14,6,7]];
+  var legF=(pose==='walk'&&!fr)?[[13,12,13],[14,12,13]]:[[12,12,13],[13,12,13],[14,12,13]];
+  shape(c,legB,PAL.s,ox,oy);shape(c,legF,PAL.p,ox,oy);
+  shape(c,body,PAL.p,ox,oy+bob);
+  R(c,ox+7,oy+bob+6,6,1,PAL.h);R(c,ox+8,oy+bob+5,4,1,PAL.h);
+  shape(c,earF,PAL.p,ox,oy+bob);
+  R(c,ox+(eat?9:8),oy+bob+3,1,1,PAL.s);
+  var hy=oy+bob+(eat?2:0);
+  R(c,ox+16,hy+7,2,3,PAL.n);R(c,ox+18,hy+8,1,2,PAL.o);
+  if(eat){R(c,ox+14,hy+8,2,1,PAL.k);}
+  else if(o.happy){R(c,ox+13,hy+6,2,1,PAL.k);R(c,ox+13,hy+7,1,1,PAL.k);R(c,ox+14,hy+7,1,1,PAL.k);}
+  else if(o.blink){R(c,ox+13,hy+7,2,1,PAL.k);}
+  else{R(c,ox+13,hy+6,2,2,PAL.k);R(c,ox+13,hy+6,1,1,PAL.w);}
+  R(c,ox+12,hy+9,2,1,PAL.s);
+  R(c,ox+13,hy+10,2,2,PAL.g);R(c,ox+13,hy+11,1,1,PAL.G);
+  R(c,ox+2,oy+bob+7,2,1,PAL.o);R(c,ox+1,oy+bob+8,2,1,PAL.p);
+}
+
+var hp=mk(24,20,function(){}), hpx=hp.getContext('2d');
+
+var PB_CX=[24,70,116,162,208,256,304,352,400,448,496,544];
+var PB_DISH=[
+  {n:'Phở bò',p:'55k'},
+  {n:'Bún bò',p:'50k'},
+  {n:'Trà đá vỉa hè',p:'5k'},
+  {n:'Cà phê bệt',p:'25k'},
+  {n:'Bánh mì',p:'25k'},
+  {n:'Cơm tấm',p:'45k'},
+  {n:'Bánh xèo',p:'40k'},
+  {n:'Chè Ba Màu',p:'20k'},
+  {n:'Nón lá & Áo dài',p:'120k'},
+  {n:'Gốm & Sơn mài',p:'150k'},
+  {n:'Bánh pía & Cà phê',p:'95k'},
+  {n:'Lồng đèn & Heo đất',p:'80k'}
+];
+
+function pbUmb(x,cx,y,w,c1,c2){
+  var l=cx-(w>>1);
+  R(x,l+2,y-2,w-4,2,c1);R(x,l,y,w,3,c1);
+  for(var k=0;k<w;k+=6)R(x,l+k+2,y-2,3,5,c2);
+  R(x,l,y+3,w,1,PBI);R(x,cx,y+4,1,14,PBI);
+}
+function pbCounter(x,cx,col){
+  R(x,cx-12,63,24,12,PBI);R(x,cx-11,64,22,10,col);R(x,cx-12,62,24,2,'#C49A6E');
+}
+function pbBowl(x,ox,oy,broth,top){
+  R(x,ox+1,oy+4,9,3,'#FFFBF1');R(x,ox+2,oy+7,7,1,'#FFFBF1');
+  R(x,ox+1,oy+3,9,1,broth);R(x,ox+3,oy+2,2,1,top);R(x,ox+6,oy+2,2,1,'#6BBF59');
+  R(x,ox+8,oy,1,4,'#8A5A34');
+}
+function pbIcon(x,i,ox,oy){
+  if(i===0)pbBowl(x,ox,oy,'#E8C77A','#B5473A');
+  else if(i===1)pbBowl(x,ox,oy,'#E0452B','#F9B8C4');
+  else if(i===2){R(x,ox+3,oy+1,5,7,'#CFEFF6');R(x,ox+4,oy+2,2,2,'#FFFFFF');R(x,ox+3,oy+5,5,3,'#E8B96B');R(x,ox+7,oy,1,4,'#E0452B');}
+  else if(i===3){R(x,ox+2,oy+3,6,5,'#FFFBF1');R(x,ox+3,oy+4,4,1,'#6B4A2B');R(x,ox+8,oy+4,2,2,'#FFFBF1');R(x,ox+4,oy,1,2,'#B9B3C4');}
+  else if(i===4){R(x,ox+1,oy+3,9,4,'#D9A55B');R(x,ox+2,oy+2,7,1,'#E8B96B');R(x,ox+2,oy+4,7,1,'#6BBF59');R(x,ox+3,oy+5,5,1,'#F9B8C4');}
+  else if(i===5){R(x,ox+1,oy+2,9,5,'#FFFBF1');R(x,ox+2,oy+3,4,3,'#9E4528');R(x,ox+7,oy+3,2,2,'#F4B93B');R(x,ox+6,oy+5,2,1,'#6BBF59');}
+  else if(i===6){R(x,ox+1,oy+3,9,4,'#F4B93B');R(x,ox+2,oy+2,7,2,'#FFE08A');R(x,ox+4,oy+4,3,1,'#5E9A57');}
+  else if(i===7){R(x,ox+3,oy+1,5,7,'#CFEFF6');R(x,ox+3,oy+3,5,2,'#E0452B');R(x,ox+3,oy+5,5,2,'#F4B93B');R(x,ox+3,oy+6,5,2,'#5E9A57');}
+  else if(i===8){R(x,ox+2,oy+3,7,2,'#E7D3A0');R(x,ox+4,oy+1,3,2,'#E7D3A0');R(x,ox+5,oy+5,1,2,'#E0452B');}
+  else if(i===9){R(x,ox+4,oy+1,3,1,'#3F8F95');R(x,ox+3,oy+2,5,5,'#6DB7C9');R(x,ox+4,oy+7,3,1,'#3F8F95');}
+  else if(i===10){R(x,ox+2,oy+2,7,5,'#E0452B');R(x,ox+3,oy+3,5,3,'#F4B93B');}
+  else{R(x,ox+3,oy+1,5,6,'#F9B8C4');R(x,ox+4,oy+2,3,3,'#F4B93B');R(x,ox+5,oy,1,2,'#E0452B');}
+}
+
+var skyTile=mk(VW,66,function(x){
+  var bands=['#6B5FC0','#8F76CC','#B685CB','#E391BF','#F8A6B0','#FFC096','#FFDA9C','#FFEBB8'];
+  for(var i=0;i<bands.length;i++){
+    R(x,0,i*8,VW,8,bands[i]);
+    if(i<bands.length-1){for(var px=0;px<VW;px+=2)R(x,px,i*8+7,1,1,bands[i+1]);}
+  }
+  R(x,0,60,VW,6,'#FFEBB8');
+  E(x,150,34,17,17,'#FFE9A8');E(x,150,34,13,13,'#FFF6CF');
+  R(x,136,36,28,1,'#FFC096');R(x,138,40,24,1,'#FFDA9C');R(x,141,44,18,2,'#FFEBB8');
+});
+
+var worldBg=mk(WORLD_W,VH,function(x){
+  var rd=mulberry32(19);
+  // Tòa nhà xa chân trời
+  for(var tx=8;tx<WORLD_W;tx+=28){
+    var h=18+((rd()*22)|0), w=10+((rd()*12)|0);
+    R(x,tx,64-h,w,h,'#7B66AE');R(x,tx+2,64-h-3,2,3,'#7B66AE');
+  }
+  // NHÀ PHỐ DỌC CON PHỐ + CHỢ BẾN THÀNH Ở TRUNG TÂM (x=242..330)
+  var HC=['#F2C9A0','#E8A0A8','#A8CBA0','#F5E0A0','#9FC4DC','#D9A8D0'];
+  var hx=0, idx=0;
+  while(hx<WORLD_W){
+    if(hx>=238 && hx<328){
+      // KHU VỰC CHỢ BẾN THÀNH (Vòm mái đỏ, Tháp đồng hồ biểu tượng, 2 cánh chợ mái ngói)
+      var bx=238, bw=90;
+      R(x,bx,26,bw,38,PBI);R(x,bx+2,28,bw-4,36,'#F2DFA8');
+      // 2 mái ngói đỏ hai bên
+      R(x,bx,26,bw,5,'#C4603A');R(x,bx+2,25,bw-4,2,'#9E4528');
+      // Tháp đồng hồ chính giữa
+      R(x,bx+34,10,22,54,PBI);R(x,bx+36,12,18,52,'#F7EFDA');
+      R(x,bx+32,8,26,4,'#C4603A');R(x,bx+38,4,14,4,'#9E4528');R(x,bx+44,1,2,3,'#F4B93B');
+      // Mặt đồng hồ tròn
+      E(x,bx+45,23,6,6,PBI);E(x,bx+45,23,5,5,'#FFFBF1');
+      R(x,bx+45,20,1,3,PBI);R(x,bx+45,23,3,1,PBI);
+      // Cổng vòm cửa chợ
+      R(x,bx+39,40,12,24,'#4A4658');E(x,bx+45,40,6,5,'#4A4658');
+      R(x,bx+10,38,16,18,'#5E9A57');R(x,bx+64,38,16,18,'#5E9A57');
+      for(var wy=40;wy<54;wy+=4){R(x,bx+11,wy,14,1,'#3E7A3A');R(x,bx+65,wy,14,1,'#3E7A3A');}
+      hx=328; continue;
+    }
+    var w=28+((rd()*10)|0), h=26+((rd()*14)|0), top=64-h;
+    R(x,hx,top,w,h,PBI);R(x,hx+1,top+1,w-2,h-1,HC[idx%HC.length]);
+    R(x,hx,top,w,2,'#4B3F86');R(x,hx+2,top+2,w-4,1,'rgba(255,255,255,.35)');
+    var rows=((h-12)/9)|0;
+    for(var r=0;r<rows;r++)for(var k=0;k<2;k++){
+      var wx=hx+5+k*((w-14)>>1)+k*2, wy=top+6+r*9;
+      R(x,wx,wy,7,6,PBI);R(x,wx+1,wy+1,5,4,rd()<.55?'#FFE08A':'#2B2A5E');R(x,wx-1,wy+6,9,1,'#8A5A34');
+    }
+    R(x,hx+w-1,top,1,h,'rgba(0,0,0,.18)');
+    if(idx%2===0){R(x,hx+w-6,35,5,13,'#E0452B');R(x,hx+w-5,37,3,1,'#F4B93B');}
+    hx+=w; idx++;
+  }
+  // Vỉa hè, lề đường, lòng đường suốt 584px
+  R(x,0,64,WORLD_W,12,'#D8CDB8');for(var xx=0;xx<WORLD_W;xx+=12)R(x,xx,64,1,12,'#C4B8A0');R(x,0,64,WORLD_W,1,PBI);
+  R(x,0,76,WORLD_W,2,'#F4E7A8');R(x,0,78,WORLD_W,1,PBI);R(x,0,79,WORLD_W,21,'#4A4658');
+  for(var xx=4;xx<WORLD_W;xx+=20)R(x,xx,92,9,1,'#F4E7A8');
+
+  // 0 PHỞ BÒ
+  var cx=PB_CX[0];pbUmb(x,cx,48,28,'#E0452B','#FFFBF1');pbCounter(x,cx,'#8A5A34');E(x,cx-3,61,6,4,'#9AA0AE');R(x,cx-9,59,12,2,'#CFD3DC');R(x,cx+5,58,6,2,'#FFFBF1');R(x,cx+5,60,6,2,'#FFFBF1');R(x,cx-8,66,16,7,'#E0452B');pbIcon(x,0,cx-5,66);
+  // 1 BÚN BÒ
+  cx=PB_CX[1];pbUmb(x,cx,48,28,'#F08A2B','#FFF1D0');pbCounter(x,cx,'#6B4A2B');R(x,cx-9,58,6,2,'#FFFBF1');R(x,cx-9,60,6,2,'#FFFBF1');E(x,cx+3,61,6,4,'#C0562B');R(x,cx-2,59,10,2,'#E8A07A');R(x,cx-8,66,16,7,'#F4B93B');pbIcon(x,1,cx-5,66);
+  // 2 TRÀ ĐÁ VỈA HÈ
+  cx=PB_CX[2];R(x,cx-8,46,16,9,PBI);R(x,cx-7,47,14,7,'#8EC9E8');pbIcon(x,2,cx-5,46);R(x,cx,55,1,6,PBI);R(x,cx-12,63,24,4,PBI);R(x,cx-11,64,22,2,'#F9B8C4');R(x,cx-11,67,2,8,PBI);R(x,cx+9,67,2,8,PBI);R(x,cx-10,56,7,8,PBI);R(x,cx-9,57,5,6,'#3E9A57');
+  [[-16,'#E0452B'],[11,'#4B6FA5'],[-5,'#F4B93B']].forEach(function(s){var sx=cx+s[0],sy=s[0]===-5?73:70;R(x,sx,sy,7,3,PBI);R(x,sx+1,sy,5,2,s[1]);R(x,sx+1,sy+3,1,3,PBI);R(x,sx+5,sy+3,1,3,PBI);});
+  // 3 CÀ PHÊ BỆT
+  cx=PB_CX[3];R(x,cx+7,50,4,26,'#6B4A2B');E(x,cx+9,47,14,9,'#3E7A3A');E(x,cx+9,45,10,6,'#5E9A57');R(x,cx-15,73,26,3,PBI);R(x,cx-14,74,24,1,'#E7C76A');
+  [[-9,'#4B6FA5',false],[1,'#F9B8C4',true]].forEach(function(p){var bx=cx+p[0];R(x,bx-1,63,7,8,PBI);R(x,bx,64,5,6,p[1]);E(x,bx+2,60,3,3,PBI);E(x,bx+2,60,2,2,'#F2C9A0');if(p[2]){R(x,bx-3,57,11,1,PBI);R(x,bx-2,56,9,1,'#E7D3A0');R(x,bx,55,5,1,'#E7D3A0');}});
+  // 4 BÁNH MÌ
+  cx=PB_CX[4];R(x,cx-15,49,30,3,PBI);for(var k=0;k<30;k+=6)R(x,cx-14+k,50,3,2,k%12?'#FFFBF1':'#E0452B');R(x,cx-13,55,26,13,PBI);R(x,cx-12,56,24,11,'#CFEFF6');R(x,cx-10,59,11,2,'#D9A55B');R(x,cx-8,62,13,2,'#E8B96B');R(x,cx-13,67,26,7,'#4B6FA5');R(x,cx-8,69,16,4,'#F4B93B');pbIcon(x,4,cx-5,66);
+  // 5 CƠM TẤM
+  cx=PB_CX[5];pbUmb(x,cx,48,28,'#3E9A57','#FFFBF1');pbCounter(x,cx,'#A65E38');R(x,cx-9,59,18,3,'#4A4658');R(x,cx-6,57,5,2,'#9E4528');R(x,cx+1,57,5,2,'#B5473A');R(x,cx-8,66,16,7,'#F08A2B');pbIcon(x,5,cx-5,66);
+  // 6 BÁNH XÈO
+  cx=PB_CX[6];pbUmb(x,cx,48,28,'#F4B93B','#FFFBF1');pbCounter(x,cx,'#6B4A2B');E(x,cx-4,60,6,3,'#3A3A44');E(x,cx-4,60,4,2,'#F4B93B');R(x,cx+4,58,6,4,'#5E9A57');R(x,cx-8,66,16,7,'#5E9A57');pbIcon(x,6,cx-5,66);
+  // 7 CHÈ BA MÀU
+  cx=PB_CX[7];R(x,cx-13,52,26,15,PBI);R(x,cx-12,53,24,13,'#FFFBF1');R(x,cx-10,56,5,5,'#E0452B');R(x,cx-3,56,5,5,'#F4B93B');R(x,cx+4,56,5,5,'#5E9A57');R(x,cx-13,67,26,7,'#E8548C');pbIcon(x,7,cx-5,66);
+  // 8 LƯU NIỆM: NÓN LÁ & ÁO DÀI
+  cx=PB_CX[8];R(x,cx-15,47,30,3,PBI);for(var k=0;k<30;k+=6)R(x,cx-14+k,48,3,2,k%12?'#FFFBF1':'#4B6FA5');R(x,cx-14,50,28,24,PBI);R(x,cx-13,51,26,22,'#FFF6E5');
+  // Treo áo dài hồng & đỏ + nón lá
+  R(x,cx-10,54,5,11,'#F9B8C4');R(x,cx-3,54,5,11,'#E0452B');R(x,cx+5,55,7,2,'#E7D3A0');R(x,cx+7,53,3,2,'#E7D3A0');pbIcon(x,8,cx-5,66);
+  // 9 LƯU NIỆM: GỐM & SƠN MÀI
+  cx=PB_CX[9];pbUmb(x,cx,48,28,'#4B6FA5','#FFFBF1');pbCounter(x,cx,'#8A5A34');R(x,cx-9,56,4,6,'#6DB7C9');R(x,cx-2,55,5,7,'#3F8F95');R(x,cx+5,57,5,5,'#E0452B');R(x,cx-8,66,16,7,'#3F8F95');pbIcon(x,9,cx-5,66);
+  // 10 ĐẶC SẢN: BÁNH PÍA & CÀ PHÊ QUÀ
+  cx=PB_CX[10];pbUmb(x,cx,48,28,'#E0452B','#F4B93B');pbCounter(x,cx,'#6B4A2B');R(x,cx-9,56,6,6,'#F4B93B');R(x,cx-1,56,6,6,'#E0452B');R(x,cx+7,57,4,5,'#6B4A2B');R(x,cx-8,66,16,7,'#E0452B');pbIcon(x,10,cx-5,66);
+  // 11 LỒNG ĐÈN & HEO ĐẤT LƯU NIỆM
+  cx=PB_CX[11];R(x,cx-15,47,30,3,PBI);R(x,cx-14,50,28,24,PBI);R(x,cx-13,51,26,22,'#2B1B2E');
+  E(x,cx-7,56,3,4,'#E0452B');E(x,cx,55,3,4,'#F4B93B');E(x,cx+7,56,3,4,'#F9B8C4');
+  R(x,cx-9,65,5,4,'#F9B8C4');R(x,cx-1,65,5,4,'#F4B93B');R(x,cx+6,65,5,4,'#F9B8C4');pbIcon(x,11,cx-5,66);
+});
+
+var cv=document.getElementById('psCv'), X=cv.getContext('2d');
+X.imageSmoothingEnabled=false;
+
+var PB={i:0,px:PB_CX[0]-12,tx:PB_CX[0]-12,camX:0,dir:1,mode:'eat',tm:2.6,hop:0,t:0,last:0,spk:[],run:false};
+function pbGo(i){
+  i=((i%PB_DISH.length)+PB_DISH.length)%PB_DISH.length;
+  PB.i=i;PB.tx=PB_CX[i]-12;PB.hop=0.5;
+  if(reduced){PB.px=PB.tx;PB.mode='eat';PB.dir=1;PB.camX=Math.max(0,Math.min(WORLD_W-VW,PB.px+12-96));notify('STALL_VISIT',{index:i,label:'Heo ghé '+PB_DISH[i].n+' · '+PB_DISH[i].p});draw(3);}
+  else{PB.mode='walk';PB.dir=PB.tx<PB.px?-1:1;}
+}
+window.__pbGo=pbGo;
+window.__pbSetActive=function(v){isActive=!!v;if(isActive&&!PB.run&&!reduced){PB.run=true;PB.last=performance.now();requestAnimationFrame(frame);}};
+
+function pbSteam(x,sx,sy,t,n){
+  for(var k=0;k<n;k++){
+    var ph=(t*0.7+k/n)%1, yy=sy-ph*13, xx=sx+Math.round(Math.sin((t+k)*3)*1.6);
+    R(x,xx,Math.round(yy),2,2,'rgba(255,251,241,'+(0.85*(1-ph)).toFixed(2)+')');
+  }
+}
+function pbHeart(x,hx,hy,c){
+  R(x,hx,hy,2,1,c);R(x,hx+3,hy,2,1,c);R(x,hx-1,hy+1,7,1,c);R(x,hx,hy+2,5,1,c);R(x,hx+1,hy+3,3,1,c);R(x,hx+2,hy+4,1,1,c);
+}
+function fbRider(x,rx,ry,t,rev){
+  var bob=(t*12|0)%2;
+  R(x,rx,ry+bob,10,4,'#E0452B');R(x,rx+1,ry+4,2,2,PBI);R(x,rx+7,ry+4,2,2,PBI);
+  R(x,rx+(rev?2:4),ry-5+bob,4,5,'#4B6FA5');E(x,rx+(rev?4:6),ry-7+bob,2,2,'#F9B8C4');R(x,rx+(rev?3:5),ry-9+bob,4,2,'#F4B93B');
+}
+
+function draw(t){
+  var cx=Math.round(PB.camX);
+  X.drawImage(skyTile,0,0);
+  // Mây trôi chậm
+  [[0,8,9],[1,20,13]].forEach(function(c){
+    var mox=((t*c[2]+c[0]*90)%(VW+50))-25;
+    R(X,Math.round(mox),c[1],20,4,'#FFE6EE');R(X,Math.round(mox+4),c[1]-3,11,4,'#FFE6EE');
+  });
+  // Thế giới phố Chợ Bến Thành cắt theo camX!
+  X.drawImage(worldBg,cx,0,VW,VH,0,0,VW,VH);
+
+  // Dây đèn nhấp nháy dọc thế giới
+  var cols=['#FF8A6B','#FFE08A','#8EE0B0'];
+  for(var xx=0;xx<VW;xx++){
+    var wx=xx+cx;
+    R(X,xx,36+Math.round(4*Math.sin((wx%48)/48*Math.PI)),1,1,PBI);
+    if(wx%6===3){var dy=Math.round(4*Math.sin((wx%48)/48*Math.PI));R(X,xx,37+dy,2,2,cols[(((wx/6)|0)+Math.floor(t*2))%3]);}
+  }
+  // Hơi nóng bốc lên từ các quầy phở, bún, cà phê, cơm tấm, bánh xèo
+  [PB_CX[0]-3,PB_CX[1]+3,PB_CX[3]-6,PB_CX[5]-4,PB_CX[6]-4].forEach(function(sx){
+    var screenX=sx-cx;
+    if(screenX>-10 && screenX<VW+10) pbSteam(X,screenX,57,t,2);
+  });
+  // Xe máy chạy ngang lòng đường trên thế giới
+  var moto1=(WORLD_W+40-((t*32)%(WORLD_W+90)))-cx;
+  if(moto1>-20&&moto1<VW+20) fbRider(X,Math.round(moto1),85,t,false);
+  var moto2=(((t*24+220)%(WORLD_W+90))-30)-cx;
+  if(moto2>-20&&moto2<VW+20) fbRider(X,Math.round(moto2),81,t,true);
+
+  // Mũi tên vàng nhấp nhô chỉ quán đích
+  if(PB.mode==='walk'){
+    var ax=PB_CX[PB.i]-cx, b=Math.round(Math.sin(t*6)*2), ay=42+b;
+    if(ax>-10 && ax<VW+10){
+      R(X,ax-3,ay+1,7,1,PBI);R(X,ax-2,ay+2,5,1,PBI);R(X,ax-1,ay+3,3,1,PBI);
+      R(X,ax-3,ay,7,1,'#F4B93B');R(X,ax-2,ay+1,5,1,'#F4B93B');R(X,ax-1,ay+2,3,1,'#F4B93B');R(X,ax,ay+3,1,1,'#F4B93B');
+    }
+  }
+
+  // Vẽ chú heo theo tọa độ màn hình (px - camX)
+  var jy=PB.hop>0?-Math.round(Math.abs(Math.sin(PB.hop*10))*6):0, py=79+jy, eat=PB.mode==='eat';
+  hpx.clearRect(0,0,24,20);
+  drawPigSprite(hpx,{pose:eat?'eat':'walk',frame:eat?0:(t*5|0)%2,happy:PB.hop>0||eat,blink:(t%4)<0.15});
+  var px=Math.round(PB.px)-cx;
+  X.save();
+  if(PB.dir<0){X.translate(px+24,py);X.scale(-1,1);X.drawImage(hp,0,0,24,20,0,0,24,20);}
+  else X.drawImage(hp,0,0,24,20,px,py,24,20);
+  X.restore();
+
+  // Bong bóng món ăn / đồ lưu niệm trên đầu heo
+  if(eat||PB.hop>0){
+    var bx=Math.max(2,Math.min(VW-22,px+12-10)), by=py-17;
+    R(X,bx,by,20,15,PBI);R(X,bx+1,by+1,18,13,'#FFFBF1');
+    R(X,bx+8,by+15,4,2,PBI);R(X,bx+9,by+15,2,1,'#FFFBF1');
+    pbIcon(X,PB.i,bx+4,by+3);
+  }
+  if(eat){var h=(t*2)%1;pbHeart(X,px+14,Math.round(py-26-h*8),'#E0452B');}
+
+  PB.spk=PB.spk.filter(function(s){s.l-=0.03;return s.l>0;});
+  PB.spk.forEach(function(s){s.x+=s.vx;s.y+=s.vy;R(X,Math.round(s.x)-cx,Math.round(s.y),2,2,s.c);});
+
+  R(X,0,0,VW,2,PBI);R(X,0,VH-2,VW,2,PBI);
+}
+
+function step(dt){
+  PB.t+=dt;
+  if(PB.hop>0) PB.hop=Math.max(0,PB.hop-dt);
+  if(PB.mode==='walk'){
+    var d=PB.tx-PB.px;
+    if(Math.abs(d)<1.4){
+      PB.px=PB.tx; PB.mode='eat'; PB.tm=2.6; PB.dir=1;
+      notify('STALL_VISIT',{index:PB.i,label:'Heo ghé '+PB_DISH[PB.i].n+' · '+PB_DISH[PB.i].p});
+    }else{
+      PB.dir=d<0?-1:1; PB.px+=PB.dir*42*dt;
+    }
+  }else{
+    PB.tm-=dt;
+    if(PB.tm<=0) pbGo((PB.i+1)%PB_DISH.length);
+  }
+  // Camera cuộn theo chú heo mượt mà (không bó hẹp 1 khung hình!)
+  var targetCam=Math.max(0,Math.min(WORLD_W-VW, PB.px+12-(VW/2)));
+  PB.camX += (targetCam - PB.camX) * Math.min(1, dt * 6);
+}
+
+function frame(now){
+  if(!isActive){PB.run=false;return;}
+  var dt=Math.min(0.05,(now-PB.last)/1000);PB.last=now;
+  step(dt);draw(PB.t);requestAnimationFrame(frame);
+}
+
+cv.addEventListener('pointerdown',function(e){
+  var r=cv.getBoundingClientRect();
+  var lx=((e.clientX-r.left)/r.width)*VW + PB.camX;
+  var ly=((e.clientY-r.top)/r.height)*VH;
+  notify('HAPTIC_LIGHT');
+  if(ly>=72 && Math.abs(lx-(PB.px+12))<18){
+    PB.hop=0.7;
+    for(var k=0;k<12;k++){
+      var a=Math.random()*6.28;
+      PB.spk.push({x:PB.px+12,y:84,vx:Math.cos(a)*1.4,vy:Math.sin(a)*1.4-0.6,l:1,c:['#F9B8C4','#F4B93B','#FFFBF1'][k%3]});
+    }
+    return;
+  }
+  var bi=0;
+  for(var j=0;j<PB_CX.length;j++){
+    if(Math.abs(lx-PB_CX[j])<Math.abs(lx-PB_CX[bi])) bi=j;
+  }
+  pbGo(bi);
+});
+
+window.addEventListener('message',function(ev){
+  try{
+    var d=JSON.parse(ev.data);
+    if(d&&d.type==='GO_TO') pbGo(Number(d.index)||0);
+  }catch(e){}
+});
+
+PB.px=PB_CX[0]-12; PB.tx=PB.px; PB.camX=0;
+if(reduced){draw(3);}else{PB.run=true;PB.last=performance.now();requestAnimationFrame(frame);}
+})();
+</script>
+</body>
+</html>`,
+    []
+  );
+
+  const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
+
+  return (
+    <View style={styles.wrapper}>
+      {/* Banner World Cuộn Ngang Chợ Bến Thành 192×100 (WORLD_W = 584) */}
+      <View style={styles.bannerFrame}>
+        {Platform.OS === 'web' ? (
+          <iframe
+            ref={iframeRef}
+            srcDoc={htmlContent}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            title="Ben Thanh Street Banner"
+          />
+        ) : (
+          <SafeWebView
+            ref={webViewRef}
+            source={memoizedSource}
+            originWhitelist={['*']}
+            containerStyle={styles.webContainer}
+            style={styles.webStyle}
+            scrollEnabled={false}
+            bounces={false}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            onMessage={handleMessage}
+          />
+        )}
+
+        {/* Nhãn nổi gọn (Toast món ăn / lưu niệm đang ghé) */}
+        <View style={styles.floatingToast} pointerEvents="none">
+          <PixelIconStar size={12} />
+          <Text style={styles.floatingToastText} numberOfLines={1}>
+            {toastText}
+          </Text>
+        </View>
+      </View>
+
+      {/* Hàng Chip Cuộn Ngang 12 Quầy Đặc Sản & Lưu Niệm Chợ Bến Thành */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.stallChipsRow}
+      >
+        {BEN_THANH_STALLS.map((stall, idx) => {
+          const isSelected = selectedStallIdx === idx;
+          return (
+            <TouchableOpacity
+              key={stall.name}
+              style={[
+                styles.stallChip,
+                isSelected && styles.stallChipActive,
+              ]}
+              onPress={() => handleSelectChip(idx)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.stallChipText, isSelected && styles.stallChipTextActive]}>
+                {stall.name}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  wrapper: {
+    gap: 8,
+  },
+  bannerFrame: {
+    position: 'relative',
+    width: '100%',
+    aspectRatio: 192 / 100,
+    borderRadius: 22,
+    borderWidth: 3,
+    borderColor: '#2B2118',
+    overflow: 'hidden',
+    backgroundColor: '#8F76CC',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
+  },
+  webContainer: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#8F76CC',
+  },
+  webStyle: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#8F76CC',
+  },
+  floatingToast: {
+    position: 'absolute',
+    top: 7,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 999,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  floatingToastText: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 11.5,
+    color: '#2B2118',
+  },
+  stallChipsRow: {
+    gap: 6,
+    paddingVertical: 2,
+  },
+  stallChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  stallChipActive: {
+    backgroundColor: '#F4B93B',
+  },
+  stallChipText: {
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '800',
+    fontSize: 11.5,
+    color: '#2B2118',
+  },
+  stallChipTextActive: {
+    fontFamily: 'Baloo2_800ExtraBold',
+  },
+});

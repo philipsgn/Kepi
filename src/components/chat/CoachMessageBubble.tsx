@@ -19,11 +19,7 @@ interface CoachMessageBubbleProps {
 }
 
 /**
- * Bong bóng tin nhắn từ Anh Minh (Cố vấn tĩnh tâm) — Phong cách "Ấm, tĩnh, sang"
- * Tuân thủ mục 2.1 của đặc tả docs/screens/CHAT.md:
- * - Avatar tròn 32px vàng ấm chữ "M".
- * - Nền bề mặt tokens.surface, viền hairline 1px tokens.border, bo góc 16px.
- * - Nhúng thẻ số liệu mini hoặc thẻ xác nhận nếu có.
+ * Bong bóng tin nhắn từ Heo-Coach (Heo AI) — Neo-Brutalist Pixel Art
  */
 export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
   message,
@@ -50,7 +46,7 @@ export const CoachMessageBubble: React.FC<CoachMessageBubbleProps> = ({
             isHeocon && { fontFamily: 'Baloo2_800ExtraBold', fontWeight: '800' },
           ]}
         >
-          Anh Minh
+          Heo AI
         </Text>
 
         <View

@@ -10,6 +10,8 @@ Bộ prompt dùng để dựng app theo phong cách của 6 ảnh tham khảo: U
 2. Dán **PLAN 0 (System Prompt tổng)** làm system prompt cố định.
 3. Với mỗi việc, dán thêm đúng Plan liên quan (UI, Font, Style...) vào tin nhắn.
 4. Thứ tự đề xuất: 0 → Style → Màu → Font → UI → Pixel Art → Mascot → Animation → Copy → Dev → Marketing → QA.
+5. Tab Giải trí và Hồ sơ: dán thêm PLAN 14 (hub), 15 (Heo qua đường), 16 (Hộ Chiếu), 17 (Trò chuyện Heo AI), 18 (banner phố ẩm thực) và 19 (công thức pixel art cảnh Việt Nam). Gửi kèm prototype `ve-heo-con.html`.
+6. Ưu tiên khi mâu thuẫn: PLAN 15 đến 19 (mới nhất) trước PLAN 14 và PLAN 12.
 
 ## Biến dự án
 
@@ -384,6 +386,8 @@ Nếu mục nào "Không đạt", nêu cách sửa bằng token hoặc mã cụ 
 
 ## PLAN 12: Map Plan (bản đồ thật Việt Nam, lưu chi tiêu theo vị trí, 0 đồng)
 
+> **ĐÃ THAY THẾ (24/11/2026) bởi PLAN 16 (Hộ Chiếu Quán Quen).** App không còn bản đồ nền. Giữ phần này làm tài liệu lưu trữ nếu sau này muốn bản đồ trở lại; xem thêm 16.2 (khảo sát nguồn, lưu ý OpenFreeMap và Nominatim không nên dùng cho bản sản xuất).
+
 Quyết định kỹ thuật đã chốt (đừng đổi nếu không có lý do):
 
 | Phần | Chọn | Lý do |
@@ -528,7 +532,7 @@ LUẬT CHƠI
 
 LIÊN KẾT BẮT BUỘC
 - Ngân sách: đã chi dưới 50% hạn mức hôm nay thì +1 lượt bay; chi vượt hạn mức thì -1. Heo nhà đói (<25%) thì bắn yếu (x0.85).
-- Vé dùng chung hai game: mỗi ván mất 1 vé; ghi một khoản chi (từ Chụp, Bản đồ, Chat, Hồ sơ) +1 vé; 10 cám đổi 1 vé; tối đa 99.
+- Vé dùng chung hai game: mỗi ván mất 1 vé; ghi một khoản chi (từ Chụp, Hộ Chiếu, Chat, Hồ sơ) +1 vé; 10 cám đổi 1 vé; tối đa 99.
 - Việc nhà: ba chỉ số heo, cá ao, hoa hồng (0 đến 100%) giảm theo thời gian thật (heo 1.2, cá 0.8, hoa 0.6 điểm mỗi phút, tối đa 12 giờ bù). Đồ ăn hái ở Heo bay mang về: bắp +10 và cà rốt +8 cho cá; chuối +9, táo +10, dưa hấu +14 cho hoa hồng. Cho heo ăn cám +25 cho heo, mất 1 cám. Dưới 25% thì heo ngoài Vườn buồn và nói nhắc.
 - Dùng chung sprite heo, cánh, đồ ăn, nền cảnh với Heo bay.
 
@@ -537,7 +541,9 @@ KỸ THUẬT: canvas 224x140, vật lý khối AABB (đạn là hình tròn), gi
 
 ---
 
-## PLAN 14: Tab Giải trí (Trung Tâm Heo Con): hub, Chat, 2 game, Bản đồ
+## PLAN 14: Tab Giải trí (Trung Tâm Heo Con): hub, Chat, các game, Hộ Chiếu
+
+> **Cập nhật 24/11/2026:** "Bản đồ" thành "Hộ Chiếu Quán Quen" (PLAN 16); Chat chỉ còn Heo-Coach local-first, bỏ "Hội bạn thân" (PLAN 17); thêm game Heo qua đường (PLAN 15). Khi 14.1 mâu thuẫn với PLAN 15 đến 19 thì theo PLAN 15 đến 19.
 
 Tab Giải trí là tab thứ 4 trong thanh 5 tab: Vườn, Nhà, Chụp (giữa), Giải trí, Hồ sơ. Prototype đối chiếu: file `ve-heo-con.html`. Gửi kèm prototype và MASTER-PROMPTS.md cho agent.
 
@@ -547,24 +553,22 @@ Tab Giải trí là tab thứ 4 trong thanh 5 tab: Vườn, Nhà, Chụp (giữa
 Bạn là Art Director kiêm UI engineer. Thiết kế và dựng tab "Giải trí" (Trung Tâm Heo Con) của {APP_NAME}, giống prototype đính kèm `ve-heo-con.html` về cấu trúc, luồng và phong cách. Đồng bộ với MASTER-PROMPTS.md: Plan 1 đến 4 (style, màu, font, UI), 5 đến 7 (pixel, heo, hành vi), 8 (giọng văn), 12 (bản đồ thật), 13 (Heo bắn). Mọi giá trị khác với tài liệu thì ghi rõ chỗ lệch và lý do, không tự đổi.
 
 1) CẤU TRÚC
-- Tab Giải trí = hub. Chat, Heo bay, Heo bắn, Bản đồ là bốn màn con, mỗi màn có nút "‹ Trung tâm Heo Con" ở đầu. Khi ở màn con, tab Giải trí vẫn sáng.
-- Hub gồm: pill "PIGFLY HUB" (chấm đỏ), chip chuỗi ngày (vàng), avatar mặt heo, tiêu đề "Trung Tâm Heo Con", lời chào "Chào {TÊN}! Khám phá giải trí & bản đồ khu phố", hai chip Vé và Cám, rồi các thẻ xếp dọc (4 thẻ gốc, thêm thẻ thứ 5 "Game Heo Qua Đường · SÀI GÒN · LÁCH ĐƯỜNG" theo PLAN 15).
+- Tab Giải trí = hub. Chat, Heo bay, Heo bắn, Heo qua đường, Hộ Chiếu là năm màn con, mỗi màn có nút "‹ Trung tâm Heo Con" ở đầu. Khi ở màn con, tab Giải trí vẫn sáng.
+- Hub gồm: pill "PIGFLY HUB" (chấm đỏ), chip chuỗi ngày (vàng), avatar mặt heo, tiêu đề "Trung Tâm Heo Con", lời chào "Chào {TÊN}! Khám phá giải trí & quán quen của bạn", hai chip Vé và Cám, rồi các thẻ xếp dọc (4 thẻ gốc, thêm thẻ thứ 5 "Game Heo Qua Đường · SÀI GÒN · LÁCH ĐƯỜNG" theo PLAN 15).
 - Mỗi thẻ: ô icon pixel 64px nền màu (viền 3px mực, bo 18px, bóng cứng 3px), tag pill chữ hoa, tên (Baloo 2 ExtraBold), dòng số liệu thật màu xanh, mô tả 1 đến 2 dòng, "Khám phá ngay ›".
-  - Trò Chuyện & Bạn Bè · AI COACH & SQUAD · số tin mới.
+  - Trò Chuyện Cùng Heo AI · HEO AI · CHẠY TRONG MÁY · "Heo-Coach đang ngồi chờ".
   - Game Heo Bay · FLAPPY PIG · 60FPS · kỷ lục.
   - Game Heo Bắn · ANGRY PIG · 3 SAO · sao đã được trên 9.
-  - Bản Đồ Chi Tiêu · GPS PIXEL · QUÁN QUEN · số ghim hôm nay.
+  - Game Heo Qua Đường · SÀI GÒN · LÁCH ĐƯỜNG · sao đã được trên 12.
+  - Hộ Chiếu Quán Quen · CHECK-IN · QUÁN QUEN · số quán đã ghé.
 - Thanh tab: 5 nút, icon trên chữ dưới, nút Chụp ở giữa màu đỏ khi chọn, nút Giải trí màu vàng khi chọn, icon bong bóng chat.
 
-2) CHAT (hai ngăn)
-- Heo-Coach: trả lời từ số liệu thật của app (hạn mức hôm nay, danh mục chi nhiều nhất tháng, phản biện khoản gần nhất bằng 3 câu hỏi "cần hay muốn, có rẻ hơn không, tuần sau còn xứng đáng không", trạng thái heo nhà, vé và cám). Có gợi ý bấm nhanh. Prototype dùng luật có sẵn; bản chính thức gọi LLM theo 14.2.
-- Hội bạn thân: bảng xếp hạng (điểm = chuỗi ngày x10 + kỷ lục Heo bay x2 + sao x15), thử thách tuần "ghi chi 5 ngày liền" (thưởng 3 cám), khung chat riêng với từng bạn, tặng 1 cám, thách Heo bay, nhắc ghi chi, mã mời có nút sao chép.
-- Quyền riêng tư: bạn bè chỉ thấy chuỗi ngày, điểm game và sao. Không bao giờ thấy số tiền, ảnh, danh mục hay vị trí.
+2) CHAT: chỉ có Heo-Coach, local-first, banner quán cà phê hai chú heo nói chuyện. Chi tiết ở PLAN 17. (Không có "Hội bạn thân".)
 
 3) LIÊN KẾT VỚI PHẦN CÒN LẠI CỦA APP
 - Vé, cám, việc nhà, ngân sách: theo Plan 13. Ghi chi ở bất cứ đâu +1 vé.
-- Bản đồ: nút chuyển Pixel / Bản đồ thật (Plan 12). Lưu chi ở bản đồ hoặc ở tab Chụp thì lấy GPS đúng lúc đó, ghim vào máy; tên nơi lấy từ Nominatim (tối đa 1 yêu cầu/giây, có cache, lỗi thì dùng tên người dùng gõ).
-- Cổng phòng trong tab Nhà: Sảnh sang Hồ sơ; Phòng ngủ (tay cầm) sang game; Phòng làm việc sang Bản đồ; Phòng khách sang Chat.
+- Hộ Chiếu Quán Quen: thay Bản đồ, xem PLAN 16 (lưu chi lấy GPS một lần, địa chỉ lấy từ bộ đổi tọa độ của hệ điều hành, chỉ đường mở Google Maps hoặc Apple Maps).
+- Cổng phòng trong tab Nhà: Sảnh sang Hồ sơ; Phòng ngủ (tay cầm) sang game; Phòng làm việc sang Hộ Chiếu Quán Quen; Phòng khách sang Chat.
 - Hồ sơ đặt hạn mức hôm nay, ảnh hưởng số lượt bay của Heo bắn và câu trả lời của Heo-Coach.
 
 4) PHONG CÁCH
@@ -574,7 +578,7 @@ Token, font, bo góc, bóng cứng, nút 44px, nhãn chữ hoa theo Plan 1 đế
 (a) Bản thiết kế hub, chat, các màn con ở khung 390x844; (b) bảng token và component mới; (c) luồng điều hướng; (d) danh sách lệch so với tài liệu hiện có; (e) checklist kiểm thử bên dưới.
 
 6) KIỂM THỬ
-Bấm đủ bốn thẻ và quay lại; tab Giải trí sáng ở mọi màn con; không cuộn ngang ở 360px; Coach trả lời đúng khi đổi hạn mức; chuyển sang "Bản đồ thật" khi mất mạng thì hiện thông báo và vẫn lưu được ghim; từ chối quyền vị trí thì vẫn ghi được chi, không ghim; bạn bè không bao giờ nhận số tiền.
+Bấm đủ các thẻ và quay lại; tab Giải trí sáng ở mọi màn con; không cuộn ngang ở 360px; Coach trả lời đúng khi đổi hạn mức; Hộ Chiếu vẫn dùng được khi mất mạng hoặc từ chối quyền vị trí.
 ````
 
 ### 14.2 Prompt hệ thống cho Heo-Coach (LLM thật)
@@ -673,10 +677,173 @@ KIỂM THỬ: giữ ▲ khoảng 10 giây ở màn 1 thì có thể qua; đứng
 
 ---
 
+## PLAN 16: Hộ Chiếu Quán Quen (thay hoàn toàn Bản đồ chi tiêu, 0 đồng)
+
+**Quyết định (24/11/2026):** bỏ bản đồ nền trong app. Tab Giải trí không còn thẻ "Bản đồ chi tiêu", thay bằng thẻ "Hộ Chiếu Quán Quen". PLAN 12 (Map) chuyển thành tài liệu lưu trữ, chỉ dùng nếu sau này cần bản đồ nền trở lại. Prototype đối chiếu: `ve-heo-con.html`, màn Hộ Chiếu trong tab Giải trí (file `pass.js`, `pass-b.js`).
+
+**Lý do:** không tile, không máy chủ bản đồ, không lag, không khung vuông rỗng khi mạng yếu, không phụ thuộc nhà cung cấp, không phải gia hạn, không rủi ro vẽ sai Hoàng Sa, Trường Sa. Người dùng cần xem lại "mình đã ghé quán nào, tiêu bao nhiêu" hơn là xem bản đồ; khi cần đi thì mở Google Maps hoặc Apple Maps.
+
+> **Lệch công nghệ cần chốt trước khi giao việc:** biến `PLATFORM` đầu file ghi Flutter, nhưng bản đặc tả Hộ Chiếu do chủ dự án soạn dùng React Native/Expo (`Location.reverseGeocodeAsync`, `PixelIconMapPin`, `PiggySpendMapView.tsx`) và nhắc `AGENTS.md`, `docs/DECISIONS.md` (Quyết định 183). Hãy xác nhận nền tảng thật rồi sửa biến `PLATFORM`; prompt bên dưới viết trung tính, chỗ nào có tên API thì ghi cả hai.
+
+### 16.1 Prompt chính cho agent
+
+````
+Bạn là kỹ sư mobile kiêm UI engineer. Dựng màn "Hộ Chiếu Quán Quen" cho {APP_NAME}, thay thế màn Bản đồ chi tiêu, giống prototype đính kèm `ve-heo-con.html` về cấu trúc, luồng, chữ và phong cách. Đồng bộ với MASTER-PROMPTS.md (Plan 1 đến 3 cho style, Plan 13 cho vé và cám, Plan 17 và 18 cho banner). Trước khi viết mã: cập nhật tài liệu sống (docs/DECISIONS.md thêm quyết định mới, đặc tả màn Giải trí, TECH_ARCHITECTURE.md), rồi mới code.
+
+1) NGUYÊN TẮC
+- 100% thành phần native của nền tảng (View, Text, Image, ScrollView hoặc tương đương). Không WebView, không tile, không SDK bản đồ nền trong màn này.
+- Local-first: mọi dữ liệu vị trí và chi tiêu lưu trong máy. Không gửi tọa độ lên máy chủ.
+- Chỉ đọc GPS một lần lúc Lưu chi (độ chính xác cân bằng), không theo dõi nền. Hỏi quyền đúng lúc cần, giải thích lý do, từ chối vẫn dùng được app (khoản chi không có vị trí).
+
+2) DỮ LIỆU
+- Mỗi khoản chi có thể mang: lat, lng, accuracy (m), ts, location_name (người dùng gõ, có thể trống), address (địa chỉ tự tìm), district (quận/huyện/thành phố), amount, photo_id.
+- Địa chỉ tự tìm bằng bộ đổi tọa độ thành địa chỉ của hệ điều hành (Expo: `Location.reverseGeocodeAsync`; Flutter: gói `geocoding`; Android gốc: `Geocoder`). Kết quả chỉ là ĐỊA CHỈ (đường, phường, quận), không đảm bảo có tên quán. Vì vậy: ô "Tên quán" tùy chọn, để trống thì hiện địa chỉ. Lỗi hoặc mất mạng thì lưu tọa độ, địa chỉ để trống, thử lại sau; không chặn việc lưu chi.
+- "Quán" = các khoản chi cùng tên (hoặc cùng ô 50 m khi chưa có tên) gộp lại. Tính: số lần ghé, tổng tiền, lần gần nhất, số lần trong 14 ngày.
+- Khoảng cách dùng công thức Haversine từ vị trí hiện tại (lấy một lần khi mở màn hoặc bấm "Định vị"; không có GPS thì dùng vị trí mẫu hoặc ẩn bộ lọc "Gần").
+
+3) MÀN HÌNH (khung 390x844)
+- Đầu màn: nút "‹ Trung tâm Heo Con", tiêu đề "Hộ Chiếu Quán Quen", dòng phụ ("Gần bạn tính từ GPS thật" hoặc "...từ vị trí mẫu"), nút "Định vị".
+- Banner động "heo dạo phố ẩm thực" (Plan 18).
+- Thẻ tổng quan: Quán đã ghé, Quận đã đặt chân, Quán ruột (ghé nhiều nhất), Tổng chi; dưới là các "con dấu" quận (chip "Quận 1 · 2").
+- Thanh lọc 4 nút: 14 ngày (ghé trong 14 ngày gần nhất, mới nhất trước), Quen (số lần ghé giảm dần), Gần (khoảng cách tăng dần), Top chi (tổng tiền giảm dần).
+- Thẻ nhắc màu vàng kem khi có ảnh chưa gắn vị trí: "Bạn có X ảnh chưa gắn vị trí" + nút "Gắn vị trí hiện tại" (một chạm gắn GPS hiện tại cho cả X ảnh).
+- Danh sách thẻ quán: ảnh vuông 52x52 viền 2.5px bo 12px bóng cứng (chưa có ảnh thì icon pixel theo loại quán), tên quán (Baloo 2 ExtraBold), địa chỉ và quận (Nunito 700), huy hiệu "Ghé N lần", "tổng tiền", khoảng cách, dòng "Gần nhất ... · −số tiền", nút "Chỉ đường".
+- Trạng thái trống: "Chưa có quán nào trong 14 ngày qua." Có công tắc "Tự gắn vị trí khi lưu chi ở tab Chụp".
+
+4) CHỈ ĐƯỜNG MỘT CHẠM (mở app bản đồ có sẵn, app không vẽ bản đồ)
+- Android: `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(name)})`
+- iOS: `maps://app?daddr=${lat},${lng}&q=${encodeURIComponent(name)}`
+- Dự phòng web: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+Nếu không mở được app thì hiện địa chỉ để người dùng sao chép.
+
+5) LIÊN KẾT: thẻ ở sảnh Giải trí tên "Hộ Chiếu Quán Quen", tag "CHECK-IN · QUÁN QUEN", mô tả "Check-in quán xá, album ảnh và chỉ đường 1 chạm", dòng số liệu "N quán đã ghé". Cổng "Phòng làm việc" trong tab Nhà và hành động "Mở Hộ chiếu quán quen" ở banner Hồ sơ đều dẫn tới đây. Lưu chi ở tab Chụp tự gắn vị trí nếu công tắc bật. Ghi chi +1 vé (Plan 13).
+
+6) QUYỀN RIÊNG TƯ VÀ PHÁP LÝ
+- Vị trí gắn với chi tiêu là dữ liệu nhạy cảm về thói quen. Lưu trong máy, cho xóa từng quán hoặc toàn bộ lịch sử vị trí, có công tắc tắt tự gắn.
+- Luật Bảo vệ dữ liệu cá nhân 2025 (Luật 91/2025/QH15, hiệu lực 01/01/2026) và Nghị định 356/2025/NĐ-CP áp dụng; đội ngũ cần nhờ luật sư xác nhận cách xử lý dữ liệu vị trí trước khi phát hành (chưa có điều khoản cụ thể nào được kiểm chứng trong tài liệu này).
+- Không dùng logo, tên thương hiệu thật làm hình trong app.
+
+7) KIỂM THỬ
+Mở từ thẻ sảnh, từ cổng phòng và từ banner Hồ sơ; bốn bộ lọc đổi đúng thứ tự; "Gần" đúng khi đổi vị trí; gắn vị trí cho ảnh làm thẻ nhắc biến mất và danh sách cập nhật; từ chối quyền vị trí vẫn lưu được khoản chi; mất mạng không chặn lưu; nút Chỉ đường mở đúng tọa độ trên Android và iOS; không cuộn ngang ở 360px; 12 quán cuộn mượt 60fps; chạy với `prefers-reduced-motion`.
+````
+
+### 16.2 Nếu sau này cần bản đồ nền (lưu trữ, chưa làm)
+
+Kết quả khảo sát 24/11/2026 để agent không phải tra lại. Phần có link là đã đọc nguồn; phần khác là khuyến nghị kỹ thuật chưa đo trên app.
+
+- Hướng 0 đồng bền nhất: MapLibre Native + dữ liệu OpenStreetMap đóng gói PMTiles ngay trong app (`pmtiles://asset://`, MapLibre Android từ 11.7.0 hỗ trợ PMTiles, [ví dụ](https://maplibre.org/maplibre-native/android/examples/data/PMTiles/)). Dung lượng file cắt riêng Việt Nam chưa được đo. Dữ liệu OSM theo giấy phép ODbL share-alike, bắt buộc ghi nguồn.
+- Không dùng làm nền sản xuất: [OpenFreeMap](https://openfreemap.org/tos/) (không SLA, có thể ngừng bất cứ lúc nào), Nominatim công cộng ([giới hạn 1 req/giây, cấm autocomplete](https://operations.osmfoundation.org/policies/nominatim/)). Goong, VietMap, Google Maps SDK đều có phí hoặc yêu cầu thanh toán/khóa API ([Goong](https://goong.io/pricing-plans/), [VietMap](https://maps.vietmap.vn/docs/map-api/tilemap), [Google](https://developers.google.com/maps/documentation/android-sdk/usage-and-billing)).
+- Hiển thị điểm không lag (khuyến nghị): một nguồn GeoJSON, một lớp circle/symbol, bật clustering (`cluster`, `clusterRadius`, `clusterMaxZoom`, [hướng dẫn](https://docs.mapbox.com/android/legacy/maps/guides/clustering)); chỉ nạp điểm trong khung nhìn; zoom xa thì gom theo lưới H3/geohash hoặc heatmap.
+- Bản đồ phải thể hiện đúng Hoàng Sa, Trường Sa. Tham khảo [Nghị định 18/2020/NĐ-CP](https://thuvienphapluat.vn/van-ban/Bat-dong-san/Nghi-dinh-18-2020-ND-CP-xu-phat-vi-pham-hanh-chinh-trong-linh-vuc-do-dac-va-ban-do-434367.aspx) (kết quả tìm kiếm cho thấy mức phạt tới 50 triệu đồng) và [Nghị định 228/2026/NĐ-CP](https://luatvietnam.vn/vi-pham-hanh-chinh/nghi-dinh-228-2026-nd-cp-sua-doi-xu-phat-vi-pham-do-dac-va-ban-do-hieu-luc-15-08-2026-438741-d1.html) sửa đổi, hiệu lực 15/08/2026; chưa xác nhận được điều khoản cụ thể cho ứng dụng di động, cần luật sư.
+
+---
+
+## PLAN 17: Trò chuyện với Heo AI (local-first) + banner quán cà phê Sài Gòn
+
+**Quyết định (24/11/2026):** tab Trò chuyện chỉ còn Heo-Coach. Bỏ hoàn toàn "Hội bạn thân" (bảng xếp hạng, nhắn bạn, tặng cám, thách đấu, mã mời) vì app theo hướng local-first, không có máy chủ bạn bè. Những phần ở Plan 14.1 mục 2 về "Hội bạn thân" không còn hiệu lực. Heo-Coach chạy trong máy: bản prototype dùng luật trả lời theo số liệu app; bản thật có thể gắn mô hình ngôn ngữ chạy trên thiết bị (chưa kiểm chứng mô hình nào đủ nhẹ), prompt hệ thống ở 14.2 vẫn dùng, dữ liệu không rời máy. Prototype đối chiếu: `ve-heo-con.html`, màn Trò chuyện (file `chat-b.js`).
+
+````
+Dựng màn "Trò chuyện" của {APP_NAME} theo prototype đính kèm.
+
+BỐ CỤC: đầu màn "‹ Trung tâm Heo Con", tiêu đề "Trò chuyện", dòng phụ "Heo AI ngồi quán cà phê, chạy ngay trong máy". Tiếp theo là BANNER, hàng gợi ý nhanh (Hôm nay còn chi được bao nhiêu? / Tháng này chi nhiều nhất gì? / Phản biện khoản vừa ghi / Heo nhà đói chưa? / Mẹo kiếm vé chơi), ô nhập + nút Gửi, dòng riêng tư ("Heo AI chạy ngay trong máy, đọc số liệu tổng hợp trong app. Ảnh và vị trí không được gửi đi."), rồi mục thu gọn "Lịch sử trò chuyện" chứa toàn bộ tin nhắn dạng danh sách (role log).
+
+BANNER (canvas logic 144x96, hiển thị pixelated gấp 2,5 lần, bội số nguyên): quán cà phê Sài Gòn. Hai chú heo đứng đối diện nhau qua bàn cao nhỏ: heo hồng là người dùng, heo xanh nhạt đeo kính tròn có ăng-ten phát sáng là Heo AI (đổi bảng màu sprite heo hồng sang xanh nhạt, thêm kính và ăng-ten vẽ chồng lên sprite 24x20, lật ngang để nhìn về phía bạn). Trên bàn: phin cà phê đang nhỏ giọt và bốc hơi, hai ly cà phê sữa đá. Nền: cửa sổ chớp xanh nhìn ra phố với xe máy chạy qua, quạt trần quay, ba bóng đèn thả nhấp nháy, biển neon hình cốc cà phê chớp, khung ảnh mặt heo, bảng menu viết phấn, kệ lọ và phin, nón lá và mũ bảo hiểm treo tường, ghế nhựa, sàn gạch bông, tường vàng loang, chân tường xanh ngọc.
+
+CHỮ HIỆN TRÊN BANNER: bong bóng thoại dựng bằng thành phần giao diện thật đặt chồng lên banner (không vẽ chữ vào canvas, để có tiếng Việt có dấu, nét chữ rõ và đọc được bằng trình đọc màn hình). Câu người dùng gửi hiện trong bong bóng hồng trên heo hồng. Heo AI "suy nghĩ" bằng dấu ··· nhấp nháy (ăng-ten nháy nhanh), rồi trả lời trong bong bóng xanh với chữ hiện dần (khoảng 2 ký tự mỗi 28 ms; giảm chuyển động thì hiện ngay). Bong bóng rộng 50% banner, tối đa 3 dòng, chạm vào để mở rộng (cuộn được). Có đuôi bong bóng chỉ về chú heo. Bong bóng AI có aria-live polite. Khi mở màn thì hiện câu cuối của mỗi bên.
+
+HÀNH ĐỘNG: gửi tin thì heo hồng nhảy và "nói" (mắt cười nhấp nháy, nhún nhẹ); AI trả lời thì heo xanh nhảy, tim bay lên; lúc rảnh hai heo tự nhấp cà phê (tư thế cúi đầu) lệch nhau 3 giây; chạm vào heo bên nào thì heo đó nhảy. Không gửi được tin mới khi đang chờ trả lời.
+
+KHÔNG: không logo thương hiệu thật, không chữ trên biển neon và menu (chỉ vạch, icon). Giảm chuyển động: vẽ một khung tĩnh, vẫn đổi bong bóng.
+KIỂM THỬ: gửi 5 gợi ý nhanh và một câu tự gõ; câu dài mở rộng được; mất mạng vẫn trả lời; không có phần "Hội bạn thân" ở bất cứ đâu; không cuộn ngang ở 360px.
+````
+
+---
+
+## PLAN 18: Banner động "Heo dạo phố ẩm thực Sài Gòn" (đầu màn Hộ Chiếu)
+
+Prototype đối chiếu: `ve-heo-con.html`, màn Hộ Chiếu (hàm `pbStatic`, `pbDraw`, `pbStep` trong `pass-b.js`).
+
+````
+Dựng banner động cho đầu màn Hộ Chiếu Quán Quen, canvas logic 192x100 hiển thị pixelated, cùng phong cách với banner Giải trí và Hồ sơ.
+
+CẢNH (hoàng hôn): trời tím cam dithering, vài tòa nhà xa mờ, mặt trời lớn, hàng nhà phố nhiều màu (kem, hồng, xanh lá, vàng, xanh dương, tím) có cửa sổ sáng đèn và cờ treo, dây đèn nhấp nháy ba màu, vỉa hè gạch xám, lòng đường nhựa có vạch đứt, xe máy chạy ngang.
+NĂM QUÁN TRÊN VỈA HÈ (đúng thứ tự, mỗi quán nhận ra bằng hình khối và đồ dùng, KHÔNG dùng tên hoặc logo thương hiệu thật):
+1. Phở bò: dù sọc đỏ trắng, nồi nước dùng lớn bốc hơi, chồng tô, biển đỏ có hình tô phở.
+2. Bún bò: dù cam, nồi nước dùng đỏ nâu, chồng tô, biển vàng hình tô bún có chanh.
+3. Trà đá vỉa hè: bàn thấp màu hồng, bình trà xanh lá, ly đá, ghế nhựa thấp đỏ, xanh, vàng, biển hình ly.
+4. Cà phê bệt: chiếu cói dưới gốc cây, hai chú heo con ngồi bệt (một đội nón lá), phích và ly bốc hơi.
+5. Bánh mì: xe kính có ổ bánh mì xếp bên trong, mái che sọc, biển vàng hình ổ bánh.
+HÀNH ĐỘNG: chú heo tự đi dọc lòng đường tới từng quán theo thứ tự, mũi tên vàng nhấp nhô chỉ quán đang tới; tới nơi thì ngồi ăn 2,6 giây, hiện bong bóng icon món, tim bay lên, chữ nổi "Heo ghé {tên món} · {giá}" ở góc trên (aria-live). Hàng nút tên món dưới banner (Phở bò, Bún bò, Trà đá vỉa hè, Cà phê bệt, Bánh mì) và chạm trực tiếp lên quán đều gọi heo tới đó; chạm vào heo thì nhảy và tóe hạt. Hơi nóng bốc lên từ nồi, phin và ly. Chỉ chạy vòng lặp khi đang ở màn Hộ Chiếu. Giảm chuyển động: vẽ một khung tĩnh, bấm nút thì heo dịch ngay tới quán.
+Giá và câu mô tả món là số tưởng tượng, bản thật có thể lấy từ quán người dùng đã ghé.
+````
+
+---
+
+## PLAN 19: Công thức pixel art chân thực cảnh Việt Nam
+
+Dùng cho mọi banner, cảnh game và minh họa có bối cảnh Việt Nam (quán, phố, nhà, địa danh). Dán đoạn "Prompt" ở cuối vào mọi phiên vẽ cảnh. Các banner, game trong prototype đã làm theo công thức này (xem `fun-c.js`, `cr.js`, `pass-b.js`, `chat-b.js`). Đây là cách vẽ bằng mã để làm prototype; bản chính thức nên được họa sĩ vẽ lại bằng Aseprite hoặc Piskel rồi xuất sprite sheet, giữ nguyên máy trạng thái.
+
+### 19.1 Bảy bước
+
+1. **Chọn khoảnh khắc và ánh sáng.** Một giờ trong ngày (nắng sớm, trưa gắt, hoàng hôn, đêm mưa), một màu chủ đạo ấm, một màu bù lạnh, một hướng sáng. Hoàng hôn Sài Gòn: trời tím rồi hồng rồi cam rồi vàng nhạt sát chân trời, mặt trời có vạch cắt ngang.
+2. **Thước đo theo chú heo.** Sprite heo 24x20 là thước chung. Cửa chính cao khoảng 2,5 con heo, xe máy dài khoảng 1,5 con heo, bàn cao ngang lưng heo. Canvas logic nhỏ (144 đến 192 px rộng) và chỉ phóng bằng bội số nguyên (2, 2,5 chỉ khi bố cục chịu được; ưu tiên 2, 3). Không phóng riêng một sprite khác tỉ lệ với cảnh.
+3. **Năm lớp độ sâu.** (1) trời; (2) xa: đường chân trời, tòa nhà mờ, màu pha 20 đến 35% màu trời, ít chi tiết; (3) trung: nhà phố, địa danh, nhìn rõ hình khối; (4) gần: vỉa hè, quán, xe đỗ, nhiều chi tiết, viền tối 1px; (5) tiền cảnh: nhân vật, bàn, dây điện. Vẽ theo trục y: xa trước, gần sau. Vẽ nền tĩnh một lần vào canvas phụ, chỉ vẽ lại phần chuyển động mỗi khung.
+4. **Bảng màu có kỷ luật.** Tối đa khoảng 32 màu mỗi cảnh. Mỗi chất liệu có dải 3 đến 4 tông, bóng đổi hue sang tím hoặc xanh, vùng sáng đổi sang vàng (không chỉ đổi độ sáng). Viền thống nhất nâu mực `#2B2118`, không dùng đen thuần. Chuyển sắc trời bằng dithering ô 2x2 so le, không dùng gradient mịn.
+5. **Chất liệu đặc trưng Việt Nam** (bảng dưới).
+6. **Bộn bề có chủ đích.** Mỗi cảnh có 1 điểm nhấn, ít nhất 5 chi tiết nhỏ đặc trưng và ít nhất 3 chuyển động nền độc lập. Mật độ chi tiết cao ở trung cảnh, thưa ở vùng sẽ bị chữ hoặc bong bóng che. Sự bộn bề phải có trật tự (lưới, hàng, nhịp lặp bị phá nhẹ bằng ngẫu nhiên có seed).
+7. **Chuyển động và hồi sinh.** Vòng lặp `requestAnimationFrame`, giới hạn `dt` 0,05 giây; mọi ngẫu nhiên dùng RNG có seed để cảnh không đổi giữa các lần chạy; chỉ chạy khi màn đang hiện; có phương án `prefers-reduced-motion` (một khung tĩnh).
+
+### 19.2 Chất liệu và chi tiết Việt Nam
+
+| Thứ cần vẽ | Cách vẽ bằng khối pixel |
+|---|---|
+| Tường nhà phố cũ | Nền vàng kem, loang ẩm và rêu bằng mảng 4 đến 12 px màu tối hơn một nấc, vài vệt bong tróc; viền cửa trắng ngà; mái hiên hoặc ban công sắt |
+| Cửa chớp | Xanh lá, sọc ngang 3 px, một cánh mở hé |
+| Gạch bông | Ô 12x8, hoa bốn cánh hai màu (đỏ gạch, xanh ngọc) trên nền kem, ron nhạt |
+| Vỉa hè gạch đỏ hoặc xám | Chữ nhật xếp so le, ron tối; gạch to dần về phía gần |
+| Mái tôn và ngói | Tôn: sọc dọc, vệt gỉ cam; ngói âm dương: hàng cong |
+| Dây điện chằng chịt | Đường 1 px mực, võng theo hàm sin giữa hai cột, 3 đến 6 sợi mỗi cột, hộp biến áp |
+| Biển hiệu | Nền đậm, hình món ăn hoặc đồ vật; không dùng chữ thương hiệu thật, chữ thật để ở giao diện bên trên |
+| Xe máy | Bánh tròn bán kính 4, thân hai khối, người lái 3 khối (mũ bảo hiểm, áo, chân); đổi màu mũ, áo; một số bịt khẩu trang, đội nón lá, chở thêm người; chạy có khói và bánh quay |
+| Quán vỉa hè | Ghế nhựa thấp (đỏ, xanh, vàng), bàn thấp, dù hoặc bạt sọc, thùng xốp, ly đá, nồi bốc hơi |
+| Cà phê | Phin kim loại nhỏ giọt, ly cà phê sữa đá (lớp nâu, lớp sữa, đá, ống hút đỏ) |
+| Cây đường phố | Me, phượng, bàng: tán 3 tầng sáng, thân nâu có vệt; lá rụng |
+| Nón lá và mũ | Nón lá: chóp nhiều tầng, sọc vân, quai đỏ; mũ bảo hiểm tròn nhiều màu |
+| Đèn | Bóng thả, dây đèn nhấp nháy ba màu, neon chớp; quầng sáng alpha thấp |
+| Mưa và đêm | Hạt xiên 2 px, vũng nước phản chiếu đèn (lật dọc, alpha 50%) |
+| Địa danh | Vẽ bằng khối nhận diện (Bưu điện, Chợ Bến Thành, Nhà thờ Đức Bà, Bitexco, Landmark 81, Dinh Độc Lập), không sao chép ảnh chụp |
+
+### 19.3 Điều không làm
+
+Gradient mịn hoặc làm mờ; phóng không nguyên; nhiều hướng sáng; đối xứng quá hoàn hảo; viền đen thuần; logo, biển hiệu, tên thương hiệu thật; mặt người thật, biển số xe thật; sao chép ảnh hay game của người khác (chỉ học nguyên tắc: góc nhìn, chiều sâu, mật độ chi tiết).
+
+### 19.4 Kiểm tra chất lượng
+
+- Chụp ở rộng 420 px, tỉ lệ 2x và nhìn một lần.
+- Bài thử nheo mắt: làm mờ ảnh, vẫn nhận ra giờ trong ngày, địa điểm, nhân vật chính.
+- Chữ, bong bóng, nút không che mất điểm nhấn; không cuộn ngang ở 360 px.
+- Chỉ dùng `fillRect` và canvas 2D, không ảnh ngoài; chạy 60 khung hình trên máy tầm trung.
+- Có `aria-label` mô tả cảnh bằng tiếng Việt.
+
+### 19.5 Prompt (dán đầu mọi phiên vẽ cảnh Việt Nam)
+
+````
+Vẽ cảnh pixel art chân thực về Việt Nam cho {APP_NAME} bằng canvas 2D, chỉ dùng fillRect, theo PLAN 19 của MASTER-PROMPTS.md:
+- Chọn một khoảnh khắc ánh sáng, một màu chủ đạo ấm và một màu bù lạnh, nêu rõ hai màu đó trước khi vẽ.
+- Dùng sprite heo 24x20 làm thước đo; canvas logic nhỏ, chỉ phóng bằng bội số nguyên.
+- Dựng 5 lớp độ sâu (trời, xa, trung, gần, tiền cảnh), xa pha màu trời, gần có viền mực 1 px.
+- Mỗi chất liệu 3 đến 4 tông theo dải hue (bóng ngả tím hoặc xanh, sáng ngả vàng), tối đa khoảng 32 màu, viền nâu mực #2B2118, chuyển sắc trời bằng dithering 2x2.
+- Có 1 điểm nhấn, ít nhất 5 chi tiết nhỏ đặc trưng (chọn trong bảng 19.2) và ít nhất 3 chuyển động nền; dây điện, ghế nhựa, xe máy, nón lá là chi tiết bắt buộc với cảnh phố.
+- Dùng RNG có seed; vòng lặp giới hạn dt; chỉ chạy khi màn hiện; có phương án giảm chuyển động.
+- Không logo, tên thương hiệu, mặt người thật, biển số thật; địa danh vẽ bằng khối nhận diện.
+- Giao: mã, ảnh chụp 420 px (2x), danh sách chi tiết đã vẽ theo bảng 19.2, và các điểm chưa đạt độ chân thực mà họa sĩ cần vẽ lại.
+````
+
 ## Gợi ý cuối
 
 - Plan 14 (tab Giải trí) dùng cùng prototype `ve-heo-con.html`: gửi file đó kèm prompt 14.1.
-- Plan 12 (Map) là bộ prompt riêng: dán Prompt A trước, rồi B cho prototype web hoặc C cho app Flutter, sau đó D và E.
+- Plan 12 (Map) đã thay bằng Plan 16 (Hộ Chiếu Quán Quen); chỉ dùng Plan 12 nếu muốn bản đồ nền trở lại.
+- Mọi cảnh có bối cảnh Việt Nam: dán Prompt ở 19.5 trước khi giao việc cho agent vẽ.
 - Chạy Plan 5 và Plan 6 sớm, vì khu vườn và sprite heo quyết định bản sắc cả app.
 - Prototype tương tác của mình có thể làm điểm đối chiếu cho Plan 5, 6, 7 (heo, ao, bát cám, thời điểm trong ngày đều khớp mô tả ở trên).
 - Khi đã có tên app thật, thay biến ở đầu file rồi dán lại các Plan.

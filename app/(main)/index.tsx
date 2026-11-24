@@ -177,6 +177,7 @@ export default function MainAppScreen() {
   // Tab & Scroll State
   const [activeTabIndex, setActiveTabIndex] = useState<number>(2); // Default to Camera (Index 2 - Trang trung tâm)
   const [isGameActive, setIsGameActive] = useState<boolean>(false); // Quyết định 144: Fullscreen mode ẩn tab bar khi chơi Game
+  const [requestedChatSubView, setRequestedChatSubView] = useState<'hub' | 'chat' | 'fly' | 'cross' | 'map' | null>(null);
   const horizontalPagerRef = useRef<ScrollViewInstance | null>(null);
   const verticalHistoryScrollRef = useRef<ScrollViewInstance | null>(null);
 
@@ -1533,6 +1534,14 @@ export default function MainAppScreen() {
             isActive={activeTabIndex === 1}
             onNavigateToCamera={() => handleTabPress(2)}
             onNavigateHome={() => handleTabPress(0)}
+            onNavigatePortal={(target) => {
+              if (target === 'me') {
+                handleTabPress(4);
+              } else {
+                setRequestedChatSubView(target);
+                handleTabPress(3);
+              }
+            }}
           />
         </View>
 
@@ -2056,12 +2065,14 @@ export default function MainAppScreen() {
           </ScrollView>
         </View>
 
-        {/* ================= PAGE 3: CHAT / BẠN BÈ ================= */}
+        {/* ================= PAGE 3: GIẢI TRÍ (HUB / HEO AI / QUÁN QUEN) ================= */}
         <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}>
           <ChatView
             onNavigateToStats={() => handleTabPress(1)}
             onNavigateToCamera={() => handleTabPress(2)}
             onToggleTabBar={(visible) => setIsGameActive(!visible)}
+            requestedSubView={requestedChatSubView}
+            onClearRequestedSubView={() => setRequestedChatSubView(null)}
           />
         </View>
 

@@ -7,24 +7,19 @@ import {
   View,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import {
-  ChevronRight,
-  Flame,
-  Ticket,
-  Wheat,
-  Utensils,
-  Users,
-} from 'lucide-react-native';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useAuthStore } from '../../store/authStore';
 import { useTransactionStore } from '../../store/transactionStore';
 import { useTheme } from '../../theme/ThemeContext';
 import {
+  PixelIconBowl,
   PixelIconChat,
-  PixelIconCrossRoad,
-  PixelIconFlyWing,
-  PixelIconGamepad,
+  PixelIconFish,
+  PixelIconFlame,
+  PixelIconGrain,
   PixelIconMapPin,
+  PixelIconPigCoach,
+  PixelIconRose,
   PixelIconTicket,
   PixelIconTraffic,
   PixelIconWing,
@@ -32,7 +27,7 @@ import {
 import { PixelPigAvatar } from '../pixel/PixelPigAvatar';
 import { EntertainmentBannerWebView } from './EntertainmentBannerWebView';
 
-export type SubViewType = 'hub' | 'chat' | 'squad' | 'fly' | 'cross' | 'map';
+export type SubViewType = 'hub' | 'chat' | 'fly' | 'cross' | 'map';
 
 interface PixelHubDashboardProps {
   onSelectSubView: (view: SubViewType) => void;
@@ -57,6 +52,8 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
     gameTickets,
     pigFood,
     pigHunger,
+    fishHunger,
+    flowerWater,
     flyBestScore,
     crossRoadStars,
     feedPig,
@@ -67,9 +64,8 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
   const isPink = mode === 'pink';
   const [feedToast, setFeedToast] = useState<string | null>(null);
 
-  const todayStr = new Date().toISOString().slice(0, 10);
   const todayPinsCount = transactions.filter(
-    (t) => (t.occurred_at || t.created_at)?.startsWith(todayStr)
+    (t) => t.type === 'EXPENSE' && t.status !== 'CANCELLED' && (Boolean(t.location_name) || (typeof t.lat === 'number' && typeof t.lng === 'number'))
   ).length;
 
   const handlePressCard = (view: SubViewType) => {
@@ -81,42 +77,42 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const success = feedPig();
     if (success) {
-      setFeedToast('Heo đã được no bụng (+25% no)!');
+      setFeedToast('Heo đã được ăn cám (+25% no)!');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } else {
-      setFeedToast('Hết thức ăn! Hãy chơi game cùng heo để kiếm thêm thức ăn.');
+      setFeedToast('Hết cám rồi! Ghi chi hoặc chơi game để kiếm thêm nhé.');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
     setTimeout(() => setFeedToast(null), 2500);
   };
 
   const getHungerLabel = (hunger: number) => {
-    if (hunger >= 80) return 'No căng · Sung sức (+15% lực)';
-    if (hunger >= 40) return 'Vừa bụng · Sẵn sàng';
-    return 'Heo đói · Cần ăn để chơi hăng hơn';
+    if (hunger < 25 || fishHunger < 25 || flowerWater < 25) return 'Nhà hơi đói · Chơi Heo Bay hái đồ ăn nhé';
+    if (hunger >= 80) return 'Cả nhà no căng · Sung sức';
+    return 'Vừa bụng · Sẵn sàng';
   };
 
-  // Nhóm 1: Kết nối & Địa điểm (1 khung · 2 cột)
+  // Nhóm 1: Trò chuyện & Địa điểm (100% Local-First · Bỏ Squad)
   const CONNECT_CARDS: HubCardItem[] = [
     {
       id: 'chat',
-      title: 'Trò Chuyện & Bạn Bè',
-      shortTitle: 'Trò chuyện',
-      badge: 'KẾT NỐI',
+      title: 'Trò Chuyện Heo AI',
+      shortTitle: 'Heo AI',
+      badge: 'CHẠY TRONG MÁY',
       accentBg: '#BFDDF2',
       icon: <PixelIconChat size={26} />,
-      desc: 'AI & Bạn bè',
-      statusText: 'Online',
+      desc: 'Hỏi ngân sách, phản biện chi tiêu',
+      statusText: 'Heo-Coach chờ bạn',
     },
     {
       id: 'map',
-      title: 'Hộ Chiếu Quán Quen',
-      shortTitle: 'Hộ chiếu',
+      title: 'Quán Quen',
+      shortTitle: 'Quán Quen',
       badge: 'CHECK-IN',
       accentBg: '#CDE6C4',
       icon: <PixelIconMapPin size={26} />,
-      desc: 'Check-in quán xá, album ảnh & chỉ đường 1-chạm',
-      statusText: `${todayPinsCount} địa điểm`,
+      desc: 'Quán đã ghé & chỉ đường 1 chạm',
+      statusText: `${todayPinsCount} lượt ghé`,
     },
   ];
 
@@ -144,6 +140,12 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
     },
   ];
 
+  const choreItems = [
+    { label: 'Heo', val: pigHunger, icon: <PixelIconPigCoach size={15} />, col: '#5E9A57' },
+    { label: 'Cá ao', val: fishHunger, icon: <PixelIconFish size={15} />, col: '#4B6FA5' },
+    { label: 'Hoa hồng', val: flowerWater, icon: <PixelIconRose size={15} />, col: '#E0452B' },
+  ];
+
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: tokens.bg }]}
@@ -158,25 +160,21 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
             <Text style={[styles.brandBadgeText, { color: tokens.text }]}>GIẢI TRÍ</Text>
           </View>
 
-          {/* Huy hiệu chuỗi ngày */}
           <View style={[styles.streakBadge, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-            <Flame size={15} color="#E0452B" strokeWidth={2.8} />
+            <PixelIconFlame size={15} />
             <Text style={[styles.streakText, { color: tokens.text }]}>{streakDays || 1} ngày</Text>
           </View>
         </View>
 
-        {/* Banner Anime Pixel Động (192×88 - Quyết định 153) */}
         <EntertainmentBannerWebView />
 
-        {/* Lời chào phong cách Heo Con kèm Avatar Mascot */}
         <View style={styles.bannerRow}>
           <PixelPigAvatar size={34} mood={pigHunger >= 60 ? 'happy' : 'idle'} />
           <Text style={[styles.greetText, { color: tokens.text }]} numberOfLines={1}>
-            Chào {profile?.full_name || 'Trà Xanh'}! Khám phá giải trí & hộ chiếu quán quen
+            Chào {profile?.full_name || 'Trà Xanh'}! Khám phá giải trí & quán quen
           </Text>
         </View>
 
-        {/* Chips Vé & Cám (Thuần túy 2 ô như prototype) */}
         <View style={styles.chipsRow}>
           <View style={[styles.metricChip, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
             <PixelIconTicket size={18} />
@@ -187,7 +185,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
           </View>
 
           <View style={[styles.metricChip, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-            <Wheat size={16} color="#F4B93B" strokeWidth={2.6} />
+            <PixelIconGrain size={18} />
             <View style={styles.chipTextCol}>
               <Text style={styles.chipLabel}>Cám</Text>
               <Text style={[styles.chipValue, { color: tokens.text }]}>{pigFood} cám</Text>
@@ -196,34 +194,44 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
         </View>
       </View>
 
-      {/* 2. THẺ CHĂM SÓC HEO CƯNG (PET HOME CARD) */}
+      {/* 2. THẺ VIỆC NHÀ HÔM NAY — ĐỒNG BỘ ĐỦ 3 CHỈ SỐ (HEO · CÁ AO · HOA HỒNG) */}
       <View style={[styles.careCard, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
         <View style={styles.careHeader}>
-          <View>
-            <Text style={[styles.careTitle, { color: tokens.text }]}>CHĂM SÓC HEO CƯNG</Text>
-            <Text style={styles.careSub}>{getHungerLabel(pigHunger)}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.careTitle, { color: tokens.text }]}>VIỆC NHÀ HÔM NAY</Text>
+            <Text style={styles.careSub} numberOfLines={1}>{getHungerLabel(pigHunger)}</Text>
           </View>
           <TouchableOpacity
             style={[styles.feedButton, { backgroundColor: '#F4B93B', borderColor: tokens.border, shadowColor: tokens.shadowColor }]}
             onPress={handleFeed}
             activeOpacity={0.82}
           >
-            <Utensils size={13} color="#2B2118" strokeWidth={2.6} />
-            <Text style={[styles.feedButtonText, { color: '#2B2118' }]}>Cho ăn (-1)</Text>
+            <PixelIconBowl size={14} />
+            <Text style={[styles.feedButtonText, { color: '#2B2118' }]}>Cho ăn (-1 cám)</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Progress Bar độ no */}
-        <View style={[styles.progressBarTrack, { backgroundColor: isPink ? '#FCE7F3' : '#E6D7B8', borderColor: tokens.border }]}>
-          <View
-            style={[
-              styles.progressBarFill,
-              {
-                width: `${Math.min(100, Math.max(8, pigHunger))}%`,
-                backgroundColor: pigHunger >= 40 ? '#5E9A57' : '#E0452B',
-              },
-            ]}
-          />
+        <View style={{ gap: 6 }}>
+          {choreItems.map((item) => (
+            <View key={item.label} style={styles.choreRow}>
+              <View style={styles.choreLabelCol}>
+                {item.icon}
+                <Text style={[styles.choreLabel, { color: tokens.text }]}>{item.label}</Text>
+              </View>
+              <View style={[styles.progressBarTrack, { flex: 1, backgroundColor: isPink ? '#FCE7F3' : '#E6D7B8', borderColor: tokens.border }]}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${Math.min(100, Math.max(8, item.val))}%`,
+                      backgroundColor: item.val < 25 ? '#E0452B' : item.col,
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={[styles.chorePct, { color: tokens.text }]}>{Math.round(item.val)}%</Text>
+            </View>
+          ))}
         </View>
 
         {feedToast && (
@@ -231,9 +239,9 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
         )}
       </View>
 
-      {/* 3. KHUNG 1: KẾT NỐI & ĐỊA ĐIỂM (1 SECTION BOX · 2 CỘT) */}
+      {/* 3. KHUNG 1: TRÒ CHUYỆN & QUÁN QUEN */}
       <View style={[styles.sectionBox, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-        <Text style={[styles.sectionBoxLabel, { color: tokens.text }]}>KẾT NỐI & ĐỊA ĐIỂM</Text>
+        <Text style={[styles.sectionBoxLabel, { color: tokens.text }]}>HEO AI & QUÁN QUEN</Text>
         <View style={styles.connectRow}>
           {CONNECT_CARDS.map((card) => (
             <TouchableOpacity
@@ -246,12 +254,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
                 {card.icon}
               </View>
               <View style={styles.tileTextCol}>
-                <View style={styles.tileHeaderRow}>
-                  {card.id === 'chat' && (
-                    <Users size={11} color="#2B2118" strokeWidth={2.5} style={{ marginRight: 3 }} />
-                  )}
-                  <Text style={styles.tileTitle} numberOfLines={1}>{card.shortTitle}</Text>
-                </View>
+                <Text style={styles.tileTitle} numberOfLines={1}>{card.shortTitle}</Text>
                 <Text style={styles.tileSub} numberOfLines={1}>{card.statusText}</Text>
               </View>
             </TouchableOpacity>
@@ -259,7 +262,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
         </View>
       </View>
 
-      {/* 4. KHUNG 2: TRÒ CHƠI HEO CON (1 SECTION BOX · 1 HÀNG 3 CỘT) */}
+      {/* 4. KHUNG 2: TRÒ CHƠI HEO CON */}
       <View style={[styles.sectionBox, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
         <Text style={[styles.sectionBoxLabel, { color: tokens.text }]}>TRÒ CHƠI HEO CON</Text>
         <View style={styles.gamesRow}>
@@ -468,6 +471,31 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#2B2118',
     overflow: 'hidden',
+  },
+  choreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  choreLabelCol: {
+    width: 78,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  choreLabel: {
+    fontFamily: 'Nunito',
+    fontWeight: '800',
+    fontSize: 11.5,
+    color: '#2B2118',
+  },
+  chorePct: {
+    width: 34,
+    textAlign: 'right',
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 11.5,
+    color: '#2B2118',
   },
   progressBarFill: {
     height: '100%',

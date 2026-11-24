@@ -43,6 +43,7 @@ interface PixelHouseWebViewProps {
   onOpenMagazine?: () => void;
   onToggleMask?: () => void;
   onOpenCamera?: () => void;
+  onPortal?: (target: 'me' | 'fly' | 'map' | 'chat') => void;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -67,6 +68,7 @@ export const PixelHouseWebView = forwardRef<
   onOpenMagazine,
   onToggleMask,
   onOpenCamera,
+  onPortal,
   style
 }, ref) => {
   const { tokens, mode } = useTheme();
@@ -381,6 +383,43 @@ export const PixelHouseWebView = forwardRef<
     /* ---- BẢNG PHÂN TÍCH PANEL (MỖI PHÒNG 1 TRUNG TÂM PHÂN TÍCH) ---- */
     .panel {
       margin-top: 6px;
+    }
+    .portal {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px 14px;
+      text-align: left;
+      background: #F4B93B;
+      color: var(--ink);
+      border: 3px solid var(--ink);
+      border-radius: 20px;
+      box-shadow: 0 3px 0 var(--ink);
+      font: inherit;
+      cursor: pointer;
+    }
+    .portal:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--ink);
+    }
+    .portal-tx {
+      flex: 1;
+      min-width: 0;
+    }
+    .portal-tx b {
+      display: block;
+      font: 800 15px/1.2 var(--f-display);
+    }
+    .portal-tx small {
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0.85;
+    }
+    .portal i {
+      font: 800 22px/1 var(--f-display);
+      font-style: normal;
     }
     .rhead {
       display: flex;
@@ -1000,20 +1039,31 @@ function viewFor(id){
   }
 }
 
+const HOUSE_PORTALS={
+  sanh:{go:'me',t:'Mở Hồ sơ',s:'Kế hoạch, mục tiêu, danh mục'},
+  ngu:{go:'fly',t:'Cầm tay cầm chơi game',s:'Heo bay · Heo qua đường, mỗi ván 1 vé'},
+  lamviec:{go:'map',t:'Mở Quán Quen',s:'Quán đã ghé, chỉ đường 1 chạm'},
+  khach:{go:'chat',t:'Trò chuyện cùng Heo AI',s:'Hỏi ngân sách, xin phản biện'}
+};
+function portalHTML(id){
+  const p=HOUSE_PORTALS[id];if(!p)return '';
+  return \`<button class="portal" type="button" data-portal="\${p.go}"><span class="portal-tx"><b>\${p.t}</b><small>\${p.s}</small></span><i>›</i></button>\`;
+}
+
 function panelHTML(id){
   const M=month(S.month),r=HR[id],head=\`<div class="rhead"><h2>\${r.n}</h2><span class="label">\${r.sub} · Tháng \${M.m}</span></div>\`;
   const recent=k=>M.items.filter(i=>!k||i.cat===k).slice().reverse();
   if(id==='sanh'){
     const g=S.grain,chart=g==='thang'?barsSVG(M.dayTot,LIMIT,dayLabels(M.days),5,'Chi mỗi ngày so với hạn mức'):barsSVG(M.weeks,LIMIT*7,weekLabels(M.weeks.length),1,'Chi mỗi tuần so với hạn mức','hạn mức tuần '+fmtK(LIMIT*7));
-    return head+\`<div class="kpis">\${kpi('Thu',fmtK(M.income)+' đ','in')}\${kpi('Chi',fmtK(M.total)+' đ')}\${kpi('Còn lại',fmtK(M.income-M.total)+' đ','ok')}</div>\`+
+    return portalHTML(id)+head+\`<div class="kpis">\${kpi('Thu',fmtK(M.income)+' đ','in')}\${kpi('Chi',fmtK(M.total)+' đ')}\${kpi('Còn lại',fmtK(M.income-M.total)+' đ','ok')}</div>\`+
       read(insight(id,M))+
       card('Chi tiêu','<span class="toggle" role="group" aria-label="Xem theo"><button class="btn" type="button" data-grain="tuan" aria-pressed="'+(g==='tuan')+'">Tuần</button><button class="btn" type="button" data-grain="thang" aria-pressed="'+(g==='thang')+'">Tháng</button></span>',chart)+
       card('Chi theo danh mục','',stackHTML(M))+
-      \`<button class="btn dark wide" type="button" id="toGarden">🌱 Ra vườn chơi với heo</button>\`;
+      \`<button class="btn dark wide" type="button" id="toGarden">Ra vườn chơi với heo</button>\`;
   }
   if(id==='bep'||id==='khach'){
     const k=id==='bep'?'an':'mua',w=catWeeks(M,k);
-    return head+\`<div class="kpis two">\${kpi('Đã chi',fmtK(M.cat[k])+' đ')}\${kpi('Chiếm',Math.round(M.cat[k]/M.total*100)+'%')}</div>\`+read(insight(id,M))+
+    return portalHTML(id)+head+\`<div class="kpis two">\${kpi('Đã chi',fmtK(M.cat[k])+' đ')}\${kpi('Chiếm',Math.round(M.cat[k]/M.total*100)+'%')}</div>\`+read(insight(id,M))+
       card('Theo tuần','ngưỡng tuần '+fmtK(BUDGET[k])+' đ',barsSVG(w,BUDGET[k],weekLabels(w.length),1,CATS[k].n+' mỗi tuần','ngưỡng '+fmtK(BUDGET[k])))+
       card('Đắt nhất tháng','',topList(M.items.filter(i=>i.cat===k).sort((a,b)=>b.amt-a.amt).slice(0,3)))+
       photosCard('Ảnh đã chụp',recent(k).slice(0,12));
@@ -1021,13 +1071,13 @@ function panelHTML(id){
   if(id==='lamviec'){
     let acc=0;const cum=Array(M.days).fill(0);M.items.forEach(i=>{if(i.cat==='di')cum[i.d-1]+=i.amt});
     const cu=cum.map(v=>(acc+=v));const lb=cu.map((_,i)=>(i===0||(i+1)%5===0)?String(i+1):'');
-    return head+\`<div class="kpis two">\${kpi('Đã chi',fmtK(M.cat.di)+' đ')}\${kpi('Số chuyến',M.items.filter(i=>i.cat==='di').length)}</div>\`+read(insight(id,M))+
+    return portalHTML(id)+head+\`<div class="kpis two">\${kpi('Đã chi',fmtK(M.cat.di)+' đ')}\${kpi('Số chuyến',M.items.filter(i=>i.cat==='di').length)}</div>\`+read(insight(id,M))+
       card('Tích lũy tiền đi lại','cộng dồn theo ngày',lineSVG(cu,lb,'Tiền đi lại cộng dồn',v=>fmtK(v)+' đ'))+
       photosCard('Ảnh đã chụp',recent('di').slice(0,12));
   }
   if(id==='ngu'){
     const goals=SAV.goals.map(([n,a,b])=>\`<div class="goal"><div class="grow"><b>\${n}</b><span>\${fmtK(a)} / \${fmtK(b)} đ</span></div><div class="bar"><i style="width:\${Math.round(a/b*100)}%"></i></div></div>\`).join('');
-    return head+\`<div class="kpis two">\${kpi('Tổng hũ',fmtK(REAL_SAVED)+' đ','ok')}\${kpi('Chuỗi Streak','3 ngày')}</div>\`+read(insight(id,M))+
+    return portalHTML(id)+head+\`<div class="kpis two">\${kpi('Tổng hũ',fmtK(REAL_SAVED)+' đ','ok')}\${kpi('Chuỗi Streak','3 ngày')}</div>\`+read(insight(id,M))+
       card('Mục tiêu tiết kiệm','',goals)+card('Số dư 6 tháng','đơn vị triệu đồng',lineSVG(SAV.trend,SAV.tl,'Số dư hũ 6 tháng gần nhất',v=>v+'M'));
   }
 
@@ -1248,6 +1298,15 @@ roomC.addEventListener('pointerdown',e=>{
   b.addEventListener('click',()=>{S.month=m;refresh();if(rp.present)say2(insight(S.sel,month(m)),3200)});document.getElementById('months').appendChild(b)});
 
 document.getElementById('panel').addEventListener('click',e=>{
+  const pt=e.target.closest('[data-portal]');
+  if(pt){
+    try{
+      if(window.ReactNativeWebView){
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'PORTAL', target: pt.dataset.portal }));
+      }
+    }catch(err){}
+    return;
+  }
   const g=e.target.closest('[data-grain]');
   if(g){S.grain=g.dataset.grain;paintPanel();return}
   if(e.target.closest('#toGarden')){
@@ -1441,6 +1500,8 @@ requestAnimationFrame(hFrame);
                   onToggleMask();
                 } else if (data.type === 'OPEN_CAMERA' && onOpenCamera) {
                   onOpenCamera();
+                } else if (data.type === 'PORTAL' && onPortal && data.target) {
+                  onPortal(data.target);
                 }
               } catch (e) {}
             }}

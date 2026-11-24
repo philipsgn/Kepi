@@ -1889,7 +1889,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const chatUtilsCode = fs.readFileSync(path.join(__dirname, 'src/utils/chatUtils.ts'), 'utf8');
   assert.ok(chatUtilsCode.includes('topCategoryName?: string'), 'FinancialContext must support topCategoryName');
   assert.ok(chatUtilsCode.includes('savingsGoalText?: string'), 'FinancialContext must support savingsGoalText');
-  assert.ok(chatUtilsCode.includes("'bồ'"), 'Coach Minh must use warm "bồ" greeting');
+  assert.ok(chatUtilsCode.includes("'bồ'") || chatUtilsCode.includes("'bạn'"), 'Heo-Coach must use warm "bạn" (or "bồ") greeting');
 
   // 5. Kiểm tra SettingsView: 100% row icons sử dụng tokens.primary
   const settingsCode = fs.readFileSync(path.join(__dirname, 'src/components/views/SettingsView.tsx'), 'utf8');
@@ -2437,9 +2437,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(squadViewCode.includes('squad.code'), 'SquadLocketView must display squad code');
   assert.ok(squadViewCode.includes('Nhắc Heo Đói') || squadViewCode.includes('FEED_PIG'), 'SquadLocketView must support feed pig nudge');
 
-  // 4. Kiểm tra ChatView tích hợp SquadLocketView
+  // 4. Kiểm tra ChatView tích hợp Heo AI local-first (bỏ Squad khỏi ChatView từ QĐ 185)
   const chatViewCode = fs.readFileSync(path.join(__dirname, 'src/components/views/ChatView.tsx'), 'utf8');
-  assert.ok(chatViewCode.includes('SquadLocketView'), 'ChatView must integrate SquadLocketView');
+  assert.ok(chatViewCode.includes('CafeChatBannerWebView') || chatViewCode.includes('SquadLocketView'), 'ChatView must run local-first Coach or Squad view');
 
   console.log('✅ Test 50 Passed: Squad Room & Locket Feed Privacy Engine verified cleanly');
 }
@@ -2923,8 +2923,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   // 4. Kiểm tra FloatingPillTabBar: Chuẩn hóa 5 Tab
   const tabBarPath = path.join(__dirname, 'src/components/navigation/FloatingPillTabBar.tsx');
   const tabBarCode = fs.readFileSync(tabBarPath, 'utf8');
-  assert.ok((tabBarCode.includes("label: 'Sân Vườn'") || tabBarCode.includes("label: 'Vườn'")) && tabBarCode.includes("Trees"), 'Tab 0 must be Sân Vườn or Vườn with Trees icon');
-  assert.ok((tabBarCode.includes("label: 'Nhà Heo'") || tabBarCode.includes("label: 'Nhà'")) && tabBarCode.includes("Home"), 'Tab 1 must be Nhà Heo or Nhà with Home icon');
+  assert.ok((tabBarCode.includes("label: 'Sân Vườn'") || tabBarCode.includes("label: 'Vườn'")) && (tabBarCode.includes("Trees") || tabBarCode.includes("PixelIconTabGarden")), 'Tab 0 must be Sân Vườn or Vườn with Trees or PixelIconTabGarden icon');
+  assert.ok((tabBarCode.includes("label: 'Nhà Heo'") || tabBarCode.includes("label: 'Nhà'")) && (tabBarCode.includes("Home") || tabBarCode.includes("PixelIconTabHouse")), 'Tab 1 must be Nhà Heo or Nhà with Home or PixelIconTabHouse icon');
 
   // 5. Kiểm tra StatsView: Tích hợp PixelHouseWebView & liên kết dữ liệu 6 phòng
   const statsViewPath = path.join(__dirname, 'src/components/views/StatsView.tsx');
@@ -3329,7 +3329,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   if (shooterCode) assert.ok(shooterCode.includes('Quay lại Hub') || shooterCode.includes('Giải trí') || shooterCode.includes('Trung tâm Heo Con') || shooterCode.includes('accessibilityLabel="Quay lại"'), 'Must render Back to Hub header button');
 
   // 5. Bản Đồ Chi Tiêu Pixel / Native StreetMap / Hộ Chiếu Quán Quen (PiggySpendMapView)
-  assert.ok(mapCode.includes('SafeWebView') || mapCode.includes('NativeSlippyTile') || mapCode.includes('Hộ Chiếu Quán Quen') || mapCode.includes('Place Passport'), 'PiggySpendMapView must use SafeWebView, NativeSlippyTile or Place Passport');
+  assert.ok(mapCode.includes('SafeWebView') || mapCode.includes('NativeSlippyTile') || mapCode.includes('Hộ Chiếu Quán Quen') || mapCode.includes('Quán Quen') || mapCode.includes('Place Passport'), 'PiggySpendMapView must use SafeWebView, NativeSlippyTile or Quán Quen Place Check-in');
   assert.ok((mapCode.includes('MW=192') && mapCode.includes('MH=200')) || mapCode.includes('maplibregl') || mapCode.includes('lngLatToWorld'), 'Must render Spend Map / Place Passport (canvas, MapLibre, or Slippy Tile Engine)');
   assert.ok(mapCode.includes('useTransactionStore'), 'Must sync real transactions from transactionStore');
   assert.ok((mapCode.includes('mpGo') || mapCode.includes('map.flyTo') || mapCode.includes('function flyTo') || mapCode.includes('openExternalMapDirections')) && (mapCode.includes('Quay lại Hub') || mapCode.includes('Giải trí') || mapCode.includes('Trung tâm Heo Con') || mapCode.includes('accessibilityLabel="Quay lại"')), 'Must support map navigation and Back to Hub');
@@ -3650,8 +3650,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     (mapCode.includes('memoizedSource') && !mapCode.includes("baseUrl: ''") && mapCode.includes('webViewContainer')) ||
       mapCode.includes('NativeSlippyTile') ||
       mapCode.includes('Hộ Chiếu Quán Quen') ||
-      mapCode.includes('PlacePassport'),
-    'PiggySpendMapView must use flex:1 webview container without empty baseUrl or 100% Native Place Passport'
+      mapCode.includes('Quán Quen') ||
+      mapCode.includes('PlacePassport') ||
+      mapCode.includes('PlaceCheckinStreet'),
+    'PiggySpendMapView must use flex:1 webview container without empty baseUrl or 100% Native Place Check-in'
   );
 
   // 2. Hub Dashboard typography and border fixes
@@ -3694,7 +3696,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 2. 5 Tabs Layout with Vertical Icon + Labels (Vườn, Nhà, Chụp, Giải trí, Hồ sơ)
   assert.ok(tabbarCode.includes("'Vườn'") && tabbarCode.includes("'Nhà'") && tabbarCode.includes("'Chụp'") && tabbarCode.includes("'Giải trí'") && tabbarCode.includes("'Hồ sơ'"), 'FloatingPillTabBar must render all 5 prototype labels');
-  assert.ok(tabbarCode.includes('Gamepad2'), 'FloatingPillTabBar must use Gamepad2 icon for Tab Giai tri');
+  assert.ok(tabbarCode.includes('Gamepad2') || tabbarCode.includes('PixelIconTabFun'), 'FloatingPillTabBar must use Gamepad2 or PixelIconTabFun icon for Tab Giai tri');
 
   // 3. Multi-color Active Mapping
   assert.ok(tabbarCode.includes("activeBg: '#E0452B'") && tabbarCode.includes("activeBg: '#F4B93B'") && tabbarCode.includes("activeBg: '#2B2118'"), 'FloatingPillTabBar must map active colors for Camera, Entertainment and others');
@@ -3735,7 +3737,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(hubCode.includes('PixelPigAvatar'), 'PixelHubDashboard must display 16x16 PixelPigAvatar mascot');
   assert.ok(hubCode.includes('PIGFLY HUB') || hubCode.includes('GIẢI TRÍ'), 'PixelHubDashboard must feature PIGFLY HUB or GIẢI TRÍ badge');
   assert.ok(hubCode.includes('gameTickets') && hubCode.includes('pigFood'), 'PixelHubDashboard must display tickets and food chips');
-  assert.ok(hubCode.includes('CHĂM SÓC HEO CƯNG') && hubCode.includes('feedPig'), 'PixelHubDashboard must have mini-pet care card with feed action');
+  assert.ok((hubCode.includes('CHĂM SÓC HEO CƯNG') || hubCode.includes('VIỆC NHÀ HÔM NAY')) && hubCode.includes('feedPig'), 'PixelHubDashboard must have mini-pet care card with feed action');
 
   // 2. Game Heo Bắn (Angry Pig) Endless Waves & Dynamic Wind
   if (shooterCode) assert.ok(shooterCode.includes('generateWave'), 'PigShooterGameView must implement Endless Waves procedural generator');
@@ -3865,7 +3867,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(chatViewCode.includes("const isHeocon = true;") || chatViewCode.includes("const isHeocon = mode === 'heocon' || !mode;"), 'ChatView must support Neo-Brutalist isHeocon mode');
   assert.ok(chatViewCode.includes("screenBg = isHeocon ? '#F6EEDC' :") || chatViewCode.includes("screenBg = tokens.bg"), 'ChatView must support theme background');
   assert.ok(chatViewCode.includes('‹ Quay lại Hub') || chatViewCode.includes('‹ Giải trí') || chatViewCode.includes('hubBackButton'), 'ChatView must feature Neo-Brutalist back button in Coach chat');
-  assert.ok(chatViewCode.includes('SquadLocketView'), 'ChatView must support separate squad subview');
+  assert.ok(chatViewCode.includes('CafeChatBannerWebView') || chatViewCode.includes('SquadLocketView'), 'ChatView must run local-first Coach or Squad subview');
 
   // 3. Independent Neo-Brutalist Chat Components
   assert.ok(coachBubbleCode.includes('const isHeocon = true;'), 'CoachMessageBubble must always use Neo-Brutalist styling');
@@ -3888,8 +3890,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'PigShooterGameView must bridge WebView JS errors to React Native');
   if (shooterGameCode) assert.ok(shooterGameCode.includes('qStep') && shooterGameCode.includes('drawPigAP'), 'PigShooterGameView must arrange waiting pigs cleanly without overlapping slingshot');
 
-  // 5. Hub Navigation & Squad Back Button
-  assert.ok(hubCode.includes("'squad'") && hubCode.includes('Users'), 'PixelHubDashboard must provide dedicated Squad Nuoi Heo 2.0 card');
+  // 5. Hub Navigation & Back Button
+  assert.ok(hubCode.includes("'chat'") && hubCode.includes('PixelIconChat'), 'PixelHubDashboard must provide dedicated Heo AI Chat card');
   assert.ok(squadCode.includes('onBack') && (squadCode.includes('‹ Quay lại Hub') || squadCode.includes('‹ Giải trí') || squadCode.includes('hubBackButton')), 'SquadLocketView must feature back to hub button');
 
   // 6. Living Documentation Sync Audit
@@ -3921,19 +3923,18 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const agentsPath = path.join(__dirname, 'AGENTS.md');
   const agentsCode = fs.readFileSync(agentsPath, 'utf8');
 
-  // 1. Hub Architecture (Masterprompts Plan 14 & Prototype 21/11 Quyết định 153)
-  assert.ok((hubCode.includes("'AI COACH & SQUAD'") || hubCode.includes("'KẾT NỐI'")) && hubCode.includes("'Trò Chuyện & Bạn Bè'"), 'Hub must feature Card 1: Trò Chuyện & Bạn Bè');
+  // 1. Hub Architecture (Masterprompts Plan 14, 16, 17 & Prototype 24/11 Quyết định 185)
+  assert.ok(hubCode.includes("'Trò Chuyện Heo AI'") || hubCode.includes("'Trò Chuyện & Bạn Bè'"), 'Hub must feature Card 1: Trò Chuyện Heo AI');
   assert.ok(
     (hubCode.includes("'FLAPPY & ANGRY PIG · 60FPS'") && hubCode.includes("'Game Vui Heo Con'")) ||
     (hubCode.includes("'FLAPPY PIG · 60FPS'") && hubCode.includes("'Game Heo Bay'")) ||
     (hubCode.includes("'VỖ CÁNH'") && hubCode.includes("'Heo Bay'")),
     'Hub must feature Game cards'
   );
-  assert.ok(hubCode.includes('Bản Đồ Chi Tiêu') || hubCode.includes('Hộ Chiếu Quán Quen'), 'Hub must feature Bản Đồ Chi Tiêu or Hộ Chiếu Quán Quen');
+  assert.ok(hubCode.includes('Bản Đồ Chi Tiêu') || hubCode.includes('Hộ Chiếu Quán Quen') || hubCode.includes('Quán Quen'), 'Hub must feature Quán Quen check-in card');
 
-  // 2. Chat 2-Segment Switcher (Heo-Coach & Hội Bạn Thân)
-  assert.ok(chatViewCode.includes('chatSegmentRow') && chatViewCode.includes('Heo-Coach') && chatViewCode.includes('Hội Bạn Thân'), 'ChatView must provide 2-segment switcher for Heo-Coach and Hoi Ban Than');
-  assert.ok(chatViewCode.includes("activeTab === 'FRIENDS'") && chatViewCode.includes('SquadLocketView'), 'ChatView must render SquadLocketView when FRIENDS tab is active');
+  // 2. Chat Local-first Heo AI + Cafe Banner (PLAN 17)
+  assert.ok(chatViewCode.includes('CafeChatBannerWebView') && chatViewCode.includes('Heo-Coach'), 'ChatView must provide Heo-Coach local-first chat with CafeChatBannerWebView');
 
   // 3. Flappy Pig 176x224 Portrait Aspect Ratio & Sharp Pixel Rendering (Hình 1 Alignment)
   assert.ok(flyCode.includes('aspect-ratio: 176 / 224') || flyCode.includes('FH=310') || flyCode.includes('FH=312'), 'PigFlightGameView must enforce portrait aspect ratio');
@@ -4003,7 +4004,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 2. Compact Neo-Cards Hub Verification
   assert.ok(hubCode.includes('compactCard') && hubCode.includes('compactIconBox') && hubCode.includes('compactInfoCol'), 'Hub must use compact horizontal row Neo-Card layout');
-  assert.ok(hubCode.includes('PixelIconChat') && hubCode.includes('PixelIconGamepad') && hubCode.includes('PixelIconMapPin'), 'Hub cards must use PixelIcons');
+  assert.ok(hubCode.includes('PixelIconChat') && (hubCode.includes('PixelIconGamepad') || hubCode.includes('PixelIconWing')) && hubCode.includes('PixelIconMapPin'), 'Hub cards must use PixelIcons');
   assert.ok(!hubCode.includes('Hỏi đáp ngân sách, xin phản biện chi tiêu và nuôi heo cùng hội bạn thân'), 'Hub must remove verbose 3-line descriptions');
 
   // 3. Chat Segment Pixel Icons Verification
@@ -4212,7 +4213,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 2. PixelHubDashboard 4 Cards & Banner Integration
   assert.ok(hubDashCode.includes('EntertainmentBannerWebView'), 'PixelHubDashboard must render EntertainmentBannerWebView');
-  assert.ok(hubDashCode.includes('AI COACH & SQUAD') || hubDashCode.includes('KẾT NỐI'), 'PixelHubDashboard must include Card 1: Chat');
+  assert.ok(hubDashCode.includes('AI COACH & SQUAD') || hubDashCode.includes('KẾT NỐI') || hubDashCode.includes('CHẠY TRONG MÁY'), 'PixelHubDashboard must include Card 1: Chat');
   assert.ok(hubDashCode.includes('FLAPPY PIG · 60FPS') || hubDashCode.includes('VỖ CÁNH'), 'PixelHubDashboard must include Card 2: Fly');
   assert.ok(hubDashCode.includes('ANGRY PIG · 3 SAO') || hubDashCode.includes('BẮN NÁ') || hubDashCode.includes('LÁCH ĐƯỜNG'), 'PixelHubDashboard must include game cards');
   assert.ok(hubDashCode.includes('GPS PIXEL · QUÁN QUEN') || hubDashCode.includes('QUÁN QUEN') || hubDashCode.includes('CHECK-IN'), 'PixelHubDashboard must include Card 4: Map / Place Passport');
@@ -4740,9 +4741,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   // 4. PixelHubDashboard: Tinh giản 2 nhóm thẻ (Kết Nối & Game), loại bỏ toàn bộ từ ngữ hardcore
   assert.ok(!hubCode.includes('PIGFLY HUB'), 'PixelHubDashboard header must not have hardcore PIGFLY HUB');
   assert.ok(!hubCode.includes('FPS60') && !hubCode.includes('60FPS'), 'PixelHubDashboard must not have FPS60 or 60FPS');
-  assert.ok(hubCode.includes('KẾT NỐI & ĐỊA ĐIỂM'), 'PixelHubDashboard must have group 1 header KẾT NỐI & ĐỊA ĐIỂM');
+  assert.ok(hubCode.includes('KẾT NỐI & ĐỊA ĐIỂM') || hubCode.includes('HEO AI & QUÁN QUEN'), 'PixelHubDashboard must have group 1 header');
   assert.ok(hubCode.includes('TRÒ CHƠI HEO CON'), 'PixelHubDashboard must have group 2 header TRÒ CHƠI HEO CON');
-  assert.ok(hubCode.includes('PixelIconCrossRoad'), 'PixelHubDashboard must import and render PixelIconCrossRoad');
+  assert.ok(hubCode.includes('PixelIconCrossRoad') || hubCode.includes('PixelIconTraffic'), 'PixelHubDashboard must import and render crossroad pixel icon');
 
   // 5. ChatView: Tích hợp PigCrossRoadGameView & tự động ẩn tab bar
   assert.ok(chatViewCode.includes('PigCrossRoadGameView'), 'ChatView must import PigCrossRoadGameView');
@@ -4844,7 +4845,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(squadLocketCode.includes('Baloo2_800ExtraBold') && squadLocketCode.includes('Nunito'), 'SquadLocketView must use Baloo 2 and Nunito fonts');
   assert.ok(squadLocketCode.includes('feedPhotoWrap') && squadLocketCode.includes('feedPhoto') && squadLocketCode.includes('aspectRatio: 1'), 'SquadLocketView must support square 1:1 Locket photo feed');
   assert.ok(squadLocketCode.includes('feedAmountBadge') && squadLocketCode.includes('#FFE58A'), 'SquadLocketView must use ink pill badge with gold price');
-  assert.ok(chatViewCode.includes("activeTab === 'FRIENDS' ? (\n        <SquadLocketView />") || chatViewCode.includes("activeTab === 'FRIENDS' ? (\r\n        <SquadLocketView />") || (chatViewCode.includes('<SquadLocketView />') && chatViewCode.includes("<SquadLocketView onBack={() => setActiveSubView('hub')} />")), 'ChatView must support both standalone squad subview with back button and embedded friends tab without duplicate back button');
+  assert.ok(chatViewCode.includes('CafeChatBannerWebView') || chatViewCode.includes("activeTab === 'FRIENDS'"), 'ChatView must run local-first Heo AI Cafe banner or Friends tab');
 
   // 4. Luồng dữ liệu 2 chiều giữa 5 Tab:
   // - Ghi chi tiêu (Tab 2, Tab 0, Tab 3) tặng vé chơi game
@@ -4888,7 +4889,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   if (shooterCode) assert.ok(shooterCode.includes('ArrowLeft') && shooterCode.includes('backButton'), 'PigShooterGameView must use icon-only ArrowLeft back button');
   assert.ok((crossRoadCode.includes('ArrowLeft') || crossRoadCode.includes('PixelIconBack')) && (crossRoadCode.includes('backButton') || crossRoadCode.includes('bevelBtn')), 'PigCrossRoadGameView must use icon-only back button');
   assert.ok((spendMapCode.includes('ArrowLeft') && spendMapCode.includes('backButton')) || (spendMapCode.includes('PixelIconBack') && spendMapCode.includes('iconBtn')), 'PiggySpendMapView must use icon-only back button');
-  assert.ok(chatViewCode.includes('ArrowLeft') && chatViewCode.includes('hubBackButton'), 'ChatView must use icon-only ArrowLeft back button');
+  assert.ok((chatViewCode.includes('ArrowLeft') || chatViewCode.includes('PixelIconBack')) && chatViewCode.includes('hubBackButton'), 'ChatView must use icon-only back button');
 
   // 3. Phóng to khung game & Tối giản hoá giao diện trong game:
   // - Heo Bay: chuẩn khung lớn toàn màn hình, loại bỏ flyctl (vỗ cánh, tạm dừng, đổi trời), flyhud 10 vạch
@@ -5152,7 +5153,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 4. Header tối giản không đường kẻ ngang, focus icon pixel 16×16 & đệm đáy 110px
   assert.ok(mapCode.includes('borderBottomWidth: 0'), 'PiggySpendMapView header must remove horizontal divider line');
-  assert.ok(mapCode.includes('PixelIconBack') && mapCode.includes('PixelIconMapPin') && mapCode.includes('PixelIconReload'), 'PiggySpendMapView header must use 16x16 pixel icons');
+  assert.ok(mapCode.includes('PixelIconBack') && mapCode.includes('PixelIconMapPin') && (mapCode.includes('PixelIconReload') || mapCode.includes('PixelIconCrosshair')), 'PiggySpendMapView header must use 16x16 pixel icons');
   assert.ok(mapCode.includes('padding: 4px 12px 110px') || mapCode.includes('paddingBottom: 110'), 'PiggySpendMapView must reserve 110px bottom padding to prevent Tab Bar overlap');
 
   // 5. Living Documentation Sync Audit (Quyết định 175)
@@ -5486,14 +5487,14 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
   const techCode = fs.readFileSync('docs/TECH_ARCHITECTURE.md', 'utf8');
 
-  // 1. PiggySpendMapView.tsx: 100% Native Place Passport & Check-in
+  // 1. PiggySpendMapView.tsx: 100% Native Place Check-in (Quán Quen)
   assert.ok(
-    mapCode.includes('Hộ Chiếu Quán Quen') &&
+    (mapCode.includes('Quán Quen') || mapCode.includes('Hộ Chiếu Quán Quen')) &&
       mapCode.includes('heroPassportCard') &&
       mapCode.includes('openExternalMapDirections') &&
       mapCode.includes('buildPlaces') &&
       mapCode.includes('mapTransactionsToSpendPoints'),
-    'PiggySpendMapView.tsx must implement Native Place Passport UI with Hero Card and direction handoff'
+    'PiggySpendMapView.tsx must implement Native Quán Quen UI with Hero Card and direction handoff'
   );
 
   // 2. locationService.ts: Reverse Geocoding qua native OS Geocoder (0$ phí, 0 key)
@@ -5504,12 +5505,12 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'locationService.ts must export reverseGeocodePlaceAsync returning shortPlaceName and district'
   );
 
-  // 3. PixelHubDashboard.tsx: Thẻ Hộ Chiếu Quán Quen ở sảnh Tab Giải Trí
+  // 3. PixelHubDashboard.tsx: Thẻ Quán Quen ở sảnh Tab Giải Trí
   assert.ok(
-    hubCode.includes('Hộ Chiếu Quán Quen') &&
+    (hubCode.includes('Quán Quen') || hubCode.includes('Hộ Chiếu Quán Quen')) &&
       hubCode.includes('CHECK-IN') &&
-      hubCode.includes('Check-in quán xá, album ảnh & chỉ đường 1-chạm'),
-    'PixelHubDashboard.tsx must feature Hộ Chiếu Quán Quen card'
+      (hubCode.includes('chỉ đường 1 chạm') || hubCode.includes('chỉ đường 1-chạm')),
+    'PixelHubDashboard.tsx must feature Quán Quen check-in card'
   );
 
   // 4. Tab Camera (app/(main)/index.tsx): Gắn location_name tự động khi lưu ảnh
@@ -5543,22 +5544,22 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const techCode = fs.readFileSync('docs/TECH_ARCHITECTURE.md', 'utf8');
   const camDocCode = fs.readFileSync('docs/screens/CAMERA.md', 'utf8');
 
-  // 1. PiggySpendMapView.tsx: Mô phỏng sổ hộ chiếu chân thực
+  // 1. PiggySpendMapView.tsx: Thẻ tổng quan 1:1 prototype (4 ô + con dấu quận, không chữ thừa)
   assert.ok(
-    mapCode.includes('№ PK-8824-VN') &&
-      mapCode.includes('HỘ CHIẾU QUÁN QUEN') &&
-      mapCode.includes('CỘNG HÒA TIẾT KIỆM HEO CON') &&
-      mapCode.includes('PixelRoyalEmblem'),
-    'PiggySpendMapView.tsx must feature authentic Passport Number № PK-8824-VN, Royal Pig Emblem & Kingdom title'
+    mapCode.includes('Quán Quen') &&
+      mapCode.includes('psgrid') &&
+      mapCode.includes('psstamps') &&
+      !mapCode.includes('PK-8824'),
+    'PiggySpendMapView.tsx must use clean prototype Quán Quen layout without bloated PK-8824 text'
   );
 
-  // 2. Con dấu thị thực các quận đã đặt chân (.psstamps & .psstamp rotated -2.5deg / 2.5deg)
+  // 2. Con dấu thị thực các quận đã đặt chân (.psstamps & .psstamp rotated -2deg / 2deg)
   assert.ok(
     mapCode.includes('psstamps') &&
       mapCode.includes('psstamp') &&
       mapCode.includes('districtStamps') &&
-      (mapCode.includes('-2.5deg') || mapCode.includes('-2deg')),
-    'PiggySpendMapView.tsx must render rotated visa stamps (.psstamps) for visited districts'
+      (mapCode.includes('-2deg') || mapCode.includes('-2.5deg')),
+    'PiggySpendMapView.tsx must render rotated district stamps (.psstamps) for visited districts'
   );
 
   // 3. Bộ 8 glyphs Pixel Art 5×5 chi tiết port 1:1 từ prototype Ví Heo Con 24_11.html
@@ -5583,7 +5584,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(
     camCode.includes('reverseGeocodePlaceAsync') &&
       camCode.includes('district: geo.district'),
-    'app/(main)/index.tsx must auto-record district into transaction for Passport stamps'
+    'app/(main)/index.tsx must auto-record district into transaction for district stamps'
   );
 
   // 6. Living Documentation Sync Audit (Quyết định 184)
@@ -5596,7 +5597,108 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'AGENTS.md, DECISIONS.md, 10-CHAT.md, TECH_ARCHITECTURE.md and CAMERA.md must all document Quyết định 184'
   );
 
-  console.log('✅ Test 121 Passed: Mô Phỏng Hộ Chiếu Chân Thực (True Place Passport), Con Dấu Thị Thực Các Quận (Rotated Visa Stamps), Bộ Glyphs Pixel Art 5×5 Chi Tiết Port 1:1, Tự Động Định Vị Quận Khi Lưu Ảnh & Gỡ Bỏ Banner UI Thừa (Quyết định 184) Audit verified cleanly');
+  console.log('✅ Test 121 Passed: Thiết Kế Quán Quen Chuẩn Prototype (Con Dấu Quận Xoay Góc, Pixel Glyphs 5×5 & Tự Động Định Vị Quận — Quyết định 184) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 121 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (121/121)!');
+// ==========================================
+// TEST 122: ĐỒNG BỘ 1:1 PROTOTYPE 24/11 & MASTER-PROMPTS PLAN 13–19 — CHAT HEO AI BANNER QUÁN CÀ PHÊ 144×96, QUÁN QUEN CHỢ BẾN THÀNH CUỘN NGANG, XÓA SẠCH CHỮ BỊA, 100% ICON PIXEL ART & BACKEND VIỆC NHÀ 3 CHỈ SỐ (QUYẾT ĐỊNH 185)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const techCode = fs.readFileSync('docs/TECH_ARCHITECTURE.md', 'utf8');
+
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const streetBannerCode = fs.readFileSync('src/components/chat/BenThanhStreetBannerWebView.tsx', 'utf8');
+  const cafeBannerCode = fs.readFileSync('src/components/chat/CafeChatBannerWebView.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const chatUtilsCode = fs.readFileSync('src/utils/chatUtils.ts', 'utf8');
+  const coachBubbleCode = fs.readFileSync('src/components/chat/CoachMessageBubble.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const tabBarCode = fs.readFileSync('src/components/navigation/FloatingPillTabBar.tsx', 'utf8');
+  const iconsCode = fs.readFileSync('src/components/pixel/PixelIcons.tsx', 'utf8');
+  const gamifCode = fs.readFileSync('src/store/gamificationStore.ts', 'utf8');
+  const houseCode = fs.readFileSync('src/components/pixel/PixelHouseWebView.tsx', 'utf8');
+  const statsCode = fs.readFileSync('src/components/views/StatsView.tsx', 'utf8');
+  const mainIndexCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+
+  // 1. Cấm tuyệt đối chữ tự bịa hình thức ở UI Quán Quen & Chat
+  assert.ok(
+    !mapCode.includes('PK-8824') &&
+      !mapCode.includes('CỘNG HÒA TIẾT KIỆM') &&
+      !mapCode.includes('HỘ CHIẾU QUÁN QUEN') &&
+      !mapCode.includes('Hộ Chiếu Quán Quen') &&
+      !hubCode.includes('Hộ Chiếu Quán Quen') &&
+      !hubCode.includes('Bạn Bè') &&
+      !chatViewCode.includes('Hội Bạn Thân') &&
+      !chatViewCode.includes('Anh Minh') &&
+      !coachBubbleCode.includes('Anh Minh') &&
+      !chatUtilsCode.includes('Anh Minh'),
+    'UI and Copywriting must completely remove PK-8824, Cong hoa tiet kiem, Ho Chieu Quan Quen, Squad/Hoi Ban Than, and Anh Minh'
+  );
+
+  // 2. Banner Chợ Bến Thành Cuộn Ngang (World > 192px, nhiều món ăn đặc sản & đồ lưu niệm)
+  assert.ok(
+    streetBannerCode.includes('WORLD_W = 584') &&
+      streetBannerCode.includes('camX') &&
+      streetBannerCode.includes('Nón lá & Áo dài') &&
+      streetBannerCode.includes('Gốm & Sơn mài') &&
+      streetBannerCode.includes('Lồng đèn & Heo đất') &&
+      mapCode.includes('BenThanhStreetBannerWebView'),
+    'BenThanhStreetBannerWebView must render scrolling 584px Ben Thanh street with food and souvenir stalls'
+  );
+
+  // 3. Trang Chat Heo AI 1:1 Prototype (Banner Quán Cà Phê 144x96 + Bong bóng thoại + Danh sách cuộn)
+  assert.ok(
+    cafeBannerCode.includes('width="144" height="96"') &&
+      cafeBannerCode.includes('bubbleMe') &&
+      cafeBannerCode.includes('bubbleAi') &&
+      chatViewCode.includes('CafeChatBannerWebView') &&
+      chatViewCode.includes('FlatList') &&
+      !chatViewCode.includes('SquadLocketView'),
+    'ChatView must integrate 144x96 CafeChatBannerWebView with floating bubbles and scrollable FlatList, with zero Squad'
+  );
+
+  // 4. Đồng bộ 100% Pixel Art Icons (FloatingPillTabBar, Hub, Chat, Quán Quen)
+  assert.ok(
+    iconsCode.includes('PixelIconTabGarden') &&
+      iconsCode.includes('PixelIconTabCamera') &&
+      iconsCode.includes('PixelIconFlame') &&
+      iconsCode.includes('PixelIconFish') &&
+      iconsCode.includes('PixelIconRose') &&
+      tabBarCode.includes('PixelIconTabGarden') &&
+      tabBarCode.includes('PixelIconTabFun') &&
+      !tabBarCode.includes('lucide-react-native') &&
+      !hubCode.includes('lucide-react-native'),
+    'FloatingPillTabBar, PixelHubDashboard, and Chat/Quán Quen must use 100% Pixel Art SVG icons'
+  );
+
+  // 5. Đồng bộ Backend Việc nhà 3 chỉ số & Cổng phòng Nhà của Heo
+  assert.ok(
+    gamifCode.includes('fishHunger') &&
+      gamifCode.includes('flowerWater') &&
+      gamifCode.includes('addChoreProgress') &&
+      hubCode.includes('Cá ao') &&
+      hubCode.includes('Hoa hồng') &&
+      chatUtilsCode.includes('fishHunger') &&
+      houseCode.includes('HOUSE_PORTALS') &&
+      statsCode.includes('onNavigatePortal') &&
+      mainIndexCode.includes('requestedChatSubView'),
+    'Backend chores (Heo, Cá ao, Hoa hồng) and House room portals must synchronize cleanly across tabs'
+  );
+
+  // 6. Living Docs Sync Audit (Quyết định 185 & AGENTS.md Zero-Fake-Bureaucracy rule)
+  assert.ok(
+    agentsCode.includes('CHỐNG CHỮ BỊA HÌNH THỨC') &&
+      agentsCode.includes('185') &&
+      decisionsCode.includes('185') &&
+      chatDocCode.includes('185') &&
+      techCode.includes('185'),
+    'AGENTS.md, DECISIONS.md, 10-CHAT.md, and TECH_ARCHITECTURE.md must document Quyết định 185 and Zero-Fake-Bureaucracy rule'
+  );
+
+  console.log('✅ Test 122 Passed: Đồng Bộ 1:1 Prototype 24/11 & MASTER-PROMPTS (Chat Heo AI Quán Cà Phê, Quán Quen Chợ Bến Thành Cuộn Ngang, Bỏ Chữ Bịa/Squad/Anh Minh, 100% Pixel Icons & Backend Việc Nhà 3 Chỉ Số — Quyết định 185) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 122 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (122/122)!');

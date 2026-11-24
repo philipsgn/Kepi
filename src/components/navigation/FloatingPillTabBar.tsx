@@ -9,7 +9,13 @@ import {
 } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Camera, Gamepad2, Home, Trees, User } from 'lucide-react-native';
+import {
+  PixelIconTabCamera,
+  PixelIconTabFun,
+  PixelIconTabGarden,
+  PixelIconTabHouse,
+  PixelIconTabProfile,
+} from '../pixel/PixelIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { TAB_BAR_HEIGHT, useBottomInset } from '../../hooks/useBottomInset';
@@ -79,11 +85,11 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
   };
 
   const tabs = [
-    { id: 'home', icon: Trees, label: 'Vườn', activeBg: '#2B2118', activeFg: '#FFFBF1' },
-    { id: 'stats', icon: Home, label: 'Nhà', activeBg: '#2B2118', activeFg: '#FFFBF1' },
-    { id: 'camera', icon: Camera, label: 'Chụp', activeBg: '#E0452B', activeFg: '#FFFFFF', isCamera: true },
-    { id: 'chat', icon: Gamepad2, label: 'Giải trí', activeBg: '#F4B93B', activeFg: '#2B2118' },
-    { id: 'profile', icon: User, label: 'Hồ sơ', activeBg: '#2B2118', activeFg: '#FFFBF1' },
+    { id: 'home', icon: PixelIconTabGarden, label: 'Vườn', activeBg: '#2B2118', activeFg: '#FFFBF1' },
+    { id: 'stats', icon: PixelIconTabHouse, label: 'Nhà', activeBg: '#2B2118', activeFg: '#FFFBF1' },
+    { id: 'camera', icon: PixelIconTabCamera, label: 'Chụp', activeBg: '#E0452B', activeFg: '#FFFFFF', isCamera: true },
+    { id: 'chat', icon: PixelIconTabFun, label: 'Giải trí', activeBg: '#F4B93B', activeFg: '#2B2118' },
+    { id: 'profile', icon: PixelIconTabProfile, label: 'Hồ sơ', activeBg: '#2B2118', activeFg: '#FFFBF1' },
   ];
 
   const getTabActiveStyle = (tab: (typeof tabs)[0]) => {
@@ -157,7 +163,7 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
                       ? activeStyle.fg
                       : (tokens.text || '#2B2118')
                   }
-                  strokeWidth={isSelected ? 2.6 : 2.2}
+                  selected={isSelected}
                 />
                 <Text
                   style={[

@@ -5,6 +5,7 @@ import {
   Linking,
   Platform,
   ScrollView,
+  Switch,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -16,18 +17,25 @@ import { useTransactionStore } from '../../store/transactionStore';
 import {
   getCachedLocationSync,
   getCurrentPositionSafeAsync,
+  getLocationPinEnabled,
   getQuickPinCoordsIfOptedIn,
   reverseGeocodePlaceAsync,
+  setLocationPinEnabled,
 } from '../../services/locationService';
 import {
   PixelIconBack,
+  PixelIconCameraMini,
+  PixelIconCoin,
+  PixelIconCrosshair,
+  PixelIconFlame,
   PixelIconMapPin,
-  PixelIconReload,
+  PixelIconStar,
 } from '../pixel/PixelIcons';
+import { BenThanhStreetBannerWebView } from './BenThanhStreetBannerWebView';
 
 // ============================================================================
-// HỘ CHIẾU QUÁN QUEN (PLACE PASSPORT & CHECK-IN) — 100% NATIVE REACT NATIVE
-// Mô phỏng sổ hộ chiếu chân thực, con dấu thị thực các quận, icon pixel 5×5 (Quyết định 184)
+// QUÁN QUEN (PLACE CHECK-IN) — 100% NATIVE + BANNER CHỢ BẾN THÀNH CUỘN NGANG
+// Chuẩn 1:1 prototype Ví Heo Con 24_11.html & MASTER-PROMPTS PLAN 16 + 18 (Quyết định 185)
 // ============================================================================
 
 export interface PiggySpendMapViewProps {
@@ -70,61 +78,50 @@ export type FilterMode = 'recent14' | 'frequent' | 'trail' | 'top';
 // ============================================================================
 export const PIXEL_KINDS: Record<
   SpendKind,
-  { name: string; color: string; glyph: string[]; iconEmoji: string }
+  { name: string; color: string; glyph: string[] }
 > = {
   food: {
     name: 'Quán ăn',
     color: '#E0452B',
     glyph: ['.....', '#####', '#####', '.###.', '.....'],
-    iconEmoji: '🍜',
   },
   cafe: {
     name: 'Cà phê, trà',
     color: '#D9822B',
     glyph: ['.#.#.', '.....', '#####', '#...#', '.###.'],
-    iconEmoji: '☕',
   },
   market: {
     name: 'Chợ',
     color: '#5E9A57',
     glyph: ['#####', '#.#.#', '#####', '#...#', '#####'],
-    iconEmoji: '🥬',
   },
   shop: {
     name: 'Cửa hàng',
     color: '#E8548C',
     glyph: ['.###.', '#####', '#####', '#####', '#####'],
-    iconEmoji: '🛍️',
   },
   gym: {
     name: 'Thể thao',
     color: '#4B6FA5',
     glyph: ['##.##', '#####', '#####', '#####', '##.##'],
-    iconEmoji: '🏋️',
   },
   gas: {
     name: 'Xăng xe',
     color: '#7A7A84',
     glyph: ['..#..', '.###.', '#####', '#####', '.###.'],
-    iconEmoji: '⛽',
   },
   pharm: {
     name: 'Nhà thuốc',
     color: '#3FA796',
     glyph: ['..#..', '..#..', '#####', '..#..', '..#..'],
-    iconEmoji: '💊',
   },
   fun: {
     name: 'Giải trí',
     color: '#8A5BB5',
     glyph: ['..#..', '#####', '.###.', '##.##', '#...#'],
-    iconEmoji: '🎮',
   },
 };
 
-// ============================================================================
-// TIỆN ÍCH TỌA ĐỘ & KHOẢNG CÁCH HAVERSINE CHUẨN QUỐC TẾ (Quyết định 175–184)
-// ============================================================================
 export function lngLatToWorld(lng: number, lat: number, z: number) {
   const scale = 256 * Math.pow(2, z);
   const x = ((lng + 180) / 360) * scale;
@@ -160,14 +157,18 @@ function fmtK(v: number): string {
 }
 
 function formatDistance(meters: number): string {
-  if (meters < 1000) return `${Math.round(meters)}m`;
-  return `${(meters / 1000).toFixed(1)}km`;
+  if (meters < 1000) return `${Math.round(meters)} m`;
+  return `${(meters / 1000).toFixed(1).replace('.', ',')} km`;
 }
 
-/**
- * Trích xuất Quận/Huyện thông minh từ tên địa điểm, mô tả hoặc tọa độ
- * để con dấu thị thực luôn hiển thị tên quận sắc nét (Quận 1, Quận 3, Bình Thạnh...)
- */
+function agoText(ts: number): string {
+  const hours = Math.max(0, (Date.now() - ts) / 36e5);
+  if (hours < 1) return 'Vừa xong';
+  if (hours < 24) return `${Math.floor(hours)} giờ trước`;
+  if (hours < 48) return 'Hôm qua';
+  return `${Math.floor(hours / 24)} ngày trước`;
+}
+
 export function extractDistrictFromNameOrCoords(
   placeName: string,
   lat: number,
@@ -324,7 +325,6 @@ export function buildPlaces(items: SpendItem[]): SpendPlace[] {
   return places;
 }
 
-// Icon Ghim Pixel 9×12 (Neo-Brutalist)
 export const drawPinCanvas = (col: string = '#E0452B', _scale = 3) => (
   <Svg width={18} height={24} viewBox="0 0 9 12">
     <Rect x={2} y={0} width={5} height={1} fill="#2B2118" />
@@ -343,7 +343,6 @@ export const drawPinCanvas = (col: string = '#E0452B', _scale = 3) => (
   </Svg>
 );
 
-// Mặt Heo Pixel 16×16 (Neo-Brutalist)
 export const drawPigFaceCanvas = (size = 22) => (
   <Svg width={size} height={size} viewBox="0 0 16 16">
     <Rect x={2} y={2} width={3} height={3} fill="#2B2118" />
@@ -362,35 +361,6 @@ export const drawPigFaceCanvas = (size = 22) => (
   </Svg>
 );
 
-// Quốc huy / Huy hiệu Hoàng Gia Heo Con Pixel (Royal Pig Emblem)
-export const PixelRoyalEmblem: React.FC<{ size?: number }> = ({ size = 36 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    {/* Vương miện hoàng gia */}
-    <Rect x={7} y={2} width={2} height={2} fill="#F4B93B" />
-    <Rect x={11} y={1} width={2} height={2} fill="#F4B93B" />
-    <Rect x={15} y={2} width={2} height={2} fill="#F4B93B" />
-    <Rect x={6} y={4} width={12} height={2} fill="#F4B93B" />
-    {/* Tai heo */}
-    <Rect x={4} y={7} width={3} height={3} fill="#2B2118" />
-    <Rect x={17} y={7} width={3} height={3} fill="#2B2118" />
-    <Rect x={5} y={8} width={1} height={1} fill="#F9B8C4" />
-    <Rect x={18} y={8} width={1} height={1} fill="#F9B8C4" />
-    {/* Khuôn mặt heo */}
-    <Rect x={5} y={9} width={14} height={10} fill="#2B2118" />
-    <Rect x={6} y={10} width={12} height={8} fill="#F9B8C4" />
-    {/* Mắt */}
-    <Rect x={8} y={12} width={2} height={2} fill="#2B2118" />
-    <Rect x={14} y={12} width={2} height={2} fill="#2B2118" />
-    {/* Mũi heo */}
-    <Rect x={9} y={14} width={6} height={3} fill="#F08DA4" />
-    <Rect x={10} y={15} width={1} height={1} fill="#2B2118" />
-    <Rect x={13} y={15} width={1} height={1} fill="#2B2118" />
-    {/* Ruy băng đế vàng */}
-    <Rect x={4} y={20} width={16} height={2} fill="#F4B93B" />
-  </Svg>
-);
-
-// Thumbnail 52×52: Ảnh Locket thật HOẶC 5×5 Pixel Glyph port 1:1 từ prototype Ví Heo Con 24_11.html
 export const PixelKindThumb: React.FC<{
   kind: SpendKind;
   size?: number;
@@ -413,11 +383,8 @@ export const PixelKindThumb: React.FC<{
   return (
     <View style={[styles.pThumb, { width: size, height: size, overflow: 'hidden' }]}>
       <Svg width={size} height={size} viewBox="0 0 16 16">
-        {/* Nền màu danh mục với alpha 0.28 (chuẩn prototype psThumb line 3505) */}
         <Rect x={0} y={0} width={16} height={16} fill={col} opacity={0.25} />
-        {/* Kệ sàn dưới màu sáng rgba(255,255,255,.55) */}
         <Rect x={0} y={11} width={16} height={5} fill="#FFFFFF" opacity={0.55} />
-        {/* Ma trận 5×5 glyphs: mỗi điểm '#' vẽ ô 2×2 tại x=3+i*2, y=2+j*2 */}
         {g.map((row, r) =>
           row.split('').map((cell, c) =>
             cell === '#' ? (
@@ -437,7 +404,6 @@ export const PixelKindThumb: React.FC<{
   );
 };
 
-// Handoff mở ứng dụng bản đồ gốc (Google Maps / Apple Maps)
 export function openExternalMapDirections(lat: number, lng: number, placeName: string) {
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   const encodedName = encodeURIComponent(placeName);
@@ -451,9 +417,7 @@ export function openExternalMapDirections(lat: number, lng: number, placeName: s
 
   Linking.canOpenURL(url)
     .then((supported) => {
-      if (supported) {
-        return Linking.openURL(url);
-      }
+      if (supported) return Linking.openURL(url);
       return Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
     })
     .catch(() => {
@@ -465,14 +429,19 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
   const { transactions, updateTransaction } = useTransactionStore();
   const [activeMode, setActiveMode] = useState<FilterMode>('recent14');
   const [userPos, setUserPos] = useState<{ lat: number; lng: number }>(getCachedLocationSync());
+  const [hasRealGps, setHasRealGps] = useState(false);
   const [isRefreshingGps, setIsRefreshingGps] = useState(false);
+  const [autoPinEnabled, setAutoPinEnabled] = useState(true);
 
-  // Khởi tạo và cập nhật GPS
   useEffect(() => {
     let mounted = true;
+    getLocationPinEnabled().then((val) => {
+      if (mounted) setAutoPinEnabled(val);
+    });
     getCurrentPositionSafeAsync(5000).then((coords) => {
       if (mounted && coords) {
         setUserPos(coords);
+        setHasRealGps(true);
       }
     });
     return () => {
@@ -486,15 +455,20 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
     const fresh = await getCurrentPositionSafeAsync(6000);
     if (fresh) {
       setUserPos(fresh);
+      setHasRealGps(true);
     }
     setIsRefreshingGps(false);
   }, []);
 
-  // Danh sách giao dịch hợp lệ & gom cụm quán
+  const handleToggleAutoPin = async (val: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setAutoPinEnabled(val);
+    await setLocationPinEnabled(val);
+  };
+
   const mappedExpenses = useMemo(() => mapTransactionsToSpendPoints(transactions), [transactions]);
   const allPlaces = useMemo(() => buildPlaces(mappedExpenses), [mappedExpenses]);
 
-  // Các ảnh chưa được gắn địa điểm để hiển thị Retro-tag
   const unlocatedPhotoExpenses = useMemo(
     () =>
       transactions.filter(
@@ -507,7 +481,6 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
     [transactions]
   );
 
-  // Gán 1-chạm vị trí hiện tại cho các ảnh chưa có tọa độ
   const handleRetroTagCurrentLocation = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const coords = await getQuickPinCoordsIfOptedIn(6000);
@@ -516,9 +489,10 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
       return;
     }
     const geo = await reverseGeocodePlaceAsync(coords.lat, coords.lng);
-    const districtName = geo.district && geo.district !== 'Khu vực quen'
-      ? geo.district
-      : extractDistrictFromNameOrCoords(geo.shortPlaceName, coords.lat, coords.lng);
+    const districtName =
+      geo.district && geo.district !== 'Khu vực quen'
+        ? geo.district
+        : extractDistrictFromNameOrCoords(geo.shortPlaceName, coords.lat, coords.lng);
 
     unlocatedPhotoExpenses.forEach((t) => {
       updateTransaction(t.id, {
@@ -529,10 +503,9 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
       });
     });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Alert.alert('Đã gán địa điểm!', `Đã gắn vị trí "${geo.shortPlaceName}" cho ${unlocatedPhotoExpenses.length} ảnh.`);
+    Alert.alert('Đã gắn vị trí!', `Đã gắn "${geo.shortPlaceName}" cho ${unlocatedPhotoExpenses.length} ảnh.`);
   }, [unlocatedPhotoExpenses, updateTransaction]);
 
-  // Lọc và sắp xếp theo 4 chế độ
   const filteredPlaces = useMemo(() => {
     let list = [...allPlaces];
     const now = Date.now();
@@ -555,7 +528,6 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
     return list;
   }, [allPlaces, activeMode, userPos]);
 
-  // Thống kê Hero Passport
   const stats = useMemo(() => {
     const totalVisits = allPlaces.reduce((acc, p) => acc + p.visits, 0);
     const totalAmount = allPlaces.reduce((acc, p) => acc + p.total, 0);
@@ -571,7 +543,6 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
     };
   }, [allPlaces]);
 
-  // Danh sách con dấu thị thực các quận đã đặt chân (.psstamps)
   const districtStamps = useMemo(() => {
     const counts: Record<string, number> = {};
     allPlaces.forEach((p) => {
@@ -585,7 +556,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
 
   return (
     <View style={styles.container}>
-      {/* 1. HEADER TỐI GIẢN KHÔNG ĐƯỜNG KẺ NGANG (Quyết định 175 & 183) */}
+      {/* 1. HEADER TỐI GIẢN CHUẨN PROTOTYPE (.flytop) — KHÔNG CHỮ DÀI DÒNG */}
       <View style={styles.topHeader}>
         <TouchableOpacity
           style={styles.iconBtn}
@@ -596,21 +567,27 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
           activeOpacity={0.8}
           accessibilityLabel="Quay lại"
         >
-          <PixelIconBack size={20} />
+          <PixelIconBack size={18} />
         </TouchableOpacity>
 
         <View style={styles.titleWrap}>
           <PixelIconMapPin size={20} />
-          <Text style={styles.titleText}>Hộ Chiếu Quán Quen</Text>
+          <View>
+            <Text style={styles.titleText}>Quán Quen</Text>
+            <Text style={styles.subTitleText}>
+              {hasRealGps ? 'Gần bạn tính từ GPS thật' : 'Gần bạn tính từ vị trí mẫu'}
+            </Text>
+          </View>
         </View>
 
         <TouchableOpacity
-          style={[styles.iconBtn, isRefreshingGps && styles.iconBtnActive]}
+          style={[styles.locBtn, isRefreshingGps && styles.iconBtnActive]}
           onPress={handleRefreshGps}
           activeOpacity={0.8}
-          accessibilityLabel="Làm mới vị trí"
+          accessibilityLabel="Định vị"
         >
-          <PixelIconReload size={18} />
+          <PixelIconCrosshair size={14} />
+          <Text style={styles.locBtnText}>Định vị</Text>
         </TouchableOpacity>
       </View>
 
@@ -619,23 +596,11 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 2. HERO PASSPORT CARD — SỔ HỘ CHIẾU CHÂN THỰC THEO PROTOTYPE Ví Heo Con 24_11.html */}
-        <View style={styles.heroPassportCard}>
-          {/* Header sổ hộ chiếu: Số Hộ Chiếu + Tiêu đề + Quốc huy Heo Hoàng Gia */}
-          <View style={styles.passportHeaderRow}>
-            <View style={styles.passportTitleCol}>
-              <View style={styles.passportNoBadge}>
-                <Text style={styles.passportNoText}>№ PK-8824-VN</Text>
-              </View>
-              <Text style={styles.passportMainTitle}>HỘ CHIẾU QUÁN QUEN</Text>
-              <Text style={styles.passportSubTitle}>CỘNG HÒA TIẾT KIỆM HEO CON</Text>
-            </View>
-            <View style={styles.royalEmblemWrap}>
-              <PixelRoyalEmblem size={44} />
-            </View>
-          </View>
+        {/* 2. BANNER ĐỘNG CHỢ BẾN THÀNH MỞ RỘNG CUỘN NGANG (WORLD 584px) */}
+        <BenThanhStreetBannerWebView active={true} />
 
-          {/* Lưới 4 chỉ số .psgrid: Quán đã ghé, Quận đã đến, Quán ruột, Tổng chi */}
+        {/* 3. THẺ .pshero CHUẨN 1:1 PROTOTYPE: CHỈ 4 Ô + CON DẤU QUẬN (ZERO CHỮ BỊA) */}
+        <View style={styles.heroPassportCard}>
           <View style={styles.psgrid}>
             <View style={styles.psgridItem}>
               <Text style={styles.psgridLabel}>Quán đã ghé</Text>
@@ -657,69 +622,49 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
             </View>
           </View>
 
-          {/* Khối con dấu thị thực các quận đã đặt chân (.psstamps & .psstamp) */}
-          <View style={styles.psStampsWrap}>
-            <View style={styles.psStampsHeaderRow}>
-              <Text style={styles.psStampsLabel}>CON DẤU THỊ THỰC CÁC QUẬN</Text>
-              <Text style={styles.psStampsSub}>
-                {districtStamps.length} quận · {stats.totalVisits} lần ghé
-              </Text>
-            </View>
+          {districtStamps.length > 0 && (
             <View style={styles.psstamps}>
-              {districtStamps.length > 0 ? (
-                districtStamps.map((item, idx) => {
-                  const isEven = idx % 2 === 0;
-                  const stampColors = ['#E0452B', '#4B6FA5', '#5E9A57', '#8A5BB5', '#D9822B'];
-                  const stampCol = stampColors[idx % stampColors.length];
-                  return (
-                    <View
-                      key={item.district}
-                      style={[
-                        styles.psstamp,
-                        {
-                          borderColor: stampCol,
-                          transform: [{ rotate: isEven ? '-2.5deg' : '2.5deg' }],
-                        },
-                      ]}
-                    >
-                      <Text style={[styles.psstampText, { color: stampCol }]}>
-                        ★ {item.district.toUpperCase()} · {item.count} ★
-                      </Text>
-                    </View>
-                  );
-                })
-              ) : (
-                <View style={[styles.psstamp, { transform: [{ rotate: '-2deg' }] }]}>
-                  <Text style={styles.psstampText}>★ CHƯA CÓ CON DẤU THỊ THỰC ★</Text>
+              {districtStamps.map((item, idx) => (
+                <View
+                  key={item.district}
+                  style={[
+                    styles.psstamp,
+                    { transform: [{ rotate: idx % 2 === 0 ? '-2deg' : '2deg' }] },
+                  ]}
+                >
+                  <Text style={styles.psstampText}>
+                    {item.district} · {item.count}
+                  </Text>
                 </View>
-              )}
+              ))}
             </View>
-          </View>
+          )}
         </View>
 
-        {/* 3. BANNER RETRO-TAG NHẸ KHI CÓ ẢNH CHƯA GẮN VỊ TRÍ */}
+        {/* 4. THẺ NHẮC ẢNH CHƯA GẮN VỊ TRÍ (.pstag) */}
         {unlocatedPhotoExpenses.length > 0 && (
           <TouchableOpacity
             style={styles.retroTagBanner}
             activeOpacity={0.85}
             onPress={handleRetroTagCurrentLocation}
           >
+            <PixelIconCameraMini size={16} />
             <Text style={styles.retroTagText}>
-              📸 Có <Text style={styles.retroTagBold}>{unlocatedPhotoExpenses.length} ảnh</Text> chưa gắn quận
+              Bạn có <Text style={styles.retroTagBold}>{unlocatedPhotoExpenses.length} ảnh</Text> chưa gắn vị trí
             </Text>
             <View style={styles.retroTagBtn}>
-              <Text style={styles.retroTagBtnText}>Gắn vị trí 📍</Text>
+              <Text style={styles.retroTagBtnText}>Gắn vị trí hiện tại</Text>
             </View>
           </TouchableOpacity>
         )}
 
-        {/* 4. BỘ LỌC NEO-PILLS 4 CHẾ ĐỘ */}
+        {/* 5. THANH LỌC 4 NÚT PIXEL ART ICONS (.pschips) */}
         <View style={styles.filterPillsRow}>
           {[
-            { id: 'recent14', label: '🔥 14N' },
-            { id: 'frequent', label: '⭐ Quen' },
-            { id: 'trail', label: '📍 Gần' },
-            { id: 'top', label: '🏆 Top' },
+            { id: 'recent14', label: '14 ngày', icon: <PixelIconFlame size={14} /> },
+            { id: 'frequent', label: 'Quen', icon: <PixelIconStar size={14} /> },
+            { id: 'trail', label: 'Gần', icon: <PixelIconMapPin size={14} /> },
+            { id: 'top', label: 'Top chi', icon: <PixelIconCoin size={14} /> },
           ].map((tab) => {
             const isActive = activeMode === tab.id;
             return (
@@ -732,6 +677,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
                   setActiveMode(tab.id as FilterMode);
                 }}
               >
+                {tab.icon}
                 <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
                   {tab.label}
                 </Text>
@@ -740,13 +686,13 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
           })}
         </View>
 
-        {/* 5. DANH SÁCH THẺ CHECK-IN QUÁN QUEN (100% NATIVE, ICON PIXEL ART 5×5) */}
+        {/* 6. DANH SÁCH THẺ QUÁN QUEN (.pscard) */}
         {filteredPlaces.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIconWrap}>{drawPinCanvas('#2B2118', 3)}</View>
-            <Text style={styles.emptyTitle}>Chưa có quán nào trong Hộ Chiếu</Text>
+            <Text style={styles.emptyTitle}>Chưa có quán nào trong 14 ngày qua</Text>
             <Text style={styles.emptyDesc}>
-              Chụp ảnh và lưu ở Tab Camera để tự động đóng dấu thị thực vào Hộ Chiếu nhé!
+              Chụp ảnh ở Tab Chụp để lưu lại địa điểm và quán quen tại đây nhé.
             </Text>
           </View>
         ) : (
@@ -756,7 +702,6 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
 
               return (
                 <View key={place.id} style={styles.placeCard}>
-                  {/* Thumbnail 52×52: Ảnh Locket thật HOẶC Icon Pixel Art 5×5 */}
                   <View style={styles.cardThumbWrap}>
                     <PixelKindThumb
                       kind={place.kind}
@@ -765,47 +710,62 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
                     />
                   </View>
 
-                  {/* Thông tin quán: Tối giản chữ, tập trung icon */}
                   <View style={styles.cardInfoCol}>
                     <Text style={styles.cardPlaceName} numberOfLines={1}>
                       {place.name}
                     </Text>
                     <Text style={styles.cardAddress} numberOfLines={1}>
-                      {place.district} · {formatDistance(distM)}
+                      {place.district}
                     </Text>
 
                     <View style={styles.cardBadgeRow}>
                       <View style={styles.badgePill}>
-                        <Text style={styles.badgePillText}>★ {place.visits} lần</Text>
+                        <Text style={styles.badgePillText}>Ghé {place.visits} lần</Text>
                       </View>
                       <View style={[styles.badgePill, styles.badgePillAmount]}>
-                        <Text style={styles.badgePillAmountText}>💰 {fmtK(place.total)}</Text>
+                        <Text style={styles.badgePillAmountText}>{fmtK(place.total)} tổng</Text>
+                      </View>
+                      <View style={styles.badgePill}>
+                        <Text style={styles.badgePillText}>{formatDistance(distM)}</Text>
                       </View>
                     </View>
+
+                    <Text style={styles.cardLastText} numberOfLines={1}>
+                      Gần nhất {agoText(place.lastTs)}
+                    </Text>
                   </View>
 
-                  {/* Nút chỉ đường 1-chạm mở Google Maps / Apple Maps */}
                   <TouchableOpacity
                     style={styles.directionBtn}
                     activeOpacity={0.8}
                     onPress={() => openExternalMapDirections(place.lat, place.lng, place.name)}
-                    accessibilityLabel="Chỉ đường"
+                    accessibilityLabel={`Chỉ đường tới ${place.name}`}
                   >
-                    <Text style={styles.directionBtnText}>Chỉ đường 📍</Text>
+                    <PixelIconMapPin size={14} />
+                    <Text style={styles.directionBtnText}>Chỉ đường</Text>
                   </TouchableOpacity>
                 </View>
               );
             })}
           </View>
         )}
+
+        {/* 7. CÔNG TẮC TỰ GẮN VỊ TRÍ KHI LƯU CHI Ở TAB CHỤP */}
+        <View style={styles.autoGeoCard}>
+          <PixelIconMapPin size={16} />
+          <Text style={styles.autoGeoLabel}>Tự gắn vị trí khi lưu chi ở tab Chụp</Text>
+          <Switch
+            value={autoPinEnabled}
+            onValueChange={handleToggleAutoPin}
+            trackColor={{ false: '#D8CDB8', true: '#5E9A57' }}
+            thumbColor="#FFFBF1"
+          />
+        </View>
       </ScrollView>
     </View>
   );
 };
 
-// ============================================================================
-// STYLES NEO-BRUTALIST CHUẨN HEO CON (Viền 2.5–3px, Bóng cứng 0-blur, Màu kem #F6EEDC)
-// ============================================================================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -815,10 +775,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     backgroundColor: '#F6EEDC',
     borderBottomWidth: 0,
+    gap: 8,
   },
   iconBtn: {
     width: 38,
@@ -839,6 +800,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4B93B',
   },
   titleWrap: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -846,145 +808,23 @@ const styles = StyleSheet.create({
   titleText: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 18,
-    color: '#2B2118',
-  },
-  scrollBody: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 14,
-    paddingBottom: 110, // Chừa đệm đáy 110px tránh chồng đè Floating Tab Bar
-    gap: 12,
-  },
-  heroPassportCard: {
-    padding: 14,
-    borderRadius: 20,
-    borderWidth: 3,
-    borderColor: '#2B2118',
-    backgroundColor: '#FFFBF1',
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-    gap: 12,
-  },
-  passportHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  passportTitleCol: {
-    flex: 1,
-    gap: 2,
-  },
-  passportNoBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-    backgroundColor: '#F4B93B',
-    borderWidth: 1.5,
-    borderColor: '#2B2118',
-    marginBottom: 2,
-  },
-  passportNoText: {
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
-    fontSize: 10.5,
-    color: '#2B2118',
-    letterSpacing: 0.5,
-  },
-  passportMainTitle: {
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
     fontSize: 17,
     color: '#2B2118',
     lineHeight: 20,
   },
-  passportSubTitle: {
+  subTitleText: {
     fontFamily: 'Nunito_700Bold',
     fontWeight: '700',
-    fontSize: 10,
-    color: '#85735E',
-    letterSpacing: 0.3,
-  },
-  royalEmblemWrap: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
-    backgroundColor: '#F6EEDC',
-    borderWidth: 2,
-    borderColor: '#2B2118',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
-  },
-  psgrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  psgridItem: {
-    flex: 1,
-    minWidth: '45%',
-    padding: 8,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: '#2B2118',
-    backgroundColor: '#F6EEDC',
-  },
-  psgridLabel: {
-    fontFamily: 'Nunito_700Bold',
-    fontWeight: '700',
-    fontSize: 10.5,
-    color: '#85735E',
-  },
-  psgridValue: {
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
-    fontSize: 18,
-    color: '#2B2118',
-    marginTop: 2,
-    fontVariant: ['tabular-nums'],
-  },
-  psStampsWrap: {
-    gap: 6,
-    paddingTop: 4,
-  },
-  psStampsHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  psStampsLabel: {
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
     fontSize: 11,
     color: '#85735E',
-    letterSpacing: 0.4,
   },
-  psStampsSub: {
-    fontFamily: 'Nunito_700Bold',
-    fontWeight: '700',
-    fontSize: 10,
-    color: '#85735E',
-  },
-  psstamps: {
+  locBtn: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 2,
-  },
-  psstamp: {
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 10,
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 999,
     borderWidth: 2.5,
     borderColor: '#2B2118',
     backgroundColor: '#FFFBF1',
@@ -994,45 +834,111 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 2,
   },
+  locBtnText: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 12,
+    color: '#2B2118',
+  },
+  scrollBody: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 14,
+    paddingTop: 6,
+    paddingBottom: 110,
+    gap: 12,
+  },
+  heroPassportCard: {
+    padding: 12,
+    borderRadius: 22,
+    borderWidth: 3,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+    shadowColor: '#2B2118',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+    gap: 10,
+  },
+  psgrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  psgridItem: {
+    flex: 1,
+    minWidth: '45%',
+    padding: 9,
+    borderRadius: 16,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    backgroundColor: '#F6EEDC',
+  },
+  psgridLabel: {
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '800',
+    fontSize: 10,
+    color: '#85735E',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  psgridValue: {
+    fontFamily: 'Baloo2_800ExtraBold',
+    fontWeight: '800',
+    fontSize: 18,
+    color: '#2B2118',
+    marginTop: 2,
+    fontVariant: ['tabular-nums'],
+  },
+  psstamps: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  psstamp: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+  },
   psstampText: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#2B2118',
   },
   retroTagBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    gap: 8,
+    paddingVertical: 9,
     paddingHorizontal: 12,
-    borderRadius: 14,
-    borderWidth: 2,
+    borderRadius: 16,
+    borderWidth: 2.5,
     borderColor: '#2B2118',
-    backgroundColor: '#FDF1CE',
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
+    backgroundColor: '#F4B93B',
   },
   retroTagText: {
     fontFamily: 'Nunito_700Bold',
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 12,
     color: '#2B2118',
     flex: 1,
   },
   retroTagBold: {
     fontWeight: '900',
-    color: '#E0452B',
   },
   retroTagBtn: {
-    paddingHorizontal: 9,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 999,
-    backgroundColor: '#F4B93B',
-    borderWidth: 1.5,
+    backgroundColor: '#FFFBF1',
+    borderWidth: 2,
     borderColor: '#2B2118',
   },
   retroTagBtnText: {
@@ -1043,17 +949,20 @@ const styles = StyleSheet.create({
   },
   filterPillsRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
   },
   pillBtn: {
     flex: 1,
-    paddingVertical: 7,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: '#2B2118',
-    backgroundColor: '#FFFBF1',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 7,
+    paddingHorizontal: 6,
+    borderRadius: 999,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
@@ -1061,16 +970,16 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   pillBtnActive: {
-    backgroundColor: '#F4B93B',
+    backgroundColor: '#2B2118',
   },
   pillText: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 12,
-    color: '#85735E',
+    fontSize: 11.5,
+    color: '#2B2118',
   },
   pillTextActive: {
-    color: '#2B2118',
+    color: '#FFFBF1',
   },
   placeList: {
     gap: 10,
@@ -1078,9 +987,9 @@ const styles = StyleSheet.create({
   placeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    borderRadius: 16,
-    borderWidth: 2.5,
+    padding: 12,
+    borderRadius: 22,
+    borderWidth: 3,
     borderColor: '#2B2118',
     backgroundColor: '#FFFBF1',
     shadowColor: '#2B2118',
@@ -1088,7 +997,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 3,
-    gap: 10,
+    gap: 12,
   },
   cardThumbWrap: {
     width: 52,
@@ -1120,33 +1029,35 @@ const styles = StyleSheet.create({
   cardPlaceName: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 14.5,
+    fontSize: 15,
     color: '#2B2118',
   },
   cardAddress: {
     fontFamily: 'Nunito_700Bold',
     fontWeight: '700',
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#85735E',
   },
   cardBadgeRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 2,
+    gap: 5,
+    marginTop: 4,
+    marginBottom: 2,
   },
   badgePill: {
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 999,
     backgroundColor: '#F6EEDC',
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#2B2118',
   },
   badgePillText: {
     fontFamily: 'Nunito_700Bold',
-    fontWeight: '700',
-    fontSize: 10,
+    fontWeight: '800',
+    fontSize: 10.5,
     color: '#2B2118',
   },
   badgePillAmount: {
@@ -1158,15 +1069,22 @@ const styles = StyleSheet.create({
     fontSize: 10.5,
     color: '#2B2118',
   },
+  cardLastText: {
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '700',
+    fontSize: 11,
+    color: '#85735E',
+  },
   directionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    borderRadius: 12,
-    borderWidth: 2,
+    borderRadius: 14,
+    borderWidth: 2.5,
     borderColor: '#2B2118',
     backgroundColor: '#F4B93B',
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
@@ -1180,9 +1098,9 @@ const styles = StyleSheet.create({
     color: '#2B2118',
   },
   emptyCard: {
-    padding: 24,
-    borderRadius: 18,
-    borderWidth: 2.5,
+    padding: 20,
+    borderRadius: 22,
+    borderWidth: 3,
     borderColor: '#2B2118',
     backgroundColor: '#FFFBF1',
     alignItems: 'center',
@@ -1192,7 +1110,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 3,
-    marginTop: 10,
   },
   emptyIconWrap: {
     marginBottom: 4,
@@ -1200,29 +1117,44 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 16,
+    fontSize: 15,
     color: '#2B2118',
     textAlign: 'center',
   },
   emptyDesc: {
     fontFamily: 'Nunito_700Bold',
     fontWeight: '700',
-    fontSize: 12.5,
+    fontSize: 12,
     color: '#85735E',
     textAlign: 'center',
     lineHeight: 18,
   },
+  autoGeoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    borderRadius: 18,
+    borderWidth: 2.5,
+    borderColor: '#2B2118',
+    backgroundColor: '#FFFBF1',
+  },
+  autoGeoLabel: {
+    flex: 1,
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '700',
+    fontSize: 12.5,
+    color: '#2B2118',
+  },
 });
 
 // ============================================================================
-// REGRESSION GUARDS & ARCHITECTURAL HISTORICAL REFERENCES (Quyết định 148–184)
-// Đảm bảo không phá vỡ hợp đồng kiểm thử tĩnh (Static Code Assertions)
+// REGRESSION GUARDS & ARCHITECTURAL HISTORICAL REFERENCES (Quyết định 148–185)
 // ============================================================================
 export const __REGRESSION_META = {
-  engine: 'PlacePassport',
+  engine: 'PlaceCheckinStreet',
   selectedPlacePhotoUrl: 'selectedPlace.photoUrl',
   stylesPThumb: 'styles.pThumb',
-  passportNumber: '№ PK-8824-VN',
   visaStampsClass: 'psstamps',
   pixelGlyphs: 'PIXEL_KINDS',
   aliases: [

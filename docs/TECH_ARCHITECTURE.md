@@ -341,6 +341,18 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
 - **Tối Giản Văn Bản & Focus Icon (Reduce Text & Focus Icon):** Rút gọn tối đa chữ rườm rà. Mỗi thẻ quán xá hiển thị ảnh chụp thật hoặc icon pixel 5×5 sắc nét, tên quán + quận, 2 badge số lần ghé & tổng chi tiêu, cùng nút `Chỉ đường 📍` 1-chạm mở Google Maps/Apple Maps.
 - **Tự Động Định Vị Quận Khi Chụp Ảnh Ở Tab Camera:** Khi người dùng chụp và lưu ảnh ở Tab Camera, hệ thống lập tức gọi `reverseGeocodePlaceAsync` lấy tên đường và quận/huyện để ghi vào giao dịch, tự động mở khóa và cập nhật ngay con dấu thị thực mới trên trang Hộ Chiếu.
 
+### 9.8. Đồng Bộ 1:1 Prototype 24/11 — Banner Chợ Bến Thành Mở Rộng Cuộn Ngang, Banner Quán Cà Phê 144×96, Backend Việc Nhà 3 Chỉ Số & 100% Pixel Art Icons (Quyết định 185)
+- **Thế Giới Phố Chợ Bến Thành Cuộn Ngang (`BenThanhStreetBannerWebView.tsx`):**
+  - Viewport logic `192×100` (`image-rendering: pixelated; crisp-edges`) quan sát world canvas rộng **`560×100`**. Camera `camX` tự động nội suy mượt mà bám theo vị trí `PB.px` của chú heo để không bao giờ bị bó hẹp trong 1 khung hình: đi sang phải/trái sẽ lướt qua 12 gian hàng đặc sản (Phở bò, Bún bò, Trà đá, Cà phê bệt, Bánh mì, Cơm tấm, Bánh xèo, Chè Ba Màu) và đồ lưu niệm Chợ Bến Thành (Nón lá & Áo dài, Gốm & Sơn mài, Quà đặc sản, Lồng đèn & Heo đất).
+- **Banner Quán Cà Phê Sài Gòn `144×96` & Bong Bóng Thoại Thực (`CafeChatBannerWebView.tsx`):**
+  - Port 1:1 `cbStatic`, `cbWindow`, `cbPig`, `cbDraw` với hai chú heo (Hồng = bạn, Xanh đeo kính + ăng-ten = Heo AI). Hai bong bóng `.bnb.me` và `.bnb.ai` render bằng Native React Native `View/Text` đè lên banner để đảm bảo dấu tiếng Việt sắc nét và hỗ trợ hiệu ứng suy nghĩ `···` + typewriter 28ms.
+- **Mở Rộng State Việc Nhà 3 Chỉ Số (`useGamificationStore`):**
+  - Bổ sung `fishHunger` & `flowerWater` song song với `pigHunger`. Khi chơi **Heo Bay**, đồ ăn hái được tự động nuôi Cá ao (bắp/cà rốt) & Hoa hồng (chuối/táo/dưa hấu); **PixelHubDashboard** hiển thị đủ 3 thanh tiến độ; **Heo AI (`chatUtils.ts`)** phản hồi chính xác cả 3 chỉ số và hoàn toàn bỏ nhân vật `"Anh Minh"` / `"Squad"`.
+- **Liên Kết Cổng Phòng Tab Nhà (`PORTAL` trong `StatsView.tsx` & `app/(main)/index.tsx`):**
+  - Chạm nút cổng phòng từ Nhà của Heo điều hướng thẳng: Sảnh $\to$ Hồ sơ (Tab 4), Phòng ngủ $\to$ Game (Tab 3), Phòng làm việc $\to$ Quán Quen (Tab 3), Phòng khách $\to$ Trò chuyện Heo AI (Tab 3).
+- **Pixel Art Icons 100% (`PixelIcons.tsx` & `FloatingPillTabBar.tsx`):**
+  - Toàn bộ 5 icon thanh Tab Bar nổi và các màn Hub / Trò chuyện / Quán Quen dùng SVG ma trận pixel đồng bộ viền nâu mực `#2B2118`.
+
 
 ---
 

@@ -40,6 +40,8 @@ interface GamificationState {
   gameTickets: number;
   pigFood: number;
   pigHunger: number;
+  fishHunger: number;
+  flowerWater: number;
   savedBabies: number;
   flyBestScore: number;
   shooterMaxWave: number;
@@ -56,6 +58,7 @@ interface GamificationState {
   buyTicketWithFood: () => boolean;
   addPigFood: (amount: number) => void;
   feedPig: () => boolean;
+  addChoreProgress: (delta: { pig?: number; fish?: number; rose?: number }) => void;
   updateGameStats: (stats: {
     flyBestScore?: number;
     shooterMaxWave?: number;
@@ -63,6 +66,8 @@ interface GamificationState {
     crossRoadStars?: number;
     crossRoadMaxLevel?: number;
     pigHunger?: number;
+    fishHunger?: number;
+    flowerWater?: number;
   }) => void;
   evaluateRules: (
     ctx: Omit<GamificationContextVariables, 'currentFep' | 'unlockedAchievements'>,
@@ -87,8 +92,10 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
   diceRollsLeft: 2, // 2 lượt miễn phí mỗi ngày
   monopolyPosition: 0,
   gameTickets: 3, // 3 vé chơi mỗi ngày
-  pigFood: 10, // 10 đơn vị thức ăn cho heo
-  pigHunger: 75, // Độ no 75%
+  pigFood: 10, // 10 đơn vị cám cho heo
+  pigHunger: 75, // Độ no heo 75%
+  fishHunger: 72, // Độ no cá ao 72%
+  flowerWater: 68, // Độ tươi hoa hồng 68%
   savedBabies: 0,
   flyBestScore: 0,
   shooterMaxWave: 1,
@@ -115,6 +122,8 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
           gameTickets: parsed.gameTickets ?? 3,
           pigFood: parsed.pigFood ?? 10,
           pigHunger: parsed.pigHunger ?? 75,
+          fishHunger: parsed.fishHunger ?? 72,
+          flowerWater: parsed.flowerWater ?? 68,
           savedBabies: parsed.savedBabies ?? 0,
           flyBestScore: parsed.flyBestScore ?? 0,
           shooterMaxWave: parsed.shooterMaxWave ?? 1,
@@ -183,6 +192,18 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
     return true;
   },
 
+  addChoreProgress: (delta) => {
+    const cur = get();
+    const nextPig = Math.min(100, Math.max(0, cur.pigHunger + (delta.pig ?? 0)));
+    const nextFish = Math.min(100, Math.max(0, cur.fishHunger + (delta.fish ?? 0)));
+    const nextRose = Math.min(100, Math.max(0, cur.flowerWater + (delta.rose ?? 0)));
+    set({ pigHunger: nextPig, fishHunger: nextFish, flowerWater: nextRose });
+    AsyncStorage.setItem(
+      STORAGE_KEY_GAMIFICATION,
+      JSON.stringify({ ...get(), pigHunger: nextPig, fishHunger: nextFish, flowerWater: nextRose })
+    ).catch(() => {});
+  },
+
   updateGameStats: (stats) => {
     const current = get();
     const updated = {
@@ -192,6 +213,8 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       crossRoadStars: Math.max(current.crossRoadStars, stats.crossRoadStars ?? 0),
       crossRoadMaxLevel: Math.max(current.crossRoadMaxLevel, stats.crossRoadMaxLevel ?? 1),
       pigHunger: stats.pigHunger !== undefined ? Math.min(100, Math.max(0, stats.pigHunger)) : current.pigHunger,
+      fishHunger: stats.fishHunger !== undefined ? Math.min(100, Math.max(0, stats.fishHunger)) : current.fishHunger,
+      flowerWater: stats.flowerWater !== undefined ? Math.min(100, Math.max(0, stats.flowerWater)) : current.flowerWater,
     };
     set(updated);
     AsyncStorage.setItem(
