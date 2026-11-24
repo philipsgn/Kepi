@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
+  AppState,
+  Linking,
   Modal,
   Pressable,
   ScrollView,
@@ -17,12 +19,15 @@ import * as Haptics from 'expo-haptics';
 import {
   ArrowLeft,
   Bell,
+  Camera,
   Check,
   ChevronRight,
   Cloud,
+  ExternalLink,
   EyeOff,
   LogOut,
   MapPin,
+  Navigation,
   Palette,
   QrCode,
   ShieldCheck,
@@ -41,8 +46,11 @@ import { BankNotificationSettingsCard } from '../profile/BankNotificationSetting
 import { QRPaySettingsCard } from '../profile/QRPaySettingsCard';
 import { useTheme } from '../../theme/ThemeContext';
 import { useBottomInset } from '../../hooks/useBottomInset';
+import { useAppPermissions } from '../../hooks/useCameraPermissions';
 import {
+  getLocationPermissionStatusAsync,
   getLocationPinEnabled,
+  requestLocationPermissionAsync,
   setLocationPinEnabled,
   STORAGE_KEY_LOCATION_PIN,
 } from '../../services/locationService';
@@ -83,21 +91,50 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
 
   const [isMasked, setIsMasked] = useState(false);
   const [isLocationPinEnabled, setIsLocationPinEnabledState] = useState(true);
+  const [locationGranted, setLocationGranted] = useState(false);
+  const [locationCanAsk, setLocationCanAsk] = useState(true);
   const [activeSheet, setActiveSheet] = useState<ActiveSheetType>(null);
 
-  // Load preferences from AsyncStorage on mount
+  const {
+    cameraGranted,
+    canAskCameraAgain,
+    requestCameraPermission,
+    openAppSettings,
+  } = useAppPermissions();
+
+  const refreshLocationPermissions = useCallback(async () => {
+    try {
+      const [pinOptIn, locPerm] = await Promise.all([
+        getLocationPinEnabled(),
+        getLocationPermissionStatusAsync(),
+      ]);
+      setIsLocationPinEnabledState(pinOptIn);
+      setLocationGranted(locPerm.granted);
+      setLocationCanAsk(locPerm.canAskAgain);
+    } catch (_e) {
+      // ignore
+    }
+  }, []);
+
+  // Load preferences & OS permission status on mount + when returning from OS Settings
   useEffect(() => {
     (async () => {
       try {
         const savedMask = await AsyncStorage.getItem(STORAGE_KEY_MASK_MONEY);
         if (savedMask !== null) setIsMasked(savedMask === 'true');
-        const pinOptIn = await getLocationPinEnabled();
-        setIsLocationPinEnabledState(pinOptIn);
+        await refreshLocationPermissions();
       } catch (err) {
         console.warn('Failed to load settings preferences:', err);
       }
     })();
-  }, []);
+
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        refreshLocationPermissions();
+      }
+    });
+    return () => sub.remove();
+  }, [refreshLocationPermissions]);
 
   // Handler: Toggle Mask Money
   const handleToggleMask = async (val: boolean) => {
@@ -108,8 +145,105 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
     } catch {}
   };
 
-  // Handler: Toggle Opt-in Location Pin when saving expenses (Quyết định 180)
+  // Handler: Toggle Camera OS Permission
+  const handleToggleCameraPermission = async (val: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!val) {
+      Alert.alert(
+        'Quản lý quyền Máy ảnh',
+        'Để thu hồi quyền Máy ảnh của ứng dụng, bạn vui lòng tắt trong Cài đặt hệ thống của điện thoại.',
+        [
+          { text: 'Đóng', style: 'cancel' },
+          { text: 'Mở Cài đặt', onPress: () => openAppSettings() },
+        ]
+      );
+      return;
+    }
+
+    if (canAskCameraAgain) {
+      const res = await requestCameraPermission();
+      if (!res?.granted) {
+        Alert.alert(
+          'Cần quyền Máy ảnh',
+          'Bạn có thể bật quyền Máy ảnh trong Cài đặt điện thoại để chụp ảnh & quét VietQR.',
+          [
+            { text: 'Để sau', style: 'cancel' },
+            { text: 'Mở Cài đặt', onPress: () => openAppSettings() },
+          ]
+        );
+      }
+    } else {
+      openAppSettings();
+    }
+  };
+
+  // Handler: Toggle Location OS Permission
+  const handleToggleLocationPermission = async (val: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!val) {
+      Alert.alert(
+        'Quản lý quyền Vị trí',
+        'Để tắt quyền Vị trí ở cấp hệ thống, bạn vui lòng tắt trong Cài đặt của điện thoại (hoặc tắt riêng công tắc "Tự gắn vị trí khi lưu chi ở tab Chụp" bên dưới).',
+        [
+          { text: 'Đóng', style: 'cancel' },
+          { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
+        ]
+      );
+      return;
+    }
+
+    if (locationCanAsk) {
+      const res = await requestLocationPermissionAsync();
+      setLocationGranted(res.granted);
+      setLocationCanAsk(res.canAskAgain);
+      if (!res.granted) {
+        Alert.alert(
+          'Cần quyền Vị trí',
+          'Bạn có thể bật quyền Vị trí trong Cài đặt điện thoại để lưu địa điểm quán thật.',
+          [
+            { text: 'Để sau', style: 'cancel' },
+            { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
+          ]
+        );
+      }
+    } else {
+      Linking.openSettings();
+    }
+  };
+
+  // Handler: Toggle Opt-in Location Pin when saving expenses (Quyết định 180 & 186)
   const handleToggleLocationPin = async (val: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (val && !locationGranted) {
+      if (locationCanAsk) {
+        const res = await requestLocationPermissionAsync();
+        setLocationGranted(res.granted);
+        setLocationCanAsk(res.canAskAgain);
+        if (!res.granted) {
+          setIsLocationPinEnabledState(false);
+          await setLocationPinEnabled(false);
+          Alert.alert(
+            'Chưa có quyền Vị trí',
+            'Vui lòng bật quyền Vị trí để tự gắn địa điểm khi lưu chi ở tab Chụp.',
+            [
+              { text: 'Đóng', style: 'cancel' },
+              { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
+            ]
+          );
+          return;
+        }
+      } else {
+        Alert.alert(
+          'Chưa có quyền Vị trí',
+          'Quyền Vị trí đang bị tắt trên điện thoại. Mở Cài đặt để cấp quyền ngay nhé.',
+          [
+            { text: 'Đóng', style: 'cancel' },
+            { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
+          ]
+        );
+        return;
+      }
+    }
     setIsLocationPinEnabledState(val);
     await setLocationPinEnabled(val);
   };
@@ -308,10 +442,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
           </TouchableOpacity>
         </View>
 
-        {/* ================= NHÓM 3: BẢO MẬT & QUYỀN RIÊNG TƯ ================= */}
+        {/* ================= NHÓM 3: BẢO MẬT & QUYỀN TRUY CẬP ================= */}
         <View style={styles.sectionHeaderRow}>
           <Text style={[styles.sectionHeaderText, { color: textMutedColor }]}>
-            Bảo mật & Quyền riêng tư
+            Bảo mật & Quyền truy cập
           </Text>
         </View>
 
@@ -340,27 +474,105 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
 
           <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
 
-          {/* Row 2: Ghim vị trí chi tiêu (Opt-In 1 lần lúc lưu chi, 0 theo dõi nền — Quyết định 180) */}
+          {/* Row 2: Quyền Máy ảnh (Camera) */}
+          <View style={styles.settingRow}>
+            <View style={styles.rowLeft}>
+              <View style={styles.iconContainerFloating}>
+                <Camera size={22} color={tokens.primary} strokeWidth={2.8} />
+              </View>
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <Text style={[styles.rowTitle, { color: inkBorder }]}>
+                  Cho phép Máy ảnh
+                </Text>
+                <Text style={{ fontSize: 11, color: textMutedColor, fontFamily: 'Nunito', fontWeight: '600' }} numberOfLines={1}>
+                  {cameraGranted ? 'Đang bật · Chụp món & quét QR' : 'Chưa cấp quyền trên máy'}
+                </Text>
+              </View>
+            </View>
+
+            <Switch
+              value={cameraGranted}
+              onValueChange={handleToggleCameraPermission}
+              trackColor={{ false: isPink ? '#FCE7F3' : '#E8DEC8', true: accentColor }}
+              thumbColor={cameraGranted ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
+            />
+          </View>
+
+          <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
+
+          {/* Row 3: Quyền Vị trí hiện tại (GPS) */}
+          <View style={styles.settingRow}>
+            <View style={styles.rowLeft}>
+              <View style={styles.iconContainerFloating}>
+                <Navigation size={22} color={tokens.primary} strokeWidth={2.8} />
+              </View>
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <Text style={[styles.rowTitle, { color: inkBorder }]}>
+                  Cho phép Vị trí hiện tại
+                </Text>
+                <Text style={{ fontSize: 11, color: textMutedColor, fontFamily: 'Nunito', fontWeight: '600' }} numberOfLines={1}>
+                  {locationGranted ? 'Đang bật · Chỉ dùng khi mở app' : 'Chưa cấp quyền trên máy'}
+                </Text>
+              </View>
+            </View>
+
+            <Switch
+              value={locationGranted}
+              onValueChange={handleToggleLocationPermission}
+              trackColor={{ false: isPink ? '#FCE7F3' : '#E8DEC8', true: accentColor }}
+              thumbColor={locationGranted ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
+            />
+          </View>
+
+          <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
+
+          {/* Row 4: Tự gắn vị trí khi lưu chi ở tab Chụp (chuyển từ trang Quán Quen về đây — QĐ 186) */}
           <View style={styles.settingRow}>
             <View style={styles.rowLeft}>
               <View style={styles.iconContainerFloating}>
                 <MapPin size={22} color={tokens.primary} strokeWidth={2.8} />
               </View>
-              <Text style={[styles.rowTitle, { color: inkBorder }]}>
-                Ghim vị trí chi tiêu
-              </Text>
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <Text style={[styles.rowTitle, { color: inkBorder }]}>
+                  Tự gắn vị trí khi lưu chi ở tab Chụp
+                </Text>
+                <Text style={{ fontSize: 11, color: textMutedColor, fontFamily: 'Nunito', fontWeight: '600' }} numberOfLines={1}>
+                  Ghim vị trí chi tiêu · Lưu tên đường & quận thật vào Quán Quen
+                </Text>
+              </View>
             </View>
 
             <Switch
-              value={isLocationPinEnabled}
-              onValueChange={(val) => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                handleToggleLocationPin(val);
-              }}
+              value={isLocationPinEnabled && locationGranted}
+              onValueChange={handleToggleLocationPin}
               trackColor={{ false: isPink ? '#FCE7F3' : '#E8DEC8', true: accentColor }}
-              thumbColor={isLocationPinEnabled ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
+              thumbColor={isLocationPinEnabled && locationGranted ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
             />
           </View>
+
+          <View style={[styles.rowDivider, { backgroundColor: isPink ? 'rgba(59, 7, 19, 0.08)' : 'rgba(43, 33, 24, 0.08)' }]} />
+
+          {/* Row 5: Mở Cài đặt điện thoại */}
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              Linking.openSettings();
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={styles.rowLeft}>
+              <View style={styles.iconContainerFloating}>
+                <ExternalLink size={20} color={tokens.primary} strokeWidth={2.8} />
+              </View>
+              <Text style={[styles.rowTitle, { color: inkBorder }]}>
+                Mở cài đặt quyền trên điện thoại
+              </Text>
+            </View>
+            <View style={styles.rowRight}>
+              <ChevronRight size={17} color={inkBorder} strokeWidth={2.4} />
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* ================= NHÓM 4: TIỆN ÍCH & TÍCH HỢP ================= */}

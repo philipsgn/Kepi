@@ -200,7 +200,7 @@ Màn hình Tab 3 hiển thị:
 
 - **Gỡ Bỏ Chữ Hình Thức Tự Bịa (Thay Thế Quy Định Hiển Thị Của Mục 12):**
   - Loại bỏ hoàn toàn `"№ PK-8824-VN"`, `"CỘNG HÒA TIẾT KIỆM HEO CON"`, `"HỘ CHIẾU QUÁN QUEN"` trên thẻ Hero, `"CON DẤU THỊ THỰC CÁC QUẬN"` và tên `"Anh Minh"` khỏi giao diện.
-  - Màn hình địa điểm dùng tiêu đề ngắn **`Quán Quen`** kèm nút **`Định vị`** dùng Pixel Art Icon; thẻ `.pshero` giữ nguyên 1:1 prototype: chỉ gồm lưới 4 ô (`Quán đã ghé`, `Quận đã đến`, `Quán ruột`, `Tổng chi`) + dải con dấu quận xoay `-2.5deg`/`2.5deg` bên dưới.
+  - Màn hình địa điểm dùng tiêu đề ngắn **`Quán Quen`** (sạch chữ backend: bỏ nút `"Định vị"`, bỏ dòng `"Gần bạn tính từ GPS thật"` và chuyển công tắc `"Tự gắn vị trí khi lưu chi ở tab Chụp"` về Cài đặt — QĐ 186); thẻ `.pshero` gộp thành **1 hàng 3 cột siêu gọn** (`Đã ghé: X quán · Y quận` | `Quán ruột` | `Tổng chi`) + dải con dấu quận thật xoay `-2.5deg`/`2.5deg` bên dưới; bộ lọc 4 chip gồm **`Gần đây`** (`PixelClockIcon`, 14 ngày gần nhất), **`Quen`**, **`Gần bạn`**, **`Chi nhiều`**; nút **`Chỉ đường`** chuẩn Production mở Google Maps/Apple Maps theo tọa độ GPS thật hoặc tên địa chỉ thật (0 hardcode tọa độ/quận `"Bình Thạnh"`, `"Quận 1"`).
 - **Banner Chợ Bến Thành Cuộn Ngang Đa Quầy (`BenThanhStreetBannerWebView.tsx`):**
   - Viewport `192×100` (bo 24px, viền 3px mực), thế giới phố rộng `560×100` với camera `camX` trượt mượt theo chú heo qua 12 gian hàng Chợ Bến Thành (Phở bò, Bún bò, Trà đá vỉa hè, Cà phê bệt, Bánh mì, Cơm tấm, Bánh xèo, Chè Ba Màu, Nón lá & Áo dài, Gốm & Sơn mài, Quà đặc sản, Lồng đèn & Heo đất), kèm thanh chip cuộn ngang chọn quầy.
 - **Trò Chuyện Heo AI (`ChatView.tsx` + `CafeChatBannerWebView.tsx`):**

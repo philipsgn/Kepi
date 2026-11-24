@@ -9,10 +9,11 @@ export interface GeoCoords {
   lng: number;
 }
 
-const DEFAULT_VN_COORDS: GeoCoords = {
-  lat: 10.7769,
-  lng: 106.7009,
-};
+export interface LocationPermissionStatus {
+  granted: boolean;
+  canAskAgain: boolean;
+  status: string;
+}
 
 let cachedPinEnabled: boolean | null = null;
 let lastKnownMemoryCoords: GeoCoords | null = null;
@@ -27,7 +28,7 @@ function loadExpoLocation(): any | null {
   }
 }
 
-function isValidVietnamOrWorldCoord(lat: unknown, lng: unknown): boolean {
+export function isValidVietnamOrWorldCoord(lat: unknown, lng: unknown): boolean {
   return (
     typeof lat === 'number' &&
     typeof lng === 'number' &&
@@ -71,15 +72,58 @@ async function loadLastKnownCoordsFromStorage(): Promise<GeoCoords | null> {
 }
 
 /**
- * Trả về tức thì (0ms) tọa độ GPS đã được pre-warm trong RAM (hoặc tâm mặc định nếu đang khóa vệ tinh)
- * để giao dịch Lưu ảnh ở Tab Camera có ngay ghim trên Bản đồ mà không chờ I/O.
+ * Kiểm tra trạng thái quyền Vị trí (Foreground Location) hiện tại từ OS (Production-grade).
  */
-export function getCachedLocationSync(): GeoCoords {
-  return lastKnownMemoryCoords || DEFAULT_VN_COORDS;
+export async function getLocationPermissionStatusAsync(): Promise<LocationPermissionStatus> {
+  const ExpoLocation = loadExpoLocation();
+  if (ExpoLocation && typeof ExpoLocation.getForegroundPermissionsAsync === 'function') {
+    try {
+      const res = await ExpoLocation.getForegroundPermissionsAsync();
+      return {
+        granted: res?.status === 'granted',
+        canAskAgain: res?.canAskAgain !== false,
+        status: res?.status || 'undetermined',
+      };
+    } catch (_e) {
+      return { granted: false, canAskAgain: true, status: 'undetermined' };
+    }
+  }
+  if (typeof navigator !== 'undefined' && navigator.geolocation) {
+    return { granted: true, canAskAgain: true, status: 'granted' };
+  }
+  return { granted: false, canAskAgain: true, status: 'undetermined' };
 }
 
 /**
- * Đọc trạng thái công tắc Opt-in "Ghim vị trí chi tiêu" (Mặc định: true, lưu trên máy).
+ * Yêu cầu người dùng cấp quyền Vị trí (Foreground Location) từ OS dialog.
+ */
+export async function requestLocationPermissionAsync(): Promise<LocationPermissionStatus> {
+  const ExpoLocation = loadExpoLocation();
+  if (ExpoLocation && typeof ExpoLocation.requestForegroundPermissionsAsync === 'function') {
+    try {
+      const res = await ExpoLocation.requestForegroundPermissionsAsync();
+      return {
+        granted: res?.status === 'granted',
+        canAskAgain: res?.canAskAgain !== false,
+        status: res?.status || 'denied',
+      };
+    } catch (_e) {
+      return { granted: false, canAskAgain: false, status: 'denied' };
+    }
+  }
+  return getLocationPermissionStatusAsync();
+}
+
+/**
+ * Trả về tức thì (0ms) tọa độ GPS thật đã cache trong RAM, hoặc null nếu chưa có vị trí thật.
+ * Tuyệt đối không trả về tọa độ hardcode.
+ */
+export function getCachedLocationSync(): GeoCoords | null {
+  return lastKnownMemoryCoords;
+}
+
+/**
+ * Đọc trạng thái công tắc Opt-in "Tự gắn vị trí khi lưu chi ở tab Chụp" (Mặc định: true, lưu trên máy).
  */
 export async function getLocationPinEnabled(): Promise<boolean> {
   if (cachedPinEnabled !== null) return cachedPinEnabled;
@@ -97,7 +141,7 @@ export async function getLocationPinEnabled(): Promise<boolean> {
 }
 
 /**
- * Cập nhật công tắc Opt-in "Ghim vị trí chi tiêu" trong Cài đặt hoặc Bản đồ.
+ * Cập nhật công tắc Opt-in "Tự gắn vị trí khi lưu chi ở tab Chụp" trong Cài đặt.
  */
 export async function setLocationPinEnabled(enabled: boolean): Promise<void> {
   cachedPinEnabled = enabled;
@@ -109,24 +153,27 @@ export async function setLocationPinEnabled(enabled: boolean): Promise<void> {
 }
 
 /**
- * Lấy tọa độ GPS foreground 1 lần an toàn (dùng cho nút 🎯 trên Bản đồ hoặc gắn vị trí khi Lưu ảnh).
- * Tuyệt đối không theo dõi nền (Zero Background Tracking).
+ * Lấy tọa độ GPS foreground 1 lần an toàn (dùng khi người dùng đã cấp quyền).
+ * Tuyệt đối không theo dõi nền (Zero Background Tracking) và không bịa tọa độ hardcode.
  */
-export async function getCurrentPositionSafeAsync(timeoutMs = 6000): Promise<GeoCoords | null> {
-  await loadLastKnownCoordsFromStorage();
-
+export async function getCurrentPositionSafeAsync(
+  timeoutMs = 6000,
+  promptIfUndetermined = false
+): Promise<GeoCoords | null> {
   const ExpoLocation = loadExpoLocation();
   if (ExpoLocation) {
     try {
       const currentPerm = await ExpoLocation.getForegroundPermissionsAsync();
       let granted = currentPerm?.status === 'granted';
-      if (!granted && currentPerm?.canAskAgain !== false) {
+      if (!granted && promptIfUndetermined && currentPerm?.canAskAgain !== false) {
         const req = await ExpoLocation.requestForegroundPermissionsAsync();
         granted = req?.status === 'granted';
       }
       if (!granted) {
-        return lastKnownMemoryCoords;
+        return null;
       }
+
+      await loadLastKnownCoordsFromStorage();
 
       // 1. Thử lấy vị trí gần nhất đã cache trong OS (< 50ms)
       try {
@@ -169,6 +216,7 @@ export async function getCurrentPositionSafeAsync(timeoutMs = 6000): Promise<Geo
 
   // Fallback cho Web / môi trường không có native module
   if (typeof navigator !== 'undefined' && navigator.geolocation) {
+    await loadLastKnownCoordsFromStorage();
     return new Promise<GeoCoords | null>((resolve) => {
       let settled = false;
       const timer = setTimeout(() => {
@@ -205,34 +253,34 @@ export async function getCurrentPositionSafeAsync(timeoutMs = 6000): Promise<Geo
     });
   }
 
-  return lastKnownMemoryCoords;
+  return null;
 }
 
 /**
- * Làm nóng GPS ngay khi người dùng mở Tab Camera để khi bấm [ ✓ Lưu ảnh ] luôn có sẵn tọa độ 0ms.
+ * Làm nóng GPS khi mở Tab Camera (chỉ chạy nếu người dùng đã bật tính năng và đã cấp quyền).
  */
-export async function prewarmLocationAsync(): Promise<GeoCoords> {
-  await loadLastKnownCoordsFromStorage();
+export async function prewarmLocationAsync(): Promise<GeoCoords | null> {
   const enabled = await getLocationPinEnabled();
-  if (!enabled) {
-    return lastKnownMemoryCoords || DEFAULT_VN_COORDS;
-  }
-  const fresh = await getCurrentPositionSafeAsync(6000);
-  return fresh || lastKnownMemoryCoords || DEFAULT_VN_COORDS;
+  if (!enabled) return null;
+  const perm = await getLocationPermissionStatusAsync();
+  if (!perm.granted) return null;
+  const fresh = await getCurrentPositionSafeAsync(6000, false);
+  return fresh || lastKnownMemoryCoords || null;
 }
 
 /**
- * Lấy tọa độ GPS khi lưu khoản chi (nếu người dùng đã bật công tắc Opt-in).
- * Luôn trả về tọa độ hợp lệ (ưu tiên GPS trực tiếp tại điểm nhấn lưu -> LastKnown -> Default VN)
- * để đảm bảo 100% ảnh chụp ở Tab Camera đều xuất hiện ghim trên Bản đồ chi tiêu.
+ * Lấy tọa độ GPS thật khi lưu khoản chi (chỉ trả về khi người dùng đã bật công tắc Opt-in và có GPS thật).
+ * Tuyệt đối không trả về tọa độ hardcode.
  */
 export async function getQuickPinCoordsIfOptedIn(timeoutMs = 8000): Promise<GeoCoords | null> {
   const enabled = await getLocationPinEnabled();
   if (!enabled) return null;
+  const perm = await getLocationPermissionStatusAsync();
+  if (!perm.granted) return null;
 
   await loadLastKnownCoordsFromStorage();
-  const fresh = await getCurrentPositionSafeAsync(timeoutMs);
-  return fresh || lastKnownMemoryCoords || DEFAULT_VN_COORDS;
+  const fresh = await getCurrentPositionSafeAsync(timeoutMs, false);
+  return fresh || lastKnownMemoryCoords || null;
 }
 
 export interface PlaceAddressResult {
@@ -244,40 +292,34 @@ export interface PlaceAddressResult {
 
 /**
  * Reverse Geocoding miễn phí từ Geocoder tích hợp sẵn của iOS và Android (0$ chi phí, 0 API key).
- * Tự động chuyển đổi tọa độ GPS thành Tên Đường, Phường, Quận, Thành phố cho Hộ Chiếu Quán Quen (Quyết định 184).
+ * Chỉ trả về địa chỉ thật từ OS Geocoder; tuyệt đối không tự bịa tên quận hoặc địa điểm mẫu.
  */
-export async function reverseGeocodePlaceAsync(lat: number, lng: number): Promise<PlaceAddressResult> {
+export async function reverseGeocodePlaceAsync(
+  lat: number,
+  lng: number
+): Promise<PlaceAddressResult | null> {
+  if (!isValidVietnamOrWorldCoord(lat, lng)) return null;
+
   const ExpoLocation = loadExpoLocation();
   if (ExpoLocation && typeof ExpoLocation.reverseGeocodeAsync === 'function') {
     try {
       const results = await ExpoLocation.reverseGeocodeAsync({ latitude: lat, longitude: lng });
       if (Array.isArray(results) && results.length > 0) {
         const item = results[0];
-        const street = item.street || item.name || '';
-        let district = item.district || item.subregion || '';
-        const city = item.city || item.region || 'Việt Nam';
-
-        // Tinh chỉnh tên quận nếu rỗng hoặc chung chung
-        if (!district || district.toLowerCase().includes('việt nam')) {
-          const combo = `${street} ${city}`.toLowerCase();
-          const match = combo.match(
-            /(quận\s*\d+|quận\s*[a-zđà-ỹ]+|bình thạnh|phú nhuận|gò vấp|tân bình|tân phú|thủ đức|bình tân|nhà bè|hóc môn|củ chi|cần giờ|hoàn kiếm|đống đa|ba đình|hai bà trưng|cầu giấy|tây hồ|thanh xuân|hải châu|sơn trà)/i
-          );
-          if (match) {
-            district = match[0].charAt(0).toUpperCase() + match[0].slice(1);
-          } else if (lat > 10.7 && lat < 10.9 && lng > 106.6 && lng < 106.8) {
-            district = 'Quận 1';
-          }
-        }
+        const street = (item.street || item.name || '').trim();
+        const district = (item.district || item.subregion || '').trim();
+        const city = (item.city || item.region || '').trim();
 
         const shortParts = [street, district].filter(Boolean);
         const fullParts = [street, district, city].filter(Boolean);
 
+        if (fullParts.length === 0) return null;
+
         return {
-          fullAddress: fullParts.join(', ') || 'Việt Nam',
-          shortPlaceName: shortParts.join(', ') || district || city || 'Địa điểm check-in',
-          district: district || 'Quận 1',
-          city: city || 'Việt Nam',
+          fullAddress: fullParts.join(', '),
+          shortPlaceName: shortParts.join(', ') || district || city,
+          district,
+          city,
         };
       }
     } catch (_e) {
@@ -285,16 +327,5 @@ export async function reverseGeocodePlaceAsync(lat: number, lng: number): Promis
     }
   }
 
-  // Fallback thông minh dựa trên tọa độ trung tâm TP.HCM
-  let fallbackDistrict = 'Quận 1';
-  if (lat > 10.78 && lat < 10.82 && lng > 106.7) fallbackDistrict = 'Bình Thạnh';
-  else if (lat > 10.77 && lat < 10.79 && lng < 106.69) fallbackDistrict = 'Quận 3';
-  else if (lat > 10.79 && lng < 106.69) fallbackDistrict = 'Phú Nhuận';
-
-  return {
-    fullAddress: `${fallbackDistrict}, TP. Hồ Chí Minh`,
-    shortPlaceName: `Địa điểm ${fallbackDistrict}`,
-    district: fallbackDistrict,
-    city: 'TP. Hồ Chí Minh',
-  };
+  return null;
 }

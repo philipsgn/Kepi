@@ -15,8 +15,14 @@
 | Mục Giao Diện (Theme) | **Tập trung hoàn toàn về Cài Đặt (QĐ 165):** Bỏ thẻ Giao diện ở cuối Tab Hồ Sơ; chạm pill `[ 🎨 Giao diện ]` trên Quick Jump sẽ chuyển hướng mở ngay Cài Đặt; hiển thị chuẩn 2 tùy chọn `[ Kem ]` và `[ Hồng ]` (QĐ 154, 156, 160, 163, 164, 165) |
 | Chip danh mục / preset % | `NeoChip` bo 18; chọn = Vàng Cám |
 
-## 2. Màn Cài Đặt (`SettingsView`) — QĐ 165
+## 2. Màn Cài Đặt (`SettingsView`) — QĐ 165 & QĐ 186
 - **Chuẩn Neo-Brutalist Pixel Art 100%:** Toàn bộ thẻ nhóm bo 22px, viền đặc 3px mực (`#2B2118` / `#3B0713`), bóng cứng 0-blur 4px, font `Baloo2_800ExtraBold` cho tiêu đề và `Nunito` 700 cho các dòng.
+- **Nhóm Bảo Mật & Quyền Truy Cập (QĐ 186):**
+  - **Ẩn số tiền:** Làm mờ số tiền nhạy cảm.
+  - **Cho phép Máy ảnh (Camera):** Đồng bộ trạng thái quyền thật của OS, bấm bật xin quyền OS hoặc mở Cài đặt điện thoại (`Linking.openSettings()`).
+  - **Cho phép Vị trí hiện tại (GPS):** Đồng bộ trạng thái quyền Location thật của OS, bấm bật/tắt linh hoạt hoặc mở Cài đặt điện thoại.
+  - **Tự gắn vị trí khi lưu chi ở tab Chụp:** Chuyển từ màn Quán Quen về đây; cho phép tự động đính kèm vị trí GPS thật + tên đường/quận thật khi lưu khoản chi từ Tab Chụp (0 hardcode tọa độ).
+  - Tự động cập nhật lại trạng thái quyền khi người dùng quay lại ứng dụng (`AppState` = `'active'`).
 - Nút Back [←]: Neo-Badge tròn 36×36px, bo 18px viền 2px mực nền pastel.
 - Dòng Giao diện: Hiển thị nhãn tóm tắt siêu ngắn gọn `Kem` / `Hồng`.
 - Universal Modal Bottom Sheet: Bo trên 28px viền đặc 3px mực, nền `#F6EEDC` / `#FFF5F7`, nút đóng [X] Neo-Badge tròn 30px viền 2px, nút Xong Vàng Cám `#F4B93B` bo 16px viền 2.5px mực font `Baloo2_800ExtraBold`.

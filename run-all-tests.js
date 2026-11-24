@@ -5701,4 +5701,90 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 122 Passed: Đồng Bộ 1:1 Prototype 24/11 & MASTER-PROMPTS (Chat Heo AI Quán Cà Phê, Quán Quen Chợ Bến Thành Cuộn Ngang, Bỏ Chữ Bịa/Squad/Anh Minh, 100% Pixel Icons & Backend Việc Nhà 3 Chỉ Số — Quyết định 185) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 122 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (122/122)!');
+// ==========================================
+// TEST 123: CHUẨN HÓA PRODUCTION ZERO-HARDCODE VỊ TRÍ, XIN QUYỀN CAMERA & VỊ TRÍ LẦN ĐẦU, QUẢN LÝ QUYỀN Ở CÀI ĐẶT & TỐI GIẢN QUÁN QUEN (QUYẾT ĐỊNH 186)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const profileDocCode = fs.readFileSync('docs/screens/heocon/11-PROFILE-SETTINGS.md', 'utf8');
+  const privacyDocCode = fs.readFileSync('docs/PRIVACY.md', 'utf8');
+
+  const locSvcCode = fs.readFileSync('src/services/locationService.ts', 'utf8');
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const settingsCode = fs.readFileSync('src/components/views/SettingsView.tsx', 'utf8');
+  const mainIndexCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+  const firstModalPath = path.join(__dirname, 'src/components/common/FirstLaunchPermissionsModal.tsx');
+  assert.ok(fs.existsSync(firstModalPath), 'FirstLaunchPermissionsModal.tsx must exist');
+  const firstModalCode = fs.readFileSync(firstModalPath, 'utf8');
+
+  // 1. Zero-Hardcode Location: Cấm tuyệt đối DEFAULT_VN_COORDS & quận giả Bình Thạnh/Quận 1
+  assert.ok(
+    !locSvcCode.includes('DEFAULT_VN_COORDS'),
+    'src/services/locationService.ts must eliminate DEFAULT_VN_COORDS'
+  );
+  assert.ok(
+    !locSvcCode.includes("fallbackDistrict = 'Bình Thạnh'"),
+    'src/services/locationService.ts must not inject fake fallback district Bình Thạnh'
+  );
+  assert.ok(
+    !mapCode.includes('knownDistrictCenters') && !mapCode.includes('|| 10.7769'),
+    'PiggySpendMapView.tsx must eliminate knownDistrictCenters and fallback coordinate injection'
+  );
+
+  // 2. Tinh sạch UI: Bỏ chữ backend 'Định vị', 'Gần bạn tính từ GPS thật' & chuyển switch vị trí về Cài đặt
+  assert.ok(
+    !mapCode.includes('>Định vị<') && !mapCode.includes('Gần bạn tính từ GPS thật'),
+    'PiggySpendMapView.tsx must remove backend-ish "Định vị" button and "Gần bạn tính từ GPS thật" subtitle'
+  );
+  assert.ok(
+    !mapCode.includes('autoPinEnabled') && !mapCode.includes('styles.autoGeoCard'),
+    'PiggySpendMapView.tsx must move auto-pin toggle card completely to SettingsView'
+  );
+
+  // 3. Tối giản spacing: Gộp 1 khung tóm tắt siêu gọn (.psCompactRow) & đổi filter sang 'Gần đây'
+  assert.ok(
+    mapCode.includes('psCompactRow') &&
+      mapCode.includes('psCompactCol') &&
+      mapCode.includes('PixelIconClock') &&
+      mapCode.includes('Gần đây'),
+    'PiggySpendMapView.tsx must merge summary boxes into 1 compact row and rename 14 days filter to "Gần đây" with PixelIconClock'
+  );
+  assert.ok(
+    mapCode.includes('openExternalMapDirections') &&
+      mapCode.includes('google.navigation:q=') &&
+      mapCode.includes('maps://?daddr='),
+    'PiggySpendMapView.tsx must provide production native map directions for real coordinates/addresses'
+  );
+
+  // 4. Luồng Xin Quyền Lần Đầu & Quản Lý 2 Chiều Ở Cài Đặt (SettingsView)
+  assert.ok(
+    firstModalCode.includes('FirstLaunchPermissionsModal') &&
+      firstModalCode.includes('requestLocationPermissionAsync') &&
+      mainIndexCode.includes('FirstLaunchPermissionsModal'),
+    'FirstLaunchPermissionsModal must prompt user on first launch and sync with main screen'
+  );
+  assert.ok(
+    settingsCode.includes('Cho phép Máy ảnh') &&
+      settingsCode.includes('Cho phép Vị trí hiện tại') &&
+      settingsCode.includes('Tự gắn vị trí khi lưu chi ở tab Chụp') &&
+      settingsCode.includes('Linking.openSettings'),
+    'SettingsView must manage Camera, Location, and Auto-pin toggles with openSettings link'
+  );
+
+  // 5. Living Documentation Sync Audit (Quyết định 186 & Zero-Hardcode Rule)
+  assert.ok(
+    agentsCode.includes('ZERO-HARDCODE LOCATION RULE') &&
+      agentsCode.includes('186') &&
+      decisionsCode.includes('186') &&
+      chatDocCode.includes('186') &&
+      profileDocCode.includes('186') &&
+      privacyDocCode.includes('186'),
+    'AGENTS.md, DECISIONS.md, 10-CHAT.md, 11-PROFILE-SETTINGS.md, and PRIVACY.md must document Quyết định 186 and Zero-Hardcode rule'
+  );
+
+  console.log('✅ Test 123 Passed: Chuẩn Hóa Production Zero-Hardcode Vị Trí, Xin Quyền Camera & Vị Trí Lần Đầu, Quản Lý Quyền Ở Cài Đặt & Tối Giản Quán Quen (Quyết định 186) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 123 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (123/123)!');

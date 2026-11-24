@@ -5,7 +5,6 @@ import {
   Linking,
   Platform,
   ScrollView,
-  Switch,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,19 +14,17 @@ import Svg, { Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { useTransactionStore } from '../../store/transactionStore';
 import {
+  GeoCoords,
   getCachedLocationSync,
   getCurrentPositionSafeAsync,
-  getLocationPinEnabled,
   getQuickPinCoordsIfOptedIn,
   reverseGeocodePlaceAsync,
-  setLocationPinEnabled,
 } from '../../services/locationService';
 import {
   PixelIconBack,
   PixelIconCameraMini,
+  PixelIconClock,
   PixelIconCoin,
-  PixelIconCrosshair,
-  PixelIconFlame,
   PixelIconMapPin,
   PixelIconStar,
 } from '../pixel/PixelIcons';
@@ -35,7 +32,7 @@ import { BenThanhStreetBannerWebView } from './BenThanhStreetBannerWebView';
 
 // ============================================================================
 // QUÁN QUEN (PLACE CHECK-IN) — 100% NATIVE + BANNER CHỢ BẾN THÀNH CUỘN NGANG
-// Chuẩn 1:1 prototype Ví Heo Con 24_11.html & MASTER-PROMPTS PLAN 16 + 18 (Quyết định 185)
+// Chuẩn Production: Zero-Hardcode Vị Trí, Gộp Khung Tóm Tắt, Chỉ Đường Chuẩn Store (QĐ 186)
 // ============================================================================
 
 export interface PiggySpendMapViewProps {
@@ -51,8 +48,8 @@ export interface SpendItem {
   kind: SpendKind;
   amount: number;
   ts: number;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
   photoUrl?: string | null;
 }
 
@@ -61,8 +58,8 @@ export interface SpendPlace {
   name: string;
   district: string;
   kind: SpendKind;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
   visits: number;
   total: number;
   lastTs: number;
@@ -171,28 +168,28 @@ function agoText(ts: number): string {
 
 export function extractDistrictFromNameOrCoords(
   placeName: string,
-  lat: number,
-  lng: number
+  _lat?: number | null,
+  _lng?: number | null
 ): string {
   const lower = (placeName || '').toLowerCase();
 
   const districtMatches: [RegExp, string][] = [
-    [/quận\s*1\b|bến thành|bến nghé|nguyễn huệ|lê thánh tôn|đỗ quang đẩu|phố đi bộ/i, 'Quận 1'],
-    [/quận\s*3\b|võ văn tần|pasteur|nam kỳ khởi nghĩa|hồ con rùa/i, 'Quận 3'],
-    [/quận\s*4\b|vĩnh khánh|đoàn văn bơ/i, 'Quận 4'],
-    [/quận\s*5\b|nguyễn trãi|chợ lớn|hải thượng lãn ông/i, 'Quận 5'],
-    [/quận\s*7\b|phú mỹ hưng|nguyễn thị thập/i, 'Quận 7'],
-    [/quận\s*10\b|ba tháng hai|sư vạn hạnh|cách mạng tháng tám/i, 'Quận 10'],
-    [/bình thạnh|đinh tiên hoàng|nguyễn gia trí|hàng xanh/i, 'Bình Thạnh'],
-    [/phú nhuận|phan xích long|hồ văn huê/i, 'Phú Nhuận'],
-    [/tân bình|cộng hòa|bầu cát/i, 'Tân Bình'],
-    [/thủ đức|võ văn ngân|phạm văn đồng/i, 'Thủ Đức'],
-    [/gò vấp|quang trung|phan văn trị/i, 'Gò Vấp'],
-    [/hoàn kiếm|hồ gươm|tràng tiền/i, 'Hoàn Kiếm'],
-    [/ba đình|đội cấn|kim mã/i, 'Ba Đình'],
-    [/đống đa|chùa bộc|xã đàn/i, 'Đống Đa'],
-    [/cầu giấy|xuân thủy|duy tân/i, 'Cầu Giấy'],
-    [/hải châu|bạch đằng|nguyễn văn linh/i, 'Hải Châu'],
+    [/quận\s*1\b/i, 'Quận 1'],
+    [/quận\s*3\b/i, 'Quận 3'],
+    [/quận\s*4\b/i, 'Quận 4'],
+    [/quận\s*5\b/i, 'Quận 5'],
+    [/quận\s*7\b/i, 'Quận 7'],
+    [/quận\s*10\b/i, 'Quận 10'],
+    [/bình thạnh/i, 'Bình Thạnh'],
+    [/phú nhuận/i, 'Phú Nhuận'],
+    [/tân bình/i, 'Tân Bình'],
+    [/thủ đức/i, 'Thủ Đức'],
+    [/gò vấp/i, 'Gò Vấp'],
+    [/hoàn kiếm/i, 'Hoàn Kiếm'],
+    [/ba đình/i, 'Ba Đình'],
+    [/đống đa/i, 'Đống Đa'],
+    [/cầu giấy/i, 'Cầu Giấy'],
+    [/hải châu/i, 'Hải Châu'],
   ];
 
   for (const [regex, distName] of districtMatches) {
@@ -205,35 +202,13 @@ export function extractDistrictFromNameOrCoords(
     const parts = placeName.split(',').map((s) => s.trim()).filter(Boolean);
     if (parts.length >= 2) {
       const candidate = parts[parts.length - 1];
-      if (candidate.length <= 20 && !candidate.toLowerCase().includes('việt nam')) {
+      if (candidate.length <= 24 && !candidate.toLowerCase().includes('việt nam')) {
         return candidate;
       }
     }
   }
 
-  const knownDistrictCenters = [
-    { name: 'Quận 1', lat: 10.7721, lng: 106.6983 },
-    { name: 'Quận 3', lat: 10.7835, lng: 106.6921 },
-    { name: 'Bình Thạnh', lat: 10.801, lng: 106.711 },
-    { name: 'Phú Nhuận', lat: 10.796, lng: 106.68 },
-    { name: 'Quận 10', lat: 10.769, lng: 106.667 },
-    { name: 'Quận 5', lat: 10.762, lng: 106.683 },
-  ];
-
-  if (Number.isFinite(lat) && Number.isFinite(lng) && lat > 10.6 && lat < 10.9 && lng > 106.5 && lng < 106.9) {
-    let bestDist = 999999;
-    let bestName = 'Quận 1';
-    for (const c of knownDistrictCenters) {
-      const d = haversineM(lat, lng, c.lat, c.lng);
-      if (d < bestDist) {
-        bestDist = d;
-        bestName = c.name;
-      }
-    }
-    return bestName;
-  }
-
-  return 'Quận 1';
+  return '';
 }
 
 export function mapTransactionsToSpendPoints(transactions: any[]): SpendItem[] {
@@ -259,8 +234,8 @@ export function mapTransactionsToSpendPoints(transactions: any[]): SpendItem[] {
     else if (cat.includes('game') || desc.includes('phim') || desc.includes('vui') || desc.includes('giải trí')) kind = 'fun';
 
     const placeName = String(t.location_name || t.description || t.category || `Địa điểm #${idx + 1}`).trim();
-    const lat = Number(t.lat) || 10.7769;
-    const lng = Number(t.lng) || 106.7009;
+    const lat = typeof t.lat === 'number' && Number.isFinite(t.lat) ? t.lat : null;
+    const lng = typeof t.lng === 'number' && Number.isFinite(t.lng) ? t.lng : null;
 
     let district = String(t.district || '').trim();
     if (!district || district === 'Việt Nam' || district === 'TP. Hồ Chí Minh' || district === 'Khu vực quen') {
@@ -287,7 +262,14 @@ export function buildPlaces(items: SpendItem[]): SpendPlace[] {
   items.forEach((item) => {
     let found: SpendPlace | null = null;
     for (let i = 0; i < places.length; i++) {
-      const sameDist = haversineM(places[i].lat, places[i].lng, item.lat, item.lng) <= 40;
+      const pLat = places[i].lat;
+      const pLng = places[i].lng;
+      const sameDist =
+        pLat !== null &&
+        pLng !== null &&
+        item.lat !== null &&
+        item.lng !== null &&
+        haversineM(pLat, pLng, item.lat, item.lng) <= 40;
       const sameName = places[i].name.toLowerCase().trim() === item.name.toLowerCase().trim();
       if (sameDist || (sameName && item.name.length > 3)) {
         found = places[i];
@@ -305,11 +287,18 @@ export function buildPlaces(items: SpendItem[]): SpendPlace[] {
         found.photoUrls.unshift(item.photoUrl);
         found.photoUrl = item.photoUrl;
       }
+      if (!found.district && item.district) {
+        found.district = item.district;
+      }
+      if ((found.lat === null || found.lng === null) && item.lat !== null && item.lng !== null) {
+        found.lat = item.lat;
+        found.lng = item.lng;
+      }
     } else {
       places.push({
         id: `place-${item.id}`,
         name: item.name,
-        district: item.district || 'Quận 1',
+        district: item.district || '',
         kind: item.kind,
         lat: item.lat,
         lng: item.lng,
@@ -404,67 +393,57 @@ export const PixelKindThumb: React.FC<{
   );
 };
 
-export function openExternalMapDirections(lat: number, lng: number, placeName: string) {
+export function openExternalMapDirections(
+  lat: number | null,
+  lng: number | null,
+  placeName: string,
+  district?: string
+) {
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  const encodedName = encodeURIComponent(placeName);
-  let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 
-  if (Platform.OS === 'android') {
-    url = `geo:${lat},${lng}?q=${lat},${lng}(${encodedName})`;
-  } else if (Platform.OS === 'ios') {
-    url = `maps://app?daddr=${lat},${lng}&q=${encodedName}`;
+  if (lat !== null && lng !== null && Number.isFinite(lat) && Number.isFinite(lng)) {
+    const webDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    let nativeUrl = webDirectionsUrl;
+
+    if (Platform.OS === 'android') {
+      nativeUrl = `google.navigation:q=${lat},${lng}`;
+    } else if (Platform.OS === 'ios') {
+      nativeUrl = `maps://?daddr=${lat},${lng}&dirflg=d`;
+    }
+
+    Linking.canOpenURL(nativeUrl)
+      .then((supported) => Linking.openURL(supported ? nativeUrl : webDirectionsUrl))
+      .catch(() => {
+        Linking.openURL(webDirectionsUrl).catch(() => {});
+      });
+    return;
   }
 
-  Linking.canOpenURL(url)
-    .then((supported) => {
-      if (supported) return Linking.openURL(url);
-      return Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
-    })
-    .catch(() => {
-      Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
-    });
+  const query = [placeName, district].filter(Boolean).join(', ');
+  if (!query) {
+    Alert.alert('Chưa có địa chỉ', 'Địa điểm này chưa có tọa độ hoặc tên đường để chỉ đường.');
+    return;
+  }
+  const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  Linking.openURL(searchUrl).catch(() => {});
 }
 
 export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) => {
   const { transactions, updateTransaction } = useTransactionStore();
   const [activeMode, setActiveMode] = useState<FilterMode>('recent14');
-  const [userPos, setUserPos] = useState<{ lat: number; lng: number }>(getCachedLocationSync());
-  const [hasRealGps, setHasRealGps] = useState(false);
-  const [isRefreshingGps, setIsRefreshingGps] = useState(false);
-  const [autoPinEnabled, setAutoPinEnabled] = useState(true);
+  const [userPos, setUserPos] = useState<GeoCoords | null>(getCachedLocationSync());
 
   useEffect(() => {
     let mounted = true;
-    getLocationPinEnabled().then((val) => {
-      if (mounted) setAutoPinEnabled(val);
-    });
-    getCurrentPositionSafeAsync(5000).then((coords) => {
+    getCurrentPositionSafeAsync(5000, false).then((coords) => {
       if (mounted && coords) {
         setUserPos(coords);
-        setHasRealGps(true);
       }
     });
     return () => {
       mounted = false;
     };
   }, []);
-
-  const handleRefreshGps = useCallback(async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setIsRefreshingGps(true);
-    const fresh = await getCurrentPositionSafeAsync(6000);
-    if (fresh) {
-      setUserPos(fresh);
-      setHasRealGps(true);
-    }
-    setIsRefreshingGps(false);
-  }, []);
-
-  const handleToggleAutoPin = async (val: boolean) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setAutoPinEnabled(val);
-    await setLocationPinEnabled(val);
-  };
 
   const mappedExpenses = useMemo(() => mapTransactionsToSpendPoints(transactions), [transactions]);
   const allPlaces = useMemo(() => buildPlaces(mappedExpenses), [mappedExpenses]);
@@ -485,21 +464,24 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const coords = await getQuickPinCoordsIfOptedIn(6000);
     if (!coords) {
-      Alert.alert('Chưa có vị trí', 'Vui lòng cấp quyền định vị để gán địa điểm cho ảnh.');
+      Alert.alert(
+        'Chưa có vị trí',
+        'Vui lòng bật quyền Vị trí & "Tự gắn vị trí khi lưu chi ở tab Chụp" trong Cài đặt.'
+      );
       return;
     }
     const geo = await reverseGeocodePlaceAsync(coords.lat, coords.lng);
-    const districtName =
-      geo.district && geo.district !== 'Khu vực quen'
-        ? geo.district
-        : extractDistrictFromNameOrCoords(geo.shortPlaceName, coords.lat, coords.lng);
+    if (!geo) {
+      Alert.alert('Không lấy được địa chỉ', 'Thiết bị chưa xác định được tên đường/quận thật.');
+      return;
+    }
 
     unlocatedPhotoExpenses.forEach((t) => {
       updateTransaction(t.id, {
         lat: coords.lat,
         lng: coords.lng,
         location_name: geo.shortPlaceName,
-        district: districtName,
+        district: geo.district || extractDistrictFromNameOrCoords(geo.shortPlaceName),
       });
     });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -512,13 +494,19 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
 
     if (activeMode === 'recent14') {
       const sub = list.filter((p) => now - p.lastTs <= 14 * 86400000);
-      list = (sub.length ? sub : list).sort((a, b) => b.lastTs - a.lastTs);
+      list = sub.sort((a, b) => b.lastTs - a.lastTs);
     } else if (activeMode === 'frequent') {
       list = list.sort((a, b) => b.visits - a.visits || b.total - a.total);
     } else if (activeMode === 'trail') {
       list = list.sort((a, b) => {
-        const da = haversineM(userPos.lat, userPos.lng, a.lat, a.lng);
-        const db = haversineM(userPos.lat, userPos.lng, b.lat, b.lng);
+        const da =
+          userPos && a.lat !== null && a.lng !== null
+            ? haversineM(userPos.lat, userPos.lng, a.lat, a.lng)
+            : Number.MAX_SAFE_INTEGER;
+        const db =
+          userPos && b.lat !== null && b.lng !== null
+            ? haversineM(userPos.lat, userPos.lng, b.lat, b.lng)
+            : Number.MAX_SAFE_INTEGER;
         return da - db;
       });
     } else if (activeMode === 'top') {
@@ -531,14 +519,14 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
   const stats = useMemo(() => {
     const totalVisits = allPlaces.reduce((acc, p) => acc + p.visits, 0);
     const totalAmount = allPlaces.reduce((acc, p) => acc + p.total, 0);
-    const districts = new Set(allPlaces.map((p) => p.district).filter(Boolean));
+    const districts = new Set(allPlaces.map((p) => p.district.trim()).filter(Boolean));
     const topPlace = [...allPlaces].sort((a, b) => b.visits - a.visits)[0] || null;
 
     return {
       totalPlaces: allPlaces.length,
       totalVisits,
       totalAmount,
-      totalDistricts: districts.size || (allPlaces.length > 0 ? 1 : 0),
+      totalDistricts: districts.size,
       topPlace,
     };
   }, [allPlaces]);
@@ -546,7 +534,8 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
   const districtStamps = useMemo(() => {
     const counts: Record<string, number> = {};
     allPlaces.forEach((p) => {
-      const d = (p.district || 'Quận 1').trim();
+      const d = (p.district || '').trim();
+      if (!d) return;
       counts[d] = (counts[d] || 0) + p.visits;
     });
     return Object.keys(counts)
@@ -556,7 +545,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
 
   return (
     <View style={styles.container}>
-      {/* 1. HEADER TỐI GIẢN CHUẨN PROTOTYPE (.flytop) — KHÔNG CHỮ DÀI DÒNG */}
+      {/* 1. HEADER TỐI GIẢN SẠCH CHỮ BACKEND (QĐ 186) */}
       <View style={styles.topHeader}>
         <TouchableOpacity
           style={styles.iconBtn}
@@ -572,23 +561,10 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
 
         <View style={styles.titleWrap}>
           <PixelIconMapPin size={20} />
-          <View>
-            <Text style={styles.titleText}>Quán Quen</Text>
-            <Text style={styles.subTitleText}>
-              {hasRealGps ? 'Gần bạn tính từ GPS thật' : 'Gần bạn tính từ vị trí mẫu'}
-            </Text>
-          </View>
+          <Text style={styles.titleText}>Quán Quen</Text>
         </View>
 
-        <TouchableOpacity
-          style={[styles.locBtn, isRefreshingGps && styles.iconBtnActive]}
-          onPress={handleRefreshGps}
-          activeOpacity={0.8}
-          accessibilityLabel="Định vị"
-        >
-          <PixelIconCrosshair size={14} />
-          <Text style={styles.locBtnText}>Định vị</Text>
-        </TouchableOpacity>
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView
@@ -599,26 +575,33 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
         {/* 2. BANNER ĐỘNG CHỢ BẾN THÀNH MỞ RỘNG CUỘN NGANG (WORLD 584px) */}
         <BenThanhStreetBannerWebView active={true} />
 
-        {/* 3. THẺ .pshero CHUẨN 1:1 PROTOTYPE: CHỈ 4 Ô + CON DẤU QUẬN (ZERO CHỮ BỊA) */}
+        {/* 3. THẺ TÓM TẮT GỘP 1 KHUNG SIÊU GỌN (.pshero Compact) + CON DẤU QUẬN THẬT */}
         <View style={styles.heroPassportCard}>
-          <View style={styles.psgrid}>
-            <View style={styles.psgridItem}>
-              <Text style={styles.psgridLabel}>Quán đã ghé</Text>
-              <Text style={styles.psgridValue}>{stats.totalPlaces}</Text>
+          <View style={styles.psCompactRow}>
+            <View style={styles.psCompactCol}>
+              <Text style={styles.psgridLabel}>Đã ghé</Text>
+              <Text style={styles.psgridValue} numberOfLines={1}>
+                {stats.totalPlaces} quán
+                {stats.totalDistricts > 0 ? ` · ${stats.totalDistricts} quận` : ''}
+              </Text>
             </View>
-            <View style={styles.psgridItem}>
-              <Text style={styles.psgridLabel}>Quận đã đến</Text>
-              <Text style={styles.psgridValue}>{stats.totalDistricts}</Text>
-            </View>
-            <View style={styles.psgridItem}>
+
+            <View style={styles.psCompactDivider} />
+
+            <View style={styles.psCompactCol}>
               <Text style={styles.psgridLabel}>Quán ruột</Text>
               <Text style={styles.psgridValue} numberOfLines={1}>
                 {stats.topPlace ? stats.topPlace.name : '—'}
               </Text>
             </View>
-            <View style={styles.psgridItem}>
+
+            <View style={styles.psCompactDivider} />
+
+            <View style={[styles.psCompactCol, { alignItems: 'flex-end' }]}>
               <Text style={styles.psgridLabel}>Tổng chi</Text>
-              <Text style={styles.psgridValue}>{fmtK(stats.totalAmount)}</Text>
+              <Text style={styles.psgridValue} numberOfLines={1}>
+                {fmtK(stats.totalAmount)}
+              </Text>
             </View>
           </View>
 
@@ -661,10 +644,10 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
         {/* 5. THANH LỌC 4 NÚT PIXEL ART ICONS (.pschips) */}
         <View style={styles.filterPillsRow}>
           {[
-            { id: 'recent14', label: '14 ngày', icon: <PixelIconFlame size={14} /> },
+            { id: 'recent14', label: 'Gần đây', icon: <PixelIconClock size={14} /> },
             { id: 'frequent', label: 'Quen', icon: <PixelIconStar size={14} /> },
-            { id: 'trail', label: 'Gần', icon: <PixelIconMapPin size={14} /> },
-            { id: 'top', label: 'Top chi', icon: <PixelIconCoin size={14} /> },
+            { id: 'trail', label: 'Gần bạn', icon: <PixelIconMapPin size={14} /> },
+            { id: 'top', label: 'Chi nhiều', icon: <PixelIconCoin size={14} /> },
           ].map((tab) => {
             const isActive = activeMode === tab.id;
             return (
@@ -690,7 +673,11 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
         {filteredPlaces.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIconWrap}>{drawPinCanvas('#2B2118', 3)}</View>
-            <Text style={styles.emptyTitle}>Chưa có quán nào trong 14 ngày qua</Text>
+            <Text style={styles.emptyTitle}>
+              {activeMode === 'recent14'
+                ? 'Chưa có quán nào trong 14 ngày gần đây'
+                : 'Chưa có địa điểm chi tiêu nào'}
+            </Text>
             <Text style={styles.emptyDesc}>
               Chụp ảnh ở Tab Chụp để lưu lại địa điểm và quán quen tại đây nhé.
             </Text>
@@ -698,7 +685,10 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
         ) : (
           <View style={styles.placeList}>
             {filteredPlaces.map((place) => {
-              const distM = haversineM(userPos.lat, userPos.lng, place.lat, place.lng);
+              const distM =
+                userPos && place.lat !== null && place.lng !== null
+                  ? haversineM(userPos.lat, userPos.lng, place.lat, place.lng)
+                  : null;
 
               return (
                 <View key={place.id} style={styles.placeCard}>
@@ -714,9 +704,11 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
                     <Text style={styles.cardPlaceName} numberOfLines={1}>
                       {place.name}
                     </Text>
-                    <Text style={styles.cardAddress} numberOfLines={1}>
-                      {place.district}
-                    </Text>
+                    {Boolean(place.district) && (
+                      <Text style={styles.cardAddress} numberOfLines={1}>
+                        {place.district}
+                      </Text>
+                    )}
 
                     <View style={styles.cardBadgeRow}>
                       <View style={styles.badgePill}>
@@ -725,9 +717,11 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
                       <View style={[styles.badgePill, styles.badgePillAmount]}>
                         <Text style={styles.badgePillAmountText}>{fmtK(place.total)} tổng</Text>
                       </View>
-                      <View style={styles.badgePill}>
-                        <Text style={styles.badgePillText}>{formatDistance(distM)}</Text>
-                      </View>
+                      {distM !== null && (
+                        <View style={styles.badgePill}>
+                          <Text style={styles.badgePillText}>{formatDistance(distM)}</Text>
+                        </View>
+                      )}
                     </View>
 
                     <Text style={styles.cardLastText} numberOfLines={1}>
@@ -738,7 +732,9 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
                   <TouchableOpacity
                     style={styles.directionBtn}
                     activeOpacity={0.8}
-                    onPress={() => openExternalMapDirections(place.lat, place.lng, place.name)}
+                    onPress={() =>
+                      openExternalMapDirections(place.lat, place.lng, place.name, place.district)
+                    }
                     accessibilityLabel={`Chỉ đường tới ${place.name}`}
                   >
                     <PixelIconMapPin size={14} />
@@ -749,18 +745,6 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
             })}
           </View>
         )}
-
-        {/* 7. CÔNG TẮC TỰ GẮN VỊ TRÍ KHI LƯU CHI Ở TAB CHỤP */}
-        <View style={styles.autoGeoCard}>
-          <PixelIconMapPin size={16} />
-          <Text style={styles.autoGeoLabel}>Tự gắn vị trí khi lưu chi ở tab Chụp</Text>
-          <Switch
-            value={autoPinEnabled}
-            onValueChange={handleToggleAutoPin}
-            trackColor={{ false: '#D8CDB8', true: '#5E9A57' }}
-            thumbColor="#FFFBF1"
-          />
-        </View>
       </ScrollView>
     </View>
   );
@@ -812,33 +796,8 @@ const styles = StyleSheet.create({
     color: '#2B2118',
     lineHeight: 20,
   },
-  subTitleText: {
-    fontFamily: 'Nunito_700Bold',
-    fontWeight: '700',
-    fontSize: 11,
-    color: '#85735E',
-  },
-  locBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 999,
-    borderWidth: 2.5,
-    borderColor: '#2B2118',
-    backgroundColor: '#FFFBF1',
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
-  },
-  locBtnText: {
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
-    fontSize: 12,
-    color: '#2B2118',
+  headerSpacer: {
+    width: 38,
   },
   scrollBody: {
     flex: 1,
@@ -847,11 +806,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 6,
     paddingBottom: 110,
-    gap: 12,
+    gap: 10,
   },
   heroPassportCard: {
-    padding: 12,
-    borderRadius: 22,
+    padding: 10,
+    borderRadius: 20,
     borderWidth: 3,
     borderColor: '#2B2118',
     backgroundColor: '#FFFBF1',
@@ -860,21 +819,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 4,
-    gap: 10,
-  },
-  psgrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 8,
   },
-  psgridItem: {
+  psCompactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  psCompactCol: {
     flex: 1,
-    minWidth: '45%',
-    padding: 9,
-    borderRadius: 16,
-    borderWidth: 2.5,
-    borderColor: '#2B2118',
-    backgroundColor: '#F6EEDC',
+    minWidth: 0,
+  },
+  psCompactDivider: {
+    width: 1.5,
+    height: 28,
+    backgroundColor: '#E8DEC8',
   },
   psgridLabel: {
     fontFamily: 'Nunito_700Bold',
@@ -887,15 +847,18 @@ const styles = StyleSheet.create({
   psgridValue: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 18,
+    fontSize: 14,
     color: '#2B2118',
-    marginTop: 2,
+    marginTop: 1,
     fontVariant: ['tabular-nums'],
   },
   psstamps: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
+    paddingTop: 6,
+    borderTopWidth: 1.5,
+    borderTopColor: '#E8DEC8',
   },
   psstamp: {
     paddingHorizontal: 10,
@@ -1129,23 +1092,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
-  autoGeoCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 12,
-    borderRadius: 18,
-    borderWidth: 2.5,
-    borderColor: '#2B2118',
-    backgroundColor: '#FFFBF1',
-  },
-  autoGeoLabel: {
-    flex: 1,
-    fontFamily: 'Nunito_700Bold',
-    fontWeight: '700',
-    fontSize: 12.5,
-    color: '#2B2118',
-  },
 });
 
 // ============================================================================
@@ -1158,6 +1104,7 @@ export const __REGRESSION_META = {
   visaStampsClass: 'psstamps',
   pixelGlyphs: 'PIXEL_KINDS',
   aliases: [
+    'PixelIconCrosshair',
     'NativeSlippyTile',
     'PanResponder.create',
     'GeoJSONSource',

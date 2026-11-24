@@ -19,6 +19,7 @@ import { ActivityIndicator,
   Linking, Platform, ScrollViewInstance } from 'react-native';
 import { useRouter, Redirect } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CameraView } from 'expo-camera';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -96,6 +97,10 @@ import { ProfileView } from '../../src/components/views/ProfileView';
 // Modals & Sheets
 import { ConfirmationSheet } from '../../src/components/cards/ConfirmationSheet';
 import { ActualPriceSheet } from '../../src/components/cards/ActualPriceSheet';
+import {
+  FirstLaunchPermissionsModal,
+  STORAGE_KEY_FIRST_PERMISSIONS_PROMPTED,
+} from '../../src/components/common/FirstLaunchPermissionsModal';
 import { MinhAvatar } from '../../src/components/coach/MinhAvatar';
 import { MinhCoachModal } from '../../src/components/coach/MinhCoachModal';
 import { LessonViewerModal } from '../../src/components/lessons/LessonViewerModal';
@@ -408,6 +413,7 @@ export default function MainAppScreen() {
   const [uploadPhotoUri, setUploadPhotoUri] = useState<string | null>(null);
   const [showBankSettingsFromCamera, setShowBankSettingsFromCamera] = useState<boolean>(false);
   const [showVoiceSheet, setShowVoiceSheet] = useState<boolean>(false);
+  const [showFirstLaunchPermModal, setShowFirstLaunchPermModal] = useState<boolean>(false);
 
   // Locket Bank Snapshot & Fast Log State (Decision 69)
   const [activeBankSnapshotEvent, setActiveBankSnapshotEvent] = useState<ParsedBankNotification | null>(null);
@@ -446,6 +452,28 @@ export default function MainAppScreen() {
       setShowActualPrice(true);
     },
     actualPriceThreshold: 200000 });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const prompted = await AsyncStorage.getItem(STORAGE_KEY_FIRST_PERMISSIONS_PROMPTED);
+        if (!prompted && isAuthenticated) {
+          setShowFirstLaunchPermModal(true);
+        }
+      } catch (_e) {
+        // ignore
+      }
+    })();
+  }, [isAuthenticated]);
+
+  const handleCompleteFirstPermissions = async () => {
+    setShowFirstLaunchPermModal(false);
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY_FIRST_PERMISSIONS_PROMPTED, 'true');
+    } catch (_e) {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     setupNotificationChannels();
@@ -1047,8 +1075,8 @@ export default function MainAppScreen() {
         source: 'VOICE',
         photo_url: null,
         status: 'CONFIRMED',
-        lat: syncCoords.lat,
-        lng: syncCoords.lng,
+        lat: syncCoords ? syncCoords.lat : null,
+        lng: syncCoords ? syncCoords.lng : null,
       });
       getQuickPinCoordsIfOptedIn()
         .then((coords) => {
@@ -1371,8 +1399,8 @@ export default function MainAppScreen() {
       thumbnail_url: capturedThumbUri || capturedPhotoUri,
       payment_method: 'BANK',
       source: 'MANUAL',
-      lat: syncCoords.lat,
-      lng: syncCoords.lng,
+      lat: syncCoords ? syncCoords.lat : null,
+      lng: syncCoords ? syncCoords.lng : null,
     });
 
     getQuickPinCoordsIfOptedIn()
@@ -2260,6 +2288,13 @@ export default function MainAppScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* MODAL XIN QUYỀN CAMERA & VỊ TRÍ LẦN ĐẦU VÀO APP CHUẨN PRODUCTION (QĐ 186) */}
+      <FirstLaunchPermissionsModal
+        visible={showFirstLaunchPermModal}
+        onRequestCameraPermission={requestCameraPermission}
+        onComplete={handleCompleteFirstPermissions}
+      />
 
     </View>
   );

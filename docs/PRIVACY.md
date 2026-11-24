@@ -38,12 +38,13 @@
 
 ---
 
-### 1.5. Quyền Riêng Tư Định Vị Bản Đồ Chi Tiêu (Opt-In 1-Time Foreground Location — Quyết định 180)
-- **Nguyên tắc Opt-In 100% & Không Theo Dõi Nền (Zero Background Tracking):**
+### 1.5. Quyền Riêng Tư Định Vị & Xin Quyền Lần Đầu (Opt-In 1-Time Foreground Location — Quyết định 180 & 186)
+- **Nguyên tắc Opt-In 100% & Zero Hardcode Fallback:**
+  - Lần đầu vào ứng dụng, người dùng được hỏi rõ ràng quyền **Máy ảnh (Camera)** và **Vị trí hiện tại (GPS)** qua hộp thoại Neo-Brutalist minh bạch (`FirstLaunchPermissionsModal`), đồng thời có thể bật/tắt bất kỳ lúc nào trong **Cài đặt** (`SettingsView`) hoặc trong Cài đặt hệ điều hành của thiết bị.
   - Ứng dụng chỉ sử dụng quyền vị trí khi đang mở (`NSLocationWhenInUseUsageDescription` trên iOS / `ACCESS_COARSE_LOCATION` & `ACCESS_FINE_LOCATION` trên Android) qua `expo-location` (`src/services/locationService.ts`).
   - **Không bao giờ** xin quyền hay chạy dịch vụ định vị ngầm (`ACCESS_BACKGROUND_LOCATION`).
-  - Tọa độ `lat`/`lng` chỉ được đọc đúng 1 lần tại thời điểm người dùng chủ động lưu khoản chi (khi bật công tắc **"Ghim vị trí chi tiêu"** trong Cài đặt) hoặc khi bấm nút `🎯` trên Bản đồ chi tiêu.
-  - Nếu người dùng tắt công tắc hoặc từ chối quyền vị trí, giao dịch vẫn được lưu bình thường với `lat: null, lng: null` — ứng dụng **tuyệt đối không tự bịa tọa độ giả**.
+  - Tọa độ `lat`/`lng` và địa chỉ thật chỉ được đọc tại thời điểm người dùng chủ động lưu khoản chi ở Tab Chụp (khi bật công tắc **"Tự gắn vị trí khi lưu chi ở tab Chụp"** trong Cài đặt) hoặc lấy khoảng cách thật trên trang Quán Quen.
+  - Nếu người dùng tắt công tắc hoặc từ chối quyền vị trí, giao dịch vẫn được lưu bình thường với `lat: null, lng: null, district: null, location_name: null` — ứng dụng **tuyệt đối không tự bịa tọa độ hay quận/địa điểm giả**.
   - Quy tắc xóa sạch siêu dữ liệu EXIF của file ảnh biên lai (Mục 1.3) vẫn được giữ nguyên 100%.
 
 ---

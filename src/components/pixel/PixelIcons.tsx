@@ -616,3 +616,22 @@ export const PixelIconTabProfile: React.FC<{ size?: number; color?: string; sele
   color = '#2B2118',
   selected = false,
 }) => renderTabPixelMatrix(TAB_PROFILE_ROWS, color, '#F9B8C4', selected && color !== '#2B2118' ? 'rgba(255,255,255,0.22)' : '#FFFBF1', size);
+
+/** Icon Đồng Hồ (Gần đây 14 ngày) 16×16 Pixel */
+const CLOCK_16_ROWS = [
+  '................',
+  '.....######.....',
+  '...##wwwwww##...',
+  '..#wwww##wwww#..',
+  '.#wwwww##wwwww#.',
+  '.#wwwww##wwwww#.',
+  '.#wwwww####www#.',
+  '.#wwwwwwwwwwww#.',
+  '..#wwwwwwwwww#..',
+  '...##wwwwww##...',
+  '.....######.....',
+  '................',
+];
+export const PixelIconClock: React.FC<PixelIconProps> = ({ size = 16 }) =>
+  renderPixelMatrix(CLOCK_16_ROWS, ICP, size);
+
