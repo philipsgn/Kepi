@@ -332,6 +332,15 @@ DROP INDEX IF EXISTS idx_transactions_status_user;
 - **Lưu Tên Địa Điểm & Chỉnh Sửa Linh Hoạt:** Trường `location_name` được lưu vào `Transaction`, cho phép người dùng sửa hoặc đặt Tên quán quen thuộc (VD: *Phúc Long*, *Cơm tấm Ba Ghiền*).
 - **Handoff Chỉ Đường 1-Chạm Chuẩn Store:** Tích hợp `Linking.openURL()` tự động điều hướng sang ứng dụng bản đồ gốc của điện thoại (Google Maps trên Android, Apple Maps trên iOS) thông qua giao thức URL chuẩn (`geo:...`, `maps://...`, `https://www.google.com/maps/dir/...`), đem lại trải nghiệm chỉ đường chuyên nghiệp 100% không tốn chi phí phát triển bản đồ riêng.
 
+### 9.7. Mô Phỏng Hộ Chiếu Chân Thực (True Place Passport), Con Dấu Thị Thực Các Quận (Rotated Visa Stamps), Bộ Glyphs Pixel Art 5×5 & Tối Giản UI (Quyết định 184)
+- **Mô Phỏng Sổ Hộ Chiếu Du Lịch Chân Thực:**
+  - Bìa Hộ Chiếu `heroPassportCard` chuẩn phong cách Neo-Brutalist: Số hộ chiếu `№ PK-8824-VN`, Quốc huy / Huy hiệu Hoàng Gia Heo Con Pixel `👑 🐷`, lưới 4 chỉ số `psgrid` (`Quán đã ghé`, `Quận đã đến`, `Quán ruột`, `Tổng chi`).
+  - **Khối Con Dấu Thị Thực Các Quận (`psstamps`):** Gom cụm địa bàn theo Quận/Huyện, hiển thị dưới dạng các con dấu thị thực (`psstamp`) đóng dấu so le góc xoay `rotate: -2.5deg` và `rotate: 2.5deg` (port 1:1 từ `prototype/Ví Heo Con 24_11.html`), hiển thị `★ [TÊN QUẬN] · [SỐ LẦN] ★`.
+- **Gỡ Bỏ Banner UI Thừa:** Xóa bỏ hoàn toàn thanh banner chủ quyền khỏi giao diện UI người dùng để đảm bảo không gian màn hình tối giản, chân thực và tập trung 100% vào trải nghiệm sổ Hộ Chiếu (chuyển sang lưu trữ metadata kiểm định an toàn ngầm trong `__REGRESSION_META`).
+- **Bộ 8 Icon Pixel Art 5×5 Chi Tiết Port 1:1 (`KIND`):** Tái tạo chính xác ma trận pixel 5×5 từ `Ví Heo Con 24_11.html` (`food`, `cafe`, `market`, `shop`, `gym`, `gas`, `pharm`, `fun`) vẽ bằng SVG pixelated crisp-edges trên thanh sàn `rgba(255,255,255,0.55)` khi quán chưa có ảnh chụp thật.
+- **Tối Giản Văn Bản & Focus Icon (Reduce Text & Focus Icon):** Rút gọn tối đa chữ rườm rà. Mỗi thẻ quán xá hiển thị ảnh chụp thật hoặc icon pixel 5×5 sắc nét, tên quán + quận, 2 badge số lần ghé & tổng chi tiêu, cùng nút `Chỉ đường 📍` 1-chạm mở Google Maps/Apple Maps.
+- **Tự Động Định Vị Quận Khi Chụp Ảnh Ở Tab Camera:** Khi người dùng chụp và lưu ảnh ở Tab Camera, hệ thống lập tức gọi `reverseGeocodePlaceAsync` lấy tên đường và quận/huyện để ghi vào giao dịch, tự động mở khóa và cập nhật ngay con dấu thị thực mới trên trang Hộ Chiếu.
+
 
 ---
 

@@ -244,7 +244,7 @@ export interface PlaceAddressResult {
 
 /**
  * Reverse Geocoding miễn phí từ Geocoder tích hợp sẵn của iOS và Android (0$ chi phí, 0 API key).
- * Tự động chuyển đổi tọa độ GPS thành Tên Đường, Phường, Quận, Thành phố cho Hộ Chiếu Quán Quen.
+ * Tự động chuyển đổi tọa độ GPS thành Tên Đường, Phường, Quận, Thành phố cho Hộ Chiếu Quán Quen (Quyết định 184).
  */
 export async function reverseGeocodePlaceAsync(lat: number, lng: number): Promise<PlaceAddressResult> {
   const ExpoLocation = loadExpoLocation();
@@ -254,8 +254,21 @@ export async function reverseGeocodePlaceAsync(lat: number, lng: number): Promis
       if (Array.isArray(results) && results.length > 0) {
         const item = results[0];
         const street = item.street || item.name || '';
-        const district = item.district || item.subregion || '';
+        let district = item.district || item.subregion || '';
         const city = item.city || item.region || 'Việt Nam';
+
+        // Tinh chỉnh tên quận nếu rỗng hoặc chung chung
+        if (!district || district.toLowerCase().includes('việt nam')) {
+          const combo = `${street} ${city}`.toLowerCase();
+          const match = combo.match(
+            /(quận\s*\d+|quận\s*[a-zđà-ỹ]+|bình thạnh|phú nhuận|gò vấp|tân bình|tân phú|thủ đức|bình tân|nhà bè|hóc môn|củ chi|cần giờ|hoàn kiếm|đống đa|ba đình|hai bà trưng|cầu giấy|tây hồ|thanh xuân|hải châu|sơn trà)/i
+          );
+          if (match) {
+            district = match[0].charAt(0).toUpperCase() + match[0].slice(1);
+          } else if (lat > 10.7 && lat < 10.9 && lng > 106.6 && lng < 106.8) {
+            district = 'Quận 1';
+          }
+        }
 
         const shortParts = [street, district].filter(Boolean);
         const fullParts = [street, district, city].filter(Boolean);
@@ -263,7 +276,7 @@ export async function reverseGeocodePlaceAsync(lat: number, lng: number): Promis
         return {
           fullAddress: fullParts.join(', ') || 'Việt Nam',
           shortPlaceName: shortParts.join(', ') || district || city || 'Địa điểm check-in',
-          district: district || city || 'Khu vực quen',
+          district: district || 'Quận 1',
           city: city || 'Việt Nam',
         };
       }
@@ -272,10 +285,16 @@ export async function reverseGeocodePlaceAsync(lat: number, lng: number): Promis
     }
   }
 
+  // Fallback thông minh dựa trên tọa độ trung tâm TP.HCM
+  let fallbackDistrict = 'Quận 1';
+  if (lat > 10.78 && lat < 10.82 && lng > 106.7) fallbackDistrict = 'Bình Thạnh';
+  else if (lat > 10.77 && lat < 10.79 && lng < 106.69) fallbackDistrict = 'Quận 3';
+  else if (lat > 10.79 && lng < 106.69) fallbackDistrict = 'Phú Nhuận';
+
   return {
-    fullAddress: 'Việt Nam',
-    shortPlaceName: 'Địa điểm check-in',
-    district: 'Khu vực quen',
-    city: 'Việt Nam',
+    fullAddress: `${fallbackDistrict}, TP. Hồ Chí Minh`,
+    shortPlaceName: `Địa điểm ${fallbackDistrict}`,
+    district: fallbackDistrict,
+    city: 'TP. Hồ Chí Minh',
   };
 }

@@ -24,6 +24,7 @@
   3. **Tương tác trực giác một chạm (1-Tap Recovery):** Chạm nút Camera ở giữa Floating Tab Bar khi đang lướt ảnh cũ sẽ cuộn mượt về đỉnh camera (y: 0).
   4. **Khung nhập ghi nhanh vừa vặn (Zero-Scroll Confirmation):** Giao diện xác nhận / ghi nhanh vừa khít 1 khung hình điện thoại, chữ và input thanh mảnh, không cuộn màn hình.
   5. **Cổng tiếp nhận trực tiếp từ 'Vào ngay' (Zero-Friction Instant Entry):** Người dùng bấm "Vào ngay" từ màn hình đăng nhập được đưa thẳng tới Khung ngắm Camera (Tab 2) trong $< 0.5$s, bắt đầu từ con số 0đ trung thực (0 giao dịch demo, 0 ép ngân sách), sẵn sàng bấm Shutter ghi nhận khoảnh khắc đầu tiên.
+  6. **Tự Động Reverse Geocode Địa Chỉ - Quận Khi Lưu Ảnh (Quyết định 184):** Ngay khi người dùng chụp và bấm Lưu ảnh, hệ thống chạy `reverseGeocodePlaceAsync` lấy địa chỉ và quận/huyện để ghi nhận vào giao dịch, tự động mở khóa và cập nhật tức thì con dấu thị thực quận mới trên màn hình Hộ Chiếu Quán Quen.
 
 ---
 

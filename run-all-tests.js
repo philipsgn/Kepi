@@ -5530,4 +5530,73 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 120 Passed: Hộ Chiếu Quán Quen (Place Passport & Check-in) — 100% Native, OS Geocoder 0$ & Chỉ Đường 1-Chạm (Quyết định 183) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 120 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (120/120)!');
+// ==========================================
+// TEST 121: MÔ PHỎNG HỘ CHIẾU CHÂN THỰC (TRUE PLACE PASSPORT), CON DẤU THỊ THỰC CÁC QUẬN (ROTATED VISA STAMPS), BỘ GLYPHS PIXEL ART 5×5 CHI TIẾT PORT 1:1, TỰ ĐỘNG ĐỊNH VỊ QUẬN KHI LƯU ẢNH & GỠ BỎ BANNER UI THỪA (QUYẾT ĐỊNH 184)
+// ==========================================
+{
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const locCode = fs.readFileSync('src/services/locationService.ts', 'utf8');
+  const camCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const techCode = fs.readFileSync('docs/TECH_ARCHITECTURE.md', 'utf8');
+  const camDocCode = fs.readFileSync('docs/screens/CAMERA.md', 'utf8');
+
+  // 1. PiggySpendMapView.tsx: Mô phỏng sổ hộ chiếu chân thực
+  assert.ok(
+    mapCode.includes('№ PK-8824-VN') &&
+      mapCode.includes('HỘ CHIẾU QUÁN QUEN') &&
+      mapCode.includes('CỘNG HÒA TIẾT KIỆM HEO CON') &&
+      mapCode.includes('PixelRoyalEmblem'),
+    'PiggySpendMapView.tsx must feature authentic Passport Number № PK-8824-VN, Royal Pig Emblem & Kingdom title'
+  );
+
+  // 2. Con dấu thị thực các quận đã đặt chân (.psstamps & .psstamp rotated -2.5deg / 2.5deg)
+  assert.ok(
+    mapCode.includes('psstamps') &&
+      mapCode.includes('psstamp') &&
+      mapCode.includes('districtStamps') &&
+      (mapCode.includes('-2.5deg') || mapCode.includes('-2deg')),
+    'PiggySpendMapView.tsx must render rotated visa stamps (.psstamps) for visited districts'
+  );
+
+  // 3. Bộ 8 glyphs Pixel Art 5×5 chi tiết port 1:1 từ prototype Ví Heo Con 24_11.html
+  assert.ok(
+    mapCode.includes('PIXEL_KINDS') &&
+      mapCode.includes('PixelKindThumb') &&
+      mapCode.includes('food') &&
+      mapCode.includes('cafe') &&
+      mapCode.includes('market') &&
+      mapCode.includes('pharm'),
+    'PiggySpendMapView.tsx must port 1:1 5x5 pixel matrices and PixelKindThumb from prototype'
+  );
+
+  // 4. Gỡ bỏ dòng banner chủ quyền thừa khỏi UI người dùng (chỉ giữ metadata kiểm định)
+  assert.ok(
+    !mapCode.includes('<View style={styles.sovereigntyBanner}>') &&
+      !mapCode.includes('<Text style={styles.sovereigntyText}>'),
+    'PiggySpendMapView.tsx must remove the visible sovereignty banner from the rendered UI tree'
+  );
+
+  // 5. Tự động định vị quận/huyện khi lưu ảnh ở Tab Camera
+  assert.ok(
+    camCode.includes('reverseGeocodePlaceAsync') &&
+      camCode.includes('district: geo.district'),
+    'app/(main)/index.tsx must auto-record district into transaction for Passport stamps'
+  );
+
+  // 6. Living Documentation Sync Audit (Quyết định 184)
+  assert.ok(
+    agentsCode.includes('184') &&
+      decisionsCode.includes('184') &&
+      chatDocCode.includes('184') &&
+      techCode.includes('184') &&
+      camDocCode.includes('184'),
+    'AGENTS.md, DECISIONS.md, 10-CHAT.md, TECH_ARCHITECTURE.md and CAMERA.md must all document Quyết định 184'
+  );
+
+  console.log('✅ Test 121 Passed: Mô Phỏng Hộ Chiếu Chân Thực (True Place Passport), Con Dấu Thị Thực Các Quận (Rotated Visa Stamps), Bộ Glyphs Pixel Art 5×5 Chi Tiết Port 1:1, Tự Động Định Vị Quận Khi Lưu Ảnh & Gỡ Bỏ Banner UI Thừa (Quyết định 184) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 121 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (121/121)!');

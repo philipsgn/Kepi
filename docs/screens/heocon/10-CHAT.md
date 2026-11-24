@@ -174,3 +174,22 @@ Màn hình Tab 3 hiển thị:
   - **Danh Sách Thẻ Check-in Quán Quen (Place Passport Cards):** Hiển thị ảnh Locket thật chụp tại quán, tên quán, địa chỉ, badge số lần ghé (`🔥 Ghé X lần`), tổng tiền (`💰 ...k`).
   - **Nút "Chỉ Đường 📍" 1-Chạm:** Tích hợp `Linking.openURL()` mở thẳng ứng dụng bản đồ gốc của máy (Google Maps trên Android / Apple Maps trên iOS) với tọa độ chính xác.
 - **Thẻ Sảnh Tab Giải Trí (Tab 3):** Đổi tên thẻ thành **Hộ Chiếu Quán Quen** với mô tả *"Check-in quán xá, album ảnh Locket & chỉ đường 1-chạm"*.
+
+---
+
+## 12. Trải Nghiệm Hộ Chiếu Quán Quen Chân Thực & Con Dấu Thị Thực Các Quận (Quyết định 184)
+
+- **Mô Phỏng Sổ Hộ Chiếu Chân Thực (True Passport Simulation):**
+  - Bìa Hộ Chiếu phong cách Neo-Brutalist: Số hộ chiếu du lịch `№ PK-8824-VN`, Quốc huy / Huy hiệu Heo Con Pixel `👑 🐷`, lưới 4 chỉ số `psgrid` (Quán đã ghé, Quận đã đến, Quán ruột, Tổng chi).
+  - **Khối Con Dấu Thị Thực Các Quận (`psstamps`):** Mỗi quận/huyện người dùng đã check-in được đóng một con dấu thị thực (`psstamp`) với góc xoay so le `-2deg` / `2deg` (chuẩn CSS line 517–518 prototype `Ví Heo Con 24_11.html`) trên các tông màu mực thị thực (đỏ son, xanh dương, xanh lục, tím than), hiển thị `★ [Tên Quận] · [Số lần] ★`.
+- **Gỡ Bỏ Hoàn Toàn Banner Phụ:** Loại bỏ thanh banner chủ quyền thừa trên giao diện UI để màn hình thanh thoát, tinh tế và tập trung 100% vào trải nghiệm trang Hộ Chiếu.
+- **Bộ 8 Icon Pixel Art 5×5 Chi Tiết Port 1:1 (`KIND`):** Tái tạo chính xác ma trận 5×5 pixel từ prototype `Ví Heo Con 24_11.html` cho các danh mục:
+  - `food`: Chén phở nóng nghi ngút (`#E0452B`, `['.....','#####','#####','.###.','.....']`)
+  - `cafe`: Ly trà/cà phê bốc khói (`#D9822B`, `['.#.#.','.....','#####','#...#','.###.']`)
+  - `market`: Giỏ chợ / sạp rau (`#5E9A57`, `['#####','#.#.#','#####','#...#','#####']`)
+  - `shop`: Túi mua sắm / áo thời trang (`#E8548C`, `['.###.','#####','#####','#####','#####']`)
+  - `gym`: Tạ tay thể thao (`#4B6FA5`, `['##.##','#####','#####','#####','##.##']`)
+  - `gas`: Cây xăng di chuyển (`#7A7A84`, `['..#..','.###.','#####','#####','.###.']`)
+  - `pharm`: Chữ thập nhà thuốc (`#3FA796`, `['..#..','..#..','#####','..#..','..#..']`)
+  - `fun`: Rạp phim / máy chơi game (`#8A5BB5`, `['..#..','#####','.###.','##.##','#...#']`)
+- **Tối Giản Văn Bản (Reduce Text & Focus Icon):** Rút gọn tối đa chữ rườm rà. Mỗi thẻ quán hiển thị ảnh chụp thật Locket hoặc Icon Pixel 5×5 sắc cạnh, tên quán + quận, 2 badge số lần ghé & tổng chi, và nút chỉ đường 1-chạm.
