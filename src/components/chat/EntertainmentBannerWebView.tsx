@@ -15,6 +15,7 @@ const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
 interface EntertainmentBannerWebViewProps {
   onPressBanner?: () => void;
+  onEnterCafe?: () => void;
 }
 
 /**
@@ -26,12 +27,14 @@ interface EntertainmentBannerWebViewProps {
  */
 export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProps> = ({
   onPressBanner,
+  onEnterCafe,
 }) => {
   const { tokens } = useTheme();
   const webViewRef = useRef<any>(null);
   const { gameTickets, pigFood, streakDays } = useGamificationStore();
   const [roomToast, setRoomToast] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enterCafeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showRoomToast = (text: string) => {
     setRoomToast(text);
@@ -40,30 +43,44 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
   };
 
   useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
+    };
+  }, []);
+
+  const handleRoomPayload = (d: any) => {
+    if (!d) return;
+    if (d.type === 'HAPTIC_LIGHT') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    } else if (d.type === 'ROOM_ACTION') {
+      if (d.text) showRoomToast(String(d.text));
+      if (d.id === 'saigon_cafe' && d.userTriggered && onEnterCafe) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
+        enterCafeTimerRef.current = setTimeout(() => {
+          onEnterCafe();
+        }, 320);
+      }
+    }
+  };
+
+  useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return;
     const onWebMsg = (ev: MessageEvent) => {
       try {
         const d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
-        if (!d) return;
-        if (d.type === 'HAPTIC_LIGHT') {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-        } else if (d.type === 'ROOM_ACTION' && d.text) {
-          showRoomToast(String(d.text));
-        }
+        handleRoomPayload(d);
       } catch (_e) {}
     };
     window.addEventListener('message', onWebMsg);
     return () => window.removeEventListener('message', onWebMsg);
-  }, []);
+  }, [onEnterCafe]);
 
   const handleMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'HAPTIC_LIGHT') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-      } else if (data.type === 'ROOM_ACTION' && data.text) {
-        showRoomToast(String(data.text));
-      }
+      handleRoomPayload(data);
     } catch (_e) {
       // Ignored
     }

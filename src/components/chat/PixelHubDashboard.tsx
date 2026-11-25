@@ -209,7 +209,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
           </View>
         </View>
 
-        <EntertainmentBannerWebView />
+        <EntertainmentBannerWebView onEnterCafe={() => handlePressCard('chat')} />
 
         <View style={styles.bannerRow}>
           <PixelPigAvatar size={34} mood={pigHunger >= 60 ? 'happy' : 'idle'} />

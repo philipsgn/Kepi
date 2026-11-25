@@ -78,6 +78,7 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
       action: null,
       actionEnd: 0,
       pendingHotspot: null,
+      pendingUserTriggered: false,
       tapMarker: null,
       bubbleText: '',
       bubbleEnd: 0,
@@ -100,13 +101,13 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
       }
     }
 
-    function triggerAction(hs, now) {
+    function triggerAction(hs, now, userTriggered) {
       state.action = hs.actionType;
       state.actionEnd = now + (hs.duration || 2800);
       if (hs.standFace) state.facing = hs.standFace;
       state.bubbleText = hs.bubbleText || '';
       state.bubbleEnd = now + (hs.duration || 3200);
-      notifyRoom('ROOM_ACTION', { id: hs.id, actionType: hs.actionType, text: hs.bubbleText });
+      notifyRoom('ROOM_ACTION', { id: hs.id, actionType: hs.actionType, text: hs.bubbleText, userTriggered: !!userTriggered });
     }
 
     function handleRoomTap(clientX, clientY) {
@@ -129,6 +130,7 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
           state.tx = clamp(hs.standX, cfg.walkBounds.minX, cfg.walkBounds.maxX);
           state.ty = clamp(hs.standY, cfg.walkBounds.minY, cfg.walkBounds.maxY);
           state.pendingHotspot = hs;
+          state.pendingUserTriggered = true;
           state.tapMarker = { x: state.tx, y: state.ty, until: now + 750 };
           state.action = null;
           return;
@@ -250,8 +252,10 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
           state.walking = false;
           if (state.pendingHotspot) {
             var hs = state.pendingHotspot;
+            var wasUser = state.pendingUserTriggered;
             state.pendingHotspot = null;
-            triggerAction(hs, now);
+            state.pendingUserTriggered = false;
+            triggerAction(hs, now, wasUser);
           }
         }
 
@@ -292,6 +296,7 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
             state.tx = clamp(pick.standX, cfg.walkBounds.minX, cfg.walkBounds.maxX);
             state.ty = clamp(pick.standY, cfg.walkBounds.minY, cfg.walkBounds.maxY);
             state.pendingHotspot = pick;
+            state.pendingUserTriggered = false;
           } else {
             state.tx = cfg.walkBounds.minX + Math.random() * (cfg.walkBounds.maxX - cfg.walkBounds.minX);
             state.ty = cfg.walkBounds.minY + Math.random() * (cfg.walkBounds.maxY - cfg.walkBounds.minY);

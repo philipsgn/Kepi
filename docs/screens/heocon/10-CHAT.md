@@ -334,3 +334,28 @@ Màn hình Tab 3 hiển thị:
 - **Single-Canvas `540×112` (Viewport `192×88`) — 0 Vết Cắt Ghép:**
   - Nâng cấp `EntertainmentBannerWebView.tsx` lên 1 bức Panorama 16-bit liền mạch 540px (`buildSeamlessPanorama` + `getTimePalette` tự đổi 3 sắc trời Sáng/Chiều/Tối), nối liền 5 phân khu Việt Nam trên cùng 1 dải trời, skyline, vỉa hè lát gạch và đại lộ 2 làn xuyên suốt 540px (xe buýt xanh, taxi, xe máy nón lá chạy liền mạch từ mép trái sang mép phải).
 - **Chống Che Bottom Bar (`PixelHubDashboard.tsx`):** Tinh gọn khoảng cách dọc giữa header, metric chips và 2 section boxes để 2 thẻ `Heo bay` & `Qua đường` hiển thị trọn vẹn phía trên `FloatingPillTabBar`.
+
+---
+
+## 24. Công Thức Diện Tích Quán Cà Phê Liền Mạch `432×128` & Cổng Liên Thông Khám Phá (Quyết định 203)
+
+### Công Thức Diện Tích & Tỷ Lệ Không Gian Phòng
+- **Viewport:** `W_view = 144px`, `H_view = 96px` (tỷ lệ `3:2`, diện tích `13,824 px²`).
+- **Thế giới nội thất (1 Offscreen Canvas duy nhất, 0 vết ghép):**
+  - `W_world = 3 × W_view = 432px`
+  - `H_world = (4/3) × H_view = 128px`
+  - Tổng diện tích logic: `432 × 128 = 55,296 px²` (gấp `4×` khung nhìn).
+- **Phân bổ trục cao (`128px`):**
+  - `y: 0..16` (`12.5%`): Trần gỗ, quạt trần 4 cánh & dây đèn thả.
+  - `y: 16..74` (`45.3%`): Tường kem gỗ, quầy bar pha phin, cửa sổ 3 sắc trời, kệ sách, cây thông trang trí, cửa kính ra phố.
+  - `y: 74..78` (`3.1%`): Len chân tường gỗ.
+  - `y: 78..128` (`39.1%`): Sàn gạch bông Sài Gòn liên tục (`walkBounds: x = 18..414, y = 82..120`).
+- **Phân bổ 4 khu chức năng (`432px`):**
+  1. **Quầy Bar & Cà Phê Phin (`x: 0..112`, `25.9%`):** Máy espresso, 2 phin nhôm bốc khói, tủ kính bánh mì/bánh ngọt, bảng menu, ghế bar.
+  2. **Bàn Heo & Heo AI (`x: 112..240`, `29.6%`, `initialCamX: 104`):** Bàn gỗ tròn, Heo AI đeo kính, cửa sổ nhìn ra phố Sài Gòn 3 khung giờ (Sáng/Chiều/Tối), quạt trần 4 cánh.
+  3. **Góc Đọc Sách & Cây Thông (`x: 240..344`, `24.1%`):** Kệ sách gỗ cao, ghế bành đọc sách, đèn cây vàng ấm, Cây thông trang trí ngôi sao & quả châu lấp lánh, tranh treo tường.
+  4. **Cửa Ra Ngoài Trang Khám Phá (`x: 344..432`, `20.4%`):** Cửa kính vòm khung gỗ, biển `RA PHỐ`, thảm chùi chân & chậu cây.
+- **Cổng Liên Thông 2 Chiều & Smart Bubbles:**
+  - Chạm tiệm `CAFE` trên Banner Khám phá (`onEnterCafe`) hoặc thẻ `Heo AI` ➔ vào Quán Cà Phê.
+  - Chạm `Cửa Ra Phố` (`exit_door` → `onExitToHub`) trong Quán Cà Phê ➔ quay về Tab Khám phá.
+  - Bong bóng thoại Heo AI tự ẩn khi camera rời khỏi khu bàn trung tâm (`camX` ngoài `[68, 152]`) để ngắm trọn nội thất quán.

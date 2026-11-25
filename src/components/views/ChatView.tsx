@@ -493,6 +493,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
             latestAiText={latestAiText}
             isThinking={isThinking}
             active={activeSubView === 'chat'}
+            onExitToHub={() => setActiveSubView('hub')}
           />
         </View>
 

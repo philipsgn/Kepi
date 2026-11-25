@@ -6513,9 +6513,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 2. Cả 4 banner đều mở rộng kích thước thế giới 2D (worldWidth > viewWidth & worldHeight > viewHeight) với bối cảnh Việt Nam
   assert.ok(
-    cafeBannerCode.includes('worldWidth: 360') &&
-      cafeBannerCode.includes('worldHeight: 184') &&
-      cafeBannerCode.includes('drawCafeWorldWings') &&
+    (cafeBannerCode.includes('worldWidth: 432') || cafeBannerCode.includes('worldWidth: 360')) &&
+      (cafeBannerCode.includes('worldHeight: 128') || cafeBannerCode.includes('worldHeight: 184')) &&
+      (cafeBannerCode.includes('buildSeamlessCafeRoom') || cafeBannerCode.includes('drawCafeWorldWings')) &&
       profileBannerCode.includes('worldWidth: 420') &&
       profileBannerCode.includes('worldHeight: 160') &&
       profileBannerCode.includes('drawProfileWorldWings') &&
@@ -6557,4 +6557,41 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 139 Passed: Panorama 16-Bit Việt Nam Liền Mạch 100% (540×112) & Chống Che Bottom Bar (Quyết định 202) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 139 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (139/139)!');
+// ==========================================
+// TEST 140: QUÁN CÀ PHÊ LIỀN MẠCH 432×128, CÔNG THỨC KHÔNG GIAN PHÒNG & CỔNG LIÊN THÔNG KHÁM PHÁ (QUYẾT ĐỊNH 203)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const cafeCode = fs.readFileSync('src/components/chat/CafeChatBannerWebView.tsx', 'utf8');
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const openRoomCode = fs.readFileSync('src/components/pixel/pixelOpenRoomEngine.ts', 'utf8');
+
+  assert.ok(
+    cafeCode.includes('worldWidth: 432') &&
+      cafeCode.includes('worldHeight: 128') &&
+      cafeCode.includes('buildSeamlessCafeRoom') &&
+      cafeCode.includes('pine_tree') &&
+      cafeCode.includes('reading_nook') &&
+      cafeCode.includes('exit_door') &&
+      cafeCode.includes('isAtCenterTable') &&
+      !cafeCode.includes('drawCafeWorldWings'),
+    'CafeChatBannerWebView must implement unified 432x128 seamless cafe interior with bar, reading nook, pine tree, exit door, and smart bubbles'
+  );
+
+  assert.ok(
+    funCode.includes('onEnterCafe') &&
+      hubCode.includes("onEnterCafe={() => handlePressCard('chat')}") &&
+      chatViewCode.includes("onExitToHub={() => setActiveSubView('hub')}") &&
+      openRoomCode.includes('userTriggered') &&
+      decisionsCode.includes('203') &&
+      chatDocCode.includes('55,296 px²'),
+    'Two-way CAFE portal (Khám phá <-> Cafe) with userTriggered guard and Room Area Formula docs must be verified'
+  );
+
+  console.log('✅ Test 140 Passed: Quán Cà Phê Liền Mạch 432×128, Công Thức Không Gian Phòng & Cổng Liên Thông Khám Phá (Quyết định 203) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 140 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (140/140)!');
