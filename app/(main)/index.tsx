@@ -563,13 +563,26 @@ export default function MainAppScreen() {
     };
   }, []);
 
-  // Tự động xin quyền Camera & làm nóng GPS (Quyết định 181) khi mở Tab Camera
+  // Tự động xin quyền Camera trước, chờ đóng hoàn toàn (400ms) rồi mới làm nóng GPS tuần tự (Quyết định 195)
   useEffect(() => {
-    if (!cameraGranted && canAskCameraAgain) {
-      requestCameraPermission().catch(() => {});
-    }
-    prewarmLocationAsync().catch(() => {});
-  }, [cameraGranted, canAskCameraAgain, requestCameraPermission]);
+    let cancelled = false;
+    (async () => {
+      if (showFirstLaunchPermModal) return;
+      if (!cameraGranted && canAskCameraAgain) {
+        try {
+          await requestCameraPermission();
+        } catch (_e) {}
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      }
+      if (cancelled) return;
+      try {
+        await prewarmLocationAsync();
+      } catch (_e) {}
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [showFirstLaunchPermModal, cameraGranted, canAskCameraAgain, requestCameraPermission]);
 
   const currentOffsetYRef = useRef<number>(0);
 
@@ -1871,6 +1884,8 @@ export default function MainAppScreen() {
                       onSubmitEditing={() => setIsEditingStoryText(false)}
                       placeholder=""
                       style={styles.camStoryTextInput}
+                      selectionColor="#FFFFFF"
+                      underlineColorAndroid="transparent"
                       maxLength={40}
                       returnKeyType="done"
                       multiline={false}
@@ -2542,6 +2557,16 @@ const styles = StyleSheet.create({
     margin: 0,
     minWidth: 80,
     backgroundColor: 'transparent',
+    ...(Platform.OS === 'web'
+      ? ({
+          outlineStyle: 'none',
+          outlineWidth: 0,
+          outlineColor: 'transparent',
+          boxShadow: 'none',
+          WebkitAppearance: 'none',
+          caretColor: '#FFFFFF',
+        } as any)
+      : {}),
   },
   camStoryTextDisplay: {
     fontFamily: 'Nunito',

@@ -6245,4 +6245,44 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 131 Passed: Đồng Bộ 100% GitHub Web PWA & Expo Go + Pixel Art Việt Nam Toàn App (Quyết định 194) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 131 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (131/131)!');
+// ==========================================
+// TEST 132: TRIỆT TIÊU FOCUS RING XANH WEB & TUẦN TỰ HÓA XIN QUYỀN CAMERA -> LOCATION (QUYẾT ĐỊNH 195)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const camDocCode = fs.readFileSync('docs/screens/heocon/09-CAMERA.md', 'utf8');
+  const layoutCode = fs.readFileSync('app/_layout.tsx', 'utf8');
+  const mainCamCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+
+  // 1. Triệt tiêu focus ring xanh trên Web (app/_layout.tsx + camStoryTextInput)
+  assert.ok(
+    layoutCode.includes('pigfly-web-input-reset') &&
+      layoutCode.includes('outline: none !important') &&
+      mainCamCode.includes("outlineStyle: 'none'") &&
+      mainCamCode.includes("boxShadow: 'none'") &&
+      mainCamCode.includes('selectionColor="#FFFFFF"'),
+    'app/_layout.tsx and camStoryTextInput must eliminate browser blue focus ring on Web'
+  );
+
+  // 2. Tuần tự hóa xin quyền Camera -> đợi 400ms -> Location (chờ FirstLaunchPermissionsModal)
+  assert.ok(
+    mainCamCode.includes('if (showFirstLaunchPermModal) return;') &&
+      mainCamCode.includes('await requestCameraPermission();') &&
+      mainCamCode.includes('setTimeout(resolve, 400)') &&
+      mainCamCode.includes('await prewarmLocationAsync();'),
+    'app/(main)/index.tsx must sequentially await Camera permission before Location prewarm'
+  );
+
+  // 3. Living Documentation Sync Audit (Quyết định 195)
+  assert.ok(
+    agentsCode.includes('195') &&
+      decisionsCode.includes('195') &&
+      camDocCode.includes('195'),
+    'AGENTS.md, DECISIONS.md, and 09-CAMERA.md must document Quyết định 195'
+  );
+
+  console.log('✅ Test 132 Passed: Triệt Tiêu Focus Ring Xanh Web & Tuần Tự Hóa Xin Quyền Camera -> Location (Quyết định 195) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 132 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (132/132)!');

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -30,6 +31,17 @@ export default function RootLayout() {
 
   useEffect(() => {
     initializeAuth();
+    // Quyết định 195: Triệt tiêu viền focus xanh mặc định của trình duyệt Web quanh TextInput/textarea
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const styleId = 'pigfly-web-input-reset';
+      if (!document.getElementById(styleId)) {
+        const styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        styleEl.textContent =
+          'input:focus, textarea:focus, select:focus { outline: none !important; box-shadow: none !important; }';
+        document.head.appendChild(styleEl);
+      }
+    }
   }, []);
 
   useEffect(() => {
