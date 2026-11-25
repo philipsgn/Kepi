@@ -1,0 +1,27 @@
+{
+  "short_name": "PigFly",
+  "name": "PigFly — Ví Locket Chi Tiêu",
+  "description": "App Chi Tiêu Bằng Ảnh & Quét Mã QR (Phong cách Hà Nội Thu Đông)",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "./icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "./apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    }
+  ],
+  "start_url": "./",
+  "background_color": "#FAF6EC",
+  "theme_color": "#0E1620",
+  "display": "standalone",
+  "orientation": "portrait"
+}
