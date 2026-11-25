@@ -22,3 +22,4 @@ npm-debug.*
 .env.*.local
 # Subagent runtime directories
 .agents/
+scratch/
