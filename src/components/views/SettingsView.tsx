@@ -167,6 +167,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
     if (canAskCameraAgain) {
       const res = await requestCameraPermission();
       if (!res?.granted) {
+        await setCameraAppEnabledState(false);
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
           window.alert('Trình duyệt đang chặn quyền Máy ảnh. Bấm vào biểu tượng ổ khóa cạnh thanh địa chỉ để cho phép nhé!');
         } else {
@@ -181,8 +182,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
         }
       }
     } else if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      await setCameraAppEnabledState(false);
       window.alert('Trình duyệt đang chặn quyền Máy ảnh. Bấm vào biểu tượng ổ khóa cạnh thanh địa chỉ để cho phép nhé!');
     } else {
+      await setCameraAppEnabledState(false);
       openAppSettings();
     }
   };
@@ -207,6 +210,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
       setLocationGranted(res.granted);
       setLocationCanAsk(res.canAskAgain);
       if (!res.granted) {
+        setLocationAppEnabledState(false);
+        await setLocationAppEnabled(false);
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
           window.alert('Trình duyệt đang chặn quyền Vị trí. Bấm vào biểu tượng ổ khóa cạnh thanh địa chỉ (hoặc Cài đặt Safari) để cho phép nhé!');
         } else {
@@ -221,6 +226,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
         }
       }
     } else {
+      setLocationAppEnabledState(false);
+      await setLocationAppEnabled(false);
       Linking.openSettings();
     }
   };

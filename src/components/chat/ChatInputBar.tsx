@@ -31,7 +31,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   onPickImage,
   isThinking = false,
 }) => {
-  const { tokens, mode } = useTheme();
+  const { tokens } = useTheme();
   // Quyết định 144: Cố định 100% Neo-Brutalist Pixel Art cho Tab Giải Trí độc lập với Theme máy
   const isHeocon = true;
   const { bottomInset, insets } = useBottomInset();
@@ -74,7 +74,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         styles.container,
         isHeocon
           ? {
-              backgroundColor: mode === 'pink' ? '#FFF5F7' : '#F6EEDC',
+              backgroundColor: '#F6EEDC',
               borderTopWidth: 0,
               paddingBottom: currentBottomPadding,
             }

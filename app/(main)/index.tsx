@@ -587,17 +587,23 @@ export default function MainAppScreen() {
         await new Promise((resolve) => setTimeout(resolve, 450));
       } else if (cameraGranted) {
         await setCameraAppEnabledState(true).catch(() => {});
+      } else if (!canAskCameraAgain) {
+        await setCameraAppEnabledState(false).catch(() => {});
       }
       try {
         const appLocEnabled = await getLocationAppEnabled().catch(() => true);
-        if (!appLocEnabled) return;
         let locPerm = await getLocationPermissionStatusAsync();
-        if ((!locPerm.granted && locPerm.canAskAgain) || Platform.OS === 'web') {
-          locPerm = await requestLocationPermissionAsync();
-        }
-        await setLocationAppEnabled(!!locPerm.granted).catch(() => {});
         if (locPerm.granted) {
+          await setLocationAppEnabled(true).catch(() => {});
           await prewarmLocationAsync();
+        } else if (appLocEnabled && (locPerm.canAskAgain || Platform.OS === 'web')) {
+          locPerm = await requestLocationPermissionAsync();
+          await setLocationAppEnabled(!!locPerm.granted).catch(() => {});
+          if (locPerm.granted) {
+            await prewarmLocationAsync();
+          }
+        } else if (!locPerm.canAskAgain && Platform.OS !== 'web') {
+          await setLocationAppEnabled(false).catch(() => {});
         }
       } catch (_e) {}
     })();
@@ -2234,8 +2240,8 @@ export default function MainAppScreen() {
         </View>
       </ScrollView>
 
-      {/* FLOATING PILL TAB BAR ACROSS ALL 5 PAGES (Ẩn khi vào Fullscreen Game Mode - Quyết định 144) */}
-      {!isGameActive && (
+      {/* FLOATING PILL TAB BAR ACROSS ALL 5 PAGES (Ẩn khi vào sub-view của Tab Khám phá - Quyết định 144 & 199) */}
+      {!(activeTabIndex === 3 && isGameActive) && (
         <FloatingPillTabBar
           activeIndex={activeTabIndex}
           onSelectTab={handleTabPress}

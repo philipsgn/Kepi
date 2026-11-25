@@ -3862,7 +3862,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   // 1. Fullscreen Game Mode in app/(main)/index.tsx
   assert.ok(mainIndexCode.includes('isGameActive'), 'main index must maintain isGameActive state');
   assert.ok(mainIndexCode.includes('onToggleTabBar'), 'main index must pass onToggleTabBar to ChatView');
-  assert.ok(mainIndexCode.includes('!isGameActive &&') && mainIndexCode.includes('FloatingPillTabBar'), 'FloatingPillTabBar must be hidden when isGameActive is true');
+  assert.ok(
+    (mainIndexCode.includes('!isGameActive &&') || mainIndexCode.includes('!(activeTabIndex === 3 && isGameActive)')) &&
+      mainIndexCode.includes('FloatingPillTabBar'),
+    'FloatingPillTabBar must be hidden when isGameActive is true'
+  );
 
   // 2. ChatView Fullscreen & Hub Integration
   assert.ok(chatViewCode.includes('onToggleTabBar?.(false)'), 'ChatView must request hiding tab bar when entering games');
@@ -6360,27 +6364,34 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
   const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
   const mainCamCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+  const settingsCode = fs.readFileSync('src/components/views/SettingsView.tsx', 'utf8');
   const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
   const chatInputCode = fs.readFileSync('src/components/chat/ChatInputBar.tsx', 'utf8');
 
-  // 1. Tắt luồng FirstLaunchPermissionsModal trung gian & đồng bộ 2 chiều OS <-> App
+  // 1. Tắt luồng FirstLaunchPermissionsModal trung gian & đồng bộ 2 chiều OS <-> App chặt chẽ
   assert.ok(
     !mainCamCode.includes('setShowFirstLaunchPermModal(true)') &&
       mainCamCode.includes('setCameraAppEnabledState(!!camRes.granted)') &&
-      mainCamCode.includes('setLocationAppEnabled(!!locPerm.granted)'),
-    'app/(main)/index.tsx must bypass FirstLaunchPermissionsModal and sync OS permission state two-way'
+      mainCamCode.includes('setLocationAppEnabled(!!locPerm.granted)') &&
+      mainCamCode.includes('if (locPerm.granted)') &&
+      settingsCode.includes('await setCameraAppEnabledState(false)') &&
+      settingsCode.includes('await setLocationAppEnabled(false)'),
+    'app/(main)/index.tsx and SettingsView.tsx must bypass FirstLaunchPermissionsModal and sync OS permission state strictly two-way'
   );
 
-  // 2. Ẩn Bottom Bar ở tất cả màn con (chat, map, fly, cross)
+  // 2. Ẩn Bottom Bar ở tất cả màn con (chat, map, fly, cross) và ràng buộc đúng Tab Khám phá
   assert.ok(
-    chatViewCode.includes("activeSubView !== 'hub'"),
-    'ChatView must hide Bottom Tab Bar for chat, map, fly, and cross subviews'
+    chatViewCode.includes("activeSubView !== 'hub'") &&
+      mainCamCode.includes('!(activeTabIndex === 3 && isGameActive)'),
+    'ChatView and index.tsx must hide Bottom Tab Bar for Tab Khám phá subviews only'
   );
 
-  // 3. Chat liền mạch kiểu IG/Messenger: không đường kẻ ngang borderTopWidth, sát đáy insets.bottom
+  // 3. Chat liền mạch kiểu IG/Messenger: không đường kẻ ngang borderTopWidth, nền cố định #F6EEDC, sát đáy insets.bottom
   assert.ok(
     chatInputCode.includes('borderTopWidth: 0') &&
       !chatInputCode.includes('borderTopWidth: 2.5') &&
+      !chatInputCode.includes('#FFF5F7') &&
+      chatInputCode.includes("backgroundColor: '#F6EEDC'") &&
       chatInputCode.includes('Math.max(insets.bottom, 10)') &&
       decisionsCode.includes('199') &&
       chatDocCode.includes('199'),

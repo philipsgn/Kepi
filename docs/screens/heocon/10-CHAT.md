@@ -306,4 +306,4 @@ Màn hình Tab 3 hiển thị:
   - Tự động ẩn Bottom Tab Bar khi người dùng vào bất kỳ sub-view con nào (`activeSubView !== 'hub'`: Trò chuyện `'chat'`, Quán quen `'map'`, Heo bay `'fly'`, Qua đường `'cross'`) để không gian thoáng đãng, tối đa diện tích hiển thị.
 - **Khung Tin Nhắn & Thanh Nhập Chat Liền Mạch:**
   - Xóa bỏ hoàn toàn đường kẻ ngang (`borderTopWidth: 0`) trên `ChatInputBar`.
-  - Vùng tin nhắn mở rộng tràn lề liền mạch xuống thanh nhập liệu (không đóng hộp viền 3px tách rời), nền đồng bộ theo theme (`#F6EEDC` / `#FFF5F7`), sát đáy `Math.max(insets.bottom, 10)`.
+  - Vùng tin nhắn mở rộng tràn lề liền mạch xuống thanh nhập liệu (không đóng hộp viền 3px tách rời), nền cố định `#F6EEDC` khớp 100% với `ChatView` ở mọi theme, sát đáy `Math.max(insets.bottom, 10)`.
