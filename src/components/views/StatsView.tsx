@@ -40,7 +40,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { radii } from '../../theme/tokens';
 import { useBottomInset } from '../../hooks/useBottomInset';
 
-const PREFS_STORAGE_KEY = '@vi_locket_home_preferences';
+const STORAGE_MASK_KEY = 'vi_locket_mask_money';
 
 interface StatsViewProps {
   onNavigateToCamera?: () => void;
@@ -141,7 +141,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavi
 
   // Tỷ lệ tiết kiệm thực tế
   const currentSavingsRate = useMemo(() => {
-    if (!monthlyIncome || monthlyIncome <= 0) return 25;
+    if (!monthlyIncome || monthlyIncome <= 0) return 0;
     const rate = Math.round(((monthlyIncome - currentMonthSpent) / monthlyIncome) * 100);
     return Math.max(0, Math.min(100, rate));
   }, [monthlyIncome, currentMonthSpent]);
@@ -163,16 +163,11 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavi
 
   const sectionListRef = useRef<SectionList<RowData>>(null);
 
-  // 1. TẢI CÀI ĐẶT ẨN TIỀN
+  // 1. TẢI CÀI ĐẶT ẨN TIỀN (Thống nhất key vi_locket_mask_money — QĐ 200)
   useEffect(() => {
-    AsyncStorage.getItem(PREFS_STORAGE_KEY).then((val) => {
-      if (val) {
-        try {
-          const parsed = JSON.parse(val);
-          if (typeof parsed.isMasked === 'boolean') {
-            setIsMasked(parsed.isMasked);
-          }
-        } catch (_) {}
+    AsyncStorage.getItem(STORAGE_MASK_KEY).then((val) => {
+      if (val !== null) {
+        setIsMasked(val === 'true');
       }
     });
   }, []);
@@ -182,9 +177,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavi
     const nextVal = !isMasked;
     setIsMasked(nextVal);
     try {
-      const existing = await AsyncStorage.getItem(PREFS_STORAGE_KEY);
-      const parsed = existing ? JSON.parse(existing) : {};
-      await AsyncStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify({ ...parsed, isMasked: nextVal }));
+      await AsyncStorage.setItem(STORAGE_MASK_KEY, String(nextVal));
     } catch (_) {}
   };
 
@@ -382,8 +375,8 @@ export const StatsView: React.FC<StatsViewProps> = ({ onNavigateToCamera, onNavi
     { id: 'SKIPPED', label: Strings.stats.filterSkipped },
     { id: 'UNPRICED', label: Strings.stats.filterUnpriced },
     { id: 'an_uong', label: 'Ăn uống' },
-    { id: 'Mua sắm', label: 'Mua sắm' },
-    { id: 'Di chuyển', label: 'Di chuyển' },
+    { id: 'mua_sam', label: 'Mua sắm' },
+    { id: 'di_chuyen', label: 'Di chuyển' },
   ];
 
   return (

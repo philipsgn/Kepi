@@ -1,11 +1,20 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Transaction, CalendarDaySummary, TransactionType, PaymentMethod, TransactionSource, MediaType } from '../types/database';
+import { Transaction, CalendarDaySummary, TransactionType, PaymentMethod, TransactionSource, MediaType, SentimentRating } from '../types/database';
 import { useBudgetStore } from './budgetStore';
 import { useGamificationStore } from './gamificationStore';
 import { syncBudgetToLockScreen } from '../services/lockScreenService';
+import { calculateStreakDays } from '../utils/profileUtils';
 
 const STORAGE_KEY = 'vi_locket_transactions_data';
+
+function syncStreakFromTransactions(txs: Transaction[]) {
+  const dates = txs
+    .filter((tx) => tx.status === 'CONFIRMED' || !tx.status)
+    .map((tx) => (tx.occurred_at || tx.created_at).slice(0, 10));
+  const streak = calculateStreakDays(dates);
+  useGamificationStore.getState().setStreakDays(streak);
+}
 
 interface TransactionState {
   transactions: Transaction[];
@@ -35,6 +44,10 @@ interface TransactionState {
     desc_position?: { x: number; y: number } | null;
     lat?: number | null;
     lng?: number | null;
+    location_name?: string | null;
+    district?: string | null;
+    receipt_data?: any | null;
+    sentiment_rating?: SentimentRating | null;
   }) => Promise<Transaction>;
   confirmPendingTransaction: (id: string, updatedAmount?: number) => Promise<void>;
   cancelPendingTransaction: (id: string) => Promise<void>;
@@ -76,11 +89,13 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
           set({ transactions: finalTxs, isLoading: false });
           // Tự động tính toán lại ngân sách từ lịch sử giao dịch và kết chuyển ngày nếu sang ngày mới
           useBudgetStore.getState().recalculateFromTransactions(finalTxs);
+          syncStreakFromTransactions(finalTxs);
           useBudgetStore.getState().checkAndApplyDailyRollover(finalTxs).catch(() => {});
         } else {
           // Bắt đầu từ số 0: 0 giao dịch giả, 0 hardcore numbers
           set({ transactions: [], isLoading: false });
           useBudgetStore.getState().recalculateFromTransactions([]);
+          syncStreakFromTransactions([]);
           useBudgetStore.getState().checkAndApplyDailyRollover([]).catch(() => {});
         }
       } catch (err) {
@@ -111,6 +126,10 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
         desc_position: data.desc_position || null,
         lat: typeof data.lat === 'number' && Number.isFinite(data.lat) ? data.lat : null,
         lng: typeof data.lng === 'number' && Number.isFinite(data.lng) ? data.lng : null,
+        location_name: data.location_name ?? null,
+        district: data.district ?? null,
+        receipt_data: data.receipt_data ?? null,
+        sentiment_rating: data.sentiment_rating ?? null,
         occurred_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
       };
@@ -125,6 +144,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
       // Tự động tính toán lại ngân sách trực tiếp từ mảng giao dịch
       if (txStatus === 'CONFIRMED') {
         useBudgetStore.getState().recalculateFromTransactions(updated);
+        syncStreakFromTransactions(updated);
         useGamificationStore.getState().addGameTickets(1);
         syncBudgetToLockScreen().catch(() => {});
       }
@@ -201,6 +221,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
 
       // SINGLE SOURCE OF TRUTH: Cập nhật lại toàn bộ ngân sách khi sửa số tiền / ngày
       useBudgetStore.getState().recalculateFromTransactions(updated);
+      syncStreakFromTransactions(updated);
       syncBudgetToLockScreen().catch(() => {});
     },
 
@@ -211,6 +232,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => {
 
       // SINGLE SOURCE OF TRUTH: Hoàn lại tiền vào ngân sách và số dư khi xóa khoản chi
       useBudgetStore.getState().recalculateFromTransactions(updated);
+      syncStreakFromTransactions(updated);
       syncBudgetToLockScreen().catch(() => {});
     },
 

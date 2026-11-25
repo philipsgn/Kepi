@@ -10,6 +10,8 @@ import {
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
 import { PixelIconStar } from '../pixel/PixelIcons';
+import { useTransactionStore } from '../../store/transactionStore';
+import { buildOpenRoomEngineScript } from '../pixel/pixelOpenRoomEngine';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -48,8 +50,46 @@ export const BenThanhStreetBannerWebView: React.FC<BenThanhStreetBannerWebViewPr
 }) => {
   const webViewRef = useRef<any>(null);
   const iframeRef = useRef<any>(null);
+  const { transactions } = useTransactionStore();
+  const realPlacesCount = useMemo(
+    () =>
+      transactions.filter(
+        (t) => (t.status === 'CONFIRMED' || !t.status) && ((t.lat != null && t.lng != null) || Boolean(t.location_name))
+      ).length,
+    [transactions]
+  );
   const [selectedStallIdx, setSelectedStallIdx] = useState(0);
   const [toastText, setToastText] = useState<string>('Heo ghé Phở bò · 55k');
+
+  const openRoomScript = useMemo(
+    () =>
+      buildOpenRoomEngineScript({
+        canvasId: 'pbCv',
+        worldWidth: 584,
+        worldHeight: 100,
+        viewWidth: 192,
+        viewHeight: 100,
+        walkBounds: { minX: 20, maxX: 560, minY: 82, maxY: 92 },
+        initialX: 48,
+        initialY: 86,
+        speed: 42,
+        hotspots: [
+          {
+            id: 'real_places',
+            x: 16,
+            y: 10,
+            w: 72,
+            h: 48,
+            standX: 52,
+            standY: 86,
+            standFace: 1,
+            actionType: 'check_ledger',
+            bubbleText: `Bạn đã lưu ${realPlacesCount} quán quen thật!`,
+          },
+        ],
+      }),
+    [realPlacesCount]
+  );
 
   const sendCommand = (payload: Record<string, any>) => {
     const js = `window.__pbGo && window.__pbGo(${Number(payload.index) || 0}); true;`;
@@ -420,7 +460,7 @@ function draw(t){
   R(X,0,0,VW,2,PBI);R(X,0,VH-2,VW,2,PBI);
 }
 
-function step(dt){
+function step(dt, now){
   PB.t+=dt;
   if(PB.hop>0) PB.hop=Math.max(0,PB.hop-dt);
   if(PB.mode==='walk'){
@@ -435,6 +475,19 @@ function step(dt){
     PB.tm-=dt;
     if(PB.tm<=0) pbGo((PB.i+1)%PB_DISH.length);
   }
+  if (window.__openRoom) {
+    var rm = window.__openRoom.state;
+    window.__openRoom.step(dt, now);
+    if (rm.walking || rm.action) {
+      PB.px = rm.x - 12;
+      PB.dir = rm.facing;
+      PB.mode = rm.walking ? 'walk' : 'eat';
+    } else {
+      rm.x = PB.px + 12;
+      rm.tx = rm.x;
+    }
+    rm.camX = PB.camX;
+  }
   // Camera cuộn theo chú heo mượt mà (không bó hẹp 1 khung hình!)
   var targetCam=Math.max(0,Math.min(WORLD_W-VW, PB.px+12-(VW/2)));
   PB.camX += (targetCam - PB.camX) * Math.min(1, dt * 6);
@@ -443,7 +496,7 @@ function step(dt){
 function frame(now){
   if(!isActive){PB.run=false;return;}
   var dt=Math.min(0.05,(now-PB.last)/1000);PB.last=now;
-  step(dt);draw(PB.t);requestAnimationFrame(frame);
+  step(dt, now);draw(PB.t);if(window.__openRoom)window.__openRoom.drawOverlays(X, now);requestAnimationFrame(frame);
 }
 
 cv.addEventListener('pointerdown',function(e){
@@ -473,13 +526,15 @@ window.addEventListener('message',function(ev){
   }catch(e){}
 });
 
+${openRoomScript}
+
 PB.px=PB_CX[0]-12; PB.tx=PB.px; PB.camX=0;
 if(reduced){draw(3);}else{PB.run=true;PB.last=performance.now();requestAnimationFrame(frame);}
 })();
 </script>
 </body>
 </html>`,
-    []
+    [openRoomScript]
   );
 
   const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);

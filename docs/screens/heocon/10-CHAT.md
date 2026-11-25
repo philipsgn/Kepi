@@ -307,3 +307,13 @@ Màn hình Tab 3 hiển thị:
 - **Khung Tin Nhắn & Thanh Nhập Chat Liền Mạch:**
   - Xóa bỏ hoàn toàn đường kẻ ngang (`borderTopWidth: 0`) trên `ChatInputBar`.
   - Vùng tin nhắn mở rộng tràn lề liền mạch xuống thanh nhập liệu (không đóng hộp viền 3px tách rời), nền cố định `#F6EEDC` khớp 100% với `ChatView` ở mọi theme, sát đáy `Math.max(insets.bottom, 10)`.
+
+---
+
+## 21. Banner Không Gian Mở Tương Tác Toàn App (Quyết định 200)
+
+- **Engine Dùng Chung (`src/components/pixel/pixelOpenRoomEngine.ts`):**
+  - **Tap-to-Walk:** Chạm bất kỳ vị trí nào trên sàn đi lại (`walkBounds`) để chú heo 24×20 tự quay hướng và bước 4 chân so le tới điểm chạm.
+  - **Hotspot Actions Kèm Dữ Liệu Thật:** Chạm vào đồ vật/điểm tương tác trong phòng, chú heo tự bước tới điểm đứng chuẩn (`standX, standY`), thực hiện hoạt ảnh hành động (`sip_coffee`, `type_laptop`, `look_window`, `play_arcade`, `jump_joy`, `eat_snack`, `check_ledger`), rung `HAPTIC_LIGHT` và hiện bong bóng thoại chứa số liệu thật từ Store (không tự chuyển trang).
+  - **Autonomous Roaming:** Khi rảnh (~4–6s không chạm), chú heo tự dạo quanh phòng hoặc ghé thăm đồ vật.
+- **4 Banner Áp Dụng:** `CafeChatBannerWebView` (Trò chuyện), `ProfileDeskBanner` (Hồ sơ), `EntertainmentBannerWebView` (Khám phá), `BenThanhStreetBannerWebView` (Quán quen).

@@ -70,7 +70,7 @@ import { calculateStreakDays } from '../../utils/profileUtils';
 import { getPigContextualAdvice, PigAdviceResult } from '../../utils/pigAdviceEngine';
 import { Transaction } from '../../types/database';
 
-const STORAGE_PREFS_KEY = '@vi_locket_home_preferences';
+const STORAGE_MASK_KEY = 'vi_locket_mask_money';
 
 export interface JournalViewProps {
   isActive?: boolean;
@@ -139,16 +139,13 @@ export const JournalView: React.FC<JournalViewProps> = ({
   // Confirmation Inbox
   const { totalCount: inboxCount } = useConfirmationInbox();
 
-  // Load preferences
+  // Load preferences (single privacy key vi_locket_mask_money — QĐ 200)
   useEffect(() => {
     (async () => {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_PREFS_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (typeof parsed.isPrivacyHidden === 'boolean') {
-            setIsPrivacyHidden(parsed.isPrivacyHidden);
-          }
+        const raw = await AsyncStorage.getItem(STORAGE_MASK_KEY);
+        if (raw !== null) {
+          setIsPrivacyHidden(raw === 'true');
         }
       } catch (err) {}
     })();
@@ -163,10 +160,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
     const nextVal = !isPrivacyHidden;
     setIsPrivacyHidden(nextVal);
     try {
-      await AsyncStorage.setItem(
-        STORAGE_PREFS_KEY,
-        JSON.stringify({ isPrivacyHidden: nextVal })
-      );
+      await AsyncStorage.setItem(STORAGE_MASK_KEY, String(nextVal));
     } catch (e) {}
   };
 
@@ -219,8 +213,6 @@ export const JournalView: React.FC<JournalViewProps> = ({
         source: 'MANUAL',
         status: 'CONFIRMED',
       });
-
-      recordExpense(amount);
 
       gardenRef.current?.feedPig();
       gardenRef.current?.updateBudget(todaySpent + amount, effectiveLimit);
@@ -406,7 +398,9 @@ export const JournalView: React.FC<JournalViewProps> = ({
                   {!isPrivacyHidden && <DongMark size={18} />}
                 </View>
                 <Text style={styles.limitTargetText}>
-                  {isOverBudget
+                  {isPrivacyHidden
+                    ? '••••••'
+                    : isOverBudget
                     ? `vượt +${formatVND(overspentAmount)}`
                     : `còn lại ${formatVND(remainingToday)}`}
                 </Text>
@@ -546,7 +540,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
         transactions={transactions.filter(
           (t) =>
             (t.status === 'CONFIRMED' || !t.status) &&
-            getVietnamDateString(t.created_at) === selectedDayCell?.dateStr
+            getVietnamDateString(t.occurred_at || t.created_at) === selectedDayCell?.dateStr
         )}
         isPrivacyHidden={isPrivacyHidden}
         onClose={() => setIsDaySheetOpen(false)}

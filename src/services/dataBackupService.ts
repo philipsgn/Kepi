@@ -29,6 +29,9 @@ export interface BackupPayload {
   fixedCostItems: unknown[];
   goals: unknown[];
   transactions: unknown[];
+  gamification?: unknown;
+  categories?: unknown[];
+  waitBasket?: unknown[];
   embeddedPhotos?: Record<string, { fullBase64?: string; thumbBase64?: string }>;
 }
 
@@ -42,9 +45,12 @@ export async function exportAppDataAsync(): Promise<{ success: boolean; filePath
     const budgetStore = useBudgetStore.getState();
     const txStore = useTransactionStore.getState();
 
-    const [cachedGoals, cachedFixedCosts] = await Promise.all([
-      AsyncStorage.getItem('@vilocket_goals_list'),
+    const [cachedGoals, cachedFixedCosts, cachedGamification, cachedCategories, cachedWaitBasket] = await Promise.all([
+      AsyncStorage.getItem('vi_locket_goals_list'),
       AsyncStorage.getItem('vi_locket_fixed_cost_items'),
+      AsyncStorage.getItem('@pigfly_gamification_v4'),
+      AsyncStorage.getItem('vi_locket_custom_categories'),
+      AsyncStorage.getItem('vi_locket_wait_basket'),
     ]);
 
     // Nhúng toàn bộ file ảnh cục bộ vào bản sao lưu
@@ -100,6 +106,9 @@ export async function exportAppDataAsync(): Promise<{ success: boolean; filePath
       fixedCostItems: cachedFixedCosts ? JSON.parse(cachedFixedCosts) : [],
       goals: cachedGoals ? JSON.parse(cachedGoals) : [],
       transactions: txStore.transactions,
+      gamification: cachedGamification ? JSON.parse(cachedGamification) : undefined,
+      categories: cachedCategories ? JSON.parse(cachedCategories) : undefined,
+      waitBasket: cachedWaitBasket ? JSON.parse(cachedWaitBasket) : undefined,
       embeddedPhotos,
     };
 
@@ -214,9 +223,20 @@ export async function restoreAppDataAsync(jsonString: string): Promise<{ success
       await AsyncStorage.setItem('vi_locket_fixed_cost_items', JSON.stringify(parsed.fixedCostItems));
     }
 
-    // 4. Phục hồi Multi-Goals
+    // 4. Phục hồi Multi-Goals (khớp key vi_locket_goals_list của ProfileView)
     if (Array.isArray(parsed.goals)) {
-      await AsyncStorage.setItem('@vilocket_goals_list', JSON.stringify(parsed.goals));
+      await AsyncStorage.setItem('vi_locket_goals_list', JSON.stringify(parsed.goals));
+    }
+
+    // 4b. Phục hồi Gamification, Categories, WaitBasket
+    if (parsed.gamification) {
+      await AsyncStorage.setItem('@pigfly_gamification_v4', JSON.stringify(parsed.gamification));
+    }
+    if (Array.isArray(parsed.categories)) {
+      await AsyncStorage.setItem('vi_locket_custom_categories', JSON.stringify(parsed.categories));
+    }
+    if (Array.isArray(parsed.waitBasket)) {
+      await AsyncStorage.setItem('vi_locket_wait_basket', JSON.stringify(parsed.waitBasket));
     }
 
     // 5. Phục hồi Tên người dùng nếu có

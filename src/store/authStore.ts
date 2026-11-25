@@ -315,10 +315,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!user) return;
 
     const updatedProfile = { ...(profile || {}), ...data } as Profile;
-    set({ profile: updatedProfile });
+    const updatedUser =
+      data.full_name ? { ...user, full_name: data.full_name } : user;
+    set({ profile: updatedProfile, user: updatedUser });
 
     // Lưu bền vững 100% offline trong AsyncStorage
     await AsyncStorage.setItem('@vi_locket_guest_profile', JSON.stringify(updatedProfile));
+    if (data.full_name !== undefined) {
+      await AsyncStorage.setItem(STORAGE_USER_KEY, JSON.stringify(updatedUser));
+    }
   },
 
   checkCloudConflict: async (_newUserId: string) => {

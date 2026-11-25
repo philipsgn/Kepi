@@ -285,6 +285,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
               await AsyncStorage.multiRemove([
                 'vi_locket_transactions_data',
                 'vi_locket_budget_setup',
+                'vi_locket_budget_data',
+                'vi_locket_goals_list',
+                'vi_locket_fixed_cost_items',
+                'vi_locket_savings_ratio',
+                '@pigfly_gamification_v4',
+                'vi_locket_wait_basket',
+                '@vi_locket_home_preferences',
+                'vi_locket_custom_categories',
                 'vi_locket_cached_user',
                 STORAGE_KEY_MASK_MONEY,
               ]);

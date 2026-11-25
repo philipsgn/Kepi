@@ -125,7 +125,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   const flatListRef = useRef<FlatList<ChatMessage> | null>(null);
 
   const { user, profile } = useAuthStore();
-  const { todayBudget, todaySpent, recordExpense } = useBudgetStore();
+  const { todayBudget, todaySpent, goalName } = useBudgetStore();
   const { transactions, addTransaction, deleteTransaction } = useTransactionStore();
   const {
     gameTickets,
@@ -192,8 +192,12 @@ export const ChatView: React.FC<ChatViewProps> = ({
         return;
       }
 
+      const nowMonthPrefix = new Date().toISOString().slice(0, 7);
       const confirmedExpenses = transactions.filter(
-        (t) => t.type === 'EXPENSE' && (t.status === 'CONFIRMED' || !t.status)
+        (t) =>
+          t.type === 'EXPENSE' &&
+          (t.status === 'CONFIRMED' || !t.status) &&
+          (t.occurred_at || t.created_at || '').startsWith(nowMonthPrefix)
       );
       const totalSpentThisMonth = confirmedExpenses.reduce((sum, t) => sum + t.amount, 0);
 
@@ -232,7 +236,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
         topCategoryAmount: topCategoryAmount || undefined,
         coffeeSpentThisMonth,
         transactionsCount: transactions.length,
-        savingsGoalText: 'Tích lũy quỹ dự phòng mỗi ngày cùng heo',
+        savingsGoalText: goalName || 'Tích lũy quỹ dự phòng mỗi ngày cùng heo',
         nickname: profile?.full_name || undefined,
         recentExpenseName: recentExpense?.description || recentExpense?.category,
         recentExpenseAmount: recentExpense?.amount,
@@ -337,8 +341,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
         source: cardData.photoUrl ? 'PHOTO' : 'MANUAL',
       });
 
-      recordExpense(cardData.amount);
-
       setMessages((prev) =>
         prev.map((m) => {
           if (m.cardType === 'CONFIRMATION' && m.cardData?.amount === cardData.amount) {
@@ -368,7 +370,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
   const handleUndo = async () => {
     if (undoToast.txId) {
       await deleteTransaction(undoToast.txId);
-      recordExpense(-undoToast.amount);
     }
     setUndoToast({ visible: false, message: '', txId: null, amount: 0 });
   };

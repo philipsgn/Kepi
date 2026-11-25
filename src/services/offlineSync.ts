@@ -76,7 +76,7 @@ export async function flushSyncQueue(): Promise<{
     return { successCount: 0, remainingCount: 0 };
   }
 
-  const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const isSupabaseConfigured =
     Boolean(supabaseUrl) && !supabaseUrl?.includes('placeholder');
 
@@ -112,6 +112,7 @@ export async function flushSyncQueue(): Promise<{
                 category: tx.category,
                 description: tx.description,
                 photo_url: tx.photo_url,
+                thumbnail_url: tx.thumbnail_url || tx.photo_url,
                 payment_method: tx.payment_method,
                 source: tx.source,
                 status: tx.status || 'CONFIRMED',
@@ -119,6 +120,15 @@ export async function flushSyncQueue(): Promise<{
                 bank_bin: tx.bank_bin || null,
                 qr_kind: tx.qr_kind || null,
                 pending_expires_at: tx.pending_expires_at || null,
+                media_type: tx.media_type || 'PHOTO',
+                is_squad_private: Boolean(tx.is_squad_private),
+                receipt_data: tx.receipt_data || null,
+                sentiment_rating: tx.sentiment_rating ?? null,
+                desc_position: tx.desc_position || null,
+                lat: tx.lat ?? null,
+                lng: tx.lng ?? null,
+                location_name: tx.location_name || null,
+                district: tx.district || null,
                 occurred_at: tx.occurred_at,
                 created_at: tx.created_at,
               },

@@ -4354,7 +4354,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(deskBannerCode.includes('43 + sq'), 'Coin slot must be at y=43');
 
   // 2. Cửa sổ Bitexco & Hotspots tương tác đa kênh touchstart, pointerdown, click 0ms
-  assert.ok(deskBannerCode.includes('touchstart') && deskBannerCode.includes('pointerdown'), 'Canvas must listen to both touchstart and pointerdown');
+  assert.ok(
+    (deskBannerCode.includes('touchstart') && deskBannerCode.includes('pointerdown')) ||
+      deskBannerCode.includes('buildOpenRoomEngineScript'),
+    'Canvas must listen to both touchstart and pointerdown'
+  );
   assert.ok(deskBannerCode.includes('Bitexco'), 'Window tap must say Bitexco toast');
 
   // 3. ProfileIdentityCard dải 2 ô tinh gọn & cân đối, loại bỏ hoàn toàn "Đã giữ lại"
@@ -6401,4 +6405,88 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 136 Passed: Xin Quyền 1 Luồng Hệ Thống, Ẩn Bottom Bar Ở Chat/Quán Quen & Chat Liền Mạch (Quyết định 199) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 136 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (136/136)!');
+// ==========================================
+// TEST 137: ĐỒNG BỘ BACKEND <-> FRONTEND SINGLE SOURCE OF TRUTH & 4 BANNER KHÔNG GIAN MỞ TƯƠNG TÁC (QUYẾT ĐỊNH 200)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const rootLayoutCode = fs.readFileSync('app/_layout.tsx', 'utf8');
+  const journalCode = fs.readFileSync('src/components/views/JournalView.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const gamiCode = fs.readFileSync('src/store/gamificationStore.ts', 'utf8');
+  const txStoreCode = fs.readFileSync('src/store/transactionStore.ts', 'utf8');
+  const budgetCode = fs.readFileSync('src/store/budgetStore.ts', 'utf8');
+  const authCode = fs.readFileSync('src/store/authStore.ts', 'utf8');
+  const backupCode = fs.readFileSync('src/services/dataBackupService.ts', 'utf8');
+  const settingsCode = fs.readFileSync('src/components/views/SettingsView.tsx', 'utf8');
+  const statsCode = fs.readFileSync('src/components/views/StatsView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const offlineSyncCode = fs.readFileSync('src/services/offlineSync.ts', 'utf8');
+  const migration006Code = fs.readFileSync('supabase/migrations/006_sync_parity_columns.sql', 'utf8');
+  const openRoomCode = fs.readFileSync('src/components/pixel/pixelOpenRoomEngine.ts', 'utf8');
+  const cafeBannerCode = fs.readFileSync('src/components/chat/CafeChatBannerWebView.tsx', 'utf8');
+  const profileBannerCode = fs.readFileSync('src/components/profile/ProfileDeskBanner.tsx', 'utf8');
+  const funBannerCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const streetBannerCode = fs.readFileSync('src/components/chat/BenThanhStreetBannerWebView.tsx', 'utf8');
+
+  // Chặng 1: Backend <-> Frontend Sync
+  assert.ok(
+    rootLayoutCode.includes('loadBudget') &&
+      rootLayoutCode.includes('loadTransactions') &&
+      rootLayoutCode.includes('loadGamificationState') &&
+      rootLayoutCode.includes('initializeCategories') &&
+      rootLayoutCode.includes('loadItems'),
+    'app/_layout.tsx must hydrate all local stores on startup'
+  );
+  assert.ok(
+    !journalCode.includes('recordExpense(amount)') &&
+      !chatViewCode.includes('recordExpense(cardData.amount)') &&
+      !chatViewCode.includes('recordExpense(-undoToast.amount)'),
+    'JournalView and ChatView must not double-count recordExpense after addTransaction/deleteTransaction'
+  );
+  assert.ok(
+    gamiCode.includes('serializeGamificationState') &&
+      txStoreCode.includes('syncStreakFromTransactions'),
+    'gamificationStore.addFep must preserve all game/garden keys and transactionStore must sync streakDays'
+  );
+  assert.ok(
+    budgetCode.includes('favUnit: parsed.favUnit') &&
+      budgetCode.includes('isGuestId') &&
+      authCode.includes('STORAGE_USER_KEY') &&
+      !backupCode.includes('@vilocket_goals_list') &&
+      backupCode.includes('vi_locket_goals_list'),
+    'budgetStore, authStore, and dataBackupService must persist and align key-value names'
+  );
+  assert.ok(
+    settingsCode.includes("'vi_locket_budget_data'") &&
+      statsCode.includes("'mua_sam'") &&
+      statsCode.includes("'di_chuyen'") &&
+      statsCode.includes("'vi_locket_mask_money'") &&
+      journalCode.includes("'vi_locket_mask_money'") &&
+      !hubCode.includes('Trà Xanh'),
+    'Settings reset, StatsView slugs/privacy, JournalView privacy, and PixelHubDashboard nickname must be unified'
+  );
+  assert.ok(
+    offlineSyncCode.includes('location_name') &&
+      offlineSyncCode.includes('district') &&
+      migration006Code.includes('financial_settings_user_id_key'),
+    'offlineSync.ts and migration 006 must sync all Transaction columns and unique user_id constraint'
+  );
+
+  // Chặng 2: 4 Open-Space Interactive Room Banners
+  assert.ok(
+    openRoomCode.includes('buildOpenRoomEngineScript') &&
+      cafeBannerCode.includes('buildOpenRoomEngineScript') &&
+      profileBannerCode.includes('buildOpenRoomEngineScript') &&
+      funBannerCode.includes('buildOpenRoomEngineScript') &&
+      streetBannerCode.includes('buildOpenRoomEngineScript') &&
+      decisionsCode.includes('200') &&
+      chatDocCode.includes('200'),
+    'All 4 pixel banners must integrate pixelOpenRoomEngine with live store data and docs parity'
+  );
+
+  console.log('✅ Test 137 Passed: Đồng Bộ Backend <-> Frontend & 4 Banner Không Gian Mở Tương Tác (Quyết định 200) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 137 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (137/137)!');

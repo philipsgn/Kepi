@@ -119,6 +119,7 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
     const currentDayKey = getVietnamDateString(now);
     await AsyncStorage.setItem('vi_locket_budget_data', JSON.stringify({
       newSettings,
+      favUnit,
       todayBudget: baseDaily,
       realBalance: initialBalance,
       savedMoney: 0,
@@ -146,21 +147,24 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
       isLoading: false,
     });
 
-    // Đồng bộ lên Supabase nếu có mạng
-    try {
-      await supabase.from('financial_settings').upsert({
-        user_id: userId,
-        monthly_income: monthlyIncome,
-        monthly_fixed_costs: monthlyFixedCosts,
-        goal_name: goalName,
-        goal_target_amount: goalTargetAmount,
-        base_daily_budget: baseDaily,
-        updated_at: new Date().toISOString(),
-      });
+    // Đồng bộ lên Supabase nếu có mạng (bỏ qua nếu là Guest Local Sandbox)
+    const isGuestId = !userId || userId.startsWith('guest') || userId.startsWith('user-dev_') || userId === 'local-user';
+    if (!isGuestId) {
+      try {
+        await supabase.from('financial_settings').upsert({
+          user_id: userId,
+          monthly_income: monthlyIncome,
+          monthly_fixed_costs: monthlyFixedCosts,
+          goal_name: goalName,
+          goal_target_amount: goalTargetAmount,
+          base_daily_budget: baseDaily,
+          updated_at: new Date().toISOString(),
+        });
 
-      await supabase.from('profiles').update({ fav_unit: favUnit }).eq('id', userId);
-    } catch {
-      // Local first
+        await supabase.from('profiles').update({ fav_unit: favUnit }).eq('id', userId);
+      } catch {
+        // Local first
+      }
     }
   },
 
@@ -185,6 +189,7 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
           monthlyFixedCosts: parsed.newSettings.monthly_fixed_costs,
           goalName: parsed.newSettings.goal_name || '',
           goalTargetAmount: parsed.newSettings.goal_target_amount,
+          favUnit: parsed.favUnit || get().favUnit || 'tra_sua',
           baseDailyBudget: parsed.newSettings.base_daily_budget,
           todayBudget: initialDaily,
           realBalance: parsed.realBalance,
@@ -201,7 +206,13 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
         return;
       }
 
-      // Lấy từ Supabase nếu chưa có cache
+      const isGuestId = !userId || userId.startsWith('guest') || userId.startsWith('user-dev_') || userId === 'local-user';
+      if (isGuestId) {
+        set({ isLoading: false });
+        return;
+      }
+
+      // Lấy từ Supabase nếu chưa có cache (chỉ cho tài khoản đã đăng nhập thật)
       const { data } = await supabase
         .from('financial_settings')
         .select('*')
@@ -250,10 +261,18 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
   },
 
   recordSavedMoney: (amount: number) => {
-    const { savedMoney } = get();
-    set({
-      savedMoney: savedMoney + amount,
-    });
+    const newSaved = get().savedMoney + amount;
+    set({ savedMoney: newSaved });
+    AsyncStorage.getItem('vi_locket_budget_data')
+      .then((raw) => {
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        return AsyncStorage.setItem(
+          'vi_locket_budget_data',
+          JSON.stringify({ ...parsed, savedMoney: newSaved })
+        );
+      })
+      .catch(() => {});
   },
 
   applyRolloverForNewDay: (yesterdaySpent: number) => {
@@ -277,6 +296,26 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
       baseDailyBudget: dailyBudget !== undefined ? dailyBudget : state.baseDailyBudget,
       todayBudget: dailyBudget !== undefined ? dailyBudget : state.todayBudget,
     }));
+    AsyncStorage.getItem('vi_locket_budget_data')
+      .then((raw) => {
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        const cur = get();
+        return AsyncStorage.setItem(
+          'vi_locket_budget_data',
+          JSON.stringify({
+            ...parsed,
+            newSettings: {
+              ...(parsed.newSettings || {}),
+              goal_name: goalName,
+              goal_target_amount: goalTargetAmount,
+              base_daily_budget: cur.baseDailyBudget,
+            },
+            todayBudget: cur.todayBudget,
+          })
+        );
+      })
+      .catch(() => {});
   },
 
   checkAndApplyMonthRollover: async () => {
@@ -293,7 +332,7 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
       // Phát hiện sang tháng mới -> Tự động kết chuyển dòng tiền liên tục
       const carriedBalance = realBalance;
       const daysRemaining = getDaysRemainingInMonth(now);
-      const discretionary = Math.max(0, carriedBalance - monthlyFixedCosts - goalTargetAmount);
+      const discretionary = Math.max(0, carriedBalance - goalTargetAmount);
       const newDailyBudget = calculateDynamicDailyBudget(discretionary, daysRemaining);
       const weeklyLimit = newDailyBudget * 7;
 
@@ -444,9 +483,9 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
   },
 
   recalculateDynamicBudget: () => {
-    const { realBalance, monthlyFixedCosts, goalTargetAmount } = get();
+    const { realBalance, goalTargetAmount } = get();
     const daysRemaining = getDaysRemainingInMonth();
-    const discretionary = Math.max(0, realBalance - monthlyFixedCosts - goalTargetAmount);
+    const discretionary = Math.max(0, realBalance - goalTargetAmount);
     const newDaily = calculateDynamicDailyBudget(discretionary, daysRemaining);
     const weeklyLimit = newDaily * 7;
     set({

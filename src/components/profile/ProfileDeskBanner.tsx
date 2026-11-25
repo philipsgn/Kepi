@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -11,6 +11,7 @@ import { useBudgetStore } from '../../store/budgetStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useTransactionStore } from '../../store/transactionStore';
 import { formatVND } from '../../utils/currency';
+import { buildOpenRoomEngineScript } from '../pixel/pixelOpenRoomEngine';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -51,7 +52,88 @@ export const ProfileDeskBanner: React.FC<ProfileDeskBannerProps> = ({
 
   const todayNum = new Date().getDate();
   const savedCount = transactions.length;
-  const streakVal = streakDays || 1;
+  const streakVal = streakDays || 0;
+  const remainingToday = Math.max(0, (todayBudget || 0) - (todaySpent || 0));
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const onWebMsg = (ev: MessageEvent) => {
+      try {
+        const d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+        if (d?.type === 'HAPTIC_LIGHT') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+        }
+      } catch (_e) {}
+    };
+    window.addEventListener('message', onWebMsg);
+    return () => window.removeEventListener('message', onWebMsg);
+  }, []);
+
+  const openRoomScript = useMemo(
+    () =>
+      buildOpenRoomEngineScript({
+        canvasId: 'meCv',
+        worldWidth: 176,
+        worldHeight: 80,
+        viewWidth: 176,
+        viewHeight: 80,
+        walkBounds: { minX: 28, maxX: 136, minY: 50, maxY: 58 },
+        initialX: 86,
+        initialY: 54,
+        speed: 30,
+        hotspots: [
+          {
+            id: 'plant',
+            x: 10,
+            y: 34,
+            w: 28,
+            h: 28,
+            standX: 34,
+            standY: 54,
+            standFace: -1,
+            actionType: 'eat_snack',
+            bubbleText: `Đã lưu ${savedCount} khoảnh khắc`,
+          },
+          {
+            id: 'notes',
+            x: 52,
+            y: 4,
+            w: 28,
+            h: 22,
+            standX: 66,
+            standY: 52,
+            standFace: 1,
+            actionType: 'look_window',
+            bubbleText: `Hôm nay còn ${formatVND(remainingToday)}`,
+          },
+          {
+            id: 'bank',
+            x: 112,
+            y: 36,
+            w: 36,
+            h: 24,
+            standX: 110,
+            standY: 54,
+            standFace: 1,
+            actionType: 'jump_joy',
+            bubbleText: `Đã chi hôm nay: ${formatVND(todaySpent || 0)}`,
+          },
+          {
+            id: 'cal',
+            x: 126,
+            y: 4,
+            w: 36,
+            h: 34,
+            standX: 126,
+            standY: 52,
+            standFace: 1,
+            actionType: 'check_ledger',
+            bubbleText: `Chuỗi ghi ${streakVal} ngày liên tiếp`,
+          },
+        ],
+      }),
+    [savedCount, remainingToday, todaySpent, streakVal]
+  );
 
   const htmlContent = useMemo(() => `<!DOCTYPE html>
 <html lang="vi">
@@ -477,7 +559,7 @@ function mbStep(dt) {
   SPARKS = SPARKS.filter(function(item){ return item.life > 0; });
 }
 
-function mbDraw() {
+function mbDraw(dt) {
   var cv = document.getElementById('meCv');
   if (!cv) return;
   var c = cv.getContext('2d');
@@ -566,19 +648,40 @@ function mbDraw() {
     R(c, 51 + k * 2 + Math.round(Math.sin(t * 3 + k)), sy, 1, 2, 'rgba(255,255,255,.8)');
   }
 
-  // 7. Chú heo con đứng cạnh bàn (Sprite 24×20 phóng 2× = 48×40)
-  var bo = (MB.bump > 0);
-  var jy = bo ? -Math.abs(Math.sin(MB.bump * 14)) * 6 : 0;
+  // 7. Chú heo con đi lại tự do trong phòng làm việc (Sprite 24×20 phóng 2× = 48×40)
+  var rm = window.__openRoom ? window.__openRoom.state : null;
+  var bo = (MB.bump > 0) || (rm && rm.action === 'jump_joy');
+  var jy = bo ? -Math.abs(Math.sin((MB.bump > 0 ? MB.bump : t) * 14)) * 6 : 0;
+  var pigWalk = rm ? rm.walking : false;
+  var pigFace = rm ? rm.facing : 1;
+  var pigDrawX = rm ? Math.round(rm.x - 24) : 62;
+  var pigDrawY = rm ? Math.round(rm.y - 35 + jy) : Math.round(19 + jy);
   hpx.clearRect(0, 0, 24, 20);
   drawPigSprite(hpx, {
-    pose: 'stand',
-    frame: (Math.floor(t * 2)) % 2,
+    pose: pigWalk ? 'walk' : (rm && rm.action === 'eat_snack' ? 'eat' : 'stand'),
+    frame: pigWalk ? ((Math.floor(t * 6)) % 2) : ((Math.floor(t * 2)) % 2),
     mood: 'ok',
     happy: bo || (APP_DATA.savedCount > 0 && (t % 6) < 1.2),
     blink: (t % 4) < 0.15,
     tail: (Math.floor(t * 3) % 2 === 0)
   });
-  c.drawImage(hp, 0, 0, 24, 20, 62, Math.round(19 + jy), 48, 40);
+  c.save();
+  if (pigFace < 0) {
+    c.translate(pigDrawX + 48, pigDrawY);
+    c.scale(-1, 1);
+    c.drawImage(hp, 0, 0, 24, 20, 0, 0, 48, 40);
+  } else {
+    c.drawImage(hp, 0, 0, 24, 20, pigDrawX, pigDrawY, 48, 40);
+  }
+  c.restore();
+  if (window.__openRoom) {
+    window.__openRoom.step(dt || 0.016, performance.now());
+    window.__openRoom.drawOverlays(c, performance.now());
+    if (rm && rm.action && rm.bubbleText && rm.bubbleText !== lastRoomBubble) {
+      lastRoomBubble = rm.bubbleText;
+      showToast(rm.bubbleText);
+    }
+  }
 
   // Pháo hoa sao của chú heo
   SPARKS.forEach(function(sp){
@@ -612,64 +715,12 @@ function loop(now) {
   var dt = Math.min(0.05, (now - MB.last) / 1000);
   MB.last = now;
   mbStep(dt);
-  mbDraw();
+  mbDraw(dt);
   requestAnimationFrame(loop);
 }
 
-// Bắt sự kiện chạm trực tiếp trên canvas tương ứng 6 hotspots tương tác (Đa kênh pointerdown, touchstart, click)
-var cv = document.getElementById('meCv');
-var lastTapTime = 0;
-
-function handleInteraction(e) {
-  var now = performance.now();
-  if (now - lastTapTime < 200) return;
-  lastTapTime = now;
-
-  var clientX, clientY;
-  if (e.touches && e.touches.length > 0) {
-    clientX = e.touches[0].clientX;
-    clientY = e.touches[0].clientY;
-  } else {
-    clientX = e.clientX;
-    clientY = e.clientY;
-  }
-
-  if (clientX === undefined || clientY === undefined) return;
-  if (e.type === 'touchstart' && e.cancelable) {
-    e.preventDefault();
-  }
-
-  var rect = cv.getBoundingClientRect();
-  var scaleX = MB.W / rect.width;
-  var scaleY = MB.H / rect.height;
-  var px = (clientX - rect.left) * scaleX;
-  var py = (clientY - rect.top) * scaleY;
-
-  // 1. Chú Heo: x = 58..110, y = 16..58
-  if (px >= 58 && px <= 110 && py >= 16 && py <= 58) {
-    handleTouchHotspot('pig');
-  }
-  // 2. Heo đất (trên bàn): x = 112..146, y = 36..58
-  else if (px >= 112 && px <= 146 && py >= 36 && py <= 58) {
-    handleTouchHotspot('bank');
-  }
-  // 3. Lịch xé: x = 126..162, y = 4..38
-  else if (px >= 126 && px <= 162 && py >= 4 && py <= 38) {
-    handleTouchHotspot('cal');
-  }
-  // 4. Cây hoa: x = 10..36, y = 36..64
-  else if (px >= 10 && px <= 36 && py >= 36 && py <= 64) {
-    handleTouchHotspot('plant');
-  }
-  // 5. Giấy dán: x = 54..78, y = 4..24
-  else if (px >= 54 && px <= 78 && py >= 4 && py <= 24) {
-    handleTouchHotspot('notes');
-  }
-}
-
-cv.addEventListener('pointerdown', handleInteraction);
-cv.addEventListener('touchstart', handleInteraction, { passive: false });
-cv.addEventListener('click', handleInteraction);
+var lastRoomBubble = '';
+${openRoomScript}
 
 MB.last = performance.now();
 requestAnimationFrame(loop);
@@ -677,7 +728,7 @@ requestAnimationFrame(loop);
 })();
 </script>
 </body>
-</html>`, [todayBudget, todaySpent, streakVal, savedCount, todayNum]);
+</html>`, [openRoomScript, todayBudget, todaySpent, streakVal, savedCount, todayNum]);
 
   return (
     <View

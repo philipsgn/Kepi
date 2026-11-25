@@ -1,12 +1,15 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Platform,
   StyleSheet,
+  Text,
   View,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
+import { useGamificationStore } from '../../store/gamificationStore';
+import { buildOpenRoomEngineScript } from '../pixel/pixelOpenRoomEngine';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -19,18 +22,99 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
 }) => {
   const { tokens } = useTheme();
   const webViewRef = useRef<any>(null);
+  const { gameTickets, pigFood, streakDays } = useGamificationStore();
+  const [roomToast, setRoomToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showRoomToast = (text: string) => {
+    setRoomToast(text);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setRoomToast(null), 2600);
+  };
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const onWebMsg = (ev: MessageEvent) => {
+      try {
+        const d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+        if (!d) return;
+        if (d.type === 'HAPTIC_LIGHT') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+        } else if (d.type === 'ROOM_ACTION' && d.text) {
+          showRoomToast(String(d.text));
+        }
+      } catch (_e) {}
+    };
+    window.addEventListener('message', onWebMsg);
+    return () => window.removeEventListener('message', onWebMsg);
+  }, []);
 
   const handleMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       if (data.type === 'HAPTIC_LIGHT') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        onPressBanner?.();
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      } else if (data.type === 'ROOM_ACTION' && data.text) {
+        showRoomToast(String(data.text));
       }
     } catch (e) {
       // Ignored
     }
   };
+
+  const openRoomScript = useMemo(
+    () =>
+      buildOpenRoomEngineScript({
+        canvasId: 'funCv',
+        worldWidth: 192,
+        worldHeight: 88,
+        viewWidth: 192,
+        viewHeight: 88,
+        walkBounds: { minX: 16, maxX: 176, minY: 60, maxY: 72 },
+        initialX: 90,
+        initialY: 66,
+        speed: 32,
+        hotspots: [
+          {
+            id: 'ben_thanh',
+            x: 10,
+            y: 28,
+            w: 44,
+            h: 40,
+            standX: 34,
+            standY: 68,
+            standFace: -1,
+            actionType: 'eat_snack',
+            bubbleText: `Kho cám: ${pigFood} cám cho heo`,
+          },
+          {
+            id: 'landmark',
+            x: 68,
+            y: 6,
+            w: 36,
+            h: 54,
+            standX: 86,
+            standY: 66,
+            standFace: 1,
+            actionType: 'look_window',
+            bubbleText: `Chuỗi ghi ${streakDays || 0} ngày liên tiếp`,
+          },
+          {
+            id: 'arcade',
+            x: 138,
+            y: 26,
+            w: 44,
+            h: 44,
+            standX: 152,
+            standY: 66,
+            standFace: 1,
+            actionType: 'play_arcade',
+            bubbleText: `Đang có ${gameTickets} vé chơi game!`,
+          },
+        ],
+      }),
+    [pigFood, streakDays, gameTickets]
+  );
 
   const htmlContent = useMemo(() => `<!DOCTYPE html>
 <html lang="vi">
@@ -510,8 +594,30 @@ function fbHero(x, t) {
   var taxiX = Math.round(((t * 38 + 110) % (FB.w + 160)) - 60);
   fbTaxi(x, taxiX, 81, t, 1);
 
-  if (FBS.mode === 'ride') {
-    fbRider(x, Math.round(FBS.x), 80 + Math.round(jy * 0.4), t, true, 1, false);
+  if (window.__openRoom) {
+    var rm = window.__openRoom.state;
+    window.__openRoom.step(dt, performance.now());
+    var px = Math.round(rm.x - 12);
+    var py = Math.round(rm.y - 20 + (rm.action === 'jump_joy' || rm.action === 'play_arcade' ? -Math.abs(Math.sin(t * 10)) * 4 : 0));
+    hpx.clearRect(0, 0, 24, 20);
+    drawPigSprite(hpx, {
+      pose: rm.walking ? 'walk' : (rm.action === 'eat_snack' ? 'eat' : 'stand'),
+      frame: rm.walking ? (((t * 6) | 0) % 2) : 0,
+      mood: 'ok',
+      happy: Boolean(rm.action) || FBS.hop > 0,
+      blink: (t % 4) < 0.15,
+      tail: true
+    });
+    x.save();
+    if (rm.facing < 0) {
+      x.translate(px + 24, py);
+      x.scale(-1, 1);
+      x.drawImage(hp, 0, 0, 24, 20, 0, 0, 24, 20);
+    } else {
+      x.drawImage(hp, 0, 0, 24, 20, px, py, 24, 20);
+    }
+    x.restore();
+    window.__openRoom.drawOverlays(x, performance.now());
   } else {
     hpx.clearRect(0, 0, 24, 20);
     drawPigSprite(hpx, { pose: 'walk', frame: ((t * 5) | 0) % 2, mood: 'ok', happy: FBS.hop > 0, blink: (t % 4) < 0.15, tail: true });
@@ -622,6 +728,8 @@ function funBanStart() {
   requestAnimationFrame(fbFrame);
 }
 
+${openRoomScript}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', funBanStart);
 } else {
@@ -631,7 +739,7 @@ if (document.readyState === 'loading') {
 })();
 </script>
 </body>
-</html>`, []);
+</html>`, [openRoomScript]);
 
   return (
     <View style={styles.container}>
@@ -657,6 +765,13 @@ if (document.readyState === 'loading') {
             domStorageEnabled={true}
             onMessage={handleMessage}
           />
+        )}
+        {Boolean(roomToast) && (
+          <View style={styles.roomToast} pointerEvents="none">
+            <Text style={styles.roomToastText} numberOfLines={1}>
+              {roomToast}
+            </Text>
+          </View>
         )}
       </View>
     </View>
@@ -690,5 +805,22 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: '#2B2118',
+  },
+  roomToast: {
+    position: 'absolute',
+    top: 8,
+    alignSelf: 'center',
+    backgroundColor: '#2B2118',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: '#F4B93B',
+  },
+  roomToastText: {
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '800',
+    fontSize: 11,
+    color: '#FFFBF1',
   },
 });

@@ -12,6 +12,11 @@ import {
 } from '@expo-google-fonts/nunito';
 
 import { useAuthStore } from '../src/store/authStore';
+import { useBudgetStore } from '../src/store/budgetStore';
+import { useTransactionStore } from '../src/store/transactionStore';
+import { useGamificationStore } from '../src/store/gamificationStore';
+import { useCategoryStore } from '../src/store/categoryStore';
+import { useWaitBasketStore } from '../src/store/waitBasketStore';
 import { ThemeProvider } from '../src/theme';
 import { PWAInstallBanner } from '../src/components/PWAInstallBanner';
 
@@ -30,7 +35,16 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    initializeAuth();
+    initializeAuth().then(() => {
+      const uid = useAuthStore.getState().user?.id || 'guest-local-user';
+      Promise.all([
+        useBudgetStore.getState().loadBudget(uid),
+        useTransactionStore.getState().loadTransactions(uid),
+        useGamificationStore.getState().loadGamificationState(),
+        useCategoryStore.getState().initializeCategories(),
+        useWaitBasketStore.getState().loadItems(uid),
+      ]).catch(() => {});
+    });
     // Quyết định 195: Triệt tiêu viền focus xanh mặc định của trình duyệt Web quanh TextInput/textarea
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
       const styleId = 'pigfly-web-input-reset';

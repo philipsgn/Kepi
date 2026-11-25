@@ -214,7 +214,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
         <View style={styles.bannerRow}>
           <PixelPigAvatar size={34} mood={pigHunger >= 60 ? 'happy' : 'idle'} />
           <Text style={[styles.greetText, { color: tokens.text }]} numberOfLines={1}>
-            Chào {profile?.full_name || 'Trà Xanh'}! Khám phá hôm nay cùng heo
+            Chào {profile?.full_name || 'Bạn'}! Khám phá hôm nay cùng heo
           </Text>
         </View>
 

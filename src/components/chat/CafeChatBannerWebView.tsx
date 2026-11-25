@@ -9,6 +9,10 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
+import { useBudgetStore } from '../../store/budgetStore';
+import { useGamificationStore } from '../../store/gamificationStore';
+import { formatVND } from '../../utils/currency';
+import { buildOpenRoomEngineScript } from '../pixel/pixelOpenRoomEngine';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -31,6 +35,11 @@ export const CafeChatBannerWebView: React.FC<CafeChatBannerWebViewProps> = ({
 }) => {
   const webViewRef = useRef<any>(null);
   const iframeRef = useRef<any>(null);
+
+  const { todayBudget, todaySpent } = useBudgetStore();
+  const { streakDays } = useGamificationStore();
+  const [roomToast, setRoomToast] = useState<string | null>(null);
+  const roomToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [expandMe, setExpandMe] = useState(false);
   const [expandAi, setExpandAi] = useState(false);
@@ -96,14 +105,106 @@ export const CafeChatBannerWebView: React.FC<CafeChatBannerWebViewProps> = ({
     );
   }, [active]);
 
+  const showRoomToast = (text: string) => {
+    setRoomToast(text);
+    if (roomToastTimerRef.current) clearTimeout(roomToastTimerRef.current);
+    roomToastTimerRef.current = setTimeout(() => setRoomToast(null), 2800);
+  };
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const onWebMsg = (ev: MessageEvent) => {
+      try {
+        const d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+        if (!d) return;
+        if (d.type === 'HAPTIC_LIGHT') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+        } else if (d.type === 'ROOM_ACTION' && d.text) {
+          showRoomToast(String(d.text));
+        }
+      } catch (_e) {}
+    };
+    window.addEventListener('message', onWebMsg);
+    return () => window.removeEventListener('message', onWebMsg);
+  }, []);
+
   const handleMessage = (event: any) => {
     try {
       const d = JSON.parse(event.nativeEvent.data);
       if (d.type === 'HAPTIC_LIGHT') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      } else if (d.type === 'ROOM_ACTION' && d.text) {
+        showRoomToast(String(d.text));
       }
     } catch (_e) {}
   };
+
+  const remainingToday = Math.max(0, (todayBudget || 0) - (todaySpent || 0));
+  const openRoomScript = useMemo(
+    () =>
+      buildOpenRoomEngineScript({
+        canvasId: 'chCv',
+        worldWidth: 144,
+        worldHeight: 96,
+        viewWidth: 144,
+        viewHeight: 96,
+        walkBounds: { minX: 16, maxX: 86, minY: 66, maxY: 78 },
+        initialX: 40,
+        initialY: 68,
+        speed: 28,
+        hotspots: [
+          {
+            id: 'counter',
+            x: 4,
+            y: 36,
+            w: 32,
+            h: 40,
+            standX: 28,
+            standY: 70,
+            standFace: -1,
+            actionType: 'sip_coffee',
+            bubbleText: `Hôm nay đã chi ${formatVND(todaySpent || 0)}`,
+          },
+          {
+            id: 'window',
+            x: 36,
+            y: 12,
+            w: 42,
+            h: 34,
+            standX: 54,
+            standY: 68,
+            standFace: 1,
+            actionType: 'look_window',
+            bubbleText: `Chuỗi ghi ${streakDays || 0} ngày liên tiếp!`,
+          },
+          {
+            id: 'ai_table',
+            x: 92,
+            y: 44,
+            w: 38,
+            h: 36,
+            standX: 84,
+            standY: 68,
+            standFace: 1,
+            actionType: 'jump_joy',
+            bubbleText: `Còn lại hôm nay: ${formatVND(remainingToday)}`,
+          },
+          {
+            id: 'menu',
+            x: 112,
+            y: 12,
+            w: 28,
+            h: 30,
+            standX: 86,
+            standY: 66,
+            standFace: 1,
+            actionType: 'check_ledger',
+            bubbleText: `Hạn mức ngày: ${formatVND(todayBudget || 0)}`,
+          },
+        ],
+      }),
+    [todayBudget, todaySpent, remainingToday, streakDays]
+  );
 
   const htmlContent = useMemo(
     () => `<!doctype html>
@@ -303,9 +404,14 @@ function cbWindow(x,t){
 function cbPig(x,px,who,t){
   var st=who==='ai'?CB.ai:CB.me, sv={p:PAL.p,s:PAL.s,n:PAL.n,h:PAL.h};
   if(who==='ai'){PAL.p='#BFDDF2';PAL.s='#8FB9DB';PAL.n='#9CC4E2';PAL.h='#EAF6FF';}
-  var sip=((t+(who==='ai'?3:0))%7)<1.1 && st.talk<=0 && !(who==='ai'&&CB.think);
+  var rm=(who==='me'&&window.__openRoom)?window.__openRoom.state:null;
+  var sip=rm ? (rm.action==='sip_coffee'||rm.action==='eat_snack') : (((t+(who==='ai'?3:0))%7)<1.1 && st.talk<=0 && !(who==='ai'&&CB.think));
+  var isWalk=rm ? rm.walking : false;
+  var faceDir=rm ? rm.facing : (who==='ai'?-1:1);
+  var drawX=rm ? Math.round(rm.x-12) : px;
+  var drawY=rm ? Math.round(rm.y-20) : CB_PY;
   hpx.clearRect(0,0,24,20);
-  drawPigSprite(hpx,{pose:sip?'eat':'stand',happy:(st.talk>0&&(((t*6)|0)%2===0))||st.hop>0,blink:((t+(who==='ai'?1.3:0))%4)<0.15,tail:Math.floor(t*3)%2===1});
+  drawPigSprite(hpx,{pose:isWalk?'walk':(sip?'eat':'stand'),frame:isWalk?(((t*6)|0)%2):0,happy:(st.talk>0&&(((t*6)|0)%2===0))||st.hop>0||(rm&&rm.action==='jump_joy'),blink:((t+(who==='ai'?1.3:0))%4)<0.15,tail:Math.floor(t*3)%2===1});
   PAL.p=sv.p;PAL.s=sv.s;PAL.n=sv.n;PAL.h=sv.h;
   if(who==='ai'){
     var headDy=sip?4:0, hx=1, hy=3+headDy;
@@ -315,10 +421,10 @@ function cbPig(x,px,who,t){
     R(hpx,hx+15,hy+4,4,1,PBI);R(hpx,hx+15,hy+7,4,1,PBI);R(hpx,hx+15,hy+4,1,4,PBI);R(hpx,hx+18,hy+4,1,4,PBI);R(hpx,hx+13,hy+5,2,1,PBI);
     R(hpx,12,12,2,1,'#4B6FA5');
   }
-  var bob=st.talk>0?Math.round(Math.sin(t*12)*0.6):0, jy=st.hop>0?-Math.round(Math.abs(Math.sin(st.hop*9))*5):0, py=CB_PY+jy+bob;
+  var bob=st.talk>0?Math.round(Math.sin(t*12)*0.6):0, jy=(st.hop>0||(rm&&rm.action==='jump_joy'))?-Math.round(Math.abs(Math.sin((st.hop>0?st.hop:t)*9))*5):0, py=drawY+jy+bob;
   x.save();
-  if(who==='ai'){x.translate(px+24,py);x.scale(-1,1);x.drawImage(hp,0,0,24,20,0,0,24,20);}
-  else x.drawImage(hp,0,0,24,20,px,py,24,20);
+  if(faceDir<0){x.translate(drawX+24,py);x.scale(-1,1);x.drawImage(hp,0,0,24,20,0,0,24,20);}
+  else x.drawImage(hp,0,0,24,20,drawX,py,24,20);
   x.restore();
 }
 
@@ -340,6 +446,7 @@ function cbDraw(t){
   }
   cbPig(X,CB_ME_X,'me',t);cbPig(X,CB_AI_X,'ai',t);
   X.drawImage(CB.fg,0,0);
+  if(window.__openRoom){window.__openRoom.step(CB.dt||0.016,performance.now());window.__openRoom.drawOverlays(X,performance.now());}
   pbSteam(X,72,64,t,2);
   var dr=((t*1.6)%1);R(X,72,73+Math.round(dr*2),1,1,'#6B4A2B');
   CB.me.hop=Math.max(0,CB.me.hop-CB.dt);CB.ai.hop=Math.max(0,CB.ai.hop-CB.dt);
@@ -376,13 +483,15 @@ window.addEventListener('message',function(ev){
   }catch(e){}
 });
 
+${openRoomScript}
+
 cbStatic();
 if(reduced){cbDraw(3);}else{CB.run=true;CB.last=performance.now();requestAnimationFrame(frame);}
 })();
 </script>
 </body>
 </html>`,
-    []
+    [openRoomScript]
   );
 
   const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
@@ -450,6 +559,14 @@ if(reduced){cbDraw(3);}else{CB.run=true;CB.last=performance.now();requestAnimati
         )}
         <View style={[styles.tail, styles.tailAi]} />
       </TouchableOpacity>
+
+      {Boolean(roomToast) && (
+        <View style={styles.roomActionToast} pointerEvents="none">
+          <Text style={styles.roomActionToastText} numberOfLines={1}>
+            {roomToast}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -537,5 +654,22 @@ const styles = StyleSheet.create({
   tailAi: {
     right: '28%',
     backgroundColor: '#DCEEFA',
+  },
+  roomActionToast: {
+    position: 'absolute',
+    bottom: 8,
+    alignSelf: 'center',
+    backgroundColor: '#2B2118',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: '#F4B93B',
+  },
+  roomActionToastText: {
+    fontFamily: 'Nunito_700Bold',
+    fontWeight: '800',
+    fontSize: 11,
+    color: '#FFFBF1',
   },
 });

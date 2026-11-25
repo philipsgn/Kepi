@@ -86,6 +86,34 @@ interface GamificationState {
   resetDailyDiceRolls: () => void;
 }
 
+function serializeGamificationState(state: GamificationState) {
+  return JSON.stringify({
+    fepPoints: state.fepPoints,
+    streakDays: state.streakDays,
+    cloudTier: state.cloudTier,
+    tierName: state.tierName,
+    mascotMood: state.mascotMood,
+    equippedSkinId: state.equippedSkinId,
+    unlockedSkinIds: state.unlockedSkinIds,
+    unlockedAchievements: state.unlockedAchievements,
+    diceRollsLeft: state.diceRollsLeft,
+    monopolyPosition: state.monopolyPosition,
+    gameTickets: state.gameTickets,
+    pigFood: state.pigFood,
+    pigHunger: state.pigHunger,
+    fishHunger: state.fishHunger,
+    flowerWater: state.flowerWater,
+    savedBabies: state.savedBabies,
+    flyBestScore: state.flyBestScore,
+    flyFoodEarned: state.flyFoodEarned,
+    shooterMaxWave: state.shooterMaxWave,
+    crossRoadStars: state.crossRoadStars,
+    crossRoadMaxLevel: state.crossRoadMaxLevel,
+    crossRoadFoodEarned: state.crossRoadFoodEarned,
+    crossRoadLevelStars: state.crossRoadLevelStars,
+  });
+}
+
 export const useGamificationStore = create<GamificationState>((set, get) => ({
   fepPoints: 100, // Thưởng khởi đầu
   streakDays: 1,
@@ -248,21 +276,9 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
     const newFep = get().fepPoints + amount;
     set({ fepPoints: newFep });
     try {
-      const state = get();
       await AsyncStorage.setItem(
         STORAGE_KEY_GAMIFICATION,
-        JSON.stringify({
-          fepPoints: state.fepPoints,
-          streakDays: state.streakDays,
-          cloudTier: state.cloudTier,
-          tierName: state.tierName,
-          mascotMood: state.mascotMood,
-          equippedSkinId: state.equippedSkinId,
-          unlockedSkinIds: state.unlockedSkinIds,
-          unlockedAchievements: state.unlockedAchievements,
-          diceRollsLeft: state.diceRollsLeft,
-          monopolyPosition: state.monopolyPosition,
-        })
+        serializeGamificationState(get())
       );
     } catch (e) {
       console.warn('[GamificationStore] Failed to save FEP:', e);
@@ -272,6 +288,10 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
   setStreakDays: (days: number) => {
     const safeDays = Math.max(0, days);
     set({ streakDays: safeDays });
+    AsyncStorage.setItem(
+      STORAGE_KEY_GAMIFICATION,
+      serializeGamificationState(get())
+    ).catch(() => {});
   },
 
   evaluateRules: async (ctxParams, triggerEvent) => {
