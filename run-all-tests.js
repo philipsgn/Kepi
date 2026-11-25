@@ -3695,7 +3695,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(layoutCode.includes('TAB_BAR_HEIGHT = 60'), 'layoutUtils must define TAB_BAR_HEIGHT as 60 for comfortable icon+label layout');
 
   // 2. 5 Tabs Layout with Vertical Icon + Labels (Vườn, Nhà, Chụp, Giải trí, Hồ sơ)
-  assert.ok(tabbarCode.includes("'Vườn'") && tabbarCode.includes("'Nhà'") && tabbarCode.includes("'Chụp'") && tabbarCode.includes("'Giải trí'") && tabbarCode.includes("'Hồ sơ'"), 'FloatingPillTabBar must render all 5 prototype labels');
+  assert.ok(tabbarCode.includes("'Vườn'") && tabbarCode.includes("'Nhà'") && tabbarCode.includes("'Chụp'") && (tabbarCode.includes("'Khám phá'") || tabbarCode.includes("'Giải trí'")) && tabbarCode.includes("'Hồ sơ'"), 'FloatingPillTabBar must render all 5 prototype labels');
   assert.ok(tabbarCode.includes('Gamepad2') || tabbarCode.includes('PixelIconTabFun'), 'FloatingPillTabBar must use Gamepad2 or PixelIconTabFun icon for Tab Giai tri');
 
   // 3. Multi-color Active Mapping
@@ -6193,4 +6193,56 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 130 Passed: Deploy GitHub Pages (gh-pages) & Camera Web PWA Dual-Mode (Quyết định 193) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 130 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (130/130)!');
+// ==========================================
+// TEST 131: ĐỒNG BỘ 100% GITHUB WEB PWA & EXPO GO + PIXEL ART VIỆT NAM TOÀN APP (QUYẾT ĐỊNH 194)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const layoutCode = fs.readFileSync('app/_layout.tsx', 'utf8');
+  const stringsCode = fs.readFileSync('src/constants/strings.ts', 'utf8');
+  const tabBarCode = fs.readFileSync('src/components/navigation/FloatingPillTabBar.tsx', 'utf8');
+  const mainCamCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+  const funBannerCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const profileBannerCode = fs.readFileSync('src/components/profile/ProfileDeskBanner.tsx', 'utf8');
+  const crossCode = fs.readFileSync('src/components/chat/PigCrossRoadGameView.tsx', 'utf8');
+
+  // 1. Cả 3 WebView còn thiếu đều phải hỗ trợ Platform.OS === 'web' <iframe srcDoc={htmlContent} />
+  [funBannerCode, profileBannerCode, crossCode].forEach((code, idx) => {
+    assert.ok(
+      code.includes("Platform.OS === 'web'") && code.includes('<iframe'),
+      `WebView ${idx} must support Platform.OS === 'web' iframe rendering`
+    );
+  });
+
+  // 2. Đăng ký đầy đủ font alias 'Baloo2-Bold' và 'Nunito' trong app/_layout.tsx
+  assert.ok(
+    layoutCode.includes("'Baloo2-Bold': Baloo2_800ExtraBold") &&
+      layoutCode.includes('Nunito: Nunito_700Bold'),
+    'app/_layout.tsx must register Baloo2-Bold and Nunito font aliases for Web parity'
+  );
+
+  // 3. Sentence case 'Hồ sơ' & Bottom bar 'Khám phá'
+  assert.ok(
+    stringsCode.includes("title: 'Hồ sơ'") &&
+      tabBarCode.includes("label: 'Khám phá'"),
+    'Strings.profile.title must be Hồ sơ and FloatingPillTabBar must label Tab 3 Khám phá'
+  );
+
+  // 4. zeroBorderToolButton không có shadow/elevation tạo hộp bóng vuông trên Web
+  const zeroBtnBlock = mainCamCode.slice(mainCamCode.indexOf('zeroBorderToolButton:'), mainCamCode.indexOf('outsideTypeSegmentWrapper:'));
+  assert.ok(
+    !zeroBtnBlock.includes('elevation:') && !zeroBtnBlock.includes('shadowColor:'),
+    'zeroBorderToolButton must not apply box shadow or elevation on Web'
+  );
+
+  // 5. Living Documentation Sync Audit (Quyết định 194)
+  assert.ok(
+    agentsCode.includes('194') && decisionsCode.includes('194'),
+    'AGENTS.md and DECISIONS.md must document Quyết định 194'
+  );
+
+  console.log('✅ Test 131 Passed: Đồng Bộ 100% GitHub Web PWA & Expo Go + Pixel Art Việt Nam Toàn App (Quyết định 194) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 131 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (131/131)!');

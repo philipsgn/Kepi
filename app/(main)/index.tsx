@@ -3187,12 +3187,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
-    borderWidth: 0,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.45,
-    shadowRadius: 3,
-    elevation: 3 },
+    borderWidth: 0 },
   outsideTypeSegmentWrapper: {
     alignItems: 'center',
     marginTop: 4,

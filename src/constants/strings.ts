@@ -198,7 +198,7 @@ export const Strings = {
   },
 
   profile: {
-    title: 'HỒ SƠ',
+    title: 'Hồ sơ',
     streakDays: (days: number) => `${days} ngày liên tiếp`,
     savedTotal: 'Tổng đã giữ lại',
     entriesCount: (count: number) => `${count} món đã ghi`,

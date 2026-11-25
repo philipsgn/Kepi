@@ -82,7 +82,7 @@ export const FloatingPillTabBar: React.FC<FloatingPillTabBarProps> = ({
     { id: 'home', icon: Trees, label: 'Vườn', activeBg: '#2B2118', activeFg: '#FFFBF1' },
     { id: 'stats', icon: Home, label: 'Nhà', activeBg: '#2B2118', activeFg: '#FFFBF1' },
     { id: 'camera', icon: Camera, label: 'Chụp', activeBg: '#E0452B', activeFg: '#FFFFFF', isCamera: true },
-    { id: 'chat', icon: Gamepad2, label: 'Giải trí', activeBg: '#F4B93B', activeFg: '#2B2118' },
+    { id: 'chat', icon: Gamepad2, label: 'Khám phá', activeBg: '#F4B93B', activeFg: '#2B2118' },
     { id: 'profile', icon: User, label: 'Hồ sơ', activeBg: '#2B2118', activeFg: '#FFFBF1' },
   ];
 

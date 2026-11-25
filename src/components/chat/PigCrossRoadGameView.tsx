@@ -656,8 +656,11 @@ window.__syncTickets = function(n) {
 
 function post(obj) {
   try {
+    var payload = JSON.stringify(obj);
     if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-      window.ReactNativeWebView.postMessage(JSON.stringify(obj));
+      window.ReactNativeWebView.postMessage(payload);
+    } else if (window.parent && window.parent !== window) {
+      window.parent.postMessage(payload, '*');
     }
   } catch(e) {}
 }
@@ -1460,17 +1463,24 @@ window.addEventListener('touchcancel', onScreenEnd);
 
       {/* SafeWebView Container */}
       <View style={styles.webViewContainer}>
-        <SafeWebView
-          ref={webViewRef}
-          source={memoizedSource}
-          style={styles.webView}
-          containerStyle={styles.webView}
-          scrollEnabled={false}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          originWhitelist={['*']}
-          onMessage={handleMessage}
-        />
+        {Platform.OS === 'web' ? (
+          <iframe
+            srcDoc={htmlContent}
+            style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#F6EEDC' } as any}
+          />
+        ) : (
+          <SafeWebView
+            ref={webViewRef}
+            source={memoizedSource}
+            style={styles.webView}
+            containerStyle={styles.webView}
+            scrollEnabled={false}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            originWhitelist={['*']}
+            onMessage={handleMessage}
+          />
+        )}
       </View>
     </View>
   );

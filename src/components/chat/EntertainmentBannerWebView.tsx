@@ -636,21 +636,28 @@ if (document.readyState === 'loading') {
   return (
     <View style={styles.container}>
       <View style={styles.webViewWrapper}>
-        <SafeWebView
-          ref={webViewRef}
-          source={{ html: htmlContent }}
-          style={styles.webView}
-          containerStyle={styles.webView}
-          scrollEnabled={false}
-          bounces={false}
-          overScrollMode="never"
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          originWhitelist={['*']}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          onMessage={handleMessage}
-        />
+        {Platform.OS === 'web' ? (
+          <iframe
+            srcDoc={htmlContent}
+            style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#2B2118' } as any}
+          />
+        ) : (
+          <SafeWebView
+            ref={webViewRef}
+            source={{ html: htmlContent }}
+            style={styles.webView}
+            containerStyle={styles.webView}
+            scrollEnabled={false}
+            bounces={false}
+            overScrollMode="never"
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            originWhitelist={['*']}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            onMessage={handleMessage}
+          />
+        )}
       </View>
     </View>
   );

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import {
+  Platform,
   StyleSheet,
   View,
 } from 'react-native';
@@ -689,16 +690,28 @@ requestAnimationFrame(loop);
         },
       ]}
     >
-      <SafeWebView
-        originWhitelist={['*']}
-        source={{ html: htmlContent }}
-        onMessage={handleMessage}
-        scrollEnabled={false}
-        bounces={false}
-        overScrollMode="never"
-        containerStyle={[styles.webContainer, { backgroundColor: isPink ? '#FFF5F7' : '#F9E6C9' }]}
-        style={[styles.webView, { backgroundColor: isPink ? '#FFF5F7' : '#F9E6C9' }]}
-      />
+      {Platform.OS === 'web' ? (
+        <iframe
+          srcDoc={htmlContent}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            backgroundColor: isPink ? '#FFF5F7' : '#F9E6C9',
+          } as any}
+        />
+      ) : (
+        <SafeWebView
+          originWhitelist={['*']}
+          source={{ html: htmlContent }}
+          onMessage={handleMessage}
+          scrollEnabled={false}
+          bounces={false}
+          overScrollMode="never"
+          containerStyle={[styles.webContainer, { backgroundColor: isPink ? '#FFF5F7' : '#F9E6C9' }]}
+          style={[styles.webView, { backgroundColor: isPink ? '#FFF5F7' : '#F9E6C9' }]}
+        />
+      )}
     </View>
   );
 };

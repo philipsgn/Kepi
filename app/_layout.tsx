@@ -21,6 +21,8 @@ export default function RootLayout() {
 
   const [fontsLoaded] = useFonts({
     Baloo2_800ExtraBold,
+    'Baloo2-Bold': Baloo2_800ExtraBold,
+    Nunito: Nunito_700Bold,
     Nunito_600SemiBold,
     Nunito_700Bold,
     Nunito_800ExtraBold,
