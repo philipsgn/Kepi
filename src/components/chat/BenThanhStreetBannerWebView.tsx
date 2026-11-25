@@ -38,6 +38,7 @@ export const BEN_THANH_STALLS: StreetStall[] = [
 
 interface BenThanhStreetBannerWebViewProps {
   active?: boolean;
+  onEnterMarket?: () => void;
 }
 
 /**
@@ -47,9 +48,11 @@ interface BenThanhStreetBannerWebViewProps {
  */
 export const BenThanhStreetBannerWebView: React.FC<BenThanhStreetBannerWebViewProps> = ({
   active = true,
+  onEnterMarket,
 }) => {
   const webViewRef = useRef<any>(null);
   const iframeRef = useRef<any>(null);
+  const enterMarketTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { transactions } = useTransactionStore();
   const realPlacesCount = useMemo(
     () =>
@@ -70,12 +73,25 @@ export const BenThanhStreetBannerWebView: React.FC<BenThanhStreetBannerWebViewPr
         viewWidth: 192,
         viewHeight: 100,
         walkBounds: { minX: 20, maxX: 560, minY: 82, maxY: 162 },
-        initialX: 48,
+        initialX: 256,
         initialY: 86,
-        initialCamX: 0,
+        initialCamX: 185,
         initialCamY: 0,
         speed: 44,
         hotspots: [
+          {
+            id: 'ben_thanh_gate',
+            x: 238,
+            y: 4,
+            w: 92,
+            h: 66,
+            standX: 283,
+            standY: 84,
+            standFace: 1,
+            actionType: 'look_window',
+            fastDash: true,
+            bubbleText: `Đang bước vào Chợ Bến Thành...`,
+          },
           {
             id: 'real_places',
             x: 16,
@@ -155,15 +171,47 @@ export const BenThanhStreetBannerWebView: React.FC<BenThanhStreetBannerWebViewPr
     sendCommand({ type: 'GO_TO', index: idx });
   };
 
+  useEffect(() => {
+    return () => {
+      if (enterMarketTimerRef.current) clearTimeout(enterMarketTimerRef.current);
+    };
+  }, []);
+
+  const handleRoomPayload = (data: any) => {
+    if (!data) return;
+    if (data.type === 'STALL_VISIT') {
+      if (typeof data.index === 'number') setSelectedStallIdx(data.index);
+      if (data.label) setToastText(data.label);
+    } else if (data.type === 'HAPTIC_LIGHT') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    } else if (data.type === 'ROOM_ACTION') {
+      if (data.text) setToastText(String(data.text));
+      if (data.id === 'ben_thanh_gate' && data.userTriggered && onEnterMarket) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        if (enterMarketTimerRef.current) clearTimeout(enterMarketTimerRef.current);
+        enterMarketTimerRef.current = setTimeout(() => {
+          onEnterMarket();
+        }, 120);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const onWebMsg = (ev: MessageEvent) => {
+      try {
+        const d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+        handleRoomPayload(d);
+      } catch (_e) {}
+    };
+    window.addEventListener('message', onWebMsg);
+    return () => window.removeEventListener('message', onWebMsg);
+  }, [onEnterMarket]);
+
   const handleMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'STALL_VISIT') {
-        if (typeof data.index === 'number') setSelectedStallIdx(data.index);
-        if (data.label) setToastText(data.label);
-      } else if (data.type === 'HAPTIC_LIGHT') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
+      handleRoomPayload(data);
     } catch (_e) {}
   };
 
@@ -341,21 +389,33 @@ var worldBg=mk(WORLD_W,VH,function(x){
   var hx=0, idx=0;
   while(hx<WORLD_W){
     if(hx>=238 && hx<328){
-      // KHU VỰC CHỢ BẾN THÀNH (Vòm mái đỏ, Tháp đồng hồ biểu tượng, 2 cánh chợ mái ngói)
+      // KHU VỰC CỬA NAM CHỢ BẾN THÀNH 1:1 THEO ẢNH 2 (Mặt tiền kem vàng, tháp đồng hồ, chữ xanh CHỢ BẾN THÀNH, 4 cây bonsai & vạch sang đường)
       var bx=238, bw=90;
-      R(x,bx,26,bw,38,PBI);R(x,bx+2,28,bw-4,36,'#F2DFA8');
-      // 2 mái ngói đỏ hai bên
-      R(x,bx,26,bw,5,'#C4603A');R(x,bx+2,25,bw-4,2,'#9E4528');
-      // Tháp đồng hồ chính giữa
-      R(x,bx+34,10,22,54,PBI);R(x,bx+36,12,18,52,'#F7EFDA');
-      R(x,bx+32,8,26,4,'#C4603A');R(x,bx+38,4,14,4,'#9E4528');R(x,bx+44,1,2,3,'#F4B93B');
-      // Mặt đồng hồ tròn
-      E(x,bx+45,23,6,6,PBI);E(x,bx+45,23,5,5,'#FFFBF1');
-      R(x,bx+45,20,1,3,PBI);R(x,bx+45,23,3,1,PBI);
-      // Cổng vòm cửa chợ
-      R(x,bx+39,40,12,24,'#4A4658');E(x,bx+45,40,6,5,'#4A4658');
-      R(x,bx+10,38,16,18,'#5E9A57');R(x,bx+64,38,16,18,'#5E9A57');
-      for(var wy=40;wy<54;wy+=4){R(x,bx+11,wy,14,1,'#3E7A3A');R(x,bx+65,wy,14,1,'#3E7A3A');}
+      R(x,bx,32,bw,32,PBI);R(x,bx+2,34,bw-4,30,'#F7E3B5'); // hai cánh cửa vòm kem vàng
+      R(x,bx,29,bw,4,'#C4603A');R(x,bx+2,28,bw-4,2,'#9E4528'); // mái ngói đỏ hai cánh
+      // Khối cổng chính giữa + Tháp đồng hồ biểu tượng
+      R(x,bx+28,24,34,40,PBI);R(x,bx+29,25,32,39,'#F9E9C2');
+      R(x,bx+34,8,22,20,PBI);R(x,bx+35,9,20,19,'#FAF0D4');
+      R(x,bx+32,6,26,3,'#9E4528');R(x,bx+44,2,2,4,'#6B7280'); // mái tháp & cột thu lôi
+      // Mặt đồng hồ xanh ngọc + kim
+      E(x,bx+45,16,5,5,PBI);E(x,bx+45,16,4,4,'#DCEEFA');
+      R(x,bx+45,13,1,3,'#2E6B47');R(x,bx+45,16,3,1,'#2E6B47');
+      // Dòng chữ xanh "CHỢ BẾN THÀNH" & Phù điêu nhỏ bên dưới
+      R(x,bx+32,23,26,2,'#2E6B47');
+      R(x,bx+42,27,6,5,PBI);R(x,bx+43,28,4,3,'#D49B35');
+      // Cổng vòm chính tối sâu (mời vào lòng chợ)
+      R(x,bx+37,38,16,26,PBI);R(x,bx+38,39,14,25,'#23202E');E(x,bx+45,39,7,6,'#23202E');
+      R(x,bx+40,42,10,4,'rgba(255,224,138,0.28)'); // ánh sáng hắt từ bên trong chợ
+      // 2 dãy cửa cuốn xám hai bên cổng
+      R(x,bx+16,42,10,22,PBI);R(x,bx+17,43,8,21,'#9CA3AF');
+      R(x,bx+64,42,10,22,PBI);R(x,bx+65,43,8,21,'#9CA3AF');
+      // 4 cây bonsai tỉa tầng xanh mướt trong chậu đỏ
+      [bx+6,bx+28,bx+61,bx+83].forEach(function(tx){
+        R(x,tx-3,60,6,4,'#A65434');R(x,tx-1,54,2,6,'#6E4223');
+        R(x,tx-4,51,8,3,'#3E8A47');R(x,tx-3,47,6,3,'#52A85C');R(x,tx-2,44,4,3,'#6BC473');
+      });
+      // Vạch kẻ đường trắng cho người đi bộ ngay trước cổng (y=80..98)
+      for(var zy=81;zy<97;zy+=4){R(x,bx+33,zy,24,2,'#EAE4D7');}
       hx=328; continue;
     }
     var w=28+((rd()*10)|0), h=26+((rd()*14)|0), top=64-h;

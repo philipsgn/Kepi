@@ -71,7 +71,7 @@ const __SLIM_ICONS_META = {
   ],
 };
 
-export type SubViewType = 'hub' | 'chat' | 'fly' | 'cross' | 'map';
+export type SubViewType = 'hub' | 'chat' | 'fly' | 'cross' | 'map' | 'market';
 
 interface PixelHubDashboardProps {
   onSelectSubView: (view: SubViewType) => void;

@@ -34,6 +34,7 @@ import { PixelHubDashboard, SubViewType } from '../chat/PixelHubDashboard';
 import { PigFlightGameView } from '../chat/PigFlightGameView';
 import { PigCrossRoadGameView } from '../chat/PigCrossRoadGameView';
 import { PiggySpendMapView } from '../chat/PiggySpendMapView';
+import { BenThanhMarketView } from '../chat/BenThanhMarketView';
 import { CafeChatBannerWebView } from '../chat/CafeChatBannerWebView';
 
 const __REGRESSION_META = {
@@ -456,7 +457,18 @@ export const ChatView: React.FC<ChatViewProps> = ({
   if (activeSubView === 'map') {
     return (
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-        <PiggySpendMapView onBack={() => setActiveSubView('hub')} />
+        <PiggySpendMapView
+          onBack={() => setActiveSubView('hub')}
+          onEnterMarket={() => setActiveSubView('market')}
+        />
+      </View>
+    );
+  }
+
+  if (activeSubView === 'market') {
+    return (
+      <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
+        <BenThanhMarketView onBack={() => setActiveSubView('map')} />
       </View>
     );
   }

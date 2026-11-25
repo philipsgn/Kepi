@@ -364,3 +364,16 @@ Màn hình Tab 3 hiển thị:
 - **Cổng Vào Siêu Tốc (`fastDash: true`):** Khi chạm vào Tiệm CAFE trên Banner Khám phá (`saigon_cafe`) hoặc `Cửa Ra Phố` (`exit_door`), chú heo kích hoạt tốc độ lướt nhanh `160 px/s` thẳng tới ngưỡng cửa và chuyển cảnh trong `300ms` (không còn trễ 5–8s).
 - **Ngoại Thất Tiệm CAFE 1:1 (`EntertainmentBannerWebView.tsx`):** Mặt tiền kem/cam ấm 2 tầng, bảng hiệu `CAFE` chữ pixel khối, mái hiên sọc xanh-trắng, cửa kính phản chiếu chéo, bàn tròn vỉa hè với 2 khách uống cà phê, cửa chính gỗ trắng 2 cánh, khối phụ cửa sổ vòm với 2 bạn trò chuyện, cây tùng xoắn ốc pastel trong bồn gạch, cột đèn chỉ hướng & bảng menu chữ A.
 - **Sàn Gạch Bông Indochine 16×16 (`CafeChatBannerWebView.tsx`):** Căn chỉnh lưới `16×16` chuẩn xác từ len chân tường (`y = 78`) đến đáy (`y = 128`), hoa văn 8 cánh cổ điển màu xanh ngọc (`#4A8A80`) & đất nung (`#C4603A`) trên nền kem sứ (`#F7EED8`); kết hợp lambris gỗ (`y = 58..78`) đồng bộ tỷ lệ với chú heo `24×20`.
+
+## 26. Không Gian Chợ Bến Thành (Ngoại Thất Cửa Nam + Nội Thất 3 Phân Khu Pixel Art 10YOE — Quyết định 205)
+- **Cổng Liên Thông 2 Chiều (`Quán quen` ↔ `Chợ Bến Thành`):**
+  - Chạm trực tiếp vào Cổng Cửa Nam Chợ Bến Thành (`ben_thanh_gate`, `fastDash: true`) trên Banner `BenThanhStreetBannerWebView` ➔ chú heo lướt nhanh vào cổng và mở màn hình `BenThanhMarketView` trong `≤ 300ms`.
+  - Trong `BenThanhMarketView`, chạm `Cổng Ra Quán Quen` (`exit_market`, `fastDash: true`) hoặc nút `[←]` ➔ quay lại Tab `Quán quen`.
+- **Thông Số Không Gian Lòng Chợ (`BenThanhMarketBannerWebView.tsx`):**
+  - Khung nhìn `192 × 112` trên thế giới liền mạch **`576 × 144`** (gấp `3×` chiều rộng).
+  - **Trần vòm thép vàng & Ô lấy sáng trời (`y: 0..42`):** Giàn kèo thép vàng `#D49B35` / `#8C5E1A` giao nhau, ô kính lấy sáng `#FBEAC2`, đèn tuýp huỳnh quang & quạt trần xanh lá `#3E8A58`.
+  - **4 Phân Khu Lòng Chợ:**
+    1. `x: 0..176`: **Sạp Vải, Túi Xách & Nón Lá (`HƯƠNG TRINH`)** — vải lụa xếp tầng, túi xách treo, nón lá, quạt giấy, người bán ngồi ghế nhựa.
+    2. `x: 176..344`: **Sạp Thủ Công Mỹ Nghệ & Đồ Lưu Niệm** — giỏ tre đan, bình sơn mài, dải LED vàng ấm chiếu sáng tượng lưu niệm.
+    3. `x: 344..500`: **Sạp Trái Cây Nhiệt Đới (`1029 NGỌC HẢO`)** — tháp bưởi xanh, xoài vàng, thanh long, sầu riêng, chôm chôm.
+    4. `x: 500..576`: **Cổng Ra Quán Quen (`exit_market`)** — cổng vòm sáng hướng ra mặt tiền.

@@ -53,6 +53,7 @@ import { BenThanhStreetBannerWebView } from './BenThanhStreetBannerWebView';
 
 export interface PiggySpendMapViewProps {
   onBack: () => void;
+  onEnterMarket?: () => void;
 }
 
 export type SpendKind = 'food' | 'cafe' | 'market' | 'shop' | 'gym' | 'gas' | 'pharm' | 'fun';
@@ -462,7 +463,7 @@ export function openExternalMapDirections(
   Linking.openURL(searchUrl).catch(() => {});
 }
 
-export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) => {
+export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack, onEnterMarket }) => {
   const { transactions, updateTransaction } = useTransactionStore();
   const [activeMode, setActiveMode] = useState<FilterMode>('recent14');
   const [userPos, setUserPos] = useState<GeoCoords | null>(getCachedLocationSync());
@@ -606,7 +607,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
         showsVerticalScrollIndicator={false}
       >
         {/* 2. BANNER ĐỘNG CHỢ BẾN THÀNH MỞ RỘNG CUỘN NGANG (WORLD 584px) */}
-        <BenThanhStreetBannerWebView active={true} />
+        <BenThanhStreetBannerWebView active={true} onEnterMarket={onEnterMarket} />
 
         {/* 3. THẺ TÓM TẮT GỘP 1 KHUNG SIÊU GỌN (.pshero Compact) + CON DẤU QUẬN THẬT */}
         <View style={styles.heroPassportCard}>

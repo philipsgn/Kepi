@@ -6634,4 +6634,47 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 141 Passed: Tiệm CAFE Ngoại Thất 1:1, Sàn Gạch Bông Indochine 16×16 & Cổng Vào Siêu Tốc (Quyết định 204) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 141 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (141/141)!');
+// ==========================================
+// TEST 142: KHÔNG GIAN CHỢ BẾN THÀNH (CỬA NAM + NỘI THẤT 3 PHÂN KHU 576×144 & CỔNG 2 CHIỀU QUÁN QUEN — QUYẾT ĐỊNH 205)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const streetCode = fs.readFileSync('src/components/chat/BenThanhStreetBannerWebView.tsx', 'utf8');
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const marketViewCode = fs.readFileSync('src/components/chat/BenThanhMarketView.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+
+  assert.ok(
+    hubCode.includes("'market'") &&
+      streetCode.includes('ben_thanh_gate') &&
+      streetCode.includes('onEnterMarket') &&
+      mapCode.includes('onEnterMarket') &&
+      chatViewCode.includes("activeSubView === 'market'") &&
+      chatViewCode.includes("onEnterMarket={() => setActiveSubView('market')}") &&
+      chatViewCode.includes("onBack={() => setActiveSubView('map')}"),
+    'Two-way Ben Thanh Market portal (Quán quen <-> Chợ Bến Thành) must be wired across Hub, Street Banner, MapView, MarketView, and ChatView'
+  );
+
+  assert.ok(
+    marketBannerCode.includes('worldWidth: 576') &&
+      marketBannerCode.includes('worldHeight: 144') &&
+      marketBannerCode.includes('stall_fabric') &&
+      marketBannerCode.includes('stall_souvenir') &&
+      marketBannerCode.includes('stall_fruit') &&
+      marketBannerCode.includes('exit_market') &&
+      marketBannerCode.includes('fastDash: true') &&
+      marketViewCode.includes('Sạp Vải & Nón Lá') &&
+      marketViewCode.includes('Đồ Lưu Niệm') &&
+      marketViewCode.includes('Trái Cây 1029') &&
+      decisionsCode.includes('205') &&
+      chatDocCode.includes('576 × 144'),
+    'BenThanhMarketBannerWebView & BenThanhMarketView must implement 576x144 3-zone market interior with fastDash exit and sync docs for QD 205'
+  );
+
+  console.log('✅ Test 142 Passed: Không Gian Chợ Bến Thành 576×144, Ngoại Thất Cửa Nam & Cổng 2 Chiều Quán Quen (Quyết định 205) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 142 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (142/142)!');
