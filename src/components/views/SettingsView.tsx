@@ -4,6 +4,7 @@ import {
   AppState,
   Linking,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -48,9 +49,11 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useBottomInset } from '../../hooks/useBottomInset';
 import { useAppPermissions } from '../../hooks/useCameraPermissions';
 import {
+  getLocationAppEnabled,
   getLocationPermissionStatusAsync,
   getLocationPinEnabled,
   requestLocationPermissionAsync,
+  setLocationAppEnabled,
   setLocationPinEnabled,
   STORAGE_KEY_LOCATION_PIN,
 } from '../../services/locationService';
@@ -91,12 +94,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
 
   const [isMasked, setIsMasked] = useState(false);
   const [isLocationPinEnabled, setIsLocationPinEnabledState] = useState(true);
+  const [locationAppEnabled, setLocationAppEnabledState] = useState(true);
   const [locationGranted, setLocationGranted] = useState(false);
   const [locationCanAsk, setLocationCanAsk] = useState(true);
   const [activeSheet, setActiveSheet] = useState<ActiveSheetType>(null);
 
   const {
     cameraGranted,
+    cameraAppEnabled,
+    setCameraAppEnabledState,
     canAskCameraAgain,
     requestCameraPermission,
     openAppSettings,
@@ -104,10 +110,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
 
   const refreshLocationPermissions = useCallback(async () => {
     try {
-      const [pinOptIn, locPerm] = await Promise.all([
+      const [appLocEnabled, pinOptIn, locPerm] = await Promise.all([
+        getLocationAppEnabled(),
         getLocationPinEnabled(),
         getLocationPermissionStatusAsync(),
       ]);
+      setLocationAppEnabledState(appLocEnabled);
       setIsLocationPinEnabledState(pinOptIn);
       setLocationGranted(locPerm.granted);
       setLocationCanAsk(locPerm.canAskAgain);
@@ -145,66 +153,72 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
     } catch {}
   };
 
-  // Handler: Toggle Camera OS Permission
+  // Handler: Toggle Camera Permission (Bật/tắt thật cấp App + xin quyền OS khi bật — QĐ 198)
   const handleToggleCameraPermission = async (val: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (!val) {
-      Alert.alert(
-        'Quản lý quyền Máy ảnh',
-        'Để thu hồi quyền Máy ảnh của ứng dụng, bạn vui lòng tắt trong Cài đặt hệ thống của điện thoại.',
-        [
-          { text: 'Đóng', style: 'cancel' },
-          { text: 'Mở Cài đặt', onPress: () => openAppSettings() },
-        ]
-      );
+      await setCameraAppEnabledState(false);
       return;
     }
+
+    await setCameraAppEnabledState(true);
+    if (cameraGranted) return;
 
     if (canAskCameraAgain) {
       const res = await requestCameraPermission();
       if (!res?.granted) {
-        Alert.alert(
-          'Cần quyền Máy ảnh',
-          'Bạn có thể bật quyền Máy ảnh trong Cài đặt điện thoại để chụp ảnh & quét VietQR.',
-          [
-            { text: 'Để sau', style: 'cancel' },
-            { text: 'Mở Cài đặt', onPress: () => openAppSettings() },
-          ]
-        );
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          window.alert('Trình duyệt đang chặn quyền Máy ảnh. Bấm vào biểu tượng ổ khóa cạnh thanh địa chỉ để cho phép nhé!');
+        } else {
+          Alert.alert(
+            'Cần quyền Máy ảnh',
+            'Bạn có thể bật quyền Máy ảnh trong Cài đặt điện thoại để chụp ảnh & quét VietQR.',
+            [
+              { text: 'Để sau', style: 'cancel' },
+              { text: 'Mở Cài đặt', onPress: () => openAppSettings() },
+            ]
+          );
+        }
       }
+    } else if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.alert('Trình duyệt đang chặn quyền Máy ảnh. Bấm vào biểu tượng ổ khóa cạnh thanh địa chỉ để cho phép nhé!');
     } else {
       openAppSettings();
     }
   };
 
-  // Handler: Toggle Location OS Permission
+  // Handler: Toggle Location Permission (Bật/tắt thật cấp App + xin quyền OS khi bật — QĐ 198)
   const handleToggleLocationPermission = async (val: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (!val) {
-      Alert.alert(
-        'Quản lý quyền Vị trí',
-        'Để tắt quyền Vị trí ở cấp hệ thống, bạn vui lòng tắt trong Cài đặt của điện thoại (hoặc tắt riêng công tắc "Tự gắn vị trí khi lưu chi ở tab Chụp" bên dưới).',
-        [
-          { text: 'Đóng', style: 'cancel' },
-          { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
-        ]
-      );
+      setLocationAppEnabledState(false);
+      await setLocationAppEnabled(false);
+      setIsLocationPinEnabledState(false);
+      await setLocationPinEnabled(false);
       return;
     }
 
-    if (locationCanAsk) {
+    setLocationAppEnabledState(true);
+    await setLocationAppEnabled(true);
+    if (locationGranted) return;
+
+    if (locationCanAsk || Platform.OS === 'web') {
       const res = await requestLocationPermissionAsync();
       setLocationGranted(res.granted);
       setLocationCanAsk(res.canAskAgain);
       if (!res.granted) {
-        Alert.alert(
-          'Cần quyền Vị trí',
-          'Bạn có thể bật quyền Vị trí trong Cài đặt điện thoại để lưu địa điểm quán thật.',
-          [
-            { text: 'Để sau', style: 'cancel' },
-            { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
-          ]
-        );
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          window.alert('Trình duyệt đang chặn quyền Vị trí. Bấm vào biểu tượng ổ khóa cạnh thanh địa chỉ (hoặc Cài đặt Safari) để cho phép nhé!');
+        } else {
+          Alert.alert(
+            'Cần quyền Vị trí',
+            'Bạn có thể bật quyền Vị trí trong Cài đặt điện thoại để lưu địa điểm quán thật.',
+            [
+              { text: 'Để sau', style: 'cancel' },
+              { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
+            ]
+          );
+        }
       }
     } else {
       Linking.openSettings();
@@ -485,16 +499,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
                   Cho phép Máy ảnh
                 </Text>
                 <Text style={{ fontSize: 11, color: textMutedColor, fontFamily: 'Nunito', fontWeight: '600' }} numberOfLines={1}>
-                  {cameraGranted ? 'Đang bật · Chụp món & quét QR' : 'Chưa cấp quyền trên máy'}
+                  {cameraAppEnabled && cameraGranted
+                    ? 'Đang bật · Chụp món & quét QR'
+                    : !cameraAppEnabled
+                      ? 'Đã tắt trong App'
+                      : 'Chưa cấp quyền trên máy'}
                 </Text>
               </View>
             </View>
 
             <Switch
-              value={cameraGranted}
+              value={cameraAppEnabled && cameraGranted}
               onValueChange={handleToggleCameraPermission}
               trackColor={{ false: isPink ? '#FCE7F3' : '#E8DEC8', true: accentColor }}
-              thumbColor={cameraGranted ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
+              thumbColor={cameraAppEnabled && cameraGranted ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
             />
           </View>
 
@@ -511,16 +529,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
                   Cho phép Vị trí hiện tại
                 </Text>
                 <Text style={{ fontSize: 11, color: textMutedColor, fontFamily: 'Nunito', fontWeight: '600' }} numberOfLines={1}>
-                  {locationGranted ? 'Đang bật · Chỉ dùng khi mở app' : 'Chưa cấp quyền trên máy'}
+                  {locationAppEnabled && locationGranted
+                    ? 'Đang bật · Chỉ dùng khi mở app'
+                    : !locationAppEnabled
+                      ? 'Đã tắt trong App'
+                      : 'Chưa cấp quyền trên máy'}
                 </Text>
               </View>
             </View>
 
             <Switch
-              value={locationGranted}
+              value={locationAppEnabled && locationGranted}
               onValueChange={handleToggleLocationPermission}
               trackColor={{ false: isPink ? '#FCE7F3' : '#E8DEC8', true: accentColor }}
-              thumbColor={locationGranted ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
+              thumbColor={locationAppEnabled && locationGranted ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
             />
           </View>
 
@@ -543,10 +565,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onSignOut }) => {
             </View>
 
             <Switch
-              value={isLocationPinEnabled && locationGranted}
+              value={isLocationPinEnabled && locationAppEnabled && locationGranted}
               onValueChange={handleToggleLocationPin}
               trackColor={{ false: isPink ? '#FCE7F3' : '#E8DEC8', true: accentColor }}
-              thumbColor={isLocationPinEnabled && locationGranted ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
+              thumbColor={isLocationPinEnabled && locationAppEnabled && locationGranted ? (isPink ? '#FFFFFF' : '#2B2118') : '#FFFFFF'}
             />
           </View>
 

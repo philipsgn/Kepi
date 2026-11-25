@@ -83,6 +83,7 @@ import { ParsedBankNotification } from '../../src/utils/bankNotificationParser';
 import { groupTransactionsByDay } from '../../src/utils/cameraUtils';
 import {
   getCachedLocationSync,
+  getLocationAppEnabled,
   getLocationPermissionStatusAsync,
   getQuickPinCoordsIfOptedIn,
   prewarmLocationAsync,
@@ -136,7 +137,7 @@ import { useBudgetStore } from '../../src/store/budgetStore';
 import { useWaitBasketStore } from '../../src/store/waitBasketStore';
 import { useTransactionStore } from '../../src/store/transactionStore';
 import { useSquadStore } from '../../src/store/squadStore';
-import { useAppPermissions } from '../../src/hooks/useCameraPermissions';
+import { getCameraAppEnabled, useAppPermissions } from '../../src/hooks/useCameraPermissions';
 import { ParsedExpenseData } from '../../src/services/gemini';
 import { scheduleAggressiveReminders, setupNotificationChannels, scheduleDailyExpenseReminder } from '../../src/services/notifications';
 import { trackEvent } from '../../src/services/analytics';
@@ -178,7 +179,14 @@ export default function MainAppScreen() {
   const { items: waitItems, addItem: addToWaitBasket } = useWaitBasketStore();
   const { transactions, addTransaction } = useTransactionStore();
 
-  const { cameraGranted, canAskCameraAgain, requestCameraPermission, openAppSettings } = useAppPermissions();
+  const {
+    cameraGranted,
+    cameraAppEnabled,
+    setCameraAppEnabledState,
+    canAskCameraAgain,
+    requestCameraPermission,
+    openAppSettings,
+  } = useAppPermissions();
   const cameraRef = useRef<CameraView | null>(null);
 
   // Tab & Scroll State
@@ -569,20 +577,23 @@ export default function MainAppScreen() {
     };
   }, []);
 
-  // Tự động xin quyền Camera trước, chờ đóng hoàn toàn (450ms) rồi mới xin quyền & làm nóng GPS tuần tự (Quyết định 195 & 196)
+  // Tự động xin quyền Camera trước, chờ đóng hoàn toàn (450ms) rồi mới xin quyền & làm nóng GPS tuần tự (Quyết định 195, 196 & 198)
   useEffect(() => {
     if (!isFirstLaunchCheckDone || showFirstLaunchPermModal || hasRunAutoPermSequenceRef.current) {
       return;
     }
     hasRunAutoPermSequenceRef.current = true;
     (async () => {
-      if (!cameraGranted && canAskCameraAgain) {
+      const appCamEnabled = await getCameraAppEnabled().catch(() => true);
+      if (appCamEnabled && !cameraGranted && canAskCameraAgain) {
         try {
           await requestCameraPermission();
         } catch (_e) {}
         await new Promise((resolve) => setTimeout(resolve, 450));
       }
       try {
+        const appLocEnabled = await getLocationAppEnabled().catch(() => true);
+        if (!appLocEnabled) return;
         const locPerm = await getLocationPermissionStatusAsync();
         if ((!locPerm.granted && locPerm.canAskAgain) || Platform.OS === 'web') {
           await requestLocationPermissionAsync();
@@ -1773,7 +1784,7 @@ export default function MainAppScreen() {
                   style={styles.viewfinder}
                   {...pinchPanResponder.panHandlers}
                 >
-                  {cameraGranted && isCameraActive && isPagerSettled ? (
+                  {cameraAppEnabled && cameraGranted && isCameraActive && isPagerSettled ? (
                     <>
                       <CameraView
                         key={cameraFacing}
@@ -1796,15 +1807,20 @@ export default function MainAppScreen() {
                     <View style={styles.permissionFallback}>
                       <Camera size={44} color="#666666" strokeWidth={2} />
                       <Text style={styles.permissionText}>
-                        {Platform.OS === 'web'
-                          ? 'Bật Camera trực tiếp hoặc chụp / tải ảnh chi tiêu'
-                          : 'Cấp quyền Camera để chụp ảnh chi tiêu nhanh'}
+                        {!cameraAppEnabled
+                          ? 'Camera đang tắt trong Cài đặt'
+                          : Platform.OS === 'web'
+                            ? 'Bật Camera trực tiếp hoặc chụp / tải ảnh chi tiêu'
+                            : 'Cấp quyền Camera để chụp ảnh chi tiêu nhanh'}
                       </Text>
                       {Platform.OS === 'web' ? (
                         <View style={{ flexDirection: 'row', gap: 10 }}>
                           <BlockButton
-                            title="Bật Camera"
-                            onPress={() => requestCameraPermission().catch(() => {})}
+                            title={!cameraAppEnabled ? 'Bật lại Camera' : 'Bật Camera'}
+                            onPress={() => {
+                              setCameraAppEnabledState(true).catch(() => {});
+                              requestCameraPermission().catch(() => {});
+                            }}
                             variant="primary"
                             size="sm"
                           />
@@ -1817,8 +1833,17 @@ export default function MainAppScreen() {
                         </View>
                       ) : (
                         <BlockButton
-                          title={canAskCameraAgain ? 'Cấp quyền Camera' : 'Mở Cài Đặt'}
-                          onPress={canAskCameraAgain ? () => requestCameraPermission().catch(() => {}) : openAppSettings}
+                          title={!cameraAppEnabled ? 'Bật lại Camera' : canAskCameraAgain ? 'Cấp quyền Camera' : 'Mở Cài Đặt'}
+                          onPress={() => {
+                            if (!cameraAppEnabled) {
+                              setCameraAppEnabledState(true).catch(() => {});
+                              requestCameraPermission().catch(() => {});
+                            } else if (canAskCameraAgain) {
+                              requestCameraPermission().catch(() => {});
+                            } else {
+                              openAppSettings();
+                            }
+                          }}
                           variant="secondary"
                           size="sm"
                         />

@@ -52,3 +52,4 @@
 - [ ] Cân bằng ngân sách: drag 0–100% mượt 60fps (QĐ 47); thumb vàng cám viền 3px.
 - [ ] Mục tiêu: SegmentBar10 khớp tiến độ thật; số tabular.
 - [ ] Mọi modal bo 28 viền trên 3px; nút nguy hiểm double-confirm giữ nguyên.
+- [ ] **Quyết định 198:** Hai công tắc `Cho phép Máy ảnh` và `Cho phép Vị trí hiện tại` hỗ trợ bật/tắt thật ở cấp App (`cameraAppEnabled` / `locationAppEnabled` lưu `AsyncStorage`), cập nhật Switch tức thì trên cả Web PWA lẫn Native và ngắt/bật trực tiếp `CameraView` / GPS.

@@ -147,6 +147,39 @@ export function getCachedLocationSync(): GeoCoords | null {
   return lastKnownMemoryCoords;
 }
 
+export const STORAGE_KEY_LOCATION_APP_ENABLED = 'vi_locket_location_app_enabled_v1';
+let cachedLocationAppEnabled: boolean | null = null;
+
+/**
+ * Đọc trạng thái công tắc cấp App "Cho phép Vị trí hiện tại" (Mặc định: true).
+ */
+export async function getLocationAppEnabled(): Promise<boolean> {
+  if (cachedLocationAppEnabled !== null) return cachedLocationAppEnabled;
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY_LOCATION_APP_ENABLED);
+    if (raw === null) {
+      cachedLocationAppEnabled = true;
+      return true;
+    }
+    cachedLocationAppEnabled = raw === 'true';
+    return cachedLocationAppEnabled;
+  } catch (_e) {
+    return true;
+  }
+}
+
+/**
+ * Lưu trạng thái bật/tắt Vị trí cấp App.
+ */
+export async function setLocationAppEnabled(enabled: boolean): Promise<void> {
+  cachedLocationAppEnabled = enabled;
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY_LOCATION_APP_ENABLED, String(enabled));
+  } catch (_e) {
+    // ignore storage errors
+  }
+}
+
 /**
  * Đọc trạng thái công tắc Opt-in "Tự gắn vị trí khi lưu chi ở tab Chụp" (Mặc định: true, lưu trên máy).
  */
@@ -285,6 +318,8 @@ export async function getCurrentPositionSafeAsync(
  * Làm nóng GPS khi mở Tab Camera (chỉ chạy nếu người dùng đã bật tính năng và đã cấp quyền).
  */
 export async function prewarmLocationAsync(): Promise<GeoCoords | null> {
+  const appEnabled = await getLocationAppEnabled();
+  if (!appEnabled) return null;
   const enabled = await getLocationPinEnabled();
   if (!enabled) return null;
   const perm = await getLocationPermissionStatusAsync();
@@ -298,6 +333,8 @@ export async function prewarmLocationAsync(): Promise<GeoCoords | null> {
  * Tuyệt đối không trả về tọa độ hardcode.
  */
 export async function getQuickPinCoordsIfOptedIn(timeoutMs = 8000): Promise<GeoCoords | null> {
+  const appEnabled = await getLocationAppEnabled();
+  if (!appEnabled) return null;
   const enabled = await getLocationPinEnabled();
   if (!enabled) return null;
   const perm = await getLocationPermissionStatusAsync();

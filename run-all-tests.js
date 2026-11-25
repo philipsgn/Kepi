@@ -6177,7 +6177,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(
     mainCamCode.includes('capturePhotoFromWebInput') &&
       mainCamCode.includes("input.setAttribute('capture', 'environment')") &&
-      mainCamCode.includes('title="Bật Camera"') &&
+      (mainCamCode.includes('title="Bật Camera"') || mainCamCode.includes("'Bật Camera'")) &&
       !mainCamCode.includes('</View>\n                  {/* LỚP PHỦ GESTURE NHẬN DIỆN CHẠM ĐÚP LẬT CAMERA */}'),
     'app/(main)/index.tsx must support capturePhotoFromWebInput and keep double-tap Pressable inside CameraView branch only'
   );
@@ -6325,4 +6325,29 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 134 Passed: Kiểm Tra Chính Xác Trạng Thái Quyền Location Trên Web (Quyết định 197) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 134 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (134/134)!');
+// ==========================================
+// TEST 135: BẬT/TẮT THẬT QUYỀN MÁY ẢNH & VỊ TRÍ CẤP APP TRONG CÀI ĐẶT (WEB + NATIVE — QUYẾT ĐỊNH 198)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const camHookCode = fs.readFileSync('src/hooks/useCameraPermissions.ts', 'utf8');
+  const locCode = fs.readFileSync('src/services/locationService.ts', 'utf8');
+  const settingsCode = fs.readFileSync('src/components/views/SettingsView.tsx', 'utf8');
+  const mainCamCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+
+  assert.ok(
+    camHookCode.includes('STORAGE_KEY_CAMERA_APP_ENABLED') &&
+      camHookCode.includes('setCameraAppEnabled') &&
+      locCode.includes('STORAGE_KEY_LOCATION_APP_ENABLED') &&
+      locCode.includes('setLocationAppEnabled') &&
+      settingsCode.includes('cameraAppEnabled && cameraGranted') &&
+      settingsCode.includes('locationAppEnabled && locationGranted') &&
+      mainCamCode.includes('cameraAppEnabled && cameraGranted') &&
+      decisionsCode.includes('198'),
+    'SettingsView, useCameraPermissions, locationService, and index.tsx must support real app-level toggle for Camera and Location'
+  );
+
+  console.log('✅ Test 135 Passed: Bật/Tắt Thật Quyền Máy Ảnh & Vị Trí Cấp App Trong Cài Đặt (Quyết định 198) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 135 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (135/135)!');
