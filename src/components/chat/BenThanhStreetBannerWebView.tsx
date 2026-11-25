@@ -66,13 +66,15 @@ export const BenThanhStreetBannerWebView: React.FC<BenThanhStreetBannerWebViewPr
       buildOpenRoomEngineScript({
         canvasId: 'pbCv',
         worldWidth: 584,
-        worldHeight: 100,
+        worldHeight: 172,
         viewWidth: 192,
         viewHeight: 100,
-        walkBounds: { minX: 20, maxX: 560, minY: 82, maxY: 92 },
+        walkBounds: { minX: 20, maxX: 560, minY: 82, maxY: 162 },
         initialX: 48,
         initialY: 86,
-        speed: 42,
+        initialCamX: 0,
+        initialCamY: 0,
+        speed: 44,
         hotspots: [
           {
             id: 'real_places',
@@ -85,6 +87,42 @@ export const BenThanhStreetBannerWebView: React.FC<BenThanhStreetBannerWebViewPr
             standFace: 1,
             actionType: 'check_ledger',
             bubbleText: `Bạn đã lưu ${realPlacesCount} quán quen thật!`,
+          },
+          {
+            id: 'xich_lo',
+            x: 108,
+            y: 112,
+            w: 64,
+            h: 44,
+            standX: 140,
+            standY: 146,
+            standFace: 1,
+            actionType: 'jump_joy',
+            bubbleText: `Xích lô Sài Gòn · ${realPlacesCount} điểm check-in`,
+          },
+          {
+            id: 'cafe_bet_square',
+            x: 268,
+            y: 110,
+            w: 92,
+            h: 46,
+            standX: 314,
+            standY: 146,
+            standFace: -1,
+            actionType: 'sip_coffee',
+            bubbleText: `Quảng trường cà phê bệt & Đèn lồng Hội An`,
+          },
+          {
+            id: 'banh_trang_cart',
+            x: 420,
+            y: 110,
+            w: 76,
+            h: 46,
+            standX: 458,
+            standY: 146,
+            standFace: 1,
+            actionType: 'eat_snack',
+            bubbleText: `Xe bánh tráng trộn phố đi bộ đêm!`,
           },
         ],
       }),
@@ -460,69 +498,89 @@ function draw(t){
   R(X,0,0,VW,2,PBI);R(X,0,VH-2,VW,2,PBI);
 }
 
+function drawLowerVietnamSquare(X, camX, camY, t) {
+  // Tầng dưới mở rộng (y: 100..172): Quảng trường phố đêm Việt Nam, xích lô, cà phê bệt & đèn lồng Hội An
+  X.save();
+  X.translate(-Math.round(camX), -Math.round(camY));
+  for (var sx = 0; sx < WORLD_W; sx += 16) {
+    for (var sy = 100; sy < 172; sy += 16) {
+      R(X, sx, sy, 16, 16, ((sx / 16 + sy / 16) % 2 === 0) ? '#D8C3A5' : '#CBB292');
+    }
+  }
+  R(X, 0, 100, WORLD_W, 2, PBI);
+  // Dây đèn lồng Hội An dọc quảng trường
+  R(X, 0, 106, WORLD_W, 1, PBI);
+  for (var lx = 24; lx < WORLD_W - 10; lx += 40) {
+    var col = (lx % 80 === 24) ? '#E0452B' : '#F4B93B';
+    E(X, lx, 111 + Math.round(Math.sin(t * 2 + lx) * 0.8), 4, 4, PBI);
+    E(X, lx, 111 + Math.round(Math.sin(t * 2 + lx) * 0.8), 3, 3, col);
+  }
+  // Xích lô Việt Nam (x: 118, y: 122)
+  R(X, 118, 122, 24, 16, PBI); R(X, 119, 123, 22, 14, '#4B6FA5');
+  R(X, 116, 116, 28, 6, '#F4B93B'); // mui xích lô
+  E(X, 122, 140, 4, 4, PBI); E(X, 138, 140, 4, 4, PBI); E(X, 152, 140, 4, 4, PBI);
+  R(X, 142, 128, 12, 3, PBI); // ghi-đông đạp sau
+  // Khu ghế nhựa cà phê bệt giữa quảng trường (x: 276..350)
+  [[276, 128, '#E0452B'], [296, 126, '#4B6FA5'], [320, 130, '#E0452B'], [340, 126, '#4B6FA5']].forEach(function(st) {
+    R(X, st[0], st[1], 10, 8, PBI); R(X, st[0] + 1, st[1] + 1, 8, 5, st[2]);
+  });
+  // Xe bánh tráng trộn (x: 428, y: 118)
+  R(X, 428, 118, 44, 24, PBI); R(X, 429, 119, 42, 10, '#DCEEFA'); R(X, 429, 129, 42, 12, '#5E9A57');
+  R(X, 426, 114, 48, 4, '#E0452B');
+  E(X, 436, 144, 4, 4, PBI); E(X, 464, 144, 4, 4, PBI);
+  X.restore();
+}
+
 function step(dt, now){
   PB.t+=dt;
   if(PB.hop>0) PB.hop=Math.max(0,PB.hop-dt);
-  if(PB.mode==='walk'){
-    var d=PB.tx-PB.px;
-    if(Math.abs(d)<1.4){
-      PB.px=PB.tx; PB.mode='eat'; PB.tm=2.6; PB.dir=1;
-      notify('STALL_VISIT',{index:PB.i,label:'Heo ghé '+PB_DISH[PB.i].n+' · '+PB_DISH[PB.i].p});
-    }else{
-      PB.dir=d<0?-1:1; PB.px+=PB.dir*42*dt;
-    }
-  }else{
-    PB.tm-=dt;
-    if(PB.tm<=0) pbGo((PB.i+1)%PB_DISH.length);
-  }
   if (window.__openRoom) {
     var rm = window.__openRoom.state;
     window.__openRoom.step(dt, now);
-    if (rm.walking || rm.action) {
-      PB.px = rm.x - 12;
-      PB.dir = rm.facing;
-      PB.mode = rm.walking ? 'walk' : 'eat';
-    } else {
-      rm.x = PB.px + 12;
-      rm.tx = rm.x;
-    }
-    rm.camX = PB.camX;
+    PB.px = rm.x - 12;
+    PB.py = rm.y;
+    PB.dir = rm.facing;
+    PB.mode = rm.walking ? 'walk' : 'eat';
+    PB.camX = rm.camX;
+    PB.camY = rm.camY;
   }
-  // Camera cuộn theo chú heo mượt mà (không bó hẹp 1 khung hình!)
-  var targetCam=Math.max(0,Math.min(WORLD_W-VW, PB.px+12-(VW/2)));
-  PB.camX += (targetCam - PB.camX) * Math.min(1, dt * 6);
 }
 
 function frame(now){
   if(!isActive){PB.run=false;return;}
   var dt=Math.min(0.05,(now-PB.last)/1000);PB.last=now;
-  step(dt, now);draw(PB.t);if(window.__openRoom)window.__openRoom.drawOverlays(X, now);requestAnimationFrame(frame);
+  step(dt, now);
+  var camY = PB.camY || 0;
+  X.save();
+  X.translate(0, -Math.round(camY));
+  draw(PB.t);
+  X.restore();
+  drawLowerVietnamSquare(X, PB.camX, camY, PB.t);
+  // Nếu heo đang ở tầng dưới (y > 96), vẽ heo nổi trên quảng trường đêm
+  if (PB.py && PB.py > 96) {
+    var pxScreen = Math.round(PB.px - PB.camX);
+    var pyScreen = Math.round(PB.py - 20 - camY);
+    hpx.clearRect(0, 0, 24, 20);
+    drawPigSprite(hpx, { pose: PB.mode === 'walk' ? 'walk' : 'stand', frame: ((PB.t * 6) | 0) % 2, happy: PB.hop > 0, blink: (PB.t % 4) < 0.15, tail: true });
+    X.save();
+    if (PB.dir < 0) { X.translate(pxScreen + 24, pyScreen); X.scale(-1, 1); X.drawImage(hp, 0, 0, 24, 20, 0, 0, 24, 20); }
+    else X.drawImage(hp, 0, 0, 24, 20, pxScreen, pyScreen, 24, 20);
+    X.restore();
+  }
+  if(window.__openRoom)window.__openRoom.drawOverlays(X, now);
+  requestAnimationFrame(frame);
 }
-
-cv.addEventListener('pointerdown',function(e){
-  var r=cv.getBoundingClientRect();
-  var lx=((e.clientX-r.left)/r.width)*VW + PB.camX;
-  var ly=((e.clientY-r.top)/r.height)*VH;
-  notify('HAPTIC_LIGHT');
-  if(ly>=72 && Math.abs(lx-(PB.px+12))<18){
-    PB.hop=0.7;
-    for(var k=0;k<12;k++){
-      var a=Math.random()*6.28;
-      PB.spk.push({x:PB.px+12,y:84,vx:Math.cos(a)*1.4,vy:Math.sin(a)*1.4-0.6,l:1,c:['#F9B8C4','#F4B93B','#FFFBF1'][k%3]});
-    }
-    return;
-  }
-  var bi=0;
-  for(var j=0;j<PB_CX.length;j++){
-    if(Math.abs(lx-PB_CX[j])<Math.abs(lx-PB_CX[bi])) bi=j;
-  }
-  pbGo(bi);
-});
 
 window.addEventListener('message',function(ev){
   try{
     var d=JSON.parse(ev.data);
-    if(d&&d.type==='GO_TO') pbGo(Number(d.index)||0);
+    if(d&&d.type==='GO_TO') {
+      var idx = Number(d.index) || 0;
+      pbGo(idx);
+      if (window.__openRoom && PB_CX[idx] !== undefined) {
+        window.__openRoom.walkTo(PB_CX[idx], 86);
+      }
+    }
   }catch(e){}
 });
 

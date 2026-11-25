@@ -317,3 +317,12 @@ Màn hình Tab 3 hiển thị:
   - **Hotspot Actions Kèm Dữ Liệu Thật:** Chạm vào đồ vật/điểm tương tác trong phòng, chú heo tự bước tới điểm đứng chuẩn (`standX, standY`), thực hiện hoạt ảnh hành động (`sip_coffee`, `type_laptop`, `look_window`, `play_arcade`, `jump_joy`, `eat_snack`, `check_ledger`), rung `HAPTIC_LIGHT` và hiện bong bóng thoại chứa số liệu thật từ Store (không tự chuyển trang).
   - **Autonomous Roaming:** Khi rảnh (~4–6s không chạm), chú heo tự dạo quanh phòng hoặc ghé thăm đồ vật.
 - **4 Banner Áp Dụng:** `CafeChatBannerWebView` (Trò chuyện), `ProfileDeskBanner` (Hồ sơ), `EntertainmentBannerWebView` (Khám phá), `BenThanhStreetBannerWebView` (Quán quen).
+
+---
+
+## 22. Thế Giới Mở 2D Văn Hóa Việt Nam & Camera Lia 4 Hướng (Quyết định 201)
+
+- **Camera 2D Deadzone Smooth Follow (`camX`, `camY`):**
+  - Cả 4 banner mở rộng thành thế giới 2D lớn hơn khung nhìn cả chiều ngang lẫn chiều dọc (`CafeChat 360×184`, `ProfileDesk 420×160`, `Entertainment 460×168`, `BenThanh 584×172`).
+  - Khi chú heo di chuyển tới vùng biên (~28% mép khung hình), camera tự động lia mượt sang khu vực kế tiếp; hỗ trợ vuốt kéo trực tiếp trên banner để lia xem trước bản đồ (`Drag-to-Pan`) và hiển thị mũi tên biên (`◄ ► ▲ ▼`) khi còn không gian mở rộng.
+- **Bối Cảnh Văn Hóa Việt Nam:** Quầy cà phê phin, hiên cà phê bệt ghế nhựa, xe bánh mì, quạt trần, nhà sàn gỗ, chiếu cói, Chợ Bến Thành, Bitexco, Landmark 81, xe máy nón lá, xe buýt xanh, xích lô, đèn lồng Hội An, bờ sông Sài Gòn.

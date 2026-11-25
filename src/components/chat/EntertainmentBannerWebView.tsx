@@ -66,50 +66,76 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     () =>
       buildOpenRoomEngineScript({
         canvasId: 'funCv',
-        worldWidth: 192,
-        worldHeight: 88,
+        worldWidth: 460,
+        worldHeight: 168,
         viewWidth: 192,
         viewHeight: 88,
-        walkBounds: { minX: 16, maxX: 176, minY: 60, maxY: 72 },
-        initialX: 90,
+        walkBounds: { minX: 16, maxX: 444, minY: 60, maxY: 152 },
+        initialX: 226,
         initialY: 66,
-        speed: 32,
+        initialCamX: 136,
+        initialCamY: 0,
+        speed: 38,
         hotspots: [
           {
-            id: 'ben_thanh',
-            x: 10,
-            y: 28,
-            w: 44,
-            h: 40,
-            standX: 34,
+            id: 'banh_mi_pho',
+            x: 16,
+            y: 26,
+            w: 96,
+            h: 48,
+            standX: 64,
             standY: 68,
             standFace: -1,
             actionType: 'eat_snack',
-            bubbleText: `Kho cám: ${pigFood} cám cho heo`,
+            bubbleText: `Phở & Bánh mì Sài Gòn · Kho cám: ${pigFood}`,
+          },
+          {
+            id: 'ben_thanh',
+            x: 146,
+            y: 28,
+            w: 44,
+            h: 40,
+            standX: 170,
+            standY: 68,
+            standFace: -1,
+            actionType: 'eat_snack',
+            bubbleText: `Chợ Bến Thành · Kho cám: ${pigFood} cám`,
           },
           {
             id: 'landmark',
-            x: 68,
+            x: 204,
             y: 6,
-            w: 36,
+            w: 40,
             h: 54,
-            standX: 86,
+            standX: 222,
             standY: 66,
             standFace: 1,
             actionType: 'look_window',
-            bubbleText: `Chuỗi ghi ${streakDays || 0} ngày liên tiếp`,
+            bubbleText: `Landmark 81 & Bitexco · Chuỗi ${streakDays || 0} ngày`,
           },
           {
-            id: 'arcade',
-            x: 138,
-            y: 26,
-            w: 44,
-            h: 44,
-            standX: 152,
-            standY: 66,
+            id: 'arcade_stilt',
+            x: 336,
+            y: 20,
+            w: 108,
+            h: 56,
+            standX: 384,
+            standY: 68,
             standFace: 1,
             actionType: 'play_arcade',
-            bubbleText: `Đang có ${gameTickets} vé chơi game!`,
+            bubbleText: `Góc Arcade & Nhà sàn ven hồ · ${gameTickets} vé chơi!`,
+          },
+          {
+            id: 'saigon_river',
+            x: 140,
+            y: 100,
+            w: 180,
+            h: 56,
+            standX: 230,
+            standY: 126,
+            standFace: 1,
+            actionType: 'look_window',
+            bubbleText: `Bờ sông Sài Gòn mát rượi · ${gameTickets} vé sẵn sàng`,
           },
         ],
       }),
@@ -625,8 +651,70 @@ function fbHero(x, t) {
   }
 }
 
+function drawFunWorldWings(x, t) {
+  // 1. KHU TRÁI (0..136, 0..88): Bầu trời hoàng hôn + Quán Phở & Xe Bánh Mì Sài Gòn
+  R(x, 0, 0, 136, 56, '#7E64B8');
+  R(x, 0, 32, 136, 24, '#F09A84');
+  R(x, 0, 56, 136, 32, '#5A504B'); // vỉa hè & mặt đường
+  R(x, 0, 68, 136, 2, '#F4B93B'); // vạch kẻ đường
+  // Quán Phở Việt Nam
+  R(x, 12, 26, 56, 32, '#2B2118'); R(x, 13, 27, 54, 30, '#FFFBF1');
+  R(x, 10, 22, 60, 6, '#E0452B'); // mái tôn đỏ
+  R(x, 20, 30, 40, 6, '#F4B93B'); // bảng hiệu PHỞ
+  // Xe bánh mì Sài Gòn
+  R(x, 82, 34, 38, 22, '#2B2118'); R(x, 83, 35, 36, 10, '#DCEEFA'); R(x, 83, 45, 36, 10, '#F4B93B');
+  E(x, 90, 57, 3, 3, '#2B2118'); E(x, 112, 57, 3, 3, '#2B2118');
+
+  // 2. KHU PHẢI (328..460, 0..88): Khu Arcade & Nhà sàn gỗ ven hồ
+  R(x, 328, 0, 132, 56, '#7E64B8');
+  R(x, 328, 32, 132, 24, '#F09A84');
+  R(x, 328, 56, 132, 32, '#5A504B');
+  // Máy Arcade neon
+  R(x, 342, 24, 32, 34, '#2B2118'); R(x, 343, 25, 30, 32, '#4B6FA5');
+  R(x, 347, 30, 22, 12, ((t * 4) | 0) % 2 === 0 ? '#FFE08A' : '#7EC8F0');
+  R(x, 348, 45, 4, 3, '#E0452B'); R(x, 356, 45, 4, 3, '#F4B93B');
+  // Nhà sàn gỗ mái lá ven hồ
+  R(x, 390, 28, 54, 24, '#2B2118'); R(x, 391, 29, 52, 22, '#A86E3E');
+  R(x, 386, 20, 62, 10, '#6F4423'); // mái nhà sàn
+  R(x, 396, 52, 4, 8, '#5C3A21'); R(x, 434, 52, 4, 8, '#5C3A21'); // chân cột sàn
+
+  // 3. KHU DƯỚI (0..460, 88..168): Công viên bờ sông Sài Gòn, ghế đá, phượng vĩ & thuyền trôi
+  R(x, 0, 88, 460, 44, '#78B65C'); // thảm cỏ công viên
+  R(x, 0, 96, 460, 18, '#E6D3B3'); // đường dạo bộ bờ sông
+  R(x, 0, 132, 460, 36, '#4A8EC2'); // sông Sài Gòn xanh biếc
+  // Ghế đá công viên & cây phượng vĩ đỏ
+  [70, 190, 310, 400].forEach(function(gx) {
+    R(x, gx, 90, 18, 6, '#2B2118'); R(x, gx + 1, 91, 16, 4, '#CFCFD8');
+  });
+  [120, 270, 365].forEach(function(tx) {
+    R(x, tx, 114, 3, 14, '#6F4423');
+    E(x, tx + 1, 112, 9, 6, '#3E7A3A');
+    R(x, tx - 3, 109, 3, 2, '#E0452B'); R(x, tx + 3, 111, 3, 2, '#E0452B'); // hoa phượng đỏ
+  });
+  // Thuyền gỗ trôi trên sông Sài Gòn
+  var boatX = Math.round(((t * 14) % 480) - 20);
+  R(x, boatX, 144, 24, 6, '#2B2118'); R(x, boatX + 1, 145, 22, 4, '#8A5A34');
+  R(x, boatX + 8, 138, 8, 6, '#FFFBF1'); // mui thuyền
+}
+
 function fbDraw(t) {
   var x = FB.x;
+  var dt = Math.min(0.05, FB.dt || 0.016);
+  var rm = window.__openRoom ? window.__openRoom.state : null;
+  if (window.__openRoom) {
+    window.__openRoom.step(dt, performance.now());
+  }
+  var camX = rm ? Math.round(rm.camX) : 136;
+  var camY = rm ? Math.round(rm.camY) : 0;
+
+  x.save();
+  x.translate(-camX, -camY);
+
+  drawFunWorldWings(x, t);
+
+  // Vẽ khu trung tâm Đại lộ Sài Gòn Hoàng Hôn gốc tại (offsetX = 136, offsetY = 0)
+  x.save();
+  x.translate(136, 0);
   x.drawImage(FB.bg, 0, 0);
 
   /* Sao lấp lánh */
@@ -664,8 +752,39 @@ function fbDraw(t) {
   fbBird(x, 158, 48, t, 0);
   fbBird(x, 172, 48, t, 1.7);
 
-  /* Nhân vật Heo lái xe máy / đi bộ */
-  fbHero(x, t);
+  /* Xe buýt xanh, Taxi & Xe máy nón lá Việt Nam trên đại lộ */
+  var busX = Math.round(FB.w + 40 - ((t * 22) % (FB.w + 160)));
+  var motoX = Math.round(FB.w + 40 - (((t * 32) + 95) % (FB.w + 150)));
+  fbBus(x, busX, 75, t, -1);
+  fbRider(x, motoX, 76, t, false, -1, true);
+  var taxiX = Math.round(((t * 38 + 110) % (FB.w + 160)) - 60);
+  fbTaxi(x, taxiX, 81, t, 1);
+
+  x.restore();
+
+  /* Vẽ chú heo 24×20 trong toàn bộ thế giới 2D (460×168) */
+  if (rm) {
+    var px = Math.round(rm.x - 12);
+    var py = Math.round(rm.y - 20 + (rm.action === 'jump_joy' || rm.action === 'play_arcade' ? -Math.abs(Math.sin(t * 10)) * 4 : 0));
+    hpx.clearRect(0, 0, 24, 20);
+    drawPigSprite(hpx, {
+      pose: rm.walking ? 'walk' : (rm.action === 'eat_snack' ? 'eat' : 'stand'),
+      frame: rm.walking ? (((t * 6) | 0) % 2) : 0,
+      mood: 'ok',
+      happy: Boolean(rm.action) || FBS.hop > 0,
+      blink: (t % 4) < 0.15,
+      tail: true
+    });
+    x.save();
+    if (rm.facing < 0) {
+      x.translate(px + 24, py);
+      x.scale(-1, 1);
+      x.drawImage(hp, 0, 0, 24, 20, 0, 0, 24, 20);
+    } else {
+      x.drawImage(hp, 0, 0, 24, 20, px, py, 24, 20);
+    }
+    x.restore();
+  }
 
   /* Hạt lấp lánh khi chạm */
   FB.spk = FB.spk.filter(function(s) { return (s.l -= 0.03) > 0; });
@@ -674,6 +793,12 @@ function fbDraw(t) {
     s.y += s.vy;
     fbSpark(x, Math.round(s.x), Math.round(s.y), s.l > 0.5 ? 2 : 1, s.c);
   });
+
+  x.restore();
+
+  if (window.__openRoom) {
+    window.__openRoom.drawOverlays(x, performance.now());
+  }
 
   /* Viền phim hoạt hình trên dưới 2px */
   R(x, 0, 0, FB.w, 2, '#2B2118');

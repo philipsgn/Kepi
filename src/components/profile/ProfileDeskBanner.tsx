@@ -73,22 +73,36 @@ export const ProfileDeskBanner: React.FC<ProfileDeskBannerProps> = ({
     () =>
       buildOpenRoomEngineScript({
         canvasId: 'meCv',
-        worldWidth: 176,
-        worldHeight: 80,
+        worldWidth: 420,
+        worldHeight: 160,
         viewWidth: 176,
         viewHeight: 80,
-        walkBounds: { minX: 28, maxX: 136, minY: 50, maxY: 58 },
-        initialX: 86,
+        walkBounds: { minX: 28, maxX: 392, minY: 50, maxY: 146 },
+        initialX: 210,
         initialY: 54,
-        speed: 30,
+        initialCamX: 124,
+        initialCamY: 0,
+        speed: 36,
         hotspots: [
           {
-            id: 'plant',
+            id: 'stilt_house',
             x: 10,
+            y: 12,
+            w: 96,
+            h: 62,
+            standX: 60,
+            standY: 62,
+            standFace: -1,
+            actionType: 'sip_coffee',
+            bubbleText: `Góc nhà sàn gỗ · Còn ${formatVND(remainingToday)}`,
+          },
+          {
+            id: 'plant',
+            x: 134,
             y: 34,
             w: 28,
             h: 28,
-            standX: 34,
+            standX: 158,
             standY: 54,
             standFace: -1,
             actionType: 'eat_snack',
@@ -96,23 +110,23 @@ export const ProfileDeskBanner: React.FC<ProfileDeskBannerProps> = ({
           },
           {
             id: 'notes',
-            x: 52,
+            x: 176,
             y: 4,
             w: 28,
             h: 22,
-            standX: 66,
+            standX: 190,
             standY: 52,
             standFace: 1,
             actionType: 'look_window',
-            bubbleText: `Hôm nay còn ${formatVND(remainingToday)}`,
+            bubbleText: `Cửa sổ Bitexco · Còn ${formatVND(remainingToday)}`,
           },
           {
             id: 'bank',
-            x: 112,
+            x: 236,
             y: 36,
             w: 36,
             h: 24,
-            standX: 110,
+            standX: 234,
             standY: 54,
             standFace: 1,
             actionType: 'jump_joy',
@@ -120,15 +134,39 @@ export const ProfileDeskBanner: React.FC<ProfileDeskBannerProps> = ({
           },
           {
             id: 'cal',
-            x: 126,
+            x: 250,
             y: 4,
             w: 36,
             h: 34,
-            standX: 126,
+            standX: 250,
             standY: 52,
             standFace: 1,
             actionType: 'check_ledger',
             bubbleText: `Chuỗi ghi ${streakVal} ngày liên tiếp`,
+          },
+          {
+            id: 'bookshelf_vn',
+            x: 312,
+            y: 12,
+            w: 94,
+            h: 60,
+            standX: 356,
+            standY: 62,
+            standFace: 1,
+            actionType: 'type_laptop',
+            bubbleText: `Mâm trái cây & Sổ mục tiêu · ${savedCount} ghi chép`,
+          },
+          {
+            id: 'tea_patio',
+            x: 156,
+            y: 96,
+            w: 112,
+            h: 54,
+            standX: 212,
+            standY: 134,
+            standFace: 1,
+            actionType: 'sip_coffee',
+            bubbleText: `Bàn trà nóng sân hiên · Chuỗi ${streakVal} ngày`,
           },
         ],
       }),
@@ -559,14 +597,86 @@ function mbStep(dt) {
   SPARKS = SPARKS.filter(function(item){ return item.life > 0; });
 }
 
+function drawProfileWorldWings(c, t) {
+  // 1. KHU TRÁI (0..124, 0..80): Nhà sàn gỗ Việt Nam, chiếu cói, quạt trần tre & bình gốm
+  R(c, 0, 0, 124, 56, '#F2DEC0');
+  R(c, 0, 56, 124, 24, '#A86E3E');
+  // Cột gỗ nhà sàn
+  R(c, 8, 0, 6, 80, '#6F4423'); R(c, 110, 0, 6, 80, '#6F4423');
+  // Quạt trần tre quay chậm
+  R(c, 58, 2, 4, 4, INK);
+  var fa = t * 5;
+  for (var fk = 0; fk < 4; fk++) {
+    var an = fa + fk * Math.PI / 2;
+    R(c, 60 + Math.round(Math.cos(an) * 10), 7 + Math.round(Math.sin(an) * 2), 6, 2, '#8A5A34');
+  }
+  // Phản gỗ & chiếu cói Việt Nam
+  R(c, 22, 42, 74, 18, INK); R(c, 23, 43, 72, 16, '#8A5A34');
+  R(c, 26, 44, 66, 10, '#E8D59E'); // chiếu cói
+  R(c, 26, 48, 66, 2, '#E0452B'); // viền đỏ chiếu cói
+  // Bình gốm Bát Tràng men xanh
+  R(c, 92, 28, 10, 14, INK); R(c, 93, 29, 8, 12, '#FFFBF1'); R(c, 93, 33, 8, 4, '#4B6FA5');
+
+  // 2. KHU PHẢI (300..420, 0..80): Kệ sách tài chính & Mâm trái cây Việt Nam
+  R(c, 300, 0, 120, 56, '#F9E6C9');
+  R(c, 300, 56, 120, 24, '#C8925C');
+  // Kệ sách gỗ
+  R(c, 312, 10, 48, 42, INK); R(c, 313, 11, 46, 40, '#8A5A34');
+  [22, 34, 46].forEach(function(sy) {
+    R(c, 314, sy, 44, 2, INK);
+    R(c, 316, sy - 7, 6, 7, '#5E9A57'); R(c, 324, sy - 6, 6, 6, '#F4B93B');
+    R(c, 332, sy - 7, 7, 7, '#E0452B'); R(c, 341, sy - 6, 6, 6, '#4B6FA5');
+  });
+  // Bàn gỗ + Mâm trái cây Việt (xoài vàng, thanh long hồng)
+  R(c, 368, 44, 40, 14, INK); R(c, 369, 45, 38, 12, '#A86E3E');
+  E(c, 382, 41, 6, 4, '#F4B93B'); // xoài
+  E(c, 394, 41, 5, 4, '#E0452B'); // thanh long
+
+  // 3. KHU DƯỚI (0..420, 80..160): Sân hiên rộng lát gạch tàu đỏ & bàn trà nóng + chậu hoa sen
+  for (var rx = 0; rx < 420; rx += 16) {
+    for (var ry = 80; ry < 160; ry += 16) {
+      R(c, rx, ry, 16, 16, ((rx / 16 + ry / 16) % 2 === 0) ? '#E8CFA8' : '#DEC094');
+    }
+  }
+  R(c, 0, 80, 420, 2, INK);
+  // Chiếu hoa giữa sân hiên + bộ ấm trà nóng Việt Nam
+  R(c, 164, 104, 92, 40, INK); R(c, 165, 105, 90, 38, '#FFF4DC');
+  R(c, 170, 110, 80, 28, '#F6D9A8');
+  R(c, 200, 116, 20, 14, INK); R(c, 201, 117, 18, 12, '#8A5A34'); // bàn trà thấp
+  R(c, 206, 111, 7, 5, '#4B6FA5'); // ấm trà gốm
+  // 2 chậu hoa sen hai bên sân hiên
+  [76, 330].forEach(function(sx) {
+    R(c, sx, 118, 18, 12, INK); R(c, sx + 1, 119, 16, 10, '#4B6FA5');
+    E(c, sx + 9, 114, 7, 3, '#5E9A57');
+    E(c, sx + 9, 110, 4, 4, '#F9B8C4');
+  });
+}
+
 function mbDraw(dt) {
   var cv = document.getElementById('meCv');
   if (!cv) return;
   var c = cv.getContext('2d');
   c.imageSmoothingEnabled = false;
 
+  var rm = window.__openRoom ? window.__openRoom.state : null;
+  if (window.__openRoom) {
+    window.__openRoom.step(dt || 0.016, performance.now());
+  }
+  var camX = rm ? Math.round(rm.camX) : 124;
+  var camY = rm ? Math.round(rm.camY) : 0;
+
   var t = MB.t;
   var d = APP_DATA.todayStr;
+
+  c.save();
+  c.translate(-camX, -camY);
+
+  // Vẽ các khu văn hóa Việt Nam xung quanh (Nhà sàn, Kệ sách trái cây, Sân hiên trà nóng)
+  drawProfileWorldWings(c, t);
+
+  // Vẽ khu Góc làm việc Bitexco gốc tại (offsetX = 124, offsetY = 0)
+  c.save();
+  c.translate(124, 0);
 
   // 1. Tường kem sọc
   R(c, 0, 0, MB.W, MB.H, '#F9E6C9');
@@ -648,41 +758,7 @@ function mbDraw(dt) {
     R(c, 51 + k * 2 + Math.round(Math.sin(t * 3 + k)), sy, 1, 2, 'rgba(255,255,255,.8)');
   }
 
-  // 7. Chú heo con đi lại tự do trong phòng làm việc (Sprite 24×20 phóng 2× = 48×40)
-  var rm = window.__openRoom ? window.__openRoom.state : null;
-  var bo = (MB.bump > 0) || (rm && rm.action === 'jump_joy');
-  var jy = bo ? -Math.abs(Math.sin((MB.bump > 0 ? MB.bump : t) * 14)) * 6 : 0;
-  var pigWalk = rm ? rm.walking : false;
-  var pigFace = rm ? rm.facing : 1;
-  var pigDrawX = rm ? Math.round(rm.x - 24) : 62;
-  var pigDrawY = rm ? Math.round(rm.y - 35 + jy) : Math.round(19 + jy);
-  hpx.clearRect(0, 0, 24, 20);
-  drawPigSprite(hpx, {
-    pose: pigWalk ? 'walk' : (rm && rm.action === 'eat_snack' ? 'eat' : 'stand'),
-    frame: pigWalk ? ((Math.floor(t * 6)) % 2) : ((Math.floor(t * 2)) % 2),
-    mood: 'ok',
-    happy: bo || (APP_DATA.savedCount > 0 && (t % 6) < 1.2),
-    blink: (t % 4) < 0.15,
-    tail: (Math.floor(t * 3) % 2 === 0)
-  });
-  c.save();
-  if (pigFace < 0) {
-    c.translate(pigDrawX + 48, pigDrawY);
-    c.scale(-1, 1);
-    c.drawImage(hp, 0, 0, 24, 20, 0, 0, 48, 40);
-  } else {
-    c.drawImage(hp, 0, 0, 24, 20, pigDrawX, pigDrawY, 48, 40);
-  }
-  c.restore();
-  if (window.__openRoom) {
-    window.__openRoom.step(dt || 0.016, performance.now());
-    window.__openRoom.drawOverlays(c, performance.now());
-    if (rm && rm.action && rm.bubbleText && rm.bubbleText !== lastRoomBubble) {
-      lastRoomBubble = rm.bubbleText;
-      showToast(rm.bubbleText);
-    }
-  }
-
+  // 7. Chú heo con đi lại tự do trong toàn bộ thế giới 2D (420×160) — vẽ ở hệ tọa độ thế giới
   // Pháo hoa sao của chú heo
   SPARKS.forEach(function(sp){
     R(c, Math.round(sp.x), Math.round(sp.y), 2, 2, sp.col);
@@ -709,6 +785,44 @@ function mbDraw(dt) {
     E(c, Math.round(bi.x), Math.round(bi.y), 2, 2, INK);
     R(c, Math.round(bi.x) - 1, Math.round(bi.y) - 1, 2, 2, '#F4B93B');
   });
+
+  c.restore(); // kết thúc offset 124 của khu Bitexco gốc
+
+  // Vẽ chú heo 24×20 (scale 1.5× = 36×30 cho cân đối phòng rộng 2D)
+  var bo = (MB.bump > 0) || (rm && rm.action === 'jump_joy');
+  var jy = bo ? -Math.abs(Math.sin((MB.bump > 0 ? MB.bump : t) * 14)) * 5 : 0;
+  var pigWalk = rm ? rm.walking : false;
+  var pigFace = rm ? rm.facing : 1;
+  var pigDrawX = rm ? Math.round(rm.x - 18) : 186;
+  var pigDrawY = rm ? Math.round(rm.y - 26 + jy) : Math.round(24 + jy);
+  hpx.clearRect(0, 0, 24, 20);
+  drawPigSprite(hpx, {
+    pose: pigWalk ? 'walk' : (rm && rm.action === 'eat_snack' ? 'eat' : 'stand'),
+    frame: pigWalk ? ((Math.floor(t * 6)) % 2) : ((Math.floor(t * 2)) % 2),
+    mood: 'ok',
+    happy: bo || (APP_DATA.savedCount > 0 && (t % 6) < 1.2),
+    blink: (t % 4) < 0.15,
+    tail: (Math.floor(t * 3) % 2 === 0)
+  });
+  c.save();
+  if (pigFace < 0) {
+    c.translate(pigDrawX + 36, pigDrawY);
+    c.scale(-1, 1);
+    c.drawImage(hp, 0, 0, 24, 20, 0, 0, 36, 30);
+  } else {
+    c.drawImage(hp, 0, 0, 24, 20, pigDrawX, pigDrawY, 36, 30);
+  }
+  c.restore();
+
+  c.restore(); // kết thúc camera translate(-camX, -camY)
+
+  if (window.__openRoom) {
+    window.__openRoom.drawOverlays(c, performance.now());
+    if (rm && rm.action && rm.bubbleText && rm.bubbleText !== lastRoomBubble) {
+      lastRoomBubble = rm.bubbleText;
+      showToast(rm.bubbleText);
+    }
+  }
 }
 
 function loop(now) {

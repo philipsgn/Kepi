@@ -6489,4 +6489,48 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 137 Passed: Đồng Bộ Backend <-> Frontend & 4 Banner Không Gian Mở Tương Tác (Quyết định 200) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 137 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (137/137)!');
+// ==========================================
+// TEST 138: 4 BANNER THẾ GIỚI MỞ 2D VĂN HÓA VIỆT NAM & CAMERA LIA 4 HƯỚNG (QUYẾT ĐỊNH 201)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const openRoomCode = fs.readFileSync('src/components/pixel/pixelOpenRoomEngine.ts', 'utf8');
+  const cafeBannerCode = fs.readFileSync('src/components/chat/CafeChatBannerWebView.tsx', 'utf8');
+  const profileBannerCode = fs.readFileSync('src/components/profile/ProfileDeskBanner.tsx', 'utf8');
+  const funBannerCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const streetBannerCode = fs.readFileSync('src/components/chat/BenThanhStreetBannerWebView.tsx', 'utf8');
+
+  // 1. Engine hỗ trợ Camera 2D (camX + camY), Deadzone Smooth Follow, Drag-to-Pan & Edge Chevrons
+  assert.ok(
+    openRoomCode.includes('camY') &&
+      openRoomCode.includes('targetCamY') &&
+      openRoomCode.includes('isPanning') &&
+      openRoomCode.includes('deadzone') &&
+      openRoomCode.includes('maxCamY'),
+    'pixelOpenRoomEngine.ts must support 2D camX/camY, deadzone smooth follow, drag-to-pan, and edge indicators'
+  );
+
+  // 2. Cả 4 banner đều mở rộng kích thước thế giới 2D (worldWidth > viewWidth & worldHeight > viewHeight) với bối cảnh Việt Nam
+  assert.ok(
+    cafeBannerCode.includes('worldWidth: 360') &&
+      cafeBannerCode.includes('worldHeight: 184') &&
+      cafeBannerCode.includes('drawCafeWorldWings') &&
+      profileBannerCode.includes('worldWidth: 420') &&
+      profileBannerCode.includes('worldHeight: 160') &&
+      profileBannerCode.includes('drawProfileWorldWings') &&
+      funBannerCode.includes('worldWidth: 460') &&
+      funBannerCode.includes('worldHeight: 168') &&
+      funBannerCode.includes('drawFunWorldWings') &&
+      streetBannerCode.includes('worldWidth: 584') &&
+      streetBannerCode.includes('worldHeight: 172') &&
+      streetBannerCode.includes('drawLowerVietnamSquare') &&
+      decisionsCode.includes('201') &&
+      chatDocCode.includes('201'),
+    'All 4 banners must implement 2D open worlds with Vietnamese cultural zones and docs parity'
+  );
+
+  console.log('✅ Test 138 Passed: 4 Banner Thế Giới Mở 2D Văn Hóa Việt Nam & Camera Lia 4 Hướng (Quyết định 201) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 138 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (138/138)!');

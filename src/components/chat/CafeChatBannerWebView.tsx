@@ -144,34 +144,36 @@ export const CafeChatBannerWebView: React.FC<CafeChatBannerWebViewProps> = ({
     () =>
       buildOpenRoomEngineScript({
         canvasId: 'chCv',
-        worldWidth: 144,
-        worldHeight: 96,
+        worldWidth: 360,
+        worldHeight: 184,
         viewWidth: 144,
         viewHeight: 96,
-        walkBounds: { minX: 16, maxX: 86, minY: 66, maxY: 78 },
-        initialX: 40,
+        walkBounds: { minX: 18, maxX: 342, minY: 66, maxY: 168 },
+        initialX: 148,
         initialY: 68,
-        speed: 28,
+        initialCamX: 108,
+        initialCamY: 0,
+        speed: 34,
         hotspots: [
           {
-            id: 'counter',
-            x: 4,
-            y: 36,
-            w: 32,
-            h: 40,
-            standX: 28,
-            standY: 70,
+            id: 'phin_bar',
+            x: 10,
+            y: 34,
+            w: 84,
+            h: 48,
+            standX: 54,
+            standY: 74,
             standFace: -1,
             actionType: 'sip_coffee',
-            bubbleText: `Hôm nay đã chi ${formatVND(todaySpent || 0)}`,
+            bubbleText: `Cà phê phin · Đã chi ${formatVND(todaySpent || 0)}`,
           },
           {
             id: 'window',
-            x: 36,
+            x: 144,
             y: 12,
             w: 42,
             h: 34,
-            standX: 54,
+            standX: 162,
             standY: 68,
             standFace: 1,
             actionType: 'look_window',
@@ -179,27 +181,51 @@ export const CafeChatBannerWebView: React.FC<CafeChatBannerWebViewProps> = ({
           },
           {
             id: 'ai_table',
-            x: 92,
+            x: 200,
             y: 44,
             w: 38,
             h: 36,
-            standX: 84,
+            standX: 192,
             standY: 68,
             standFace: 1,
             actionType: 'jump_joy',
             bubbleText: `Còn lại hôm nay: ${formatVND(remainingToday)}`,
           },
           {
-            id: 'menu',
-            x: 112,
-            y: 12,
-            w: 28,
-            h: 30,
-            standX: 86,
-            standY: 66,
+            id: 'reading_nook',
+            x: 266,
+            y: 24,
+            w: 80,
+            h: 56,
+            standX: 296,
+            standY: 74,
             standFace: 1,
             actionType: 'check_ledger',
             bubbleText: `Hạn mức ngày: ${formatVND(todayBudget || 0)}`,
+          },
+          {
+            id: 'banh_mi_cart',
+            x: 56,
+            y: 112,
+            w: 76,
+            h: 52,
+            standX: 96,
+            standY: 148,
+            standFace: -1,
+            actionType: 'eat_snack',
+            bubbleText: `Xe bánh mì Sài Gòn · Cà phê bệt mát mẻ!`,
+          },
+          {
+            id: 'cafe_bet_patio',
+            x: 200,
+            y: 118,
+            w: 96,
+            h: 50,
+            standX: 248,
+            standY: 152,
+            standFace: 1,
+            actionType: 'sip_coffee',
+            bubbleText: `Hiên cà phê bệt · Còn ${formatVND(remainingToday)}`,
           },
         ],
       }),
@@ -431,7 +457,89 @@ function cbPig(x,px,who,t){
 var cv=document.getElementById('chCv'), X=cv.getContext('2d');
 X.imageSmoothingEnabled=false;
 
+function drawCafeWorldWings(x, t) {
+  // 1. KHU TRÁI (x: 0..108, y: 0..96): Quầy cà phê phin nhôm & Tủ bánh mì Sài Gòn
+  R(x, 0, 0, 108, 62, '#F2D58A');
+  R(x, 0, 62, 108, 34, '#D9A76A');
+  // Tường gạch bông & bảng gỗ CÀ PHÊ PHIN
+  R(x, 12, 12, 54, 16, PBI); R(x, 13, 13, 52, 14, '#3D2B1F');
+  R(x, 17, 17, 44, 2, '#F4B93B'); R(x, 22, 22, 34, 2, '#FFFBF1');
+  // Quầy pha chế gỗ
+  R(x, 8, 46, 86, 20, PBI); R(x, 9, 47, 84, 18, '#8A5A34'); R(x, 8, 45, 86, 4, '#C48A55');
+  // 2 ly cà phê phin nhôm nhỏ giọt
+  [22, 40].forEach(function(px, idx) {
+    R(x, px, 38, 7, 7, PBI); R(x, px + 1, 39, 5, 5, '#FFFBF1');
+    R(x, px + 1, 41, 5, 3, '#6F4E37');
+    R(x, px - 1, 35, 9, 3, '#D0D6DC'); // phin nhôm
+    pbSteam(x, px + 3, 33, t + idx, 1);
+  });
+  // Tủ kính bánh mì Sài Gòn
+  R(x, 58, 30, 30, 16, PBI); R(x, 59, 31, 28, 14, '#DCEEFA');
+  R(x, 62, 38, 9, 4, '#D88C4A'); R(x, 74, 38, 9, 4, '#E09A58'); // 2 ổ bánh mì
+
+  // 2. KHU PHẢI (x: 252..360, y: 0..96): Góc đọc sách, kệ gỗ, chậu mai vàng
+  R(x, 252, 0, 108, 62, '#F2D58A');
+  R(x, 252, 62, 108, 34, '#D9A76A');
+  // Kệ sách gỗ
+  R(x, 268, 16, 44, 42, PBI); R(x, 269, 17, 42, 40, '#8A5A34');
+  [24, 34, 44].forEach(function(sy) {
+    R(x, 270, sy, 40, 2, PBI);
+    R(x, 272, sy - 6, 5, 6, '#E0452B'); R(x, 279, sy - 5, 5, 5, '#4B6FA5');
+    R(x, 286, sy - 6, 5, 6, '#5E9A57'); R(x, 294, sy - 5, 6, 5, '#F4B93B');
+  });
+  // Chậu hoa mai vàng Việt Nam
+  R(x, 326, 46, 16, 12, PBI); R(x, 327, 47, 14, 10, '#C4603A');
+  R(x, 333, 30, 2, 16, '#5C3A21');
+  [[328, 30], [338, 28], [333, 24], [326, 36], [340, 35]].forEach(function(fl) {
+    R(x, fl[0], fl[1], 3, 3, '#F4B93B');
+  });
+
+  // 3. KHU DƯỚI (x: 0..360, y: 96..184): Hiên cà phê bệt Sài Gòn lát gạch bông + xe bánh mì + đèn lồng
+  for (var gx = 0; gx < 360; gx += 12) {
+    for (var gy = 96; gy < 184; gy += 12) {
+      var alt = ((gx / 12) + (gy / 12)) % 2 === 0;
+      R(x, gx, gy, 12, 12, alt ? '#EBD5B3' : '#DFC398');
+      R(x, gx + 5, gy + 5, 2, 2, alt ? '#C9A878' : '#F4E5C8');
+    }
+  }
+  R(x, 0, 96, 360, 2, PBI); // bậc thềm ra hiên
+  // Dây đèn lồng Hội An treo ngang hiên
+  R(x, 0, 102, 360, 1, PBI);
+  for (var lx = 24; lx < 350; lx += 44) {
+    var lcol = (lx % 88 === 24) ? '#E0452B' : '#F4B93B';
+    E(x, lx, 107 + Math.round(Math.sin(t * 2 + lx) * 0.8), 4, 4, PBI);
+    E(x, lx, 107 + Math.round(Math.sin(t * 2 + lx) * 0.8), 3, 3, lcol);
+  }
+  // Xe đẩy bánh mì Sài Gòn ở hiên trái
+  R(x, 62, 122, 46, 26, PBI); R(x, 63, 123, 44, 12, '#DCEEFA'); R(x, 63, 135, 44, 12, '#E0452B');
+  R(x, 60, 118, 50, 4, '#F4B93B'); // mái che sọc vàng
+  E(x, 72, 150, 4, 4, PBI); E(x, 98, 150, 4, 4, PBI);
+  R(x, 68, 128, 10, 4, '#D88C4A'); R(x, 82, 128, 10, 4, '#E09A58');
+  // Bộ ghế nhựa cà phê bệt đỏ/xanh ở hiên phải
+  [[208, 136, '#E0452B'], [228, 132, '#4B6FA5'], [254, 138, '#E0452B'], [274, 134, '#4B6FA5']].forEach(function(st) {
+    R(x, st[0], st[1], 10, 8, PBI); R(x, st[0] + 1, st[1] + 1, 8, 5, st[2]);
+  });
+  // Ly cà phê sữa đá trên ghế nhựa làm bàn
+  R(x, 231, 126, 4, 6, PBI); R(x, 232, 127, 2, 4, '#FFFBF1'); R(x, 232, 129, 2, 2, '#8A5A34');
+}
+
 function cbDraw(t){
+  var rm = window.__openRoom ? window.__openRoom.state : null;
+  if (window.__openRoom) {
+    window.__openRoom.step(CB.dt || 0.016, performance.now());
+  }
+  var camX = rm ? Math.round(rm.camX) : 108;
+  var camY = rm ? Math.round(rm.camY) : 0;
+
+  X.save();
+  X.translate(-camX, -camY);
+
+  // Vẽ các khu mở rộng xung quanh quán cà phê (Trái, Phải, Dưới)
+  drawCafeWorldWings(X, t);
+
+  // Vẽ khu trung tâm quán cà phê gốc tại (offsetX = 108, offsetY = 0)
+  X.save();
+  X.translate(108, 0);
   cbWindow(X,t);X.drawImage(CB.bg,0,0);
   // quạt trần
   R(X,70,5,4,3,PBI);var a=t*7;
@@ -444,14 +552,23 @@ function cbDraw(t){
     var N='#FF6FA5';R(X,54,21,8,7,N);R(X,55,22,6,5,'#2B1B2E');R(X,62,22,2,4,N);R(X,53,28,10,1,N);R(X,56,17,1,3,N);R(X,59,17,1,3,N);
     X.globalAlpha=0.25;E(X,58,23,9,8,N);X.globalAlpha=1;
   }
-  cbPig(X,CB_ME_X,'me',t);cbPig(X,CB_AI_X,'ai',t);
+  cbPig(X,CB_AI_X,'ai',t);
   X.drawImage(CB.fg,0,0);
-  if(window.__openRoom){window.__openRoom.step(CB.dt||0.016,performance.now());window.__openRoom.drawOverlays(X,performance.now());}
   pbSteam(X,72,64,t,2);
   var dr=((t*1.6)%1);R(X,72,73+Math.round(dr*2),1,1,'#6B4A2B');
+  if(CB.ai.talk>0&&!CB.think)pbHeart(X,96,60-Math.round(((t*2)%1)*6),'#E0452B');
+  X.restore();
+
+  // Vẽ chú heo người dùng trong hệ tọa độ thế giới 2D (360×184)
+  cbPig(X, 108 + CB_ME_X, 'me', t);
+
+  X.restore();
+
+  if (window.__openRoom) {
+    window.__openRoom.drawOverlays(X, performance.now());
+  }
   CB.me.hop=Math.max(0,CB.me.hop-CB.dt);CB.ai.hop=Math.max(0,CB.ai.hop-CB.dt);
   CB.me.talk=Math.max(0,CB.me.talk-CB.dt);CB.ai.talk=Math.max(0,CB.ai.talk-CB.dt);
-  if(CB.ai.talk>0&&!CB.think)pbHeart(X,96,60-Math.round(((t*2)%1)*6),'#E0452B');
   R(X,0,0,CB.w,1,PBI);R(X,0,CB.h-1,CB.w,1,PBI);
 }
 
