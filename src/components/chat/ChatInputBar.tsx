@@ -34,7 +34,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   const { tokens, mode } = useTheme();
   // Quyết định 144: Cố định 100% Neo-Brutalist Pixel Art cho Tab Giải Trí độc lập với Theme máy
   const isHeocon = true;
-  const { bottomInset } = useBottomInset();
+  const { bottomInset, insets } = useBottomInset();
   const [inputText, setInputText] = useState('');
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
@@ -66,7 +66,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   const hasText = inputText.trim().length > 0;
   const currentBottomPadding = isKeyboardVisible
     ? (Platform.OS === 'ios' ? 10 : 8)
-    : bottomInset + 8;
+    : Math.max(insets.bottom, 10);
 
   return (
     <View
@@ -74,14 +74,13 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         styles.container,
         isHeocon
           ? {
-              backgroundColor: '#F6EEDC',
-              borderTopColor: '#2B2118',
-              borderTopWidth: 2.5,
+              backgroundColor: mode === 'pink' ? '#FFF5F7' : '#F6EEDC',
+              borderTopWidth: 0,
               paddingBottom: currentBottomPadding,
             }
           : {
-              backgroundColor: tokens.surface,
-              borderTopColor: tokens.border,
+              backgroundColor: tokens.bg || tokens.surface,
+              borderTopWidth: 0,
               paddingBottom: currentBottomPadding,
             },
       ]}
@@ -178,9 +177,9 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderTopWidth: 1,
+    borderTopWidth: 0,
     paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: 8,
   },
   inputRow: {
     flexDirection: 'row',

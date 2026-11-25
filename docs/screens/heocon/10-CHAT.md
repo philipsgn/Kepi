@@ -297,3 +297,13 @@ Màn hình Tab 3 hiển thị:
 - **Chỉ Số Game Có Ý Nghĩa (`Đã kiếm: X cám`) & Lưu Tiến Trình:**
   - Thay thế `Kỷ lục` / `Sao` trên 2 thẻ game (`Heo bay`, `Qua đường`) bằng **`Đã kiếm: X cám`** (`flyFoodEarned`, `crossRoadFoodEarned` trong `gamificationStore.ts`) để người dùng thấy rõ thành quả cám kiếm được dùng để nuôi heo ở Tab Vườn hoặc đổi vé chơi.
   - Lưu bền vững `crossRoadLevelStars` và hydrate vào `PigCrossRoadGameView.tsx` để không mất tiến trình qua phố.
+
+---
+
+## 20. Ẩn Bottom Bar Ở Trò Chuyện & Quán Quen + Chat Liền Mạch IG/Messenger (Quyết định 199)
+
+- **Ẩn Thanh Điều Hướng Đáy (`FloatingPillTabBar`):**
+  - Tự động ẩn Bottom Tab Bar khi người dùng vào bất kỳ sub-view con nào (`activeSubView !== 'hub'`: Trò chuyện `'chat'`, Quán quen `'map'`, Heo bay `'fly'`, Qua đường `'cross'`) để không gian thoáng đãng, tối đa diện tích hiển thị.
+- **Khung Tin Nhắn & Thanh Nhập Chat Liền Mạch:**
+  - Xóa bỏ hoàn toàn đường kẻ ngang (`borderTopWidth: 0`) trên `ChatInputBar`.
+  - Vùng tin nhắn mở rộng tràn lề liền mạch xuống thanh nhập liệu (không đóng hộp viền 3px tách rời), nền đồng bộ theo theme (`#F6EEDC` / `#FFF5F7`), sát đáy `Math.max(insets.bottom, 10)`.

@@ -98,9 +98,9 @@ export const ChatView: React.FC<ChatViewProps> = ({
     }
   }, [requestedSubView, onClearRequestedSubView]);
 
-  // Ẩn Bottom Tab Bar khi chơi Game toàn màn hình 9:16
+  // Ẩn Bottom Tab Bar khi vào mọi màn con: Trò chuyện, Quán quen & 2 Game (Quyết định 144 & 199)
   useEffect(() => {
-    if (activeSubView === 'fly' || activeSubView === 'cross') {
+    if (activeSubView !== 'hub') {
       onToggleTabBar?.(false);
     } else {
       onToggleTabBar?.(true);
@@ -557,7 +557,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           message={undoToast.message}
           onUndo={handleUndo}
           onExpire={handleUndoExpire}
-          bottomOffset={bottomInset + 65}
+          bottomOffset={insets.bottom + 68}
         />
       </KeyboardAvoidingView>
     </View>
@@ -653,17 +653,11 @@ const styles = StyleSheet.create({
   },
   chatlogWrapperHeocon: {
     flex: 1,
-    marginHorizontal: 14,
-    marginBottom: 4,
-    backgroundColor: '#FFFBF1',
-    borderWidth: 3,
-    borderColor: '#2B2118',
-    borderRadius: 22,
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 3,
+    marginHorizontal: 0,
+    marginBottom: 0,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    borderRadius: 0,
     overflow: 'hidden',
   },
   messagesContent: {

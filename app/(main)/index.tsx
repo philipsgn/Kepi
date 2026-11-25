@@ -89,6 +89,7 @@ import {
   prewarmLocationAsync,
   requestLocationPermissionAsync,
   reverseGeocodePlaceAsync,
+  setLocationAppEnabled,
 } from '../../src/services/locationService';
 
 // Views
@@ -466,18 +467,9 @@ export default function MainAppScreen() {
     actualPriceThreshold: 200000 });
 
   useEffect(() => {
-    (async () => {
-      try {
-        const prompted = await AsyncStorage.getItem(STORAGE_KEY_FIRST_PERMISSIONS_PROMPTED);
-        if (!prompted && isAuthenticated) {
-          setShowFirstLaunchPermModal(true);
-        }
-      } catch (_e) {
-        // ignore
-      } finally {
-        setIsFirstLaunchCheckDone(true);
-      }
-    })();
+    // Quyết định 199: Tắt luồng FirstLaunchPermissionsModal trung gian, dùng 1 luồng OS/Browser duy nhất
+    setShowFirstLaunchPermModal(false);
+    setIsFirstLaunchCheckDone(true);
   }, [isAuthenticated]);
 
   const handleCompleteFirstPermissions = async () => {
@@ -577,7 +569,7 @@ export default function MainAppScreen() {
     };
   }, []);
 
-  // Tự động xin quyền Camera trước, chờ đóng hoàn toàn (450ms) rồi mới xin quyền & làm nóng GPS tuần tự (Quyết định 195, 196 & 198)
+  // Tự động xin quyền Camera trước, chờ đóng hoàn toàn (450ms) rồi mới xin quyền & làm nóng GPS tuần tự + đồng bộ 2 chiều OS ↔ App (QĐ 195, 196, 198 & 199)
   useEffect(() => {
     if (!isFirstLaunchCheckDone || showFirstLaunchPermModal || hasRunAutoPermSequenceRef.current) {
       return;
@@ -587,21 +579,29 @@ export default function MainAppScreen() {
       const appCamEnabled = await getCameraAppEnabled().catch(() => true);
       if (appCamEnabled && !cameraGranted && canAskCameraAgain) {
         try {
-          await requestCameraPermission();
+          const camRes = await requestCameraPermission();
+          if (camRes) {
+            await setCameraAppEnabledState(!!camRes.granted).catch(() => {});
+          }
         } catch (_e) {}
         await new Promise((resolve) => setTimeout(resolve, 450));
+      } else if (cameraGranted) {
+        await setCameraAppEnabledState(true).catch(() => {});
       }
       try {
         const appLocEnabled = await getLocationAppEnabled().catch(() => true);
         if (!appLocEnabled) return;
-        const locPerm = await getLocationPermissionStatusAsync();
+        let locPerm = await getLocationPermissionStatusAsync();
         if ((!locPerm.granted && locPerm.canAskAgain) || Platform.OS === 'web') {
-          await requestLocationPermissionAsync();
+          locPerm = await requestLocationPermissionAsync();
         }
-        await prewarmLocationAsync();
+        await setLocationAppEnabled(!!locPerm.granted).catch(() => {});
+        if (locPerm.granted) {
+          await prewarmLocationAsync();
+        }
       } catch (_e) {}
     })();
-  }, [isFirstLaunchCheckDone, showFirstLaunchPermModal, cameraGranted, canAskCameraAgain, requestCameraPermission]);
+  }, [isFirstLaunchCheckDone, showFirstLaunchPermModal, cameraGranted, canAskCameraAgain, requestCameraPermission, setCameraAppEnabledState]);
 
   const currentOffsetYRef = useRef<number>(0);
 

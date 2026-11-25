@@ -3664,7 +3664,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(chatViewCode.includes("screenBg = isHeocon ? '#F6EEDC' :") || chatViewCode.includes("screenBg = tokens.bg"), 'ChatView must support #F6EEDC theme background');
   assert.ok(coachBubbleCode.includes('avatarWrapperHeocon') && coachBubbleCode.includes("backgroundColor: '#FFFBF1'"), 'CoachMessageBubble must have Heo Con neo-brutalist avatar and card');
   assert.ok(userBubbleCode.includes("backgroundColor: '#F4B93B'") && userBubbleCode.includes('borderWidth: 3'), 'UserMessageBubble must have Vang Cam 3px ink border');
-  assert.ok(chatInputCode.includes("backgroundColor: '#F6EEDC'") && chatInputCode.includes('borderTopWidth: 2.5'), 'ChatInputBar must have Heo Con neo-brutalist theme');
+  assert.ok(
+    chatInputCode.includes('#F6EEDC') && (chatInputCode.includes('borderTopWidth: 0') || chatInputCode.includes('borderWidth: 2.5')),
+    'ChatInputBar must have Heo Con neo-brutalist theme'
+  );
 
   // 4. Living Docs Reverse Sync (AGENTS.md, 10-CHAT.md, DECISIONS.md)
   assert.ok(agentsCode.includes('Quyết định 140') || agentsCode.includes('Pixel Hub Đa Năng 4 Thẻ'), 'AGENTS.md must document Quyết định 140');
@@ -6350,4 +6353,41 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 135 Passed: Bật/Tắt Thật Quyền Máy Ảnh & Vị Trí Cấp App Trong Cài Đặt (Quyết định 198) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 135 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (135/135)!');
+// ==========================================
+// TEST 136: XIN QUYỀN 1 LUỒNG HỆ THỐNG, ẨN BOTTOM BAR Ở TRÒ CHUYỆN & QUÁN QUEN, VÀ CHAT LIỀN MẠCH IG/MESSENGER (QUYẾT ĐỊNH 199)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const mainCamCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const chatInputCode = fs.readFileSync('src/components/chat/ChatInputBar.tsx', 'utf8');
+
+  // 1. Tắt luồng FirstLaunchPermissionsModal trung gian & đồng bộ 2 chiều OS <-> App
+  assert.ok(
+    !mainCamCode.includes('setShowFirstLaunchPermModal(true)') &&
+      mainCamCode.includes('setCameraAppEnabledState(!!camRes.granted)') &&
+      mainCamCode.includes('setLocationAppEnabled(!!locPerm.granted)'),
+    'app/(main)/index.tsx must bypass FirstLaunchPermissionsModal and sync OS permission state two-way'
+  );
+
+  // 2. Ẩn Bottom Bar ở tất cả màn con (chat, map, fly, cross)
+  assert.ok(
+    chatViewCode.includes("activeSubView !== 'hub'"),
+    'ChatView must hide Bottom Tab Bar for chat, map, fly, and cross subviews'
+  );
+
+  // 3. Chat liền mạch kiểu IG/Messenger: không đường kẻ ngang borderTopWidth, sát đáy insets.bottom
+  assert.ok(
+    chatInputCode.includes('borderTopWidth: 0') &&
+      !chatInputCode.includes('borderTopWidth: 2.5') &&
+      chatInputCode.includes('Math.max(insets.bottom, 10)') &&
+      decisionsCode.includes('199') &&
+      chatDocCode.includes('199'),
+    'ChatInputBar and ChatView must render seamless IG/Messenger style without horizontal divider line'
+  );
+
+  console.log('✅ Test 136 Passed: Xin Quyền 1 Luồng Hệ Thống, Ẩn Bottom Bar Ở Chat/Quán Quen & Chat Liền Mạch (Quyết định 199) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 136 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (136/136)!');
