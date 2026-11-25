@@ -6307,4 +6307,22 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 133 Passed: Hoàn Thiện Xin Quyền Tuần Tự Camera -> Location (Quyết định 196) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 133 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (133/133)!');
+// ==========================================
+// TEST 134: KIỂM TRA CHÍNH XÁC TRẠNG THÁI QUYỀN LOCATION TRÊN WEB BẰNG PERMISSIONS API (QUYẾT ĐỊNH 197)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const locCode = fs.readFileSync('src/services/locationService.ts', 'utf8');
+
+  assert.ok(
+    locCode.includes('navigator.permissions.query') &&
+      locCode.includes("perm.state === 'denied'") &&
+      locCode.includes("status: 'undetermined'") &&
+      decisionsCode.includes('197'),
+    'locationService.ts must query navigator.permissions for geolocation on Web instead of hardcoding granted: true'
+  );
+
+  console.log('✅ Test 134 Passed: Kiểm Tra Chính Xác Trạng Thái Quyền Location Trên Web (Quyết định 197) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 134 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (134/134)!');

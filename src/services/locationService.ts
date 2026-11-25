@@ -89,7 +89,25 @@ export async function getLocationPermissionStatusAsync(): Promise<LocationPermis
     }
   }
   if (typeof navigator !== 'undefined' && navigator.geolocation) {
-    return { granted: true, canAskAgain: true, status: 'granted' };
+    if (typeof navigator.permissions !== 'undefined' && typeof navigator.permissions.query === 'function') {
+      try {
+        const perm = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        if (perm.state === 'granted') {
+          return { granted: true, canAskAgain: true, status: 'granted' };
+        }
+        if (perm.state === 'denied') {
+          return { granted: false, canAskAgain: false, status: 'denied' };
+        }
+        return { granted: false, canAskAgain: true, status: 'undetermined' };
+      } catch (_e) {
+        // Fallback when Permissions API rejects geolocation query
+      }
+    }
+    await loadLastKnownCoordsFromStorage();
+    if (lastKnownMemoryCoords) {
+      return { granted: true, canAskAgain: true, status: 'granted' };
+    }
+    return { granted: false, canAskAgain: true, status: 'undetermined' };
   }
   return { granted: false, canAskAgain: true, status: 'undetermined' };
 }

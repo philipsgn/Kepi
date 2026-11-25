@@ -1302,3 +1302,7 @@
       2. **Trigger Web Location Prompt (`src/services/locationService.ts`):** Khi `requestLocationPermissionAsync()` chạy trên Web (`navigator.geolocation`), gọi `await getCurrentPositionSafeAsync(6000, false)` để trình duyệt bật hộp thoại Location.
       3. **Settle 450ms trong Modal (`FirstLaunchPermissionsModal.tsx`):** Thêm `450ms` giữa `onRequestCameraPermission()` và `requestLocationPermissionAsync()`.
     - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `src/services/locationService.ts`, `src/components/common/FirstLaunchPermissionsModal.tsx`, `app/(main)/index.tsx`, `run-all-tests.js`.
+- **Quyết định 197 (2026-11-25):** **Kiểm Tra Chính Xác Trạng Thái Quyền Location Trên Web Bằng Permissions API (Không Hardcode `granted: true`):**
+    - *Bối Cảnh & Yêu Cầu Người Dùng:* Trên Web, `getLocationPermissionStatusAsync()` trước đây luôn trả về `{ granted: true }` khi tồn tại `navigator.geolocation`, làm cho màn hình Cài đặt (`SettingsView`) luôn báo `"Đang bật"` ngay cả khi trình duyệt chưa cấp hoặc đã từ chối quyền Vị trí.
+    - *Giải Pháp Kỹ Thuật:* Cập nhật `getLocationPermissionStatusAsync()` trong `src/services/locationService.ts` dùng `navigator.permissions.query({ name: 'geolocation' })` để đọc chính xác 3 trạng thái `'granted'`, `'denied'`, `'undetermined'`. Nếu trình duyệt không hỗ trợ `navigator.permissions`, kiểm tra `lastKnownMemoryCoords` qua `loadLastKnownCoordsFromStorage()` thay vì đoán bừa `granted: true`.
+    - *Tài Liệu Đồng Bộ:* `docs/DECISIONS.md`, `src/services/locationService.ts`, `run-all-tests.js`.
