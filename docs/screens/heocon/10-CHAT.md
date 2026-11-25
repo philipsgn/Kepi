@@ -326,3 +326,11 @@ Màn hình Tab 3 hiển thị:
   - Cả 4 banner mở rộng thành thế giới 2D lớn hơn khung nhìn cả chiều ngang lẫn chiều dọc (`CafeChat 360×184`, `ProfileDesk 420×160`, `Entertainment 460×168`, `BenThanh 584×172`).
   - Khi chú heo di chuyển tới vùng biên (~28% mép khung hình), camera tự động lia mượt sang khu vực kế tiếp; hỗ trợ vuốt kéo trực tiếp trên banner để lia xem trước bản đồ (`Drag-to-Pan`) và hiển thị mũi tên biên (`◄ ► ▲ ▼`) khi còn không gian mở rộng.
 - **Bối Cảnh Văn Hóa Việt Nam:** Quầy cà phê phin, hiên cà phê bệt ghế nhựa, xe bánh mì, quạt trần, nhà sàn gỗ, chiếu cói, Chợ Bến Thành, Bitexco, Landmark 81, xe máy nón lá, xe buýt xanh, xích lô, đèn lồng Hội An, bờ sông Sài Gòn.
+
+---
+
+## 23. Panorama 16-Bit Việt Nam Liền Mạch 100% Cho Tab Khám Phá (Quyết định 202)
+
+- **Single-Canvas `540×112` (Viewport `192×88`) — 0 Vết Cắt Ghép:**
+  - Nâng cấp `EntertainmentBannerWebView.tsx` lên 1 bức Panorama 16-bit liền mạch 540px (`buildSeamlessPanorama` + `getTimePalette` tự đổi 3 sắc trời Sáng/Chiều/Tối), nối liền 5 phân khu Việt Nam trên cùng 1 dải trời, skyline, vỉa hè lát gạch và đại lộ 2 làn xuyên suốt 540px (xe buýt xanh, taxi, xe máy nón lá chạy liền mạch từ mép trái sang mép phải).
+- **Chống Che Bottom Bar (`PixelHubDashboard.tsx`):** Tinh gọn khoảng cách dọc giữa header, metric chips và 2 section boxes để 2 thẻ `Heo bay` & `Qua đường` hiển thị trọn vẹn phía trên `FloatingPillTabBar`.

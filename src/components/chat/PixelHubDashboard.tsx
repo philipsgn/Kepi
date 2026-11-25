@@ -296,17 +296,17 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 14,
-    paddingTop: 6,
-    paddingBottom: 110,
+    paddingTop: 4,
+    paddingBottom: 120,
   },
   header: {
-    marginBottom: 10,
+    marginBottom: 8,
   },
   headerTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   screenTitle: {
     fontFamily: 'Baloo2_800ExtraBold',
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   greetText: {
     flex: 1,
@@ -587,8 +587,8 @@ const styles = StyleSheet.create({
   sectionBox: {
     borderWidth: 3,
     borderRadius: 18,
-    padding: 10,
-    marginBottom: 12,
+    padding: 9,
+    marginBottom: 8,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Baloo2_800ExtraBold',
     fontSize: 12,
     letterSpacing: 0.6,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   connectRow: {
     flexDirection: 'row',

@@ -5084,9 +5084,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(bannerCode.includes('function fbRider(x, bx, by, t, pig, dir, hat)') && bannerCode.includes('x.scale(-1, 1)'), 'fbRider must mirror horizontally when dir === -1 so headlights face forward and exhaust trails behind');
 
   // 3. Đội xe Việt Nam 2 chiều: Xe buýt xanh TP.HCM (fbBus), Ô tô Taxi Sài Gòn (fbTaxi), Xe máy nón lá
-  assert.ok(bannerCode.includes('function fbBus(x, bx, by, t, dir)') && bannerCode.includes('fbBus(x, busX, 75, t, -1)'), 'Banner must render TP.HCM green bus moving left cleanly');
-  assert.ok(bannerCode.includes('function fbTaxi(x, bx, by, t, dir)') && bannerCode.includes('fbTaxi(x, taxiX, 81, t, 1)'), 'Banner must render Saigon taxi moving right cleanly');
-  assert.ok(bannerCode.includes('fbRider(x, motoX, 76, t, false, -1, true)'), 'Banner must render Vietnamese conical-hat motorbike moving left with dir = -1');
+  assert.ok(bannerCode.includes('function fbBus(x, bx, by, t, dir)') && (bannerCode.includes('fbBus(x, busX, 75, t, -1)') || bannerCode.includes('fbBus(x, busX, 85, t, -1)')), 'Banner must render TP.HCM green bus moving left cleanly');
+  assert.ok(bannerCode.includes('function fbTaxi(x, bx, by, t, dir)') && (bannerCode.includes('fbTaxi(x, taxiX, 81, t, 1)') || bannerCode.includes('fbTaxi(x, taxiX, 94, t, 1)')), 'Banner must render Saigon taxi moving right cleanly');
+  assert.ok(bannerCode.includes('fbRider(x, motoX, 76, t, false, -1, true)') || bannerCode.includes('fbRider(x, motoX, 86, t, false, -1, true)'), 'Banner must render Vietnamese conical-hat motorbike moving left with dir = -1');
 
   // 4. Khôi phục khung Banner Neo-Brutalist tối giản nhẹ nhàng đồng bộ các tab khác
   assert.ok(bannerCode.includes('borderRadius: 22') && !bannerCode.includes('bevelOuter') && !bannerCode.includes('rivetTL'), 'EntertainmentBannerWebView must use clean minimalist neo-brutalist frame');
@@ -5119,7 +5119,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   // 3. Chống chồng đè Toast / HUD & Floating Tab Bar
   assert.ok(flightCode.includes('top: 48px;'), 'PigFlightGameView .flytoast must sit cleanly below floating HUD');
   assert.ok(crossRoadCode.includes('top: 46px;'), 'PigCrossRoadGameView .flytoast must sit cleanly below floating HUD');
-  assert.ok(hubCode.includes('paddingBottom: 110'), 'PixelHubDashboard must reserve 110px bottom padding so bottom cards never overlap FloatingPillTabBar');
+  assert.ok(hubCode.includes('paddingBottom: 110') || hubCode.includes('paddingBottom: 120'), 'PixelHubDashboard must reserve >=110px bottom padding so bottom cards never overlap FloatingPillTabBar');
 
   // 4. Living Documentation Sync Audit (Quyết định 174)
   assert.ok(decisionsCode.includes('174'), 'DECISIONS.md must document Quyết định 174');
@@ -6519,9 +6519,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       profileBannerCode.includes('worldWidth: 420') &&
       profileBannerCode.includes('worldHeight: 160') &&
       profileBannerCode.includes('drawProfileWorldWings') &&
-      funBannerCode.includes('worldWidth: 460') &&
-      funBannerCode.includes('worldHeight: 168') &&
-      funBannerCode.includes('drawFunWorldWings') &&
+      (funBannerCode.includes('worldWidth: 540') || funBannerCode.includes('worldWidth: 460')) &&
+      (funBannerCode.includes('worldHeight: 112') || funBannerCode.includes('worldHeight: 168')) &&
+      (funBannerCode.includes('buildSeamlessPanorama') || funBannerCode.includes('drawFunWorldWings')) &&
       streetBannerCode.includes('worldWidth: 584') &&
       streetBannerCode.includes('worldHeight: 172') &&
       streetBannerCode.includes('drawLowerVietnamSquare') &&
@@ -6533,4 +6533,28 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 138 Passed: 4 Banner Thế Giới Mở 2D Văn Hóa Việt Nam & Camera Lia 4 Hướng (Quyết định 201) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 138 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (138/138)!');
+// ==========================================
+// TEST 139: PANORAMA 16-BIT VIỆT NAM LIỀN MẠCH 100% (540×112) CHO TAB KHÁM PHÁ & CHỐNG CHE BOTTOM BAR (QUYẾT ĐỊNH 202)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const funBannerCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+
+  assert.ok(
+    funBannerCode.includes('worldWidth: 540') &&
+      funBannerCode.includes('worldHeight: 112') &&
+      funBannerCode.includes('buildSeamlessPanorama') &&
+      funBannerCode.includes('getTimePalette') &&
+      !funBannerCode.includes('drawFunWorldWings') &&
+      hubCode.includes('paddingBottom: 120') &&
+      decisionsCode.includes('202') &&
+      chatDocCode.includes('202'),
+    'EntertainmentBannerWebView must use unified single-canvas 540x112 seamless panorama with 3-time-of-day palette and PixelHubDashboard must prevent bottom bar overlap'
+  );
+
+  console.log('✅ Test 139 Passed: Panorama 16-Bit Việt Nam Liền Mạch 100% (540×112) & Chống Che Bottom Bar (Quyết định 202) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 139 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (139/139)!');
