@@ -6594,4 +6594,44 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 140 Passed: Quán Cà Phê Liền Mạch 432×128, Công Thức Không Gian Phòng & Cổng Liên Thông Khám Phá (Quyết định 203) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 140 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (140/140)!');
+// ==========================================
+// TEST 141: TIỆM CAFE NGOẠI THẤT 1:1 THEO ẢNH 6, SÀN GẠCH BÔNG INDOCHINE 16×16 & CỔNG VÀO SIÊU TỐC (QUYẾT ĐỊNH 204)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const openRoomCode = fs.readFileSync('src/components/pixel/pixelOpenRoomEngine.ts', 'utf8');
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const cafeCode = fs.readFileSync('src/components/chat/CafeChatBannerWebView.tsx', 'utf8');
+
+  assert.ok(
+    openRoomCode.includes('fastDash?: boolean') &&
+      openRoomCode.includes('state.fastDash ? Math.max(160, dist / 0.18)') &&
+      funCode.includes('fastDash: true') &&
+      cafeCode.includes('fastDash: true'),
+    'pixelOpenRoomEngine, EntertainmentBannerWebView, and CafeChatBannerWebView must implement fastDash 300ms portal transition'
+  );
+
+  assert.ok(
+    funCode.includes('TIỆM CAFE TÁI HIỆN 1:1 THEO ẢNH 6') &&
+      funCode.includes('Cột đèn đường cổ điển') &&
+      funCode.includes('Bảng phấn menu chữ A') &&
+      funCode.includes('Cây tùng xoắn ốc pastel'),
+    'EntertainmentBannerWebView must render 1:1 Cafe exterior with striped awning, reflective glass, outdoor table, arched window, swirl pine tree, and direction lamp'
+  );
+
+  assert.ok(
+    cafeCode.includes('SÀN GẠCH BÔNG INDOCHINE 16×16') &&
+      cafeCode.includes('for(var gx=0;gx<WORLD_W;gx+=16)') &&
+      cafeCode.includes('for(var gy=80;gy<WORLD_H;gy+=16)') &&
+      cafeCode.includes('#4A8A80') &&
+      cafeCode.includes('#C4603A') &&
+      decisionsCode.includes('204') &&
+      chatDocCode.includes('Indochine 16×16'),
+    'CafeChatBannerWebView must render aligned 16x16 Indochine cement tiles from y=80 to y=128 and sync docs for QD 204'
+  );
+
+  console.log('✅ Test 141 Passed: Tiệm CAFE Ngoại Thất 1:1, Sàn Gạch Bông Indochine 16×16 & Cổng Vào Siêu Tốc (Quyết định 204) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 141 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (141/141)!');

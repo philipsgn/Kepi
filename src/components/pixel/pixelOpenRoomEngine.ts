@@ -27,6 +27,7 @@ export interface OpenRoomHotspot {
     | 'check_ledger';
   duration?: number;
   bubbleText: string;
+  fastDash?: boolean;
 }
 
 export interface OpenRoomConfig {
@@ -131,6 +132,7 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
           state.ty = clamp(hs.standY, cfg.walkBounds.minY, cfg.walkBounds.maxY);
           state.pendingHotspot = hs;
           state.pendingUserTriggered = true;
+          state.fastDash = !!hs.fastDash;
           state.tapMarker = { x: state.tx, y: state.ty, until: now + 750 };
           state.action = null;
           return;
@@ -148,6 +150,8 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
       state.tx = clamp(wx + nudgeX, cfg.walkBounds.minX, cfg.walkBounds.maxX);
       state.ty = clamp(wy + nudgeY, cfg.walkBounds.minY, cfg.walkBounds.maxY);
       state.pendingHotspot = null;
+      state.pendingUserTriggered = false;
+      state.fastDash = false;
       state.action = null;
       state.tapMarker = { x: state.tx, y: state.ty, until: now + 750 };
     }
@@ -239,7 +243,7 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
         var dx = state.tx - state.x;
         var dy = state.ty - state.y;
         var dist = Math.hypot(dx, dy);
-        var spd = cfg.speed || 34;
+        var spd = state.fastDash ? Math.max(160, dist / 0.18) : (cfg.speed || 34);
         if (dist > 1.5) {
           state.walking = true;
           if (Math.abs(dx) > 0.5) state.facing = dx >= 0 ? 1 : -1;
@@ -250,6 +254,7 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
           state.x = state.tx;
           state.y = state.ty;
           state.walking = false;
+          state.fastDash = false;
           if (state.pendingHotspot) {
             var hs = state.pendingHotspot;
             var wasUser = state.pendingUserTriggered;

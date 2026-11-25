@@ -359,3 +359,8 @@ Màn hình Tab 3 hiển thị:
   - Chạm tiệm `CAFE` trên Banner Khám phá (`onEnterCafe`) hoặc thẻ `Heo AI` ➔ vào Quán Cà Phê.
   - Chạm `Cửa Ra Phố` (`exit_door` → `onExitToHub`) trong Quán Cà Phê ➔ quay về Tab Khám phá.
   - Bong bóng thoại Heo AI tự ẩn khi camera rời khỏi khu bàn trung tâm (`camX` ngoài `[68, 152]`) để ngắm trọn nội thất quán.
+
+## 25. Nâng Cấp Tiệm CAFE Ngoại Thất 1:1, Sàn Gạch Bông Indochine 16×16 & Cổng Vào Siêu Tốc (Quyết định 204)
+- **Cổng Vào Siêu Tốc (`fastDash: true`):** Khi chạm vào Tiệm CAFE trên Banner Khám phá (`saigon_cafe`) hoặc `Cửa Ra Phố` (`exit_door`), chú heo kích hoạt tốc độ lướt nhanh `160 px/s` thẳng tới ngưỡng cửa và chuyển cảnh trong `300ms` (không còn trễ 5–8s).
+- **Ngoại Thất Tiệm CAFE 1:1 (`EntertainmentBannerWebView.tsx`):** Mặt tiền kem/cam ấm 2 tầng, bảng hiệu `CAFE` chữ pixel khối, mái hiên sọc xanh-trắng, cửa kính phản chiếu chéo, bàn tròn vỉa hè với 2 khách uống cà phê, cửa chính gỗ trắng 2 cánh, khối phụ cửa sổ vòm với 2 bạn trò chuyện, cây tùng xoắn ốc pastel trong bồn gạch, cột đèn chỉ hướng & bảng menu chữ A.
+- **Sàn Gạch Bông Indochine 16×16 (`CafeChatBannerWebView.tsx`):** Căn chỉnh lưới `16×16` chuẩn xác từ len chân tường (`y = 78`) đến đáy (`y = 128`), hoa văn 8 cánh cổ điển màu xanh ngọc (`#4A8A80`) & đất nung (`#C4603A`) trên nền kem sứ (`#F7EED8`); kết hợp lambris gỗ (`y = 58..78`) đồng bộ tỷ lệ với chú heo `24×20`.

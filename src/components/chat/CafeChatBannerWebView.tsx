@@ -141,7 +141,7 @@ export const CafeChatBannerWebView: React.FC<CafeChatBannerWebViewProps> = ({
         if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
         exitTimerRef.current = setTimeout(() => {
           onExitToHub();
-        }, 360);
+        }, 120);
       }
     }
   };
@@ -252,6 +252,7 @@ export const CafeChatBannerWebView: React.FC<CafeChatBannerWebViewProps> = ({
             standFace: 1,
             actionType: 'look_window',
             duration: 900,
+            fastDash: true,
             bubbleText: `Ra phố Khám phá...`,
           },
         ],
@@ -373,27 +374,35 @@ function buildSeamlessCafeRoom(){
   R(x,0,14,WORLD_W,2,PBI);
   for(var bx=0;bx<WORLD_W;bx+=36){R(x,bx,0,4,14,'#6E4223');}
 
-  // 2. TƯỜNG KEM GỖ ẤM LIỀN MẠCH 432px (y: 16..74)
-  R(x,0,16,WORLD_W,58,'#F5DFB0');
-  for(var wx=0;wx<WORLD_W;wx+=12){R(x,wx,16,1,58,'rgba(160,110,60,0.10)');}
-  // Ốp gỗ chân tường (y: 58..78)
+  // 2. TƯỜNG KEM GỖ ẤM LIỀN MẠCH 432px (y: 16..79)
+  R(x,0,16,WORLD_W,42,'#F5E8D0');
+  for(var wx=0;wx<WORLD_W;wx+=16){R(x,wx,16,1,42,'rgba(160,110,60,0.08)');}
+  // Ốp gỗ chân tường Lambris (y: 58..75) & Len chân tường (y: 75..80)
   R(x,0,58,WORLD_W,1,PBI);
-  R(x,0,59,WORLD_W,15,'#C9965B');
-  for(var px=0;px<WORLD_W;px+=10){R(x,px,59,1,15,'#B07D46');}
-  R(x,0,74,WORLD_W,4,'#7A4B28');
-  R(x,0,77,WORLD_W,1,PBI);
+  R(x,0,59,WORLD_W,16,'#C9965B');
+  for(var px=0;px<WORLD_W;px+=12){R(x,px,59,1,16,'#B07D46');}
+  R(x,0,75,WORLD_W,4,'#7A4B28');
+  R(x,0,79,WORLD_W,1,PBI);
 
-  // 3. SÀN GẠCH BÔNG SÀI GÒN LIỀN MẠCH 432px (y: 78..128)
-  for(var gx=0;gx<WORLD_W;gx+=12){
-    for(var gy=78;gy<WORLD_H;gy+=12){
-      var alt=((gx/12)+(gy/12))%2===0;
-      R(x,gx,gy,12,12,alt?'#FBF1DD':'#EFE0C2');
-      R(x,gx,gy,12,1,'rgba(130,95,60,0.15)');
-      R(x,gx,gy,1,12,'rgba(130,95,60,0.15)');
-      // Hoa văn gạch bông Sài Gòn
-      var motifCol=alt?'#5AA39B':'#D66B4F';
-      R(x,gx+5,gy+4,2,4,motifCol);
-      R(x,gx+4,gy+5,4,2,motifCol);
+  // 3. SÀN GẠCH BÔNG INDOCHINE 16×16 LIỀN MẠCH 432px (y: 80..128 — trọn vẹn 3 hàng 16px)
+  for(var gx=0;gx<WORLD_W;gx+=16){
+    for(var gy=80;gy<WORLD_H;gy+=16){
+      var alt=((gx/16)+(gy/16))%2===0;
+      R(x,gx,gy,16,16,alt?'#F7EED8':'#EFE2C4');
+      // Đường ron gạch mảnh đồng nhất
+      R(x,gx,gy,16,1,'rgba(110,75,45,0.20)');
+      R(x,gx,gy,1,16,'rgba(110,75,45,0.20)');
+      // Hoa văn bông hoa 8 cánh Indochine cổ điển (Xanh ngọc cổ vịt & Đất nung)
+      var motif=alt?'#4A8A80':'#C4603A';
+      var accent=alt?'#82B5AC':'#E28C6B';
+      // 4 cánh chính (trên, dưới, trái, phải)
+      R(x,gx+7,gy+3,2,3,motif); R(x,gx+7,gy+10,2,3,motif);
+      R(x,gx+3,gy+7,3,2,motif); R(x,gx+10,gy+7,3,2,motif);
+      // 4 cánh chéo góc
+      R(x,gx+4,gy+4,2,2,accent); R(x,gx+10,gy+4,2,2,accent);
+      R(x,gx+4,gy+10,2,2,accent); R(x,gx+10,gy+10,2,2,accent);
+      // Nhụy kem ở tâm viên gạch
+      R(x,gx+7,gy+7,2,2,'#FFFBF1');
     }
   }
 

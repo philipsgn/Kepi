@@ -60,7 +60,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
         if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
         enterCafeTimerRef.current = setTimeout(() => {
           onEnterCafe();
-        }, 320);
+        }, 120);
       }
     }
   };
@@ -95,9 +95,9 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
         viewWidth: 192,
         viewHeight: 88,
         walkBounds: { minX: 16, maxX: 524, minY: 66, maxY: 102 },
-        initialX: 256,
+        initialX: 244,
         initialY: 74,
-        initialCamX: 160,
+        initialCamX: 120,
         initialCamY: 0,
         speed: 40,
         hotspots: [
@@ -115,15 +115,16 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
           },
           {
             id: 'saigon_cafe',
-            x: 118,
-            y: 18,
-            w: 92,
-            h: 48,
+            x: 112,
+            y: 14,
+            w: 108,
+            h: 56,
             standX: 164,
             standY: 74,
             standFace: 1,
             actionType: 'sip_coffee',
-            bubbleText: `Tiệm CAFE & Bánh mì · Chuỗi ${streakDays || 0} ngày`,
+            fastDash: true,
+            bubbleText: `Đang bước vào Tiệm CAFE...`,
           },
           {
             id: 'ben_thanh_notre',
@@ -487,42 +488,83 @@ function buildSeamlessPanorama(c) {
   drawPerson16(c, 32, 66, '#FFFBF1', '#4B6FA5', true);
   drawTree16(c, 98, 66, '#5EA353', '#82C76E', '#3F7A3A', false);
 
-  // 4. KHU 2 (x: 112..216): TIỆM CAFE MÁI SỌC (CẢM HỨNG HÌNH 5) & XE BÁNH MÌ SÀI GÒN
-  // Tòa nhà CAFE 2 khối cam-vàng sắc nét
-  R(c, 116, 26, 62, 40, INK);
-  R(c, 117, 27, 46, 39, '#F49B4E'); // thân cam ấm
-  R(c, 163, 27, 14, 39, '#CF6F36'); // bóng cạnh
-  // Viền mái vương miện vàng kem giống Hình 5
-  R(c, 120, 22, 42, 5, INK); R(c, 121, 23, 40, 3, '#FDE18E');
-  // Bảng hiệu CAFE sắc nét
-  R(c, 124, 29, 34, 9, INK); R(c, 125, 30, 32, 7, '#FFFBF1');
-  // Chữ pixel C-A-F-E màu đỏ nâu
-  R(c, 128, 32, 4, 1, '#9E3632'); R(c, 128, 32, 1, 4, '#9E3632'); R(c, 128, 35, 4, 1, '#9E3632');
-  R(c, 134, 32, 4, 4, '#9E3632'); R(c, 135, 33, 2, 1, '#FFFBF1'); R(c, 135, 35, 2, 1, '#FFFBF1');
-  R(c, 140, 32, 4, 1, '#9E3632'); R(c, 140, 32, 1, 4, '#9E3632'); R(c, 140, 34, 3, 1, '#9E3632');
-  R(c, 146, 32, 4, 1, '#9E3632'); R(c, 146, 32, 1, 4, '#9E3632'); R(c, 146, 34, 3, 1, '#9E3632'); R(c, 146, 35, 4, 1, '#9E3632');
-  // Mái hiên sọc xanh-cam-trắng chuẩn Hình 5
-  R(c, 115, 40, 50, 6, INK);
-  for (var cx = 116; cx < 164; cx += 6) {
-    R(c, cx, 41, 3, 4, '#6CA9DF');
-    R(c, cx + 3, 41, 3, 4, '#FFFBF1');
+  // 4. KHU 2 (x: 110..222): TIỆM CAFE TÁI HIỆN 1:1 THEO ẢNH 6 (CHUẨN SENIOR PIXEL ART)
+  // Cột đèn đường cổ điển + 2 biển mũi tên chỉ hướng (x: 112)
+  R(c, 111, 44, 2, 22, INK);
+  R(c, 109, 39, 6, 5, INK); R(c, 110, 40, 4, 3, PAL_TIME.lampGlow ? '#FFE08A' : '#FFFBF1');
+  R(c, 108, 47, 8, 3, '#FFFBF1'); R(c, 108, 47, 8, 1, INK); R(c, 115, 48, 1, 1, '#E0452B'); // biển chỉ hướng ->
+  R(c, 108, 51, 7, 3, '#FFFBF1'); R(c, 108, 51, 7, 1, INK); R(c, 108, 52, 1, 1, '#4B6FA5'); // biển chỉ hướng <-
+  // Bảng phấn menu chữ A vỉa hè (x: 116..122)
+  R(c, 116, 59, 6, 7, INK); R(c, 117, 60, 4, 5, '#3E3546'); R(c, 118, 61, 2, 1, '#FFFBF1'); R(c, 118, 63, 2, 1, '#FFE08A');
+
+  // Khối nhà chính Tiệm CAFE (x: 123..180, y: 20..66)
+  R(c, 123, 23, 57, 43, INK);
+  R(c, 124, 24, 50, 42, '#F7B267'); // mặt tiền kem cam ấm
+  R(c, 174, 24, 5, 42, '#E69138');  // cạnh đổ bóng
+  // Vương miện mái 2 tầng màu vàng kem
+  R(c, 128, 19, 42, 5, INK); R(c, 129, 20, 40, 3, '#FDE18E');
+  R(c, 136, 21, 26, 1, '#E69138');
+  // Bảng hiệu CAFE nền trắng viền nâu đỏ sắc nét
+  R(c, 130, 26, 38, 11, INK); R(c, 131, 27, 36, 9, '#FFFBF1');
+  R(c, 132, 28, 34, 7, '#FFFFFF');
+  // Chữ C-A-F-E pixel khối đỏ nâu (#8E3538)
+  R(c, 134, 29, 5, 1, '#8E3538'); R(c, 134, 29, 1, 5, '#8E3538'); R(c, 134, 33, 5, 1, '#8E3538'); // C
+  R(c, 141, 29, 5, 5, '#8E3538'); R(c, 142, 30, 3, 1, '#FFFFFF'); R(c, 142, 32, 3, 2, '#FFFFFF'); // A
+  R(c, 148, 29, 5, 1, '#8E3538'); R(c, 148, 29, 1, 5, '#8E3538'); R(c, 148, 31, 4, 1, '#8E3538'); // F
+  R(c, 155, 29, 5, 1, '#8E3538'); R(c, 155, 29, 1, 5, '#8E3538'); R(c, 155, 31, 4, 1, '#8E3538'); R(c, 155, 33, 5, 1, '#8E3538'); // E
+
+  // Mái hiên sọc Canvas xanh pastel - trắng - cam đất (y: 38..44)
+  R(c, 121, 38, 56, 6, INK);
+  for (var cx = 122; cx < 176; cx += 6) {
+    R(c, cx, 39, 3, 4, '#79A8DF');
+    R(c, cx + 3, 39, 3, 4, '#FFFBF1');
   }
-  // Cửa kính lớn + cửa vòm bên phải
-  R(c, 119, 47, 26, 19, INK); R(c, 120, 48, 24, 18, PAL_TIME.winGlow);
-  R(c, 131, 48, 2, 18, '#B8C9DC');
-  R(c, 148, 48, 12, 18, INK); R(c, 149, 49, 10, 17, '#A65434');
-  // Khối phụ bên phải có cửa kính vòm tròn giống Hình 5
-  R(c, 178, 36, 28, 30, INK); R(c, 179, 37, 26, 29, '#F7B267');
-  R(c, 178, 33, 28, 4, '#FDE18E');
-  E(c, 192, 50, 8, 8, INK); E(c, 192, 50, 7, 7, PAL_TIME.winGlow);
-  R(c, 184, 50, 16, 10, PAL_TIME.winGlow); R(c, 184, 60, 16, 1, INK);
-  // 2 bạn nhỏ ngồi cà phê vỉa hè + Xe Bánh Mì Sài Gòn
-  drawPerson16(c, 124, 66, '#E0452B', '#2B2118', false);
-  drawPerson16(c, 138, 66, '#4B6FA5', '#2B2118', false);
-  // Xe bánh mì mini gọn gàng ở x=206..220
-  R(c, 206, 51, 14, 13, INK); R(c, 207, 52, 12, 6, '#DCEEFA'); R(c, 207, 58, 12, 5, '#F4B93B');
-  R(c, 209, 55, 4, 2, '#D88C4A'); R(c, 214, 55, 4, 2, '#D88C4A');
-  E(c, 209, 65, 2, 2, INK); E(c, 217, 65, 2, 2, INK);
+  R(c, 122, 43, 54, 1, '#E69138'); // viền đổ bóng dưới mái hiên
+
+  // Cửa kính trưng bày lớn có vệt phản chiếu chéo (x: 126..155, y: 45..64)
+  R(c, 126, 45, 29, 19, INK);
+  R(c, 127, 46, 27, 17, '#A7D0F5');
+  // 2 vệt phản chiếu ánh sáng chéo trên kính
+  R(c, 131, 47, 5, 14, '#DCEEFF'); R(c, 136, 47, 2, 10, '#FFFFFF');
+  R(c, 143, 48, 4, 12, '#DCEEFF');
+  R(c, 140, 46, 1, 17, '#5B6B8C'); // thanh chia kính mảnh
+
+  // Bàn tròn ngoài hiên + 2 bạn ngồi uống cà phê vỉa hè (x: 129..151)
+  R(c, 135, 59, 10, 2, INK); R(c, 136, 59, 8, 1, '#FFFBF1'); // mặt bàn tròn
+  R(c, 139, 61, 2, 5, INK); // chân bàn
+  R(c, 137, 57, 2, 2, '#E69138'); R(c, 141, 57, 2, 2, '#E69138'); // 2 ly cà phê
+  drawPerson16(c, 129, 66, '#E0452B', '#2B2118', false); // bạn trái ngồi uống
+  drawPerson16(c, 146, 66, '#F4B93B', '#2B2118', false); // bạn phải ngồi uống
+
+  // Cửa chính gỗ trắng 2 cánh có phào chỉ (x: 158..173, y: 46..66)
+  R(c, 158, 46, 15, 20, INK);
+  R(c, 159, 47, 13, 19, '#FFFBF1');
+  R(c, 165, 47, 1, 19, '#8E7368'); // khe giữa 2 cánh
+  R(c, 160, 49, 4, 6, '#E2D4CC'); R(c, 167, 49, 4, 6, '#E2D4CC');
+  R(c, 160, 57, 4, 6, '#E2D4CC'); R(c, 167, 57, 4, 6, '#E2D4CC');
+
+  // Gian phụ bên phải tường cam đất + cửa sổ vòm tròn (x: 180..204, y: 34..66)
+  R(c, 180, 34, 24, 32, INK);
+  R(c, 181, 35, 22, 31, '#F29B52');
+  R(c, 180, 31, 24, 4, '#FDE18E'); // viền mái gian phụ
+  E(c, 192, 48, 7, 7, INK); E(c, 192, 48, 6, 6, '#A7D0F5');
+  R(c, 185, 48, 14, 10, '#A7D0F5'); R(c, 185, 58, 14, 1, INK);
+  R(c, 192, 42, 1, 16, '#5B6B8C'); R(c, 186, 51, 12, 1, '#5B6B8C'); // nan cửa vòm
+  // 2 bạn đứng trò chuyện trước cửa vòm
+  drawPerson16(c, 184, 66, '#4B6FA5', '#2B2118', false);
+  drawPerson16(c, 194, 66, '#E68FA2', '#2B2118', false);
+
+  // Cây tùng xoắn ốc pastel trong bồn gạch cạnh tiệm (x: 213, y: 27..66)
+  R(c, 207, 62, 12, 4, INK); R(c, 208, 63, 10, 3, '#A65434'); // bồn gạch
+  R(c, 211, 51, 4, 11, INK); R(c, 212, 52, 2, 10, '#B37B4E'); // thân cây
+  E(c, 213, 44, 7, 10, INK);
+  E(c, 213, 44, 6, 9, '#8CA8DC');
+  E(c, 212, 39, 5, 7, '#B8CCF2');
+  R(c, 210, 37, 4, 2, '#E4EEFF'); R(c, 211, 44, 5, 2, '#E4EEFF'); // vân xoắn sáng
+
+  // Nhãn nhỏ "[CAFE]" gợi ý chạm ở trên mái
+  R(c, 143, 12, 22, 6, INK); R(c, 144, 13, 20, 4, '#FFE08A');
+  R(c, 147, 14, 14, 2, '#2B2118');
 
   // 5. KHU 3 (x: 224..328): CHỢ BẾN THÀNH & NHÀ THỜ ĐỨC BÀ
   // Nhà Thờ Đức Bà tháp đôi gạch đỏ
