@@ -6091,4 +6091,66 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 128 Passed: Đồng Bộ Sprite Heo 24×20 Chuẩn Tab Vườn, Header Chat Tinh Giản 22px & Dọn Dẹp Text Thừa (Quyết định 191) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 128 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (128/128)!');
+// ==========================================
+// TEST 129: TAB "KHÁM PHÁ", ĐỒNG BỘ SCREEN TITLE 22PX BALOO2 SENTENCE CASE, BỎ DESCRIPTION HEO AI & THAY CHỈ SỐ GAME BẰNG "ĐÃ KIẾM: X CÁM" (QUYẾT ĐỊNH 192)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const mapCode = fs.readFileSync('src/components/chat/PiggySpendMapView.tsx', 'utf8');
+  const statsCode = fs.readFileSync('src/components/views/StatsView.tsx', 'utf8');
+  const profileCode = fs.readFileSync('src/components/views/ProfileView.tsx', 'utf8');
+  const settingsCode = fs.readFileSync('src/components/views/SettingsView.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const gamiCode = fs.readFileSync('src/store/gamificationStore.ts', 'utf8');
+  const crossCode = fs.readFileSync('src/components/chat/PigCrossRoadGameView.tsx', 'utf8');
+
+  // 1. Tab 3 mang tiêu đề 'Khám phá', bỏ description ở Heo AI, 2 game hiển thị 'Đã kiếm: ... cám'
+  assert.ok(
+    hubCode.includes('>Khám phá</Text>') &&
+      hubCode.includes("statusText: ''") &&
+      hubCode.includes('card.statusText ?') &&
+      hubCode.includes('Đã kiếm: ${flyFoodEarned || 0} cám') &&
+      hubCode.includes('Đã kiếm: ${crossRoadFoodEarned || 0} cám'),
+    'PixelHubDashboard must rename title to Khám phá, remove Heo AI description, and display Đã kiếm: X cám'
+  );
+
+  // 2. Quán quen gỡ bỏ icon <MapPin /> ở đầu title, Sentence case 'Quán quen', size 22px
+  assert.ok(
+    mapCode.includes('>Quán quen</Text>') &&
+      !mapCode.includes('<View style={styles.titleWrap}>\n          <MapPin') &&
+      mapCode.includes('fontSize: 22'),
+    'PiggySpendMapView title must be plain Sentence case Quán quen at 22px with no leading icon'
+  );
+
+  // 3. Đồng bộ 100% font Baloo2_800ExtraBold và fontSize: 22 cho tất cả Screen Title
+  [hubCode, mapCode, statsCode, profileCode, settingsCode, chatViewCode].forEach((code, idx) => {
+    assert.ok(
+      code.includes("fontFamily: 'Baloo2_800ExtraBold'") && code.includes('fontSize: 22'),
+      `Screen ${idx} must enforce Baloo2_800ExtraBold and fontSize: 22`
+    );
+  });
+
+  // 4. Lưu bền vững flyFoodEarned, crossRoadFoodEarned, crossRoadLevelStars trong gamificationStore & hydrate vào PigCrossRoadGameView
+  assert.ok(
+    gamiCode.includes('flyFoodEarned') &&
+      gamiCode.includes('crossRoadFoodEarned') &&
+      gamiCode.includes('crossRoadLevelStars') &&
+      crossCode.includes('initialLevelStars'),
+    'gamificationStore and PigCrossRoadGameView must persist food earned per game and crossRoadLevelStars'
+  );
+
+  // 5. Living Documentation Sync Audit (Quyết định 192)
+  assert.ok(
+    agentsCode.includes('192') &&
+      decisionsCode.includes('192') &&
+      chatDocCode.includes('192'),
+    'AGENTS.md, DECISIONS.md, and 10-CHAT.md must document Quyết định 192'
+  );
+
+  console.log('✅ Test 129 Passed: Tab "Khám phá", Đồng Bộ Screen Title 22px Baloo2 Sentence Case, Bỏ Description Heo AI & Chỉ Số Đã Kiếm Cám (Quyết định 192) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 129 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (129/129)!');

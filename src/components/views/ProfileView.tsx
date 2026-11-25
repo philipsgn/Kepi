@@ -584,9 +584,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   screenTitle: {
+    fontFamily: 'Baloo2_800ExtraBold',
     fontSize: 22,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   settingsButton: {
     padding: 6,

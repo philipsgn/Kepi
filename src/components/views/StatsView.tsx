@@ -783,9 +783,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   headerTitle: {
+    fontFamily: 'Baloo2_800ExtraBold',
     fontSize: 22,
     fontWeight: '800',
-    letterSpacing: -0.3,
+    letterSpacing: 0.3,
   },
   headerActions: {
     flexDirection: 'row',

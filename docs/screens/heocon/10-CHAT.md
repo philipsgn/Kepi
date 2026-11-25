@@ -283,3 +283,17 @@ Màn hình Tab 3 hiển thị:
   - Tiêu đề chữ lớn `Trò chuyện` (22px `Baloo2_800ExtraBold`, màu mực `#2B2118`) đặt ngay cạnh nút Quay lại `[←]`, bên phải để trống thoáng đãng.
 - **Gỡ Bỏ Text Riêng Tư Chân Trang:**
   - Xóa dòng `"Heo AI chạy ngay trong máy, đọc số liệu tổng hợp. Ảnh và vị trí không được gửi đi."` phía trên khung nhập liệu để tối ưu không gian hiển thị tin nhắn trên màn hình mobile.
+
+---
+
+## 19. Tab "Khám phá", Chuẩn Screen Title Toàn App & Chỉ Số "Đã kiếm: X cám" (Quyết định 192)
+
+- **Tên Chính Thức Tab 3 (`Khám phá`):**
+  - Tiêu đề màn hình chính đổi từ `Giải trí` sang **`Khám phá`** (Sentence case, `Baloo2_800ExtraBold`, `fontSize: 22`, `fontWeight: '800'`, `letterSpacing: 0.3`).
+- **Đồng Bộ Screen Title Toàn App:**
+  - Tất cả Screen Title (`Khám phá`, `Thống kê`, `Hồ sơ`, `Cài đặt`, `Trò chuyện`, `Quán quen`) đồng nhất font `Baloo2_800ExtraBold`, size `22px`, chỉ viết hoa chữ đầu, **không gắn icon ở đầu tiêu đề** (đã gỡ `<MapPin />` ở đầu `Quán quen`).
+- **Khung `Heo AI` Sạch Gọn:**
+  - Bỏ dòng mô tả bị cắt chữ bên dưới thẻ `Heo AI`; giữ thẻ `Quán quen` hiển thị `X lượt ghé`.
+- **Chỉ Số Game Có Ý Nghĩa (`Đã kiếm: X cám`) & Lưu Tiến Trình:**
+  - Thay thế `Kỷ lục` / `Sao` trên 2 thẻ game (`Heo bay`, `Qua đường`) bằng **`Đã kiếm: X cám`** (`flyFoodEarned`, `crossRoadFoodEarned` trong `gamificationStore.ts`) để người dùng thấy rõ thành quả cám kiếm được dùng để nuôi heo ở Tab Vườn hoặc đổi vé chơi.
+  - Lưu bền vững `crossRoadLevelStars` và hydrate vào `PigCrossRoadGameView.tsx` để không mất tiến trình qua phố.

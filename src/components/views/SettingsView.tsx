@@ -939,10 +939,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   screenTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '800',
     fontFamily: 'Baloo2_800ExtraBold',
-    letterSpacing: -0.3,
+    letterSpacing: 0.3,
   },
   headerSpacer: {
     width: 36,

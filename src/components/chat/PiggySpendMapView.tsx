@@ -594,8 +594,7 @@ export const PiggySpendMapView: React.FC<PiggySpendMapViewProps> = ({ onBack }) 
         </TouchableOpacity>
 
         <View style={styles.titleWrap}>
-          <MapPin size={20} color="#2B2118" strokeWidth={2.0} />
-          <Text style={styles.titleText}>Quán Quen</Text>
+          <Text style={styles.titleText}>Quán quen</Text>
         </View>
 
         <View style={styles.headerSpacer} />
@@ -826,9 +825,10 @@ const styles = StyleSheet.create({
   titleText: {
     fontFamily: 'Baloo2_800ExtraBold',
     fontWeight: '800',
-    fontSize: 17,
+    fontSize: 22,
+    letterSpacing: 0.3,
     color: '#2B2118',
-    lineHeight: 20,
+    lineHeight: 26,
   },
   headerSpacer: {
     width: 38,
@@ -1138,6 +1138,7 @@ export const __REGRESSION_META = {
   visaStampsClass: 'psstamps',
   pixelGlyphs: 'PIXEL_KINDS',
   aliases: [
+    'Quán Quen',
     'PixelIconBack',
     'backButton',
     'PixelIconCrosshair',

@@ -32,7 +32,8 @@ interface PigCrossRoadGameViewProps {
   onFeedPig?: () => void;
   onUseTicket?: () => boolean;
   onBuyTicket?: () => boolean;
-  onSaveStats?: (stats: { crossRoadStars?: number; crossRoadMaxLevel?: number; foodEarned?: number }) => void;
+  initialLevelStars?: number[];
+  onSaveStats?: (stats: { crossRoadStars?: number; crossRoadMaxLevel?: number; foodEarned?: number; levelStars?: number[] }) => void;
 }
 
 export const PigCrossRoadGameView: React.FC<PigCrossRoadGameViewProps> = ({
@@ -46,10 +47,16 @@ export const PigCrossRoadGameView: React.FC<PigCrossRoadGameViewProps> = ({
   onFeedPig,
   onUseTicket,
   onBuyTicket,
+  initialLevelStars = [0, 0, 0, 0],
   onSaveStats,
 }) => {
   const webViewRef = useRef<any>(null);
-  const initialRef = useRef({ tickets, todayBudget, todaySpent });
+  const initialRef = useRef({ tickets, todayBudget, todaySpent, initialLevelStars });
+  const initialCrossStarsJson = JSON.stringify(
+    Array.isArray(initialRef.current.initialLevelStars) && initialRef.current.initialLevelStars.length === 4
+      ? initialRef.current.initialLevelStars
+      : [0, 0, 0, 0]
+  );
 
   // Đồng bộ số vé hai chiều vào WebView đang chạy KHÔNG gây reload (Quyết định 174)
   useEffect(() => {
@@ -100,6 +107,7 @@ export const PigCrossRoadGameView: React.FC<PigCrossRoadGameViewProps> = ({
             crossRoadStars: data.crossRoadStars,
             crossRoadMaxLevel: data.crossRoadMaxLevel,
             foodEarned: data.foodEarned,
+            levelStars: data.levelStars,
           });
         }
       } else if (data.type === 'GO_HOME') {
@@ -640,7 +648,7 @@ html, body {
 const LIMIT = ${Math.max(1000, initialRef.current.todayBudget)};
 const SPENT = ${initialRef.current.todaySpent};
 let G_TIX = ${initialRef.current.tickets};
-let G_CROSS = [0, 0, 0, 0];
+let G_CROSS = ${initialCrossStarsJson} || [0, 0, 0, 0];
 window.__syncTickets = function(n) {
   G_TIX = Math.max(0, Number(n) || 0);
   if (typeof crHud === 'function') crHud();
@@ -1032,7 +1040,8 @@ function crFinish(win) {
       type: 'SAVE_STATS',
       crossRoadStars: G_CROSS.reduce((a, b) => a + b, 0),
       crossRoadMaxLevel: Math.max(cr.lv + 1, 1),
-      foodEarned: gain
+      foodEarned: gain,
+      levelStars: G_CROSS.slice(),
     });
     post({ type: 'FEED_PIG' });
   } else {

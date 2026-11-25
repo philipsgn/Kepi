@@ -133,6 +133,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
     pigHunger,
     fishHunger,
     flowerWater,
+    crossRoadLevelStars,
     feedPig,
     addChoreProgress,
     updateGameStats,
@@ -409,7 +410,10 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 rose: Math.min(24, stats.foodEarned * 3),
               });
             }
-            updateGameStats({ flyBestScore: stats.flyBestScore });
+            updateGameStats({
+              flyBestScore: stats.flyBestScore,
+              flyFoodEarnedDelta: stats.foodEarned,
+            });
           }}
         />
       </View>
@@ -430,6 +434,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           onFeedPig={feedPig}
           onUseTicket={useGameTicket}
           onBuyTicket={buyTicketWithFood}
+          initialLevelStars={crossRoadLevelStars}
           onSaveStats={(stats) => {
             if (stats.foodEarned) {
               addPigFood(stats.foodEarned);
@@ -438,6 +443,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
             updateGameStats({
               crossRoadStars: stats.crossRoadStars,
               crossRoadMaxLevel: stats.crossRoadMaxLevel,
+              crossRoadFoodEarnedDelta: stats.foodEarned,
+              crossRoadLevelStars: stats.levelStars,
             });
           }}
         />
@@ -591,7 +598,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Baloo2_800ExtraBold',
     fontSize: 22,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
     color: '#2B2118',
     lineHeight: 26,
   },

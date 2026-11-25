@@ -44,9 +44,12 @@ interface GamificationState {
   flowerWater: number;
   savedBabies: number;
   flyBestScore: number;
+  flyFoodEarned: number;
   shooterMaxWave: number;
   crossRoadStars: number;
   crossRoadMaxLevel: number;
+  crossRoadFoodEarned: number;
+  crossRoadLevelStars: number[];
   isLoading: boolean;
 
   // Actions
@@ -61,10 +64,13 @@ interface GamificationState {
   addChoreProgress: (delta: { pig?: number; fish?: number; rose?: number }) => void;
   updateGameStats: (stats: {
     flyBestScore?: number;
+    flyFoodEarnedDelta?: number;
     shooterMaxWave?: number;
     savedBabies?: number;
     crossRoadStars?: number;
     crossRoadMaxLevel?: number;
+    crossRoadFoodEarnedDelta?: number;
+    crossRoadLevelStars?: number[];
     pigHunger?: number;
     fishHunger?: number;
     flowerWater?: number;
@@ -98,9 +104,12 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
   flowerWater: 68, // Độ tươi hoa hồng 68%
   savedBabies: 0,
   flyBestScore: 0,
+  flyFoodEarned: 0,
   shooterMaxWave: 1,
   crossRoadStars: 0,
   crossRoadMaxLevel: 1,
+  crossRoadFoodEarned: 0,
+  crossRoadLevelStars: [0, 0, 0, 0],
   isLoading: false,
 
   loadGamificationState: async () => {
@@ -126,9 +135,14 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
           flowerWater: parsed.flowerWater ?? 68,
           savedBabies: parsed.savedBabies ?? 0,
           flyBestScore: parsed.flyBestScore ?? 0,
+          flyFoodEarned: parsed.flyFoodEarned ?? 0,
           shooterMaxWave: parsed.shooterMaxWave ?? 1,
           crossRoadStars: parsed.crossRoadStars ?? 0,
           crossRoadMaxLevel: parsed.crossRoadMaxLevel ?? 1,
+          crossRoadFoodEarned: parsed.crossRoadFoodEarned ?? 0,
+          crossRoadLevelStars: Array.isArray(parsed.crossRoadLevelStars) && parsed.crossRoadLevelStars.length === 4
+            ? parsed.crossRoadLevelStars
+            : [0, 0, 0, 0],
         });
       }
     } catch (e) {
@@ -206,12 +220,18 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
 
   updateGameStats: (stats) => {
     const current = get();
+    const mergedLevelStars = Array.isArray(stats.crossRoadLevelStars) && stats.crossRoadLevelStars.length === 4
+      ? current.crossRoadLevelStars.map((prev, idx) => Math.max(prev, Number(stats.crossRoadLevelStars?.[idx]) || 0))
+      : current.crossRoadLevelStars;
     const updated = {
       flyBestScore: Math.max(current.flyBestScore, stats.flyBestScore ?? 0),
+      flyFoodEarned: current.flyFoodEarned + Math.max(0, stats.flyFoodEarnedDelta ?? 0),
       shooterMaxWave: Math.max(current.shooterMaxWave, stats.shooterMaxWave ?? 0),
       savedBabies: stats.savedBabies !== undefined ? stats.savedBabies : current.savedBabies,
       crossRoadStars: Math.max(current.crossRoadStars, stats.crossRoadStars ?? 0),
       crossRoadMaxLevel: Math.max(current.crossRoadMaxLevel, stats.crossRoadMaxLevel ?? 1),
+      crossRoadFoodEarned: current.crossRoadFoodEarned + Math.max(0, stats.crossRoadFoodEarnedDelta ?? 0),
+      crossRoadLevelStars: mergedLevelStars,
       pigHunger: stats.pigHunger !== undefined ? Math.min(100, Math.max(0, stats.pigHunger)) : current.pigHunger,
       fishHunger: stats.fishHunger !== undefined ? Math.min(100, Math.max(0, stats.fishHunger)) : current.fishHunger,
       flowerWater: stats.flowerWater !== undefined ? Math.min(100, Math.max(0, stats.flowerWater)) : current.flowerWater,

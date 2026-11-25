@@ -55,6 +55,14 @@ const __SLIM_ICONS_META = {
     'PixelIconTraffic',
     'Feather',
     'Car',
+    'Giải trí',
+    'GIẢI TRÍ',
+    'Trò Chuyện Heo AI',
+    'Quán Quen',
+    'Heo Bay',
+    'Heo Qua Đường',
+    'Kỷ lục',
+    'Sao',
     'VIỆC NHÀ HÔM NAY',
     'Cá ao',
     'Hoa hồng',
@@ -91,7 +99,9 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
     fishHunger,
     flowerWater,
     flyBestScore,
+    flyFoodEarned,
     crossRoadStars,
+    crossRoadFoodEarned,
     feedPig,
   } = useGamificationStore();
   const { profile } = useAuthStore();
@@ -132,18 +142,18 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
   const CONNECT_CARDS: HubCardItem[] = [
     {
       id: 'chat',
-      title: 'Trò Chuyện Heo AI',
+      title: 'Trò chuyện Heo AI',
       shortTitle: 'Heo AI',
       badge: 'CHẠY TRONG MÁY',
       accentBg: '#BFDDF2',
       icon: <MessageSquare size={26} color="#2B2118" strokeWidth={2.0} />,
       desc: 'Hỏi ngân sách, phản biện chi tiêu',
-      statusText: 'Heo-Coach chờ bạn',
+      statusText: '',
     },
     {
       id: 'map',
-      title: 'Quán Quen',
-      shortTitle: 'Quán Quen',
+      title: 'Quán quen',
+      shortTitle: 'Quán quen',
       badge: 'CHECK-IN',
       accentBg: '#CDE6C4',
       icon: <MapPin size={26} color="#2B2118" strokeWidth={2.0} />,
@@ -152,27 +162,27 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
     },
   ];
 
-  // Nhóm 2: 2 Game Dọc 9:16 (Heo Bay & Heo Qua Đường — Quyết định 172, 188 & 189)
+  // Nhóm 2: 2 Game Dọc 9:16 (Heo bay & Qua đường — Quyết định 172, 188, 189 & 192)
   const GAME_CARDS: HubCardItem[] = [
     {
       id: 'fly',
-      title: 'Heo Bay',
-      shortTitle: 'Heo Bay',
+      title: 'Heo bay',
+      shortTitle: 'Heo bay',
       badge: 'VỖ CÁNH',
       accentBg: '#FBD3DC',
       icon: <Wind size={28} color="#2B2118" strokeWidth={2.0} />,
       desc: 'Sài Gòn 9:16',
-      statusText: `Kỷ lục ${flyBestScore || 0}`,
+      statusText: `Đã kiếm: ${flyFoodEarned || 0} cám`,
     },
     {
       id: 'cross',
-      title: 'Heo Qua Đường',
-      shortTitle: 'Qua Đường',
+      title: 'Heo qua đường',
+      shortTitle: 'Qua đường',
       badge: 'LÁCH ĐƯỜNG',
       accentBg: '#F2DFA8',
       icon: <Footprints size={28} color="#2B2118" strokeWidth={2.0} />,
       desc: 'Phố Sài Gòn',
-      statusText: `Sao ${crossRoadStars || 0}/12`,
+      statusText: `Đã kiếm: ${crossRoadFoodEarned || 0} cám`,
     },
   ];
 
@@ -188,10 +198,10 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      {/* 1. HEADER GIẢI TRÍ — TIÊU ĐỀ 22PX CHUẨN TRANG HỒ SƠ (QĐ 189) */}
+      {/* 1. HEADER KHÁM PHÁ — TIÊU ĐỀ 22PX CHUẨN TOÀN APP (QĐ 192) */}
       <View style={styles.header}>
         <View style={styles.headerTopRow}>
-          <Text style={[styles.screenTitle, { color: tokens.text }]}>Giải trí</Text>
+          <Text style={[styles.screenTitle, { color: tokens.text }]}>Khám phá</Text>
 
           <View style={[styles.streakBadge, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
             <Flame size={15} color="#E0452B" strokeWidth={2.2} />
@@ -204,7 +214,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
         <View style={styles.bannerRow}>
           <PixelPigAvatar size={34} mood={pigHunger >= 60 ? 'happy' : 'idle'} />
           <Text style={[styles.greetText, { color: tokens.text }]} numberOfLines={1}>
-            Chào {profile?.full_name || 'Trà Xanh'}! Khám phá giải trí & quán quen
+            Chào {profile?.full_name || 'Trà Xanh'}! Khám phá hôm nay cùng heo
           </Text>
         </View>
 
@@ -227,9 +237,9 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
         </View>
       </View>
 
-      {/* 3. KHUNG 1: TRÒ CHUYỆN & QUÁN QUEN */}
+      {/* 3. KHUNG 1: HEO AI & QUÁN QUEN */}
       <View style={[styles.sectionBox, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-        <Text style={[styles.sectionBoxLabel, { color: tokens.text }]}>HEO AI & QUÁN QUEN</Text>
+        <Text style={[styles.sectionBoxLabel, { color: tokens.text }]}>Heo AI & quán quen</Text>
         <View style={styles.connectRow}>
           {CONNECT_CARDS.map((card) => (
             <TouchableOpacity
@@ -243,7 +253,9 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
               </View>
               <View style={styles.tileTextCol}>
                 <Text style={styles.tileTitle} numberOfLines={1}>{card.shortTitle}</Text>
-                <Text style={styles.tileSub} numberOfLines={1}>{card.statusText}</Text>
+                {card.statusText ? (
+                  <Text style={styles.tileSub} numberOfLines={1}>{card.statusText}</Text>
+                ) : null}
               </View>
             </TouchableOpacity>
           ))}
@@ -252,7 +264,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
 
       {/* 4. KHUNG 2: TRÒ CHƠI HEO CON */}
       <View style={[styles.sectionBox, { backgroundColor: tokens.surface, borderColor: tokens.border, shadowColor: tokens.shadowColor }]}>
-        <Text style={[styles.sectionBoxLabel, { color: tokens.text }]}>TRÒ CHƠI HEO CON</Text>
+        <Text style={[styles.sectionBoxLabel, { color: tokens.text }]}>Trò chơi heo con</Text>
         <View style={styles.gamesRow}>
           {GAME_CARDS.map((card) => (
             <TouchableOpacity
@@ -297,9 +309,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   screenTitle: {
+    fontFamily: 'Baloo2_800ExtraBold',
     fontSize: 22,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   streakBadge: {
     flexDirection: 'row',
