@@ -35,6 +35,7 @@ export const FirstLaunchPermissionsModal: React.FC<FirstLaunchPermissionsModalPr
 
     try {
       await onRequestCameraPermission();
+      await new Promise((resolve) => setTimeout(resolve, 450));
       const locStatus = await requestLocationPermissionAsync();
       await setLocationPinEnabled(locStatus.granted);
     } catch (_e) {

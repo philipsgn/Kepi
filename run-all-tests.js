@@ -6265,11 +6265,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'app/_layout.tsx and camStoryTextInput must eliminate browser blue focus ring on Web'
   );
 
-  // 2. Tuần tự hóa xin quyền Camera -> đợi 400ms -> Location (chờ FirstLaunchPermissionsModal)
+  // 2. Tuần tự hóa xin quyền Camera -> đợi 400/450ms -> Location (chờ FirstLaunchPermissionsModal)
   assert.ok(
-    mainCamCode.includes('if (showFirstLaunchPermModal) return;') &&
+    (mainCamCode.includes('if (showFirstLaunchPermModal) return;') || mainCamCode.includes('!isFirstLaunchCheckDone || showFirstLaunchPermModal')) &&
       mainCamCode.includes('await requestCameraPermission();') &&
-      mainCamCode.includes('setTimeout(resolve, 400)') &&
+      (mainCamCode.includes('setTimeout(resolve, 400)') || mainCamCode.includes('setTimeout(resolve, 450)')) &&
       mainCamCode.includes('await prewarmLocationAsync();'),
     'app/(main)/index.tsx must sequentially await Camera permission before Location prewarm'
   );
@@ -6285,4 +6285,26 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 132 Passed: Triệt Tiêu Focus Ring Xanh Web & Tuần Tự Hóa Xin Quyền Camera -> Location (Quyết định 195) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 132 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (132/132)!');
+// ==========================================
+// TEST 133: HOÀN THIỆN XIN QUYỀN TUẦN TỰ CAMERA -> LOCATION (KHÔNG BỎ SÓT LOCATION & CHỐNG RACE CONDITION — QUYẾT ĐỊNH 196)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const locCode = fs.readFileSync('src/services/locationService.ts', 'utf8');
+  const modalCode = fs.readFileSync('src/components/common/FirstLaunchPermissionsModal.tsx', 'utf8');
+  const mainCamCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+
+  assert.ok(
+    mainCamCode.includes('isFirstLaunchCheckDone') &&
+      mainCamCode.includes('hasRunAutoPermSequenceRef') &&
+      mainCamCode.includes('await requestLocationPermissionAsync()') &&
+      locCode.includes('getCurrentPositionSafeAsync(6000, false)') &&
+      modalCode.includes('setTimeout(resolve, 450)') &&
+      decisionsCode.includes('196'),
+    'Sequential Camera -> 450ms -> Location permission flow must be enforced across index.tsx, locationService.ts, and FirstLaunchPermissionsModal.tsx'
+  );
+
+  console.log('✅ Test 133 Passed: Hoàn Thiện Xin Quyền Tuần Tự Camera -> Location (Quyết định 196) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 133 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (133/133)!');

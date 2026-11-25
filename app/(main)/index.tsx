@@ -83,8 +83,10 @@ import { ParsedBankNotification } from '../../src/utils/bankNotificationParser';
 import { groupTransactionsByDay } from '../../src/utils/cameraUtils';
 import {
   getCachedLocationSync,
+  getLocationPermissionStatusAsync,
   getQuickPinCoordsIfOptedIn,
   prewarmLocationAsync,
+  requestLocationPermissionAsync,
   reverseGeocodePlaceAsync,
 } from '../../src/services/locationService';
 
@@ -414,6 +416,8 @@ export default function MainAppScreen() {
   const [showBankSettingsFromCamera, setShowBankSettingsFromCamera] = useState<boolean>(false);
   const [showVoiceSheet, setShowVoiceSheet] = useState<boolean>(false);
   const [showFirstLaunchPermModal, setShowFirstLaunchPermModal] = useState<boolean>(false);
+  const [isFirstLaunchCheckDone, setIsFirstLaunchCheckDone] = useState<boolean>(false);
+  const hasRunAutoPermSequenceRef = useRef<boolean>(false);
 
   // Locket Bank Snapshot & Fast Log State (Decision 69)
   const [activeBankSnapshotEvent, setActiveBankSnapshotEvent] = useState<ParsedBankNotification | null>(null);
@@ -462,6 +466,8 @@ export default function MainAppScreen() {
         }
       } catch (_e) {
         // ignore
+      } finally {
+        setIsFirstLaunchCheckDone(true);
       }
     })();
   }, [isAuthenticated]);
@@ -563,26 +569,28 @@ export default function MainAppScreen() {
     };
   }, []);
 
-  // Tự động xin quyền Camera trước, chờ đóng hoàn toàn (400ms) rồi mới làm nóng GPS tuần tự (Quyết định 195)
+  // Tự động xin quyền Camera trước, chờ đóng hoàn toàn (450ms) rồi mới xin quyền & làm nóng GPS tuần tự (Quyết định 195 & 196)
   useEffect(() => {
-    let cancelled = false;
+    if (!isFirstLaunchCheckDone || showFirstLaunchPermModal || hasRunAutoPermSequenceRef.current) {
+      return;
+    }
+    hasRunAutoPermSequenceRef.current = true;
     (async () => {
-      if (showFirstLaunchPermModal) return;
       if (!cameraGranted && canAskCameraAgain) {
         try {
           await requestCameraPermission();
         } catch (_e) {}
-        await new Promise((resolve) => setTimeout(resolve, 400));
+        await new Promise((resolve) => setTimeout(resolve, 450));
       }
-      if (cancelled) return;
       try {
+        const locPerm = await getLocationPermissionStatusAsync();
+        if ((!locPerm.granted && locPerm.canAskAgain) || Platform.OS === 'web') {
+          await requestLocationPermissionAsync();
+        }
         await prewarmLocationAsync();
       } catch (_e) {}
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [showFirstLaunchPermModal, cameraGranted, canAskCameraAgain, requestCameraPermission]);
+  }, [isFirstLaunchCheckDone, showFirstLaunchPermModal, cameraGranted, canAskCameraAgain, requestCameraPermission]);
 
   const currentOffsetYRef = useRef<number>(0);
 

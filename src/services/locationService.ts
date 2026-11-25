@@ -111,6 +111,13 @@ export async function requestLocationPermissionAsync(): Promise<LocationPermissi
       return { granted: false, canAskAgain: false, status: 'denied' };
     }
   }
+  if (typeof navigator !== 'undefined' && navigator.geolocation) {
+    // Quyết định 196: Trên Web, gọi getCurrentPositionSafeAsync để trình duyệt thực sự bật hộp thoại xin quyền Vị trí
+    const coords = await getCurrentPositionSafeAsync(6000, false);
+    if (coords) {
+      return { granted: true, canAskAgain: true, status: 'granted' };
+    }
+  }
   return getLocationPermissionStatusAsync();
 }
 
