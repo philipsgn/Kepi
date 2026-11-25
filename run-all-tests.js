@@ -6153,4 +6153,44 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 129 Passed: Tab "Khám phá", Đồng Bộ Screen Title 22px Baloo2 Sentence Case, Bỏ Description Heo AI & Chỉ Số Đã Kiếm Cám (Quyết định 192) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 129 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (129/129)!');
+// ==========================================
+// TEST 130: DEPLOY GITHUB PAGES (gh-pages) KHÔNG TỐN ARTIFACT QUOTA & KHÔI PHỤC CHỤP ẢNH WEB PWA DUAL-MODE (QUYẾT ĐỊNH 193)
+// ==========================================
+{
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const camDocCode = fs.readFileSync('docs/screens/heocon/09-CAMERA.md', 'utf8');
+  const deployYml = fs.readFileSync('.github/workflows/deploy-web.yml', 'utf8');
+  const mainCamCode = fs.readFileSync('app/(main)/index.tsx', 'utf8');
+
+  // 1. Workflow deploy lên nhánh gh-pages, bỏ actions/upload-pages-artifact
+  assert.ok(
+    deployYml.includes('peaceiris/actions-gh-pages@v4') &&
+      deployYml.includes('publish_dir: ./dist') &&
+      deployYml.includes('publish_branch: gh-pages') &&
+      !deployYml.includes('actions/upload-pages-artifact'),
+    'deploy-web.yml must deploy via peaceiris/actions-gh-pages@v4 to gh-pages branch without upload-pages-artifact'
+  );
+
+  // 2. Camera Web PWA Dual-Mode & lớp Pressable chạm đúp nằm trong nhánh CameraView (không che permissionFallback)
+  const camBranch = mainCamCode.split(') : (')[0];
+  assert.ok(
+    mainCamCode.includes('capturePhotoFromWebInput') &&
+      mainCamCode.includes("input.setAttribute('capture', 'environment')") &&
+      mainCamCode.includes('title="Bật Camera"') &&
+      !mainCamCode.includes('</View>\n                  {/* LỚP PHỦ GESTURE NHẬN DIỆN CHẠM ĐÚP LẬT CAMERA */}'),
+    'app/(main)/index.tsx must support capturePhotoFromWebInput and keep double-tap Pressable inside CameraView branch only'
+  );
+
+  // 3. Living Documentation Sync Audit (Quyết định 193)
+  assert.ok(
+    agentsCode.includes('193') &&
+      decisionsCode.includes('193') &&
+      camDocCode.includes('193'),
+    'AGENTS.md, DECISIONS.md, and 09-CAMERA.md must document Quyết định 193'
+  );
+
+  console.log('✅ Test 130 Passed: Deploy GitHub Pages (gh-pages) & Camera Web PWA Dual-Mode (Quyết định 193) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 130 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (130/130)!');

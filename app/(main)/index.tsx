@@ -894,12 +894,62 @@ export default function MainAppScreen() {
     setCamHintMessage('Đã lưu và treo ảnh thành công!');
   };
 
+  // Quyết định 193: Fallback mở thẳng Camera gốc / chọn ảnh trên trình duyệt Web PWA (<input capture="environment">)
+  const capturePhotoFromWebInput = () => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') {
+      handlePickImageFromLibrary();
+      return;
+    }
+    try {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.setAttribute('capture', 'environment');
+      input.style.display = 'none';
+      input.onchange = (e: any) => {
+        const file = e?.target?.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = typeof reader.result === 'string' ? reader.result : '';
+            if (dataUrl) {
+              setCapturedPhotoUri(dataUrl);
+              setCapturedMediaType('PHOTO');
+              setCapturedThumbUri(dataUrl);
+              optimizedPhotoRef.current = dataUrl;
+              optimizedThumbRef.current = dataUrl;
+              if (!inFrameCategory) {
+                setInFrameCategory(inFrameType === 'INCOME' ? 'luong' : 'an_uong');
+              }
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+        if (input.parentNode) {
+          input.parentNode.removeChild(input);
+        }
+      };
+      document.body.appendChild(input);
+      input.click();
+    } catch (err) {
+      console.log('Web input capture fallback to ImagePicker:', err);
+      handlePickImageFromLibrary();
+    }
+  };
+
   const handleCapturePhoto = async () => {
     setIsShootingPig(true);
     setTimeout(() => setIsShootingPig(false), 900);
     setIsPhotoSavedSuccess(false);
     if (Platform.OS === 'web') {
       try {
+        if (!cameraGranted && canAskCameraAgain) {
+          const permRes = await requestCameraPermission();
+          if (permRes?.granted) {
+            setCamHintMessage('Đã bật Camera! Chạm nút chụp để lưu khoảnh khắc.');
+            return;
+          }
+        }
         if (cameraRef.current && cameraGranted) {
           const photo = await cameraRef.current.takePictureAsync({
             quality: 0.85,
@@ -925,9 +975,9 @@ export default function MainAppScreen() {
           }
         }
       } catch (err) {
-        console.log('Web camera capture fallback to library:', err);
+        console.log('Web camera capture fallback to native input:', err);
       }
-      handlePickImageFromLibrary();
+      capturePhotoFromWebInput();
       return;
     }
     if (!cameraGranted) {
@@ -1703,38 +1753,57 @@ export default function MainAppScreen() {
                   {...pinchPanResponder.panHandlers}
                 >
                   {cameraGranted && isCameraActive && isPagerSettled ? (
-                    <CameraView
-                      key={cameraFacing}
-                      ref={cameraRef}
-                      style={StyleSheet.absoluteFill}
-                      facing={cameraFacing}
-                      enableTorch={cameraFacing === 'back' && flashMode === 'on'}
-                      zoom={cameraFacing === 'back' ? cameraZoom : 0}
-                      barcodeScannerSettings={BARCODE_SCANNER_SETTINGS}
-                      onBarcodeScanned={capturedPhotoUri ? undefined : handleBarcodeScanned}
-                      onMountError={(e) => console.warn('[CameraView Mount Error]', e)}
-                    />
+                    <>
+                      <CameraView
+                        key={cameraFacing}
+                        ref={cameraRef}
+                        style={StyleSheet.absoluteFill}
+                        facing={cameraFacing}
+                        enableTorch={cameraFacing === 'back' && flashMode === 'on'}
+                        zoom={cameraFacing === 'back' ? cameraZoom : 0}
+                        barcodeScannerSettings={BARCODE_SCANNER_SETTINGS}
+                        onBarcodeScanned={capturedPhotoUri ? undefined : handleBarcodeScanned}
+                        onMountError={(e) => console.warn('[CameraView Mount Error]', e)}
+                      />
+                      {/* LỚP PHỦ GESTURE NHẬN DIỆN CHẠM ĐÚP LẬT CAMERA (chỉ phủ lên CameraView sống, không che permissionFallback - QĐ 193) */}
+                      <Pressable
+                        style={StyleSheet.absoluteFill}
+                        onPress={handleDoubleTapViewfinder}
+                      />
+                    </>
                   ) : (
                     <View style={styles.permissionFallback}>
                       <Camera size={44} color="#666666" strokeWidth={2} />
                       <Text style={styles.permissionText}>
                         {Platform.OS === 'web'
-                          ? 'Chạm nút bên dưới để Chụp hoặc Tải ảnh chi tiêu'
-                          : 'Chạm đúp để kiểm tra hoặc cấp quyền Camera'}
+                          ? 'Bật Camera trực tiếp hoặc chụp / tải ảnh chi tiêu'
+                          : 'Cấp quyền Camera để chụp ảnh chi tiêu nhanh'}
                       </Text>
-                      <BlockButton
-                        title={Platform.OS === 'web' ? 'Chụp / Tải Ảnh' : 'Mở Cài Đặt'}
-                        onPress={Platform.OS === 'web' ? handlePickImageFromLibrary : openAppSettings}
-                        variant="secondary"
-                        size="sm"
-                      />
+                      {Platform.OS === 'web' ? (
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <BlockButton
+                            title="Bật Camera"
+                            onPress={() => requestCameraPermission().catch(() => {})}
+                            variant="primary"
+                            size="sm"
+                          />
+                          <BlockButton
+                            title="Chụp / Tải Ảnh"
+                            onPress={capturePhotoFromWebInput}
+                            variant="secondary"
+                            size="sm"
+                          />
+                        </View>
+                      ) : (
+                        <BlockButton
+                          title={canAskCameraAgain ? 'Cấp quyền Camera' : 'Mở Cài Đặt'}
+                          onPress={canAskCameraAgain ? () => requestCameraPermission().catch(() => {}) : openAppSettings}
+                          variant="secondary"
+                          size="sm"
+                        />
+                      )}
                     </View>
                   )}
-                  {/* LỚP PHỦ GESTURE NHẬN DIỆN CHẠM ĐÚP LẬT CAMERA */}
-                  <Pressable
-                    style={StyleSheet.absoluteFill}
-                    onPress={handleDoubleTapViewfinder}
-                  />
                 </View>
 
                 {/* LỚP 2: ẢNH CHỤP TĨNH PHỦ LÊN TRÊN (SEAMLESS FREEZE-FRAME, 0 DELAY, KHÔNG CO GIẬT KHUNG) */}
