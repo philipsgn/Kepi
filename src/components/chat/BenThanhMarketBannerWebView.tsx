@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
 import { buildOpenRoomEngineScript } from '../pixel/pixelOpenRoomEngine';
@@ -33,7 +33,6 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
   const webViewRef = useRef<any>(null);
   const iframeRef = useRef<any>(null);
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [toastText, setToastText] = useState<string>('Cửa Số 1 · Chào mừng vào Chợ Bến Thành!');
 
   useEffect(() => {
     return () => {
@@ -65,7 +64,6 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
     if (d.type === 'HAPTIC_LIGHT') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     } else if (d.type === 'ROOM_ACTION') {
-      if (d.text) setToastText(String(d.text));
       if (d.id === 'exit_market' && d.userTriggered && onExitToMap) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
         if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
@@ -106,15 +104,15 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
       buildOpenRoomEngineScript({
         canvasId: 'mkCv',
         worldWidth: 680,
-        worldHeight: 152,
+        worldHeight: 176,
         viewWidth: 192,
-        viewHeight: 112,
-        walkBounds: { minX: 20, maxX: 660, minY: 104, maxY: 144 },
+        viewHeight: 136,
+        walkBounds: { minX: 20, maxX: 660, minY: 106, maxY: 164 },
         initialX: 82,
-        initialY: 120,
+        initialY: 128,
         initialCamX: 0,
-        initialCamY: 18,
-        speed: 44,
+        initialCamY: 22,
+        speed: 46,
         hotspots: [
           {
             id: 'exit_market',
@@ -199,16 +197,16 @@ window.onerror=function(msg,src,line){
 </script>
 </head>
 <body>
-<canvas id="mkCv" width="192" height="112" role="img" aria-label="Không gian bên trong Chợ Bến Thành 4 khu: Cửa Số 1, Liên Sài Gòn, Khu Ăn Uống và Sạp Bánh Cuốn Bánh Bèo"></canvas>
+<canvas id="mkCv" width="192" height="136" role="img" aria-label="Không gian bên trong Chợ Bến Thành 4 khu: Cửa Số 1, Liên Sài Gòn, Khu Ăn Uống và Sạp Bánh Cuốn Bánh Bèo"></canvas>
 <script>
 (function(){
 'use strict';
 
 var INK='#2B2118';
 var WORLD_W=680;
-var WORLD_H=152;
+var WORLD_H=176;
 var VW=192;
-var VH=112;
+var VH=136;
 
 function R(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
 function E(c,cx,cy,rx,ry,col){
@@ -337,7 +335,7 @@ function buildMarketInterior(){
   R(x,0,44,WORLD_W,58,'#E6D6BE');
 
   // =========================================================================
-  // 2. SÀN GẠCH HÀNH LANG CHỢ BẾN THÀNH (y: 102..152 — Ảnh 2, 4, 5, 7)
+  // 2. SÀN GẠCH HÀNH LANG CHỢ BẾN THÀNH MỞ RỘNG (y: 102..176 — Ảnh 2, 4, 5, 7)
   // =========================================================================
   for(var fx=0;fx<WORLD_W;fx+=16){
     for(var fy=102;fy<WORLD_H;fy+=10){
@@ -345,10 +343,11 @@ function buildMarketInterior(){
       R(x,fx,fy,16,10,alt?'#C9AC90':'#B9987B');
       R(x,fx,fy,16,1,'rgba(75,52,36,0.22)');
       R(x,fx,fy,1,10,'rgba(75,52,36,0.22)');
+      if((fx%84)>=24&&(fx%84)<=66){R(x,fx+2,fy+2,12,6,'rgba(255,246,216,0.16)');}
     }
   }
-  // Hai dải gạch dẫn hướng màu nâu đỏ sẫm dọc hành lang (y: 112..116 & 134..138)
-  R(x,0,112,WORLD_W,4,'#7E5640');R(x,0,134,WORLD_W,4,'#7E5640');
+  // Hai dải gạch dẫn hướng màu nâu đỏ sẫm dọc hành lang (y: 116..120 & 148..152)
+  R(x,0,116,WORLD_W,4,'#7E5640');R(x,0,148,WORLD_W,4,'#7E5640');
   R(x,0,102,WORLD_W,1,INK);
 
   // =========================================================================
@@ -472,19 +471,51 @@ function buildMarketInterior(){
 }
 
 function drawLiveMarketEffects(x,t){
-  // 1. Quạt lồng sắt công nghiệp quay (Ảnh 4 & 5)
-  [390,545,620].forEach(function(fx){
-    E(x,fx,58,5,5,INK);E(x,fx,58,4,4,'#334155');
-    var sp=Math.max(1,Math.round(Math.abs(Math.sin(t*9+fx))*4));
-    R(x-sp,57,sp*2,2,'#94A3B8');
-  });
-  // 2. Hơi nóng bốc lên từ nồi Bánh Cuốn (x=531) & Bún Bò (x=462)
-  [462,531].forEach(function(sx){
-    for(var i=0;i<3;i++){
-      var p=((t*0.9+i*0.33)%1);
-      var sy=68-Math.round(p*12), stx=sx+Math.round(Math.sin(t*4+i*2)*1.5);
-      x.save();x.globalAlpha=0.7*(1-p);R(x,stx,sy,2,2,'#FFFBF1');x.restore();
-    }
+  try{
+    // 1. Quầng sáng ấm tỏa quanh chao đèn mây tre đan, LED Cửa Số 1 & tủ kính Khu Ăn Uống
+    x.save();
+    x.globalAlpha=0.18+Math.sin(t*3)*0.04;
+    [196,268,316].forEach(function(lx){E(x,lx,44,10,8,'#FFE08A');});
+    R(x,42,54,84,12,'#FDBA74');
+    R(x,356,64,140,14,'#E0F2FE');
+    x.restore();
+    // 2. Quạt lồng sắt công nghiệp quay mượt (Ảnh 4 & 5)
+    [390,545,620].forEach(function(fx){
+      E(x,fx,58,5,5,INK);E(x,fx,58,4,4,'#334155');
+      var sp=Math.max(1,Math.round(Math.abs(Math.sin(t*9+fx))*4));
+      R(x,fx-sp,57,sp*2,2,'#94A3B8');
+    });
+    // 3. Hơi nóng bốc lên từ nồi Bánh Cuốn (x=531) & Bún Bò (x=462)
+    [462,531].forEach(function(sx){
+      for(var i=0;i<3;i++){
+        var p=((t*0.9+i*0.33)%1);
+        var sy=68-Math.round(p*12), stx=sx+Math.round(Math.sin(t*4+i*2)*1.5);
+        x.save();x.globalAlpha=0.7*(1-p);R(x,stx,sy,2,2,'#FFFBF1');x.restore();
+      }
+    });
+  }catch(_e){}
+}
+
+function getWalkingShoppers(t){
+  return [
+    {y:134,x:((t*14+40)%640),dir:1,shirt:'#E0452B',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
+    {y:144,x:640-((t*12+160)%640),dir:-1,shirt:'#38BDF8',pants:'#334155',hat:'cap',bag:'#F4B93B'},
+    {y:154,x:((t*16+320)%640),dir:1,shirt:'#10B981',pants:'#1F2937',hat:'none',bag:'#EC4899'},
+    {y:160,x:640-((t*11+490)%640),dir:-1,shirt:'#F59E0B',pants:'#374151',hat:'nonla',bag:'#3B82F6'}
+  ];
+}
+
+function drawWalkingShoppers(x,t,minY,maxY){
+  var list=getWalkingShoppers(t);
+  list.forEach(function(w){
+    if(w.y<minY||w.y>=maxY)return;
+    var bob=(((t*6)|0)%2);
+    var px=Math.round(w.x);
+    var py=Math.round(w.y);
+    drawPerson(x,px,py-bob,w.shirt,w.pants,w.hat,false);
+    // Túi đồ đi chợ
+    R(x,px+(w.dir>0?-2:5),py-5-bob,3,4,INK);
+    R(x,px+(w.dir>0?-1:6),py-4-bob,1,2,w.bag);
   });
 }
 
@@ -494,17 +525,22 @@ function mkDraw(t){
   var rm=window.__openRoom?window.__openRoom.state:null;
   if(window.__openRoom) window.__openRoom.step(dt,performance.now());
   var camX=rm?Math.round(rm.camX):0;
-  var camY=rm?Math.round(rm.camY):18;
+  var camY=rm?Math.round(rm.camY):22;
 
   x.save();
   x.translate(-camX,-camY);
   x.drawImage(MK.bg,0,0);
   drawLiveMarketEffects(x,t);
 
-  // Chú heo 24x20 dạo chợ
+  var pigY=rm?rm.y:128;
+  drawWalkingShoppers(x,t,0,pigY);
+
+  // Chú heo 24x20 dạo chợ có bóng đổ tiếp xúc
   if(rm){
     var px=Math.round(rm.x-12);
-    var py=Math.round(rm.y-20+(rm.action==='jump_joy'?-Math.abs(Math.sin(t*10))*4:0));
+    var jumpY=(rm.action==='jump_joy'?-Math.abs(Math.sin(t*10))*4:0);
+    var py=Math.round(rm.y-20+jumpY);
+    R(x,px+4,Math.round(rm.y)-1,16,2,'rgba(43,33,24,0.28)'); // bóng đổ tiếp xúc dưới chân heo
     hpx.clearRect(0,0,24,20);
     drawPigSprite(hpx,{
       pose:rm.walking?'walk':(rm.action==='eat_snack'?'eat':'stand'),
@@ -518,6 +554,8 @@ function mkDraw(t){
     else x.drawImage(hp,0,0,24,20,px,py,24,20);
     x.restore();
   }
+
+  drawWalkingShoppers(x,t,pigY,999);
   x.restore();
 
   if(window.__openRoom) window.__openRoom.drawOverlays(x,performance.now());
@@ -531,7 +569,7 @@ function mkFrame(now){
 }
 
 window.__mkGo=function(zoneIdx){
-  var targets=[{x:82,y:118},{x:246,y:118},{x:422,y:118},{x:594,y:118}];
+  var targets=[{x:82,y:128},{x:246,y:128},{x:422,y:128},{x:594,y:128}];
   var tg=targets[zoneIdx]||targets[0];
   if(window.__openRoom) window.__openRoom.walkTo(tg.x,tg.y,null);
 };
@@ -593,30 +631,26 @@ else mkStart();
           />
         )}
       </View>
-      <View style={styles.toastRow}>
-        <Text style={styles.toastText} numberOfLines={1}>
-          {toastText}
-        </Text>
-      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   wrap: {
+    flex: 1,
     width: '100%',
-    marginBottom: 12,
   },
   canvasFrame: {
+    flex: 1,
     width: '100%',
-    aspectRatio: 192 / 112,
+    minHeight: 360,
     borderWidth: 3,
     borderColor: '#2B2118',
-    borderRadius: 18,
+    borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#3A2D25',
     shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 4,
@@ -625,21 +659,5 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     backgroundColor: '#3A2D25',
-  },
-  toastRow: {
-    marginTop: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#2B2118',
-    backgroundColor: '#FFFBF1',
-    alignSelf: 'flex-start',
-  },
-  toastText: {
-    fontFamily: 'Nunito',
-    fontWeight: '700',
-    fontSize: 12,
-    color: '#2B2118',
   },
 });

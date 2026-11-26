@@ -393,3 +393,7 @@ Màn hình Tab 3 hiển thị:
   3. `x: 336..512`: **Cổng Vòm Cong `KHU AN UONG` & Quầy Chữ L `Sạp 1044`** — tủ kính đồ ăn, chùm dừa tươi góc quầy, hàng ghế đẩu inox sáng bóng.
   4. `x: 512..680`: **Hẻm Ẩm Thực Nóng** — biển vàng `BANH CUON 50K` (nồi hơi bốc khói, quầy gạch bông), `BUN BO HUE`, và `BANH BEO 20K` (mặt bàn đá mài vàng, dĩa bánh bèo, nem chua lá chuối).
 - **Sàn hành lang chợ (`y: 102..152`):** Gạch chữ nhật nâu đất – kem xám kèm 2 dải gạch dẫn hướng nâu đỏ sẫm dọc hành lang.
+
+## 30. Sửa Lỗi Đứng Hình Dòng 479 & Nâng Cấp Chợ Bến Thành Full-Focus 60fps (`680×176` — Quyết định 209)
+- **Khắc phục triệt để bug runtime (`BenThanhMarketBannerWebView.tsx`):** Sửa `R(x-sp,...)` thành `R(x,fx-sp,...)` trong `drawLiveMarketEffects` + bọc `try/catch` để chú heo `24×20` và thao tác trượt camera hoạt động mượt 60fps.
+- **Mở rộng không gian Full-Focus (`BenThanhMarketView.tsx`, `680×176` trên viewport `192×136`):** Xóa bỏ toàn bộ `zoneCard`, `statsCard` và thanh toast rời; mở rộng khung Chợ Bến Thành chiếm trọn trọng tâm màn hình kèm 1 hàng chip ngang 4 khu ở đáy. Bổ sung `drawWalkingShoppers` (du khách đi bộ dạo chợ 2 chiều Y-sorted với heo) và quầng sáng đèn ấm.

@@ -74,8 +74,6 @@ export const BenThanhMarketView: React.FC<BenThanhMarketViewProps> = ({ onBack }
     };
   }, [transactions]);
 
-  const activeZone = MARKET_ZONES[selectedZone] || MARKET_ZONES[0];
-
   const handleSelectZone = (idx: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedZone(idx);
@@ -111,22 +109,25 @@ export const BenThanhMarketView: React.FC<BenThanhMarketViewProps> = ({ onBack }
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.scrollBody}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <BenThanhMarketBannerWebView
-          active={true}
-          shoppingTotalText={marketStats.shoppingTotalText}
-          foodTotalText={marketStats.foodTotalText}
-          visitsCount={marketStats.visitsCount}
-          selectedZone={selectedZone}
-          onExitToMap={onBack}
-          onSelectZoneFromCanvas={(z) => setSelectedZone(z)}
-        />
+      <View style={styles.immersiveBody}>
+        <View style={styles.canvasArea}>
+          <BenThanhMarketBannerWebView
+            active={true}
+            shoppingTotalText={marketStats.shoppingTotalText}
+            foodTotalText={marketStats.foodTotalText}
+            visitsCount={marketStats.visitsCount}
+            selectedZone={selectedZone}
+            onExitToMap={onBack}
+            onSelectZoneFromCanvas={(z) => setSelectedZone(z)}
+          />
+        </View>
 
-        <View style={styles.chipsRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.chipsScroll}
+          contentContainerStyle={styles.chipsRow}
+        >
           {MARKET_ZONES.map((z) => {
             const isActive = selectedZone === z.id;
             const IconComp =
@@ -143,30 +144,8 @@ export const BenThanhMarketView: React.FC<BenThanhMarketViewProps> = ({ onBack }
               </TouchableOpacity>
             );
           })}
-        </View>
-
-        <View style={styles.zoneCard}>
-          <Text style={styles.zoneTitle}>{activeZone.stallName}</Text>
-          <Text style={styles.zoneDesc}>{activeZone.desc}</Text>
-        </View>
-
-        <View style={styles.statsCard}>
-          <View style={styles.statCol}>
-            <Text style={styles.statLabel}>Mua sắm</Text>
-            <Text style={styles.statVal}>{marketStats.shoppingTotalText}</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statCol}>
-            <Text style={styles.statLabel}>Ăn uống</Text>
-            <Text style={styles.statVal}>{marketStats.foodTotalText}</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={[styles.statCol, { alignItems: 'flex-end' }]}>
-            <Text style={styles.statLabel}>Điểm đã ghé</Text>
-            <Text style={styles.statVal}>{marketStats.visitsCount} quán</Text>
-          </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </View>
   );
 };
@@ -229,25 +208,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#2B2118',
   },
-  scrollBody: {
+  immersiveBody: {
     flex: 1,
+    paddingHorizontal: 14,
+    paddingBottom: 16,
+    gap: 12,
   },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 28,
+  canvasArea: {
+    flex: 1,
+    width: '100%',
+  },
+  chipsScroll: {
+    flexGrow: 0,
   },
   chipsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     gap: 8,
-    marginBottom: 12,
+    paddingVertical: 2,
   },
   zoneChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 11,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
     borderRadius: 14,
     borderWidth: 2.5,
     borderColor: '#2B2118',
@@ -270,69 +255,5 @@ const styles = StyleSheet.create({
   zoneChipTextActive: {
     color: '#2B2118',
     fontWeight: '800',
-  },
-  zoneCard: {
-    backgroundColor: '#FFFBF1',
-    borderWidth: 3,
-    borderColor: '#2B2118',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 12,
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 3,
-  },
-  zoneTitle: {
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
-    fontSize: 16,
-    color: '#2B2118',
-    marginBottom: 4,
-  },
-  zoneDesc: {
-    fontFamily: 'Nunito',
-    fontWeight: '700',
-    fontSize: 13,
-    lineHeight: 19,
-    color: '#5E4E40',
-  },
-  statsCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFBF1',
-    borderWidth: 3,
-    borderColor: '#2B2118',
-    borderRadius: 16,
-    padding: 14,
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 3,
-  },
-  statCol: {
-    flex: 1,
-  },
-  statLabel: {
-    fontFamily: 'Nunito',
-    fontWeight: '700',
-    fontSize: 11,
-    color: '#8A7A6A',
-    marginBottom: 2,
-  },
-  statVal: {
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
-    fontSize: 15,
-    color: '#2B2118',
-    fontVariant: ['tabular-nums'],
-  },
-  statDivider: {
-    width: 2,
-    height: 28,
-    backgroundColor: '#E8DAC2',
-    marginHorizontal: 10,
   },
 });

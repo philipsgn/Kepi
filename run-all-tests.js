@@ -6660,7 +6660,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     (marketBannerCode.includes('worldWidth: 680') || marketBannerCode.includes('worldWidth: 576')) &&
-      (marketBannerCode.includes('worldHeight: 152') || marketBannerCode.includes('worldHeight: 144')) &&
+      (marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152') || marketBannerCode.includes('worldHeight: 144')) &&
       marketBannerCode.includes('exit_market') &&
       marketBannerCode.includes('fastDash: true') &&
       (marketViewCode.includes('Sạp Liên Sài Gòn') || marketViewCode.includes('Sạp Vải & Nón Lá')) &&
@@ -6759,7 +6759,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     marketBannerCode.includes('worldWidth: 680') &&
-      marketBannerCode.includes('worldHeight: 152') &&
+      (marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152')) &&
       marketBannerCode.includes('initialCamX: 0') &&
       marketBannerCode.includes('WELCOME BEN THANH') &&
       marketBannerCode.includes('LIEN SAI GON') &&
@@ -6779,11 +6779,50 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       marketViewCode.includes('Bánh Cuốn & Bánh Bèo') &&
       decisionsCode.includes('208') &&
       chatDocCode.includes('680×152') &&
-      specCode.includes('680 × 152'),
-    'BenThanhMarketView and docs must sync 4 real market zones and 680x152 dimensions for QD 208'
+      (specCode.includes('680 × 176') || specCode.includes('680 × 152')),
+    'BenThanhMarketView and docs must sync 4 real market zones and 680px width dimensions for QD 208'
   );
 
   console.log('✅ Test 145 Passed: Tái Thiết Kế Lòng Chợ Bến Thành 680×152 Bám Sát 7 Ảnh Thực Tế (Quyết định 208) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 145 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (145/145)!');
+// ==========================================
+// TEST 146: SỬA LỖI CRASH FRAME 1 DÒNG 479, XÓA CARD CHỮ THỪA & NÂNG CẤP CHỢ BẾN THÀNH FULL-FOCUS 60FPS (QUYẾT ĐỊNH 209)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const marketViewCode = fs.readFileSync('src/components/chat/BenThanhMarketView.tsx', 'utf8');
+
+  assert.ok(
+    !marketBannerCode.includes('R(x-sp') &&
+      marketBannerCode.includes('R(x,fx-sp,57') &&
+      marketBannerCode.includes('worldHeight: 176') &&
+      marketBannerCode.includes('viewHeight: 136') &&
+      marketBannerCode.includes('drawWalkingShoppers') &&
+      !marketBannerCode.includes('toastRow'),
+    'BenThanhMarketBannerWebView must fix R(x-sp) crash bug, extend world to 680x176 (viewport 192x136), add walking shoppers, and remove toastRow'
+  );
+
+  assert.ok(
+    !marketViewCode.includes('zoneCard') &&
+      !marketViewCode.includes('statsCard') &&
+      marketViewCode.includes('immersiveBody') &&
+      decisionsCode.includes('209') &&
+      chatDocCode.includes('680×176') &&
+      specCode.includes('680 × 176'),
+    'BenThanhMarketView must remove text/stats cards for full-focus immersive canvas + 1 bottom chip row and sync docs for QD 209'
+  );
+
+  // Verify inline JS syntax cleanly via Function constructor
+  const scriptMatch = marketBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
+  assert.ok(scriptMatch && scriptMatch[1], 'Must find inline market canvas script');
+  const cleanJs = scriptMatch[1].replace('${openRoomScript}', '');
+  new Function(cleanJs);
+
+  console.log('✅ Test 146 Passed: Sửa Lỗi Đứng Hình Dòng 479, Xóa Card Chữ Thừa & Chợ Bến Thành Full-Focus 60fps (Quyết định 209) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 146 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (146/146)!');
