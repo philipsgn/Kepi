@@ -30,6 +30,13 @@ export interface OpenRoomHotspot {
   fastDash?: boolean;
 }
 
+export interface OpenRoomObstacle {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 export interface OpenRoomConfig {
   canvasId: string;
   worldWidth: number;
@@ -48,6 +55,7 @@ export interface OpenRoomConfig {
   initialCamY?: number;
   speed?: number;
   hotspots: OpenRoomHotspot[];
+  obstacles?: OpenRoomObstacle[];
 }
 
 export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
@@ -258,6 +266,17 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
         state.nextAutoAt = now + 5600;
       },
       step: function(dt, now) {
+        function hitsObstacle(px, py) {
+          if (state.fastDash || !Array.isArray(cfg.obstacles) || cfg.obstacles.length === 0) return false;
+          var hw = 7, hh = 4;
+          for (var oi = 0; oi < cfg.obstacles.length; oi++) {
+            var ob = cfg.obstacles[oi];
+            if (px + hw > ob.x && px - hw < ob.x + ob.w && py > ob.y && py - hh < ob.y + ob.h) {
+              return true;
+            }
+          }
+          return false;
+        }
         var dx = state.tx - state.x;
         var dy = state.ty - state.y;
         var dist = Math.hypot(dx, dy);
@@ -266,8 +285,16 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
           state.walking = true;
           if (Math.abs(dx) > 0.5) state.facing = dx >= 0 ? 1 : -1;
           var move = Math.min(dist, spd * dt);
-          state.x += (dx / dist) * move;
-          state.y += (dy / dist) * move;
+          var stepX = (dx / dist) * move;
+          var stepY = (dy / dist) * move;
+          var moved = false;
+          if (!hitsObstacle(state.x + stepX, state.y)) { state.x += stepX; moved = true; }
+          if (!hitsObstacle(state.x, state.y + stepY)) { state.y += stepY; moved = true; }
+          if (!moved) {
+            state.walking = false;
+            state.tx = state.x;
+            state.ty = state.y;
+          }
         } else {
           state.x = state.tx;
           state.y = state.ty;

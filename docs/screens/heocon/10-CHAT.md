@@ -412,3 +412,11 @@ Màn hình Tab 3 hiển thị:
 - **Đại Thế Giới `1024 × 360` & 2 Cổng Ra (`BenThanhMarketBannerWebView.tsx`):**
   - **Cổng Trước (`exit_market`, `Cửa Số 1` bên trái)** và **Cổng Sau (`exit_back_gate`, `Cửa Bắc` bên phải)** đều bật `fastDash: true` để bước ra ngoài phố.
   - **6 phân khu trên** (Cửa Số 1 ➔ Quần Áo `HƯƠNG TRINH` ➔ Đặc Sản `LIÊN SÀI GÒN & NGỌC HOA` ➔ Vòm `KHU ĂN UỐNG` Sạp 1044 ➔ `BÁNH CUỐN 50K & BÁNH BÈO 20K` ➔ `CỬA BẮC`) + **5 Đảo Giữa Chợ Y-Sorted** (Lưu Niệm, Trái Cây `1029`, 2 Đảo Bàn Ăn, Đảo Hoa Tươi & Gốm) + **20+ nhân vật** gồm cả **khách du lịch nước ngoài** (tóc vàng/balo du lịch/kính râm/máy ảnh) và người Việt tấp nập ở 2 hành lang song song.
+
+## 33. Tái Thiết Kế Toàn Diện Chợ Bến Thành Chuẩn 32-Bit Indie Game (`1200×480` — Quyết định 212)
+- **Kiến trúc Asset Mô-đun (`src/components/chat/market/`):** Tách thành 4 module độc lập: `marketPalette.ts` (bảng màu ấm & dithering), `marketArchitecture.ts` (2 cổng vòm thuộc địa Cửa Số 1 & Cửa Bắc nhìn ra phố xe máy, sàn gạch `16×16` có vết mòn & rãnh thoát nước, mái vòm kèo thép & tia nắng xiên), `marketStalls.ts` (3 dãy sạp dày đặc không trùng lặp), `marketCrowd.ts` (nhân vật đa dạng, nhóm nói chuyện, khách tây/Việt, người bán hàng).
+- **3 Dãy Sạp Thương Mại (`1200 × 480`, 0 khoảng sàn trống):**
+  1. **Dãy Bắc (`y: 58..166`):** Cửa Số 1 ➔ Vải & Áo Dài `HƯƠNG TRINH` ➔ Đặc Sản `LIÊN SÀI GÒN & NGỌC HOA` ➔ Vòm `KHU ĂN UỐNG` `SẠP 1044` ➔ `BÁNH CUỐN 50K & BÁNH BÈO 20K` ➔ Cửa Bắc.
+  2. **Dãy Đảo Trung Tâm (`y: 224..292`, Y-Sorted):** Đảo Trái Cây `1029 NGỌC HẢO` (xoài, cam, chuối, thanh long, dừa, dưa hấu, cân đồng hồ) ➔ Đảo Rau Củ, Thịt & Hải Sản Đá Lạnh ➔ Đảo Bàn Ăn 1 ➔ Đảo Lưu Niệm, Gốm Sơn Mài & Nón Lá.
+  3. **Dãy Nam (`y: 356..466`, Y-Sorted):** Quầy Nước Mía & Dừa Tươi ➔ Sạp Chè & Bánh Dân Gian ➔ Đảo Bàn Ăn 2 ➔ Sạp Hoa Tươi & Gia Dụng.
+- **Va Chạm AABB (`pixelOpenRoomEngine.ts`):** Hỗ trợ `obstacles` giúp chú heo đi lại mượt theo 2 lối đi chính & trượt quanh các sạp hàng thay vì đi xuyên quầy kệ.
