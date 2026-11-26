@@ -149,11 +149,11 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
           {
             id: 'exit_market',
             x: 0,
-            y: 266,
-            w: 48,
-            h: 92,
-            standX: 54,
-            standY: 316,
+            y: 280,
+            w: 28,
+            h: 58,
+            standX: 34,
+            standY: 312,
             standFace: -1,
             actionType: 'jump_joy',
             fastDash: true,
@@ -161,12 +161,12 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
           },
           {
             id: 'exit_back_gate',
-            x: 1152,
-            y: 266,
-            w: 48,
-            h: 92,
-            standX: 1146,
-            standY: 316,
+            x: 1172,
+            y: 280,
+            w: 28,
+            h: 58,
+            standX: 1166,
+            standY: 312,
             standFace: 1,
             actionType: 'jump_joy',
             fastDash: true,
@@ -529,6 +529,7 @@ function buildMarketInterior(){
   var cen=document.createElement('canvas');cen.width=WORLD_W;cen.height=WORLD_H;
   var cx=cen.getContext('2d');cx.imageSmoothingEnabled=false;
   drawCentralIslands(cx);
+  drawExtraMicroStalls(cx);
   MK.central=cen;
 
   var sth=document.createElement('canvas');sth.width=WORLD_W;sth.height=WORLD_H;
@@ -600,13 +601,13 @@ function mkDraw(t){
 
   var prevY=0;
   events.forEach(function(ev){
-    drawWalkingShoppers(x,t,prevY,ev.y);
+    drawWalkingShoppers(x,t,prevY,ev.y,camX,VW);
     prevY=ev.y;
     if(ev.kind==='central'&&!cenDrawn){x.drawImage(MK.central,0,0);cenDrawn=true;}
     else if(ev.kind==='south'&&!sthDrawn){x.drawImage(MK.south,0,0);sthDrawn=true;}
     else if(ev.kind==='pig'&&!pigDrawn){drawPigAt(x,rm,t);pigDrawn=true;}
   });
-  drawWalkingShoppers(x,t,prevY,999);
+  drawWalkingShoppers(x,t,prevY,999,camX,VW);
   x.restore();
 
   if(window.__openRoom) window.__openRoom.drawOverlays(x,performance.now());

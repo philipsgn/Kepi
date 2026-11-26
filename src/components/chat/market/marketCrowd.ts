@@ -124,46 +124,93 @@ function drawPlasticStool(c,sx,sy,col){
   R(c,sx,sy,8,7,INK);R(c,sx+1,sy+1,6,2,col);R(c,sx+1,sy+3,2,3,col);R(c,sx+5,sy+3,2,3,col);
 }
 
-function getWalkingShoppers(t){
-  return [
-    {y:178,x:((t*16+20)%1100)+46,shirt:'#E0452B',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
-    {y:183,x:1140-((t*14+110)%1080),shirt:'#38BDF8',pants:'#334155',tourist:true,hair:'#FDE047',backpack:'#EA580C',camera:true,shades:true,tall:true},
-    {y:188,x:((t*18+240)%1100)+46,shirt:'#F59E0B',pants:'#1F2937',tourist:true,hat:'bucket',backpack:'#2563EB',bag:'#FFFBF1'},
-    {y:193,x:1140-((t*13+390)%1080),shirt:'#EC4899',pants:'#374151',hat:'bun',bag:'#F4B93B'},
-    {y:198,x:((t*15+540)%1100)+46,shirt:'#10B981',pants:'#1E293B',tourist:true,hair:'#92400E',camera:true,tall:true},
-    {y:203,x:1140-((t*17+690)%1080),shirt:'#FFFBF1',pants:'#4B6FA5',hat:'cap',bag:'#E0452B'},
-    {y:208,x:((t*12+860)%1100)+46,shirt:'#A855F7',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
-    {y:213,x:1140-((t*15+1010)%1080),shirt:'#F97316',pants:'#334155',tourist:true,hair:'#FACC15',backpack:'#16A34A',shades:true},
-    {y:304,x:1140-((t*15+60)%1080),shirt:'#FFFBF1',pants:'#4B6FA5',tourist:true,hair:'#FACC15',backpack:'#16A34A',shades:true,tall:true},
-    {y:310,x:((t*13+200)%1100)+46,shirt:'#EF4444',pants:'#1F2937',hat:'nonla',bag:'#E5BA7E'},
-    {y:316,x:1140-((t*16+360)%1080),shirt:'#6366F1',pants:'#1E293B',tourist:true,hat:'cap',backpack:'#EC4899',camera:true},
-    {y:322,x:((t*14+520)%1100)+46,shirt:'#84CC16',pants:'#334155',hat:'bun',bag:'#38BDF8'},
-    {y:328,x:1140-((t*12+680)%1080),shirt:'#F97316',pants:'#1F2937',tourist:true,hair:'#DC2626',shades:true,bag:'#FFFBF1',tall:true},
-    {y:334,x:((t*17+820)%1100)+46,shirt:'#14B8A6',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
-    {y:340,x:1140-((t*15+950)%1080),shirt:'#F43F5E',pants:'#334155',hat:'bun',bag:'#F4B93B'},
-    {y:346,x:((t*13+1060)%1100)+46,shirt:'#0EA5E9',pants:'#1F2937',tourist:true,hat:'bucket',camera:true},
-    {y:352,x:1140-((t*14+140)%1080),shirt:'#EAB308',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
-    {y:442,x:((t*13+120)%1100)+46,shirt:'#F472B6',pants:'#1E293B',hat:'bun',bag:'#FFFBF1'},
-    {y:448,x:1140-((t*15+340)%1080),shirt:'#FACC15',pants:'#334155',tourist:true,hat:'bucket',backpack:'#DC2626',camera:true},
-    {y:454,x:((t*16+580)%1100)+46,shirt:'#3B82F6',pants:'#1F2937',hat:'cap',bag:'#F4B93B'},
-    {y:460,x:1140-((t*12+810)%1080),shirt:'#22C55E',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
-    {y:465,x:((t*14+990)%1100)+46,shirt:'#FB7185',pants:'#334155',tourist:true,hair:'#FDE047',shades:true,tall:true}
+// =========================================================================
+// BIỂN NGƯỜI 140+ NHÂN VẬT 60FPS: SPRITE CACHE mk(18,24) + mulberry32(21600) + FRUSTUM CULLING
+// =========================================================================
+var CROWD_SPRITES = null;
+var CROWD_WALKERS = null;
+
+function ensureCrowdBuilt(){
+  if(CROWD_SPRITES && CROWD_WALKERS) return;
+  var templates = [
+    {shirt:'#E0452B',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
+    {shirt:'#38BDF8',pants:'#334155',tourist:true,hair:'#FDE047',backpack:'#EA580C',camera:true,shades:true,tall:true},
+    {shirt:'#F59E0B',pants:'#1F2937',tourist:true,hat:'bucket',backpack:'#2563EB',bag:'#FFFBF1'},
+    {shirt:'#EC4899',pants:'#374151',hat:'bun',bag:'#F4B93B'},
+    {shirt:'#10B981',pants:'#1E293B',tourist:true,hair:'#92400E',camera:true,tall:true},
+    {shirt:'#FFFBF1',pants:'#4B6FA5',hat:'cap',bag:'#E0452B'},
+    {shirt:'#A855F7',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
+    {shirt:'#F97316',pants:'#334155',tourist:true,hair:'#FACC15',backpack:'#16A34A',shades:true},
+    {shirt:'#EF4444',pants:'#1F2937',hat:'nonla',bag:'#E5BA7E'},
+    {shirt:'#6366F1',pants:'#1E293B',tourist:true,hat:'cap',backpack:'#EC4899',camera:true},
+    {shirt:'#84CC16',pants:'#334155',hat:'bun',bag:'#38BDF8'},
+    {shirt:'#14B8A6',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
+    {shirt:'#F43F5E',pants:'#334155',hat:'bun',bag:'#F4B93B'},
+    {shirt:'#0EA5E9',pants:'#1F2937',tourist:true,hat:'bucket',camera:true},
+    {shirt:'#EAB308',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
+    {shirt:'#F472B6',pants:'#1E293B',hat:'bun',bag:'#FFFBF1'},
+    {shirt:'#FACC15',pants:'#334155',tourist:true,hat:'bucket',backpack:'#DC2626',camera:true},
+    {shirt:'#3B82F6',pants:'#1F2937',hat:'cap',bag:'#F4B93B'},
+    {shirt:'#22C55E',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
+    {shirt:'#FB7185',pants:'#334155',tourist:true,hair:'#FDE047',shades:true,tall:true}
   ];
+  CROWD_SPRITES = templates.map(function(tpl){
+    return [
+      mk(18, 24, function(ctx){ drawPerson16Bit(ctx, 5, 22, Object.assign({}, tpl, {step:0})); }),
+      mk(18, 24, function(ctx){ drawPerson16Bit(ctx, 5, 22, Object.assign({}, tpl, {step:1})); })
+    ];
+  });
+
+  var rng = mulberry32(21600);
+  var lanes = [
+    {minY:176, maxY:216, count:36},
+    {minY:300, maxY:358, count:42},
+    {minY:440, maxY:472, count:22}
+  ];
+  CROWD_WALKERS = [];
+  lanes.forEach(function(ln){
+    for(var i=0; i<ln.count; i++){
+      CROWD_WALKERS.push({
+        y: Math.round(ln.minY + rng() * (ln.maxY - ln.minY)),
+        x0: Math.round(28 + rng() * 1140),
+        speed: 9 + rng() * 11,
+        dir: rng() > 0.5 ? 1 : -1,
+        tpl: (rng() * templates.length) | 0,
+        phase: rng() * 10
+      });
+    }
+  });
+  CROWD_WALKERS.sort(function(a,b){ return a.y - b.y; });
 }
 
-function drawWalkingShoppers(x,t,minY,maxY){
-  getWalkingShoppers(t).forEach(function(w){
-    if(w.y<minY||w.y>=maxY)return;
-    drawPerson16Bit(x,Math.round(w.x),Math.round(w.y),{
-      shirt:w.shirt,pants:w.pants,hat:w.hat,hair:w.hair,tourist:w.tourist,
-      backpack:w.backpack,camera:w.camera,shades:w.shades,bag:w.bag,tall:w.tall,step:((t*6)|0)%2
-    });
-  });
+function getWalkingShoppers(t){
+  ensureCrowdBuilt();
+  return CROWD_WALKERS;
+}
+
+function drawWalkingShoppers(x,t,minY,maxY,camX,vw){
+  ensureCrowdBuilt();
+  var hasCull = (typeof camX === 'number' && typeof vw === 'number');
+  var leftB = hasCull ? (camX - 24) : -999;
+  var rightB = hasCull ? (camX + vw + 24) : 9999;
+  for(var i=0; i<CROWD_WALKERS.length; i++){
+    var w = CROWD_WALKERS[i];
+    if(w.y < minY || w.y >= maxY) continue;
+    var span = 1144;
+    var raw = (w.x0 + w.dir * t * w.speed) % span;
+    if(raw < 0) raw += span;
+    var sx = Math.round(28 + raw);
+    if(sx < leftB || sx > rightB) continue;
+    var fr = (((t * 5.5 + w.phase) | 0) & 1);
+    x.drawImage(CROWD_SPRITES[w.tpl][fr], sx - 5, w.y - 22);
+  }
 }
 
 function drawPigAt(x,rm,t){
   if(!rm)return;
   var px=Math.round(rm.x-12), jumpY=(rm.action==='jump_joy'?-Math.abs(Math.sin(t*10))*4:0), py=Math.round(rm.y-20+jumpY);
+  // Vầng sáng kem nhẹ dưới chân để Heo Con luôn nổi bật giữa 140+ người!
+  E(x,Math.round(rm.x),Math.round(rm.y)-1,13,4,'rgba(255,248,214,0.58)');
   pxShadow(x,px+4,Math.round(rm.y)-1,16,2);
   hpx.clearRect(0,0,24,20);
   drawPigSprite(hpx,{pose:rm.walking?'walk':(rm.action==='eat_snack'?'eat':'stand'),frame:rm.walking?(((t*6)|0)%2):0,happy:Boolean(rm.action),blink:(t%4)<0.15,tail:Math.floor(t*3)%2===1});

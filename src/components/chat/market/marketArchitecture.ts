@@ -68,57 +68,47 @@ function drawFloorAndCeiling(x,WORLD_W,WORLD_H){
   E(x,286,304,12,3,'#93C5FD');E(x,288,304,7,2,'#E0F2FE');
 }
 
-// 2 CỔNG VÒM TRÒN GỌN SÁNG ẤM Ở LÀN ĐI GIỮA (y: 266..358) — XÓA SẠCH MẢNG NÂU ĐEN 2 RÌA!
+// 2 CỔNG VÒM TRÒN SIÊU GỌN 22×58px SÁT MÉP TRÁI (x: 0..22) & PHẢI (x: 1178..1200) TẠI y: 280..338
 function drawSideArchGate(x,side,WORLD_W,WORLD_H){
   var isLeft=(side==='left');
-  var x0=isLeft?0:(WORLD_W-44);
-  var innerX=isLeft?36:(WORLD_W-44);
+  var x0=isLeft?0:(WORLD_W-22);
+  var innerX=isLeft?17:(WORLD_W-22);
 
-  // Ánh nắng vàng ấm hắt nhẹ từ vòm cổng vào nền gạch hành lang giữa
+  // Vệt sáng vàng ấm rất mảnh hắt từ cửa vào sàn
   x.save();
-  x.globalAlpha=0.18;
-  R(x,isLeft?36:(WORLD_W-78),282,42,66,'#FEF08A');
-  x.globalAlpha=0.10;
-  R(x,isLeft?78:(WORLD_W-108),290,30,50,'#FEF9C3');
+  x.globalAlpha=0.16;
+  R(x,isLeft?22:(WORLD_W-44),290,22,42,'#FEF08A');
   x.restore();
 
-  // Khung trụ & mái vòm tròn vàng kem Chợ Bến Thành gọn gàng (cao 92px tại y: 266..358)
-  pxBevelBox(x,x0,266,44,92,'#E6D39F','#FFF6DA','#B89B58');
-  // Lòng vòm tròn sáng ấm (kem vàng dịu, không còn mảng nâu đen xấu!)
-  var archX=isLeft?0:(WORLD_W-34);
-  R(x,archX,284,34,70,INK);
-  R(x,archX+(isLeft?0:2),286,32,66,'#F5E6C4');
-  R(x,archX+(isLeft?0:6),292,28,54,'#FFF5D6');
-  // Đường cong vòm tròn trên đỉnh cổng
-  for(var ay=0;ay<14;ay++){
-    var inset=Math.round((14-ay)*(14-ay)*0.07);
-    if(isLeft){
-      R(x,archX+34-inset,284+ay,inset,1,'#E6D39F');
-      R(x,archX+34-inset-1,284+ay,2,1,INK);
-    }else{
-      R(x,archX,284+ay,inset,1,'#E6D39F');
-      R(x,archX+inset-1,284+ay,2,1,INK);
-    }
+  // Khung cổng vòm tròn siêu hẹp (22×58px) màu vàng kem Chợ Bến Thành
+  pxBevelBox(x,x0,280,22,58,'#E6D39F','#FFF6DA','#B89B58');
+  var archX=isLeft?0:(WORLD_W-16);
+  R(x,archX,292,16,42,INK);
+  R(x,archX+(isLeft?0:1),294,15,38,'#F5E6C4');
+  R(x,archX+(isLeft?0:3),298,13,30,'#FFF5D6');
+  for(var ay=0;ay<8;ay++){
+    var inset=Math.round((8-ay)*(8-ay)*0.11);
+    if(isLeft){R(x,archX+16-inset,292+ay,inset,1,'#E6D39F');R(x,archX+16-inset-1,292+ay,1,1,INK);}
+    else{R(x,archX,292+ay,inset,1,'#E6D39F');R(x,archX+inset,292+ay,1,1,INK);}
   }
 
-  // Biển tên cổng nhỏ gọn ngay đỉnh vòm (CỬA NAM trái / CỬA BẮC phải)
+  // Biển tên cổng thu gọn ngay đỉnh vòm (CUA NAM / CUA BAC)
   if(isLeft){
-    pxBevelBox(x,2,268,40,12,'#1E3A8A','#3B82F6','#172554');
-    pxText(x,'CUA NAM',7,272,'#FFFFFF',1);
+    pxBevelBox(x,1,281,20,9,'#1E3A8A','#3B82F6','#172554');
+    R(x,4,284,14,3,'#FFFFFF');
   }else{
-    pxBevelBox(x,WORLD_W-42,268,40,12,'#245940','#3E8A58','#143D29');
-    pxText(x,'CUA BAC',WORLD_W-37,272,'#FFFFFF',1);
+    pxBevelBox(x,WORLD_W-21,281,20,9,'#245940','#3E8A58','#143D29');
+    R(x,WORLD_W-18,284,14,3,'#FFFFFF');
   }
 
-  // Cửa sắt xếp mảnh hai bên mép vòm & thảm đỏ đón khách
-  drawAccordionGate(x,innerX,286,8,66);
-  var matX=isLeft?44:(WORLD_W-52);
-  pxBevelBox(x,matX,290,8,58,'#9E2A2B','#DC2626','#6B1819');
-  R(x,matX+3,296,2,46,'#F4B93B');
+  // Cửa sắt xếp mảnh & thảm đỏ siêu gọn (5px)
+  drawAccordionGate(x,innerX,294,5,38);
+  var matX=isLeft?22:(WORLD_W-27);
+  pxBevelBox(x,matX,296,5,34,'#9E2A2B','#DC2626','#6B1819');
 
-  // Chú bảo vệ thân thiện đứng gác ngay cạnh cổng
-  var guardX=isLeft?46:(WORLD_W-58);
-  drawPerson16Bit(x,guardX,282,{shirt:'#FFFBF1',pants:'#1E293B',hat:'kepi',guard:true});
+  // Chú bảo vệ đứng sát mép cửa
+  var guardX=isLeft?24:(WORLD_W-34);
+  drawPerson16Bit(x,guardX,290,{shirt:'#FFFBF1',pants:'#1E293B',hat:'kepi',guard:true});
 }
 `;
 }

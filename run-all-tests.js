@@ -7001,12 +7001,12 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     marketBannerCode.includes("id: 'exit_market'") &&
       marketBannerCode.includes('x: 0') &&
       marketBannerCode.includes("id: 'exit_back_gate'") &&
-      (marketBannerCode.includes('x: 1128') || marketBannerCode.includes('x: 1152')) &&
+      (marketBannerCode.includes('x: 1128') || marketBannerCode.includes('x: 1152') || marketBannerCode.includes('x: 1172')) &&
       marketBannerCode.includes("id: 'stall_aodai'") &&
       marketBannerCode.includes("id: 'stall_thoitrang'") &&
       decisionsCode.includes('213') &&
       chatDocCode.includes('Quyết định 213') &&
-      (specCode.includes('QĐ 213') || specCode.includes('QĐ 214') || specCode.includes('QĐ 215')),
+      (specCode.includes('QĐ 213') || specCode.includes('QĐ 214') || specCode.includes('QĐ 215') || specCode.includes('QĐ 216')),
     'BenThanhMarketBannerWebView hotspots, obstacles, and docs must sync QD 213'
   );
 
@@ -7040,7 +7040,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       crowdCode.includes('E(c,px+4,py,6,2') &&
       decisionsCode.includes('214') &&
       chatDocCode.includes('Quyết định 214') &&
-      (specCode.includes('QĐ 214') || specCode.includes('QĐ 215')),
+      (specCode.includes('QĐ 214') || specCode.includes('QĐ 215') || specCode.includes('QĐ 216')),
     'Market modules and docs must implement 32-bit indie visual overhaul for QD 214'
   );
 
@@ -7076,7 +7076,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     !archCode.includes('286,INK') &&
-      archCode.includes('266,44,92') &&
+      (archCode.includes('266,44,92') || archCode.includes('280,22,58')) &&
       stallsCode.includes('BAO CHI - GIAY TO') &&
       stallsCode.includes('DO CUNG - NHANG DEN') &&
       stallsCode.includes('HOA CUC - NHANG') &&
@@ -7089,11 +7089,48 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       (crowdCode.match(/shirt:/g) || []).length >= 20 &&
       decisionsCode.includes('215') &&
       chatDocCode.includes('Quyết định 215') &&
-      specCode.includes('QĐ 215'),
+      (specCode.includes('QĐ 215') || specCode.includes('QĐ 216')),
     'Ben Thanh Market must remove dark brown side strips, add staggered Vietnamese stalls (newspapers, offerings, produce, daily tools) and 20+ walking shoppers for QD 215'
   );
 
   console.log('✅ Test 152 Passed: Xóa Mảng Nâu 2 Rìa, Bố Cục So Le Chen Lấn & Đủ Nhóm Hàng Văn Hóa Việt (Quyết định 215) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 152 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (152/152)!');
+// ==========================================
+// TEST 153: CHỢ BẾN THÀNH SIÊU ĐÔNG 140+ NGƯỜI (SPRITE CACHE 60FPS), CỔNG SIÊU GỌN 22×58PX & MÓN ĂN SHAPE4 CHUẨN PIXEL-MASCOT-UI (QUYẾT ĐỊNH 216)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const paletteCode = fs.readFileSync('src/components/chat/market/marketPalette.ts', 'utf8');
+  const archCode = fs.readFileSync('src/components/chat/market/marketArchitecture.ts', 'utf8');
+  const stallsCode = fs.readFileSync('src/components/chat/market/marketStalls.ts', 'utf8');
+  const crowdCode = fs.readFileSync('src/components/chat/market/marketCrowd.ts', 'utf8');
+
+  assert.ok(
+    paletteCode.includes('function mk(') &&
+      paletteCode.includes('function mulberry32(') &&
+      paletteCode.includes('function shape4(') &&
+      paletteCode.includes('drawPhoBowl') &&
+      paletteCode.includes('drawBanhCuonPlate') &&
+      paletteCode.includes('drawSeafoodTray') &&
+      paletteCode.includes('drawFruitPyramid') &&
+      archCode.includes('280,22,58') &&
+      stallsCode.includes('drawExtraMicroStalls') &&
+      crowdCode.includes('CROWD_SPRITES') &&
+      crowdCode.includes('CROWD_WALKERS') &&
+      crowdCode.includes('mulberry32(21600)') &&
+      crowdCode.includes('rgba(255,248,214,0.58)') &&
+      marketBannerCode.includes('drawExtraMicroStalls') &&
+      decisionsCode.includes('216') &&
+      chatDocCode.includes('Quyết định 216') &&
+      specCode.includes('QĐ 216'),
+    'Ben Thanh Market must implement 140+ crowd sprite cache, 22x58 compact gates, extra micro stalls, and pixel-mascot-ui shape4 food art for QD 216'
+  );
+
+  console.log('✅ Test 153 Passed: Chợ Bến Thành Siêu Đông 140+ Người (Sprite Cache 60fps), Cổng 22×58px & Món Ăn shape4 (Quyết định 216) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 153 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (153/153)!');

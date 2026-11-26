@@ -119,8 +119,10 @@ function drawNorthStalls(x){
   R(x,756,92,58,30,INK);R(x,757,93,56,28,'#DCEEFA');
   for(var dx=762;dx<808;dx+=14){R(x,dx,104,10,4,'#FFFBF1');R(x,dx+2,102,6,2,'#EA580C');}
   drawWoodCounter(x,688,124,132,42,'#DFC484',MK_PAL.wood);
-  for(var nx=694;nx<810;nx+=16){R(x,nx,128,11,7,'#4ADE80');R(x,nx+3,129,5,5,'#EC4899');}
+  drawBanhCuonPlate(x,696,126);drawBanhCuonPlate(x,722,126);drawBanhCuonPlate(x,748,126);
+  drawBanhCuonPlate(x,776,126);drawBanhCuonPlate(x,800,126);
   drawPerson16Bit(x,736,169,{shirt:'#F472B6',pants:'#1E293B',hat:'nonla',apron:'#FFFBF1'});
+  drawPerson16Bit(x,764,171,{shirt:'#38BDF8',pants:'#334155',tourist:true,camera:true});
 
   // 7. SẠP PHỞ BÒ & BÚN BÒ HUẾ (x: 824..956)
   pxBevelBox(x,824,64,132,14,'#DC2626','#EF4444','#991B1B');pxText(x,'PHO BO - BUN BO',854,69,'#FEF08A',1);
@@ -132,8 +134,10 @@ function drawNorthStalls(x){
   pxBevelBox(x,900,96,24,24,'#CBD5E1','#F8FAFC','#64748B');
   pxBevelBox(x,928,98,22,22,'#CBD5E1','#F8FAFC','#64748B');
   drawWoodCounter(x,824,124,132,42,'#EFE9DD','#B45309');
+  drawPhoBowl(x,834,125);drawPhoBowl(x,862,125);drawPhoBowl(x,892,125);drawPhoBowl(x,924,125);
   drawInoxStool(x,846,168);drawInoxStool(x,892,168);drawInoxStool(x,936,168);
   drawPerson16Bit(x,890,166,{shirt:'#38BDF8',pants:'#1E293B',tourist:true,hair:'#FDE047',sit:true});
+  drawPerson16Bit(x,934,166,{shirt:'#F59E0B',pants:'#1F2937',hat:'cap',sit:true});
 
   // 8. SHOP QUẦN ÁO THỜI TRANG SÀI GÒN (x: 960..1084)
   pxBevelBox(x,960,64,124,14,'#7C3AED','#A855F7','#581C87');pxText(x,'THOI TRANG SAI GON',976,69,'#FFFFFF',1);
@@ -170,25 +174,27 @@ function drawNorthStalls(x){
 
 // 7 CỤM TRUNG TÂM SO LE TỰ NHIÊN (NHÔ/THỤT ±10..14px, ĐÔNG ĐÚC CHEN LẤN — y: 214..298)
 function drawCentralIslands(x){
-  // Cụm 1 (x: 54..194, y=224 NHÔ LÊN): TRÁI CÂY "1029 NGỌC HẢO" (Mái chóp sọc vàng-kem)
+  // Cụm 1 (x: 54..194, y=224 NHÔ LÊN): TRÁI CÂY "1029 NGỌC HẢO" (Mái chóp sọc vàng-kem + Tháp trái cây shape4)
   drawWoodCounter(x,54,234,140,48,'#F3E7CE',MK_PAL.wood);
-  drawWoodenCrate(x,60,232,40,15,'mango');
-  drawWoodenCrate(x,104,232,40,15,'dragon');
-  drawWoodenCrate(x,148,232,40,15,'melon');
+  drawFruitPyramid(x,64,235,'mango');
+  drawFruitPyramid(x,92,235,'dragon');
+  drawFruitPyramid(x,122,235,'durian');
+  drawFruitPyramid(x,152,235,'mango');
   drawPitchedCanopy(x,54,208,140,24,'#E0A33A','#FFF8E7');
   pxText(x,'1029 NGOC HAO',88,264,'#FEF08A',1);
   drawBambooBasket(x,62,286,'#FACC15');drawBambooBasket(x,182,284,'#EC4899');drawScale(x,178,234);
   drawPerson16Bit(x,116,288,{shirt:'#FFFBF1',pants:'#1E293B',hat:'nonla',apron:'#15803D'});
   drawPerson16Bit(x,144,290,{shirt:'#38BDF8',pants:'#334155',tourist:true,hair:'#FDE047',bag:'#FFFBF1'});
 
-  // Cụm 2 (x: 212..340, y=240 THỤT XUỐNG): HẢI SẢN TƯƠI ĐÁ BÀO + XÔ CUA CÁ TRÀN SÀN
+  // Cụm 2 (x: 212..340, y=240 THỤT XUỐNG): HẢI SẢN TƯƠI ĐÁ BÀO + MẸT TÔM CUA shape4
   drawWoodCounter(x,212,244,128,48,'#BAE6FD','#1E3A8A');
   drawStripedAwning(x,212,232,128,13,'#1D4ED8','#E0F2FE',7);
-  [222,246,270,294].forEach(function(hx){R(x,hx,246,18,10,INK);R(x,hx+1,247,16,8,'#E0F2FE');R(x,hx+4,249,10,4,'#FB923C');});
+  drawSeafoodTray(x,220,246);drawSeafoodTray(x,246,246);drawSeafoodTray(x,272,246);drawSeafoodTray(x,298,246);
   drawScale(x,320,246);
   pxText(x,'HAI SAN TUOI',246,276,'#FFFFFF',1);
   drawBambooBasket(x,224,294,'#FB923C');
   drawPerson16Bit(x,272,298,{shirt:'#38BDF8',pants:'#334155',hat:'nonla',apron:'#FFFBF1'});
+  drawPerson16Bit(x,298,298,{shirt:'#EF4444',pants:'#1F2937',hat:'bun',bag:'#FFFBF1'});
 
   // Cụm 3 (x: 358..484, y=226 NHÔ LÊN): NÔNG SẢN & RAU CỦ TƯƠI
   drawWoodCounter(x,358,234,126,48,'#DCFCE7','#166534');
@@ -314,6 +320,27 @@ function drawSouthStalls(x){
   }
   pxText(x,'TAP HOA - BAO',1098,418,'#FEF08A',1);
   drawPerson16Bit(x,1124,442,{shirt:'#38BDF8',pants:'#1E293B',hat:'cap',bag:'#FEF08A'});
+}
+
+// 10 QUẦY CÓC, GÁNH HÀNG RONG, XE BÁNH MÌ & BÀN NHỰA MINI CHEN KÍN KHOẢNG TRỐNG (~34 SẠP SAN SÁT!)
+function drawExtraMicroStalls(x){
+  var spots=[
+    {x:26,y:248,kind:'ganh',vShirt:'#F59E0B',vHat:'nonla',bShirt:'#38BDF8'},
+    {x:196,y:276,kind:'baskets',vShirt:'#EC4899',vHat:'bun',bShirt:'#FEF08A'},
+    {x:342,y:278,kind:'banhmi',vShirt:'#FFFBF1',vHat:'cap',bShirt:'#10B981'},
+    {x:486,y:280,kind:'table',vShirt:'#F472B6',vHat:'nonla',bShirt:'#6366F1'},
+    {x:650,y:278,kind:'ganh',vShirt:'#EF4444',vHat:'nonla',bShirt:'#FACC15'},
+    {x:788,y:278,kind:'baskets',vShirt:'#22C55E',vHat:'bun',bShirt:'#EC4899'},
+    {x:930,y:280,kind:'banhmi',vShirt:'#38BDF8',vHat:'cap',bShirt:'#F97316'},
+    {x:1144,y:248,kind:'ganh',vShirt:'#A855F7',vHat:'nonla',bShirt:'#FFFBF1'},
+    {x:278,y:426,kind:'table',vShirt:'#F97316',vHat:'nonla',bShirt:'#38BDF8'},
+    {x:742,y:426,kind:'table',vShirt:'#14B8A6',vHat:'bun',bShirt:'#EF4444'}
+  ];
+  spots.forEach(function(s){
+    drawStreetVendorCart(x,s.x,s.y,s.kind);
+    drawPerson16Bit(x,s.x+6,s.y+4,{shirt:s.vShirt,pants:'#1E293B',hat:s.vHat,apron:'#FFFBF1'});
+    drawPerson16Bit(x,s.x+18,s.y+18,{shirt:s.bShirt,pants:'#334155',tourist:((s.x%3)===0),bag:'#FFFBF1'});
+  });
 }
 `;
 }
