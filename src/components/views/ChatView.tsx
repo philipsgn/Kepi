@@ -90,6 +90,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   const screenBg = isHeocon ? '#F6EEDC' : tokens.bg || '#FFF5F7';
   const { bottomInset, contentBottomPadding } = useBottomInset();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('hub');
+  const [marketReturnSubView, setMarketReturnSubView] = useState<'hub' | 'map'>('map');
 
   // Điều hướng trực tiếp từ Cổng Phòng Tab Nhà hoặc Hồ Sơ
   useEffect(() => {
@@ -387,7 +388,12 @@ export const ChatView: React.FC<ChatViewProps> = ({
   if (activeSubView === 'hub') {
     return (
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-        <PixelHubDashboard onSelectSubView={setActiveSubView} />
+        <PixelHubDashboard
+          onSelectSubView={(sub) => {
+            if (sub === 'market') setMarketReturnSubView('hub');
+            setActiveSubView(sub);
+          }}
+        />
       </View>
     );
   }
@@ -459,7 +465,10 @@ export const ChatView: React.FC<ChatViewProps> = ({
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
         <PiggySpendMapView
           onBack={() => setActiveSubView('hub')}
-          onEnterMarket={() => setActiveSubView('market')}
+          onEnterMarket={() => {
+            setMarketReturnSubView('map');
+            setActiveSubView('market');
+          }}
         />
       </View>
     );
@@ -468,7 +477,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   if (activeSubView === 'market') {
     return (
       <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
-        <BenThanhMarketView onBack={() => setActiveSubView('map')} />
+        <BenThanhMarketView onBack={() => setActiveSubView(marketReturnSubView)} />
       </View>
     );
   }

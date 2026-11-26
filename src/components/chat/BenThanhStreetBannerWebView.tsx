@@ -67,7 +67,7 @@ export const BenThanhStreetBannerWebView: React.FC<BenThanhStreetBannerWebViewPr
   const openRoomScript = useMemo(
     () =>
       buildOpenRoomEngineScript({
-        canvasId: 'pbCv',
+        canvasId: 'psCv',
         worldWidth: 584,
         worldHeight: 172,
         viewWidth: 192,
@@ -232,7 +232,7 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
   image-rendering:-webkit-crisp-edges;
   image-rendering:-moz-crisp-edges;
   image-rendering:crisp-edges;
-  touch-action:pan-y;
+  touch-action:none;
   cursor:pointer;
 }
 </style>
@@ -646,7 +646,7 @@ window.addEventListener('message',function(ev){
 
 ${openRoomScript}
 
-PB.px=PB_CX[0]-12; PB.tx=PB.px; PB.camX=0;
+PB.px=256-12; PB.tx=PB.px; PB.camX=185;
 if(reduced){draw(3);}else{PB.run=true;PB.last=performance.now();requestAnimationFrame(frame);}
 })();
 </script>

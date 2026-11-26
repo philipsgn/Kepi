@@ -16,6 +16,7 @@ const SafeWebView = WebView as unknown as React.ComponentType<any>;
 interface EntertainmentBannerWebViewProps {
   onPressBanner?: () => void;
   onEnterCafe?: () => void;
+  onEnterMarket?: () => void;
 }
 
 /**
@@ -28,6 +29,7 @@ interface EntertainmentBannerWebViewProps {
 export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProps> = ({
   onPressBanner,
   onEnterCafe,
+  onEnterMarket,
 }) => {
   const { tokens } = useTheme();
   const webViewRef = useRef<any>(null);
@@ -61,6 +63,12 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
         enterCafeTimerRef.current = setTimeout(() => {
           onEnterCafe();
         }, 120);
+      } else if (d.id === 'ben_thanh_notre' && d.userTriggered && onEnterMarket) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
+        enterCafeTimerRef.current = setTimeout(() => {
+          onEnterMarket();
+        }, 120);
       }
     }
   };
@@ -75,7 +83,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     };
     window.addEventListener('message', onWebMsg);
     return () => window.removeEventListener('message', onWebMsg);
-  }, [onEnterCafe]);
+  }, [onEnterCafe, onEnterMarket]);
 
   const handleMessage = (event: any) => {
     try {
@@ -128,15 +136,16 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
           },
           {
             id: 'ben_thanh_notre',
-            x: 222,
+            x: 258,
             y: 12,
-            w: 98,
+            w: 66,
             h: 54,
-            standX: 268,
+            standX: 292,
             standY: 74,
             standFace: 1,
             actionType: 'look_window',
-            bubbleText: `Chợ Bến Thành & Nhà Thờ · ${gameTickets} vé chơi`,
+            fastDash: true,
+            bubbleText: `Đang bước vào Chợ Bến Thành...`,
           },
           {
             id: 'bitexco_landmark',

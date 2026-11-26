@@ -6653,8 +6653,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       streetCode.includes('onEnterMarket') &&
       mapCode.includes('onEnterMarket') &&
       chatViewCode.includes("activeSubView === 'market'") &&
-      chatViewCode.includes("onEnterMarket={() => setActiveSubView('market')}") &&
-      chatViewCode.includes("onBack={() => setActiveSubView('map')}"),
+      chatViewCode.includes("setActiveSubView('market')") &&
+      chatViewCode.includes('marketReturnSubView'),
     'Two-way Ben Thanh Market portal (Quán quen <-> Chợ Bến Thành) must be wired across Hub, Street Banner, MapView, MarketView, and ChatView'
   );
 
@@ -6677,4 +6677,36 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 142 Passed: Không Gian Chợ Bến Thành 576×144, Ngoại Thất Cửa Nam & Cổng 2 Chiều Quán Quen (Quyết định 205) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 142 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (142/142)!');
+// ==========================================
+// TEST 143: SỬA LỖI ENGINE CANVAS psCv Ở QUÁN QUEN & MỞ CỔNG CHỢ BẾN THÀNH TỪ CẢ KHÁM PHÁ LẪN QUÁN QUEN (QUYẾT ĐỊNH 206)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const streetCode = fs.readFileSync('src/components/chat/BenThanhStreetBannerWebView.tsx', 'utf8');
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+
+  assert.ok(
+    streetCode.includes("canvasId: 'psCv'") &&
+      streetCode.includes('<canvas id="psCv"') &&
+      streetCode.includes('touch-action:none') &&
+      streetCode.includes('PB.camX=185'),
+    'BenThanhStreetBannerWebView must match canvasId psCv with <canvas id="psCv">, touch-action:none, and initial PB.camX=185'
+  );
+
+  assert.ok(
+    funCode.includes('onEnterMarket') &&
+      funCode.includes("d.id === 'ben_thanh_notre' && d.userTriggered && onEnterMarket") &&
+      hubCode.includes("onEnterMarket={() => handlePressCard('market')}") &&
+      chatViewCode.includes('marketReturnSubView') &&
+      decisionsCode.includes('206') &&
+      chatDocCode.includes("canvasId: 'psCv'"),
+    'EntertainmentBannerWebView must support fastDash portal to Ben Thanh Market and ChatView must preserve marketReturnSubView (QD 206)'
+  );
+
+  console.log('✅ Test 143 Passed: Sửa Lỗi Engine Canvas psCv & Cổng Chợ Bến Thành Từ Cả Khám Phá Lẫn Quán Quen (Quyết định 206) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 143 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (143/143)!');

@@ -377,3 +377,7 @@ Màn hình Tab 3 hiển thị:
     2. `x: 176..344`: **Sạp Thủ Công Mỹ Nghệ & Đồ Lưu Niệm** — giỏ tre đan, bình sơn mài, dải LED vàng ấm chiếu sáng tượng lưu niệm.
     3. `x: 344..500`: **Sạp Trái Cây Nhiệt Đới (`1029 NGỌC HẢO`)** — tháp bưởi xanh, xoài vàng, thanh long, sầu riêng, chôm chôm.
     4. `x: 500..576`: **Cổng Ra Quán Quen (`exit_market`)** — cổng vòm sáng hướng ra mặt tiền.
+
+## 27. Sửa Lỗi Engine Canvas `psCv` & Cổng Chợ Bến Thành Từ Cả Khám Phá Lẫn Quán Quen (Quyết định 206)
+- **`BenThanhStreetBannerWebView.tsx`:** Đồng bộ `canvasId: 'psCv'` khớp `<canvas id="psCv">`, bật `touch-action: none` và đặt `PB.camX = 185` khi khởi tạo để Cửa Nam Chợ Bến Thành hiện ngay chính giữa Tab Quán quen.
+- **`EntertainmentBannerWebView.tsx` & `ChatView.tsx`:** Hotspot `ben_thanh_notre` trên Banner Tab Khám phá bật `fastDash: true` và kích hoạt `onEnterMarket` (`≤ 300ms`). `ChatView.tsx` lưu `marketReturnSubView` (`'hub'` hoặc `'map'`) để nút `[←]` / `Ra phố` trả về đúng Tab nguồn.
