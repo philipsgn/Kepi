@@ -126,21 +126,28 @@ function drawPlasticStool(c,sx,sy,col){
 
 function getWalkingShoppers(t){
   return [
-    {y:180,x:((t*16+40)%1040)+80,shirt:'#E0452B',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
-    {y:188,x:1100-((t*14+150)%1020),shirt:'#38BDF8',pants:'#334155',tourist:true,hair:'#FDE047',backpack:'#EA580C',camera:true,shades:true,tall:true},
-    {y:196,x:((t*15+340)%1040)+80,shirt:'#F59E0B',pants:'#1F2937',tourist:true,hat:'bucket',backpack:'#2563EB',bag:'#FFFBF1'},
-    {y:204,x:1100-((t*13+520)%1020),shirt:'#EC4899',pants:'#374151',hat:'bun',bag:'#F4B93B'},
-    {y:212,x:((t*17+740)%1040)+80,shirt:'#10B981',pants:'#1E293B',tourist:true,hair:'#92400E',camera:true,tall:true},
-    {y:218,x:1100-((t*12+920)%1020),shirt:'#FFFBF1',pants:'#4B6FA5',hat:'cap',bag:'#E0452B'},
-    {y:304,x:1100-((t*15+80)%1020),shirt:'#FFFBF1',pants:'#4B6FA5',tourist:true,hair:'#FACC15',backpack:'#16A34A',shades:true,tall:true},
-    {y:314,x:((t*13+280)%1040)+80,shirt:'#EF4444',pants:'#1F2937',hat:'nonla',bag:'#E5BA7E'},
-    {y:322,x:1100-((t*16+480)%1020),shirt:'#6366F1',pants:'#1E293B',tourist:true,hat:'cap',backpack:'#EC4899',camera:true},
-    {y:332,x:((t*14+680)%1040)+80,shirt:'#84CC16',pants:'#334155',hat:'bun',bag:'#38BDF8'},
-    {y:340,x:1100-((t*12+860)%1020),shirt:'#F97316',pants:'#1F2937',tourist:true,hair:'#DC2626',shades:true,bag:'#FFFBF1',tall:true},
-    {y:348,x:((t*15+1020)%1040)+80,shirt:'#14B8A6',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
-    {y:444,x:((t*13+160)%1040)+80,shirt:'#F472B6',pants:'#1E293B',hat:'bun',bag:'#FFFBF1'},
-    {y:454,x:1100-((t*14+410)%1020),shirt:'#FACC15',pants:'#334155',tourist:true,hat:'bucket',backpack:'#DC2626',camera:true},
-    {y:462,x:((t*16+790)%1040)+80,shirt:'#3B82F6',pants:'#1F2937',hat:'cap',bag:'#F4B93B'}
+    {y:178,x:((t*16+20)%1100)+46,shirt:'#E0452B',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
+    {y:183,x:1140-((t*14+110)%1080),shirt:'#38BDF8',pants:'#334155',tourist:true,hair:'#FDE047',backpack:'#EA580C',camera:true,shades:true,tall:true},
+    {y:188,x:((t*18+240)%1100)+46,shirt:'#F59E0B',pants:'#1F2937',tourist:true,hat:'bucket',backpack:'#2563EB',bag:'#FFFBF1'},
+    {y:193,x:1140-((t*13+390)%1080),shirt:'#EC4899',pants:'#374151',hat:'bun',bag:'#F4B93B'},
+    {y:198,x:((t*15+540)%1100)+46,shirt:'#10B981',pants:'#1E293B',tourist:true,hair:'#92400E',camera:true,tall:true},
+    {y:203,x:1140-((t*17+690)%1080),shirt:'#FFFBF1',pants:'#4B6FA5',hat:'cap',bag:'#E0452B'},
+    {y:208,x:((t*12+860)%1100)+46,shirt:'#A855F7',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
+    {y:213,x:1140-((t*15+1010)%1080),shirt:'#F97316',pants:'#334155',tourist:true,hair:'#FACC15',backpack:'#16A34A',shades:true},
+    {y:304,x:1140-((t*15+60)%1080),shirt:'#FFFBF1',pants:'#4B6FA5',tourist:true,hair:'#FACC15',backpack:'#16A34A',shades:true,tall:true},
+    {y:310,x:((t*13+200)%1100)+46,shirt:'#EF4444',pants:'#1F2937',hat:'nonla',bag:'#E5BA7E'},
+    {y:316,x:1140-((t*16+360)%1080),shirt:'#6366F1',pants:'#1E293B',tourist:true,hat:'cap',backpack:'#EC4899',camera:true},
+    {y:322,x:((t*14+520)%1100)+46,shirt:'#84CC16',pants:'#334155',hat:'bun',bag:'#38BDF8'},
+    {y:328,x:1140-((t*12+680)%1080),shirt:'#F97316',pants:'#1F2937',tourist:true,hair:'#DC2626',shades:true,bag:'#FFFBF1',tall:true},
+    {y:334,x:((t*17+820)%1100)+46,shirt:'#14B8A6',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
+    {y:340,x:1140-((t*15+950)%1080),shirt:'#F43F5E',pants:'#334155',hat:'bun',bag:'#F4B93B'},
+    {y:346,x:((t*13+1060)%1100)+46,shirt:'#0EA5E9',pants:'#1F2937',tourist:true,hat:'bucket',camera:true},
+    {y:352,x:1140-((t*14+140)%1080),shirt:'#EAB308',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
+    {y:442,x:((t*13+120)%1100)+46,shirt:'#F472B6',pants:'#1E293B',hat:'bun',bag:'#FFFBF1'},
+    {y:448,x:1140-((t*15+340)%1080),shirt:'#FACC15',pants:'#334155',tourist:true,hat:'bucket',backpack:'#DC2626',camera:true},
+    {y:454,x:((t*16+580)%1100)+46,shirt:'#3B82F6',pants:'#1F2937',hat:'cap',bag:'#F4B93B'},
+    {y:460,x:1140-((t*12+810)%1080),shirt:'#22C55E',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
+    {y:465,x:((t*14+990)%1100)+46,shirt:'#FB7185',pants:'#334155',tourist:true,hair:'#FDE047',shades:true,tall:true}
   ];
 }
 

@@ -6991,7 +6991,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       stallsCode.includes('THOI TRANG SAI GON') &&
       stallsCode.includes('PHO BO - BUN BO') &&
       stallsCode.includes('HAI SAN TUOI') &&
-      stallsCode.includes('DO GIA DUNG') &&
+      (stallsCode.includes('DO GIA DUNG') || stallsCode.includes('DUNG CU GIA DUNG')) &&
       stallsCode.includes('DO KHO TOM KHO') &&
       stallsCode.includes('CA PHE SINH TO'),
     'Market must feature vertical side arch gates hiding exterior, 7 full-width North shops, and 6+6 dense central/south stalls'
@@ -7001,12 +7001,12 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     marketBannerCode.includes("id: 'exit_market'") &&
       marketBannerCode.includes('x: 0') &&
       marketBannerCode.includes("id: 'exit_back_gate'") &&
-      marketBannerCode.includes('x: 1128') &&
+      (marketBannerCode.includes('x: 1128') || marketBannerCode.includes('x: 1152')) &&
       marketBannerCode.includes("id: 'stall_aodai'") &&
       marketBannerCode.includes("id: 'stall_thoitrang'") &&
       decisionsCode.includes('213') &&
       chatDocCode.includes('Quyết định 213') &&
-      (specCode.includes('QĐ 213') || specCode.includes('QĐ 214')),
+      (specCode.includes('QĐ 213') || specCode.includes('QĐ 214') || specCode.includes('QĐ 215')),
     'BenThanhMarketBannerWebView hotspots, obstacles, and docs must sync QD 213'
   );
 
@@ -7040,7 +7040,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       crowdCode.includes('E(c,px+4,py,6,2') &&
       decisionsCode.includes('214') &&
       chatDocCode.includes('Quyết định 214') &&
-      specCode.includes('QĐ 214'),
+      (specCode.includes('QĐ 214') || specCode.includes('QĐ 215')),
     'Market modules and docs must implement 32-bit indie visual overhaul for QD 214'
   );
 
@@ -7062,4 +7062,38 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 151 Passed: Nâng Cấp Đồ Họa Chợ Bến Thành Chuẩn Indie 32-Bit (Mái Hiên Vải Sọc, Cụm Hàng Hóa & Nhân Vật Đổ Bóng — Quyết định 214) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 151 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (151/151)!');
+// ==========================================
+// TEST 152: XÓA MẢNG NÂU 2 RÌA, BỐ CỤC SO LE CHEN LẤN & ĐỦ NHÓM HÀNG VĂN HÓA VIỆT (BÁO CHÍ, ĐỒ CÚNG, 34+ NGƯỜI — QUYẾT ĐỊNH 215)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const archCode = fs.readFileSync('src/components/chat/market/marketArchitecture.ts', 'utf8');
+  const stallsCode = fs.readFileSync('src/components/chat/market/marketStalls.ts', 'utf8');
+  const crowdCode = fs.readFileSync('src/components/chat/market/marketCrowd.ts', 'utf8');
+
+  assert.ok(
+    !archCode.includes('286,INK') &&
+      archCode.includes('266,44,92') &&
+      stallsCode.includes('BAO CHI - GIAY TO') &&
+      stallsCode.includes('DO CUNG - NHANG DEN') &&
+      stallsCode.includes('HOA CUC - NHANG') &&
+      stallsCode.includes('TAP HOA - BAO') &&
+      stallsCode.includes('NONG SAN RAU CU') &&
+      stallsCode.includes('DUNG CU GIA DUNG') &&
+      stallsCode.includes('DEP LAO QUAN AO') &&
+      marketBannerCode.includes("id: 'stall_newspaper'") &&
+      marketBannerCode.includes("id: 'stall_offering'") &&
+      (crowdCode.match(/shirt:/g) || []).length >= 20 &&
+      decisionsCode.includes('215') &&
+      chatDocCode.includes('Quyết định 215') &&
+      specCode.includes('QĐ 215'),
+    'Ben Thanh Market must remove dark brown side strips, add staggered Vietnamese stalls (newspapers, offerings, produce, daily tools) and 20+ walking shoppers for QD 215'
+  );
+
+  console.log('✅ Test 152 Passed: Xóa Mảng Nâu 2 Rìa, Bố Cục So Le Chen Lấn & Đủ Nhóm Hàng Văn Hóa Việt (Quyết định 215) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 152 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (152/152)!');

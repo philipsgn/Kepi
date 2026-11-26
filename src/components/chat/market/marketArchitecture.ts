@@ -56,79 +56,69 @@ function drawFloorAndCeiling(x,WORLD_W,WORLD_H){
     }
   }
   // Dải gạch dẫn hướng nâu đỏ dọc 2 hành lang chính
-  R(x,72,174,WORLD_W-144,4,'#7E5640');R(x,72,214,WORLD_W-144,4,'#7E5640');
-  R(x,72,302,WORLD_W-144,4,'#7E5640');R(x,72,342,WORLD_W-144,4,'#7E5640');
+  R(x,0,174,WORLD_W,4,'#7E5640');R(x,0,212,WORLD_W,4,'#7E5640');
+  R(x,0,302,WORLD_W,4,'#7E5640');R(x,0,344,WORLD_W,4,'#7E5640');
   R(x,0,164,WORLD_W,2,INK);
 
   // Rãnh thoát nước gang dọc khu ẩm thực & hải sản
-  [360,544,728].forEach(function(dx){
-    R(x,dx,286,32,6,INK);R(x,dx+1,287,30,4,'#475569');
-    for(var gx2=dx+3;gx2<dx+29;gx2+=4)R(x,gx2,287,2,4,'#1E293B');
+  [240,520,860].forEach(function(dx){
+    R(x,dx,292,32,6,INK);R(x,dx+1,293,30,4,'#475569');
+    for(var gx2=dx+3;gx2<dx+29;gx2+=4)R(x,gx2,293,2,4,'#1E293B');
   });
-  E(x,340,296,12,3,'#93C5FD');E(x,342,296,7,2,'#E0F2FE');
+  E(x,286,304,12,3,'#93C5FD');E(x,288,304,7,2,'#E0F2FE');
 }
 
-// CỔNG VÒM TRÒN NẰM DỌC Ở 2 ĐẦU ĐƯỜNG TRÁI (x: 0..72) & PHẢI (x: 1128..1200) — GIẤU HOÀN TOÀN KHÔNG GIAN NGOÀI
+// 2 CỔNG VÒM TRÒN GỌN SÁNG ẤM Ở LÀN ĐI GIỮA (y: 266..358) — XÓA SẠCH MẢNG NÂU ĐEN 2 RÌA!
 function drawSideArchGate(x,side,WORLD_W,WORLD_H){
   var isLeft=(side==='left');
-  var x0=isLeft?0:(WORLD_W-72);
-  var innerX=isLeft?58:(WORLD_W-70);
-  var wallX=isLeft?0:(WORLD_W-58);
+  var x0=isLeft?0:(WORLD_W-44);
+  var innerX=isLeft?36:(WORLD_W-44);
 
-  // 1. Khối tường vàng kem Chợ Bến Thành phía trên đầu cổng (y: 64..166)
-  pxBevelBox(x,x0,64,72,102,'#E6D39F','#FFF6DA','#B89B58');
-  // Phù điêu sóng nước đặc trưng Chợ Bến Thành (như Hình 3)
-  R(x,x0+10,74,52,18,INK);R(x,x0+11,75,50,16,'#F5F0E1');
-  for(var wy=79;wy<=87;wy+=4)R(x,x0+15,wy,42,1,'#334155');
-  // Đồng hồ nhỏ trang trí mặt cổng & khung vòm mái ngói đỏ trên đầu
-  E(x,x0+36,108,11,11,INK);E(x,x0+36,108,9,9,'#FFFBF1');
-  R(x,x0+35,102,2,6,'#1E3A8A');R(x,x0+36,107,5,2,'#1E3A8A');
+  // Ánh nắng vàng ấm hắt nhẹ từ vòm cổng vào nền gạch hành lang giữa
+  x.save();
+  x.globalAlpha=0.18;
+  R(x,isLeft?36:(WORLD_W-78),282,42,66,'#FEF08A');
+  x.globalAlpha=0.10;
+  R(x,isLeft?78:(WORLD_W-108),290,30,50,'#FEF9C3');
+  x.restore();
 
-  // Biển tên cổng (CỬA NAM bên trái / CỬA BẮC bên phải)
-  if(isLeft){
-    pxBevelBox(x,x0+6,126,60,14,'#1E3A8A','#3B82F6','#172554');
-    pxText(x,'CUA NAM',x0+18,131,'#FFFFFF',1);
-    R(x,x0+14,144,44,10,INK);R(x,x0+15,145,42,8,'#16A34A');pxText(x,'RA PHO',x0+22,147,'#FFFFFF',1);
-  }else{
-    pxBevelBox(x,x0+6,126,60,14,'#245940','#3E8A58','#143D29');
-    pxText(x,'CUA BAC',x0+18,131,'#FFFFFF',1);
-    R(x,x0+14,144,44,10,INK);R(x,x0+15,145,42,8,'#16A34A');pxText(x,'EXIT',x0+27,147,'#FFFFFF',1);
-  }
-
-  // 2. Cổng vòm tròn khổng lồ nằm dọc suốt 2 đầu hành lang (y: 164..476)
-  pxBevelBox(x,x0,164,72,WORLD_H-164,'#E6D39F','#FFF6DA','#B89B58');
-  // Khung vòm tròn sâu tối ấm giấu hoàn toàn không gian bên ngoài
-  R(x,wallX,176,58,286,INK);
-  R(x,wallX+(isLeft?0:3),178,55,282,'#2B2118');
-  R(x,wallX+(isLeft?0:8),188,50,262,'#3B291E');
-  R(x,wallX+(isLeft?0:14),204,44,230,'#4D3526');
-  // Đường cong vòm tròn trên đỉnh cổng (pixel-by-pixel arch curve)
-  for(var ay=0;ay<24;ay++){
-    var inset=Math.round((24-ay)*(24-ay)*0.06);
+  // Khung trụ & mái vòm tròn vàng kem Chợ Bến Thành gọn gàng (cao 92px tại y: 266..358)
+  pxBevelBox(x,x0,266,44,92,'#E6D39F','#FFF6DA','#B89B58');
+  // Lòng vòm tròn sáng ấm (kem vàng dịu, không còn mảng nâu đen xấu!)
+  var archX=isLeft?0:(WORLD_W-34);
+  R(x,archX,284,34,70,INK);
+  R(x,archX+(isLeft?0:2),286,32,66,'#F5E6C4');
+  R(x,archX+(isLeft?0:6),292,28,54,'#FFF5D6');
+  // Đường cong vòm tròn trên đỉnh cổng
+  for(var ay=0;ay<14;ay++){
+    var inset=Math.round((14-ay)*(14-ay)*0.07);
     if(isLeft){
-      R(x,wallX+58-inset,176+ay,inset,1,'#E6D39F');
-      R(x,wallX+58-inset-1,176+ay,2,1,INK);
+      R(x,archX+34-inset,284+ay,inset,1,'#E6D39F');
+      R(x,archX+34-inset-1,284+ay,2,1,INK);
     }else{
-      R(x,wallX,176+ay,inset,1,'#E6D39F');
-      R(x,wallX+inset-1,176+ay,2,1,INK);
+      R(x,archX,284+ay,inset,1,'#E6D39F');
+      R(x,archX+inset-1,284+ay,2,1,INK);
     }
   }
 
-  // Cửa sắt xếp mở hai bên mép cổng vòm
-  drawAccordionGate(x,innerX,184,12,268);
+  // Biển tên cổng nhỏ gọn ngay đỉnh vòm (CỬA NAM trái / CỬA BẮC phải)
+  if(isLeft){
+    pxBevelBox(x,2,268,40,12,'#1E3A8A','#3B82F6','#172554');
+    pxText(x,'CUA NAM',7,272,'#FFFFFF',1);
+  }else{
+    pxBevelBox(x,WORLD_W-42,268,40,12,'#245940','#3E8A58','#143D29');
+    pxText(x,'CUA BAC',WORLD_W-37,272,'#FFFFFF',1);
+  }
 
-  // Ánh đèn lồng vàng ấm treo giữa vòm cổng
-  drawRattanLamp(x,wallX+(isLeft?36:22),206);
+  // Cửa sắt xếp mảnh hai bên mép vòm & thảm đỏ đón khách
+  drawAccordionGate(x,innerX,286,8,66);
+  var matX=isLeft?44:(WORLD_W-52);
+  pxBevelBox(x,matX,290,8,58,'#9E2A2B','#DC2626','#6B1819');
+  R(x,matX+3,296,2,46,'#F4B93B');
 
-  // Thảm đỏ đón khách & chỉ dẫn lối ra dọc mép cổng
-  var matX=isLeft?64:(WORLD_W-72);
-  pxBevelBox(x,matX,270,8,92,'#9E2A2B','#DC2626','#6B1819');
-  R(x,matX+3,278,2,76,'#F4B93B');
-
-  // Trụ cột & Bảo vệ gác cổng trên/dưới
-  var guardX=isLeft?68:(WORLD_W-82);
-  drawPerson16Bit(x,guardX,186,{shirt:'#FFFBF1',pants:'#1E293B',hat:'kepi',guard:true});
-  drawPerson16Bit(x,guardX,450,{shirt:'#FFFBF1',pants:'#1E293B',hat:'kepi',guard:true});
+  // Chú bảo vệ thân thiện đứng gác ngay cạnh cổng
+  var guardX=isLeft?46:(WORLD_W-58);
+  drawPerson16Bit(x,guardX,282,{shirt:'#FFFBF1',pants:'#1E293B',hat:'kepi',guard:true});
 }
 `;
 }
