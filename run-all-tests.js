@@ -5660,15 +5660,15 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'BenThanhStreetBannerWebView must render scrolling 584px Ben Thanh street with food and souvenir stalls'
   );
 
-  // 3. Trang Chat Heo AI 1:1 Prototype (Banner Quán Cà Phê 144x96 + Bong bóng thoại + Danh sách cuộn)
+  // 3. Trang Chat Heo AI 1:1 Prototype (Banner Quán Cà Phê 144x96 hoặc 180x120 + Bong bóng thoại + Danh sách cuộn)
   assert.ok(
-    cafeBannerCode.includes('width="144" height="96"') &&
+    (cafeBannerCode.includes('width="144" height="96"') || cafeBannerCode.includes('width="180" height="120"')) &&
       cafeBannerCode.includes('bubbleMe') &&
       cafeBannerCode.includes('bubbleAi') &&
       chatViewCode.includes('CafeChatBannerWebView') &&
       chatViewCode.includes('FlatList') &&
       !chatViewCode.includes('SquadLocketView'),
-    'ChatView must integrate 144x96 CafeChatBannerWebView with floating bubbles and scrollable FlatList, with zero Squad'
+    'ChatView must integrate CafeChatBannerWebView with floating bubbles and scrollable FlatList, with zero Squad'
   );
 
   // 4. Đồng bộ Icon Art (FloatingPillTabBar hỗ trợ QĐ 185 hoặc QĐ 187 Vector Navigation, Hub hỗ trợ Pixel Art hoặc QĐ 188 Slim Vector)
@@ -6513,8 +6513,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   // 2. Cả 4 banner đều mở rộng kích thước thế giới 2D (worldWidth > viewWidth & worldHeight > viewHeight) với bối cảnh Việt Nam
   assert.ok(
-    (cafeBannerCode.includes('worldWidth: 432') || cafeBannerCode.includes('worldWidth: 360')) &&
-      (cafeBannerCode.includes('worldHeight: 128') || cafeBannerCode.includes('worldHeight: 184')) &&
+    (cafeBannerCode.includes('worldWidth: 720') || cafeBannerCode.includes('worldWidth: 432') || cafeBannerCode.includes('worldWidth: 360')) &&
+      (cafeBannerCode.includes('worldHeight: 176') || cafeBannerCode.includes('worldHeight: 128') || cafeBannerCode.includes('worldHeight: 184')) &&
       (cafeBannerCode.includes('buildSeamlessCafeRoom') || cafeBannerCode.includes('drawCafeWorldWings')) &&
       profileBannerCode.includes('worldWidth: 420') &&
       profileBannerCode.includes('worldHeight: 160') &&
@@ -6570,15 +6570,15 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const openRoomCode = fs.readFileSync('src/components/pixel/pixelOpenRoomEngine.ts', 'utf8');
 
   assert.ok(
-    cafeCode.includes('worldWidth: 432') &&
-      cafeCode.includes('worldHeight: 128') &&
+    (cafeCode.includes('worldWidth: 432') || cafeCode.includes('worldWidth: 720')) &&
+      (cafeCode.includes('worldHeight: 128') || cafeCode.includes('worldHeight: 176')) &&
       cafeCode.includes('buildSeamlessCafeRoom') &&
       cafeCode.includes('pine_tree') &&
       cafeCode.includes('reading_nook') &&
       cafeCode.includes('exit_door') &&
       cafeCode.includes('isAtCenterTable') &&
       !cafeCode.includes('drawCafeWorldWings'),
-    'CafeChatBannerWebView must implement unified 432x128 seamless cafe interior with bar, reading nook, pine tree, exit door, and smart bubbles'
+    'CafeChatBannerWebView must implement unified seamless cafe interior with bar, reading nook, pine tree, exit door, and smart bubbles'
   );
 
   assert.ok(
@@ -6620,15 +6620,17 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'EntertainmentBannerWebView must render 1:1 Cafe exterior with striped awning, reflective glass, outdoor table, arched window, swirl pine tree, and direction lamp'
   );
 
+  const cafeArtCode = fs.readFileSync('src/components/chat/cafe/cafeInteriorArt.ts', 'utf8');
+  const cafeAllCode = cafeCode + cafeArtCode;
   assert.ok(
-    cafeCode.includes('SÀN GẠCH BÔNG INDOCHINE 16×16') &&
-      cafeCode.includes('for(var gx=0;gx<WORLD_W;gx+=16)') &&
-      cafeCode.includes('for(var gy=80;gy<WORLD_H;gy+=16)') &&
-      cafeCode.includes('#4A8A80') &&
-      cafeCode.includes('#C4603A') &&
+    (cafeAllCode.includes('SÀN GẠCH BÔNG INDOCHINE 16×16') || cafeAllCode.includes('drawIndochineFloor')) &&
+      (cafeAllCode.includes('gx+=16') || cafeAllCode.includes('tx += 16')) &&
+      (cafeAllCode.includes('gy+=16') || cafeAllCode.includes('ty += 16')) &&
+      cafeAllCode.includes('#4A8A80') &&
+      cafeAllCode.includes('#C4603A') &&
       decisionsCode.includes('204') &&
       chatDocCode.includes('Indochine 16×16'),
-    'CafeChatBannerWebView must render aligned 16x16 Indochine cement tiles from y=80 to y=128 and sync docs for QD 204'
+    'CafeChatBannerWebView must render aligned 16x16 Indochine cement tiles and sync docs for QD 204'
   );
 
   console.log('✅ Test 141 Passed: Tiệm CAFE Ngoại Thất 1:1, Sàn Gạch Bông Indochine 16×16 & Cổng Vào Siêu Tốc (Quyết định 204) Audit verified cleanly');
@@ -7165,4 +7167,48 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 154 Passed: Mê Cung 6 Hàng Sạp (1200×760), 180 Người Chen Chúc & Chú Heo Ngộp Thở Chạy Ra Cổng (Quyết định 217) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 154 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (154/154)!');
+// ==========================================
+// TEST 155: NÂNG CẤP QUÁN CÀ PHÊ MINI WORKSHOP, THƯ VIỆN 3 KỆ SÁCH & BOUTIQUE QUẦN ÁO (720×176 — QUYẾT ĐỊNH 218)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const cafeBannerCode = fs.readFileSync('src/components/chat/CafeChatBannerWebView.tsx', 'utf8');
+  const cafeArtCode = fs.readFileSync('src/components/chat/cafe/cafeInteriorArt.ts', 'utf8');
+
+  assert.ok(
+    cafeBannerCode.includes('worldWidth: 720') &&
+      cafeBannerCode.includes('worldHeight: 176') &&
+      cafeBannerCode.includes('viewWidth: 180') &&
+      cafeBannerCode.includes('viewHeight: 120') &&
+      cafeBannerCode.includes('obstacles:') &&
+      cafeBannerCode.includes("id: 'coffee_workshop'") &&
+      cafeBannerCode.includes("id: 'clothes_boutique'") &&
+      cafeBannerCode.includes('buildCafeInteriorArtScript') &&
+      cafeArtCode.includes('drawPhinCup') &&
+      cafeArtCode.includes('drawCafePerson') &&
+      cafeArtCode.includes('drawIndochineFloor') &&
+      cafeArtCode.includes('drawCafeBg') &&
+      cafeArtCode.includes('drawCafeFgTables') &&
+      cafeArtCode.includes('drawCafeLiveEffects') &&
+      decisionsCode.includes('218') &&
+      chatDocCode.includes('Quyết định 218') &&
+      specCode.includes('720 × 176') &&
+      specCode.includes('QĐ 218'),
+    'CafeChatBannerWebView and cafeInteriorArt must implement 720x176 6-zone cozy coffee workshop & boutique with Barista, 3 bookshelves, 3 ceiling fans, AABB obstacles, and sync docs for QD 218'
+  );
+
+  const mArt = cafeArtCode.match(/return `([\s\S]*)`;\s*\}/);
+  assert.ok(mArt && mArt[1], 'Must extract cafeInteriorArt script');
+  const mCafe = cafeBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
+  assert.ok(mCafe && mCafe[1], 'Must find inline cafe script');
+  const assembledCafeJs = mCafe[1]
+    .replace('${cafeInteriorScript}', mArt[1].replace(/\\`/g, '`'))
+    .replace('${openRoomScript}', '');
+  new Function(assembledCafeJs);
+
+  console.log('✅ Test 155 Passed: Nâng Cấp Quán Cà Phê Mini Workshop, Thư Viện 3 Kệ Sách & Boutique Quần Áo (720×176 — Quyết định 218) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 155 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (155/155)!');

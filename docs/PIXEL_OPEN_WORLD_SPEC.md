@@ -59,7 +59,7 @@ $$W_{\text{world}} \ge 2.75 \times W_{\text{view}} \quad (\text{chuẩn hóa } 3
 | 3 | **Vườn (Sân Vườn & Mặt Tiền)** | `PixelGardenWebView.tsx` | `160 × 96` | `440 × 140` | `4.01×` | Chặng 3 |
 | 4 | **Nhà của bạn (Các Phòng)** | `PixelHouseWebView.tsx` | `160 × 96` | `480 × 132` | `4.13×` | Chặng 3 |
 | 5 | **Khám phá (Phố Sài Gòn)** | `EntertainmentBannerWebView.tsx` | `192 × 88` | `540 × 112` | `3.58×` | Hoàn thiện + Rà soát Chặng 4 |
-| 6 | **Trò chuyện (Quán Cà Phê)** | `CafeChatBannerWebView.tsx` | `144 × 96` | `432 × 128` | `4.00×` | Hoàn thiện + Rà soát Chặng 4 |
+| 6 | **Trò chuyện (Quán Cà Phê)** | `CafeChatBannerWebView.tsx` + `cafe/*` | `180 × 120` | `720 × 176` | `5.87×` | Hoàn thiện (QĐ 218 — 6 khu ấm cúng: Barista phin, Thư viện 3 kệ sách + Sofa, Mini Coffee Workshop, Boutique quần áo, Cây thông & 3 quạt trần) |
 
 ---
 
