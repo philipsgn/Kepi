@@ -19,13 +19,10 @@ interface BenThanhMarketBannerWebViewProps {
 }
 
 /**
- * Đại Thế Giới Lòng Chợ Bến Thành 32-Bit Indie Pixel Art (1200×480, Dynamic 1:1 Square Pixel — Quyết định 212)
- * - Kiến trúc mô-đun: marketPalette.ts, marketArchitecture.ts, marketStalls.ts, marketCrowd.ts.
- * - 3 tầng thương mại đặc quánh không gian chợ Việt:
- *   + Tầng Bắc (y: 44..166): Cửa Số 1 (phố Sài Gòn ngoài cửa) -> Quần Áo & Vải Hương Trinh -> Đặc Sản Liên Sài Gòn -> Vòm Khu Ăn Uống Sạp 1044 -> Bánh Cuốn & Phở -> Cửa Bắc (view phố Lê Thánh Tôn ngoài cửa).
- *   + Tầng Trung Tâm Y-Sorted (y: 230..290): Trái Cây 1029 Ngọc Hảo, Hải Sản/Rau/Thịt Đá Bào, Bàn Ăn Ẩm Thực 1, Gốm Sứ & Nón Lá Lưu Niệm.
- *   + Tầng Nam Y-Sorted (y: 374..434): Nước Mía & Dừa Tươi, Chè & Bánh Tráng, Bàn Ăn Ẩm Thực 2, Hoa Tươi & Gốm Sơn Mài.
- * - Va chạm vật cản AABB (obstacles) giúp Heo Con đi men theo hành lang và lách quanh sạp hàng.
+ * Đại Thế Giới Lòng Chợ Bến Thành 32-Bit Indie Pixel Art (1200×480, Dynamic 1:1 Square Pixel — Quyết định 213)
+ * - 2 Cổng Vòm Tròn Nằm Dọc 2 Đầu (Cửa Nam bên trái x: 0..72 & Cửa Bắc bên phải x: 1128..1200) giấu hoàn toàn không gian bên ngoài.
+ * - Dãy Bắc kín ngang 7 shop sát vách nhau: Áo Dài Sài Gòn (từ Cửa 1 cũ) -> Hương Trinh -> Liên Sài Gòn -> Vòm Khu Ăn Uống -> Bánh Cuốn/Bèo -> Phở Bò -> Thời Trang Sài Gòn (từ Cửa Bắc cũ).
+ * - Tầng Trung Tâm (6 đảo) & Tầng Nam (6 sạp) xếp sát sát kề kề nhau (khe hẻm 20px) + Va chạm AABB chuẩn xác.
  */
 export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewProps> = ({
   active = true,
@@ -113,74 +110,109 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
         worldHeight: 480,
         viewWidth: 220,
         viewHeight: 320,
-        walkBounds: { minX: 20, maxX: 1180, minY: 168, maxY: 468 },
-        initialX: 98,
-        initialY: 192,
+        walkBounds: { minX: 16, maxX: 1184, minY: 168, maxY: 468 },
+        initialX: 112,
+        initialY: 196,
         initialCamX: 0,
         initialCamY: 20,
         speed: 58,
         obstacles: [
-          // Tầng Bắc (4 sạp từ x=178..1014)
-          { x: 178, y: 120, w: 176, h: 46 },
-          { x: 358, y: 120, w: 178, h: 46 },
-          { x: 546, y: 120, w: 218, h: 46 },
-          { x: 776, y: 120, w: 238, h: 46 },
-          // Tầng Trung Tâm (4 đảo giữa chợ)
-          { x: 184, y: 234, w: 172, h: 56 },
-          { x: 384, y: 234, w: 160, h: 56 },
-          { x: 572, y: 238, w: 196, h: 52 },
-          { x: 796, y: 236, w: 200, h: 54 },
-          // Tầng Nam (4 sạp & bàn ăn phía dưới)
-          { x: 48, y: 378, w: 196, h: 56 },
-          { x: 280, y: 378, w: 200, h: 56 },
-          { x: 516, y: 386, w: 220, h: 48 },
-          { x: 772, y: 382, w: 208, h: 52 },
+          // 2 đầu cổng vòm dọc (phần khung tường đặc)
+          { x: 0, y: 120, w: 62, h: 46 },
+          { x: 1138, y: 120, w: 62, h: 46 },
+          // Tầng Bắc (7 shop sát vách nhau từ x=76..1126)
+          { x: 76, y: 120, w: 144, h: 46 },
+          { x: 224, y: 120, w: 144, h: 46 },
+          { x: 372, y: 120, w: 152, h: 46 },
+          { x: 528, y: 120, w: 152, h: 46 },
+          { x: 684, y: 120, w: 144, h: 46 },
+          { x: 832, y: 120, w: 144, h: 46 },
+          { x: 980, y: 120, w: 146, h: 46 },
+          // Tầng Trung Tâm (6 đảo sát kề nhau, khe hẻm 20px)
+          { x: 88, y: 234, w: 148, h: 56 },
+          { x: 256, y: 234, w: 148, h: 56 },
+          { x: 424, y: 234, w: 148, h: 56 },
+          { x: 592, y: 238, w: 160, h: 52 },
+          { x: 772, y: 234, w: 152, h: 56 },
+          { x: 944, y: 234, w: 166, h: 56 },
+          // Tầng Nam (6 sạp sát kề nhau, khe hẻm 20px)
+          { x: 88, y: 378, w: 148, h: 56 },
+          { x: 256, y: 378, w: 148, h: 56 },
+          { x: 424, y: 386, w: 160, h: 48 },
+          { x: 604, y: 378, w: 148, h: 56 },
+          { x: 772, y: 378, w: 152, h: 56 },
+          { x: 944, y: 382, w: 166, h: 52 },
         ],
         hotspots: [
           {
             id: 'exit_market',
-            x: 24,
-            y: 48,
-            w: 132,
-            h: 116,
-            standX: 92,
-            standY: 174,
+            x: 0,
+            y: 156,
+            w: 72,
+            h: 312,
+            standX: 78,
+            standY: 316,
             standFace: -1,
             actionType: 'jump_joy',
             fastDash: true,
-            bubbleText: `Bước ra Cửa Số 1...`,
+            bubbleText: `Bước qua Cổng Vòm Nam ra phố...`,
+          },
+          {
+            id: 'exit_back_gate',
+            x: 1128,
+            y: 156,
+            w: 72,
+            h: 312,
+            standX: 1122,
+            standY: 316,
+            standFace: 1,
+            actionType: 'jump_joy',
+            fastDash: true,
+            bubbleText: `Bước qua Cổng Vòm Bắc ra phố...`,
+          },
+          {
+            id: 'stall_aodai',
+            x: 76,
+            y: 56,
+            w: 144,
+            h: 110,
+            standX: 148,
+            standY: 184,
+            standFace: 1,
+            actionType: 'look_window',
+            bubbleText: `Áo Dài Sài Gòn & Đồng Hồ · Mua sắm ${shoppingTotalText}`,
           },
           {
             id: 'stall_clothing',
-            x: 178,
+            x: 224,
             y: 56,
-            w: 176,
+            w: 144,
             h: 110,
-            standX: 266,
+            standX: 296,
             standY: 184,
             standFace: 1,
             actionType: 'check_ledger',
-            bubbleText: `Sạp Quần Áo & Vải Hương Trinh · Mua sắm ${shoppingTotalText}`,
+            bubbleText: `Sạp Vải & Giày Dép Hương Trinh · Mua sắm ${shoppingTotalText}`,
           },
           {
             id: 'stall_liensaigon',
-            x: 358,
+            x: 372,
             y: 56,
-            w: 178,
+            w: 152,
             h: 110,
             standX: 448,
             standY: 184,
             standFace: 1,
             actionType: 'check_ledger',
-            bubbleText: `Sạp Liên Sài Gòn & Ngọc Hoa · Trà Cà Phê Đặc Sản`,
+            bubbleText: `Sạp Liên Sài Gòn & Ngọc Hoa 823 · Trà Cà Phê Đặc Sản`,
           },
           {
             id: 'arch_foodcourt',
-            x: 546,
+            x: 528,
             y: 44,
-            w: 218,
+            w: 152,
             h: 122,
-            standX: 654,
+            standX: 604,
             standY: 184,
             standFace: 1,
             actionType: 'look_window',
@@ -188,72 +220,107 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
           },
           {
             id: 'stall_banhcuon_banhbeo',
-            x: 776,
+            x: 684,
             y: 56,
-            w: 238,
+            w: 144,
             h: 110,
-            standX: 896,
+            standX: 756,
             standY: 184,
             standFace: 1,
             actionType: 'eat_snack',
-            bubbleText: `Bánh Cuốn 50K & Phở Bò Bún Bò · Ăn uống ${foodTotalText}`,
+            bubbleText: `Bánh Cuốn 50K & Bánh Bèo 20K · Ăn uống ${foodTotalText}`,
           },
           {
-            id: 'exit_back_gate',
-            x: 1036,
-            y: 48,
-            w: 140,
-            h: 116,
-            standX: 1112,
-            standY: 174,
+            id: 'stall_pho',
+            x: 832,
+            y: 56,
+            w: 144,
+            h: 110,
+            standX: 904,
+            standY: 184,
             standFace: 1,
-            actionType: 'jump_joy',
-            fastDash: true,
-            bubbleText: `Ra Cửa Bắc (Lê Thánh Tôn)...`,
+            actionType: 'eat_snack',
+            bubbleText: `Phở Bò & Bún Bò Huế Nóng Hổi · Ăn uống ${foodTotalText}`,
+          },
+          {
+            id: 'stall_thoitrang',
+            x: 980,
+            y: 56,
+            w: 146,
+            h: 110,
+            standX: 1052,
+            standY: 184,
+            standFace: -1,
+            actionType: 'check_ledger',
+            bubbleText: `Shop Thời Trang Sài Gòn · Quần Áo & Túi Xách`,
           },
           {
             id: 'island_fruit',
-            x: 184,
+            x: 88,
             y: 230,
-            w: 172,
+            w: 148,
             h: 62,
-            standX: 270,
+            standX: 162,
             standY: 310,
             standFace: 1,
             actionType: 'eat_snack',
-            bubbleText: `Sạp Trái Cây 1029 Ngọc Hảo · Xoài Cát, Thanh Long & Dừa Tươi!`,
+            bubbleText: `Trái Cây 1029 Ngọc Hảo · Xoài Cát, Thanh Long & Dừa Tươi!`,
           },
           {
             id: 'island_seafood',
-            x: 384,
+            x: 256,
             y: 230,
-            w: 160,
+            w: 148,
             h: 62,
-            standX: 464,
+            standX: 330,
             standY: 310,
             standFace: 1,
             actionType: 'look_window',
-            bubbleText: `Hải Sản & Rau Củ Tươi Đá Bào · Tôm Cua Mực Tươi Rói!`,
+            bubbleText: `Hải Sản Tươi Đá Bào · Tôm Cua Mực Tươi Rói!`,
+          },
+          {
+            id: 'island_veg',
+            x: 424,
+            y: 230,
+            w: 148,
+            h: 62,
+            standX: 498,
+            standY: 310,
+            standFace: 1,
+            actionType: 'look_window',
+            bubbleText: `Rau Củ Tươi & Thịt Sạch Chợ Bến Thành!`,
           },
           {
             id: 'island_dining',
-            x: 572,
+            x: 592,
             y: 234,
-            w: 196,
+            w: 160,
             h: 58,
-            standX: 670,
+            standX: 672,
             standY: 310,
             standFace: 1,
             actionType: 'sip_coffee',
-            bubbleText: `Bàn Ăn Khu Ẩm Thực · Bún bò, Bánh xèo & Trà đá!`,
+            bubbleText: `Bàn Ăn Khu Ẩm Thực 1 · Bún bò, Bánh xèo & Trà đá!`,
+          },
+          {
+            id: 'island_houseware',
+            x: 772,
+            y: 230,
+            w: 152,
+            h: 62,
+            standX: 848,
+            standY: 310,
+            standFace: 1,
+            actionType: 'check_ledger',
+            bubbleText: `Đồ Gia Dụng & Bếp Núc Inox!`,
           },
           {
             id: 'island_souvenir',
-            x: 796,
-            y: 232,
-            w: 200,
-            h: 60,
-            standX: 896,
+            x: 944,
+            y: 230,
+            w: 166,
+            h: 62,
+            standX: 1026,
             standY: 310,
             standFace: -1,
             actionType: 'check_ledger',
@@ -261,51 +328,75 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
           },
           {
             id: 'south_drinks',
-            x: 48,
+            x: 88,
             y: 374,
-            w: 196,
+            w: 148,
             h: 62,
-            standX: 146,
+            standX: 162,
             standY: 454,
             standFace: 1,
             actionType: 'sip_coffee',
-            bubbleText: `Xe Nước Mía & Dừa Xiêm Ướp Lạnh · Mát Lịm Sài Gòn!`,
+            bubbleText: `Xe Nước Mía & Dừa Xiêm Ướp Lạnh!`,
           },
           {
             id: 'south_snacks',
-            x: 280,
+            x: 256,
             y: 374,
-            w: 200,
+            w: 148,
             h: 62,
-            standX: 380,
+            standX: 330,
             standY: 454,
             standFace: 1,
             actionType: 'eat_snack',
-            bubbleText: `Chè Ba Màu & Bánh Tráng Trộn Cô Tư · Ngon Hết Sẩy!`,
+            bubbleText: `Chè Ba Màu & Bánh Dân Gian Ngon Hết Sẩy!`,
           },
           {
             id: 'south_dining',
-            x: 516,
+            x: 424,
             y: 382,
-            w: 220,
+            w: 160,
             h: 54,
-            standX: 626,
+            standX: 504,
             standY: 454,
             standFace: 1,
             actionType: 'sip_coffee',
-            bubbleText: `Dãy Bàn Ghế Nhựa Vỉa Hè · Đông Vui Tấp Nập Du Khách!`,
+            bubbleText: `Dãy Bàn Ghế Nhựa Vỉa Hè Đông Vui Du Khách!`,
+          },
+          {
+            id: 'south_dried',
+            x: 604,
+            y: 374,
+            w: 148,
+            h: 62,
+            standX: 678,
+            standY: 454,
+            standFace: 1,
+            actionType: 'check_ledger',
+            bubbleText: `Đồ Khô, Tôm Khô & Mắm Nêm Đặc Sản!`,
+          },
+          {
+            id: 'south_coffee',
+            x: 772,
+            y: 374,
+            w: 152,
+            h: 62,
+            standX: 848,
+            standY: 454,
+            standFace: 1,
+            actionType: 'sip_coffee',
+            bubbleText: `Cà Phê Sữa Đá & Sinh Tố Bơ Xoài!`,
           },
           {
             id: 'south_flowers',
-            x: 772,
+            x: 944,
             y: 378,
-            w: 208,
+            w: 166,
             h: 58,
-            standX: 876,
+            standX: 1026,
             standY: 454,
             standFace: -1,
             actionType: 'look_window',
-            bubbleText: `Hoa Tươi & Gốm Sơn Mài Chợ Bến Thành · Rực Rỡ Sắc Xuân!`,
+            bubbleText: `Hoa Tươi & Gốm Sơn Mài Chợ Bến Thành!`,
           },
         ],
       }),
@@ -368,8 +459,8 @@ function buildMarketInterior(){
   var x=bg.getContext('2d');x.imageSmoothingEnabled=false;
 
   drawFloorAndCeiling(x,WORLD_W,WORLD_H);
-  drawColonialEntrance(x,'front');
-  drawColonialEntrance(x,'back');
+  drawSideArchGate(x,'left',WORLD_W,WORLD_H);
+  drawSideArchGate(x,'right',WORLD_W,WORLD_H);
   drawNorthStalls(x);
   MK.bg=bg;
 
@@ -392,21 +483,22 @@ function drawLiveMarketEffects(x,t){
     for(var sk=36;sk<WORLD_W;sk+=120){
       for(var dy=0;dy<110;dy+=3){R(x,sk+Math.round(dy*0.28),28+dy,42,3,'#FFF6D6');}
     }
-    // Ánh sáng ấm đèn mây tre & bảng LED cổng
+    // Ánh sáng ấm đèn mây tre & 2 vòm cổng hai đầu
     x.globalAlpha=0.18+Math.sin(t*3)*0.04;
-    [264,448,654,884].forEach(function(lx){E(x,lx,54,14,10,'#FFE08A');});
-    R(x,46,72,96,12,'#FDBA74');
+    [148,296,448,604,756,904,1052].forEach(function(lx){E(x,lx,54,14,10,'#FFE08A');});
+    E(x,36,216,14,12,'#FFE08A');
+    E(x,1164,216,14,12,'#FFE08A');
     x.restore();
 
     // Quạt lồng sắt công nghiệp quay mượt 60fps
-    [340,624,788,986].forEach(function(fx){
+    [354,604,798,966].forEach(function(fx){
       E(x,fx,72,6,6,INK);E(x,fx,72,5,5,'#334155');
       var sp=Math.max(1,Math.round(Math.abs(Math.sin(t*10+fx))*5));
       R(x,fx-sp,71,sp*2,2,'#CBD5E1');
     });
 
-    // Khói bếp bay từ Nồi nước lèo Khu Ẩm Thực, Bánh Cuốn/Phở & Sạp Chè/Bàn Ăn
-    [[618,96],[844,96],[920,96],[638,248],[690,248],[350,394]].forEach(function(pt){
+    // Khói bếp bay từ Nồi nước lèo Khu Ẩm Thực, Bánh Cuốn, Phở Bò & Bàn Ăn
+    [[592,98],[706,92],[928,92],[955,94],[644,248],[696,248]].forEach(function(pt){
       for(var i=0;i<3;i++){
         var p=((t*0.95+i*0.33)%1);
         var sy=pt[1]-Math.round(p*15), stx=pt[0]+Math.round(Math.sin(t*4+i*2)*1.8);

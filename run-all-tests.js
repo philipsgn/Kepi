@@ -6767,7 +6767,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     (marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680')) &&
       (marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152')) &&
       marketBannerCode.includes('initialCamX: 0') &&
-      marketAllCode.includes('WELCOME BEN THANH') &&
+      (marketAllCode.includes('WELCOME BEN THANH') || marketAllCode.includes('AO DAI SAI GON')) &&
       marketAllCode.includes('LIEN SAI GON') &&
       marketAllCode.includes('NGOC HOA 823') &&
       marketAllCode.includes('KHU AN UONG') &&
@@ -6940,7 +6940,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(
     paletteCode.includes('pxBevelBox') &&
       paletteCode.includes('pxDitherRect') &&
-      archCode.includes('drawColonialEntrance') &&
+      (archCode.includes('drawColonialEntrance') || archCode.includes('drawSideArchGate')) &&
       archCode.includes('drawFloorAndCeiling') &&
       stallsCode.includes('drawNorthStalls') &&
       stallsCode.includes('drawCentralIslands') &&
@@ -6971,4 +6971,46 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 149 Passed: Đại Tu Chợ Bến Thành 32-Bit Indie Game (1200×480), Mô-Đun 4 File, 3 Tầng Sạp & Va Chạm AABB (Quyết định 212) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 149 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (149/149)!');
+// ==========================================
+// TEST 150: CỔNG VÒM DỌC HAI ĐẦU GIẤU KHÔNG GIAN NGOÀI, 7 SHOP BẮC KÍN NGANG & 12 HÀNG QUÁN TRUNG TÂM SÁT KỀ (QUYẾT ĐỊNH 213)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const archCode = fs.readFileSync('src/components/chat/market/marketArchitecture.ts', 'utf8');
+  const stallsCode = fs.readFileSync('src/components/chat/market/marketStalls.ts', 'utf8');
+
+  assert.ok(
+    archCode.includes('drawSideArchGate') &&
+      !archCode.includes('EXIT LE THANH TON') &&
+      archCode.includes('CUA NAM') &&
+      archCode.includes('CUA BAC') &&
+      stallsCode.includes('AO DAI SAI GON') &&
+      stallsCode.includes('THOI TRANG SAI GON') &&
+      stallsCode.includes('PHO BO - BUN BO') &&
+      stallsCode.includes('HAI SAN TUOI') &&
+      stallsCode.includes('DO GIA DUNG') &&
+      stallsCode.includes('DO KHO TOM KHO') &&
+      stallsCode.includes('CA PHE SINH TO'),
+    'Market must feature vertical side arch gates hiding exterior, 7 full-width North shops, and 6+6 dense central/south stalls'
+  );
+
+  assert.ok(
+    marketBannerCode.includes("id: 'exit_market'") &&
+      marketBannerCode.includes('x: 0') &&
+      marketBannerCode.includes("id: 'exit_back_gate'") &&
+      marketBannerCode.includes('x: 1128') &&
+      marketBannerCode.includes("id: 'stall_aodai'") &&
+      marketBannerCode.includes("id: 'stall_thoitrang'") &&
+      decisionsCode.includes('213') &&
+      chatDocCode.includes('Quyết định 213') &&
+      specCode.includes('QĐ 213'),
+    'BenThanhMarketBannerWebView hotspots, obstacles, and docs must sync QD 213'
+  );
+
+  console.log('✅ Test 150 Passed: Cổng Vòm Dọc Hai Đầu Giấu Không Gian Ngoài, 7 Shop Bắc Kín Ngang & 12 Hàng Quán Sát Kề (Quyết định 213) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 150 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (150/150)!');

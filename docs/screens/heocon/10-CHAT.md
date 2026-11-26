@@ -420,3 +420,8 @@ Màn hình Tab 3 hiển thị:
   2. **Dãy Đảo Trung Tâm (`y: 224..292`, Y-Sorted):** Đảo Trái Cây `1029 NGỌC HẢO` (xoài, cam, chuối, thanh long, dừa, dưa hấu, cân đồng hồ) ➔ Đảo Rau Củ, Thịt & Hải Sản Đá Lạnh ➔ Đảo Bàn Ăn 1 ➔ Đảo Lưu Niệm, Gốm Sơn Mài & Nón Lá.
   3. **Dãy Nam (`y: 356..466`, Y-Sorted):** Quầy Nước Mía & Dừa Tươi ➔ Sạp Chè & Bánh Dân Gian ➔ Đảo Bàn Ăn 2 ➔ Sạp Hoa Tươi & Gia Dụng.
 - **Va Chạm AABB (`pixelOpenRoomEngine.ts`):** Hỗ trợ `obstacles` giúp chú heo đi lại mượt theo 2 lối đi chính & trượt quanh các sạp hàng thay vì đi xuyên quầy kệ.
+
+### 34. Bố Cục Cổng Vòm Dọc Hai Đầu, 7 Shop Bắc Kín Ngang & 12 Hàng Quán Trung Tâm Sát Kề (Quyết định 213)
+- **2 Cổng Vòm Tròn Nằm Dọc Giấu Không Gian Ngoài (`marketArchitecture.ts`):** Đưa 2 cổng ra vào (`CUA NAM` bên trái `x: 0..72` và `CUA BAC` bên phải `x: 1128..1200`) về dạng cổng vòm tròn tường vàng kem Chợ Bến Thành nằm dọc cuối 2 đầu đường hành lang (`y: 156..468`), lòng cổng tối ấm giấu kín hoàn toàn không gian phố bên ngoài, kèm thảm đỏ & bảo vệ đứng gác.
+- **7 Shop Dãy Bắc Kín Ngang (`marketStalls.ts`):** Chuyển Cửa 1 cũ thành `AO DAI SAI GON` (giữ 4 tà áo dài + tủ `WATCH`) và Cửa Bắc cũ thành `THOI TRANG SAI GON` (quần áo, váy, túi xách); nối liền 7 shop sát vách nhau (`x: 74..1126`, chỉ cách cột 4px): `AO DAI SAI GON`, `HUONG TRINH`, `LIEN SAI GON & NGOC HOA 823`, `KHU AN UONG 1044`, `BANH CUON 50K & BANH BEO`, `PHO BO - BUN BO`, `THOI TRANG SAI GON`.
+- **12 Hàng Quán Trung Tâm & Tầng Nam Sát Kề (`6 + 6`):** Tăng mật độ lên 6 đảo trung tâm (`y: 230..290`) + 6 sạp tầng Nam (`y: 374..434`) đặt sát kề nhau (chỉ chừa khe hẻm đi bộ 20px), đồng bộ `obstacles` AABB & 14+ `hotspots` trong `BenThanhMarketBannerWebView.tsx`.
