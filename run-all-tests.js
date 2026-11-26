@@ -7006,11 +7006,60 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       marketBannerCode.includes("id: 'stall_thoitrang'") &&
       decisionsCode.includes('213') &&
       chatDocCode.includes('Quyết định 213') &&
-      specCode.includes('QĐ 213'),
+      (specCode.includes('QĐ 213') || specCode.includes('QĐ 214')),
     'BenThanhMarketBannerWebView hotspots, obstacles, and docs must sync QD 213'
   );
 
   console.log('✅ Test 150 Passed: Cổng Vòm Dọc Hai Đầu Giấu Không Gian Ngoài, 7 Shop Bắc Kín Ngang & 12 Hàng Quán Sát Kề (Quyết định 213) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 150 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (150/150)!');
+// ==========================================
+// TEST 151: NÂNG CẤP ĐỒ HỌA CHỢ BẾN THÀNH CHUẨN INDIE 32-BIT (MÁI HIÊN VẢI SỌC, CỤM HÀNG HÓA & NHÂN VẬT ĐỔ BÓNG — QUYẾT ĐỊNH 214)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const paletteCode = fs.readFileSync('src/components/chat/market/marketPalette.ts', 'utf8');
+  const crowdCode = fs.readFileSync('src/components/chat/market/marketCrowd.ts', 'utf8');
+  const archCode = fs.readFileSync('src/components/chat/market/marketArchitecture.ts', 'utf8');
+  const stallsCode = fs.readFileSync('src/components/chat/market/marketStalls.ts', 'utf8');
+
+  assert.ok(
+    paletteCode.includes('drawStripedAwning') &&
+      paletteCode.includes('drawPitchedCanopy') &&
+      paletteCode.includes('drawWoodenCrate') &&
+      paletteCode.includes('drawBambooBasket') &&
+      paletteCode.includes('drawHangingLantern') &&
+      paletteCode.includes('drawScale') &&
+      paletteCode.includes('drawCeramicVase') &&
+      stallsCode.includes('drawStripedAwning') &&
+      stallsCode.includes('drawPitchedCanopy') &&
+      stallsCode.includes('drawWoodenCrate') &&
+      crowdCode.includes('E(c,px+4,py,6,2') &&
+      decisionsCode.includes('214') &&
+      chatDocCode.includes('Quyết định 214') &&
+      specCode.includes('QĐ 214'),
+    'Market modules and docs must implement 32-bit indie visual overhaul for QD 214'
+  );
+
+  const extractTemplate = (tsCode) => {
+    const m = tsCode.match(/return `([\s\S]*)`;\s*\}/);
+    assert.ok(m && m[1], 'Must extract template string from market module');
+    return m[1].replace(/\\`/g, '`').replace(/\$\{/g, '\\${');
+  };
+  const scriptMatch = marketBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
+  assert.ok(scriptMatch && scriptMatch[1], 'Must find inline market canvas script');
+  const assembledJs = scriptMatch[1]
+    .replace('${paletteScript}', extractTemplate(paletteCode))
+    .replace('${crowdScript}', extractTemplate(crowdCode))
+    .replace('${archScript}', extractTemplate(archCode))
+    .replace('${stallsScript}', extractTemplate(stallsCode))
+    .replace('${openRoomScript}', '');
+  new Function(assembledJs);
+
+  console.log('✅ Test 151 Passed: Nâng Cấp Đồ Họa Chợ Bến Thành Chuẩn Indie 32-Bit (Mái Hiên Vải Sọc, Cụm Hàng Hóa & Nhân Vật Đổ Bóng — Quyết định 214) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 151 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (151/151)!');

@@ -51,10 +51,12 @@ function drawPerson16Bit(c,px,py,o){
   var tall=o.tall?1:0;
   var hair=o.hair||(isForeign?'#EAB308':'#2B2118');
   var skin=isForeign?'#FAD7B8':'#F5CCA0', skinSh=isForeign?'#E2B48E':'#DDA878';
-  pxShadow(c,px-2,py-1,12,2);
+  // Bóng tiếp xúc elip mềm dưới chân
+  E(c,px+4,py,6,2,'rgba(43,33,24,0.32)');
   var by=sit?(py-13-tall):(py-14-tall);
   if(o.backpack){
-    R(c,px-4,by+1,4,7,INK);R(c,px-3,by+2,2,5,o.backpack);R(c,px-3,by+2,2,1,'rgba(255,255,255,0.28)');
+    R(c,px-4,by+1,5,7,INK);R(c,px-3,by+2,3,5,o.backpack);R(c,px-3,by+2,3,1,'rgba(255,255,255,0.3)');
+    R(c,px-3,by+5,3,1,'rgba(0,0,0,0.22)');
   }
   if(sit){
     R(c,px,py-5,8,4,INK);R(c,px+1,py-4,6,3,pants);
@@ -67,7 +69,10 @@ function drawPerson16Bit(c,px,py,o){
   }
   R(c,px-1,by,10,8+tall,INK);
   R(c,px,by+1,8,6+tall,shirt);
-  R(c,px+6,by+1,2,6+tall,'rgba(0,0,0,0.14)');
+  // Highlight vai trái & bóng đổ cạnh phải + cổ áo
+  R(c,px,by+1,2,5+tall,'rgba(255,255,255,0.22)');
+  R(c,px+6,by+1,2,6+tall,'rgba(0,0,0,0.16)');
+  R(c,px+2,by+1,4,1,'rgba(255,255,255,0.45)');
   R(c,px-2,by+2,2,5,INK);R(c,px-1,by+2,1,4,skin);
   R(c,px+8,by+2,2,5,INK);R(c,px+8,by+2,1,4,skin);
   if(o.guard){
@@ -79,7 +84,7 @@ function drawPerson16Bit(c,px,py,o){
     R(c,px+2,by+3,4,3,'#111827');R(c,px+3,by+4,2,1,'#94A3B8');
   }
   if(o.bag){
-    R(c,px+9,by+5,4,5,INK);R(c,px+10,by+6,2,3,o.bag);
+    R(c,px+9,by+5,5,5,INK);R(c,px+10,by+6,3,3,o.bag);R(c,px+10,by+5,3,1,'#8C5832');
   }
   var hy=by-7;
   R(c,px,hy,8,7,INK);R(c,px+1,hy+1,6,5,skin);R(c,px+1,hy+5,6,1,skinSh);
@@ -104,7 +109,7 @@ function drawPerson16Bit(c,px,py,o){
   }else if(o.hat==='cap'){
     R(c,px,hy-1,8,2,INK);R(c,px+1,hy,6,1,'#3B82F6');R(c,px+6,hy+1,3,1,INK);
   }else{
-    R(c,px+1,hy,6,2,hair);R(c,px,hy+1,1,3,hair);R(c,px+7,hy+1,1,3,hair);
+    R(c,px+1,hy,6,2,hair);R(c,px+2,hy,3,1,'rgba(255,255,255,0.22)');R(c,px,hy+1,1,3,hair);R(c,px+7,hy+1,1,3,hair);
   }
 }
 
@@ -121,18 +126,21 @@ function drawPlasticStool(c,sx,sy,col){
 
 function getWalkingShoppers(t){
   return [
-    {y:178,x:((t*16+40)%1140)+24,shirt:'#E0452B',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
-    {y:186,x:1140-((t*14+150)%1100),shirt:'#38BDF8',pants:'#334155',tourist:true,hair:'#FDE047',backpack:'#EA580C',camera:true,shades:true,tall:true},
-    {y:194,x:((t*15+340)%1140)+24,shirt:'#F59E0B',pants:'#1F2937',tourist:true,hat:'bucket',backpack:'#2563EB',bag:'#FFFBF1'},
-    {y:202,x:1140-((t*13+520)%1100),shirt:'#EC4899',pants:'#374151',hat:'bun',bag:'#F4B93B'},
-    {y:210,x:((t*17+740)%1140)+24,shirt:'#10B981',pants:'#1E293B',tourist:true,hair:'#92400E',camera:true,tall:true},
-    {y:216,x:1140-((t*12+920)%1100),shirt:'#FFFBF1',pants:'#4B6FA5',hat:'cap',bag:'#E0452B'},
-    {y:304,x:1140-((t*15+80)%1100),shirt:'#FFFBF1',pants:'#4B6FA5',tourist:true,hair:'#FACC15',backpack:'#16A34A',shades:true,tall:true},
-    {y:314,x:((t*13+280)%1140)+24,shirt:'#EF4444',pants:'#1F2937',hat:'nonla',bag:'#E5BA7E'},
-    {y:324,x:1140-((t*16+480)%1100),shirt:'#6366F1',pants:'#1E293B',tourist:true,hat:'cap',backpack:'#EC4899',camera:true},
-    {y:334,x:((t*14+680)%1140)+24,shirt:'#84CC16',pants:'#334155',hat:'bun',bag:'#38BDF8'},
-    {y:342,x:1140-((t*12+860)%1100),shirt:'#F97316',pants:'#1F2937',tourist:true,hair:'#DC2626',shades:true,bag:'#FFFBF1',tall:true},
-    {y:348,x:((t*15+1020)%1140)+24,shirt:'#14B8A6',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'}
+    {y:180,x:((t*16+40)%1040)+80,shirt:'#E0452B',pants:'#1E293B',hat:'nonla',bag:'#FFFBF1'},
+    {y:188,x:1100-((t*14+150)%1020),shirt:'#38BDF8',pants:'#334155',tourist:true,hair:'#FDE047',backpack:'#EA580C',camera:true,shades:true,tall:true},
+    {y:196,x:((t*15+340)%1040)+80,shirt:'#F59E0B',pants:'#1F2937',tourist:true,hat:'bucket',backpack:'#2563EB',bag:'#FFFBF1'},
+    {y:204,x:1100-((t*13+520)%1020),shirt:'#EC4899',pants:'#374151',hat:'bun',bag:'#F4B93B'},
+    {y:212,x:((t*17+740)%1040)+80,shirt:'#10B981',pants:'#1E293B',tourist:true,hair:'#92400E',camera:true,tall:true},
+    {y:218,x:1100-((t*12+920)%1020),shirt:'#FFFBF1',pants:'#4B6FA5',hat:'cap',bag:'#E0452B'},
+    {y:304,x:1100-((t*15+80)%1020),shirt:'#FFFBF1',pants:'#4B6FA5',tourist:true,hair:'#FACC15',backpack:'#16A34A',shades:true,tall:true},
+    {y:314,x:((t*13+280)%1040)+80,shirt:'#EF4444',pants:'#1F2937',hat:'nonla',bag:'#E5BA7E'},
+    {y:322,x:1100-((t*16+480)%1020),shirt:'#6366F1',pants:'#1E293B',tourist:true,hat:'cap',backpack:'#EC4899',camera:true},
+    {y:332,x:((t*14+680)%1040)+80,shirt:'#84CC16',pants:'#334155',hat:'bun',bag:'#38BDF8'},
+    {y:340,x:1100-((t*12+860)%1020),shirt:'#F97316',pants:'#1F2937',tourist:true,hair:'#DC2626',shades:true,bag:'#FFFBF1',tall:true},
+    {y:348,x:((t*15+1020)%1040)+80,shirt:'#14B8A6',pants:'#1E293B',hat:'nonla',bag:'#FEF08A'},
+    {y:444,x:((t*13+160)%1040)+80,shirt:'#F472B6',pants:'#1E293B',hat:'bun',bag:'#FFFBF1'},
+    {y:454,x:1100-((t*14+410)%1020),shirt:'#FACC15',pants:'#334155',tourist:true,hat:'bucket',backpack:'#DC2626',camera:true},
+    {y:462,x:((t*16+790)%1040)+80,shirt:'#3B82F6',pants:'#1F2937',hat:'cap',bag:'#F4B93B'}
   ];
 }
 
