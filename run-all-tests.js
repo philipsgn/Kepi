@@ -7615,4 +7615,69 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 163 Passed: Mô Phỏng Quy Trình Quán Phở Thực Tế 100% (FSM), Khuôn Mặt Chi Tiết, 14 Bàn San Sát & Bỏ Quạt Trần (Quyết định 226) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 163 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (163/163)!');
+// =========================================================================
+// TEST 164: ADIDAS FLAGSHIP BRAND CENTER 2 TẦNG 640×560 (QĐ 227)
+// =========================================================================
+{
+  const adArtPath = 'src/components/chat/adidas/adidasInteriorArt.ts';
+  const adBannerPath = 'src/components/chat/AdidasStoreBannerWebView.tsx';
+  const adViewPath = 'src/components/chat/AdidasStoreView.tsx';
+  assert.ok(fs.existsSync(adArtPath), 'adidasInteriorArt.ts must exist');
+  assert.ok(fs.existsSync(adBannerPath), 'AdidasStoreBannerWebView.tsx must exist');
+  assert.ok(fs.existsSync(adViewPath), 'AdidasStoreView.tsx must exist');
+
+  const adArtCode = fs.readFileSync(adArtPath, 'utf8');
+  const adBannerCode = fs.readFileSync(adBannerPath, 'utf8');
+  const adViewCode = fs.readFileSync(adViewPath, 'utf8');
+  const vnKitCode = fs.readFileSync('src/components/pixel/vnPixelArtKit.ts', 'utf8');
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    funCode.includes('onEnterAdidas') &&
+      funCode.includes("d.id === 'adidas_store' && d.userTriggered && onEnterAdidas") &&
+      hubCode.includes("'adidas'") &&
+      hubCode.includes("onEnterAdidas={() => handlePressCard('adidas')}") &&
+      chatViewCode.includes("activeSubView === 'adidas'") &&
+      chatViewCode.includes('AdidasStoreView') &&
+      adViewCode.includes('fullscreenContainer') &&
+      adBannerCode.includes('worldWidth: 640') &&
+      adBannerCode.includes('worldHeight: 560') &&
+      adBannerCode.includes('buildVnPixelKitPrimitivesScript') &&
+      adBannerCode.includes("id: 'adidas_sneaker_wall'") &&
+      adBannerCode.includes("id: 'adidas_fitting_mirror'") &&
+      adBannerCode.includes("id: 'adidas_checkout'") &&
+      adBannerCode.includes("id: 'exit_adidas'") &&
+      adArtCode.includes('drawThreeStripesLogo') &&
+      adArtCode.includes('drawFootwearWall') &&
+      adArtCode.includes('drawAdiletteSlide') &&
+      adArtCode.includes('drawClothingRack') &&
+      adArtCode.includes('drawMannequin') &&
+      adArtCode.includes('drawAdidasStaff') &&
+      adArtCode.includes('drawAdidasShopper') &&
+      adArtCode.includes('CẦU THANG KÍNH') &&
+      decisionsCode.includes('Quyết định 227') &&
+      chatDocCode.includes('Quyết định 227') &&
+      specCode.includes('QĐ 227'),
+    'Adidas Flagship 2-story 640x560 interior (3-stripes sneakers/slides/clothes, 7 mannequins, glass LED stairs, 2 staff, shoppers, 2-way portal, and docs) must be synced for QD 227'
+  );
+
+  // Kiểm chứng cú pháp JS runtime của toàn bộ script Adidas lắp ráp (vnKit + adArt + inline)
+  const mKit = vnKitCode.match(/return `([\s\S]*)`;\s*\}/);
+  const mArt = adArtCode.match(/return `([\s\S]*)`;\s*\}/);
+  const mAd = adBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
+  assert.ok(mKit && mKit[1] && mArt && mArt[1] && mAd && mAd[1], 'Must extract vnKit, adArt, and inline adidas script');
+  const assembledAdJs = mAd[1]
+    .replace('${vnKitScript}', mKit[1].replace('${matJson}', '{}').replace(/\\`/g, '`'))
+    .replace('${adidasArtScript}', mArt[1].replace(/\\`/g, '`'))
+    .replace('${openRoomScript}', '');
+  new Function(assembledAdJs);
+
+  console.log('✅ Test 164 Passed: Không Gian Toàn Màn Hình Adidas Flagship Brand Center 2 Tầng (640×560, Minimalist Luxury — Quyết định 227) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 164 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (164/164)!');

@@ -18,6 +18,7 @@ interface EntertainmentBannerWebViewProps {
   onPressBanner?: () => void;
   onEnterPho?: () => void;
   onEnterCafe?: () => void;
+  onEnterAdidas?: () => void;
   onEnterMarket?: () => void;
   onEnterCathedral?: () => void;
   onEnterPagoda?: () => void;
@@ -33,6 +34,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
   onPressBanner,
   onEnterPho,
   onEnterCafe,
+  onEnterAdidas,
   onEnterMarket,
   onEnterCathedral,
   onEnterPagoda,
@@ -71,6 +73,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
       };
       if (d.id === 'pho_old_quarter' && d.userTriggered && onEnterPho) triggerPortal(onEnterPho);
       else if (d.id === 'saigon_cafe' && d.userTriggered && onEnterCafe) triggerPortal(onEnterCafe);
+      else if (d.id === 'adidas_store' && d.userTriggered && onEnterAdidas) triggerPortal(onEnterAdidas);
       else if (d.id === 'ben_thanh_notre' && d.userTriggered && onEnterMarket) triggerPortal(onEnterMarket);
       else if (d.id === 'notre_dame_gate' && d.userTriggered && onEnterCathedral) triggerPortal(onEnterCathedral);
       else if (d.id === 'pagoda_gate' && d.userTriggered && onEnterPagoda) triggerPortal(onEnterPagoda);
@@ -87,7 +90,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     };
     window.addEventListener('message', onWebMsg);
     return () => window.removeEventListener('message', onWebMsg);
-  }, [onEnterPho, onEnterCafe, onEnterMarket, onEnterCathedral, onEnterPagoda]);
+  }, [onEnterPho, onEnterCafe, onEnterAdidas, onEnterMarket, onEnterCathedral, onEnterPagoda]);
 
   const handleMessage = (event: any) => {
     try {
@@ -149,7 +152,8 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             standY: 82,
             standFace: 1,
             actionType: 'look_window',
-            bubbleText: 'Cửa hàng Adidas 3 sọc · Diện đồ thể thao cực chất!',
+            fastDash: true,
+            bubbleText: 'Đang bước vào Adidas Flagship 2 Tầng...',
           },
           {
             id: 'notre_dame_gate',
