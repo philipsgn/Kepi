@@ -7542,7 +7542,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       chatViewCode.includes('PhoRestaurantView') &&
       phoViewCode.includes('fullscreenContainer') &&
       phoBannerCode.includes('worldWidth: 640') &&
-      phoBannerCode.includes('worldHeight: 440') &&
+      (phoBannerCode.includes('worldHeight: 460') || phoBannerCode.includes('worldHeight: 440')) &&
       phoBannerCode.includes('buildVnPixelKitPrimitivesScript') &&
       phoBannerCode.includes("id: 'pho_kitchen'") &&
       phoBannerCode.includes("id: 'pho_special_table'") &&
@@ -7554,14 +7554,14 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       phoArtCode.includes('drawPhoWaiter') &&
       phoArtCode.includes('drawSeatedPhoGuest') &&
       phoArtCode.includes('drawWalkingPhoGuest') &&
-      phoArtCode.includes('drawCeilingFan') &&
+      (phoArtCode.includes('drawWallFan') || phoArtCode.includes('drawCeilingFan')) &&
       phoArtCode.includes('drawTileFloorIndochine') &&
       phoArtCode.includes('drawSteamPuff') &&
       decisionsCode.includes('Quyết định 225') &&
       chatDocCode.includes('Quyết định 225') &&
-      specCode.includes('640 × 440') &&
-      specCode.includes('QĐ 225'),
-    'Pho Restaurant 640x440 fullscreen interior (chef, 2 waiters, boiling pots + steam, beef/noodles, 3 fans, guests, Ong Dia altar, vnPixelArtKit reuse, 2-way portal, and docs) must be synced for QD 225'
+      (specCode.includes('640 × 460') || specCode.includes('640 × 440')) &&
+      (specCode.includes('QĐ 226') || specCode.includes('QĐ 225')),
+    'Pho Restaurant fullscreen interior (chef, 2 waiters, boiling pots + steam, beef/noodles, fans, guests, Ong Dia altar, vnPixelArtKit reuse, 2-way portal, and docs) must be synced for QD 225/226'
   );
 
   // Kiểm chứng cú pháp JS runtime của toàn bộ script Quán Phở lắp ráp (vnKit + phoArt + inline)
@@ -7575,7 +7575,44 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     .replace('${openRoomScript}', '');
   new Function(assembledPhoJs);
 
-  console.log('✅ Test 162 Passed: Không Gian Toàn Màn Hình Quán Phở Cổ Truyền Việt Nam (640×440, Chuẩn VIETNAM_PIXEL_ART_BIBLE — Quyết định 225) Audit verified cleanly');
+  console.log('✅ Test 162 Passed: Không Gian Toàn Màn Hình Quán Phở Cổ Truyền Việt Nam (Chuẩn VIETNAM_PIXEL_ART_BIBLE — Quyết định 225) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 162 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (162/162)!');
+// =========================================================================
+// TEST 163: MÔ PHỎNG QUY TRÌNH QUÁN PHỞ THỰC TẾ 100% (FSM), MẶT NGƯỜI CHI TIẾT, 14 BÀN SAN SÁT & BỎ QUẠT TRẦN (QĐ 226)
+// =========================================================================
+{
+  const phoArtCode = fs.readFileSync('src/components/chat/pho/phoInteriorArt.ts', 'utf8');
+  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    !phoArtCode.includes('drawCeilingFan') &&
+      phoArtCode.includes('function drawWallFan') &&
+      phoArtCode.includes('function drawDetailedHumanFace') &&
+      phoArtCode.includes('function drawDynamicPhoBowl') &&
+      phoArtCode.includes("bowlState === 'FULL'") &&
+      phoArtCode.includes("bowlState === 'EMPTY_DIRTY'") &&
+      phoBannerCode.includes('worldHeight: 460') &&
+      phoBannerCode.includes('id: 13') &&
+      phoBannerCode.includes('function stepPhoSimulation') &&
+      phoBannerCode.includes('function buildAislePath') &&
+      phoBannerCode.includes('WAITING_FOOD') &&
+      phoBannerCode.includes('EATING') &&
+      phoBannerCode.includes('NEEDS_CLEAR') &&
+      phoBannerCode.includes('SERVE_WALK') &&
+      phoBannerCode.includes('CLEAR_WALK') &&
+      phoBannerCode.includes('RETURN_DIRTY') &&
+      decisionsCode.includes('Quyết định 226') &&
+      chatDocCode.includes('Quyết định 226') &&
+      specCode.includes('640 × 460') &&
+      specCode.includes('QĐ 226'),
+    'Pho Restaurant realistic FSM (waiting->serve->eat->leave->clear->sink), detailed faces, 14 dense tables, no ceiling fans (wall fans instead), and docs must be synced for QD 226'
+  );
+
+  console.log('✅ Test 163 Passed: Mô Phỏng Quy Trình Quán Phở Thực Tế 100% (FSM), Khuôn Mặt Chi Tiết, 14 Bàn San Sát & Bỏ Quạt Trần (Quyết định 226) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 163 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (163/163)!');
