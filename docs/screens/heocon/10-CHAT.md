@@ -397,3 +397,11 @@ Màn hình Tab 3 hiển thị:
 ## 30. Sửa Lỗi Đứng Hình Dòng 479 & Nâng Cấp Chợ Bến Thành Full-Focus 60fps (`680×176` — Quyết định 209)
 - **Khắc phục triệt để bug runtime (`BenThanhMarketBannerWebView.tsx`):** Sửa `R(x-sp,...)` thành `R(x,fx-sp,...)` trong `drawLiveMarketEffects` + bọc `try/catch` để chú heo `24×20` và thao tác trượt camera hoạt động mượt 60fps.
 - **Mở rộng không gian Full-Focus (`BenThanhMarketView.tsx`, `680×176` trên viewport `192×136`):** Xóa bỏ toàn bộ `zoneCard`, `statsCard` và thanh toast rời; mở rộng khung Chợ Bến Thành chiếm trọn trọng tâm màn hình kèm 1 hàng chip ngang 4 khu ở đáy. Bổ sung `drawWalkingShoppers` (du khách đi bộ dạo chợ 2 chiều Y-sorted với heo) và quầng sáng đèn ấm.
+
+## 31. Đại Tu Lòng Chợ Bến Thành 16-Bit 2.5D Có Chiều Sâu 4 Lớp & Pixel Vuông 1:1 (`720×280` — Quyết định 210)
+- **Khóa tỷ lệ Pixel vuông 1:1 (`BenThanhMarketBannerWebView.tsx`):** Đổi kích thước khung nhìn sang **`VW = 208, VH = 240`** với `aspectRatio: 208 / 240` trên thế giới **`720 × 280`** — triệt tiêu 100% lỗi kéo giãn dọc gây méo chú heo & nhân vật.
+- **4 Lớp Chiều Sâu 2.5D & Sprite Người `14×22` (`drawPerson16Bit`):**
+  1. `y: 0..56`: Mái vòm bê tông cong parabol, kèo thép chữ A, giếng trời chiếu tia nắng xiên (`sunbeams`) & chao đèn mây tre đan nan (`drawRattanLamp`).
+  2. `y: 56..148`: 4 phân khu sạp hàng 3D chi tiết từng vật phẩm (cửa sắt xếp mắt cáo `drawAccordionGate` + hậu cảnh sạp Áo dài, hũ mứt nắp đỏ & hộp trà `LIÊN SÀI GÒN`, cổng vòm 3D `KHU ĂN UỐNG` + nồi nước lèo có bếp lửa + dừa tươi `Sạp 1044`, nồi hơi vải trắng `Bánh Cuốn 50K` & mặt bàn đá mài terrazzo + 12 chén `Bánh Bèo 20K` + chùm nem chua lá chuối).
+  3. `y: 148..196`: Hành lang đi dạo chính, ghế đẩu inox có kiềng & thực khách `14×22`.
+  4. `y: 196..280`: **4 Đảo Giữa Chợ Y-Sorted (`drawForegroundIslands`)** ở nửa dưới sàn (Đảo Lưu Niệm Nón Lá, Đảo Trái Cây `1029 Ngọc Hảo`, 2 Đảo Bàn Ăn Khu Ẩm Thực đầy món ăn & thực khách) để chú heo đi vòng quanh.
