@@ -99,25 +99,25 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     () =>
       buildOpenRoomEngineScript({
         canvasId: 'funCv',
-        worldWidth: 1160,
-        worldHeight: 128,
+        worldWidth: 1200,
+        worldHeight: 164,
         viewWidth: 224,
-        viewHeight: 108,
-        walkBounds: { minX: 16, maxX: 892, minY: 70, maxY: 84 },
+        viewHeight: 116,
+        walkBounds: { minX: 20, maxX: 892, minY: 74, maxY: 92 },
         initialX: 468,
-        initialY: 76,
+        initialY: 84,
         initialCamX: 356,
-        initialCamY: 0,
-        speed: 48,
+        initialCamY: 24,
+        speed: 52,
         hotspots: [
           {
             id: 'pho_old_quarter',
             x: 8,
             y: 18,
             w: 88,
-            h: 52,
+            h: 56,
             standX: 52,
-            standY: 76,
+            standY: 82,
             standFace: -1,
             actionType: 'eat_snack',
             bubbleText: `Quán Phở Bò nóng hổi · Kho cám: ${pigFood} cám`,
@@ -127,9 +127,9 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             x: 106,
             y: 16,
             w: 98,
-            h: 54,
+            h: 58,
             standX: 155,
-            standY: 76,
+            standY: 82,
             standFace: 1,
             actionType: 'sip_coffee',
             fastDash: true,
@@ -140,9 +140,9 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             x: 214,
             y: 18,
             w: 100,
-            h: 52,
+            h: 56,
             standX: 264,
-            standY: 76,
+            standY: 82,
             standFace: 1,
             actionType: 'look_window',
             bubbleText: 'Cửa hàng Adidas 3 sọc · Diện đồ thể thao cực chất!',
@@ -152,9 +152,9 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             x: 324,
             y: 6,
             w: 80,
-            h: 64,
+            h: 68,
             standX: 362,
-            standY: 76,
+            standY: 82,
             standFace: 1,
             actionType: 'look_window',
             fastDash: true,
@@ -165,9 +165,9 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             x: 414,
             y: 8,
             w: 112,
-            h: 62,
+            h: 66,
             standX: 470,
-            standY: 76,
+            standY: 82,
             standFace: 1,
             actionType: 'look_window',
             fastDash: true,
@@ -178,9 +178,9 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             x: 536,
             y: 8,
             w: 150,
-            h: 62,
+            h: 66,
             standX: 611,
-            standY: 76,
+            standY: 82,
             standFace: 1,
             actionType: 'jump_joy',
             bubbleText: `SVĐ Thống Nhất rực đèn · Chuỗi ${streakDays} ngày cực sung!`,
@@ -190,9 +190,9 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             x: 696,
             y: 8,
             w: 144,
-            h: 62,
+            h: 66,
             standX: 797,
-            standY: 76,
+            standY: 82,
             standFace: 1,
             actionType: 'look_window',
             fastDash: true,
@@ -202,10 +202,10 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             id: 'bach_dang_wharf',
             x: 856,
             y: 16,
-            w: 300,
-            h: 110,
+            w: 340,
+            h: 146,
             standX: 882,
-            standY: 76,
+            standY: 84,
             standFace: 1,
             actionType: 'play_arcade',
             bubbleText: `Bến Bạch Đằng · Cầu Ba Son & Cầu Đi Bộ · ${gameTickets} vé`,
@@ -237,10 +237,10 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
 </style>
 </head>
 <body>
-<canvas id="funCv" width="224" height="108"></canvas>
+<canvas id="funCv" width="224" height="116"></canvas>
 <script>
 (function(){
-var VW = 224, VH = 108, W = 1160, H = 128;
+var VW = 224, VH = 116, W = 1200, H = 164;
 
 var PAL = {
   ink: '#2B2118', pig: '#F596A8', pigHi: '#FDBAC7', pigSh: '#D96D85',
@@ -366,40 +366,72 @@ function fbSpark(c, x, y, t) {
 
 var FB = {
   t: 0, last: 0, boost: 0, hour: new Date().getHours(), pal: null, bg: null,
+  pigSprites: null,
   planeX: 40,
   clouds: [
     { x: 40, y: 8, w: 26, sp: 3.5 },
     { x: 220, y: 12, w: 32, sp: 2.8 },
     { x: 440, y: 7, w: 28, sp: 3.2 },
     { x: 690, y: 11, w: 30, sp: 2.5 },
-    { x: 960, y: 9, w: 26, sp: 3.0 }
+    { x: 980, y: 9, w: 28, sp: 3.0 }
   ],
   vehicles: [
-    // Làn 0 (trên, y ~ 88..94, đi sang trái dir: -1)
-    { kind: 'moto', lane: 0, dir: -1, x: 780, y: 90, w: 13, h: 9, sp: 38, col: '#E0452B', riderCol: '#2563EB', helmCol: '#FFFFFF' },
-    { kind: 'car', lane: 0, dir: -1, x: 670, y: 89, w: 24, h: 12, sp: 32, col: '#F8FAFC' },
-    { kind: 'police', lane: 0, dir: -1, x: 540, y: 89, w: 24, h: 12, sp: 40, col: '#FFFFFF' },
-    { kind: 'bus', lane: 0, dir: -1, x: 380, y: 88, w: 38, h: 14, sp: 24, col: '#2563EB' },
-    { kind: 'moto', lane: 0, dir: -1, x: 290, y: 91, w: 13, h: 9, sp: 42, col: '#16A34A', riderCol: '#F4B93B', helmCol: '#1E293B' },
-    { kind: 'truck', lane: 0, dir: -1, x: 180, y: 88, w: 30, h: 13, sp: 26, col: '#0284C7' },
-    { kind: 'car', lane: 0, dir: -1, x: 80, y: 89, w: 24, h: 12, sp: 34, col: '#DC2626' },
-    { kind: 'moto', lane: 0, dir: -1, x: 20, y: 91, w: 13, h: 9, sp: 36, col: '#F4B93B', riderCol: '#EC4899', helmCol: '#FFFFFF' },
-    // Làn 1 (dưới, y ~ 109..115, đi sang phải dir: 1)
-    { kind: 'moto', lane: 1, dir: 1, x: 40, y: 112, w: 13, h: 9, sp: 40, col: '#2563EB', riderCol: '#E0452B', helmCol: '#F4B93B' },
-    { kind: 'container', lane: 1, dir: 1, x: 140, y: 109, w: 45, h: 15, sp: 20, col: '#EA580C' },
-    { kind: 'car', lane: 1, dir: 1, x: 260, y: 110, w: 24, h: 12, sp: 34, col: '#1E3A8A' },
-    { kind: 'moto', lane: 1, dir: 1, x: 340, y: 113, w: 13, h: 9, sp: 44, col: '#FFFFFF', riderCol: '#16A34A', helmCol: '#E0452B' },
-    { kind: 'truck', lane: 1, dir: 1, x: 420, y: 109, w: 30, h: 13, sp: 27, col: '#16A34A' },
-    { kind: 'car', lane: 1, dir: 1, x: 560, y: 110, w: 24, h: 12, sp: 36, col: '#94A3B8' },
-    { kind: 'police', lane: 1, dir: 1, x: 660, y: 110, w: 24, h: 12, sp: 42, col: '#FFFFFF' },
-    { kind: 'bus', lane: 1, dir: 1, x: 760, y: 109, w: 38, h: 14, sp: 25, col: '#2563EB' }
+    // Làn 0 (trên, y ~ 97..106, đi sang trái dir: -1, xe to bự giãn cách thoáng)
+    { kind: 'moto', lane: 0, dir: -1, x: 810, y: 104, w: 22, h: 16, sp: 36, col: '#E0452B', riderCol: '#2563EB', helmCol: '#FFFFFF' },
+    { kind: 'police', lane: 0, dir: -1, x: 680, y: 101, w: 40, h: 20, sp: 38, col: '#FFFFFF' },
+    { kind: 'bus', lane: 0, dir: -1, x: 520, y: 97, w: 66, h: 25, sp: 24, col: '#2563EB' },
+    { kind: 'moto', lane: 0, dir: -1, x: 430, y: 105, w: 22, h: 16, sp: 40, col: '#16A34A', riderCol: '#F4B93B', helmCol: '#1E293B' },
+    { kind: 'truck', lane: 0, dir: -1, x: 290, y: 98, w: 52, h: 24, sp: 26, col: '#0284C7' },
+    { kind: 'car', lane: 0, dir: -1, x: 160, y: 101, w: 40, h: 20, sp: 34, col: '#DC2626' },
+    { kind: 'moto', lane: 0, dir: -1, x: 50, y: 104, w: 22, h: 16, sp: 38, col: '#F4B93B', riderCol: '#EC4899', helmCol: '#FFFFFF' },
+    // Làn 1 (dưới, y ~ 132..140, đi sang phải dir: 1, xe container & bus khổng lồ)
+    { kind: 'container', lane: 1, dir: 1, x: 40, y: 132, w: 82, h: 28, sp: 20, col: '#EA580C' },
+    { kind: 'moto', lane: 1, dir: 1, x: 175, y: 141, w: 22, h: 16, sp: 40, col: '#2563EB', riderCol: '#E0452B', helmCol: '#F4B93B' },
+    { kind: 'car', lane: 1, dir: 1, x: 260, y: 138, w: 40, h: 20, sp: 34, col: '#1E3A8A' },
+    { kind: 'truck', lane: 1, dir: 1, x: 390, y: 135, w: 52, h: 24, sp: 27, col: '#16A34A' },
+    { kind: 'police', lane: 1, dir: 1, x: 520, y: 138, w: 40, h: 20, sp: 42, col: '#FFFFFF' },
+    { kind: 'moto', lane: 1, dir: 1, x: 615, y: 141, w: 22, h: 16, sp: 42, col: '#FFFFFF', riderCol: '#16A34A', helmCol: '#E0452B' },
+    { kind: 'bus', lane: 1, dir: 1, x: 700, y: 134, w: 66, h: 25, sp: 25, col: '#2563EB' }
   ],
   boats: [
-    { kind: 'cruise', dir: 1, x: 910, y: 80, w: 46, h: 15, sp: 9.5, phase: 0.4 },
-    { kind: 'waterbus', dir: -1, x: 1070, y: 97, w: 34, h: 12, sp: 13.5, phase: 1.8 },
-    { kind: 'barge', dir: 1, x: 960, y: 110, w: 50, h: 14, sp: 6.5, phase: 3.1 }
+    { kind: 'cruise', dir: 1, x: 910, y: 84, w: 68, h: 22, sp: 10.5, phase: 0.4 },
+    { kind: 'waterbus', dir: -1, x: 1090, y: 112, w: 54, h: 20, sp: 14.5, phase: 1.8 },
+    { kind: 'barge', dir: 1, x: 960, y: 134, w: 78, h: 24, sp: 7.2, phase: 3.1 }
   ]
 };
+
+function buildPigSpriteSet() {
+  return {
+    idle: mk(24, 20, function(g) { drawPigSprite(g, { step: 0, blink: false, mood: 'happy', ear: 0 }); }),
+    step1: mk(24, 20, function(g) { drawPigSprite(g, { step: 1, blink: false, mood: 'happy', ear: 1 }); }),
+    step2: mk(24, 20, function(g) { drawPigSprite(g, { step: 2, blink: false, mood: 'happy', ear: 0 }); }),
+    blink: mk(24, 20, function(g) { drawPigSprite(g, { step: 0, blink: true, mood: 'happy', ear: 0 }); })
+  };
+}
+
+function drawMascotPig(ctx, st, t) {
+  if (!FB.pigSprites) return;
+  var px = Math.round(st.x);
+  var py = Math.round(st.y);
+  var bounce = st.walking
+    ? Math.round(Math.abs(Math.sin(t * 11)) * 1.5)
+    : (st.action ? Math.round(Math.abs(Math.sin(t * 7)) * 2.5) : 0);
+  var sp = FB.pigSprites.idle;
+  if (st.walking) {
+    sp = (Math.floor(t * 10) % 2 === 0) ? FB.pigSprites.step1 : FB.pigSprites.step2;
+  } else if ((t % 3.6) < 0.14) {
+    sp = FB.pigSprites.blink;
+  }
+  // Bóng tiếp xúc dưới chân Heo Mascot
+  E(ctx, px, py + 1, 8, 2.5, 'rgba(43,33,24,0.30)');
+  ctx.save();
+  ctx.translate(px, py - 18 - bounce);
+  if (st.facing < 0) {
+    ctx.scale(-1, 1);
+  }
+  ctx.drawImage(sp, -12, 0);
+  ctx.restore();
+}
 
 function fbFrame(now) {
   var dt = Math.min(0.05, (now - FB.last) / 1000);
@@ -415,36 +447,36 @@ function fbFrame(now) {
     if (FB.clouds[ci].x > W + 40) FB.clouds[ci].x = -40;
   }
 
-  // Cập nhật 6 loại xe cộ trên đại lộ (x: -55..875)
+  // Cập nhật 6 loại xe to bự trên đại lộ (x: -95..880)
   for (var vi = 0; vi < FB.vehicles.length; vi++) {
     var v = FB.vehicles[vi];
     v.x += v.dir * v.sp * dt * (1 + FB.boost * 0.4);
-    if (v.dir > 0 && v.x > 875) v.x = -v.w - 12;
-    if (v.dir < 0 && v.x < -v.w - 15) v.x = 875;
+    if (v.dir > 0 && v.x > 880) v.x = -v.w - 18;
+    if (v.dir < 0 && v.x < -v.w - 20) v.x = 880;
   }
 
-  // Cập nhật tàu thuyền lớn trên Sông Bạch Đằng (x: 865..1175)
+  // Cập nhật 3 tàu thuyền khổng lồ trên Sông Bạch Đằng (x: 860..1220)
   for (var bi = 0; bi < FB.boats.length; bi++) {
     var b = FB.boats[bi];
     b.x += b.dir * b.sp * dt;
-    if (b.dir > 0 && b.x > 1170) b.x = 876 - b.w;
-    if (b.dir < 0 && b.x < 874 - b.w) b.x = 1168;
+    if (b.dir > 0 && b.x > 1215) b.x = 874 - b.w;
+    if (b.dir < 0 && b.x < 874 - b.w) b.x = 1210;
   }
 
-  var eng = window.OPEN_ROOM_ENGINE;
+  var eng = window.__openRoom;
   var cv = document.getElementById('funCv');
   if (!cv || !FB.bg) { requestAnimationFrame(fbFrame); return; }
   var ctx = cv.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
-  if (eng) eng.step(dt);
+  if (eng) eng.step(dt, now);
   var camX = eng ? Math.round(eng.state.camX) : 356;
-  var camY = eng ? Math.round(eng.state.camY) : 0;
+  var camY = eng ? Math.round(eng.state.camY) : 24;
 
   ctx.save();
   ctx.translate(-camX, -camY);
 
-  // 1. Nền tĩnh 1160×128
+  // 1. Nền tĩnh 1200×164
   ctx.drawImage(FB.bg, 0, 0);
 
   // 2. Mây trôi, máy bay & đàn chim
@@ -459,17 +491,16 @@ function fbFrame(now) {
   fbSpark(ctx, 251, 3, FB.t); // Đèn đỉnh Bitexco
   fbSpark(ctx, 797, 1, FB.t + 1.2); // Đèn đỉnh Landmark 81
 
-  // 3. Chú Heo Con đi dạo trên vỉa hè (y: 70..84)
-  if (eng) eng.drawPig(ctx, drawPigSprite);
+  // 3. Chú Heo Mascot 24×20 đi dạo khám phá trên vỉa hè rộng (y: 74..92)
+  if (eng) drawMascotPig(ctx, eng.state, FB.t);
 
-  // 4. Giao thông 2 làn (6 loại xe + CSGT áo vàng) & Sông Bạch Đằng (tàu thuyền lớn)
+  // 4. Giao thông 2 làn xe to bự + CSGT áo vàng 12×22 & Sông Bạch Đằng (3 tàu lớn)
   drawSaigonLiveTrafficAndRiver(ctx, FB.t, FB.pal, FB.vehicles, FB.boats);
 
-  // 5. Bong bóng lời thoại & chỉ thị biên
+  // 5. Vòng chạm, bong bóng lời thoại & 4 mũi tên chỉ thị biên
   ctx.restore();
   if (eng) {
-    eng.drawBubble(ctx);
-    eng.drawEdgeHints(ctx);
+    eng.drawOverlays(ctx, now);
   }
 
   requestAnimationFrame(fbFrame);
@@ -479,6 +510,7 @@ function funBanStart() {
   FB.hour = new Date().getHours();
   FB.pal = fbTimePalette(FB.hour);
   FB.bg = fbStatic(FB.pal);
+  FB.pigSprites = buildPigSpriteSet();
   var cv = document.getElementById('funCv');
   if (cv) {
     cv.addEventListener('pointerdown', function() { FB.boost = 1; }, { passive: true });
@@ -539,7 +571,7 @@ if (document.readyState === 'loading') {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    aspectRatio: 224 / 108,
+    aspectRatio: 224 / 116,
     borderRadius: 22,
     borderWidth: 3,
     borderColor: '#2B2118',

@@ -60,7 +60,7 @@ $$W_{\text{world}} \ge 2.75 \times W_{\text{view}} \quad (\text{chuẩn hóa } 3
 | 2 | **Hồ sơ (Văn Phòng Heo)** | `ProfileDeskBanner.tsx` | `176 × 80` | `432 × 128` | `3.93×` | Chặng 2 |
 | 3 | **Vườn (Sân Vườn & Mặt Tiền)** | `PixelGardenWebView.tsx` | `160 × 96` | `440 × 140` | `4.01×` | Chặng 3 |
 | 4 | **Nhà của bạn (Các Phòng)** | `PixelHouseWebView.tsx` | `160 × 96` | `480 × 132` | `4.13×` | Chặng 3 |
-| 5 | **Khám phá (Đại Lộ Sài Gòn & Bến Bạch Đằng)** | `EntertainmentBannerWebView.tsx` + `hub/saigonPanoramaArt.ts` | `224 × 108` | `1160 × 128` | `6.14×` | Hoàn thiện (QĐ 221 — Skyline xa Bitexco & Landmark 81, 7 công trình mặt tiền: Quán Phở, Tiệm Cà Phê, Adidas Store, Nhà Thờ Đức Bà, Chợ Bến Thành, SVĐ Thống Nhất, Chùa Việt Nam; đại lộ 2 làn 6 loại xe + CSGT áo vàng; khu Sông Bạch Đằng: Cầu đi bộ, Cầu Ba Son, tàu thuyền lớn) |
+| 5 | **Khám phá (Đại Lộ Sài Gòn & Bến Bạch Đằng)** | `EntertainmentBannerWebView.tsx` + `hub/saigonPanoramaArt.ts` | `224 × 116` | `1200 × 164` | `7.58×` | Hoàn thiện (QĐ 222 — Khôi phục `window.__openRoom` hiển thị Heo Mascot 24×20 & camera lia 4 hướng; đại lộ 2 làn rộng 68px phóng to gấp ~1.8×–2× 6 loại xe + CSGT áo vàng 12×22 + tàu thuyền lớn trên sông Bạch Đằng) |
 | 6 | **Trò chuyện (Quán Cà Phê)** | `CafeChatBannerWebView.tsx` + `cafe/*` | `180 × 120` | `720 × 176` | `5.87×` | Hoàn thiện (QĐ 218 — 6 khu ấm cúng: Barista phin, Thư viện 3 kệ sách + Sofa, Mini Coffee Workshop, Boutique quần áo, Cây thông & 3 quạt trần) |
 
 ---

@@ -4211,8 +4211,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const chatDocPath = path.join(__dirname, 'docs/screens/heocon/10-CHAT.md');
   const chatDocCode = fs.readFileSync(chatDocPath, 'utf8');
 
-  // 1. EntertainmentBannerWebView (192x88 cũ hoặc 224x108 Đại Lộ Sài Gòn QĐ 221)
-  assert.ok(bannerViewCode.includes('width="192" height="88"') || bannerViewCode.includes('width="224" height="108"'), 'EntertainmentBannerWebView must use 192x88 or 224x108 prototype canvas ratio');
+  // 1. EntertainmentBannerWebView (192x88 cũ hoặc 224x108/224x116 Đại Lộ Sài Gòn QĐ 221-222)
+  assert.ok(bannerViewCode.includes('width="192" height="88"') || bannerViewCode.includes('width="224" height="108"') || bannerViewCode.includes('width="224" height="116"'), 'EntertainmentBannerWebView must use 192x88 or 224x108/224x116 prototype canvas ratio');
   assert.ok(bannerViewCode.includes('fbSky') && bannerViewCode.includes('fbStatic'), 'EntertainmentBannerWebView must port fbSky and fbStatic');
   assert.ok(bannerViewCode.includes('fbBird') && bannerViewCode.includes('fbSpark'), 'EntertainmentBannerWebView must port fbBird and fbSpark');
   assert.ok(bannerViewCode.includes('FB.boost = 1'), 'EntertainmentBannerWebView must support touch boost acceleration');
@@ -4736,8 +4736,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(pixelIconsCode.includes('export const PixelIconCrossRoad'), 'PixelIcons must export PixelIconCrossRoad');
   assert.ok(pixelIconsCode.includes('#4A4658') && (pixelIconsCode.includes('#FFFBF1') || pixelIconsCode.includes('#F4E7A8')), 'PixelIconCrossRoad must have asphalt and zebra stripe colors');
 
-  // 2. Banner Động Ngày 22 / QĐ 221: Canvas 192x88 hoặc 224x108, máy bay Vietnam Airlines, địa danh Sài Gòn
-  assert.ok(bannerCode.includes('width="192" height="88"') || bannerCode.includes('width="224" height="108"') || (bannerCode.includes('192') && bannerCode.includes('88')), 'Banner canvas must be 192x88 or 224x108');
+  // 2. Banner Động Ngày 22 / QĐ 221-222: Canvas 192x88 hoặc 224x108/224x116
+  assert.ok(bannerCode.includes('width="192" height="88"') || bannerCode.includes('width="224" height="108"') || bannerCode.includes('width="224" height="116"') || (bannerCode.includes('192') && bannerCode.includes('88')), 'Banner canvas must be 192x88 or 224x108/224x116');
   assert.ok(bannerCode.includes('fbPlane') && (bannerCode.includes('#2F6F8F') || bannerCode.includes('#1A6B8A') || bannerCode.includes('#0B5F8A') || bannerCode.includes('#1D5AA6')), 'Banner must render Vietnam Airlines plane with lotus gold and navy');
   assert.ok((bannerCode.includes('fbLandmarks') || bannerCode.includes('fbStatic')) && bannerCode.includes('Bitexco'), 'Banner must render Saigon landmarks');
   assert.ok(bannerCode.includes('fbRider') && (bannerCode.includes('ride') || bannerCode.includes('vehicles')) && bannerCode.includes('walk'), 'Banner must render traffic/ride and walking pig');
@@ -6539,8 +6539,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       profileBannerCode.includes('worldWidth: 420') &&
       profileBannerCode.includes('worldHeight: 160') &&
       profileBannerCode.includes('drawProfileWorldWings') &&
-      (funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540') || funBannerCode.includes('worldWidth: 460')) &&
-      (funBannerCode.includes('worldHeight: 128') || funBannerCode.includes('worldHeight: 112') || funBannerCode.includes('worldHeight: 168')) &&
+      (funBannerCode.includes('worldWidth: 1200') || funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540') || funBannerCode.includes('worldWidth: 460')) &&
+      (funBannerCode.includes('worldHeight: 164') || funBannerCode.includes('worldHeight: 128') || funBannerCode.includes('worldHeight: 112') || funBannerCode.includes('worldHeight: 168')) &&
       (funBannerCode.includes('buildSaigonPanoramaArtScript') || funBannerCode.includes('buildSeamlessPanorama') || funBannerCode.includes('drawFunWorldWings')) &&
       streetBannerCode.includes('worldWidth: 584') &&
       (streetBannerCode.includes('worldHeight: 160') || streetBannerCode.includes('worldHeight: 172')) &&
@@ -6563,8 +6563,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
 
   assert.ok(
-    (funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540')) &&
-      (funBannerCode.includes('worldHeight: 128') || funBannerCode.includes('worldHeight: 112')) &&
+    (funBannerCode.includes('worldWidth: 1200') || funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540')) &&
+      (funBannerCode.includes('worldHeight: 164') || funBannerCode.includes('worldHeight: 128') || funBannerCode.includes('worldHeight: 112')) &&
       (funBannerCode.includes('buildSaigonPanoramaArtScript') || funBannerCode.includes('buildSeamlessPanorama')) &&
       (funBannerCode.includes('fbTimePalette') || funBannerCode.includes('getTimePalette')) &&
       !funBannerCode.includes('drawFunWorldWings') &&
@@ -7348,10 +7348,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
 
   assert.ok(
-    funCode.includes('worldWidth: 1160') &&
-      funCode.includes('worldHeight: 128') &&
+    (funCode.includes('worldWidth: 1200') || funCode.includes('worldWidth: 1160')) &&
+      (funCode.includes('worldHeight: 164') || funCode.includes('worldHeight: 128')) &&
       funCode.includes('viewWidth: 224') &&
-      funCode.includes('viewHeight: 108') &&
+      (funCode.includes('viewHeight: 116') || funCode.includes('viewHeight: 108')) &&
       funCode.includes('buildSaigonPanoramaArtScript') &&
       funCode.includes("id: 'pho_old_quarter'") &&
       funCode.includes("id: 'saigon_cafe'") &&
@@ -7377,9 +7377,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       artCode.includes('drawRiverBoat') &&
       decisionsCode.includes('221') &&
       chatDocCode.includes('Quyết định 221') &&
-      specCode.includes('1160 × 128') &&
-      specCode.includes('QĐ 221'),
-    'Saigon Boulevard & Bach Dang Panorama 1160x128 (QD 221) with far Bitexco/Landmark 81, 7 landmarks, 6 vehicle types + traffic police, Bach Dang river bridges/boats, and docs must be synced'
+      (specCode.includes('1200 × 164') || specCode.includes('1160 × 128')) &&
+      (specCode.includes('QĐ 222') || specCode.includes('QĐ 221')),
+    'Saigon Boulevard & Bach Dang Panorama (QD 221/222) with far Bitexco/Landmark 81, 7 landmarks, 6 vehicle types + traffic police, Bach Dang river bridges/boats, and docs must be synced'
   );
 
   const mArt = artCode.match(/return `([\s\S]*)`;\s*\}/);
@@ -7391,7 +7391,44 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     .replace('${openRoomScript}', '');
   new Function(assembledFunJs);
 
-  console.log('✅ Test 158 Passed: Đại Lộ Sài Gòn & Bến Bạch Đằng Panorama (1160×128 / 224×108, 7 Công Trình, 6 Loại Xe + CSGT & Sông Bạch Đằng — Quyết định 221) Audit verified cleanly');
+  console.log('✅ Test 158 Passed: Đại Lộ Sài Gòn & Bến Bạch Đằng Panorama (7 Công Trình, 6 Loại Xe + CSGT & Sông Bạch Đằng — Quyết định 221) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 158 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (158/158)!');
+// =========================================================================
+// TEST 159: KHÔI PHỤC HEO MASCOT + CAMERA LIA (window.__openRoom) & XE TO BỰ 1200×164 (QĐ 222)
+// =========================================================================
+{
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const artCode = fs.readFileSync('src/components/chat/hub/saigonPanoramaArt.ts', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    funCode.includes('window.__openRoom') &&
+      !funCode.includes('window.OPEN_ROOM_ENGINE') &&
+      funCode.includes('eng.step(dt, now)') &&
+      funCode.includes('eng.drawOverlays(ctx, now)') &&
+      funCode.includes('drawMascotPig') &&
+      funCode.includes('buildPigSpriteSet') &&
+      funCode.includes('worldWidth: 1200') &&
+      funCode.includes('worldHeight: 164') &&
+      funCode.includes('viewHeight: 116') &&
+      funCode.includes('w: 82, h: 28') &&
+      funCode.includes('w: 66, h: 25') &&
+      funCode.includes('w: 52, h: 24') &&
+      funCode.includes('w: 40, h: 20') &&
+      funCode.includes('w: 22, h: 16') &&
+      funCode.includes('w: 78, h: 24') &&
+      artCode.includes('function drawWheel') &&
+      decisionsCode.includes('222') &&
+      chatDocCode.includes('Quyết định 222') &&
+      specCode.includes('1200 × 164') &&
+      specCode.includes('QĐ 222'),
+    'EntertainmentBannerWebView must bind window.__openRoom for Mascot Pig & 4-way camera pan, enlarge vehicles/boats on 1200x164 world, and sync docs for QD 222'
+  );
+
+  console.log('✅ Test 159 Passed: Khôi Phục Chú Heo Mascot & Camera Lia 4 Hướng (window.__openRoom) + Đội Xe Khổng Lồ 1200×164 (Quyết định 222) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 159 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (159/159)!');

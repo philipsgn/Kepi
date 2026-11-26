@@ -440,19 +440,20 @@ function drawSaigonLandmarks(c, pal) {
   R(c, 834, 61, 6, 7, '#A65432'); E(c, 837, 56, 6, 5, '#3A7D3C');
 }
 
-/* ==================== 3. VỈA HÈ + ĐẠI LỘ 2 LÀN (x: 0..864) ==================== */
+/* ==================== 3. VỈA HÈ RỘNG + ĐẠI LỘ 2 LÀN (x: 0..868, y: 68..164) ==================== */
 function drawAvenueAndSidewalk(c, pal) {
-  // Vỉa hè lát gạch (y: 68..86)
-  R(c, 0, 68, 868, 18, '#DFCFB2');
+  // Vỉa hè lát gạch rộng thoáng cho Chú Heo Mascot 24×20 đi dạo (y: 68..96)
+  R(c, 0, 68, 868, 28, '#DFCFB2');
   R(c, 0, 68, 868, 1, '#2B2118');
   for (var gx = 0; gx < 868; gx += 12) {
-    R(c, gx, 69, 1, 15, 'rgba(43,33,24,0.12)');
+    R(c, gx, 69, 1, 25, 'rgba(43,33,24,0.12)');
   }
-  R(c, 0, 76, 868, 1, 'rgba(43,33,24,0.10)');
-  // Bó vỉa vạch trắng-đen
+  R(c, 0, 77, 868, 1, 'rgba(43,33,24,0.10)');
+  R(c, 0, 86, 868, 1, 'rgba(43,33,24,0.10)');
+  // Bó vỉa vạch trắng-đen (y: 94..96)
   for (var kx = 0; kx < 862; kx += 12) {
-    R(c, kx, 84, 6, 2, '#F5F5F5');
-    R(c, kx + 6, 84, 6, 2, '#2B2118');
+    R(c, kx, 94, 6, 2, '#F5F5F5');
+    R(c, kx + 6, 94, 6, 2, '#2B2118');
   }
   // Hàng cây xanh & đèn đường dọc vỉa hè (đặt khe giữa các công trình)
   var lampXs = [100, 208, 318, 408, 530, 690, 846];
@@ -471,63 +472,61 @@ function drawAvenueAndSidewalk(c, pal) {
     }
   }
 
-  // Đại lộ nhựa 2 làn (y: 86..128)
-  R(c, 0, 86, 862, 42, '#3E3E44');
-  R(c, 0, 86, 862, 1, '#26262B');
-  R(c, 0, 126, 862, 2, '#2B2118');
-  // Đường vạch phân cách tim vàng đứt đoạn ở giữa (y: 106)
-  for (var dx = 6; dx < 854; dx += 18) {
-    R(c, dx, 106, 10, 2, '#F4C44E');
+  // Đại lộ nhựa 2 làn RỘNG RÃI (y: 96..164, tổng 68px chứa xe to bự)
+  R(c, 0, 96, 862, 68, '#3B3C42');
+  R(c, 0, 96, 862, 2, '#25262B');
+  R(c, 0, 162, 862, 2, '#2B2118');
+  // Đường vạch phân cách tim vàng đứt đoạn ở giữa (y: 129)
+  for (var dx = 6; dx < 854; dx += 22) {
+    R(c, dx, 129, 13, 2, '#F4C44E');
   }
-  // Vạch ngựa vằn đi bộ trước Chợ Bến Thành (x: 454..482) & SVĐ (x: 600..622)
-  var zXs = [454, 600];
+  // Vạch ngựa vằn đi bộ lớn trước Chợ Bến Thành (x: 452..484) & SVĐ (x: 598..626)
+  var zXs = [452, 598];
   for (var zi = 0; zi < zXs.length; zi++) {
-    for (var zy = 89; zy < 124; zy += 5) {
-      R(c, zXs[zi], zy, 22, 3, '#E8E6DF');
+    for (var zy = 100; zy < 158; zy += 7) {
+      R(c, zXs[zi], zy, 28, 4, '#E8E6DF');
     }
   }
-  // Bục CSGT điều tiết giao thông tại giao lộ (x: 468, y: 104)
-  R(c, 460, 104, 16, 6, '#2B2118');
-  R(c, 461, 105, 14, 4, '#FFFFFF');
-  R(c, 463, 105, 3, 4, '#D93B30');
-  R(c, 470, 105, 3, 4, '#D93B30');
+  // Bục CSGT điều tiết giao thông tại giao lộ (x: 468, y: 125)
+  R(c, 456, 125, 24, 9, '#2B2118');
+  R(c, 457, 126, 22, 7, '#FFFFFF');
+  R(c, 460, 126, 4, 7, '#D93B30');
+  R(c, 471, 126, 4, 7, '#D93B30');
 }
 
-/* ==================== 4. BẾN BẠCH ĐẰNG & SÔNG SÀI GÒN (x: 860..1160) ==================== */
+/* ==================== 4. BẾN BẠCH ĐẰNG & SÔNG SÀI GÒN (x: 860..1200, y: 56..164) ==================== */
 function drawBachDangRiverStatic(c, pal) {
   var isDark = pal.mode !== 'day';
 
-  // Mặt nước Sông Sài Gòn rộng (x: 874..1160, y: 60..128)
-  R(c, 874, 60, 286, 18, pal.waterTop);
-  R(c, 874, 78, 286, 24, pal.waterMid);
-  R(c, 874, 102, 286, 26, pal.waterBot);
+  // Mặt nước Sông Sài Gòn rộng sâu (x: 874..1200, y: 60..164)
+  R(c, 874, 60, 326, 24, pal.waterTop);
+  R(c, 874, 84, 326, 36, pal.waterMid);
+  R(c, 874, 120, 326, 44, pal.waterBot);
   // Bờ Thủ Thiêm cây xanh xa phía đối diện (y: 54..61)
-  R(c, 880, 56, 280, 5, pal.mode === 'night' ? '#1B2E2A' : '#3C6E47');
-  for (var tx = 886; tx < 1154; tx += 14) {
+  R(c, 880, 56, 320, 5, pal.mode === 'night' ? '#1B2E2A' : '#3C6E47');
+  for (var tx = 886; tx < 1194; tx += 14) {
     E(c, tx, 55, 6, 3, pal.mode === 'night' ? '#243D36' : '#4D8A55');
   }
 
-  // Bờ kè Bến Bạch Đằng nối từ vỉa hè (x: 856..896, y: 68..128)
-  R(c, 856, 68, 36, 60, '#D8C7A8');
-  R(c, 890, 68, 5, 60, '#8E8475'); // Mép kè đá
-  R(c, 894, 68, 2, 60, '#2B2118');
+  // Bờ kè Bến Bạch Đằng nối từ vỉa hè (x: 856..896, y: 68..164)
+  R(c, 856, 68, 36, 96, '#D8C7A8');
+  R(c, 890, 68, 5, 96, '#8E8475'); // Mép kè đá
+  R(c, 894, 68, 2, 96, '#2B2118');
   // Lan can trắng Bến Bạch Đằng dọc bờ sông
-  for (var ry = 70; ry < 124; ry += 8) {
-    R(c, 888, ry, 2, 6, '#FFFFFF');
+  for (var ry = 70; ry < 160; ry += 10) {
+    R(c, 888, ry, 2, 7, '#FFFFFF');
   }
-  R(c, 887, 70, 4, 56, 'rgba(255,255,255,0.45)');
+  R(c, 887, 70, 4, 92, 'rgba(255,255,255,0.45)');
   // Trạm chờ Saigon Waterbus mái cong xanh-vàng (x: 858..884, y: 50..68)
   R(c, 860, 52, 26, 4, '#2563EB');
   R(c, 862, 50, 22, 2, '#F4B93B');
   R(c, 863, 56, 2, 12, '#4B5563'); R(c, 881, 56, 2, 12, '#4B5563');
   R(c, 866, 61, 14, 5, '#FFF8E6'); // Bảng Waterbus
 
-  // ---- CẦU ĐI BỘ QUA SÔNG SÀI GÒN (x: 892..998, y: 48..76) ----
-  // Trụ cầu xuống nước
-  R(c, 916, 68, 4, 12, '#A7B5C4'); R(c, 968, 68, 4, 12, '#A7B5C4');
-  // Nhịp cầu uốn lượn hiện đại
-  for (var pbx = 892; pbx <= 996; pbx++) {
-    var u = (pbx - 892) / 104;
+  // ---- CẦU ĐI BỘ QUA SÔNG SÀI GÒN (x: 892..1006, y: 48..76) ----
+  R(c, 918, 68, 5, 14, '#A7B5C4'); R(c, 976, 68, 5, 14, '#A7B5C4');
+  for (var pbx = 892; pbx <= 1006; pbx++) {
+    var u = (pbx - 892) / 114;
     var deckY = Math.round(68 - Math.sin(u * Math.PI) * 10);
     var archY = Math.round(deckY - 6 - Math.sin(u * Math.PI) * 7);
     R(c, pbx, deckY, 1, 4, '#E8EFF5');
@@ -540,79 +539,87 @@ function drawBachDangRiverStatic(c, pal) {
       R(c, pbx, deckY - 1, 2, 1, '#FFE08A');
     }
   }
-  // Người đi bộ dạo trên Cầu Đi Bộ
-  var walkers = [918, 936, 950, 966];
+  var walkers = [920, 940, 956, 974];
   var wCols = ['#E0452B','#F4B93B','#38BDF8','#EC4899'];
   for (var wi = 0; wi < walkers.length; wi++) {
     var wx = walkers[wi];
-    var wu = (wx - 892) / 104;
+    var wu = (wx - 892) / 114;
     var wy = Math.round(68 - Math.sin(wu * Math.PI) * 10);
     R(c, wx, wy - 4, 2, 2, '#FFD2B3');
     R(c, wx, wy - 2, 2, 3, wCols[wi]);
   }
 
-  // ---- CẦU BA SON (THỦ THIÊM 2) DÂY VĂNG TRẮNG (x: 1002..1156, y: 12..78) ----
-  // Mặt cầu bắc ngang sông
-  R(c, 1002, 65, 154, 4, '#D9E2EC');
-  R(c, 1002, 69, 154, 2, '#627385');
-  R(c, 1002, 64, 154, 1, isDark ? '#FFE08A' : '#FFFFFF');
-  // Trụ bê tông dưới mặt nước
-  R(c, 1018, 70, 5, 10, '#8596A6');
-  R(c, 1072, 70, 8, 12, '#8596A6');
-  R(c, 1134, 70, 5, 10, '#8596A6');
-  // Tháp trụ nghiêng biểu tượng Cầu Ba Son (vươn từ (1076,65) nghiêng về (1088,12))
-  for (var py = 12; py <= 65; py++) {
-    var pr = (65 - py) / 53;
-    var pxMain = Math.round(1075 + pr * 13);
-    var pwMain = Math.max(3, Math.round(6 - pr * 2.5));
+  // ---- CẦU BA SON (THỦ THIÊM 2) DÂY VĂNG TRẮNG (x: 1012..1192, y: 10..78) ----
+  R(c, 1012, 65, 180, 4, '#D9E2EC');
+  R(c, 1012, 69, 180, 2, '#627385');
+  R(c, 1012, 64, 180, 1, isDark ? '#FFE08A' : '#FFFFFF');
+  R(c, 1030, 70, 5, 12, '#8596A6');
+  R(c, 1094, 70, 9, 14, '#8596A6');
+  R(c, 1166, 70, 5, 12, '#8596A6');
+  // Tháp trụ nghiêng biểu tượng Cầu Ba Son
+  for (var py = 10; py <= 65; py++) {
+    var pr = (65 - py) / 55;
+    var pxMain = Math.round(1096 + pr * 14);
+    var pwMain = Math.max(3, Math.round(7 - pr * 2.8));
     R(c, pxMain, py, pwMain, 1, '#FFFFFF');
     R(c, pxMain + pwMain - 1, py, 1, 1, '#9EB0C2');
   }
-  // Hệ dây văng xòe quạt 2 bên đặc trưng Cầu Ba Son
   var cableCol = isDark ? '#FFE8A3' : '#F4F8FC';
-  var leftTargets = [1008, 1018, 1028, 1038, 1048, 1058];
+  var leftTargets = [1018, 1030, 1042, 1054, 1066, 1078];
   for (var cl = 0; cl < leftTargets.length; cl++) {
-    var anchorY = 16 + cl * 5;
-    var anchorX = Math.round(1075 + ((65 - anchorY) / 53) * 13);
+    var anchorY = 14 + cl * 6;
+    var anchorX = Math.round(1096 + ((65 - anchorY) / 55) * 14);
     fbDrawLine(c, anchorX, anchorY, leftTargets[cl], 64, cableCol);
   }
-  var rightTargets = [1102, 1112, 1122, 1132, 1142, 1150];
+  var rightTargets = [1124, 1136, 1148, 1160, 1172, 1184];
   for (var cr = 0; cr < rightTargets.length; cr++) {
-    var rAnchorY = 16 + cr * 5;
-    var rAnchorX = Math.round(1078 + ((65 - rAnchorY) / 53) * 13);
+    var rAnchorY = 14 + cr * 6;
+    var rAnchorX = Math.round(1100 + ((65 - rAnchorY) / 55) * 14);
     fbDrawLine(c, rAnchorX, rAnchorY, rightTargets[cr], 64, cableCol);
   }
 }
 
-/* ==================== 5. HOẠT CẢNH ĐỘNG 60FPS: 6 LOẠI XE + CSGT + TÀU THUYỀN ==================== */
+/* ==================== 5. HOẠT CẢNH ĐỘNG 60FPS: ĐỘI XE TO BỰ + CSGT 12×22 + TÀU LỚN ==================== */
 function drawTrafficPolice(c, x, y, t) {
   var wave = Math.sin(t * 5.2) > 0;
   // Bóng tiếp xúc
-  R(c, x - 3, y + 1, 7, 2, 'rgba(43,33,24,0.35)');
-  // Ủng & quần đồng phục vàng cát CSGT
-  R(c, x - 2, y - 4, 2, 5, '#C7A23A');
-  R(c, x + 1, y - 4, 2, 5, '#C7A23A');
-  R(c, x - 2, y, 2, 1, '#2B2118');
-  R(c, x + 1, y, 2, 1, '#2B2118');
-  // Áo CSGT vàng rực + dây chéo nâu
-  R(c, x - 3, y - 9, 7, 5, '#F2CE5E');
-  R(c, x - 2, y - 9, 5, 1, '#D9A72E');
-  R(c, x - 2, y - 8, 1, 4, '#7A4B2A'); // Dây chéo
-  R(c, x - 3, y - 5, 7, 1, '#5C3A21'); // Thắt lưng
-  // Đầu & Mũ kê-pi vàng viền đỏ
-  R(c, x - 2, y - 13, 5, 4, '#FFD5B5');
-  R(c, x - 3, y - 15, 7, 2, '#E8C048');
-  R(c, x - 2, y - 13, 5, 1, '#C92A22'); // Dải đỏ mũ CSGT
-  // Tay giơ gậy chỉ huy trắng-đỏ vẫy nhịp nhàng
+  R(c, x - 5, y + 1, 11, 2, 'rgba(43,33,24,0.4)');
+  // Giày & quần đồng phục vàng cát CSGT (to rõ 12×22)
+  R(c, x - 4, y - 7, 3, 8, '#2B2118'); R(c, x - 3, y - 6, 2, 6, '#C7A23A');
+  R(c, x + 1, y - 7, 3, 8, '#2B2118'); R(c, x + 1, y - 6, 2, 6, '#C7A23A');
+  R(c, x - 4, y - 1, 3, 2, '#1F1A17'); R(c, x + 1, y - 1, 3, 2, '#1F1A17');
+  // Áo CSGT vàng rực có viền + dây chéo nâu + thắt lưng
+  R(c, x - 5, y - 15, 10, 9, '#2B2118');
+  R(c, x - 4, y - 14, 8, 7, '#F4D059');
+  R(c, x - 4, y - 14, 8, 2, '#FFE484');
+  R(c, x - 3, y - 14, 2, 6, '#7A4B2A'); // Dây chéo
+  R(c, x - 4, y - 9, 8, 2, '#5C3A21');  // Thắt lưng da
+  R(c, x - 1, y - 9, 2, 2, '#F4B93B');  // Khóa thắt lưng
+  // Đầu & Mũ kê-pi vàng viền đỏ to rõ
+  R(c, x - 4, y - 20, 8, 5, '#2B2118');
+  R(c, x - 3, y - 19, 6, 4, '#FFD5B5');
+  R(c, x - 2, y - 18, 1, 1, '#2B2118'); R(c, x + 1, y - 18, 1, 1, '#2B2118');
+  R(c, x - 5, y - 23, 10, 3, '#2B2118');
+  R(c, x - 4, y - 22, 8, 2, '#E8C048');
+  R(c, x - 3, y - 20, 6, 1, '#C92A22'); // Dải đỏ mũ kê-pi
+  // Tay trái chống hông, tay phải giơ gậy chỉ huy trắng-đỏ vẫy nhịp nhàng
+  R(c, x - 6, y - 13, 2, 4, '#F4D059');
   if (wave) {
-    R(c, x + 4, y - 11, 2, 3, '#F2CE5E');
-    R(c, x + 5, y - 15, 1, 5, '#FFFFFF');
-    R(c, x + 5, y - 14, 1, 2, '#E0452B');
+    R(c, x + 5, y - 17, 3, 5, '#F4D059');
+    R(c, x + 7, y - 24, 2, 8, '#FFFFFF');
+    R(c, x + 7, y - 22, 2, 3, '#E0452B');
+    R(c, x + 7, y - 17, 2, 2, '#2B2118');
   } else {
-    R(c, x + 4, y - 8, 3, 2, '#F2CE5E');
-    R(c, x + 7, y - 8, 4, 1, '#FFFFFF');
-    R(c, x + 9, y - 8, 2, 1, '#E0452B');
+    R(c, x + 5, y - 13, 4, 3, '#F4D059');
+    R(c, x + 9, y - 13, 7, 2, '#FFFFFF');
+    R(c, x + 12, y - 13, 3, 2, '#E0452B');
   }
+}
+
+function drawWheel(c, cx, cy, r) {
+  E(c, cx, cy, r, r, '#18181B');
+  E(c, cx, cy, Math.max(1, r - 1.5), Math.max(1, r - 1.5), '#94A3B8');
+  R(c, cx, cy, 1, 1, '#18181B');
 }
 
 function drawVehicle(c, v, t, isDark) {
@@ -623,73 +630,127 @@ function drawVehicle(c, v, t, isDark) {
     c.scale(-1, 1);
     c.translate(-(x + v.w / 2), 0);
   }
-  // Bóng gầm xe
-  R(c, x + 1, y + v.h - 1, v.w - 2, 2, 'rgba(20,16,12,0.38)');
+  // Bóng gầm xe đậm
+  R(c, x + 2, y + v.h - 2, v.w - 4, 3, 'rgba(18,14,10,0.45)');
 
   if (v.kind === 'moto') {
-    // Xe máy Việt Nam + người đội mũ bảo hiểm
-    R(c, x + 1, y + 6, 3, 3, '#1C1C20'); R(c, x + 9, y + 6, 3, 3, '#1C1C20');
-    R(c, x + 2, y + 4, 9, 3, v.col);
-    R(c, x + 9, y + 2, 2, 4, '#3B424C'); // Tay lái
-    R(c, x + 5, y + 1, 3, 4, v.riderCol); // Áo người lái
-    R(c, x + 5, y - 2, 3, 3, v.helmCol); // Mũ bảo hiểm
-    if (isDark) R(c, x + 12, y + 3, 4, 2, 'rgba(255,232,140,0.45)');
+    // Xe máy Việt Nam to rõ (22×16) + người lái đội mũ bảo hiểm
+    drawWheel(c, x + 4, y + 12, 3.2);
+    drawWheel(c, x + 17, y + 12, 3.2);
+    // Thân & yếm xe viền đậm
+    R(c, x + 3, y + 7, 15, 5, '#2B2118');
+    R(c, x + 4, y + 8, 13, 3, v.col);
+    R(c, x + 14, y + 4, 4, 6, v.col); // Yếm trước
+    R(c, x + 15, y + 2, 2, 3, '#3B424C'); // Tay lái
+    R(c, x + 18, y + 5, 2, 2, '#FFF59D'); // Đèn pha
+    R(c, x + 2, y + 8, 2, 2, '#EF4444');  // Đèn hậu
+    // Người lái áo khoác & mũ bảo hiểm
+    R(c, x + 7, y + 3, 6, 6, '#2B2118');
+    R(c, x + 8, y + 4, 4, 4, v.riderCol);
+    R(c, x + 8, y - 2, 5, 5, '#2B2118');
+    R(c, x + 9, y - 1, 4, 3, v.helmCol);
+    R(c, x + 11, y + 1, 2, 2, '#FFD5B5'); // Mặt
+    if (isDark) R(c, x + 20, y + 4, 8, 4, 'rgba(255,232,140,0.38)');
   } else if (v.kind === 'car') {
-    // Xe hơi sedan/SUV
-    R(c, x + 2, y + 4, 20, 6, v.col);
-    R(c, x + 5, y + 1, 12, 4, v.col);
-    R(c, x + 7, y + 2, 8, 2, '#BEE3F8'); // Kính
-    R(c, x + 4, y + 9, 4, 3, '#1C1C20'); R(c, x + 16, y + 9, 4, 3, '#1C1C20');
-    R(c, x + 21, y + 6, 2, 2, '#FFF59D'); // Đèn pha
-    R(c, x + 1, y + 6, 2, 2, '#EF4444'); // Đèn hậu
-    if (isDark) R(c, x + 23, y + 5, 7, 4, 'rgba(255,232,140,0.32)');
+    // Xe hơi Sedan/SUV to rõ (40×20)
+    R(c, x + 1, y + 7, 38, 10, '#2B2118');
+    R(c, x + 2, y + 8, 36, 8, v.col);
+    R(c, x + 2, y + 8, 36, 2, 'rgba(255,255,255,0.22)'); // Viền sáng thân trên
+    // Mui & kính chắn gió
+    R(c, x + 8, y + 1, 21, 7, '#2B2118');
+    R(c, x + 9, y + 2, 19, 6, v.col);
+    R(c, x + 11, y + 3, 7, 4, '#BAE6FD'); // Kính sau
+    R(c, x + 19, y + 3, 8, 4, '#E0F2FE'); // Kính trước phản sáng
+    R(c, x + 18, y + 9, 3, 1, '#2B2118'); // Tay nắm cửa
+    // Đèn pha & đèn hậu
+    R(c, x + 36, y + 10, 3, 3, '#FEF08A');
+    R(c, x + 1, y + 10, 3, 3, '#EF4444');
+    // 2 Bánh xe lớn có vành bạc
+    drawWheel(c, x + 9, y + 16, 4);
+    drawWheel(c, x + 30, y + 16, 4);
+    if (isDark) R(c, x + 39, y + 8, 12, 7, 'rgba(255,232,140,0.30)');
   } else if (v.kind === 'police') {
-    // Xe Cảnh Sát Giao Thông nháy đèn Xanh-Đỏ
-    R(c, x + 1, y + 4, 22, 6, '#F8FAFC');
-    R(c, x + 1, y + 7, 22, 2, '#1D4ED8'); // Sọc xanh dương CSGT
-    R(c, x + 5, y + 1, 13, 4, '#F8FAFC');
-    R(c, x + 7, y + 2, 9, 2, '#93C5FD');
-    R(c, x + 4, y + 9, 4, 3, '#1C1C20'); R(c, x + 17, y + 9, 4, 3, '#1C1C20');
-    // Thanh đèn ưu tiên chớp luân phiên Xanh / Đỏ
+    // Xe Cảnh Sát Giao Thông to bự (40×20) nháy đèn Xanh-Đỏ rực rỡ
+    R(c, x + 1, y + 7, 38, 10, '#2B2118');
+    R(c, x + 2, y + 8, 36, 8, '#F8FAFC');
+    R(c, x + 2, y + 11, 36, 3, '#1D4ED8'); // Sọc xanh CSGT nổi bật
+    R(c, x + 16, y + 12, 8, 1, '#FDE047'); // Huy hiệu vàng
+    R(c, x + 8, y + 1, 22, 7, '#2B2118');
+    R(c, x + 9, y + 2, 20, 6, '#F8FAFC');
+    R(c, x + 11, y + 3, 7, 4, '#93C5FD');
+    R(c, x + 19, y + 3, 8, 4, '#BFDBFE');
+    R(c, x + 36, y + 10, 3, 3, '#FEF08A');
+    R(c, x + 1, y + 10, 3, 3, '#EF4444');
+    drawWheel(c, x + 9, y + 16, 4);
+    drawWheel(c, x + 30, y + 16, 4);
+    // Thanh đèn còi ưu tiên chớp luân phiên Xanh / Đỏ
     var blink = Math.floor(t * 10) % 2 === 0;
-    R(c, x + 9, y - 1, 3, 2, blink ? '#38BDF8' : '#1E3A8A');
-    R(c, x + 12, y - 1, 3, 2, blink ? '#991B1B' : '#EF4444');
-    c.globalAlpha = 0.35;
-    E(c, blink ? x + 10 : x + 13, y, 5, 4, blink ? '#38BDF8' : '#EF4444');
+    R(c, x + 14, y - 2, 5, 3, blink ? '#38BDF8' : '#1E3A8A');
+    R(c, x + 19, y - 2, 5, 3, blink ? '#991B1B' : '#EF4444');
+    c.globalAlpha = 0.42;
+    E(c, blink ? x + 16 : x + 22, y - 1, 9, 6, blink ? '#38BDF8' : '#EF4444');
     c.globalAlpha = 1;
   } else if (v.kind === 'truck') {
-    // Xe tải thùng
-    R(c, x + 1, y + 1, 20, 10, '#E2E8F0'); // Thùng hàng bạc
-    R(c, x + 1, y + 1, 20, 2, '#CBD5E1');
-    for (var tx = x + 4; tx < x + 19; tx += 4) R(c, tx, y + 3, 1, 7, '#94A3B8');
-    R(c, x + 21, y + 3, 8, 8, v.col); // Cabin
-    R(c, x + 24, y + 4, 4, 3, '#BEE3F8');
-    R(c, x + 5, y + 10, 4, 3, '#1C1C20'); R(c, x + 23, y + 10, 4, 3, '#1C1C20');
+    // Xe tải thùng lớn (52×24)
+    R(c, x + 1, y + 1, 34, 18, '#2B2118');
+    R(c, x + 2, y + 2, 32, 16, '#E2E8F0'); // Thùng hàng bạc lớn
+    R(c, x + 2, y + 2, 32, 3, '#F8FAFC');
+    for (var tx = x + 6; tx < x + 32; tx += 5) R(c, tx, y + 5, 1, 12, '#94A3B8');
+    // Cabin đầu xe
+    R(c, x + 35, y + 5, 16, 14, '#2B2118');
+    R(c, x + 36, y + 6, 14, 12, v.col);
+    R(c, x + 41, y + 7, 8, 5, '#BAE6FD'); // Kính cabin
+    R(c, x + 48, y + 14, 3, 3, '#FEF08A'); // Đèn pha
+    R(c, x + 1, y + 14, 2, 3, '#EF4444');
+    drawWheel(c, x + 11, y + 19, 4.5);
+    drawWheel(c, x + 43, y + 19, 4.5);
+    if (isDark) R(c, x + 51, y + 12, 12, 7, 'rgba(255,232,140,0.30)');
   } else if (v.kind === 'bus') {
-    // Xe buýt Sài Gòn tuyến 01 thân dài
-    R(c, x + 1, y + 1, 36, 11, '#2563EB');
-    R(c, x + 1, y + 7, 36, 2, '#FFFFFF');
-    for (var bx = x + 3; bx < x + 33; bx += 5) {
-      R(c, bx, y + 3, 4, 3, isDark ? '#FFE891' : '#DBEAFE');
+    // Xe buýt Sài Gòn to bự (66×25)
+    R(c, x + 1, y + 1, 64, 20, '#2B2118');
+    R(c, x + 2, y + 2, 62, 18, '#2563EB');
+    R(c, x + 2, y + 2, 62, 2, '#60A5FA'); // Mái sáng
+    R(c, x + 2, y + 12, 62, 4, '#FFFFFF'); // Sọc trắng biểu tượng
+    R(c, x + 2, y + 16, 62, 4, '#1D4ED8');
+    // 7 Cửa sổ lớn sáng đèn
+    for (var bx = x + 5; bx < x + 54; bx += 7) {
+      R(c, bx, y + 5, 5, 6, isDark ? '#FFE891' : '#DBEAFE');
+      R(c, bx, y + 5, 5, 1, '#1E3A8A');
     }
-    R(c, x + 6, y + 11, 4, 3, '#1C1C20'); R(c, x + 28, y + 11, 4, 3, '#1C1C20');
+    // Kính lái phía trước & bảng tuyến
+    R(c, x + 56, y + 5, 7, 7, '#BFDBFE');
+    R(c, x + 57, y + 3, 5, 2, '#FDE047'); // Đèn số tuyến 01
+    R(c, x + 62, y + 15, 3, 3, '#FEF08A');
+    R(c, x + 1, y + 15, 2, 3, '#EF4444');
+    drawWheel(c, x + 14, y + 20, 4.8);
+    drawWheel(c, x + 51, y + 20, 4.8);
+    if (isDark) R(c, x + 65, y + 13, 14, 8, 'rgba(255,232,140,0.30)');
   } else if (v.kind === 'container') {
-    // Xe Container cỡ lớn
-    R(c, x + 1, y, 32, 11, v.col); // Thùng container
-    for (var cx = x + 4; cx < x + 31; cx += 3) R(c, cx, y + 1, 1, 9, 'rgba(0,0,0,0.22)');
-    R(c, x + 1, y + 11, 33, 2, '#334155'); // Khung rơ-moóc
-    R(c, x + 34, y + 3, 10, 9, '#DC2626'); // Đầu kéo đỏ
-    R(c, x + 38, y + 4, 5, 3, '#BAE6FD');
-    R(c, x + 5, y + 12, 4, 3, '#1C1C20');
-    R(c, x + 11, y + 12, 4, 3, '#1C1C20');
-    R(c, x + 37, y + 12, 4, 3, '#1C1C20');
+    // Xe Container đầu kéo khổng lồ (82×28)
+    R(c, x + 1, y + 1, 58, 19, '#2B2118');
+    R(c, x + 2, y + 2, 56, 17, v.col); // Thùng container dài
+    R(c, x + 2, y + 2, 56, 2, 'rgba(255,255,255,0.22)');
+    for (var cx = x + 6; cx < x + 56; cx += 5) R(c, cx, y + 4, 2, 14, 'rgba(0,0,0,0.20)');
+    // Khung rơ-moóc thép
+    R(c, x + 1, y + 20, 62, 3, '#334155');
+    // Đầu kéo lớn màu đỏ
+    R(c, x + 60, y + 5, 21, 18, '#2B2118');
+    R(c, x + 61, y + 6, 19, 16, '#DC2626');
+    R(c, x + 61, y + 6, 19, 2, '#F87171');
+    R(c, x + 68, y + 8, 10, 6, '#BAE6FD'); // Kính đầu kéo
+    R(c, x + 78, y + 17, 3, 3, '#FEF08A'); // Đèn pha lớn
+    // 3 Trục bánh xe lớn
+    drawWheel(c, x + 10, y + 23, 4.8);
+    drawWheel(c, x + 21, y + 23, 4.8);
+    drawWheel(c, x + 71, y + 23, 4.8);
+    if (isDark) R(c, x + 81, y + 15, 14, 8, 'rgba(255,232,140,0.32)');
   }
   c.restore();
 }
 
 function drawRiverBoat(c, b, t, isDark) {
   var x = Math.round(b.x), y = Math.round(b.y);
-  var bob = Math.round(Math.sin(t * 2.4 + b.phase) * 0.8);
+  var bob = Math.round(Math.sin(t * 2.4 + b.phase) * 0.9);
   y += bob;
   c.save();
   if (b.dir < 0) {
@@ -699,40 +760,45 @@ function drawRiverBoat(c, b, t, isDark) {
   }
   // Vệt sóng trắng rẽ nước phía sau đuôi tàu
   var wake = Math.floor(t * 6) % 2;
-  R(c, x - 9, y + b.h - 2, 8, 1, 'rgba(255,255,255,0.65)');
-  R(c, x - 6 - wake, y + b.h, 6, 1, 'rgba(255,255,255,0.4)');
+  R(c, x - 14, y + b.h - 3, 13, 2, 'rgba(255,255,255,0.65)');
+  R(c, x - 9 - wake * 2, y + b.h, 9, 1, 'rgba(255,255,255,0.42)');
 
   if (b.kind === 'cruise') {
-    // Tàu du lịch 2 tầng sáng đèn trên sông Sài Gòn
-    R(c, x + 2, y + 9, 40, 6, '#F8FAFC'); // Thân tàu trắng
-    R(c, x + 42, y + 10, 4, 4, '#F8FAFC'); // Mũi tàu
-    R(c, x + 1, y + 13, 44, 2, '#B91C1C'); // Đáy đỏ
-    R(c, x + 6, y + 4, 30, 5, '#FFF8E6'); // Tầng 2
-    R(c, x + 4, y + 2, 34, 2, '#D97706'); // Mái vòm vàng
-    for (var wx = x + 8; wx < x + 34; wx += 4) {
-      R(c, wx, y + 5, 3, 3, isDark ? '#FFE066' : '#60A5FA');
-      R(c, wx, y + 10, 3, 2, isDark ? '#FFE066' : '#3B82F6');
+    // Tàu du lịch 2 tầng cỡ lớn (68×22)
+    R(c, x + 2, y + 12, 58, 9, '#2B2118');
+    R(c, x + 3, y + 13, 56, 7, '#F8FAFC');
+    R(c, x + 59, y + 14, 7, 5, '#F8FAFC'); // Mũi tàu
+    R(c, x + 2, y + 18, 63, 3, '#B91C1C'); // Đáy đỏ
+    R(c, x + 9, y + 5, 44, 8, '#2B2118');
+    R(c, x + 10, y + 6, 42, 7, '#FFF8E6'); // Tầng 2
+    R(c, x + 7, y + 2, 48, 4, '#D97706'); // Mái vòm vàng
+    for (var wx = x + 13; wx < x + 49; wx += 6) {
+      R(c, wx, y + 8, 4, 4, isDark ? '#FFE066' : '#60A5FA');
+      R(c, wx, y + 14, 4, 3, isDark ? '#FFE066' : '#3B82F6');
     }
   } else if (b.kind === 'waterbus') {
-    // Saigon Waterbus vàng-trắng
-    R(c, x + 1, y + 6, 28, 6, '#F4B93B');
-    R(c, x + 29, y + 8, 4, 4, '#F4B93B');
-    R(c, x + 4, y + 3, 22, 4, '#FFFFFF');
-    for (var wbx = x + 6; wbx < x + 24; wbx += 4) {
-      R(c, wbx, y + 4, 3, 2, isDark ? '#FFE891' : '#38BDF8');
+    // Saigon Waterbus cỡ lớn (54×20)
+    R(c, x + 1, y + 9, 45, 9, '#2B2118');
+    R(c, x + 2, y + 10, 43, 7, '#F4B93B');
+    R(c, x + 45, y + 12, 7, 5, '#F4B93B');
+    R(c, x + 6, y + 4, 34, 6, '#FFFFFF');
+    for (var wbx = x + 9; wbx < x + 36; wbx += 6) {
+      R(c, wbx, y + 5, 4, 4, isDark ? '#FFE891' : '#38BDF8');
     }
   } else {
-    // Tàu chở hàng / Sà lan container lớn
-    R(c, x + 1, y + 8, 46, 6, '#475569');
-    R(c, x + 47, y + 9, 4, 4, '#475569');
-    R(c, x + 1, y + 12, 49, 2, '#991B1B');
-    // Cabin lái phía sau
-    R(c, x + 3, y + 2, 8, 6, '#F8FAFC');
-    R(c, x + 6, y + 3, 4, 2, '#93C5FD');
-    // Các khối container trên sà lan
-    R(c, x + 14, y + 3, 10, 5, '#EA580C');
-    R(c, x + 25, y + 3, 10, 5, '#2563EB');
-    R(c, x + 36, y + 4, 9, 4, '#16A34A');
+    // Tàu chở hàng / Sà lan container khổng lồ (78×24)
+    R(c, x + 1, y + 12, 68, 10, '#2B2118');
+    R(c, x + 2, y + 13, 66, 8, '#475569');
+    R(c, x + 68, y + 15, 8, 6, '#475569');
+    R(c, x + 2, y + 19, 73, 3, '#991B1B');
+    // Cabin lái lớn phía sau
+    R(c, x + 4, y + 3, 13, 10, '#2B2118');
+    R(c, x + 5, y + 4, 11, 9, '#F8FAFC');
+    R(c, x + 9, y + 6, 6, 4, '#93C5FD');
+    // 3 Khối container lớn trên sà lan
+    R(c, x + 20, y + 5, 15, 8, '#EA580C');
+    R(c, x + 36, y + 5, 15, 8, '#2563EB');
+    R(c, x + 52, y + 6, 14, 7, '#16A34A');
   }
   c.restore();
 }
@@ -766,27 +832,27 @@ function drawSaigonLiveTrafficAndRiver(c, t, pal, vehicles, boats) {
     c.restore();
   }
 
-  // 4. Làn trên (đi sang trái, y ~ 88..98)
+  // 4. Đại lộ 2 làn rộng 68px (clip x: 0..860, y: 92..164)
   c.save();
-  c.beginPath(); c.rect(0, 84, 860, 44); c.clip();
+  c.beginPath(); c.rect(0, 90, 860, 74); c.clip();
   for (var vi = 0; vi < vehicles.length; vi++) {
     if (vehicles[vi].lane === 0) drawVehicle(c, vehicles[vi], t, isDark);
   }
-  // 5. CSGT áo vàng đứng bục giữa giao lộ (x: 468, y: 105)
-  drawTrafficPolice(c, 468, 106, t);
-  // 6. Làn dưới (đi sang phải, y ~ 108..119)
+  // 5. CSGT áo vàng 12×22 đứng bục giữa giao lộ (x: 468, y: 130)
+  drawTrafficPolice(c, 468, 130, t);
+  // 6. Làn dưới (đi sang phải)
   for (var vj = 0; vj < vehicles.length; vj++) {
     if (vehicles[vj].lane === 1) drawVehicle(c, vehicles[vj], t, isDark);
   }
   c.restore();
 
-  // 7. Sóng lăn tăn & Tàu thuyền lớn trên Sông Bạch Đằng (clip x: 874..1160)
+  // 7. Sóng lăn tăn & 3 Tàu thuyền lớn trên Sông Bạch Đằng (clip x: 874..1200, y: 58..164)
   c.save();
-  c.beginPath(); c.rect(874, 58, 286, 70); c.clip();
-  for (var wi = 0; wi < 14; wi++) {
-    var wx = 880 + ((wi * 37 + Math.floor(t * 9 * (wi % 2 ? 1 : -1))) % 276 + 276) % 276;
-    var wy = 68 + (wi * 11) % 54;
-    R(c, wx, wy, 7, 1, pal.waterGlint);
+  c.beginPath(); c.rect(874, 58, 326, 106); c.clip();
+  for (var wi = 0; wi < 18; wi++) {
+    var wx = 880 + ((wi * 41 + Math.floor(t * 9 * (wi % 2 ? 1 : -1))) % 314 + 314) % 314;
+    var wy = 72 + (wi * 13) % 86;
+    R(c, wx, wy, 8, 1, pal.waterGlint);
   }
   for (var bi = 0; bi < boats.length; bi++) {
     drawRiverBoat(c, boats[bi], t, isDark);
