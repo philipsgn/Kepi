@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ArrowLeft, Cherry, DoorOpen, ShoppingBag, Sparkles } from 'lucide-react-native';
+import { ArrowLeft, DoorOpen, ShoppingBag, Sparkles, Utensils } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
 import { useTransactionStore } from '../../store/transactionStore';
@@ -14,23 +14,30 @@ export interface BenThanhMarketViewProps {
 const MARKET_ZONES = [
   {
     id: 0,
-    label: 'Sạp Vải & Nón Lá',
-    stallName: 'Sạp Hương Trinh · Mái vòm thép vàng',
-    desc: 'Vải lụa đa sắc, túi xách, nón lá và quạt giấy truyền thống dưới mái vòm lấy sáng.',
-    kind: 'shopping',
+    label: 'Cửa Số 1',
+    stallName: 'Cửa Số 1 · Welcome to Ben Thanh Market',
+    desc: 'Cổng sắt xếp kem xám, bảng đèn LED rực sáng, quầy đồng hồ WATCH và 2 chú bảo vệ thân thiện.',
+    kind: 'gate',
   },
   {
     id: 1,
-    label: 'Đồ Lưu Niệm',
-    stallName: 'Sạp Thủ Công Mỹ Nghệ · Đèn LED ấm',
-    desc: 'Giỏ mây tre đan, bình gốm sơn mài và tượng lưu niệm trưng bày rực rỡ.',
+    label: 'Sạp Liên Sài Gòn',
+    stallName: 'Sạp Liên Sài Gòn & Ngọc Hoa · Mái Vòm Vàng',
+    desc: 'Gian hàng trà, cà phê, bánh kẹo đặc sản dưới mái vòm bê tông vàng, giếng trời đỏ nâu và đèn mây tre đan.',
     kind: 'shopping',
   },
   {
     id: 2,
-    label: 'Trái Cây 1029',
-    stallName: 'Sạp 1029 Ngọc Hảo · Trái cây nhiệt đới',
-    desc: 'Tháp bưởi xanh, xoài vàng, thanh long đỏ, sầu riêng gai và chôm chôm tươi ngon.',
+    label: 'Khu Ăn Uống',
+    stallName: 'Cổng Vòm Khu Ăn Uống · Quầy Chữ L Sạp 1044',
+    desc: 'Cổng vòm cong chữ đỏ biểu tượng, quầy gạch trắng trưng bày dừa tươi và hàng ghế đẩu inox sáng bóng.',
+    kind: 'food',
+  },
+  {
+    id: 3,
+    label: 'Bánh Cuốn & Bánh Bèo',
+    stallName: 'Sạp Bánh Cuốn 50k · Bún Bò Huế · Bánh Bèo 20k',
+    desc: 'Nồi hơi tráng bánh cuốn bốc khói, mặt bàn đá mài vàng xếp đầy dĩa bánh bèo và nem chua lá chuối.',
     kind: 'food',
   },
 ] as const;
@@ -122,7 +129,8 @@ export const BenThanhMarketView: React.FC<BenThanhMarketViewProps> = ({ onBack }
         <View style={styles.chipsRow}>
           {MARKET_ZONES.map((z) => {
             const isActive = selectedZone === z.id;
-            const IconComp = z.id === 0 ? ShoppingBag : z.id === 1 ? Sparkles : Cherry;
+            const IconComp =
+              z.id === 0 ? DoorOpen : z.id === 1 ? ShoppingBag : z.id === 2 ? Utensils : Sparkles;
             return (
               <TouchableOpacity
                 key={z.id}

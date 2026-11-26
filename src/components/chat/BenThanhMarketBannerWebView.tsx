@@ -15,13 +15,11 @@ interface BenThanhMarketBannerWebViewProps {
 }
 
 /**
- * Không Gian Nội Thất Lòng Chợ Bến Thành 16-Bit Liền Mạch (576×144 trên khung nhìn 192×112 — Quyết định 205)
- * Tái hiện 3 phân khu từ 4 ảnh thực tế theo chuẩn Senior Pixel Artist 10YOE:
- * - Trần vòm giàn thép vàng ô lấy sáng trời (Ảnh 1) + đèn tuýp & quạt trần xanh (Ảnh 4).
- * - Khu 1 (0..176): Sạp Vải, Túi Xách, Nón Lá & Quạt Giấy "HƯƠNG TRINH" (Ảnh 1).
- * - Khu 2 (176..344): Sạp Thủ Công Mỹ Nghệ, Sơn Mài & Tượng Lưu Niệm đèn LED ấm (Ảnh 3).
- * - Khu 3 (344..500): Sạp Trái Cây Nhiệt Đới "1029 NGỌC HẢO" tháp bưởi/xoài/sầu riêng (Ảnh 4).
- * - Khu 4 (500..576): Cổng Vòm Ra Quán Quen (fastDash 300ms quay về Cửa Nam).
+ * Không Gian Lòng Chợ Bến Thành 16-Bit 1:1 Theo 7 Ảnh Thực Tế (680×152 trên viewport 192×112 — Quyết định 208)
+ * - Khu 1 (0..156): Cửa Số 1 "WELCOME TO BEN THANH", cửa sắt xếp kem xám, WATCH, 2 chú bảo vệ (exit_market fastDash).
+ * - Khu 2 (156..336): Sạp "LIÊN SÀI GÒN" & "NGỌC HOA" dưới mái vòm bê tông vàng, giếng trời đỏ nâu & chao đèn mây tre.
+ * - Khu 3 (336..512): Cổng vòm cong chữ đỏ "KHU ĂN UỐNG" & Quầy góc chữ L ốp gạch trắng Sạp 1044 với ghế đẩu inox.
+ * - Khu 4 (512..680): Quầy "BÁNH CUỐN 50K" nồi hơi bốc khói, "BÚN BÒ HUẾ" & "BÁNH BÈO 20K" bàn đá mài vàng.
  */
 export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewProps> = ({
   active = true,
@@ -35,7 +33,7 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
   const webViewRef = useRef<any>(null);
   const iframeRef = useRef<any>(null);
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [toastText, setToastText] = useState<string>('Chợ Bến Thành · Kéo ngang hoặc chạm sạp để dạo chợ');
+  const [toastText, setToastText] = useState<string>('Cửa Số 1 · Chào mừng vào Chợ Bến Thành!');
 
   useEffect(() => {
     return () => {
@@ -68,15 +66,18 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     } else if (d.type === 'ROOM_ACTION') {
       if (d.text) setToastText(String(d.text));
-      if (d.id === 'stall_fabric' && onSelectZoneFromCanvas) onSelectZoneFromCanvas(0);
-      else if (d.id === 'stall_souvenir' && onSelectZoneFromCanvas) onSelectZoneFromCanvas(1);
-      else if (d.id === 'stall_fruit' && onSelectZoneFromCanvas) onSelectZoneFromCanvas(2);
-      else if (d.id === 'exit_market' && d.userTriggered && onExitToMap) {
+      if (d.id === 'exit_market' && d.userTriggered && onExitToMap) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
         if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
         exitTimerRef.current = setTimeout(() => {
           onExitToMap();
         }, 120);
+      } else if (d.id === 'stall_liensaigon' && onSelectZoneFromCanvas) {
+        onSelectZoneFromCanvas(1);
+      } else if (d.id === 'arch_foodcourt' && onSelectZoneFromCanvas) {
+        onSelectZoneFromCanvas(2);
+      } else if (d.id === 'stall_banhcuon_banhbeo' && onSelectZoneFromCanvas) {
+        onSelectZoneFromCanvas(3);
       }
     }
   };
@@ -104,65 +105,65 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
     () =>
       buildOpenRoomEngineScript({
         canvasId: 'mkCv',
-        worldWidth: 576,
-        worldHeight: 144,
+        worldWidth: 680,
+        worldHeight: 152,
         viewWidth: 192,
         viewHeight: 112,
-        walkBounds: { minX: 20, maxX: 556, minY: 98, maxY: 136 },
-        initialX: 96,
-        initialY: 114,
+        walkBounds: { minX: 20, maxX: 660, minY: 104, maxY: 144 },
+        initialX: 82,
+        initialY: 120,
         initialCamX: 0,
-        initialCamY: 10,
+        initialCamY: 18,
         speed: 44,
         hotspots: [
           {
-            id: 'stall_fabric',
-            x: 12,
-            y: 38,
-            w: 152,
-            h: 62,
-            standX: 92,
+            id: 'exit_market',
+            x: 24,
+            y: 12,
+            w: 112,
+            h: 88,
+            standX: 82,
             standY: 112,
             standFace: -1,
-            actionType: 'check_ledger',
-            bubbleText: `Sạp Vải & Nón Lá Hương Trinh · Mua sắm ${shoppingTotalText}`,
-          },
-          {
-            id: 'stall_souvenir',
-            x: 180,
-            y: 38,
-            w: 152,
-            h: 62,
-            standX: 256,
-            standY: 112,
-            standFace: 1,
-            actionType: 'look_window',
-            bubbleText: `Thủ Công Mỹ Nghệ & Sơn Mài · ${visitsCount} điểm quán quen`,
-          },
-          {
-            id: 'stall_fruit',
-            x: 348,
-            y: 36,
-            w: 144,
-            h: 64,
-            standX: 416,
-            standY: 112,
-            standFace: 1,
-            actionType: 'eat_snack',
-            bubbleText: `Trái Cây 1029 Ngọc Hảo · Ăn uống ${foodTotalText}`,
-          },
-          {
-            id: 'exit_market',
-            x: 504,
-            y: 38,
-            w: 64,
-            h: 68,
-            standX: 534,
-            standY: 108,
-            standFace: 1,
             actionType: 'jump_joy',
             fastDash: true,
-            bubbleText: `Ra Cổng Cửa Nam...`,
+            bubbleText: `Bước ra Cửa Số 1...`,
+          },
+          {
+            id: 'stall_liensaigon',
+            x: 162,
+            y: 34,
+            w: 166,
+            h: 68,
+            standX: 246,
+            standY: 118,
+            standFace: 1,
+            actionType: 'check_ledger',
+            bubbleText: `Sạp Liên Sài Gòn & Ngọc Hoa · Mua sắm ${shoppingTotalText}`,
+          },
+          {
+            id: 'arch_foodcourt',
+            x: 344,
+            y: 26,
+            w: 160,
+            h: 76,
+            standX: 422,
+            standY: 118,
+            standFace: 1,
+            actionType: 'look_window',
+            bubbleText: `Khu Ăn Uống Sạp 1044 · ${visitsCount} lượt quán quen`,
+          },
+          {
+            id: 'stall_banhcuon_banhbeo',
+            x: 520,
+            y: 34,
+            w: 148,
+            h: 68,
+            standX: 594,
+            standY: 118,
+            standFace: 1,
+            actionType: 'eat_snack',
+            bubbleText: `Bánh Cuốn 50k & Bánh Bèo 20k · Ăn uống ${foodTotalText}`,
           },
         ],
       }),
@@ -177,7 +178,7 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#332C26;display:flex;align-items:center;justify-content:center}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#3A2D25;display:flex;align-items:center;justify-content:center}
 #mkCv{
   width:100%;
   height:100%;
@@ -186,7 +187,7 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
   image-rendering:-webkit-crisp-edges;
   image-rendering:-moz-crisp-edges;
   image-rendering:crisp-edges;
-  cursor:pointer;
+  cursor:grab;
   touch-action:none;
 }
 </style>
@@ -198,14 +199,14 @@ window.onerror=function(msg,src,line){
 </script>
 </head>
 <body>
-<canvas id="mkCv" width="192" height="112" role="img" aria-label="Không gian lòng Chợ Bến Thành 3 phân khu: Sạp Vải Hương Trinh, Thủ Công Mỹ Nghệ và Sạp Trái Cây 1029 Ngọc Hảo"></canvas>
+<canvas id="mkCv" width="192" height="112" role="img" aria-label="Không gian bên trong Chợ Bến Thành 4 khu: Cửa Số 1, Liên Sài Gòn, Khu Ăn Uống và Sạp Bánh Cuốn Bánh Bèo"></canvas>
 <script>
 (function(){
 'use strict';
 
 var INK='#2B2118';
-var WORLD_W=576;
-var WORLD_H=144;
+var WORLD_W=680;
+var WORLD_H=152;
 var VW=192;
 var VH=112;
 
@@ -215,7 +216,33 @@ function E(c,cx,cy,rx,ry,col){
   for(var dy=-ry;dy<=ry;dy++)for(var dx=-rx;dx<=rx;dx++)if((dx*dx)/(rx*rx)+(dy*dy)/(ry*ry)<=1)c.fillRect(Math.round(cx+dx),Math.round(cy+dy),1,1);
 }
 
-// Sprite Heo 24×20 chuẩn Tab Vườn
+// Micro-font 3x5 sắc nét cho bảng hiệu Chợ Bến Thành
+var MF={
+  'A':[2,5,7,5,5],'B':[6,5,6,5,6],'C':[3,4,4,4,3],'D':[6,5,5,5,6],'E':[7,4,6,4,7],'F':[7,4,6,4,4],
+  'G':[3,4,5,5,3],'H':[5,5,7,5,5],'I':[7,2,2,2,7],'K':[5,5,6,5,5],'L':[4,4,4,4,7],'M':[5,7,7,5,5],
+  'N':[5,7,7,7,5],'O':[2,5,5,5,2],'P':[6,5,6,4,4],'Q':[2,5,5,3,1],'R':[6,5,6,5,5],'S':[3,4,2,1,6],
+  'T':[7,2,2,2,2],'U':[5,5,5,5,7],'V':[5,5,5,2,2],'W':[5,5,7,7,5],'X':[5,2,2,2,5],'Y':[5,5,2,2,2],
+  '0':[2,5,5,5,2],'1':[2,6,2,2,7],'2':[6,1,2,4,7],'4':[5,5,7,1,1],'5':[7,4,6,1,6],'8':[2,5,2,5,2],'9':[3,5,3,1,6],
+  ' ':[0,0,0,0,0],'-':[0,0,7,0,0]
+};
+function pxText(c,str,x0,y0,col,sc){
+  sc=sc||1;
+  c.fillStyle=col;
+  var cx=Math.round(x0);
+  for(var i=0;i<str.length;i++){
+    var ch=str.charAt(i).toUpperCase();
+    var g=MF[ch]||MF[' '];
+    for(var r=0;r<5;r++){
+      var row=g[r];
+      for(var b=0;b<3;b++){
+        if((row>>(2-b))&1) c.fillRect(cx+b*sc,Math.round(y0)+r*sc,sc,sc);
+      }
+    }
+    cx+=4*sc;
+  }
+}
+
+// Sprite Heo 24x20 chuẩn Tab Vườn
 var PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',h:'#FFE3E8',k:'#2B2118',g:'#F4B93B',G:'#B97A14',w:'#FFFFFF'};
 function shape(c,rows,fill,ox,oy){
   c.fillStyle=PAL.o;
@@ -257,17 +284,24 @@ function drawPigSprite(c,o){
 var hp=document.createElement('canvas');hp.width=24;hp.height=20;
 var hpx=hp.getContext('2d');hpx.imageSmoothingEnabled=false;
 
-function drawPersonMarket(c,px,py,shirt,pants,hatType){
-  R(c,px,py-4,2,4,pants);R(c,px+3,py-4,2,4,pants);
-  R(c,px,py-9,5,5,shirt);
-  R(c,px+1,py-12,3,3,'#F4C9A0');
-  if(hatType==='nonla'){
-    R(c,px-1,py-13,7,1,'#E8C56E');R(c,px,py-14,5,1,'#F7DF94');R(c,px+1,py-15,3,1,'#FFF1C2');
-  }else if(hatType==='bucket'){
-    R(c,px-1,py-13,7,1,'#EAE4D7');R(c,px+1,py-15,3,2,'#D8CFC0');
+function drawPerson(c,px,py,shirt,pants,hat,sit){
+  R(c,px-1,py-1,7,2,'rgba(43,33,24,0.24)');
+  if(sit){
+    R(c,px,py-3,5,3,pants);R(c,px,py-8,5,5,shirt);R(c,px+1,py-11,3,3,'#F4C9A0');
   }else{
-    R(c,px+1,py-13,3,1,INK);
+    R(c,px,py-4,2,4,pants);R(c,px+3,py-4,2,4,pants);
+    R(c,px,py-9,5,5,shirt);R(c,px+1,py-12,3,3,'#F4C9A0');
   }
+  var hy=sit?py-12:py-13;
+  if(hat==='nonla'){R(c,px-1,hy,7,1,'#E8C56E');R(c,px,hy-1,5,1,'#F7DF94');R(c,px+1,hy-2,3,1,'#FFF1C2');}
+  else if(hat==='cap'){R(c,px,hy,5,1,'#1F2937');R(c,px+1,hy-1,3,1,'#374151');}
+  else{R(c,px+1,hy,3,1,INK);}
+}
+
+function drawInoxStool(c,sx,sy){
+  R(c,sx-1,sy+5,8,2,'rgba(43,33,24,0.22)');
+  R(c,sx,sy,6,2,INK);R(c,sx+1,sy,4,1,'#E2E8F0'); // mặt inox bóng
+  R(c,sx+1,sy+2,1,4,'#64748B');R(c,sx+4,sy+2,1,4,'#64748B');
 }
 
 var MK={bg:null,t:0,last:0,dt:0,run:false};
@@ -276,156 +310,181 @@ function buildMarketInterior(){
   var bg=document.createElement('canvas');bg.width=WORLD_W;bg.height=WORLD_H;
   var x=bg.getContext('2d');x.imageSmoothingEnabled=false;
 
-  // 1. MÁI VÒM CAO CHỢ BẾN THÀNH (y: 0..42) — Khung giàn thép vàng & Ô lấy sáng trời (Ảnh 1 & 4)
-  R(x,0,0,WORLD_W,42,'#362D24');
-  // Các ô cửa sổ lấy sáng trời màu vàng kem ấm
-  for(var sx=16;sx<WORLD_W;sx+=72){
-    R(x,sx,4,46,24,'#FBEAC2');
-    R(x,sx+2,6,42,20,'#FFF6DC');
-    // Nan thép vàng chia ô lấy sáng
-    for(var nx=sx+11;nx<sx+46;nx+=11)R(x,nx,4,1,24,'#C98E2B');
-    R(x,sx,12,46,1,'#C98E2B');R(x,sx,20,46,1,'#C98E2B');
+  // =========================================================================
+  // 1. TRẦN VÒM BÊ TÔNG VÀNG & Ô GIẾNG TRỜI ĐỎ NÂU SUỐT 680px (Ảnh 1, 2, 3)
+  // =========================================================================
+  R(x,0,0,WORLD_W,44,'#3B2D24');
+  // Lưới ngói trần sẫm
+  for(var gx=0;gx<WORLD_W;gx+=8)R(x,gx,0,1,42,'rgba(0,0,0,0.22)');
+  for(var gy=0;gy<42;gy+=6)R(x,0,gy,WORLD_W,1,'rgba(0,0,0,0.22)');
+  // Các ô giếng trời lấy sáng đỏ nâu ấm giữa mái vòm (y: 2..24)
+  for(var sk=24;sk<WORLD_W;sk+=84){
+    R(x,sk,2,46,20,'#E08A68');
+    R(x,sk+2,4,42,16,'#FBE3C0');
+    for(var nx=sk+10;nx<sk+46;nx+=9)R(x,nx,2,1,20,'#9E4B32');
+    R(x,sk,9,46,1,'#9E4B32');R(x,sk,16,46,1,'#9E4B32');
   }
-  // Dầm thép vàng cong nhịp điệu suốt 576px
-  for(var tx=0;tx<WORLD_W;tx+=72){
-    R(x,tx,0,6,42,'#D49B35');
-    R(x,tx+1,0,2,42,'#F5C76B');
-    R(x,tx+5,0,2,42,'#8C5E1A');
-    // Thanh chéo giàn kèo
-    for(var k=0;k<12;k++){
-      R(x,tx+6+k*2,4+k*2,3,2,'#D49B35');
-      R(x,tx+68-k*2,4+k*2,3,2,'#D49B35');
+  // Hệ dầm vòm bê tông vàng đất đặc trưng (#D99B38)
+  for(var tx=0;tx<WORLD_W;tx+=84){
+    R(x,tx,0,7,44,'#D99B38');R(x,tx+1,0,2,44,'#F3C46B');R(x,tx+5,0,2,44,'#8C5C18');
+    for(var k=0;k<14;k++){
+      R(x,tx+7+k*2,4+k*2,3,2,'#D99B38');
+      R(x,tx+77-k*2,4+k*2,3,2,'#D99B38');
     }
   }
-  R(x,0,40,WORLD_W,2,INK);
-  // Tường hậu chợ ấm áp (y: 42..96)
-  R(x,0,42,WORLD_W,54,'#EADAC0');
+  R(x,0,42,WORLD_W,2,INK);
+  // Tường nền chợ (y: 44..102)
+  R(x,0,44,WORLD_W,58,'#E6D6BE');
 
-  // 2. SÀN GẠCH MEN HÀNH LANG CHỢ SÁNG BÓNG (y: 96..144 — 48px = 3 hàng gạch 24×16)
-  for(var fx=0;fx<WORLD_W;fx+=24){
-    for(var fy=96;fy<WORLD_H;fy+=16){
-      var alt=((fx/24)+(fy/16))%2===0;
-      R(x,fx,fy,24,16,alt?'#EBD8BA':'#DFC8A6');
-      R(x,fx,fy,24,1,'rgba(105,78,50,0.22)');
-      R(x,fx,fy,1,16,'rgba(105,78,50,0.22)');
-      // Ánh sáng hắt nhẹ từ ô lấy sáng mái vòm
-      if((fx%72)>=16&&(fx%72)<=56){R(x,fx+3,fy+3,18,10,'rgba(255,248,220,0.22)');}
+  // =========================================================================
+  // 2. SÀN GẠCH HÀNH LANG CHỢ BẾN THÀNH (y: 102..152 — Ảnh 2, 4, 5, 7)
+  // =========================================================================
+  for(var fx=0;fx<WORLD_W;fx+=16){
+    for(var fy=102;fy<WORLD_H;fy+=10){
+      var alt=((fx/16)+(fy/10))%2===0;
+      R(x,fx,fy,16,10,alt?'#C9AC90':'#B9987B');
+      R(x,fx,fy,16,1,'rgba(75,52,36,0.22)');
+      R(x,fx,fy,1,10,'rgba(75,52,36,0.22)');
     }
   }
-  R(x,0,96,WORLD_W,1,INK);
+  // Hai dải gạch dẫn hướng màu nâu đỏ sẫm dọc hành lang (y: 112..116 & 134..138)
+  R(x,0,112,WORLD_W,4,'#7E5640');R(x,0,134,WORLD_W,4,'#7E5640');
+  R(x,0,102,WORLD_W,1,INK);
 
   // =========================================================================
-  // KHU 1 (x: 0..176): SẠP VẢI, TÚI XÁCH, NÓN LÁ & QUẠT GIẤY "HƯƠNG TRINH" (Ảnh 1)
+  // KHU 1 (x: 0..156): CỬA SỐ 1 · WELCOME TO BEN THANH MARKET (Ảnh 7)
   // =========================================================================
-  // Biển hiệu sạp HƯƠNG TRINH xanh-trắng
-  R(x,18,40,76,12,INK);R(x,19,41,74,10,'#FFFBF1');
-  R(x,21,43,70,3,'#1D4ED8'); // dải chữ xanh
-  R(x,28,47,56,2,'#E0452B');
-  // Dãy túi xách & balo đủ màu treo vách trái
-  var bagCols=['#E0452B','#2563EB','#F4B93B','#10B981','#EC4899','#6366F1'];
-  for(var bx=10;bx<88;bx+=11){
-    R(x,bx,54,8,10,INK);R(x,bx+1,55,6,8,bagCols[(bx/11)|0 % bagCols.length]);
-    R(x,bx+3,52,2,2,INK); // quai túi
-  }
-  // Kệ sạp xếp chồng xấp vải lụa nhiều màu (x: 10..96, y: 72..96)
-  R(x,10,72,88,24,INK);R(x,11,73,86,23,'#8C5832');
-  var fabCols=['#E0452B','#F4B93B','#3B82F6','#EC4899','#2E8B57','#FFFBF1','#9333EA'];
-  for(var fy=74;fy<94;fy+=5){
-    for(var fx2=13;fx2<93;fx2+=16){
-      R(x,fx2,fy,14,4,fabCols[((fx2+fy)/5)|0 % fabCols.length]);
-      R(x,fx2,fy+3,14,1,'rgba(0,0,0,0.22)');
-    }
-  }
-  // Nón lá xếp chồng & Quạt giấy màu sắc xòe rộng (x: 106..168)
-  for(var ny=52;ny<70;ny+=4){
-    R(x,110,ny,16,3,INK);R(x,111,ny+1,14,2,'#F7DF94');
-  }
-  // Quạt giấy xòe xanh-vàng rực rỡ
-  E(x,146,66,15,10,INK);E(x,146,66,14,9,'#38BDF8');E(x,146,68,10,6,'#FDE047');
-  R(x,132,68,28,10,'#EADAC0'); // cắt nửa dưới thành hình quạt xòe
-  // Quầy hàng trước & 2 ghế nhựa đỏ-xanh + cô chủ sạp
-  R(x,112,78,52,18,INK);R(x,113,79,50,17,'#C48B52');
-  R(x,100,88,8,8,INK);R(x,101,89,6,6,'#2563EB'); // ghế nhựa xanh
-  R(x,158,88,8,8,INK);R(x,159,89,6,6,'#E0452B'); // ghế nhựa đỏ
-  drawPersonMarket(x,134,96,'#FFFBF1','#374151','none');
-
-  // =========================================================================
-  // KHU 2 (x: 176..344): SẠP THỦ CÔNG MỸ NGHỆ & ĐỒ LƯU NIỆM ĐÈN LED (Ảnh 3)
-  // =========================================================================
-  R(x,184,42,148,54,INK);R(x,185,43,146,53,'#4A3525'); // tủ gỗ sâu ấm
-  // Tầng trên: Giỏ mây tre đan & bình gốm sơn mài
-  for(var gx2=190;gx2<322;gx2+=22){
-    R(x,gx2,46,16,10,INK);R(x,gx2+1,47,14,8,'#D89C5C'); // giỏ mây tre
-    R(x,gx2+3,49,10,1,'#8C5832');R(x,gx2+3,52,10,1,'#8C5832');
-  }
-  // Tầng giữa: Bình sơn mài xanh-đỏ-vàng & Dải LED vàng ấm rực rỡ
-  R(x,187,60,142,2,'#FFF8D6'); // thanh đèn LED trên
-  [196,214,232,250,268,286,304].forEach(function(vx,vi){
-    var vCol=['#DC2626','#2563EB','#F4B93B','#10B981','#EA580C','#FFFBF1','#7C3AED'][vi%7];
-    R(x,vx,64,7,10,INK);R(x,vx+1,65,5,8,vCol);R(x,vx+2,63,3,2,vCol);
+  // Tủ kính WATCH bên trái
+  R(x,2,44,24,58,INK);R(x,3,45,22,57,'#F8FAFC');
+  R(x,4,47,20,8,'#DC2626');pxText(x,'WATCH',4,49,'#FFFFFF',1);
+  R(x,5,60,18,22,'#DCEEFA'); // mặt kính
+  // Hai cánh cửa sắt xếp kem xám thu gọn 2 bên
+  for(var gx7=26;gx7<38;gx7+=3){R(x,gx7,44,2,58,'#D8D4C8');R(x,gx7+2,44,1,58,'#6B665C');}
+  for(var gx8=130;gx8<142;gx8+=3){R(x,gx8,44,2,58,'#D8D4C8');R(x,gx8+2,44,1,58,'#6B665C');}
+  // Hoa sắt vòm trên & Biển xanh dương CỬA SỐ 1
+  R(x,38,44,92,8,'#9CA3AF');
+  R(x,70,40,28,12,INK);R(x,71,41,26,10,'#1E3A8A');
+  pxText(x,'CUA 1',74,44,'#FFFFFF',1);
+  // Bảng LED đen viền cam: WELCOME TO BEN THANH
+  R(x,38,53,92,13,INK);R(x,39,54,90,11,'#EA580C');R(x,40,55,88,9,'#18181B');
+  pxText(x,'WELCOME BEN THANH',48,57,'#FFF8D6',1);
+  // Hộp đèn EXIT xanh lá nhỏ
+  R(x,110,67,16,6,INK);R(x,111,68,14,4,'#16A34A');
+  // Sạp quần áo nhỏ phía sau cổng & 2 chú bảo vệ áo sơ mi trắng bên phải
+  R(x,44,72,64,30,'#4B3C32');
+  ['#E0452B','#2563EB','#F4B93B','#10B981','#FFFBF1'].forEach(function(sc,si){
+    R(x,48+si*11,76,8,14,sc);
   });
-  // Tầng dưới: Tủ kính trưng bày tượng Phật/ngọc/lưu niệm hắt sáng LED
-  R(x,187,77,142,2,'#FFF8D6'); // thanh đèn LED dưới
-  R(x,187,79,142,14,'#2D2520');
-  for(var sx3=194;sx3<322;sx3+=14){
-    var stCol=(sx3%28===0)?'#F4B93B':'#6EE7B7';
-    R(x,sx3,83,6,8,stCol);R(x,sx3+1,81,4,2,stCol); // tượng vàng / ngọc bích
-  }
-  // 2 du khách (mũ tai bèo & balo) đang đứng xem đồ lưu niệm
-  drawPersonMarket(x,224,98,'#F97316','#1F2937','bucket');
-  drawPersonMarket(x,240,98,'#FFFBF1','#374151','none');
+  drawPerson(x,118,104,'#FFFBF1','#1E293B','none',false); // Chú bảo vệ 1
+  drawPerson(x,129,104,'#FFFBF1','#1E293B','none',false); // Chú bảo vệ 2
+  // Ghế nhựa đỏ bên trái cổng
+  R(x,32,96,7,6,INK);R(x,33,97,5,4,'#DC2626');
 
   // =========================================================================
-  // KHU 3 (x: 344..500): SẠP TRÁI CÂY NHIỆT ĐỚI "1029 NGỌC HẢO" (Ảnh 4)
+  // KHU 2 (x: 156..336): SẠP ĐẶC SẢN LIÊN SÀI GÒN & NGỌC HOA (Ảnh 1 & 3)
   // =========================================================================
-  // Biển hiệu xanh ngọc - vàng "1029 NGỌC HẢO"
-  R(x,362,38,118,14,INK);R(x,363,39,116,12,'#E0F2FE');
-  R(x,365,41,42,8,'#0F766E'); // số 1029 nổi bật
-  R(x,411,42,60,3,'#047857');R(x,411,47,48,2,'#F59E0B');
-  // 2 đèn tuýp huỳnh quang treo ngang
-  R(x,366,54,48,2,'#FFFFFF');R(x,426,54,48,2,'#FFFFFF');
-  // Quầy kệ sạp trái cây & các kim tự tháp trái cây rực rỡ
-  R(x,352,74,138,22,INK);R(x,353,75,136,21,'#D8CFC0');
-  // Tháp Bưởi xanh (x: 358..392)
-  for(var r=0;r<4;r++)for(var c=0;c<4-r;c++){
-    E(x,362+c*7+r*3,73-r*5,3,3,INK);E(x,362+c*7+r*3,73-r*5,2,2,'#4ADE80');
+  // Biển xanh lá - trắng "LIÊN SÀI GÒN" (Sạp 1189)
+  R(x,162,46,84,15,INK);R(x,163,47,82,13,'#FFFFFF');
+  R(x,164,48,80,11,'#15803D');
+  pxText(x,'LIEN SAI GON',170,51,'#FFFFFF',1);
+  // Dãy bóng đèn tròn trắng thả dọc mép biển
+  for(var bx=166;bx<242;bx+=9){R(x,bx,62,2,2,'#FFF8D6');}
+  // Kệ trà, cà phê, bánh kẹo xếp tầng cao
+  R(x,162,65,84,37,INK);R(x,163,66,82,36,'#5C4332');
+  for(var row=0;row<3;row++){
+    for(var jx=166;jx<240;jx+=7){
+      var jCol=['#DC2626','#F4B93B','#16A34A','#2563EB','#FFFBF1','#EA580C'][((jx+row)%6)];
+      R(x,jx,68+row*10,5,7,jCol);
+    }
   }
-  // Tháp Xoài vàng chín (x: 396..428)
-  for(var r2=0;r2<4;r2++)for(var c2=0;c2<4-r2;c2++){
-    E(x,400+c2*6+r2*3,73-r2*5,3,3,INK);E(x,400+c2*6+r2*3,73-r2*5,2,2,'#FACC15');
+  // Biển trắng chữ đỏ/xanh "NGỌC HOA 823" bên cạnh
+  R(x,252,46,76,15,INK);R(x,253,47,74,13,'#F8FAFC');
+  pxText(x,'NGOC HOA 823',258,51,'#DC2626',1);
+  R(x,252,63,76,39,INK);R(x,253,64,74,38,'#47382E');
+  // Tủ kính & nón lá, giỏ mây tre đan
+  for(var kx=257;kx<320;kx+=12){
+    R(x,kx,68,9,9,'#E5BA7E');R(x,kx,82,8,12,'#DCEEFA');
   }
-  // Thanh long đỏ & Chôm chôm đỏ rực (x: 432..460)
-  for(var r3=0;r3<3;r3++)for(var c3=0;c3<3-r3;c3++){
-    E(x,436+c3*6+r3*3,73-r3*5,3,3,INK);E(x,436+c3*6+r3*3,73-r3*5,2,2,'#EC4899');
-  }
-  // Sầu riêng gai xanh rêu (x: 464..486)
-  for(var c4=0;c4<3;c4++){
-    E(x,468+c4*7,72,3,4,INK);E(x,468+c4*7,72,2,3,'#84CC16');
-  }
-  drawPersonMarket(x,384,100,'#F43F5E','#1F2937','bucket');
+  // Chao đèn mây tre đan thả từ trần vòm ở Khu 2 (Ảnh 3)
+  [196, 268, 316].forEach(function(lx){
+    R(x,lx,28,1,12,INK);
+    R(x,lx-6,40,13,5,INK);R(x,lx-5,41,11,3,'#C99A5B');R(x,lx-2,42,5,2,'#FFF8D6');
+  });
+  drawPerson(x,182,106,'#92400E','#1F2937','none',true); // Cô chủ sạp ngồi ghế nhựa xanh
+  drawPerson(x,288,108,'#FFFBF1','#4B6FA5','nonla',false); // Du khách xem hàng
 
   // =========================================================================
-  // KHU 4 (x: 500..576): CỔNG VÒM RA QUÁN QUEN (EXIT PORTAL)
+  // KHU 3 (x: 336..512): CỔNG VÒM "KHU ĂN UỐNG" & QUẦY CHỮ L SẠP 1044 (Ảnh 2 & 5)
   // =========================================================================
-  R(x,516,42,44,8,INK);R(x,517,43,42,6,'#2E6B47'); // biển xanh RA QUÁN QUEN
-  R(x,522,45,32,2,'#FFFBF1');
-  R(x,514,52,48,44,INK);R(x,515,53,46,43,'#F7E3B5');
-  R(x,522,58,32,38,INK);R(x,523,59,30,37,'#8BC6FA'); // ánh sáng bầu trời ngoài cổng
-  E(x,538,59,15,8,'#8BC6FA');
-  R(x,523,82,30,14,'#D8CDB8'); // vỉa hè ngoài cổng
-  // Thảm chào đỏ ngay chân cổng
-  R(x,520,97,36,7,INK);R(x,521,98,34,5,'#C94B38');R(x,525,100,26,1,'#F4B93B');
+  // Cổng vòm cong chữ đỏ "KHU ĂN UỐNG" bắc ngang (x: 350..428, y: 26..54)
+  R(x,350,30,78,24,INK);R(x,351,31,76,22,'#EDE9E0');
+  R(x,362,42,54,12,'#3A2D25');E(x,389,44,24,8,'#3A2D25');
+  pxText(x,'KHU AN UONG',366,34,'#991B1B',1);
+  // Biển vàng "BÚN BÒ - MÌ QUẢNG" Sạp 1044 (x: 434..504)
+  R(x,434,42,68,14,INK);R(x,435,43,66,12,'#FACC15');
+  pxText(x,'BUN BO 1044',441,47,'#991B1B',1);
+  // Quầy góc chữ L ốp gạch trắng & tủ kính sáng đèn LED (Ảnh 5)
+  R(x,352,62,148,40,INK);R(x,353,63,146,16,'#E0F2FE'); // tủ kính đồ ăn sáng trưng
+  R(x,353,79,146,23,'#F1F5F9'); // ốp gạch men trắng
+  // Hình ảnh món ăn dán dọc mặt trước tủ kính
+  for(var mx=358;mx<490;mx+=16){
+    R(x,mx,82,12,8,'#FFFBF1');R(x,mx+2,83,8,6,['#E0452B','#F59E0B','#10B981'][((mx/16)|0)%3]);
+  }
+  // Chùm 3 trái dừa tươi xanh ngay góc quầy (Ảnh 5)
+  E(x,448,74,4,4,INK);E(x,448,74,3,3,'#4D7C0F');
+  E(x,455,74,4,4,INK);E(x,455,74,3,3,'#65A30D');
+  // Hàng ghế đẩu inox sáng bóng trước quầy chữ L (y: 103)
+  [364, 382, 400, 418, 438, 466, 484].forEach(function(sx){
+    drawInoxStool(x,sx,103);
+  });
+  drawPerson(x,382,102,'#18181B','#1E293B','none',true); // Khách ngồi ăn 1
+  drawPerson(x,466,102,'#FFFBF1','#374151','cap',true);  // Khách ngồi ăn 2
+
+  // =========================================================================
+  // KHU 4 (x: 512..680): BÁNH CUỐN NÓNG 50K, BÚN BÒ HUẾ & BÁNH BÈO 20K (Ảnh 4 & 6)
+  // =========================================================================
+  // Biển vàng "BÁNH CUỐN 50K"
+  R(x,516,42,58,15,INK);R(x,517,43,56,13,'#FEF08A');
+  pxText(x,'BANH CUON 50',520,47,'#B91C1C',1);
+  // Quầy gạch bông & nồi hơi tráng bánh cuốn (x: 516..574)
+  R(x,516,64,58,38,INK);R(x,517,65,56,14,'#DCEEFA');R(x,517,79,56,23,'#E2E8F0');
+  R(x,524,69,14,9,INK);R(x,525,70,12,7,'#CBD5E1'); // nồi hơi inox
+  drawPerson(x,548,80,'#84CC16','#1F2937','none',false); // Cô bán bánh cuốn áo xanh chuối
+  // Biển vàng chữ đỏ "BÚN BÒ HUẾ" nhỏ ở giữa
+  R(x,578,42,34,13,INK);R(x,579,43,32,11,'#FDE047');
+  pxText(x,'BUN BO',582,46,'#DC2626',1);
+
+  // Quầy "BÁNH BÈO HUẾ 20.000đ/Dĩa" (x: 614..676 — Ảnh 6)
+  R(x,614,40,62,16,INK);R(x,615,41,60,14,'#FFFFFF');
+  pxText(x,'BANH BEO 20K',619,45,'#1D4ED8',1);
+  // Mặt bàn đá mài vàng (Terrazzo #DFC484) & Tủ kính xếp dĩa bánh bèo + Nem chua lá chuối
+  R(x,612,66,64,36,INK);R(x,613,67,62,12,'#DCEEFA');
+  R(x,612,79,64,23,'#DFC484'); // đá mài vàng
+  // Dĩa bánh bèo trắng & Chồng nem chua hồng-xanh
+  [618,628,638].forEach(function(px2){R(x,px2,73,8,3,'#FFFFFF');R(x,px2+2,72,4,1,'#22C55E');});
+  R(x,650,70,18,8,'#F472B6');R(x,652,71,14,2,'#22C55E'); // nem chua lá chuối
+  // Nón lá treo vách sau & Thực khách ngồi ghế inox
+  E(x,660,59,4,2,'#F7DF94');
+  drawInoxStool(x,536,103);drawInoxStool(x,634,103);
+  drawPerson(x,634,102,'#2563EB','#1E293B','none',true);
 
   MK.bg=bg;
 }
 
-function drawCeilingFansLive(x,t){
-  // Quạt trần xanh lá công nghiệp quay ở Khu 1 và Khu 3 (giống Ảnh 4)
-  [120,418].forEach(function(fx){
-    R(x,fx,36,2,8,INK);
-    E(x,fx+1,44,4,2,'#3E8A58');
-    var span=Math.max(2,Math.round(Math.abs(Math.sin(t*7))*12));
-    R(x-span,43,span*2+2,2,'#2E6B47');
+function drawLiveMarketEffects(x,t){
+  // 1. Quạt lồng sắt công nghiệp quay (Ảnh 4 & 5)
+  [390,545,620].forEach(function(fx){
+    E(x,fx,58,5,5,INK);E(x,fx,58,4,4,'#334155');
+    var sp=Math.max(1,Math.round(Math.abs(Math.sin(t*9+fx))*4));
+    R(x-sp,57,sp*2,2,'#94A3B8');
+  });
+  // 2. Hơi nóng bốc lên từ nồi Bánh Cuốn (x=531) & Bún Bò (x=462)
+  [462,531].forEach(function(sx){
+    for(var i=0;i<3;i++){
+      var p=((t*0.9+i*0.33)%1);
+      var sy=68-Math.round(p*12), stx=sx+Math.round(Math.sin(t*4+i*2)*1.5);
+      x.save();x.globalAlpha=0.7*(1-p);R(x,stx,sy,2,2,'#FFFBF1');x.restore();
+    }
   });
 }
 
@@ -435,14 +494,14 @@ function mkDraw(t){
   var rm=window.__openRoom?window.__openRoom.state:null;
   if(window.__openRoom) window.__openRoom.step(dt,performance.now());
   var camX=rm?Math.round(rm.camX):0;
-  var camY=rm?Math.round(rm.camY):10;
+  var camY=rm?Math.round(rm.camY):18;
 
   x.save();
   x.translate(-camX,-camY);
   x.drawImage(MK.bg,0,0);
-  drawCeilingFansLive(x,t);
+  drawLiveMarketEffects(x,t);
 
-  // Chú heo 24×20 dạo chợ
+  // Chú heo 24x20 dạo chợ
   if(rm){
     var px=Math.round(rm.x-12);
     var py=Math.round(rm.y-20+(rm.action==='jump_joy'?-Math.abs(Math.sin(t*10))*4:0));
@@ -472,7 +531,7 @@ function mkFrame(now){
 }
 
 window.__mkGo=function(zoneIdx){
-  var targets=[{x:92,y:112},{x:256,y:112},{x:416,y:112}];
+  var targets=[{x:82,y:118},{x:246,y:118},{x:422,y:118},{x:594,y:118}];
   var tg=targets[zoneIdx]||targets[0];
   if(window.__openRoom) window.__openRoom.walkTo(tg.x,tg.y,null);
 };
@@ -555,7 +614,7 @@ const styles = StyleSheet.create({
     borderColor: '#2B2118',
     borderRadius: 18,
     overflow: 'hidden',
-    backgroundColor: '#332C26',
+    backgroundColor: '#3A2D25',
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
@@ -565,7 +624,7 @@ const styles = StyleSheet.create({
   webView: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#332C26',
+    backgroundColor: '#3A2D25',
   },
   toastRow: {
     marginTop: 8,

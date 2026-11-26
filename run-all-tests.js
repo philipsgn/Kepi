@@ -6659,19 +6659,14 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   );
 
   assert.ok(
-    marketBannerCode.includes('worldWidth: 576') &&
-      marketBannerCode.includes('worldHeight: 144') &&
-      marketBannerCode.includes('stall_fabric') &&
-      marketBannerCode.includes('stall_souvenir') &&
-      marketBannerCode.includes('stall_fruit') &&
+    (marketBannerCode.includes('worldWidth: 680') || marketBannerCode.includes('worldWidth: 576')) &&
+      (marketBannerCode.includes('worldHeight: 152') || marketBannerCode.includes('worldHeight: 144')) &&
       marketBannerCode.includes('exit_market') &&
       marketBannerCode.includes('fastDash: true') &&
-      marketViewCode.includes('Sạp Vải & Nón Lá') &&
-      marketViewCode.includes('Đồ Lưu Niệm') &&
-      marketViewCode.includes('Trái Cây 1029') &&
+      (marketViewCode.includes('Sạp Liên Sài Gòn') || marketViewCode.includes('Sạp Vải & Nón Lá')) &&
       decisionsCode.includes('205') &&
       chatDocCode.includes('576 × 144'),
-    'BenThanhMarketBannerWebView & BenThanhMarketView must implement 576x144 3-zone market interior with fastDash exit and sync docs for QD 205'
+    'BenThanhMarketBannerWebView & BenThanhMarketView must implement market interior with fastDash exit and sync docs for QD 205'
   );
 
   console.log('✅ Test 142 Passed: Không Gian Chợ Bến Thành 576×144, Ngoại Thất Cửa Nam & Cổng 2 Chiều Quán Quen (Quyết định 205) Audit verified cleanly');
@@ -6752,4 +6747,43 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 144 Passed: Master Blueprint 6 Banner, Engine Trượt Camera 3s & Phố Lễ Hội Ẩm Thực Quán Quen (Quyết định 207) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 144 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (144/144)!');
+// ==========================================
+// TEST 145: TÁI THIẾT KẾ LÒNG CHỢ BẾN THÀNH 680×152 BÁM SÁT 7 ẢNH THỰC TẾ (QUYẾT ĐỊNH 208)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const marketViewCode = fs.readFileSync('src/components/chat/BenThanhMarketView.tsx', 'utf8');
+
+  assert.ok(
+    marketBannerCode.includes('worldWidth: 680') &&
+      marketBannerCode.includes('worldHeight: 152') &&
+      marketBannerCode.includes('initialCamX: 0') &&
+      marketBannerCode.includes('WELCOME BEN THANH') &&
+      marketBannerCode.includes('LIEN SAI GON') &&
+      marketBannerCode.includes('NGOC HOA 823') &&
+      marketBannerCode.includes('KHU AN UONG') &&
+      marketBannerCode.includes('BANH CUON 50') &&
+      marketBannerCode.includes('BANH BEO 20K') &&
+      marketBannerCode.includes('drawInoxStool') &&
+      marketBannerCode.includes('pxText'),
+    'BenThanhMarketBannerWebView must implement 680x152 4-zone interior matching 7 reference photos with pxText signage and inox stools'
+  );
+
+  assert.ok(
+    marketViewCode.includes('Cửa Số 1') &&
+      marketViewCode.includes('Sạp Liên Sài Gòn') &&
+      marketViewCode.includes('Khu Ăn Uống') &&
+      marketViewCode.includes('Bánh Cuốn & Bánh Bèo') &&
+      decisionsCode.includes('208') &&
+      chatDocCode.includes('680×152') &&
+      specCode.includes('680 × 152'),
+    'BenThanhMarketView and docs must sync 4 real market zones and 680x152 dimensions for QD 208'
+  );
+
+  console.log('✅ Test 145 Passed: Tái Thiết Kế Lòng Chợ Bến Thành 680×152 Bám Sát 7 Ảnh Thực Tế (Quyết định 208) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 145 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (145/145)!');

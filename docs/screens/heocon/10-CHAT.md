@@ -385,3 +385,11 @@ Màn hình Tab 3 hiển thị:
 ## 28. Master Blueprint & Phố Lễ Hội Ẩm Thực Quán Quen (`584×160` — Quyết định 207)
 - **Tài liệu gốc:** Tuân thủ [`docs/PIXEL_OPEN_WORLD_SPEC.md`](../../PIXEL_OPEN_WORLD_SPEC.md) về công thức diện tích 4 tầng, chuẩn vẽ 3 lớp chiều sâu, 3 sắc trời theo giờ, và cơ chế trượt camera giữ góc nhìn `3000ms` (`panHoldUntil`).
 - **Tab Quán Quen (`BenThanhStreetBannerWebView.tsx`, `584×160`):** Nâng cấp thành **Phố Lễ Hội Ẩm Thực 2 Bên Đường** gồm 8 sạp đặc sản Việt Nam (Phở bò bốc khói, Bún bò & Bánh mì, Bánh xèo & Nước mía, Chè Ba Màu, Xiên nướng, Nón lá & Áo dài, Gốm & Sơn mài, Lồng đèn & Heo đất), dây đèn lồng Hội An 3 khung giờ, du khách đứng lựa món trên vỉa hè trên và ngồi bàn ghế nhựa xanh/đỏ ăn uống ở hàng quán vỉa hè dưới, bao quanh Cổng Cửa Nam Chợ Bến Thành (`fastDash` vào Lòng Chợ).
+
+## 29. Tái Thiết Kế Lòng Chợ Bến Thành (`680×152`) Bám Sát 1:1 7 Ảnh Thực Tế (Quyết định 208)
+- **Hành trình 4 phân khu liên thông (`initialCamX = 0`, `initialX = 82`):**
+  1. `x: 0..156`: **Cửa Số 1** — cửa sắt xếp kem xám, biển xanh `CUA SO 1`, bảng LED `WELCOME TO BEN THANH`, `WATCH`, 2 chú bảo vệ (`exit_market` với `fastDash: true` quay ra ngoài phố).
+  2. `x: 156..336`: **Sạp Đặc Sản `LIEN SAI GON` & `NGOC HOA`** — kệ trà/cà phê/bánh kẹo, chao đèn mây tre đan, mái vòm bê tông vàng & ô giếng trời đỏ nâu.
+  3. `x: 336..512`: **Cổng Vòm Cong `KHU AN UONG` & Quầy Chữ L `Sạp 1044`** — tủ kính đồ ăn, chùm dừa tươi góc quầy, hàng ghế đẩu inox sáng bóng.
+  4. `x: 512..680`: **Hẻm Ẩm Thực Nóng** — biển vàng `BANH CUON 50K` (nồi hơi bốc khói, quầy gạch bông), `BUN BO HUE`, và `BANH BEO 20K` (mặt bàn đá mài vàng, dĩa bánh bèo, nem chua lá chuối).
+- **Sàn hành lang chợ (`y: 102..152`):** Gạch chữ nhật nâu đất – kem xám kèm 2 dải gạch dẫn hướng nâu đỏ sẫm dọc hành lang.
