@@ -99,16 +99,16 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     () =>
       buildOpenRoomEngineScript({
         canvasId: 'funCv',
-        worldWidth: 1200,
+        worldWidth: 1360,
         worldHeight: 164,
         viewWidth: 224,
         viewHeight: 116,
-        walkBounds: { minX: 20, maxX: 892, minY: 74, maxY: 92 },
+        walkBounds: { minX: 20, maxX: 1340, minY: 66, maxY: 146 },
         initialX: 468,
-        initialY: 84,
+        initialY: 112,
         initialCamX: 356,
-        initialCamY: 24,
-        speed: 52,
+        initialCamY: 28,
+        speed: 62,
         hotspots: [
           {
             id: 'pho_old_quarter',
@@ -201,14 +201,50 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
           {
             id: 'bach_dang_wharf',
             x: 856,
-            y: 16,
-            w: 340,
-            h: 146,
-            standX: 882,
-            standY: 84,
+            y: 44,
+            w: 36,
+            h: 48,
+            standX: 874,
+            standY: 82,
             standFace: 1,
             actionType: 'play_arcade',
-            bubbleText: `Bến Bạch Đằng · Cầu Ba Son & Cầu Đi Bộ · ${gameTickets} vé`,
+            bubbleText: `Bến Bạch Đằng · Trạm Waterbus · ${gameTickets} vé`,
+          },
+          {
+            id: 'pedestrian_bridge',
+            x: 892,
+            y: 48,
+            w: 374,
+            h: 34,
+            standX: 1080,
+            standY: 70,
+            standFace: 1,
+            actionType: 'look_window',
+            bubbleText: 'Cầu Đi Bộ qua sông Sài Gòn · Chỉ dành cho người đi bộ!',
+          },
+          {
+            id: 'ba_son_bridge',
+            x: 892,
+            y: 94,
+            w: 374,
+            h: 44,
+            standX: 1080,
+            standY: 112,
+            standFace: 1,
+            actionType: 'jump_joy',
+            bubbleText: 'Cầu Ba Son dây văng · Chú Heo vi vu xe máy sang Thủ Thiêm!',
+          },
+          {
+            id: 'thu_thiem_park',
+            x: 1268,
+            y: 44,
+            w: 90,
+            h: 110,
+            standX: 1310,
+            standY: 78,
+            standFace: -1,
+            actionType: 'jump_joy',
+            bubbleText: 'Công viên Thủ Thiêm bên kia sông · Gió mát quá!',
           },
         ],
       }),
@@ -240,12 +276,13 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
 <canvas id="funCv" width="224" height="116"></canvas>
 <script>
 (function(){
-var VW = 224, VH = 116, W = 1200, H = 164;
+var VW = 224, VH = 116, W = 1360, H = 164;
 
 var PAL = {
-  ink: '#2B2118', pig: '#F596A8', pigHi: '#FDBAC7', pigSh: '#D96D85',
-  pigDk: '#B84E68', snout: '#FBC2CE', ear: '#DE7A90', cheek: '#F06A86',
-  coin: '#F4B93B', coinHi: '#FBE08A'
+  ink: '#2B2118', k: '#2B2118', p: '#F596A8', pig: '#F596A8',
+  h: '#FDBAC7', pigHi: '#FDBAC7', s: '#D96D85', pigSh: '#D96D85',
+  pigDk: '#B84E68', n: '#FBC2CE', snout: '#FBC2CE', ear: '#DE7A90',
+  cheek: '#F06A86', w: '#FFFFFF', coin: '#F4B93B', coinHi: '#FBE08A'
 };
 
 function R(c, x, y, w, h, col) {
@@ -287,32 +324,69 @@ function shape4(c, draw, ink) {
   c.drawImage(b, 0, 0);
 }
 
+/* Port 1:1 hàm shape() & drawPigSprite() chuẩn Tab Vườn (PixelGardenWebView.tsx — thanh thoát, hết múp) */
+function shape(c, rows, fill, ox, oy) {
+  ox = ox || 0; oy = oy || 0;
+  var pts = {}, i, r, x;
+  for (i = 0; i < rows.length; i++) {
+    r = rows[i];
+    for (x = r[1]; x <= r[2]; x++) pts[x + ',' + r[0]] = 1;
+  }
+  c.fillStyle = PAL.k;
+  var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  for (i = 0; i < rows.length; i++) {
+    r = rows[i];
+    for (x = r[1]; x <= r[2]; x++) {
+      for (var d = 0; d < 4; d++) {
+        var nx = x + dirs[d][0], ny = r[0] + dirs[d][1];
+        if (!pts[nx + ',' + ny]) c.fillRect(ox + nx, oy + ny, 1, 1);
+      }
+    }
+  }
+  c.fillStyle = fill;
+  for (i = 0; i < rows.length; i++) {
+    r = rows[i];
+    c.fillRect(ox + r[1], oy + r[0], r[2] - r[1] + 1, 1);
+  }
+}
+
 function drawPigSprite(c, o) {
-  var step = o.step || 0, blink = !!o.blink, mood = o.mood || 'happy', ear = o.ear || 0;
-  var body = function(g) {
-    R(g, 3, 12, 1, 2, PAL.pigSh); R(g, 2, 11, 1, 2, PAL.pig);
-    R(g, 7, 15, 2, 3 - (step === 1 ? 1 : 0), PAL.pigSh);
-    R(g, 14, 15, 2, 3 - (step === 2 ? 1 : 0), PAL.pigSh);
-    E(g, 12, 12, 7.6, 5.2, PAL.pig);
-    R(g, 7, 14, 10, 2, PAL.pigSh);
-    R(g, 8, 8, 7, 2, PAL.pigHi);
-    R(g, 9, 15, 2, 3 - (step === 2 ? 1 : 0), PAL.pig);
-    R(g, 16, 15, 2, 3 - (step === 1 ? 1 : 0), PAL.pig);
-    R(g, 10, 5 + ear, 3, 3, PAL.pig); R(g, 11, 6 + ear, 1, 2, PAL.ear);
-    R(g, 15, 5 - ear, 3, 3, PAL.pig); R(g, 16, 6 - ear, 1, 2, PAL.ear);
-    R(g, 18, 10, 4, 4, PAL.snout); R(g, 19, 10, 2, 1, PAL.pigHi);
-    R(g, 11, 7, 4, 1, PAL.coin);
-  };
-  shape4(c, body, PAL.ink);
-  R(c, 7, 17 - (step === 1 ? 1 : 0), 2, 1, PAL.ink);
-  R(c, 9, 17 - (step === 2 ? 1 : 0), 2, 1, PAL.ink);
-  R(c, 14, 17 - (step === 2 ? 1 : 0), 2, 1, PAL.ink);
-  R(c, 16, 17 - (step === 1 ? 1 : 0), 2, 1, PAL.ink);
-  R(c, 19, 11, 1, 2, PAL.pigDk); R(c, 21, 11, 1, 2, PAL.pigDk);
-  R(c, 14, 12, 2, 1, PAL.cheek);
-  if (blink) { R(c, 15, 10, 2, 1, PAL.ink); }
-  else { R(c, 15, 9, 2, 2, PAL.ink); R(c, 15, 9, 1, 1, '#FFFFFF'); }
-  if (mood === 'happy') { R(c, 16, 13, 2, 1, PAL.ink); }
+  var ox = 1, oy = 3;
+  var walk = !!(o.step && o.step > 0);
+  var frame = o.step === 1 ? 0 : 1;
+  var bob = (walk && frame === 1) ? -1 : 0;
+  var bodyDy = bob, headDy = bob, headDx = 0;
+  // 4 chân mảnh chuẩn Tab Vườn
+  var raised = function(i) { return walk && (frame === 0 ? (i === 1 || i === 2) : (i === 0 || i === 3)); };
+  var legs = [[3, PAL.p], [9, PAL.p], [6, PAL.s], [12, PAL.s]];
+  var order = [2, 3, 0, 1];
+  for (var li = 0; li < order.length; li++) {
+    var idx = order[li], lx = legs[idx][0];
+    var rows = [[11, lx, lx + 1], [12, lx, lx + 1], [13, lx, lx + 1]];
+    if (!raised(idx)) rows.push([14, lx, lx + 1]);
+    shape(c, rows, legs[idx][1], ox, oy);
+  }
+  // Đuôi & thân heo thon gọn 1:1 Tab Vườn
+  shape(c, [[4,0,1],[5,0,0],[6,0,1]], PAL.p, ox, oy + bodyDy);
+  shape(c, [[4,4,12],[5,3,13],[6,2,14],[7,2,14],[8,2,14],[9,2,14],[10,2,14],[11,3,13]], PAL.p, ox, oy + bodyDy);
+  R(c, ox + 5, oy + bodyDy + 5, 3, 1, PAL.h);
+  R(c, ox + 7, oy + bodyDy + 4, 3, 1, PAL.coin); // Khe tiền vàng trên lưng
+  // Đầu tròn tách biệt + tai vểnh + mõm nhô
+  var hx = ox + headDx, hy = oy + headDy;
+  var hp = function(x, y, col) { R(c, hx + x, hy + y, 1, 1, col); };
+  shape(c, [[6,20,21],[7,20,21],[8,20,21]], PAL.n, hx, hy);
+  shape(c, [[3,14,18],[4,13,19],[5,13,19],[6,13,19],[7,13,19],[8,13,19],[9,14,18]], PAL.p, hx, hy);
+  shape(c, [[1,15,16],[2,14,17]], PAL.p, hx, hy);
+  R(c, hx + 14, hy + 3, 5, 1, PAL.p);
+  hp(16, 2, PAL.s);
+  R(c, hx + 14, hy + 4, 2, 1, PAL.h);
+  hp(21, 6, PAL.k); hp(21, 8, PAL.k);
+  if (o.blink) {
+    hp(16, 6, PAL.k); hp(17, 6, PAL.k);
+  } else {
+    R(c, hx + 16, hy + 5, 2, 2, PAL.k);
+    hp(16, 5, PAL.w);
+  }
 }
 
 ${artScript}
@@ -373,39 +447,48 @@ var FB = {
     { x: 220, y: 12, w: 32, sp: 2.8 },
     { x: 440, y: 7, w: 28, sp: 3.2 },
     { x: 690, y: 11, w: 30, sp: 2.5 },
-    { x: 980, y: 9, w: 28, sp: 3.0 }
+    { x: 980, y: 9, w: 28, sp: 3.0 },
+    { x: 1240, y: 12, w: 28, sp: 2.6 }
+  ],
+  pedestrians: [
+    { x: 920, dir: 1, sp: 8, shirt: '#E0452B', hair: '#2B2118' },
+    { x: 990, dir: -1, sp: 7, shirt: '#2563EB', hair: '#4A3222' },
+    { x: 1050, dir: 1, sp: 9, shirt: '#F4B93B', hair: '#2B2118' },
+    { x: 1120, dir: -1, sp: 8.5, shirt: '#EC4899', hair: '#1E293B' },
+    { x: 1185, dir: 1, sp: 7.5, shirt: '#16A34A', hair: '#2B2118' },
+    { x: 1240, dir: -1, sp: 9, shirt: '#8B5CF6', hair: '#3B2618' }
   ],
   vehicles: [
-    // Làn 0 (trên, y ~ 97..106, đi sang trái dir: -1, xe to bự giãn cách thoáng)
-    { kind: 'moto', lane: 0, dir: -1, x: 810, y: 104, w: 22, h: 16, sp: 36, col: '#E0452B', riderCol: '#2563EB', helmCol: '#FFFFFF' },
-    { kind: 'police', lane: 0, dir: -1, x: 680, y: 101, w: 40, h: 20, sp: 38, col: '#FFFFFF' },
-    { kind: 'bus', lane: 0, dir: -1, x: 520, y: 97, w: 66, h: 25, sp: 24, col: '#2563EB' },
-    { kind: 'moto', lane: 0, dir: -1, x: 430, y: 105, w: 22, h: 16, sp: 40, col: '#16A34A', riderCol: '#F4B93B', helmCol: '#1E293B' },
-    { kind: 'truck', lane: 0, dir: -1, x: 290, y: 98, w: 52, h: 24, sp: 26, col: '#0284C7' },
-    { kind: 'car', lane: 0, dir: -1, x: 160, y: 101, w: 40, h: 20, sp: 34, col: '#DC2626' },
-    { kind: 'moto', lane: 0, dir: -1, x: 50, y: 104, w: 22, h: 16, sp: 38, col: '#F4B93B', riderCol: '#EC4899', helmCol: '#FFFFFF' },
-    // Làn 1 (dưới, y ~ 132..140, đi sang phải dir: 1, xe container & bus khổng lồ)
-    { kind: 'container', lane: 1, dir: 1, x: 40, y: 132, w: 82, h: 28, sp: 20, col: '#EA580C' },
-    { kind: 'moto', lane: 1, dir: 1, x: 175, y: 141, w: 22, h: 16, sp: 40, col: '#2563EB', riderCol: '#E0452B', helmCol: '#F4B93B' },
-    { kind: 'car', lane: 1, dir: 1, x: 260, y: 138, w: 40, h: 20, sp: 34, col: '#1E3A8A' },
-    { kind: 'truck', lane: 1, dir: 1, x: 390, y: 135, w: 52, h: 24, sp: 27, col: '#16A34A' },
-    { kind: 'police', lane: 1, dir: 1, x: 520, y: 138, w: 40, h: 20, sp: 42, col: '#FFFFFF' },
-    { kind: 'moto', lane: 1, dir: 1, x: 615, y: 141, w: 22, h: 16, sp: 42, col: '#FFFFFF', riderCol: '#16A34A', helmCol: '#E0452B' },
-    { kind: 'bus', lane: 1, dir: 1, x: 700, y: 134, w: 66, h: 25, sp: 25, col: '#2563EB' }
+    // Làn 0 (trên, đi sang trái dir: -1). Xe máy/xe hơi/xe tải chạy xuyên qua Cầu Ba Son sang Thủ Thiêm (canBridge: true)
+    { kind: 'moto', lane: 0, dir: -1, x: 1280, y: 101, w: 22, h: 16, sp: 34, canBridge: true, col: '#E0452B', riderCol: '#2563EB', helmCol: '#FFFFFF' },
+    { kind: 'car', lane: 0, dir: -1, x: 1120, y: 98, w: 40, h: 20, sp: 30, canBridge: true, col: '#F8FAFC' },
+    { kind: 'truck', lane: 0, dir: -1, x: 950, y: 96, w: 52, h: 24, sp: 24, canBridge: true, col: '#0284C7' },
+    { kind: 'police', lane: 0, dir: -1, x: 760, y: 101, w: 40, h: 20, sp: 34, canBridge: false, col: '#FFFFFF' },
+    { kind: 'bus', lane: 0, dir: -1, x: 580, y: 97, w: 66, h: 25, sp: 24, canBridge: false, col: '#2563EB' },
+    { kind: 'moto', lane: 0, dir: -1, x: 360, y: 104, w: 22, h: 16, sp: 36, canBridge: true, col: '#16A34A', riderCol: '#F4B93B', helmCol: '#1E293B' },
+    { kind: 'car', lane: 0, dir: -1, x: 170, y: 101, w: 40, h: 20, sp: 32, canBridge: true, col: '#DC2626' },
+    // Làn 1 (dưới, đi sang phải dir: 1). Xe máy/xe hơi/xe tải chạy qua Cầu Ba Son (canBridge: true), Container/Bus chạy Đại lộ
+    { kind: 'container', lane: 1, dir: 1, x: 30, y: 132, w: 82, h: 28, sp: 20, canBridge: false, col: '#EA580C' },
+    { kind: 'moto', lane: 1, dir: 1, x: 210, y: 136, w: 22, h: 16, sp: 36, canBridge: true, col: '#2563EB', riderCol: '#E0452B', helmCol: '#F4B93B' },
+    { kind: 'car', lane: 1, dir: 1, x: 340, y: 134, w: 40, h: 20, sp: 32, canBridge: true, col: '#1E3A8A' },
+    { kind: 'police', lane: 1, dir: 1, x: 530, y: 136, w: 40, h: 20, sp: 36, canBridge: false, col: '#FFFFFF' },
+    { kind: 'bus', lane: 1, dir: 1, x: 680, y: 134, w: 66, h: 25, sp: 24, canBridge: false, col: '#2563EB' },
+    { kind: 'truck', lane: 1, dir: 1, x: 960, y: 118, w: 52, h: 24, sp: 25, canBridge: true, col: '#16A34A' },
+    { kind: 'car', lane: 1, dir: 1, x: 1140, y: 119, w: 40, h: 20, sp: 31, canBridge: true, col: '#94A3B8' }
   ],
   boats: [
-    { kind: 'cruise', dir: 1, x: 910, y: 84, w: 68, h: 22, sp: 10.5, phase: 0.4 },
-    { kind: 'waterbus', dir: -1, x: 1090, y: 112, w: 54, h: 20, sp: 14.5, phase: 1.8 },
-    { kind: 'barge', dir: 1, x: 960, y: 134, w: 78, h: 24, sp: 7.2, phase: 3.1 }
+    { kind: 'cruise', dir: 1, x: 920, y: 139, w: 68, h: 22, sp: 10.5, phase: 0.4 },
+    { kind: 'waterbus', dir: -1, x: 1150, y: 142, w: 54, h: 20, sp: 14.5, phase: 1.8 },
+    { kind: 'barge', dir: 1, x: 1040, y: 140, w: 78, h: 24, sp: 7.2, phase: 3.1 }
   ]
 };
 
 function buildPigSpriteSet() {
   return {
-    idle: mk(24, 20, function(g) { drawPigSprite(g, { step: 0, blink: false, mood: 'happy', ear: 0 }); }),
-    step1: mk(24, 20, function(g) { drawPigSprite(g, { step: 1, blink: false, mood: 'happy', ear: 1 }); }),
-    step2: mk(24, 20, function(g) { drawPigSprite(g, { step: 2, blink: false, mood: 'happy', ear: 0 }); }),
-    blink: mk(24, 20, function(g) { drawPigSprite(g, { step: 0, blink: true, mood: 'happy', ear: 0 }); })
+    idle: mk(24, 20, function(g) { drawPigSprite(g, { step: 0, blink: false, mood: 'happy' }); }),
+    step1: mk(24, 20, function(g) { drawPigSprite(g, { step: 1, blink: false, mood: 'happy' }); }),
+    step2: mk(24, 20, function(g) { drawPigSprite(g, { step: 2, blink: false, mood: 'happy' }); }),
+    blink: mk(24, 20, function(g) { drawPigSprite(g, { step: 0, blink: true, mood: 'happy' }); })
   };
 }
 
@@ -422,15 +505,127 @@ function drawMascotPig(ctx, st, t) {
   } else if ((t % 3.6) < 0.14) {
     sp = FB.pigSprites.blink;
   }
-  // Bóng tiếp xúc dưới chân Heo Mascot
-  E(ctx, px, py + 1, 8, 2.5, 'rgba(43,33,24,0.30)');
+  E(ctx, px, py + 1, 7.5, 2.2, 'rgba(43,33,24,0.30)');
   ctx.save();
-  ctx.translate(px, py - 18 - bounce);
-  if (st.facing < 0) {
-    ctx.scale(-1, 1);
-  }
+  ctx.translate(px, py - 17 - bounce);
+  if (st.facing < 0) ctx.scale(-1, 1);
   ctx.drawImage(sp, -12, 0);
   ctx.restore();
+}
+
+/* Chú Heo 1:1 Tab Vườn đội mũ bảo hiểm vàng-trắng lái xe máy chạy trên phố & Cầu Ba Son */
+function drawPigOnMoto(ctx, st, t, isDark) {
+  if (!FB.pigSprites) return;
+  var px = Math.round(st.x);
+  var py = Math.round(st.y);
+  var vib = st.walking ? (Math.floor(t * 16) % 2) : 0;
+  var sp = ((t % 3.6) < 0.14) ? FB.pigSprites.blink : FB.pigSprites.idle;
+
+  // Bóng xe máy trên mặt đường
+  R(ctx, px - 13, py + 1, 26, 3, 'rgba(18,14,10,0.42)');
+
+  ctx.save();
+  ctx.translate(px, py + vib);
+  if (st.facing < 0) ctx.scale(-1, 1);
+
+  // Khói ống pô trắng mini khi đang chạy
+  if (st.walking) {
+    var puff = (t * 4) % 1;
+    ctx.globalAlpha = (1 - puff) * 0.55;
+    E(ctx, -14 - puff * 9, -2 - puff * 4, 2.2, 1.8, '#FFFDF7');
+    ctx.globalAlpha = 1;
+  }
+
+  // 2 Bánh xe máy có vành bạc
+  drawWheel(ctx, -8, -2, 3.6);
+  drawWheel(ctx, 9, -2, 3.6);
+
+  // Khung & yếm xe máy Việt Nam (đỏ-kem nổi bật)
+  R(ctx, -11, -8, 22, 6, '#2B2118');
+  R(ctx, -10, -7, 20, 4, '#E0452B');
+  R(ctx, -10, -7, 11, 2, '#2B2118'); // Yên da đen
+  R(ctx, 6, -12, 5, 8, '#2B2118');
+  R(ctx, 7, -11, 3, 6, '#FFF6E5'); // Yếm trước màu kem
+  R(ctx, 8, -14, 3, 3, '#3B424C'); // Ghi-đông & gương
+  R(ctx, 11, -10, 2, 3, '#FEF08A'); // Đèn pha
+  R(ctx, -12, -7, 2, 2, '#EF4444'); // Đèn hậu
+  if (isDark) R(ctx, 13, -11, 10, 5, 'rgba(255,232,140,0.36)');
+
+  // Chú Heo Mascot 1:1 chuẩn Tab Vườn ngồi trên yên xe
+  ctx.drawImage(sp, -13, -22);
+
+  // Mũ bảo hiểm vàng-trắng có kính chắn gió đội ngay trên đầu chú Heo
+  R(ctx, 0, -21, 10, 5, '#2B2118');
+  R(ctx, 1, -20, 8, 4, '#F4B93B'); // Nón bảo hiểm vàng rực
+  R(ctx, 2, -20, 6, 1, '#FFE891'); // Highlight sáng
+  R(ctx, 1, -18, 8, 1, '#FFFFFF'); // Sọc trắng thể thao
+  R(ctx, 7, -18, 4, 3, '#BAE6FD'); // Kính chắn gió trong xanh
+
+  ctx.restore();
+}
+
+/* Thuật toán Tránh Va Chạm 2 Lớp (0% va chạm giữa các xe & chú Heo lái xe máy) */
+function stepTrafficSafe(dt, pigSt) {
+  var pigRiding = !!(pigSt && pigSt.y >= 94);
+  var pigX = pigSt ? pigSt.x : -999;
+  var pigY = pigSt ? pigSt.y : -999;
+
+  // Lớp 1: Các xe cộ trên Đại lộ & Cầu Ba Son tự giữ khoảng cách an toàn, không bao giờ đâm/đè nhau hay đụng chú Heo
+  for (var i = 0; i < FB.vehicles.length; i++) {
+    var v = FB.vehicles[i];
+    // Tự điều chỉnh y mượt khi chạy vào mặt Cầu Ba Son (x: 880..1270)
+    if (v.canBridge) {
+      var targetY = (v.x > 870 && v.x < 1275)
+        ? (v.lane === 0 ? 97 : 118)
+        : (v.lane === 0 ? 100 : 134);
+      v.y += (targetY - v.y) * Math.min(1, dt * 6);
+    }
+
+    var curSp = v.sp * (1 + FB.boost * 0.35);
+    var safeGap = 24;
+
+    // Tránh va chạm với các xe khác cùng làn
+    for (var j = 0; j < FB.vehicles.length; j++) {
+      if (i === j) continue;
+      var o = FB.vehicles[j];
+      if (o.lane !== v.lane) continue;
+      var distAhead = v.dir > 0 ? (o.x - (v.x + v.w)) : (v.x - (o.x + o.w));
+      if (distAhead >= -4 && distAhead < safeGap) {
+        curSp = Math.min(curSp, Math.max(0, (distAhead / safeGap) * o.sp * 0.7));
+      }
+    }
+
+    // Tránh va chạm với chú Heo đang lái xe máy (nhường đường 100%)
+    if (pigRiding) {
+      var pigLeft = pigX - 16, pigRight = pigX + 16;
+      var sameBand = Math.abs((v.y + v.h * 0.6) - pigY) < 18;
+      if (sameBand) {
+        var gapToPig = v.dir > 0 ? (pigLeft - (v.x + v.w)) : (v.x - pigRight);
+        if (gapToPig >= -6 && gapToPig < 34) {
+          curSp = 0; // Phanh dừng lịch sự nhường chú Heo
+        }
+      }
+    }
+
+    v.x += v.dir * curSp * dt;
+    var maxRight = v.canBridge ? 1390 : 875;
+    if (v.dir > 0 && v.x > maxRight) v.x = -v.w - 24;
+    if (v.dir < 0 && v.x < -v.w - 24) v.x = maxRight;
+  }
+
+  // Lớp 2: Chú Heo chủ động lách khe an toàn trong lòng đường nếu đang chạy sát 1 xe cùng làn
+  if (pigRiding && pigSt) {
+    for (var k = 0; k < FB.vehicles.length; k++) {
+      var veh = FB.vehicles[k];
+      var overlapX = (pigSt.x + 15 > veh.x) && (pigSt.x - 15 < veh.x + veh.w);
+      var vehCenterY = veh.y + veh.h * 0.65;
+      var dy = pigSt.y - vehCenterY;
+      if (overlapX && Math.abs(dy) < 18) {
+        var pushDir = dy >= 0 ? 1 : -1;
+        pigSt.y = Math.max(96, Math.min(148, pigSt.y + pushDir * 48 * dt));
+      }
+    }
+  }
 }
 
 function fbFrame(now) {
@@ -447,20 +642,20 @@ function fbFrame(now) {
     if (FB.clouds[ci].x > W + 40) FB.clouds[ci].x = -40;
   }
 
-  // Cập nhật 6 loại xe to bự trên đại lộ (x: -95..880)
-  for (var vi = 0; vi < FB.vehicles.length; vi++) {
-    var v = FB.vehicles[vi];
-    v.x += v.dir * v.sp * dt * (1 + FB.boost * 0.4);
-    if (v.dir > 0 && v.x > 880) v.x = -v.w - 18;
-    if (v.dir < 0 && v.x < -v.w - 20) v.x = 880;
+  // Cập nhật 6 người đi bộ tản bộ trên Cầu Đi Bộ (x: 896..1260)
+  for (var pi = 0; pi < FB.pedestrians.length; pi++) {
+    var pd = FB.pedestrians[pi];
+    pd.x += pd.dir * pd.sp * dt;
+    if (pd.x > 1258) { pd.x = 1258; pd.dir = -1; }
+    if (pd.x < 896) { pd.x = 896; pd.dir = 1; }
   }
 
-  // Cập nhật 3 tàu thuyền khổng lồ trên Sông Bạch Đằng (x: 860..1220)
+  // Cập nhật 3 tàu thuyền khổng lồ chạy dưới gầm Cầu Ba Son (x: 880..1270)
   for (var bi = 0; bi < FB.boats.length; bi++) {
     var b = FB.boats[bi];
     b.x += b.dir * b.sp * dt;
-    if (b.dir > 0 && b.x > 1215) b.x = 874 - b.w;
-    if (b.dir < 0 && b.x < 874 - b.w) b.x = 1210;
+    if (b.dir > 0 && b.x > 1272) b.x = 890 - b.w;
+    if (b.dir < 0 && b.x < 888 - b.w) b.x = 1268;
   }
 
   var eng = window.__openRoom;
@@ -470,13 +665,17 @@ function fbFrame(now) {
   ctx.imageSmoothingEnabled = false;
 
   if (eng) eng.step(dt, now);
+  // Cập nhật giao thông tránh va chạm 0% với chú Heo
+  stepTrafficSafe(dt, eng ? eng.state : null);
+
   var camX = eng ? Math.round(eng.state.camX) : 356;
-  var camY = eng ? Math.round(eng.state.camY) : 24;
+  var camY = eng ? Math.round(eng.state.camY) : 28;
+  var isDark = FB.pal.mode !== 'day';
 
   ctx.save();
   ctx.translate(-camX, -camY);
 
-  // 1. Nền tĩnh 1200×164
+  // 1. Nền tĩnh 1360×164
   ctx.drawImage(FB.bg, 0, 0);
 
   // 2. Mây trôi, máy bay & đàn chim
@@ -488,16 +687,30 @@ function fbFrame(now) {
   fbPlane(ctx, FB.planeX, 7, FB.pal);
   fbBird(ctx, (FB.t * 14 + 120) % W, 16 + Math.sin(FB.t * 2) * 2, FB.t);
   fbBird(ctx, (FB.t * 14 + 132) % W, 19 + Math.cos(FB.t * 2) * 2, FB.t + 0.5);
-  fbSpark(ctx, 251, 3, FB.t); // Đèn đỉnh Bitexco
-  fbSpark(ctx, 797, 1, FB.t + 1.2); // Đèn đỉnh Landmark 81
+  fbSpark(ctx, 251, 3, FB.t);
+  fbSpark(ctx, 797, 1, FB.t + 1.2);
 
-  // 3. Chú Heo Mascot 24×20 đi dạo khám phá trên vỉa hè rộng (y: 74..92)
-  if (eng) drawMascotPig(ctx, eng.state, FB.t);
+  // 3. Giao thông 2 làn + Cầu Ba Son + Cầu Đi Bộ + Chú Heo (tự động chuyển Lái xe máy / Đi bộ) + Tàu thuyền
+  var drawPigSmart = function() {
+    if (!eng) return;
+    if (eng.state.y >= 94) {
+      drawPigOnMoto(ctx, eng.state, FB.t, isDark);
+    } else {
+      drawMascotPig(ctx, eng.state, FB.t);
+    }
+  };
+  drawSaigonLiveTrafficAndRiver(
+    ctx,
+    FB.t,
+    FB.pal,
+    FB.vehicles,
+    FB.boats,
+    FB.pedestrians,
+    eng ? eng.state : null,
+    drawPigSmart
+  );
 
-  // 4. Giao thông 2 làn xe to bự + CSGT áo vàng 12×22 & Sông Bạch Đằng (3 tàu lớn)
-  drawSaigonLiveTrafficAndRiver(ctx, FB.t, FB.pal, FB.vehicles, FB.boats);
-
-  // 5. Vòng chạm, bong bóng lời thoại & 4 mũi tên chỉ thị biên
+  // 4. Vòng chạm, bong bóng lời thoại & 4 mũi tên chỉ thị biên
   ctx.restore();
   if (eng) {
     eng.drawOverlays(ctx, now);

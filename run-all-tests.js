@@ -6539,7 +6539,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       profileBannerCode.includes('worldWidth: 420') &&
       profileBannerCode.includes('worldHeight: 160') &&
       profileBannerCode.includes('drawProfileWorldWings') &&
-      (funBannerCode.includes('worldWidth: 1200') || funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540') || funBannerCode.includes('worldWidth: 460')) &&
+      (funBannerCode.includes('worldWidth: 1360') || funBannerCode.includes('worldWidth: 1200') || funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540') || funBannerCode.includes('worldWidth: 460')) &&
       (funBannerCode.includes('worldHeight: 164') || funBannerCode.includes('worldHeight: 128') || funBannerCode.includes('worldHeight: 112') || funBannerCode.includes('worldHeight: 168')) &&
       (funBannerCode.includes('buildSaigonPanoramaArtScript') || funBannerCode.includes('buildSeamlessPanorama') || funBannerCode.includes('drawFunWorldWings')) &&
       streetBannerCode.includes('worldWidth: 584') &&
@@ -6563,7 +6563,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
 
   assert.ok(
-    (funBannerCode.includes('worldWidth: 1200') || funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540')) &&
+    (funBannerCode.includes('worldWidth: 1360') || funBannerCode.includes('worldWidth: 1200') || funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540')) &&
       (funBannerCode.includes('worldHeight: 164') || funBannerCode.includes('worldHeight: 128') || funBannerCode.includes('worldHeight: 112')) &&
       (funBannerCode.includes('buildSaigonPanoramaArtScript') || funBannerCode.includes('buildSeamlessPanorama')) &&
       (funBannerCode.includes('fbTimePalette') || funBannerCode.includes('getTimePalette')) &&
@@ -7348,7 +7348,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
 
   assert.ok(
-    (funCode.includes('worldWidth: 1200') || funCode.includes('worldWidth: 1160')) &&
+    (funCode.includes('worldWidth: 1360') || funCode.includes('worldWidth: 1200') || funCode.includes('worldWidth: 1160')) &&
       (funCode.includes('worldHeight: 164') || funCode.includes('worldHeight: 128')) &&
       funCode.includes('viewWidth: 224') &&
       (funCode.includes('viewHeight: 116') || funCode.includes('viewHeight: 108')) &&
@@ -7377,9 +7377,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       artCode.includes('drawRiverBoat') &&
       decisionsCode.includes('221') &&
       chatDocCode.includes('Quyết định 221') &&
-      (specCode.includes('1200 × 164') || specCode.includes('1160 × 128')) &&
-      (specCode.includes('QĐ 222') || specCode.includes('QĐ 221')),
-    'Saigon Boulevard & Bach Dang Panorama (QD 221/222) with far Bitexco/Landmark 81, 7 landmarks, 6 vehicle types + traffic police, Bach Dang river bridges/boats, and docs must be synced'
+      (specCode.includes('1360 × 164') || specCode.includes('1200 × 164') || specCode.includes('1160 × 128')) &&
+      (specCode.includes('QĐ 223') || specCode.includes('QĐ 222') || specCode.includes('QĐ 221')),
+    'Saigon Boulevard & Bach Dang Panorama (QD 221-223) with far Bitexco/Landmark 81, 7 landmarks, 6 vehicle types + traffic police, Bach Dang river bridges/boats, and docs must be synced'
   );
 
   const mArt = artCode.match(/return `([\s\S]*)`;\s*\}/);
@@ -7395,7 +7395,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 }
 
 // =========================================================================
-// TEST 159: KHÔI PHỤC HEO MASCOT + CAMERA LIA (window.__openRoom) & XE TO BỰ 1200×164 (QĐ 222)
+// TEST 159: KHÔI PHỤC HEO MASCOT + CAMERA LIA (window.__openRoom) & XE TO BỰ 1200/1360×164 (QĐ 222)
 // =========================================================================
 {
   const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
@@ -7411,7 +7411,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       funCode.includes('eng.drawOverlays(ctx, now)') &&
       funCode.includes('drawMascotPig') &&
       funCode.includes('buildPigSpriteSet') &&
-      funCode.includes('worldWidth: 1200') &&
+      (funCode.includes('worldWidth: 1360') || funCode.includes('worldWidth: 1200')) &&
       funCode.includes('worldHeight: 164') &&
       funCode.includes('viewHeight: 116') &&
       funCode.includes('w: 82, h: 28') &&
@@ -7423,12 +7423,44 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       artCode.includes('function drawWheel') &&
       decisionsCode.includes('222') &&
       chatDocCode.includes('Quyết định 222') &&
-      specCode.includes('1200 × 164') &&
-      specCode.includes('QĐ 222'),
-    'EntertainmentBannerWebView must bind window.__openRoom for Mascot Pig & 4-way camera pan, enlarge vehicles/boats on 1200x164 world, and sync docs for QD 222'
+      (specCode.includes('1360 × 164') || specCode.includes('1200 × 164')) &&
+      (specCode.includes('QĐ 223') || specCode.includes('QĐ 222')),
+    'EntertainmentBannerWebView must bind window.__openRoom for Mascot Pig & 4-way camera pan, enlarge vehicles/boats on 1200/1360x164 world, and sync docs for QD 222'
   );
 
-  console.log('✅ Test 159 Passed: Khôi Phục Chú Heo Mascot & Camera Lia 4 Hướng (window.__openRoom) + Đội Xe Khổng Lồ 1200×164 (Quyết định 222) Audit verified cleanly');
+  console.log('✅ Test 159 Passed: Khôi Phục Chú Heo Mascot & Camera Lia 4 Hướng (window.__openRoom) + Đội Xe Khổng Lồ (Quyết định 222) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 159 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (159/159)!');
+// =========================================================================
+// TEST 160: 2 BỜ SÔNG BẠCH ĐẰNG ↔ THỦ THIÊM (1360×164), CẦU ĐI BỘ & CẦU BA SON TÁCH BIỆT + HEO 1:1 LÁI XE MÁY TRÁNH VA CHẠM (QĐ 223)
+// =========================================================================
+{
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const artCode = fs.readFileSync('src/components/chat/hub/saigonPanoramaArt.ts', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    funCode.includes('worldWidth: 1360') &&
+      funCode.includes('function shape(c, rows, fill, ox, oy)') &&
+      funCode.includes('shape(c, [[4,4,12]') &&
+      funCode.includes('function drawPigOnMoto') &&
+      funCode.includes('function stepTrafficSafe') &&
+      funCode.includes("id: 'pedestrian_bridge'") &&
+      funCode.includes("id: 'ba_son_bridge'") &&
+      funCode.includes("id: 'thu_thiem_park'") &&
+      funCode.includes('canBridge: true') &&
+      artCode.includes('BỜ ĐÔNG: CÔNG VIÊN & QUẢNG TRƯỜNG THỦ THIÊM') &&
+      artCode.includes('drawBridgePedestrians') &&
+      decisionsCode.includes('223') &&
+      chatDocCode.includes('Quyết định 223') &&
+      specCode.includes('1360 × 164') &&
+      specCode.includes('QĐ 223'),
+    'Two-bank river (1360x164), separate Pedestrian & Ba Son traffic bridges, 1:1 Tab Vuon pig sprite, helmeted moto riding pig, 0% collision avoidance, and docs must be synced for QD 223'
+  );
+
+  console.log('✅ Test 160 Passed: 2 Bờ Sông Bạch Đằng ↔ Thủ Thiêm (1360×164), Cầu Đi Bộ & Cầu Ba Son Tách Biệt + Heo 1:1 Lái Xe Máy Tránh Va Chạm (Quyết định 223) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 160 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (160/160)!');

@@ -68,7 +68,8 @@ function drawFarSkyline(c, pal, W) {
     [184, 18, 16], [286, 22, 20], [312, 28, 16], [362, 24, 18], [410, 20, 16],
     [468, 18, 22], [500, 24, 18], [552, 22, 20], [608, 18, 22], [652, 26, 18],
     [714, 22, 20], [746, 26, 16], [834, 20, 22], [866, 26, 18], [912, 22, 20],
-    [958, 28, 18], [1004, 24, 20], [1096, 26, 18], [1124, 22, 22]
+    [958, 28, 18], [1004, 24, 20], [1096, 26, 18], [1124, 22, 22],
+    [1174, 24, 20], [1214, 18, 22], [1262, 20, 24], [1302, 16, 20], [1330, 24, 22]
   ];
   for (var i = 0; i < farBlocks.length; i++) {
     var b = farBlocks[i];
@@ -494,88 +495,132 @@ function drawAvenueAndSidewalk(c, pal) {
   R(c, 471, 126, 4, 7, '#D93B30');
 }
 
-/* ==================== 4. BẾN BẠCH ĐẰNG & SÔNG SÀI GÒN (x: 860..1200, y: 56..164) ==================== */
+/* ==================== 4. HAI BỜ SÔNG BẾN BẠCH ĐẰNG ↔ THỦ THIÊM (x: 856..1360, y: 50..164) ==================== */
 function drawBachDangRiverStatic(c, pal) {
   var isDark = pal.mode !== 'day';
 
-  // Mặt nước Sông Sài Gòn rộng sâu (x: 874..1200, y: 60..164)
-  R(c, 874, 60, 326, 24, pal.waterTop);
-  R(c, 874, 84, 326, 36, pal.waterMid);
-  R(c, 874, 120, 326, 44, pal.waterBot);
-  // Bờ Thủ Thiêm cây xanh xa phía đối diện (y: 54..61)
-  R(c, 880, 56, 320, 5, pal.mode === 'night' ? '#1B2E2A' : '#3C6E47');
-  for (var tx = 886; tx < 1194; tx += 14) {
-    E(c, tx, 55, 6, 3, pal.mode === 'night' ? '#243D36' : '#4D8A55');
+  // Mặt nước Sông Sài Gòn rộng sâu giữa 2 bờ (x: 892..1268, y: 56..164)
+  R(c, 892, 56, 376, 26, pal.waterTop);
+  R(c, 892, 82, 376, 40, pal.waterMid);
+  R(c, 892, 122, 376, 42, pal.waterBot);
+  // Bờ xa đối diện phía chân trời (y: 52..57)
+  R(c, 892, 52, 376, 5, pal.mode === 'night' ? '#1B2E2A' : '#3C6E47');
+  for (var tx = 898; tx < 1264; tx += 14) {
+    E(c, tx, 51, 6, 3, pal.mode === 'night' ? '#243D36' : '#4D8A55');
   }
 
-  // Bờ kè Bến Bạch Đằng nối từ vỉa hè (x: 856..896, y: 68..164)
-  R(c, 856, 68, 36, 96, '#D8C7A8');
-  R(c, 890, 68, 5, 96, '#8E8475'); // Mép kè đá
-  R(c, 894, 68, 2, 96, '#2B2118');
-  // Lan can trắng Bến Bạch Đằng dọc bờ sông
-  for (var ry = 70; ry < 160; ry += 10) {
-    R(c, 888, ry, 2, 7, '#FFFFFF');
-  }
-  R(c, 887, 70, 4, 92, 'rgba(255,255,255,0.45)');
+  // ---- BỜ TÂY: BẾN BẠCH ĐẰNG (x: 856..896) ----
+  // Vỉa hè & kè đá công viên trên (y: 66..96) đón đầu Cầu Đi Bộ
+  R(c, 856, 68, 38, 28, '#D8C7A8');
+  R(c, 892, 68, 4, 28, '#8E8475');
+  R(c, 895, 68, 2, 28, '#2B2118');
+  // Đường dẫn nhựa 2 làn nối từ Đại lộ lên Cầu Ba Son (y: 96..138)
+  R(c, 856, 96, 40, 42, '#3B3C42');
+  R(c, 856, 96, 40, 2, '#E2E8F0');
+  R(c, 856, 136, 40, 2, '#E2E8F0');
+  R(c, 862, 116, 12, 2, '#F4C44E'); R(c, 880, 116, 12, 2, '#F4C44E');
+  // Kè đá phía dưới mặt đường dẫn (y: 138..164)
+  R(c, 856, 138, 38, 26, '#CBB896');
+  R(c, 892, 138, 4, 26, '#8E8475');
+  R(c, 895, 138, 2, 26, '#2B2118');
   // Trạm chờ Saigon Waterbus mái cong xanh-vàng (x: 858..884, y: 50..68)
-  R(c, 860, 52, 26, 4, '#2563EB');
-  R(c, 862, 50, 22, 2, '#F4B93B');
-  R(c, 863, 56, 2, 12, '#4B5563'); R(c, 881, 56, 2, 12, '#4B5563');
-  R(c, 866, 61, 14, 5, '#FFF8E6'); // Bảng Waterbus
+  R(c, 860, 52, 24, 4, '#2563EB');
+  R(c, 862, 50, 20, 2, '#F4B93B');
+  R(c, 863, 56, 2, 12, '#4B5563'); R(c, 879, 56, 2, 12, '#4B5563');
+  R(c, 866, 61, 12, 5, '#FFF8E6');
+  // Biển báo "CHỈ ĐI BỘ" (tròn xanh dương + người đi bộ trắng) ngay đầu Cầu Đi Bộ
+  R(c, 887, 63, 1, 9, '#475569');
+  E(c, 887, 61, 3.5, 3.5, '#1D4ED8');
+  R(c, 887, 59, 1, 3, '#FFFFFF');
 
-  // ---- CẦU ĐI BỘ QUA SÔNG SÀI GÒN (x: 892..1006, y: 48..76) ----
-  R(c, 918, 68, 5, 14, '#A7B5C4'); R(c, 976, 68, 5, 14, '#A7B5C4');
-  for (var pbx = 892; pbx <= 1006; pbx++) {
-    var u = (pbx - 892) / 114;
-    var deckY = Math.round(68 - Math.sin(u * Math.PI) * 10);
-    var archY = Math.round(deckY - 6 - Math.sin(u * Math.PI) * 7);
-    R(c, pbx, deckY, 1, 4, '#E8EFF5');
-    R(c, pbx, deckY + 4, 1, 1, '#2B2118');
+  // ---- BỜ ĐÔNG: CÔNG VIÊN & QUẢNG TRƯỜNG THỦ THIÊM (x: 1266..1360) ----
+  // Kè đá bờ Đông
+  R(c, 1265, 66, 4, 98, '#8E8475');
+  R(c, 1264, 66, 2, 98, '#2B2118');
+  // Công viên cây xanh & lối dạo bộ đón đầu Cầu Đi Bộ (y: 64..96)
+  R(c, 1269, 66, 91, 30, '#4E9A51');
+  R(c, 1269, 70, 91, 14, '#DFCFB2'); // Đường dạo bộ Thủ Thiêm
+  R(c, 1269, 70, 91, 1, '#2B2118');
+  R(c, 1269, 84, 91, 1, '#2B2118');
+  // Hàng cây xanh & đèn công viên Thủ Thiêm
+  var ttTrees = [1284, 1314, 1344];
+  for (var ti = 0; ti < ttTrees.length; ti++) {
+    R(c, ttTrees[ti], 56, 3, 12, '#6E472B');
+    E(c, ttTrees[ti] + 1, 52, 8, 6, '#3B8242');
+    E(c, ttTrees[ti], 50, 5, 4, '#56A859');
+  }
+  // Đường nhựa 2 làn Thủ Thiêm nối tiếp đầu Cầu Ba Son (y: 96..138)
+  R(c, 1268, 96, 92, 42, '#3B3C42');
+  R(c, 1268, 96, 92, 2, '#E2E8F0');
+  R(c, 1268, 136, 92, 2, '#E2E8F0');
+  for (var tdx = 1274; tdx < 1354; tdx += 20) {
+    R(c, tdx, 116, 12, 2, '#F4C44E');
+  }
+  // Thảm cỏ ven sông phía dưới bờ Đông (y: 138..164)
+  R(c, 1269, 138, 91, 26, '#3F8446');
+  R(c, 1269, 140, 91, 3, '#58A35C');
+
+  // ---- CẦU ĐI BỘ QUA SÔNG SÀI GÒN (Tầng trên x: 890..1268, y: 54..76 — CHỈ ĐI BỘ) ----
+  // 4 Trụ cầu cắm xuống mặt sông
+  var pPiers = [948, 1028, 1130, 1210];
+  for (var pi = 0; pi < pPiers.length; pi++) {
+    R(c, pPiers[pi], 70, 5, 16, '#A7B5C4');
+    R(c, pPiers[pi], 70, 1, 16, '#E2E8F0');
+  }
+  // Nhịp cầu vòm đôi uốn lượn bắt trọn từ Bến Bạch Đằng (890) sang Thủ Thiêm (1268)
+  for (var pbx = 890; pbx <= 1268; pbx++) {
+    var u = (pbx - 890) / 378;
+    var deckY = Math.round(72 - Math.sin(u * Math.PI) * 5);
+    var archWave = Math.abs(Math.sin(u * Math.PI * 2));
+    var archY = Math.round(deckY - 6 - archWave * 9);
+    R(c, pbx, deckY, 1, 5, '#E8EFF5');
+    R(c, pbx, deckY + 5, 1, 1, '#2B2118');
+    R(c, pbx, deckY + 1, 1, 2, '#CBD5E1');
     R(c, pbx, archY, 1, 2, isDark ? '#7DD3FC' : '#FFFFFF');
-    if (pbx % 6 === 0) {
+    if (pbx % 8 === 0) {
       R(c, pbx, archY + 2, 1, deckY - archY - 2, 'rgba(255,255,255,0.65)');
     }
-    if (isDark && pbx % 8 === 0) {
+    if (isDark && pbx % 10 === 0) {
       R(c, pbx, deckY - 1, 2, 1, '#FFE08A');
     }
   }
-  var walkers = [920, 940, 956, 974];
-  var wCols = ['#E0452B','#F4B93B','#38BDF8','#EC4899'];
-  for (var wi = 0; wi < walkers.length; wi++) {
-    var wx = walkers[wi];
-    var wu = (wx - 892) / 114;
-    var wy = Math.round(68 - Math.sin(wu * Math.PI) * 10);
-    R(c, wx, wy - 4, 2, 2, '#FFD2B3');
-    R(c, wx, wy - 2, 2, 3, wCols[wi]);
-  }
 
-  // ---- CẦU BA SON (THỦ THIÊM 2) DÂY VĂNG TRẮNG (x: 1012..1192, y: 10..78) ----
-  R(c, 1012, 65, 180, 4, '#D9E2EC');
-  R(c, 1012, 69, 180, 2, '#627385');
-  R(c, 1012, 64, 180, 1, isDark ? '#FFE08A' : '#FFFFFF');
-  R(c, 1030, 70, 5, 12, '#8596A6');
-  R(c, 1094, 70, 9, 14, '#8596A6');
-  R(c, 1166, 70, 5, 12, '#8596A6');
-  // Tháp trụ nghiêng biểu tượng Cầu Ba Son
-  for (var py = 10; py <= 65; py++) {
-    var pr = (65 - py) / 55;
-    var pxMain = Math.round(1096 + pr * 14);
-    var pwMain = Math.max(3, Math.round(7 - pr * 2.8));
+  // ---- CẦU BA SON (THỦ THIÊM 2) DÂY VĂNG TRẮNG (Tầng đường dẫn x: 888..1270, y: 98..136 — XE LƯU THÔNG) ----
+  // Trụ bê tông lớn dưới gầm cầu
+  R(c, 962, 136, 7, 16, '#7C8E9E');
+  R(c, 1074, 136, 12, 18, '#7C8E9E');
+  R(c, 1192, 136, 7, 16, '#7C8E9E');
+  // Mặt cầu nhựa 2 làn rộng rãi cho xe máy, xe hơi, xe tải & Heo chạy xe máy
+  R(c, 888, 98, 382, 38, '#3D3F47');
+  R(c, 888, 96, 382, 3, '#E8EFF5'); // Lan can trên
+  R(c, 888, 95, 382, 1, isDark ? '#FFE08A' : '#FFFFFF');
+  R(c, 888, 135, 382, 3, '#CBD5E1'); // Lan can dưới
+  R(c, 888, 138, 382, 2, '#475569'); // Dầm thép gầm cầu
+  // Vạch phân làn vàng trên Cầu Ba Son (y: 116)
+  for (var bdx = 896; bdx < 1262; bdx += 20) {
+    R(c, bdx, 116, 11, 2, '#F4C44E');
+  }
+  // Tháp trụ nghiêng biểu tượng Cầu Ba Son vươn cao lên trời (từ y=96 nghiêng lên y=10)
+  for (var py = 10; py <= 96; py++) {
+    var pr = (96 - py) / 86;
+    var pxMain = Math.round(1078 + pr * 18);
+    var pwMain = Math.max(3, Math.round(8 - pr * 3.5));
     R(c, pxMain, py, pwMain, 1, '#FFFFFF');
     R(c, pxMain + pwMain - 1, py, 1, 1, '#9EB0C2');
   }
+  // Hệ 14 dây văng trắng xòe quạt 2 bên xuống thành cầu
   var cableCol = isDark ? '#FFE8A3' : '#F4F8FC';
-  var leftTargets = [1018, 1030, 1042, 1054, 1066, 1078];
+  var leftTargets = [916, 940, 964, 988, 1012, 1036, 1058];
   for (var cl = 0; cl < leftTargets.length; cl++) {
-    var anchorY = 14 + cl * 6;
-    var anchorX = Math.round(1096 + ((65 - anchorY) / 55) * 14);
-    fbDrawLine(c, anchorX, anchorY, leftTargets[cl], 64, cableCol);
+    var anchorY = 16 + cl * 9;
+    var anchorX = Math.round(1078 + ((96 - anchorY) / 86) * 18);
+    fbDrawLine(c, anchorX, anchorY, leftTargets[cl], 96, cableCol);
   }
-  var rightTargets = [1124, 1136, 1148, 1160, 1172, 1184];
+  var rightTargets = [1106, 1130, 1154, 1178, 1202, 1226, 1250];
   for (var cr = 0; cr < rightTargets.length; cr++) {
-    var rAnchorY = 14 + cr * 6;
-    var rAnchorX = Math.round(1100 + ((65 - rAnchorY) / 55) * 14);
-    fbDrawLine(c, rAnchorX, rAnchorY, rightTargets[cr], 64, cableCol);
+    var rAnchorY = 16 + cr * 9;
+    var rAnchorX = Math.round(1082 + ((96 - rAnchorY) / 86) * 18);
+    fbDrawLine(c, rAnchorX, rAnchorY, rightTargets[cr], 96, cableCol);
   }
 }
 
@@ -803,7 +848,24 @@ function drawRiverBoat(c, b, t, isDark) {
   c.restore();
 }
 
-function drawSaigonLiveTrafficAndRiver(c, t, pal, vehicles, boats) {
+function drawBridgePedestrians(c, pedestrians, t) {
+  for (var i = 0; i < pedestrians.length; i++) {
+    var p = pedestrians[i];
+    var px = Math.round(p.x);
+    var u = Math.max(0, Math.min(1, (px - 890) / 378));
+    var deckY = Math.round(72 - Math.sin(u * Math.PI) * 5);
+    var step = Math.floor(t * 7 + i) % 2;
+    // Bóng & người đi bộ 2 chiều trên Cầu Đi Bộ
+    R(c, px - 1, deckY - 1, 4, 1, 'rgba(43,33,24,0.3)');
+    R(c, px, deckY - 4 + step, 1, 3, '#1E293B');
+    R(c, px + 2, deckY - 4 + (1 - step), 1, 3, '#1E293B');
+    R(c, px - 1, deckY - 8, 5, 4, p.shirt);
+    R(c, px, deckY - 11, 3, 3, '#FFD5B5');
+    R(c, px, deckY - 12, 3, 1, p.hair);
+  }
+}
+
+function drawSaigonLiveTrafficAndRiver(c, t, pal, vehicles, boats, pedestrians, pigState, drawPigFn) {
   var isDark = pal.mode !== 'day';
 
   // 1. Khói nồi Phở bốc lên (x: 74, y: 55)
@@ -832,28 +894,43 @@ function drawSaigonLiveTrafficAndRiver(c, t, pal, vehicles, boats) {
     c.restore();
   }
 
-  // 4. Đại lộ 2 làn rộng 68px (clip x: 0..860, y: 92..164)
+  // 4. Sóng mặt sông & Người đi bộ trên Cầu Đi Bộ (CHỈ ĐI BỘ, không có xe)
   c.save();
-  c.beginPath(); c.rect(0, 90, 860, 74); c.clip();
+  c.beginPath(); c.rect(892, 56, 376, 108); c.clip();
+  for (var wi = 0; wi < 20; wi++) {
+    var wx = 896 + ((wi * 43 + Math.floor(t * 9 * (wi % 2 ? 1 : -1))) % 364 + 364) % 364;
+    var wy = 78 + (wi * 13) % 82;
+    R(c, wx, wy, 8, 1, pal.waterGlint);
+  }
+  c.restore();
+  if (pedestrians && pedestrians.length) {
+    drawBridgePedestrians(c, pedestrians, t);
+  }
+
+  // 5. Nếu Heo đang đi bộ ở tầng trên (vỉa hè / Cầu Đi Bộ / Công viên Thủ Thiêm, y < 94) -> vẽ trước các làn xe
+  var pigY = pigState ? pigState.y : 80;
+  if (drawPigFn && pigY < 94) drawPigFn();
+
+  // 6. Làn xe trên (Đại lộ + Cầu Ba Son, lane === 0)
   for (var vi = 0; vi < vehicles.length; vi++) {
     if (vehicles[vi].lane === 0) drawVehicle(c, vehicles[vi], t, isDark);
   }
-  // 5. CSGT áo vàng 12×22 đứng bục giữa giao lộ (x: 468, y: 130)
+  // Nếu Heo đang lái xe máy ở làn trên (94 <= y < 126)
+  if (drawPigFn && pigY >= 94 && pigY < 126) drawPigFn();
+
+  // 7. CSGT áo vàng 12×22 đứng bục giữa giao lộ (x: 468, y: 130)
   drawTrafficPolice(c, 468, 130, t);
-  // 6. Làn dưới (đi sang phải)
+
+  // 8. Làn xe dưới (Đại lộ + Cầu Ba Son, lane === 1)
   for (var vj = 0; vj < vehicles.length; vj++) {
     if (vehicles[vj].lane === 1) drawVehicle(c, vehicles[vj], t, isDark);
   }
-  c.restore();
+  // Nếu Heo đang lái xe máy ở làn dưới (y >= 126)
+  if (drawPigFn && pigY >= 126) drawPigFn();
 
-  // 7. Sóng lăn tăn & 3 Tàu thuyền lớn trên Sông Bạch Đằng (clip x: 874..1200, y: 58..164)
+  // 9. 3 Tàu thuyền lớn rẽ sóng chạy dưới gầm Cầu Ba Son trên Sông Sài Gòn (x: 894..1264, y: 136..164)
   c.save();
-  c.beginPath(); c.rect(874, 58, 326, 106); c.clip();
-  for (var wi = 0; wi < 18; wi++) {
-    var wx = 880 + ((wi * 41 + Math.floor(t * 9 * (wi % 2 ? 1 : -1))) % 314 + 314) % 314;
-    var wy = 72 + (wi * 13) % 86;
-    R(c, wx, wy, 8, 1, pal.waterGlint);
-  }
+  c.beginPath(); c.rect(894, 136, 372, 28); c.clip();
   for (var bi = 0; bi < boats.length; bi++) {
     drawRiverBoat(c, boats[bi], t, isDark);
   }
