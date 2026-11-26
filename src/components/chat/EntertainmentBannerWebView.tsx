@@ -18,6 +18,7 @@ interface EntertainmentBannerWebViewProps {
   onEnterCafe?: () => void;
   onEnterMarket?: () => void;
   onEnterCathedral?: () => void;
+  onEnterPagoda?: () => void;
 }
 
 /**
@@ -32,6 +33,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
   onEnterCafe,
   onEnterMarket,
   onEnterCathedral,
+  onEnterPagoda,
 }) => {
   const { tokens } = useTheme();
   const webViewRef = useRef<any>(null);
@@ -77,6 +79,12 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
         enterCafeTimerRef.current = setTimeout(() => {
           onEnterCathedral();
         }, 120);
+      } else if (d.id === 'pagoda_gate' && d.userTriggered && onEnterPagoda) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
+        enterCafeTimerRef.current = setTimeout(() => {
+          onEnterPagoda();
+        }, 120);
       }
     }
   };
@@ -91,7 +99,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     };
     window.addEventListener('message', onWebMsg);
     return () => window.removeEventListener('message', onWebMsg);
-  }, [onEnterCafe, onEnterMarket, onEnterCathedral]);
+  }, [onEnterCafe, onEnterMarket, onEnterCathedral, onEnterPagoda]);
 
   const handleMessage = (event: any) => {
     try {
@@ -181,16 +189,17 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             bubbleText: `Bitexco & Landmark 81 · ${gameTickets} vé sẵn sàng!`,
           },
           {
-            id: 'stilt_river',
+            id: 'pagoda_gate',
             x: 444,
-            y: 22,
+            y: 10,
             w: 88,
-            h: 52,
+            h: 56,
             standX: 486,
             standY: 76,
             standFace: 1,
-            actionType: 'jump_joy',
-            bubbleText: `Nhà Sàn Bến Sông · ${pigFood} cám cho heo`,
+            actionType: 'look_window',
+            fastDash: true,
+            bubbleText: `Đang bước vào Ngôi Chùa Cổ Kính...`,
           },
         ],
       }),
@@ -643,22 +652,27 @@ function buildSeamlessPanorama(c) {
   }
   drawTree16(c, 428, 66, '#5EA353', '#82C76E', '#3F7A3A', false);
 
-  // 7. KHU 5 (x: 440..540): NHÀ SÀN GỖ VIỆT NAM & CÂY PHƯỢNG VĨ VEN SÔNG
-  // Nhà sàn gỗ truyền thống
-  R(c, 452, 48, 4, 18, INK); R(c, 453, 49, 2, 17, '#6F4423');
-  R(c, 498, 48, 4, 18, INK); R(c, 499, 49, 2, 17, '#6F4423');
-  R(c, 474, 48, 4, 18, INK); R(c, 475, 49, 2, 17, '#6F4423');
-  // Thân nhà sàn & lan can gỗ
-  R(c, 448, 30, 58, 20, INK); R(c, 449, 31, 56, 18, '#B87B48');
-  R(c, 452, 34, 14, 10, INK); R(c, 453, 35, 12, 8, PAL_TIME.winGlow);
-  R(c, 472, 34, 16, 14, INK); R(c, 473, 35, 14, 13, '#6F4423');
-  // Mái lá nhà sàn nhọn hai tầng
-  R(c, 444, 25, 66, 6, INK); R(c, 445, 26, 64, 4, '#7D4E2B');
-  R(c, 452, 20, 50, 5, INK); R(c, 453, 21, 48, 3, '#96613A');
-  // Đèn lồng Hội An treo hiên nhà sàn
-  E(c, 458, 33, 2, 2, '#E0452B'); E(c, 496, 33, 2, 2, '#F4B93B');
-  // Cây phượng vĩ hoa đỏ rực rỡ
-  drawTree16(c, 522, 66, '#4E8C47', '#6DB35E', '#356632', true);
+  // 7. KHU 5 (x: 440..540): NGÔI CHÙA VIỆT NAM CỔ KÍNH (BẢO THÁP MÁI CONG & CỔNG TAM QUAN — QĐ 220)
+  // Bảo Tháp 5 tầng mái đao cong đỏ rực (x: 444..476)
+  for (var pt = 0; pt < 5; pt++) {
+    var pw = 24 - pt * 3;
+    var px2 = 460 - (pw >> 1);
+    var py2 = 54 - pt * 8;
+    R(c, px2 + 2, py2, pw - 4, 8, INK); R(c, px2 + 3, py2 + 1, pw - 6, 6, '#F5B076');
+    R(c, 459, py2 + 2, 2, 4, '#5C2C1D');
+    R(c, px2 - 2, py2 - 2, pw + 4, 3, INK); R(c, px2 - 1, py2 - 1, pw + 2, 2, '#C94B38');
+    R(c, px2 - 3, py2 - 3, 2, 2, '#E0452B'); R(c, px2 + pw + 1, py2 - 3, 2, 2, '#E0452B');
+  }
+  R(c, 459, 10, 2, 8, '#F5CA72'); // đỉnh bảo tháp vàng
+  // Cổng Tam Quan mái ngói đỏ cong & Lư hương sân chùa (x: 476..522)
+  R(c, 478, 42, 40, 24, INK); R(c, 479, 43, 38, 23, '#E8D8BA');
+  R(c, 488, 48, 20, 18, INK); R(c, 489, 49, 18, 17, '#5C2C1D');
+  R(c, 494, 54, 8, 12, '#F5CA72'); // ánh vàng từ chánh điện
+  R(c, 474, 36, 48, 7, INK); R(c, 475, 37, 46, 5, '#C94B38');
+  R(c, 480, 31, 36, 6, INK); R(c, 481, 32, 34, 4, '#DC2626');
+  R(c, 490, 28, 16, 4, '#F5CA72'); // nóc Tam Quan vàng
+  // Cây bồ đề / phượng vĩ xanh rợp bóng bên chùa
+  drawTree16(c, 526, 66, '#4E8C47', '#6DB35E', '#356632', false);
 
   // 8. VỈA HÈ LÁT GẠCH THỐNG NHẤT XUYÊN SUỐT 540px (y: 66..78)
   R(c, 0, 66, WORLD_W, 1, INK);

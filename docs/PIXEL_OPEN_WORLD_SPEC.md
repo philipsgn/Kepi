@@ -56,6 +56,7 @@ $$W_{\text{world}} \ge 2.75 \times W_{\text{view}} \quad (\text{chuẩn hóa } 3
 | 1 | **Quán quen (Phố Lễ Hội)** | `BenThanhStreetBannerWebView.tsx` | `192 × 100` | `584 × 160` | `4.87×` | **Chặng 1 (Đang thực thi)** |
 | 1b | **Lòng Chợ Bến Thành** | `BenThanhMarketBannerWebView.tsx` + `market/*` | `Dynamic 1:1` | `1200 × 760` | `Fullscreen` | Hoàn thiện (QĐ 217 — Mê cung 6 hàng sạp chật chội, 180 người chen chúc 60fps, Heo ngộp thở đổ mồ hôi chạy ra sát cổng) |
 | 1c | **Nhà Thờ Đức Bà (Nội Thất)** | `NotreDameCathedralBannerWebView.tsx` + `cathedral/*` | `Dynamic 1:1` | `640 × 520` | `Fullscreen` | Hoàn thiện (QĐ 219 — Kiến trúc Gothic-Romanesque cổ kính Châu Âu, 3 tầng vòm gân vàng đất, kính màu stained-glass, Cung Thánh & ~60 người dự lễ, đèn vàng lung linh 60fps) |
+| 1d | **Chùa Việt Nam (Chánh Điện & Sân Chùa)** | `PagodaTempleBannerWebView.tsx` + `pagoda/*` | `Dynamic 1:1` | `640 × 560` | `Fullscreen` | Hoàn thiện (QĐ 220 — Thay Nhà sàn bến sông thành Chùa cổ kính 2 tầng: Chánh Điện Tượng Phật thếp vàng & Sân Chùa Bảo Tháp, Lư Hương khói trầm, Phật tử cúi lạy) |
 | 2 | **Hồ sơ (Văn Phòng Heo)** | `ProfileDeskBanner.tsx` | `176 × 80` | `432 × 128` | `3.93×` | Chặng 2 |
 | 3 | **Vườn (Sân Vườn & Mặt Tiền)** | `PixelGardenWebView.tsx` | `160 × 96` | `440 × 140` | `4.01×` | Chặng 3 |
 | 4 | **Nhà của bạn (Các Phòng)** | `PixelHouseWebView.tsx` | `160 × 96` | `480 × 132` | `4.13×` | Chặng 3 |

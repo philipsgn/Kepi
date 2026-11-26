@@ -7259,4 +7259,53 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 156 Passed: Không Gian Toàn Màn Hình Nội Thất Nhà Thờ Đức Bà Sài Gòn (640×520, Cổ Kính Châu Âu & Đèn Vàng Lung Linh — Quyết định 219) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 156 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (156/156)!');
+// ==========================================
+// TEST 157: THAY NHÀ SÀN BẾN SÔNG BẰNG NGÔI CHÙA VIỆT NAM CỔ KÍNH & KHÔNG GIAN 2 TẦNG CHÁNH ĐIỆN + SÂN CHÙA (640×560 — QUYẾT ĐỊNH 220)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const pgArtCode = fs.readFileSync('src/components/chat/pagoda/pagodaInteriorArt.ts', 'utf8');
+  const pgBannerCode = fs.readFileSync('src/components/chat/PagodaTempleBannerWebView.tsx', 'utf8');
+  const pgViewCode = fs.readFileSync('src/components/chat/PagodaTempleView.tsx', 'utf8');
+
+  assert.ok(
+    funCode.includes("id: 'pagoda_gate'") &&
+      !funCode.includes("id: 'stilt_river'") &&
+      funCode.includes('onEnterPagoda') &&
+      hubCode.includes("'pagoda'") &&
+      chatViewCode.includes("activeSubView === 'pagoda'") &&
+      chatViewCode.includes('PagodaTempleView') &&
+      pgViewCode.includes('fullscreenContainer') &&
+      pgBannerCode.includes('worldWidth: 640') &&
+      pgBannerCode.includes('worldHeight: 560') &&
+      pgBannerCode.includes("id: 'buddha_altar'") &&
+      pgBannerCode.includes("id: 'courtyard_incense'") &&
+      pgBannerCode.includes("id: 'exit_pagoda'") &&
+      pgArtCode.includes('drawWorshipper') &&
+      pgArtCode.includes('drawPagodaBg') &&
+      pgArtCode.includes('drawPagodaLiveEffects') &&
+      decisionsCode.includes('220') &&
+      chatDocCode.includes('Quyết định 220') &&
+      specCode.includes('640 × 560') &&
+      specCode.includes('QĐ 220'),
+    'Pagoda Temple 640x560 2-level interior, Hub replacement for stilt river, Buddha altar, bowing worshippers, incense smoke, and docs must be synced for QD 220'
+  );
+
+  const mArt = pgArtCode.match(/return `([\s\S]*)`;\s*\}/);
+  assert.ok(mArt && mArt[1], 'Must extract pagodaInteriorArt script');
+  const mPg = pgBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
+  assert.ok(mPg && mPg[1], 'Must find inline pagoda script');
+  const assembledPgJs = mPg[1]
+    .replace('${pagodaArtScript}', mArt[1].replace(/\\`/g, '`'))
+    .replace('${openRoomScript}', '');
+  new Function(assembledPgJs);
+
+  console.log('✅ Test 157 Passed: Thay Nhà Sàn Bến Sông Bằng Ngôi Chùa Cổ Kính & Không Gian 2 Tầng Chánh Điện + Sân Chùa (640×560 — Quyết định 220) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 157 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (157/157)!');
