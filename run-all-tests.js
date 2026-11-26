@@ -7463,4 +7463,52 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 160 Passed: 2 Bờ Sông Bạch Đằng ↔ Thủ Thiêm (1360×164), Cầu Đi Bộ & Cầu Ba Son Tách Biệt + Heo 1:1 Lái Xe Máy Tránh Va Chạm (Quyết định 223) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 160 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (160/160)!');
+// =========================================================================
+// TEST 161: BỘ CÔNG THỨC CHUẨN PIXEL ART VIỆT NAM (VIETNAM_PIXEL_ART_BIBLE) & THƯ VIỆN vnPixelArtKit (QĐ 224)
+// =========================================================================
+{
+  const biblePath = 'docs/VIETNAM_PIXEL_ART_BIBLE.md';
+  const kitPath = 'src/components/pixel/vnPixelArtKit.ts';
+  assert.ok(fs.existsSync(biblePath), 'docs/VIETNAM_PIXEL_ART_BIBLE.md must exist');
+  assert.ok(fs.existsSync(kitPath), 'src/components/pixel/vnPixelArtKit.ts must exist');
+
+  const bibleCode = fs.readFileSync(biblePath, 'utf8');
+  const kitCode = fs.readFileSync(kitPath, 'utf8');
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  assert.ok(
+    bibleCode.includes('spritefusion-pixel-snapper') &&
+      bibleCode.includes('pixelium-design') &&
+      bibleCode.includes('OKLab') &&
+      bibleCode.includes('THƯỚC TỶ LỆ VÀNG VIỆT NAM') &&
+      bibleCode.includes('LUẬT LOGIC ĐƯỜNG XÁ') &&
+      bibleCode.includes('Quán Phở Cổ Truyền') &&
+      bibleCode.includes('Quán Cà Phê Sài Gòn') &&
+      bibleCode.includes('Sân Vận Động Bóng Đá Thống Nhất') &&
+      bibleCode.includes('Cửa Hàng Quần Áo Adidas Flagship') &&
+      bibleCode.includes('CHECKLIST NGHIỆM THU BẮT BUỘC') &&
+      agentsCode.includes('VIETNAM_PIXEL_ART_BIBLE.md') &&
+      agentsCode.includes('vnPixelArtKit.ts') &&
+      specCode.includes('VIETNAM_PIXEL_ART_BIBLE.md') &&
+      decisionsCode.includes('Quyết định 224') &&
+      kitCode.includes('export const VN_OKLAB_MATERIALS') &&
+      kitCode.includes('export const VN_SCALE_STANDARDS') &&
+      kitCode.includes('export function buildVnPixelKitPrimitivesScript') &&
+      kitCode.includes('function drawPigSpriteCanonical') &&
+      kitCode.includes('function drawTileFloorIndochine') &&
+      kitCode.includes('function getVnTimePalette'),
+    'VIETNAM_PIXEL_ART_BIBLE.md (6 chapters + 4 blueprints), vnPixelArtKit.ts, AGENTS.md, PIXEL_OPEN_WORLD_SPEC.md, and DECISIONS.md must be synced for QD 224'
+  );
+
+  // Kiểm chứng cú pháp JS runtime của đoạn script nguyên thủy sinh từ vnPixelArtKit.ts
+  const mKit = kitCode.match(/return `([\s\S]*)`;\s*\}/);
+  assert.ok(mKit && mKit[1], 'Must extract vnPixelArtKit primitives script');
+  const assembledKitJs = mKit[1].replace('${matJson}', '{}');
+  new Function(assembledKitJs);
+
+  console.log('✅ Test 161 Passed: Bộ Công Thức Chuẩn Pixel Art Việt Nam (VIETNAM_PIXEL_ART_BIBLE) & Thư Viện vnPixelArtKit (Quyết định 224) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 161 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (161/161)!');

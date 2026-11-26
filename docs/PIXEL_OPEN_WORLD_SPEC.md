@@ -1,7 +1,7 @@
 # 📐 TÀI LIỆU THIẾT KẾ GỐC: KHÔNG GIAN MỞ PIXEL ART 10YOE (MASTER BLUEPRINT)
 
-> **Phạm vi:** Nguồn sự thật duy nhất (Single Source of Truth) cho toàn bộ **6 Banner Không Gian Mở + Lòng Chợ Bến Thành** trong PigFly / Ví Heo Con (Quyết định 207).
-> **Bắt buộc:** Trước khi vẽ hoặc chỉnh sửa bất kỳ Banner nào, Agent phải đọc tài liệu này kết hợp với [`docs/STYLE_HEOCON.md`](STYLE_HEOCON.md) và [`docs/screens/heocon/01-PIXEL-GFX-PORT.md`](screens/heocon/01-PIXEL-GFX-PORT.md).
+> **Phạm vi:** Nguồn sự thật duy nhất (Single Source of Truth) cho toàn bộ **6 Banner Không Gian Mở + Các Không Gian Toàn Màn Hình Việt Nam** trong PigFly / Ví Heo Con (Quyết định 207–224).
+> **Bắt buộc:** Trước khi vẽ hoặc chỉnh sửa bất kỳ không gian pixel art nào, Agent phải đọc [`docs/VIETNAM_PIXEL_ART_BIBLE.md`](VIETNAM_PIXEL_ART_BIBLE.md) (Quyết định 224 — công thức `spritefusion-pixel-snapper` + `pixelium-design` OKLab + Luật Đường Xá/Xe Cộ/Tỷ Lệ Việt Nam) kết hợp với [`docs/STYLE_HEOCON.md`](STYLE_HEOCON.md), [`docs/screens/heocon/01-PIXEL-GFX-PORT.md`](screens/heocon/01-PIXEL-GFX-PORT.md) và thư viện dùng chung [`src/components/pixel/vnPixelArtKit.ts`](../src/components/pixel/vnPixelArtKit.ts).
 
 ---
 
