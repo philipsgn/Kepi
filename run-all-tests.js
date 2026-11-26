@@ -7211,4 +7211,52 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 155 Passed: Nâng Cấp Quán Cà Phê Mini Workshop, Thư Viện 3 Kệ Sách & Boutique Quần Áo (720×176 — Quyết định 218) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 155 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (155/155)!');
+// ==========================================
+// TEST 156: KHÔNG GIAN TOÀN MÀN HÌNH NỘI THẤT NHÀ THỜ ĐỨC BÀ SÀI GÒN (640×520, CỔ KÍNH CHÂU ÂU & ĐÈN VÀNG LUNG LINH — QUYẾT ĐỊNH 219)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const ndArtCode = fs.readFileSync('src/components/chat/cathedral/cathedralInteriorArt.ts', 'utf8');
+  const ndBannerCode = fs.readFileSync('src/components/chat/NotreDameCathedralBannerWebView.tsx', 'utf8');
+  const ndViewCode = fs.readFileSync('src/components/chat/NotreDameCathedralView.tsx', 'utf8');
+
+  assert.ok(
+    funCode.includes("id: 'notre_dame_gate'") &&
+      funCode.includes('onEnterCathedral') &&
+      hubCode.includes("'cathedral'") &&
+      chatViewCode.includes("activeSubView === 'cathedral'") &&
+      chatViewCode.includes('NotreDameCathedralView') &&
+      ndViewCode.includes('fullscreenContainer') &&
+      ndBannerCode.includes('worldWidth: 640') &&
+      ndBannerCode.includes('worldHeight: 520') &&
+      ndBannerCode.includes('obstacles:') &&
+      ndBannerCode.includes("id: 'exit_cathedral'") &&
+      ndArtCode.includes('drawStainedGlass') &&
+      ndArtCode.includes('drawChandelier') &&
+      ndArtCode.includes('drawCathedralPewsLayer') &&
+      ndArtCode.includes('drawCathedralLiveEffects') &&
+      decisionsCode.includes('219') &&
+      chatDocCode.includes('Quyết định 219') &&
+      specCode.includes('640 × 520') &&
+      specCode.includes('QĐ 219'),
+    'Notre Dame Cathedral 640x520 fullscreen interior, 2-way Hub portal, stained glass, chandeliers, congregation pews, and docs must be synced for QD 219'
+  );
+
+  const mArt = ndArtCode.match(/return `([\s\S]*)`;\s*\}/);
+  assert.ok(mArt && mArt[1], 'Must extract cathedralInteriorArt script');
+  const mNd = ndBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
+  assert.ok(mNd && mNd[1], 'Must find inline cathedral script');
+  const assembledNdJs = mNd[1]
+    .replace('${cathedralArtScript}', mArt[1].replace(/\\`/g, '`'))
+    .replace('${openRoomScript}', '');
+  new Function(assembledNdJs);
+
+  console.log('✅ Test 156 Passed: Không Gian Toàn Màn Hình Nội Thất Nhà Thờ Đức Bà Sài Gòn (640×520, Cổ Kính Châu Âu & Đèn Vàng Lung Linh — Quyết định 219) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 156 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (156/156)!');

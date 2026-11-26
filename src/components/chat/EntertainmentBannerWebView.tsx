@@ -17,6 +17,7 @@ interface EntertainmentBannerWebViewProps {
   onPressBanner?: () => void;
   onEnterCafe?: () => void;
   onEnterMarket?: () => void;
+  onEnterCathedral?: () => void;
 }
 
 /**
@@ -30,6 +31,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
   onPressBanner,
   onEnterCafe,
   onEnterMarket,
+  onEnterCathedral,
 }) => {
   const { tokens } = useTheme();
   const webViewRef = useRef<any>(null);
@@ -69,6 +71,12 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
         enterCafeTimerRef.current = setTimeout(() => {
           onEnterMarket();
         }, 120);
+      } else if (d.id === 'notre_dame_gate' && d.userTriggered && onEnterCathedral) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
+        enterCafeTimerRef.current = setTimeout(() => {
+          onEnterCathedral();
+        }, 120);
       }
     }
   };
@@ -83,7 +91,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     };
     window.addEventListener('message', onWebMsg);
     return () => window.removeEventListener('message', onWebMsg);
-  }, [onEnterCafe, onEnterMarket]);
+  }, [onEnterCafe, onEnterMarket, onEnterCathedral]);
 
   const handleMessage = (event: any) => {
     try {
@@ -135,10 +143,23 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             bubbleText: `Đang bước vào Tiệm CAFE...`,
           },
           {
-            id: 'ben_thanh_notre',
-            x: 258,
+            id: 'notre_dame_gate',
+            x: 224,
             y: 12,
-            w: 66,
+            w: 38,
+            h: 54,
+            standX: 243,
+            standY: 74,
+            standFace: 1,
+            actionType: 'look_window',
+            fastDash: true,
+            bubbleText: `Đang bước vào Nhà Thờ Đức Bà Sài Gòn...`,
+          },
+          {
+            id: 'ben_thanh_notre',
+            x: 264,
+            y: 12,
+            w: 60,
             h: 54,
             standX: 292,
             standY: 74,
