@@ -16,6 +16,7 @@ const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
 interface EntertainmentBannerWebViewProps {
   onPressBanner?: () => void;
+  onEnterPho?: () => void;
   onEnterCafe?: () => void;
   onEnterMarket?: () => void;
   onEnterCathedral?: () => void;
@@ -30,6 +31,7 @@ interface EntertainmentBannerWebViewProps {
  */
 export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProps> = ({
   onPressBanner,
+  onEnterPho,
   onEnterCafe,
   onEnterMarket,
   onEnterCathedral,
@@ -67,7 +69,8 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
         if (enterPortalTimerRef.current) clearTimeout(enterPortalTimerRef.current);
         enterPortalTimerRef.current = setTimeout(() => cb(), 120);
       };
-      if (d.id === 'saigon_cafe' && d.userTriggered && onEnterCafe) triggerPortal(onEnterCafe);
+      if (d.id === 'pho_old_quarter' && d.userTriggered && onEnterPho) triggerPortal(onEnterPho);
+      else if (d.id === 'saigon_cafe' && d.userTriggered && onEnterCafe) triggerPortal(onEnterCafe);
       else if (d.id === 'ben_thanh_notre' && d.userTriggered && onEnterMarket) triggerPortal(onEnterMarket);
       else if (d.id === 'notre_dame_gate' && d.userTriggered && onEnterCathedral) triggerPortal(onEnterCathedral);
       else if (d.id === 'pagoda_gate' && d.userTriggered && onEnterPagoda) triggerPortal(onEnterPagoda);
@@ -84,7 +87,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     };
     window.addEventListener('message', onWebMsg);
     return () => window.removeEventListener('message', onWebMsg);
-  }, [onEnterCafe, onEnterMarket, onEnterCathedral, onEnterPagoda]);
+  }, [onEnterPho, onEnterCafe, onEnterMarket, onEnterCathedral, onEnterPagoda]);
 
   const handleMessage = (event: any) => {
     try {
@@ -120,7 +123,8 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             standY: 82,
             standFace: -1,
             actionType: 'eat_snack',
-            bubbleText: `Quán Phở Bò nóng hổi · Kho cám: ${pigFood} cám`,
+            fastDash: true,
+            bubbleText: 'Đang bước vào Quán Phở Cổ Truyền...',
           },
           {
             id: 'saigon_cafe',

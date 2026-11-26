@@ -37,6 +37,7 @@ import { PiggySpendMapView } from '../chat/PiggySpendMapView';
 import { BenThanhMarketView } from '../chat/BenThanhMarketView';
 import { NotreDameCathedralView } from '../chat/NotreDameCathedralView';
 import { PagodaTempleView } from '../chat/PagodaTempleView';
+import { PhoRestaurantView } from '../chat/PhoRestaurantView';
 import { CafeChatBannerWebView } from '../chat/CafeChatBannerWebView';
 
 const __REGRESSION_META = {
@@ -496,6 +497,14 @@ export const ChatView: React.FC<ChatViewProps> = ({
     return (
       <View style={[styles.container, { backgroundColor: '#3A2D25' }]}>
         <PagodaTempleView onBack={() => setActiveSubView('hub')} />
+      </View>
+    );
+  }
+
+  if (activeSubView === 'pho') {
+    return (
+      <View style={[styles.container, { backgroundColor: '#2B2118' }]}>
+        <PhoRestaurantView onBack={() => setActiveSubView('hub')} />
       </View>
     );
   }

@@ -7511,4 +7511,71 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 161 Passed: Bộ Công Thức Chuẩn Pixel Art Việt Nam (VIETNAM_PIXEL_ART_BIBLE) & Thư Viện vnPixelArtKit (Quyết định 224) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 161 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (161/161)!');
+// =========================================================================
+// TEST 162: QUÁN PHỞ CỔ TRUYỀN VIỆT NAM TOÀN MÀN HÌNH 640×440 (QĐ 225)
+// =========================================================================
+{
+  const phoArtPath = 'src/components/chat/pho/phoInteriorArt.ts';
+  const phoBannerPath = 'src/components/chat/PhoRestaurantBannerWebView.tsx';
+  const phoViewPath = 'src/components/chat/PhoRestaurantView.tsx';
+  assert.ok(fs.existsSync(phoArtPath), 'phoInteriorArt.ts must exist');
+  assert.ok(fs.existsSync(phoBannerPath), 'PhoRestaurantBannerWebView.tsx must exist');
+  assert.ok(fs.existsSync(phoViewPath), 'PhoRestaurantView.tsx must exist');
+
+  const phoArtCode = fs.readFileSync(phoArtPath, 'utf8');
+  const phoBannerCode = fs.readFileSync(phoBannerPath, 'utf8');
+  const phoViewCode = fs.readFileSync(phoViewPath, 'utf8');
+  const vnKitCode = fs.readFileSync('src/components/pixel/vnPixelArtKit.ts', 'utf8');
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    funCode.includes('onEnterPho') &&
+      funCode.includes("d.id === 'pho_old_quarter' && d.userTriggered && onEnterPho") &&
+      hubCode.includes("'pho'") &&
+      hubCode.includes("onEnterPho={() => handlePressCard('pho')}") &&
+      chatViewCode.includes("activeSubView === 'pho'") &&
+      chatViewCode.includes('PhoRestaurantView') &&
+      phoViewCode.includes('fullscreenContainer') &&
+      phoBannerCode.includes('worldWidth: 640') &&
+      phoBannerCode.includes('worldHeight: 440') &&
+      phoBannerCode.includes('buildVnPixelKitPrimitivesScript') &&
+      phoBannerCode.includes("id: 'pho_kitchen'") &&
+      phoBannerCode.includes("id: 'pho_special_table'") &&
+      phoBannerCode.includes("id: 'iced_tea_corner'") &&
+      phoBannerCode.includes("id: 'exit_pho'") &&
+      phoBannerCode.includes('waiters:') &&
+      phoBannerCode.includes('walkGuests:') &&
+      phoArtCode.includes('drawPhoChef') &&
+      phoArtCode.includes('drawPhoWaiter') &&
+      phoArtCode.includes('drawSeatedPhoGuest') &&
+      phoArtCode.includes('drawWalkingPhoGuest') &&
+      phoArtCode.includes('drawCeilingFan') &&
+      phoArtCode.includes('drawTileFloorIndochine') &&
+      phoArtCode.includes('drawSteamPuff') &&
+      decisionsCode.includes('Quyết định 225') &&
+      chatDocCode.includes('Quyết định 225') &&
+      specCode.includes('640 × 440') &&
+      specCode.includes('QĐ 225'),
+    'Pho Restaurant 640x440 fullscreen interior (chef, 2 waiters, boiling pots + steam, beef/noodles, 3 fans, guests, Ong Dia altar, vnPixelArtKit reuse, 2-way portal, and docs) must be synced for QD 225'
+  );
+
+  // Kiểm chứng cú pháp JS runtime của toàn bộ script Quán Phở lắp ráp (vnKit + phoArt + inline)
+  const mKit = vnKitCode.match(/return `([\s\S]*)`;\s*\}/);
+  const mArt = phoArtCode.match(/return `([\s\S]*)`;\s*\}/);
+  const mPho = phoBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
+  assert.ok(mKit && mKit[1] && mArt && mArt[1] && mPho && mPho[1], 'Must extract vnKit, phoArt, and inline pho script');
+  const assembledPhoJs = mPho[1]
+    .replace('${vnKitScript}', mKit[1].replace('${matJson}', '{}').replace(/\\`/g, '`'))
+    .replace('${phoArtScript}', mArt[1].replace(/\\`/g, '`'))
+    .replace('${openRoomScript}', '');
+  new Function(assembledPhoJs);
+
+  console.log('✅ Test 162 Passed: Không Gian Toàn Màn Hình Quán Phở Cổ Truyền Việt Nam (640×440, Chuẩn VIETNAM_PIXEL_ART_BIBLE — Quyết định 225) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 162 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (162/162)!');
