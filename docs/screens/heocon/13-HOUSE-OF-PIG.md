@@ -1,7 +1,7 @@
 # 🏠 13 — STATS·HOUSE: NHÀ CỦA HEO (MẶT CẮT 2 TẦNG 6 PHÒNG & NỘI THẤT PIXEL)
 
 > **Screen-unit:** Hero Section trên đầu Tab Thống Kê (Tab 1), biểu tượng icon `Home` trên thanh Tab Bar.
-> **Nguồn gốc đồ họa:** Port 1:1 từ `prototype/Nhà heo con.html`. Khớp hoàn toàn với Mặt tiền 2 tầng ngoài Sân Vườn.
+> **Nguồn gốc đồ họa:** Port 1:1 từ `prototype/Nhà heo con.html` kết hợp quy chuẩn không gian mở tại [`docs/PIXEL_OPEN_WORLD_SPEC.md`](../../PIXEL_OPEN_WORLD_SPEC.md) (§4.4: Các căn phòng tiện nghi `480×132`). Khớp hoàn toàn với Mặt tiền 2 tầng ngoài Sân Vườn.
 
 ---
 

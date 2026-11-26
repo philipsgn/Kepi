@@ -69,10 +69,10 @@ export const BenThanhStreetBannerWebView: React.FC<BenThanhStreetBannerWebViewPr
       buildOpenRoomEngineScript({
         canvasId: 'psCv',
         worldWidth: 584,
-        worldHeight: 172,
+        worldHeight: 160,
         viewWidth: 192,
         viewHeight: 100,
-        walkBounds: { minX: 20, maxX: 560, minY: 82, maxY: 162 },
+        walkBounds: { minX: 20, maxX: 560, minY: 84, maxY: 148 },
         initialX: 256,
         initialY: 86,
         initialCamX: 185,
@@ -366,15 +366,62 @@ function pbIcon(x,i,ox,oy){
   else{R(x,ox+3,oy+1,5,6,'#F9B8C4');R(x,ox+4,oy+2,3,3,'#F4B93B');R(x,ox+5,oy,1,2,'#E0452B');}
 }
 
+function getStreetTimePalette(){
+  var h=new Date().getHours();
+  if(h>=6&&h<16){
+    return {mode:'day',bands:['#6FB5F7','#85C2FA','#9CD0FC','#B4DCFE','#CCE7FF','#E0F2FE','#EBF7FF','#F4FAFF'],skyline:'#7BA9DF',plaza1:'#E6D6BC',plaza2:'#DAC5A3',lanternGlow:false};
+  }
+  if(h>=16&&h<19){
+    return {mode:'sunset',bands:['#6B5FC0','#8F76CC','#B685CB','#E391BF','#F8A6B0','#FFC096','#FFDA9C','#FFEBB8'],skyline:'#7B66AE',plaza1:'#D8C3A5',plaza2:'#CBB292',lanternGlow:true};
+  }
+  return {mode:'night',bands:['#161A36','#1F264D','#2B3363','#384178','#444C88','#525894','#5F649E','#6D71A8'],skyline:'#232952',plaza1:'#B8A48A',plaza2:'#A89378',lanternGlow:true};
+}
+var ST_PAL=getStreetTimePalette();
+
+function drawTouristStanding(c,px,py,shirt,pants,hatType){
+  R(c,px-1,py-1,7,2,'rgba(43,33,24,0.24)'); // bóng tiếp xúc 2px
+  R(c,px,py-4,2,4,pants);R(c,px+3,py-4,2,4,pants);
+  R(c,px,py-9,5,5,shirt);
+  R(c,px+1,py-12,3,3,'#F4C9A0');
+  if(hatType==='nonla'){
+    R(c,px-1,py-13,7,1,'#E8C56E');R(c,px,py-14,5,1,'#F7DF94');R(c,px+1,py-15,3,1,'#FFF1C2');
+  }else if(hatType==='bucket'){
+    R(c,px-1,py-13,7,1,'#FFFBF1');R(c,px+1,py-15,3,2,'#D8CFC0');
+  }else{
+    R(c,px+1,py-13,3,1,PBI);
+  }
+}
+
+function drawTouristEating(c,tx,ty,shirt1,shirt2,stoolCol,foodCol){
+  // Bóng tiếp xúc bàn ghế dưới sàn
+  R(c,tx-9,ty+7,26,2,'rgba(43,33,24,0.22)');
+  // Ghế nhựa trái + Người ngồi trái
+  R(c,tx-8,ty+2,6,5,PBI);R(c,tx-7,ty+3,4,3,stoolCol);
+  R(c,tx-7,ty-4,5,6,shirt1);R(c,tx-6,ty-7,3,3,'#F4C9A0');R(c,tx-6,ty-8,3,1,PBI);
+  // Bàn inox thấp + tô/đĩa thức ăn + ly nước
+  R(c,tx,ty-2,10,5,PBI);R(c,tx+1,ty-1,8,2,'#DCE4EE');R(c,tx+4,ty+3,2,4,PBI);
+  R(c,tx+2,ty-4,3,2,foodCol);R(c,tx+6,ty-4,2,2,'#FFFBF1');
+  // Ghế nhựa phải + Người ngồi phải (đội mũ/nón)
+  R(c,tx+11,ty+2,6,5,PBI);R(c,tx+12,ty+3,4,3,stoolCol==='#2563EB'?'#E0452B':'#2563EB');
+  R(c,tx+11,ty-4,5,6,shirt2);R(c,tx+12,ty-7,3,3,'#F4C9A0');
+  R(c,tx+10,ty-8,7,1,'#F7DF94');R(c,tx+12,ty-9,3,1,'#FFF1C2');
+}
+
 var skyTile=mk(VW,66,function(x){
-  var bands=['#6B5FC0','#8F76CC','#B685CB','#E391BF','#F8A6B0','#FFC096','#FFDA9C','#FFEBB8'];
+  var bands=ST_PAL.bands;
   for(var i=0;i<bands.length;i++){
     R(x,0,i*8,VW,8,bands[i]);
     if(i<bands.length-1){for(var px=0;px<VW;px+=2)R(x,px,i*8+7,1,1,bands[i+1]);}
   }
-  R(x,0,60,VW,6,'#FFEBB8');
-  E(x,150,34,17,17,'#FFE9A8');E(x,150,34,13,13,'#FFF6CF');
-  R(x,136,36,28,1,'#FFC096');R(x,138,40,24,1,'#FFDA9C');R(x,141,44,18,2,'#FFEBB8');
+  R(x,0,60,VW,6,bands[bands.length-1]);
+  if(ST_PAL.mode==='night'){
+    E(x,150,24,8,8,'#FFF8D6');E(x,153,22,6,6,bands[2]); // trăng khuyết
+  }else if(ST_PAL.mode==='day'){
+    E(x,150,22,11,11,'#FFF3B0');E(x,150,22,8,8,'#FFF9D6');
+  }else{
+    E(x,150,34,17,17,'#FFE9A8');E(x,150,34,13,13,'#FFF6CF');
+    R(x,136,36,28,1,'#FFC096');R(x,138,40,24,1,'#FFDA9C');R(x,141,44,18,2,'#FFEBB8');
+  }
 });
 
 var worldBg=mk(WORLD_W,VH,function(x){
@@ -382,7 +429,7 @@ var worldBg=mk(WORLD_W,VH,function(x){
   // Tòa nhà xa chân trời
   for(var tx=8;tx<WORLD_W;tx+=28){
     var h=18+((rd()*22)|0), w=10+((rd()*12)|0);
-    R(x,tx,64-h,w,h,'#7B66AE');R(x,tx+2,64-h-3,2,3,'#7B66AE');
+    R(x,tx,64-h,w,h,ST_PAL.skyline);R(x,tx+2,64-h-3,2,3,ST_PAL.skyline);
   }
   // NHÀ PHỐ DỌC CON PHỐ + CHỢ BẾN THÀNH Ở TRUNG TÂM (x=242..330)
   var HC=['#F2C9A0','#E8A0A8','#A8CBA0','#F5E0A0','#9FC4DC','#D9A8D0'];
@@ -465,6 +512,16 @@ var worldBg=mk(WORLD_W,VH,function(x){
   cx=PB_CX[11];R(x,cx-15,47,30,3,PBI);R(x,cx-14,50,28,24,PBI);R(x,cx-13,51,26,22,'#2B1B2E');
   E(x,cx-7,56,3,4,'#E0452B');E(x,cx,55,3,4,'#F4B93B');E(x,cx+7,56,3,4,'#F9B8C4');
   R(x,cx-9,65,5,4,'#F9B8C4');R(x,cx-1,65,5,4,'#F4B93B');R(x,cx+6,65,5,4,'#F9B8C4');pbIcon(x,11,cx-5,66);
+
+  // DU KHÁCH ĐỨNG LỰA MÓN DỌC VỈA HÈ TRÊN TRƯỚC CÁC QUẦY ĂN & QUẦY LƯU NIỆM
+  drawTouristStanding(x, 40, 75, '#E0452B', '#1F2937', 'nonla');
+  drawTouristStanding(x, 86, 75, '#38BDF8', '#374151', 'bucket');
+  drawTouristStanding(x, 140, 75, '#F4B93B', '#1F2937', 'none');
+  drawTouristStanding(x, 192, 75, '#EC4899', '#374151', 'nonla');
+  drawTouristStanding(x, 368, 75, '#10B981', '#1F2937', 'bucket');
+  drawTouristStanding(x, 418, 75, '#FFFBF1', '#4B6FA5', 'nonla');
+  drawTouristStanding(x, 472, 75, '#F97316', '#1F2937', 'bucket');
+  drawTouristStanding(x, 524, 75, '#A855F7', '#1F2937', 'none');
 });
 
 var cv=document.getElementById('psCv'), X=cv.getContext('2d');
@@ -559,35 +616,51 @@ function draw(t){
 }
 
 function drawLowerVietnamSquare(X, camX, camY, t) {
-  // Tầng dưới mở rộng (y: 100..172): Quảng trường phố đêm Việt Nam, xích lô, cà phê bệt & đèn lồng Hội An
+  // Tầng dưới mở rộng (y: 100..160): Phố Lễ Hội Ẩm Thực 2 bên đường, dãy bàn ghế nhựa du khách ngồi ăn uống & đèn lồng Hội An
   X.save();
   X.translate(-Math.round(camX), -Math.round(camY));
   for (var sx = 0; sx < WORLD_W; sx += 16) {
-    for (var sy = 100; sy < 172; sy += 16) {
-      R(X, sx, sy, 16, 16, ((sx / 16 + sy / 16) % 2 === 0) ? '#D8C3A5' : '#CBB292');
+    for (var sy = 100; sy < 160; sy += 16) {
+      R(X, sx, sy, 16, 16, ((sx / 16 + sy / 16) % 2 === 0) ? ST_PAL.plaza1 : ST_PAL.plaza2);
     }
   }
   R(X, 0, 100, WORLD_W, 2, PBI);
-  // Dây đèn lồng Hội An dọc quảng trường
-  R(X, 0, 106, WORLD_W, 1, PBI);
-  for (var lx = 24; lx < WORLD_W - 10; lx += 40) {
-    var col = (lx % 80 === 24) ? '#E0452B' : '#F4B93B';
-    E(X, lx, 111 + Math.round(Math.sin(t * 2 + lx) * 0.8), 4, 4, PBI);
-    E(X, lx, 111 + Math.round(Math.sin(t * 2 + lx) * 0.8), 3, 3, col);
+
+  // Dây đèn lồng Hội An giăng dọc phố lễ hội (tỏa sáng ban đêm/chiều)
+  R(X, 0, 105, WORLD_W, 1, PBI);
+  var lanCols = ['#E0452B', '#F4B93B', '#38BDF8', '#EC4899'];
+  for (var lx = 20; lx < WORLD_W - 10; lx += 32) {
+    var col = lanCols[((lx / 32) | 0) % lanCols.length];
+    var ly = 110 + Math.round(Math.sin(t * 2.2 + lx * 0.2) * 0.9);
+    if (ST_PAL.lanternGlow) {
+      X.save();
+      X.globalAlpha = 0.22;
+      E(X, lx, ly, 7, 7, '#FFE08A');
+      X.restore();
+    }
+    E(X, lx, ly, 4, 4, PBI);
+    E(X, lx, ly, 3, 3, col);
   }
-  // Xích lô Việt Nam (x: 118, y: 122)
+
+  // Hàng quán vỉa hè phía dưới: 5 nhóm bàn inox + ghế nhựa xanh/đỏ có du khách ngồi ăn & trò chuyện
+  drawTouristEating(X, 46, 134, '#E0452B', '#38BDF8', '#2563EB', '#F4B93B');   // Quán Phở & Trà đá
+  drawTouristEating(X, 198, 136, '#10B981', '#F43F5E', '#E0452B', '#FFE08A');  // Quán Bánh Xèo & Chè
+  drawTouristEating(X, 294, 132, '#4B6FA5', '#F9B8C4', '#2563EB', '#8A5A34');  // Quảng trường Cà phê bệt
+  drawTouristEating(X, 376, 136, '#F59E0B', '#FFFBF1', '#E0452B', '#E0452B');  // Quán Xiên nướng
+  drawTouristEating(X, 518, 134, '#EC4899', '#3B82F6', '#2563EB', '#5E9A57');  // Trà chanh & Quà phố đêm
+
+  // Xích lô Sài Gòn (x: 118, y: 122)
   R(X, 118, 122, 24, 16, PBI); R(X, 119, 123, 22, 14, '#4B6FA5');
-  R(X, 116, 116, 28, 6, '#F4B93B'); // mui xích lô
+  R(X, 116, 116, 28, 6, '#F4B93B');
   E(X, 122, 140, 4, 4, PBI); E(X, 138, 140, 4, 4, PBI); E(X, 152, 140, 4, 4, PBI);
-  R(X, 142, 128, 12, 3, PBI); // ghi-đông đạp sau
-  // Khu ghế nhựa cà phê bệt giữa quảng trường (x: 276..350)
-  [[276, 128, '#E0452B'], [296, 126, '#4B6FA5'], [320, 130, '#E0452B'], [340, 126, '#4B6FA5']].forEach(function(st) {
-    R(X, st[0], st[1], 10, 8, PBI); R(X, st[0] + 1, st[1] + 1, 8, 5, st[2]);
-  });
-  // Xe bánh tráng trộn (x: 428, y: 118)
+  R(X, 142, 128, 12, 3, PBI);
+
+  // Xe bánh tráng trộn (x: 428, y: 118) + Du khách đứng chờ mua đồ
   R(X, 428, 118, 44, 24, PBI); R(X, 429, 119, 42, 10, '#DCEEFA'); R(X, 429, 129, 42, 12, '#5E9A57');
   R(X, 426, 114, 48, 4, '#E0452B');
   E(X, 436, 144, 4, 4, PBI); E(X, 464, 144, 4, 4, PBI);
+  drawTouristStanding(X, 418, 144, '#38BDF8', '#1F2937', 'nonla');
+  drawTouristStanding(X, 478, 144, '#F4B93B', '#374151', 'bucket');
   X.restore();
 }
 

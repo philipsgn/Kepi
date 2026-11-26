@@ -6523,7 +6523,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       (funBannerCode.includes('worldHeight: 112') || funBannerCode.includes('worldHeight: 168')) &&
       (funBannerCode.includes('buildSeamlessPanorama') || funBannerCode.includes('drawFunWorldWings')) &&
       streetBannerCode.includes('worldWidth: 584') &&
-      streetBannerCode.includes('worldHeight: 172') &&
+      (streetBannerCode.includes('worldHeight: 160') || streetBannerCode.includes('worldHeight: 172')) &&
       streetBannerCode.includes('drawLowerVietnamSquare') &&
       decisionsCode.includes('201') &&
       chatDocCode.includes('201'),
@@ -6709,4 +6709,47 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 143 Passed: Sửa Lỗi Engine Canvas psCv & Cổng Chợ Bến Thành Từ Cả Khám Phá Lẫn Quán Quen (Quyết định 206) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 143 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (143/143)!');
+// ==========================================
+// TEST 144: MASTER BLUEPRINT 6 BANNER (docs/PIXEL_OPEN_WORLD_SPEC.md), ENGINE TRƯỢT CAMERA 3S & PHỐ LỄ HỘI ẨM THỰC QUÁN QUEN (QUYẾT ĐỊNH 207)
+// ==========================================
+{
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const indexDoc = fs.readFileSync('docs/screens/heocon/00-INDEX.md', 'utf8');
+  const gardenDoc = fs.readFileSync('docs/screens/heocon/04-HOME-GARDEN.md', 'utf8');
+  const chatDoc = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const profileDoc = fs.readFileSync('docs/screens/heocon/11-PROFILE-SETTINGS.md', 'utf8');
+  const houseDoc = fs.readFileSync('docs/screens/heocon/13-HOUSE-OF-PIG.md', 'utf8');
+  const openRoomCode = fs.readFileSync('src/components/pixel/pixelOpenRoomEngine.ts', 'utf8');
+  const streetCode = fs.readFileSync('src/components/chat/BenThanhStreetBannerWebView.tsx', 'utf8');
+
+  assert.ok(
+    specCode.includes('584 × 160') &&
+      specCode.includes('432 × 128') &&
+      specCode.includes('440 × 140') &&
+      specCode.includes('480 × 132') &&
+      specCode.includes('panHoldUntil') &&
+      indexDoc.includes('PIXEL_OPEN_WORLD_SPEC.md') &&
+      gardenDoc.includes('PIXEL_OPEN_WORLD_SPEC.md') &&
+      chatDoc.includes('PIXEL_OPEN_WORLD_SPEC.md') &&
+      profileDoc.includes('PIXEL_OPEN_WORLD_SPEC.md') &&
+      houseDoc.includes('PIXEL_OPEN_WORLD_SPEC.md') &&
+      decisionsCode.includes('207'),
+    'PIXEL_OPEN_WORLD_SPEC.md master blueprint must exist and be cross-linked across all heocon screen docs and DECISIONS.md'
+  );
+
+  assert.ok(
+    openRoomCode.includes('performance.now() + 3000') &&
+      openRoomCode.includes("cv.style.touchAction = 'none'") &&
+      openRoomCode.includes("cv.style.cursor = 'grab'") &&
+      streetCode.includes('worldHeight: 160') &&
+      streetCode.includes('getStreetTimePalette') &&
+      streetCode.includes('drawTouristStanding') &&
+      streetCode.includes('drawTouristEating'),
+    'pixelOpenRoomEngine must enforce 3000ms pan hold & grab touchAction, and BenThanhStreetBannerWebView must implement 584x160 3-time-of-day food festival street'
+  );
+
+  console.log('✅ Test 144 Passed: Master Blueprint 6 Banner, Engine Trượt Camera 3s & Phố Lễ Hội Ẩm Thực Quán Quen (Quyết định 207) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 144 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (144/144)!');

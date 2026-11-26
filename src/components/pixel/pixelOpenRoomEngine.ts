@@ -157,6 +157,10 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
     }
 
     // Unified Pointer + Touch Drag-to-Pan vs Tap-to-Walk
+    try {
+      cv.style.touchAction = 'none';
+      cv.style.cursor = 'grab';
+    } catch (_e) {}
     var drag = { active: false, moved: false, startX: 0, startY: 0, camStartX: 0, camStartY: 0 };
     function getPt(e) {
       if (e.touches && e.touches.length > 0) return e.touches[0];
@@ -173,6 +177,7 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
       drag.startY = pt.clientY;
       drag.camStartX = state.camX;
       drag.camStartY = state.camY;
+      try { cv.style.cursor = 'grabbing'; } catch (_e) {}
     }
 
     function onMove(e) {
@@ -195,7 +200,7 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
         state.camY = clamp(drag.camStartY - dyWorld, 0, maxCamY);
         state.targetCamX = state.camX;
         state.targetCamY = state.camY;
-        state.panHoldUntil = performance.now() + 2500;
+        state.panHoldUntil = performance.now() + 3000;
       }
     }
 
@@ -206,7 +211,10 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
       drag.active = false;
       drag.moved = false;
       state.isPanning = false;
-      if (!wasDrag) {
+      try { cv.style.cursor = 'grab'; } catch (_e) {}
+      if (wasDrag) {
+        state.panHoldUntil = performance.now() + 3000;
+      } else {
         var nowMs = Date.now();
         if (nowMs - lastTapMs < 140) return;
         lastTapMs = nowMs;

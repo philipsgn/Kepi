@@ -1,6 +1,7 @@
 # 👤 11 — PROFILE & SETTINGS: HỒ SƠ + CÀI ĐẶT + THEME 2-WAY LIGHT/DARK (re-skin)
 
-> **Screen-unit:** Tab 4 + màn `/(main)/settings`. **Logic thẻ/khóa bảo mật/danh mục GIỮ NGUYÊN** (`docs/screens/PROFILE.md`, QĐ 54/65/66, QĐ 152, QĐ 154, QĐ 155, QĐ 156).
+> **Screen-unit:** Tab 4 + màn `/(main)/settings`. **Logic thẻ/khóa bảo mật/danh mục GIỮ NGUYÊN** (`docs/screens/PROFILE.md`, QĐ 54/65/66, QĐ 152, QĐ 154, QĐ 155, QĐ 156, QĐ 207).
+> **Quy chuẩn Không gian Mở Banner Hồ Sơ:** Tuân thủ [`docs/PIXEL_OPEN_WORLD_SPEC.md`](../../PIXEL_OPEN_WORLD_SPEC.md) (§4.2: Văn phòng làm việc của chú Heo `432×128`).
 
 ## 1. Tab Hồ Sơ (QĐ 152, QĐ 153, QĐ 154, QĐ 155 & QĐ 156)
 | Phần tử | Re-skin |

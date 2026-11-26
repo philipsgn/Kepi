@@ -1,7 +1,7 @@
 # 🐷 INDEX — ĐẶC TẢ SCREEN NHỎ STYLE "HEO CON" (docs/screens/heocon/)
 
 > **Mục đích:** tách toàn bộ app thành các **screen-unit nhỏ** để Agent thi công từng miếng độc lập, mỗi miếng bám sát code đồ họa của `prototype/Ví Heo Con.html`.
-> **Thứ tự đọc bắt buộc:** `docs/STYLE_HEOCON.md` (ngôn ngữ chung) → file screen tương ứng → `01-PIXEL-GFX-PORT.md` nếu screen có pixel art.
+> **Thứ tự đọc bắt buộc:** `docs/STYLE_HEOCON.md` (ngôn ngữ chung) → `docs/PIXEL_OPEN_WORLD_SPEC.md` (Master Blueprint 6 Banner Không Gian Mở) → file screen tương ứng → `01-PIXEL-GFX-PORT.md` nếu screen có pixel art.
 
 ## Danh mục screen-unit & thứ tự thi công
 

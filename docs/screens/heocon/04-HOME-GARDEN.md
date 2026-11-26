@@ -1,7 +1,7 @@
 # 🌳 04 — HOME·GARDEN: KHUNG VƯỜN PIXEL & CHÚ HEO (screen-unit trung tâm)
 
 > **Screen-unit:** khung cảnh 4:3 trên Home, dưới Header, trên Thẻ "Chi hôm nay" (thẻ đè mép đáy khung −22px).
-> **Bám sát 100% code đồ họa:** toàn bộ hình ảnh/máy trạng thái port từ `01-PIXEL-GFX-PORT.md` — file này chỉ đặc tả **vỏ khung + overlay + tương tác** trên màn Home.
+> **Bám sát 100% code đồ họa:** toàn bộ hình ảnh/máy trạng thái port từ `01-PIXEL-GFX-PORT.md` và quy chuẩn không gian mở tại [`docs/PIXEL_OPEN_WORLD_SPEC.md`](../../PIXEL_OPEN_WORLD_SPEC.md) (§4.3: Khu vườn rộng `440×140` & Mặt tiền ngôi nhà) — file này chỉ đặc tả **vỏ khung + overlay + tương tác** trên màn Home.
 
 ## 1. Vỏ khung (CSS `.scene`)
 ```css

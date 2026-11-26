@@ -381,3 +381,7 @@ Màn hình Tab 3 hiển thị:
 ## 27. Sửa Lỗi Engine Canvas `psCv` & Cổng Chợ Bến Thành Từ Cả Khám Phá Lẫn Quán Quen (Quyết định 206)
 - **`BenThanhStreetBannerWebView.tsx`:** Đồng bộ `canvasId: 'psCv'` khớp `<canvas id="psCv">`, bật `touch-action: none` và đặt `PB.camX = 185` khi khởi tạo để Cửa Nam Chợ Bến Thành hiện ngay chính giữa Tab Quán quen.
 - **`EntertainmentBannerWebView.tsx` & `ChatView.tsx`:** Hotspot `ben_thanh_notre` trên Banner Tab Khám phá bật `fastDash: true` và kích hoạt `onEnterMarket` (`≤ 300ms`). `ChatView.tsx` lưu `marketReturnSubView` (`'hub'` hoặc `'map'`) để nút `[←]` / `Ra phố` trả về đúng Tab nguồn.
+
+## 28. Master Blueprint & Phố Lễ Hội Ẩm Thực Quán Quen (`584×160` — Quyết định 207)
+- **Tài liệu gốc:** Tuân thủ [`docs/PIXEL_OPEN_WORLD_SPEC.md`](../../PIXEL_OPEN_WORLD_SPEC.md) về công thức diện tích 4 tầng, chuẩn vẽ 3 lớp chiều sâu, 3 sắc trời theo giờ, và cơ chế trượt camera giữ góc nhìn `3000ms` (`panHoldUntil`).
+- **Tab Quán Quen (`BenThanhStreetBannerWebView.tsx`, `584×160`):** Nâng cấp thành **Phố Lễ Hội Ẩm Thực 2 Bên Đường** gồm 8 sạp đặc sản Việt Nam (Phở bò bốc khói, Bún bò & Bánh mì, Bánh xèo & Nước mía, Chè Ba Màu, Xiên nướng, Nón lá & Áo dài, Gốm & Sơn mài, Lồng đèn & Heo đất), dây đèn lồng Hội An 3 khung giờ, du khách đứng lựa món trên vỉa hè trên và ngồi bàn ghế nhựa xanh/đỏ ăn uống ở hàng quán vỉa hè dưới, bao quanh Cổng Cửa Nam Chợ Bến Thành (`fastDash` vào Lòng Chợ).
