@@ -107,17 +107,17 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
       buildOpenRoomEngineScript({
         canvasId: 'mkCv',
         worldWidth: 1200,
-        worldHeight: 480,
+        worldHeight: 760,
         viewWidth: 220,
         viewHeight: 320,
-        walkBounds: { minX: 16, maxX: 1184, minY: 168, maxY: 468 },
-        initialX: 112,
-        initialY: 196,
-        initialCamX: 0,
-        initialCamY: 20,
+        walkBounds: { minX: 16, maxX: 1184, minY: 168, maxY: 742 },
+        initialX: 180,
+        initialY: 186,
+        initialCamX: 40,
+        initialCamY: 40,
         speed: 58,
         obstacles: [
-          // Tầng Bắc (9 shop sát vách phủ kín từ x=0..1200)
+          // Hàng 1: 9 shop Bắc (y: 120..166)
           { x: 0, y: 120, w: 112, h: 46 },
           { x: 116, y: 120, w: 128, h: 46 },
           { x: 248, y: 120, w: 136, h: 46 },
@@ -127,33 +127,57 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
           { x: 824, y: 120, w: 132, h: 46 },
           { x: 960, y: 120, w: 124, h: 46 },
           { x: 1088, y: 120, w: 112, h: 46 },
-          // Tầng Trung Tâm (7 cụm so le nhô-thụt tự nhiên)
-          { x: 54, y: 230, w: 140, h: 52 },
-          { x: 212, y: 242, w: 128, h: 50 },
-          { x: 358, y: 232, w: 126, h: 50 },
-          { x: 502, y: 244, w: 146, h: 48 },
-          { x: 666, y: 232, w: 120, h: 50 },
-          { x: 804, y: 242, w: 124, h: 50 },
-          { x: 946, y: 230, w: 190, h: 52 },
-          // Tầng Nam (8 cụm so le phủ kín x=4..1196)
-          { x: 4, y: 374, w: 124, h: 52 },
-          { x: 144, y: 386, w: 132, h: 50 },
-          { x: 292, y: 376, w: 132, h: 52 },
-          { x: 440, y: 392, w: 154, h: 44 },
-          { x: 610, y: 376, w: 132, h: 52 },
-          { x: 758, y: 386, w: 134, h: 50 },
-          { x: 908, y: 376, w: 138, h: 52 },
-          { x: 1062, y: 384, w: 134, h: 52 },
+          // Hàng 2 (y: 206..266)
+          { x: 54, y: 208, w: 140, h: 52 },
+          { x: 212, y: 218, w: 128, h: 50 },
+          { x: 358, y: 208, w: 126, h: 50 },
+          { x: 502, y: 220, w: 146, h: 48 },
+          { x: 666, y: 208, w: 120, h: 50 },
+          { x: 804, y: 218, w: 124, h: 50 },
+          { x: 946, y: 208, w: 190, h: 52 },
+          // Hàng 3 (y: 308..364)
+          { x: 42, y: 310, w: 146, h: 46 },
+          { x: 204, y: 318, w: 136, h: 46 },
+          { x: 356, y: 308, w: 142, h: 46 },
+          { x: 514, y: 316, w: 158, h: 46 },
+          { x: 688, y: 308, w: 144, h: 46 },
+          { x: 848, y: 318, w: 144, h: 46 },
+          { x: 1008, y: 310, w: 154, h: 46 },
+          // Hàng 4 (y: 406..464)
+          { x: 36, y: 414, w: 152, h: 46 },
+          { x: 204, y: 406, w: 146, h: 46 },
+          { x: 366, y: 416, w: 142, h: 46 },
+          { x: 524, y: 412, w: 160, h: 46 },
+          { x: 700, y: 406, w: 144, h: 46 },
+          { x: 860, y: 416, w: 144, h: 46 },
+          { x: 1020, y: 408, w: 156, h: 46 },
+          // Hàng 5 (y: 508..564)
+          { x: 44, y: 510, w: 148, h: 46 },
+          { x: 208, y: 518, w: 142, h: 46 },
+          { x: 366, y: 508, w: 146, h: 46 },
+          { x: 528, y: 516, w: 152, h: 46 },
+          { x: 696, y: 508, w: 146, h: 46 },
+          { x: 858, y: 518, w: 142, h: 46 },
+          { x: 1016, y: 510, w: 160, h: 46 },
+          // Hàng 6 (y: 608..668)
+          { x: 4, y: 608, w: 124, h: 52 },
+          { x: 144, y: 620, w: 132, h: 50 },
+          { x: 292, y: 610, w: 132, h: 52 },
+          { x: 440, y: 626, w: 154, h: 44 },
+          { x: 610, y: 610, w: 132, h: 52 },
+          { x: 758, y: 620, w: 134, h: 50 },
+          { x: 908, y: 610, w: 138, h: 52 },
+          { x: 1062, y: 618, w: 134, h: 52 },
         ],
         hotspots: [
           {
             id: 'exit_market',
             x: 0,
-            y: 280,
+            y: 350,
             w: 28,
             h: 58,
             standX: 34,
-            standY: 312,
+            standY: 382,
             standFace: -1,
             actionType: 'jump_joy',
             fastDash: true,
@@ -162,11 +186,11 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
           {
             id: 'exit_back_gate',
             x: 1172,
-            y: 280,
+            y: 350,
             w: 28,
             h: 58,
             standX: 1166,
-            standY: 312,
+            standY: 382,
             standFace: 1,
             actionType: 'jump_joy',
             fastDash: true,
@@ -505,7 +529,7 @@ window.onerror=function(msg,src,line){
 'use strict';
 
 var WORLD_W=1200;
-var WORLD_H=480;
+var WORLD_H=760;
 var VW=220;
 var VH=320;
 
@@ -514,7 +538,8 @@ ${crowdScript}
 ${archScript}
 ${stallsScript}
 
-var MK={bg:null,central:null,south:null,t:0,last:0,dt:0,run:false,w:VW,h:VH};
+var MK={bg:null,r2:null,r3:null,r4:null,r5:null,r6:null,t:0,last:0,dt:0,run:false,w:VW,h:VH};
+var stuffyState={meter:0,level:0,warned:false,fleeing:false,panting:false,pantUntil:0};
 
 function buildMarketInterior(){
   var bg=document.createElement('canvas');bg.width=WORLD_W;bg.height=WORLD_H;
@@ -526,16 +551,11 @@ function buildMarketInterior(){
   drawNorthStalls(x);
   MK.bg=bg;
 
-  var cen=document.createElement('canvas');cen.width=WORLD_W;cen.height=WORLD_H;
-  var cx=cen.getContext('2d');cx.imageSmoothingEnabled=false;
-  drawCentralIslands(cx);
-  drawExtraMicroStalls(cx);
-  MK.central=cen;
-
-  var sth=document.createElement('canvas');sth.width=WORLD_W;sth.height=WORLD_H;
-  var sx=sth.getContext('2d');sx.imageSmoothingEnabled=false;
-  drawSouthStalls(sx);
-  MK.south=sth;
+  MK.r2=mk(WORLD_W,WORLD_H,function(c){drawRow2Stalls(c);drawExtraMicroStalls(c);});
+  MK.r3=mk(WORLD_W,WORLD_H,function(c){drawRow3Stalls(c);});
+  MK.r4=mk(WORLD_W,WORLD_H,function(c){drawRow4Stalls(c);});
+  MK.r5=mk(WORLD_W,WORLD_H,function(c){drawRow5Stalls(c);});
+  MK.r6=mk(WORLD_W,WORLD_H,function(c){drawRow6Stalls(c);});
 }
 
 function drawLiveMarketEffects(x,t){
@@ -574,8 +594,49 @@ function drawLiveMarketEffects(x,t){
 function mkDraw(t){
   var x=MK.x;
   var dt=Math.min(0.05,MK.dt||0.016);
+  var now=performance.now();
   var rm=window.__openRoom?window.__openRoom.state:null;
-  if(window.__openRoom) window.__openRoom.step(dt,performance.now());
+  if(window.__openRoom) window.__openRoom.step(dt,now);
+
+  // Cơ chế Chú Heo Ngộp Thở (chỉ tự chạy vọt ra sát cổng đứng thở phì phò, không tự thoát màn hình!)
+  if(rm){
+    var nearGate=(rm.x<=78||rm.x>=1122);
+    if(stuffyState.panting&&now>stuffyState.pantUntil){
+      stuffyState.panting=false;stuffyState.meter=0;stuffyState.level=0;stuffyState.warned=false;
+    }
+    if(stuffyState.fleeing){
+      if(nearGate||!rm.walking){
+        stuffyState.fleeing=false;stuffyState.panting=true;stuffyState.pantUntil=now+4500;
+        stuffyState.meter=0;stuffyState.level=0;stuffyState.warned=false;
+        rm.bubbleText='Phù... ra tới cổng mới thở nổi! Chạm cổng ra phố nha!';
+        rm.bubbleUntil=now+4200;
+      }
+    }else if(!nearGate&&!stuffyState.panting){
+      var nearCnt=countNearbyCrowd(rm.x,rm.y,t);
+      if(nearCnt>=2){stuffyState.meter=Math.min(1,stuffyState.meter+dt*(0.08+nearCnt*0.025));}
+      else{stuffyState.meter=Math.max(0,stuffyState.meter-dt*0.18);}
+      stuffyState.level=stuffyState.meter;
+      if(stuffyState.meter>=0.52&&!stuffyState.warned){
+        stuffyState.warned=true;
+        rm.bubbleText='Ngộp quá... đông nghẹt thở luôn!!';
+        rm.bubbleUntil=now+2600;
+      }
+      if(stuffyState.meter>=1){
+        stuffyState.fleeing=true;
+        var goLeft=(rm.x<WORLD_W/2);
+        var gateX=goLeft?42:1158;
+        rm.bubbleText='Chịu hết nổi rồi! Chạy ra cổng thở thôi!!';
+        rm.bubbleUntil=now+2600;
+        if(window.__openRoom&&window.__openRoom.walkTo){
+          window.__openRoom.walkTo(gateX,384,{id:'breathe_gate',standFace:goLeft?-1:1,fastDash:true,bubbleText:'Phù... ra tới cổng mới thở nổi! Chạm cổng ra phố nha!'});
+        }
+      }
+    }else{
+      stuffyState.meter=Math.max(0,stuffyState.meter-dt*0.35);
+      stuffyState.level=stuffyState.meter;
+    }
+  }
+
   var camX=rm?Math.round(rm.camX):0;
   var camY=rm?Math.round(rm.camY):0;
 
@@ -584,18 +645,14 @@ function mkDraw(t){
   x.drawImage(MK.bg,0,0);
   drawLiveMarketEffects(x,t);
 
-  // Y-Sorting 3 tầng: Khách & Heo Con <-> Tầng Trung Tâm (y=290) <-> Tầng Nam (y=434)
-  var pigY=rm?rm.y:192;
-  var CENTRAL_Y=290;
-  var SOUTH_Y=434;
-
-  var pigDrawn=false;
-  var cenDrawn=false;
-  var sthDrawn=false;
-
+  // Y-Sorting 6 tầng mê cung chợ (Hàng 2..Hàng 6 + 180 người + Chú Heo)
+  var pigY=rm?rm.y:186;
   var events=[
-    {y:CENTRAL_Y,kind:'central'},
-    {y:SOUTH_Y,kind:'south'},
+    {y:266,kind:'r2'},
+    {y:362,kind:'r3'},
+    {y:462,kind:'r4'},
+    {y:562,kind:'r5'},
+    {y:668,kind:'r6'},
     {y:pigY,kind:'pig'}
   ].sort(function(a,b){return a.y-b.y;});
 
@@ -603,14 +660,13 @@ function mkDraw(t){
   events.forEach(function(ev){
     drawWalkingShoppers(x,t,prevY,ev.y,camX,VW);
     prevY=ev.y;
-    if(ev.kind==='central'&&!cenDrawn){x.drawImage(MK.central,0,0);cenDrawn=true;}
-    else if(ev.kind==='south'&&!sthDrawn){x.drawImage(MK.south,0,0);sthDrawn=true;}
-    else if(ev.kind==='pig'&&!pigDrawn){drawPigAt(x,rm,t);pigDrawn=true;}
+    if(ev.kind==='pig') drawPigAt(x,rm,t,stuffyState);
+    else if(MK[ev.kind]) x.drawImage(MK[ev.kind],0,0);
   });
   drawWalkingShoppers(x,t,prevY,999,camX,VW);
   x.restore();
 
-  if(window.__openRoom) window.__openRoom.drawOverlays(x,performance.now());
+  if(window.__openRoom) window.__openRoom.drawOverlays(x,now);
 }
 
 function mkFrame(now){

@@ -161,11 +161,14 @@ function ensureCrowdBuilt(){
     ];
   });
 
-  var rng = mulberry32(21600);
+  var rng = mulberry32(21700);
   var lanes = [
-    {minY:176, maxY:216, count:36},
-    {minY:300, maxY:358, count:42},
-    {minY:440, maxY:472, count:22}
+    {minY:174, maxY:198, count:24},
+    {minY:274, maxY:298, count:24},
+    {minY:374, maxY:398, count:26},
+    {minY:474, maxY:498, count:24},
+    {minY:574, maxY:598, count:22},
+    {minY:678, maxY:738, count:20}
   ];
   CROWD_WALKERS = [];
   lanes.forEach(function(ln){
@@ -188,6 +191,21 @@ function getWalkingShoppers(t){
   return CROWD_WALKERS;
 }
 
+function countNearbyCrowd(px, py, t){
+  ensureCrowdBuilt();
+  var cnt = 0;
+  var span = 1144;
+  for(var i=0; i<CROWD_WALKERS.length; i++){
+    var w = CROWD_WALKERS[i];
+    if(Math.abs(w.y - py) > 36) continue;
+    var raw = (w.x0 + w.dir * t * w.speed) % span;
+    if(raw < 0) raw += span;
+    var sx = 28 + raw;
+    if(Math.abs(sx - px) <= 38) cnt++;
+  }
+  return cnt;
+}
+
 function drawWalkingShoppers(x,t,minY,maxY,camX,vw){
   ensureCrowdBuilt();
   var hasCull = (typeof camX === 'number' && typeof vw === 'number');
@@ -206,18 +224,35 @@ function drawWalkingShoppers(x,t,minY,maxY,camX,vw){
   }
 }
 
-function drawPigAt(x,rm,t){
+function drawPigAt(x,rm,t,stuffy){
   if(!rm)return;
-  var px=Math.round(rm.x-12), jumpY=(rm.action==='jump_joy'?-Math.abs(Math.sin(t*10))*4:0), py=Math.round(rm.y-20+jumpY);
-  // Vầng sáng kem nhẹ dưới chân để Heo Con luôn nổi bật giữa 140+ người!
+  var isStuffy = stuffy && stuffy.level > 0.45;
+  var isPanting = stuffy && stuffy.panting;
+  var shakeX = (stuffy && stuffy.level > 0.72 && !isPanting) ? Math.round(Math.sin(t*28)*1) : 0;
+  var pantY = isPanting ? Math.round(Math.abs(Math.sin(t*12))*1.5) : 0;
+  var px=Math.round(rm.x-12)+shakeX, jumpY=(rm.action==='jump_joy'?-Math.abs(Math.sin(t*10))*4:0), py=Math.round(rm.y-20+jumpY+pantY);
+  // Vầng sáng kem nhẹ dưới chân để Heo Con luôn nổi bật giữa 180+ người!
   E(x,Math.round(rm.x),Math.round(rm.y)-1,13,4,'rgba(255,248,214,0.58)');
   pxShadow(x,px+4,Math.round(rm.y)-1,16,2);
   hpx.clearRect(0,0,24,20);
-  drawPigSprite(hpx,{pose:rm.walking?'walk':(rm.action==='eat_snack'?'eat':'stand'),frame:rm.walking?(((t*6)|0)%2):0,happy:Boolean(rm.action),blink:(t%4)<0.15,tail:Math.floor(t*3)%2===1});
+  drawPigSprite(hpx,{pose:rm.walking?'walk':(rm.action==='eat_snack'?'eat':'stand'),frame:rm.walking?(((t*8)|0)%2):0,happy:Boolean(rm.action)&&!isStuffy,blink:(t%4)<0.15,tail:Math.floor(t*3)%2===1});
   x.save();
   if(rm.facing<0){x.translate(px+24,py);x.scale(-1,1);x.drawImage(hp,0,0,24,20,0,0,24,20);}
   else x.drawImage(hp,0,0,24,20,px,py,24,20);
   x.restore();
+  // Giọt mồ hôi xanh pixel rơi từ trán Heo khi ngộp thở hoặc vừa chạy ra cổng thở phì phò
+  if(isStuffy || isPanting){
+    var dropY = py + 2 + Math.round(((t*14)%6));
+    var dropX = px + (rm.facing<0 ? 4 : 18);
+    R(x,dropX,dropY,2,3,'#38BDF8');R(x,dropX,dropY,1,1,'#E0F2FE');
+  }
+  // Hơi thở "phù phù" khi Heo đứng sát cổng thở dốc
+  if(isPanting){
+    var pf = (t*2.4)%1;
+    var bx = px + (rm.facing<0 ? -3 - Math.round(pf*6) : 24 + Math.round(pf*6));
+    var by = py + 9 - Math.round(pf*4);
+    x.save();x.globalAlpha=0.75*(1-pf);E(x,bx,by,2,2,'#FFFBF1');x.restore();
+  }
 }
 `;
 }

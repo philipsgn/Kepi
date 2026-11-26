@@ -322,19 +322,110 @@ function drawSouthStalls(x){
   drawPerson16Bit(x,1124,442,{shirt:'#38BDF8',pants:'#1E293B',hat:'cap',bag:'#FEF08A'});
 }
 
-// 10 QUẦY CÓC, GÁNH HÀNG RONG, XE BÁNH MÌ & BÀN NHỰA MINI CHEN KÍN KHOẢNG TRỐNG (~34 SẠP SAN SÁT!)
+// MÊ CUNG 6 HÀNG SẠP CHẬT CHỘI (WORLD_H = 760 — Quyết định 217)
+function drawRow2Stalls(x){
+  x.save();x.translate(0,-24);drawCentralIslands(x);x.restore();
+}
+
+// HÀNG 3 (y: 304..364): Vải Lụa, Mắt Kính, Túi Xách Da, Bún Riêu Cơm Tấm, Đồ Cúng, Báo Vé Số, Cà Phê Vợt
+function drawRow3Stalls(x){
+  var stalls=[
+    {x:42,y:310,w:146,c1:'#7C3AED',c2:'#FEF08A',front:'#581C87',title:'VAI LUA TO TAM',kind:'fabric'},
+    {x:204,y:318,w:136,c1:'#0284C7',c2:'#E0F2FE',front:'#1E3A8A',title:'MAT KINH DONG HO',kind:'watch'},
+    {x:356,y:308,w:142,c1:'#B45309',c2:'#FEF3C7',front:'#78350F',title:'TUI XACH DA',kind:'bags'},
+    {x:514,y:316,w:158,c1:'#DC2626',c2:'#FFFBF1',front:'#991B1B',title:'BUN RIEU COM TAM',kind:'pho'},
+    {x:688,y:308,w:144,c1:'#B91C1C',c2:'#FACC15',front:'#7F1D1D',title:'VANG MA NHANG',kind:'offering'},
+    {x:848,y:318,w:144,c1:'#0369A1',c2:'#FEF9C3',front:'#0C4A6E',title:'BAO CHI VE SO',kind:'paper'},
+    {x:1008,y:310,w:154,c1:'#4B3C32',c2:'#F5E9CE',front:'#2B2118',title:'CA PHE VOT SG',kind:'coffee'}
+  ];
+  stalls.forEach(function(s){
+    drawWoodCounter(x,s.x,s.y,s.w,46,'#FFF8E7',s.front);
+    drawStripedAwning(x,s.x,s.y-11,s.w,12,s.c1,s.c2,7);
+    if(s.kind==='pho'){drawPhoBowl(x,s.x+14,s.y+2);drawPhoBowl(x,s.x+46,s.y+2);drawPhoBowl(x,s.x+82,s.y+2);drawPhoBowl(x,s.x+116,s.y+2);}
+    else if(s.kind==='fabric'){for(var fx=s.x+8;fx<s.x+s.w-16;fx+=18)pxBevelBox(x,fx,s.y+2,14,7,['#EC4899','#38BDF8','#FACC15','#22C55E'][(fx/18)|0 % 4],'rgba(255,255,255,0.3)','rgba(0,0,0,0.2)');}
+    else if(s.kind==='offering'){for(var ix=s.x+10;ix<s.x+s.w-14;ix+=18){R(x,ix,s.y+2,10,9,INK);R(x,ix+1,s.y+3,8,7,'#FACC15');R(x,ix+1,s.y+3,8,3,'#DC2626');}}
+    else{for(var gx=s.x+10;gx<s.x+s.w-16;gx+=20){pxBevelBox(x,gx,s.y+2,14,8,'#E0F2FE','#FFFFFF','#94A3B8');}}
+    pxText(x,s.title,s.x+16,s.y+26,'#FEF08A',1);
+    drawPerson16Bit(x,s.x+(s.w>>1),s.y+50,{shirt:s.c2,pants:'#1E293B',hat:'nonla',apron:'#FFFBF1'});
+  });
+}
+
+// HÀNG 4 (y: 404..464): Bánh Xèo Gỏi Cuốn, Mực Nướng Hải Sản Khô, Gia Vị, Bàn Ăn Hẻm Sâu, Chè Thái, Sinh Tố, Nón Lá
+function drawRow4Stalls(x){
+  var stalls=[
+    {x:36,y:414,w:152,c1:'#E0A33A',c2:'#FFFBF1',front:'#9A3412',title:'BANH XEO GOI CUON',kind:'banh'},
+    {x:204,y:406,w:146,c1:'#EA580C',c2:'#FEF08A',front:'#7C2D12',title:'MUC NUONG KHO',kind:'sea'},
+    {x:366,y:416,w:142,c1:'#15803D',c2:'#DCFCE7',front:'#14532D',title:'MAM NEM GIA VI',kind:'jar'},
+    {x:524,y:412,w:160,c1:'#C85A38',c2:'#F5E9CE',front:'#8C5832',title:'BAN AN HEM SAU',kind:'dining'},
+    {x:700,y:406,w:144,c1:'#EC4899',c2:'#FFF8E7',front:'#9D174D',title:'CHE THAI SAM BO',kind:'che'},
+    {x:860,y:416,w:144,c1:'#22C55E',c2:'#FEF9C3',front:'#166534',title:'NUOC EP SINH TO',kind:'fruit'},
+    {x:1020,y:408,w:156,c1:'#D97706',c2:'#FFFBEB',front:'#78350F',title:'NON LA THU CONG',kind:'nonla'}
+  ];
+  stalls.forEach(function(s){
+    if(s.kind==='dining'){
+      pxShadow(x,s.x,s.y+44,s.w,4);
+      drawPerson16Bit(x,s.x+20,s.y+8,{shirt:'#38BDF8',pants:'#1E293B',tourist:true,sit:true});
+      drawPerson16Bit(x,s.x+72,s.y+8,{shirt:'#F472B6',pants:'#334155',hat:'nonla',sit:true});
+      drawPerson16Bit(x,s.x+124,s.y+8,{shirt:'#F59E0B',pants:'#1F2937',tourist:true,shades:true,sit:true});
+      pxBevelBox(x,s.x,s.y+4,s.w,20,MK_PAL.woodLt,MK_PAL.creamHi,MK_PAL.wood);
+      drawPhoBowl(x,s.x+20,s.y+6);drawBanhCuonPlate(x,s.x+72,s.y+6);drawPhoBowl(x,s.x+122,s.y+6);
+      drawPlasticStool(x,s.x+22,s.y+30,'#DC2626');drawPlasticStool(x,s.x+74,s.y+30,'#2563EB');drawPlasticStool(x,s.x+126,s.y+30,'#DC2626');
+      return;
+    }
+    drawWoodCounter(x,s.x,s.y,s.w,46,'#FFF8E7',s.front);
+    drawStripedAwning(x,s.x,s.y-11,s.w,12,s.c1,s.c2,7);
+    if(s.kind==='banh'){drawBanhCuonPlate(x,s.x+16,s.y+2);drawBanhCuonPlate(x,s.x+56,s.y+2);drawBanhCuonPlate(x,s.x+98,s.y+2);}
+    else if(s.kind==='sea'){drawSeafoodTray(x,s.x+14,s.y+2);drawSeafoodTray(x,s.x+58,s.y+2);drawSeafoodTray(x,s.x+102,s.y+2);}
+    else if(s.kind==='fruit'){drawFruitPyramid(x,s.x+16,s.y+2,'mango');drawFruitPyramid(x,s.x+56,s.y+2,'dragon');drawFruitPyramid(x,s.x+98,s.y+2,'durian');}
+    else if(s.kind==='nonla'){for(var nx=s.x+20;nx<s.x+s.w-16;nx+=26){E(x,nx,s.y+6,9,3,INK);E(x,nx,s.y+6,8,2,'#FDE68A');R(x,nx-3,s.y+2,6,2,'#F59E0B');}}
+    else{for(var jx=s.x+12;jx<s.x+s.w-16;jx+=18){R(x,jx,s.y+2,9,9,INK);R(x,jx+1,s.y+3,7,7,'#E0F2FE');R(x,jx+2,s.y+5,5,4,'#F59E0B');}}
+    pxText(x,s.title,s.x+14,s.y+26,'#FEF08A',1);
+    drawBambooBasket(x,s.x+14,s.y+48,s.c1);
+  });
+}
+
+// HÀNG 5 (y: 504..564): Đồ Nhựa Rổ Rá, Chăn Ga Gối, Giày Dép, Bánh Mứt Tết, Gốm Sứ Bát Tràng, Cây Cảnh, Tạp Hóa
+function drawRow5Stalls(x){
+  var stalls=[
+    {x:44,y:510,w:148,c1:'#2563EB',c2:'#FFFBF1',front:'#1E3A8A',title:'DO NHUA RO RA',kind:'plastic'},
+    {x:208,y:518,w:142,c1:'#EC4899',c2:'#FCE7F3',front:'#831843',title:'CHAN GA GOI DEM',kind:'fabric'},
+    {x:366,y:508,w:146,c1:'#3D5A80',c2:'#F5E9CE',front:'#1E293B',title:'GIAY DEP THOI TRANG',kind:'shoes'},
+    {x:528,y:516,w:152,c1:'#DC2626',c2:'#FEF08A',front:'#991B1B',title:'BANH MUT TET SG',kind:'mut'},
+    {x:696,y:508,w:146,c1:'#0369A1',c2:'#E0F2FE',front:'#0C4A6E',title:'GOM SU BAT TRANG',kind:'vase'},
+    {x:858,y:518,w:142,c1:'#16A34A',c2:'#DCFCE7',front:'#14532D',title:'CAY CANH HOA GIA',kind:'flower'},
+    {x:1016,y:510,w:160,c1:'#D97706',c2:'#FEF9C3',front:'#78350F',title:'TAP HOA TONG HOP',kind:'misc'}
+  ];
+  stalls.forEach(function(s){
+    drawWoodCounter(x,s.x,s.y,s.w,46,'#F3E7CE',s.front);
+    drawStripedAwning(x,s.x,s.y-11,s.w,12,s.c1,s.c2,7);
+    if(s.kind==='vase'){for(var vx=s.x+16;vx<s.x+s.w-18;vx+=22)drawCeramicVase(x,vx,s.y-1,'#2563EB');}
+    else if(s.kind==='flower'){for(var fx=s.x+18;fx<s.x+s.w-16;fx+=24){E(x,fx,s.y+5,7,5,INK);E(x,fx,s.y+5,6,4,'#FACC15');E(x,fx+1,s.y+3,3,2,'#EC4899');}}
+    else{for(var kx=s.x+10;kx<s.x+s.w-16;kx+=18){pxBevelBox(x,kx,s.y+2,14,8,['#EF4444','#3B82F6','#22C55E','#FACC15','#F97316'][(kx/18)|0 % 5],'rgba(255,255,255,0.28)','rgba(0,0,0,0.2)');}}
+    pxText(x,s.title,s.x+14,s.y+26,'#FEF08A',1);
+    drawPerson16Bit(x,s.x+(s.w>>1),s.y+50,{shirt:s.c1,pants:'#1E293B',hat:'bun',bag:'#FFFBF1'});
+  });
+}
+
+// HÀNG 6 (y: 604..668 — Tầng đáy chợ): 8 cụm so le từ drawSouthStalls
+function drawRow6Stalls(x){
+  x.save();x.translate(0,234);drawSouthStalls(x);x.restore();
+}
+
+// 12 QUẦY CÓC, GÁNH HÀNG RONG, XE BÁNH MÌ & BÀN NHỰA MINI CHEN KÍN KHOẢNG TRỐNG KHẮP 6 HÀNG!
 function drawExtraMicroStalls(x){
   var spots=[
-    {x:26,y:248,kind:'ganh',vShirt:'#F59E0B',vHat:'nonla',bShirt:'#38BDF8'},
-    {x:196,y:276,kind:'baskets',vShirt:'#EC4899',vHat:'bun',bShirt:'#FEF08A'},
-    {x:342,y:278,kind:'banhmi',vShirt:'#FFFBF1',vHat:'cap',bShirt:'#10B981'},
-    {x:486,y:280,kind:'table',vShirt:'#F472B6',vHat:'nonla',bShirt:'#6366F1'},
-    {x:650,y:278,kind:'ganh',vShirt:'#EF4444',vHat:'nonla',bShirt:'#FACC15'},
-    {x:788,y:278,kind:'baskets',vShirt:'#22C55E',vHat:'bun',bShirt:'#EC4899'},
-    {x:930,y:280,kind:'banhmi',vShirt:'#38BDF8',vHat:'cap',bShirt:'#F97316'},
-    {x:1144,y:248,kind:'ganh',vShirt:'#A855F7',vHat:'nonla',bShirt:'#FFFBF1'},
-    {x:278,y:426,kind:'table',vShirt:'#F97316',vHat:'nonla',bShirt:'#38BDF8'},
-    {x:742,y:426,kind:'table',vShirt:'#14B8A6',vHat:'bun',bShirt:'#EF4444'}
+    {x:18,y:224,kind:'ganh',vShirt:'#F59E0B',vHat:'nonla',bShirt:'#38BDF8'},
+    {x:196,y:252,kind:'baskets',vShirt:'#EC4899',vHat:'bun',bShirt:'#FEF08A'},
+    {x:342,y:254,kind:'banhmi',vShirt:'#FFFBF1',vHat:'cap',bShirt:'#10B981'},
+    {x:650,y:254,kind:'ganh',vShirt:'#EF4444',vHat:'nonla',bShirt:'#FACC15'},
+    {x:930,y:254,kind:'banhmi',vShirt:'#38BDF8',vHat:'cap',bShirt:'#F97316'},
+    {x:1148,y:224,kind:'ganh',vShirt:'#A855F7',vHat:'nonla',bShirt:'#FFFBF1'},
+    {x:188,y:452,kind:'table',vShirt:'#F472B6',vHat:'nonla',bShirt:'#6366F1'},
+    {x:684,y:452,kind:'ganh',vShirt:'#22C55E',vHat:'bun',bShirt:'#EC4899'},
+    {x:350,y:554,kind:'baskets',vShirt:'#F97316',vHat:'nonla',bShirt:'#38BDF8'},
+    {x:842,y:554,kind:'banhmi',vShirt:'#14B8A6',vHat:'bun',bShirt:'#EF4444'},
+    {x:278,y:660,kind:'table',vShirt:'#F97316',vHat:'nonla',bShirt:'#38BDF8'},
+    {x:742,y:660,kind:'table',vShirt:'#14B8A6',vHat:'bun',bShirt:'#EF4444'}
   ];
   spots.forEach(function(s){
     drawStreetVendorCart(x,s.x,s.y,s.kind);

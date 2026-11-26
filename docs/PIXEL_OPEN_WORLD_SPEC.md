@@ -54,7 +54,7 @@ $$W_{\text{world}} \ge 2.75 \times W_{\text{view}} \quad (\text{chuẩn hóa } 3
 | STT | Màn Hình | File Component | Khung Nhìn (`VW×VH`) | Thế Giới (`W×H`) | Tỷ lệ Diện Tích | Trạng Thái |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: |
 | 1 | **Quán quen (Phố Lễ Hội)** | `BenThanhStreetBannerWebView.tsx` | `192 × 100` | `584 × 160` | `4.87×` | **Chặng 1 (Đang thực thi)** |
-| 1b | **Lòng Chợ Bến Thành** | `BenThanhMarketBannerWebView.tsx` + `market/*` | `Dynamic 1:1` | `1200 × 480` | `Fullscreen` | Hoàn thiện (QĐ 216 — Siêu đông 140+ người Sprite Cache 60fps, cổng siêu gọn 22×58px, ~34 sạp/quầy cóc & món ăn `shape()` chuẩn `pixel-mascot-ui`) |
+| 1b | **Lòng Chợ Bến Thành** | `BenThanhMarketBannerWebView.tsx` + `market/*` | `Dynamic 1:1` | `1200 × 760` | `Fullscreen` | Hoàn thiện (QĐ 217 — Mê cung 6 hàng sạp chật chội, 180 người chen chúc 60fps, Heo ngộp thở đổ mồ hôi chạy ra sát cổng) |
 | 2 | **Hồ sơ (Văn Phòng Heo)** | `ProfileDeskBanner.tsx` | `176 × 80` | `432 × 128` | `3.93×` | Chặng 2 |
 | 3 | **Vườn (Sân Vườn & Mặt Tiền)** | `PixelGardenWebView.tsx` | `160 × 96` | `440 × 140` | `4.01×` | Chặng 3 |
 | 4 | **Nhà của bạn (Các Phòng)** | `PixelHouseWebView.tsx` | `160 × 96` | `480 × 132` | `4.13×` | Chặng 3 |

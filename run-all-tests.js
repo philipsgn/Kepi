@@ -6660,7 +6660,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     (marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680') || marketBannerCode.includes('worldWidth: 576')) &&
-      (marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152') || marketBannerCode.includes('worldHeight: 144')) &&
+      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152') || marketBannerCode.includes('worldHeight: 144')) &&
       marketBannerCode.includes('exit_market') &&
       marketBannerCode.includes('fastDash: true') &&
       (marketViewCode.includes('fullscreenContainer') || marketViewCode.includes('Sạp Liên Sài Gòn') || marketViewCode.includes('Sạp Vải & Nón Lá')) &&
@@ -6765,8 +6765,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     (marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680')) &&
-      (marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152')) &&
-      marketBannerCode.includes('initialCamX: 0') &&
+      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152')) &&
+      (marketBannerCode.includes('initialCamX: 0') || marketBannerCode.includes('initialCamX: 40')) &&
       (marketAllCode.includes('WELCOME BEN THANH') || marketAllCode.includes('AO DAI SAI GON')) &&
       marketAllCode.includes('LIEN SAI GON') &&
       marketAllCode.includes('NGOC HOA 823') &&
@@ -6782,7 +6782,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     (marketViewCode.includes('fullscreenContainer') || marketViewCode.includes('Cửa Số 1')) &&
       decisionsCode.includes('208') &&
       chatDocCode.includes('680×152') &&
-      (specCode.includes('1200 × 480') || specCode.includes('1024 × 360') || specCode.includes('720 × 280') || specCode.includes('680 × 176') || specCode.includes('680 × 152')),
+      (specCode.includes('1200 × 760') || specCode.includes('1200 × 480') || specCode.includes('1024 × 360') || specCode.includes('720 × 280') || specCode.includes('680 × 176') || specCode.includes('680 × 152')),
     'BenThanhMarketView and docs must sync real market zones and expanded dimensions for QD 208'
   );
 
@@ -6802,7 +6802,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(
     !marketBannerCode.includes('R(x-sp') &&
       (marketBannerCode.includes('R(x,fx-sp,71') || marketBannerCode.includes('R(x,fx-sp,67') || marketBannerCode.includes('R(x,fx-sp,57')) &&
-      (marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176')) &&
+      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176')) &&
       (marketBannerCode.includes('viewHeight: 320') || marketBannerCode.includes('viewHeight: 280') || marketBannerCode.includes('viewHeight: 240') || marketBannerCode.includes('viewHeight: 136')) &&
       marketBannerCode.includes('drawWalkingShoppers') &&
       !marketBannerCode.includes('toastRow'),
@@ -6815,7 +6815,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       (marketViewCode.includes('fullscreenContainer') || marketViewCode.includes('immersiveBody')) &&
       decisionsCode.includes('209') &&
       chatDocCode.includes('680×176') &&
-      (specCode.includes('1200 × 480') || specCode.includes('1024 × 360') || specCode.includes('720 × 280') || specCode.includes('680 × 176')),
+      (specCode.includes('1200 × 760') || specCode.includes('1200 × 480') || specCode.includes('1024 × 360') || specCode.includes('720 × 280') || specCode.includes('680 × 176')),
     'BenThanhMarketView must remove text/stats cards for fullscreen immersive canvas and sync docs for QD 209'
   );
 
@@ -6850,15 +6850,15 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     (marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720')) &&
-      (marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280')) &&
+      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280')) &&
       marketAllCode.includes('drawPerson16Bit') &&
       marketAllCode.includes('drawAccordionGate') &&
       marketAllCode.includes('drawRattanLamp') &&
       (marketAllCode.includes('drawCentralIslands') || marketAllCode.includes('drawForegroundIslands')) &&
-      (marketAllCode.includes('CENTRAL_Y') || marketAllCode.includes('ISLAND_Y')) &&
+      (marketAllCode.includes('drawRow2Stalls') || marketAllCode.includes('CENTRAL_Y') || marketAllCode.includes('ISLAND_Y')) &&
       decisionsCode.includes('210') &&
       chatDocCode.includes('720×280') &&
-      (specCode.includes('1200 × 480') || specCode.includes('1024 × 360') || specCode.includes('720 × 280')),
+      (specCode.includes('1200 × 760') || specCode.includes('1200 × 480') || specCode.includes('1024 × 360') || specCode.includes('720 × 280')),
     'BenThanhMarketBannerWebView must implement 4-layer 2.5D depth with 1:1 square pixels, 14x22 detailed sprites, foreground islands, and sync docs for QD 210'
   );
 
@@ -6885,7 +6885,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(
     openRoomCode.includes('resize: function(nextVw, nextVh)') &&
       (marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024')) &&
-      (marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360')) &&
+      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360')) &&
       marketBannerCode.includes('applyResponsiveViewport') &&
       marketBannerCode.includes('exit_market') &&
       marketBannerCode.includes('exit_back_gate') &&
@@ -6903,7 +6903,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       !marketViewCode.includes('chipsScroll') &&
       decisionsCode.includes('211') &&
       chatDocCode.includes('1024×360') &&
-      (specCode.includes('1200 × 480') || specCode.includes('1024 × 360')),
+      (specCode.includes('1200 × 760') || specCode.includes('1200 × 480') || specCode.includes('1024 × 360')),
     'BenThanhMarketView must be 100% edge-to-edge fullscreen without Ra phố button or bottom chips and sync docs for QD 211'
   );
 
@@ -6928,7 +6928,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     openRoomCode.includes('OpenRoomObstacle') &&
       openRoomCode.includes('hitsObstacle') &&
       marketBannerCode.includes('worldWidth: 1200') &&
-      marketBannerCode.includes('worldHeight: 480') &&
+      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480')) &&
       marketBannerCode.includes('obstacles:') &&
       marketBannerCode.includes('buildMarketPaletteScript') &&
       marketBannerCode.includes('buildMarketCrowdScript') &&
@@ -6948,7 +6948,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       crowdCode.includes('getWalkingShoppers') &&
       decisionsCode.includes('212') &&
       chatDocCode.includes('1200×480') &&
-      specCode.includes('1200 × 480'),
+      (specCode.includes('1200 × 760') || specCode.includes('1200 × 480')),
     'All 4 market modules and docs must be present and synced for QD 212'
   );
 
@@ -7006,7 +7006,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       marketBannerCode.includes("id: 'stall_thoitrang'") &&
       decisionsCode.includes('213') &&
       chatDocCode.includes('Quyết định 213') &&
-      (specCode.includes('QĐ 213') || specCode.includes('QĐ 214') || specCode.includes('QĐ 215') || specCode.includes('QĐ 216')),
+      (specCode.includes('QĐ 213') || specCode.includes('QĐ 214') || specCode.includes('QĐ 215') || specCode.includes('QĐ 216') || specCode.includes('QĐ 217')),
     'BenThanhMarketBannerWebView hotspots, obstacles, and docs must sync QD 213'
   );
 
@@ -7040,7 +7040,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       crowdCode.includes('E(c,px+4,py,6,2') &&
       decisionsCode.includes('214') &&
       chatDocCode.includes('Quyết định 214') &&
-      (specCode.includes('QĐ 214') || specCode.includes('QĐ 215') || specCode.includes('QĐ 216')),
+      (specCode.includes('QĐ 214') || specCode.includes('QĐ 215') || specCode.includes('QĐ 216') || specCode.includes('QĐ 217')),
     'Market modules and docs must implement 32-bit indie visual overhaul for QD 214'
   );
 
@@ -7076,7 +7076,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     !archCode.includes('286,INK') &&
-      (archCode.includes('266,44,92') || archCode.includes('280,22,58')) &&
+      (archCode.includes('266,44,92') || archCode.includes('280,22,58') || archCode.includes('gy,22,58')) &&
       stallsCode.includes('BAO CHI - GIAY TO') &&
       stallsCode.includes('DO CUNG - NHANG DEN') &&
       stallsCode.includes('HOA CUC - NHANG') &&
@@ -7089,7 +7089,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       (crowdCode.match(/shirt:/g) || []).length >= 20 &&
       decisionsCode.includes('215') &&
       chatDocCode.includes('Quyết định 215') &&
-      (specCode.includes('QĐ 215') || specCode.includes('QĐ 216')),
+      (specCode.includes('QĐ 215') || specCode.includes('QĐ 216') || specCode.includes('QĐ 217')),
     'Ben Thanh Market must remove dark brown side strips, add staggered Vietnamese stalls (newspapers, offerings, produce, daily tools) and 20+ walking shoppers for QD 215'
   );
 
@@ -7117,20 +7117,52 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       paletteCode.includes('drawBanhCuonPlate') &&
       paletteCode.includes('drawSeafoodTray') &&
       paletteCode.includes('drawFruitPyramid') &&
-      archCode.includes('280,22,58') &&
+      (archCode.includes('280,22,58') || archCode.includes('gy,22,58')) &&
       stallsCode.includes('drawExtraMicroStalls') &&
       crowdCode.includes('CROWD_SPRITES') &&
       crowdCode.includes('CROWD_WALKERS') &&
-      crowdCode.includes('mulberry32(21600)') &&
+      (crowdCode.includes('mulberry32(21600)') || crowdCode.includes('mulberry32(21700)')) &&
       crowdCode.includes('rgba(255,248,214,0.58)') &&
       marketBannerCode.includes('drawExtraMicroStalls') &&
       decisionsCode.includes('216') &&
       chatDocCode.includes('Quyết định 216') &&
-      specCode.includes('QĐ 216'),
+      (specCode.includes('QĐ 216') || specCode.includes('QĐ 217')),
     'Ben Thanh Market must implement 140+ crowd sprite cache, 22x58 compact gates, extra micro stalls, and pixel-mascot-ui shape4 food art for QD 216'
   );
 
   console.log('✅ Test 153 Passed: Chợ Bến Thành Siêu Đông 140+ Người (Sprite Cache 60fps), Cổng 22×58px & Món Ăn shape4 (Quyết định 216) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 153 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (153/153)!');
+// ==========================================
+// TEST 154: MÊ CUNG 6 HÀNG SẠP (1200×760), 180 NGƯỜI CHEN CHÚC & CHÚ HEO NGỘP THỞ CHẠY RA CỔNG (QUYẾT ĐỊNH 217)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const stallsCode = fs.readFileSync('src/components/chat/market/marketStalls.ts', 'utf8');
+  const crowdCode = fs.readFileSync('src/components/chat/market/marketCrowd.ts', 'utf8');
+
+  assert.ok(
+    marketBannerCode.includes('worldHeight: 760') &&
+      marketBannerCode.includes('stuffyState') &&
+      marketBannerCode.includes('breathe_gate') &&
+      stallsCode.includes('drawRow2Stalls') &&
+      stallsCode.includes('drawRow3Stalls') &&
+      stallsCode.includes('drawRow4Stalls') &&
+      stallsCode.includes('drawRow5Stalls') &&
+      stallsCode.includes('drawRow6Stalls') &&
+      crowdCode.includes('mulberry32(21700)') &&
+      crowdCode.includes('countNearbyCrowd') &&
+      decisionsCode.includes('217') &&
+      chatDocCode.includes('Quyết định 217') &&
+      specCode.includes('1200 × 760') &&
+      specCode.includes('QĐ 217'),
+    'Ben Thanh Market must implement 6-row maze (1200x760), 180 crowd, and stuffy pig flee-to-gate behavior for QD 217'
+  );
+
+  console.log('✅ Test 154 Passed: Mê Cung 6 Hàng Sạp (1200×760), 180 Người Chen Chúc & Chú Heo Ngộp Thở Chạy Ra Cổng (Quyết định 217) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 154 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (154/154)!');
