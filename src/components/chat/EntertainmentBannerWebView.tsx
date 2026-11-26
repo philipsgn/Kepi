@@ -10,6 +10,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { buildOpenRoomEngineScript } from '../pixel/pixelOpenRoomEngine';
+import { buildSaigonPanoramaArtScript } from './hub/saigonPanoramaArt';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -22,11 +23,10 @@ interface EntertainmentBannerWebViewProps {
 }
 
 /**
- * Banner Panorama 16-Bit Việt Nam Liền Mạch 100% (540×112 trên khung nhìn 192×88 — Quyết định 202)
- * - 1 Offscreen Canvas duy nhất (0 vết cắt ghép): 1 dải trời, 1 skyline, 1 vỉa hè lát gạch & 1 đại lộ 2 làn xuyên suốt 540px.
+ * Banner Panorama Đại Lộ Sài Gòn & Bến Bạch Đằng (1160×128 trên khung nhìn 224×108 — Quyết định 221)
+ * - 1 Offscreen Canvas duy nhất (0 vết cắt ghép): Skyline xa Bitexco & Landmark 81 + 7 công trình mặt tiền + Đại lộ 2 làn 6 loại xe & CSGT áo vàng + Bến Bạch Đằng (Cầu Đi Bộ, Cầu Ba Son, tàu thuyền lớn).
  * - Tự động đổi 3 sắc trời theo giờ thực tế (Sáng nắng xanh tươi / Chiều hoàng hôn / Tối đèn phố).
- * - 5 khu phố Việt Nam liên thông: Phố Cổ Phở ➔ Tiệm CAFE Mái Sọc & Bánh Mì ➔ Chợ Bến Thành & Nhà Thờ Đức Bà ➔ Bitexco & Landmark 81 ➔ Nhà Sàn & Bến Sông.
- * - Tích hợp pixelOpenRoomEngine 2D (Tap-to-Walk + Drag-to-Pan + 5 Hotspot Actions gắn dữ liệu thật từ Store).
+ * - Tích hợp pixelOpenRoomEngine 2D (Tap-to-Walk + Drag-to-Pan + 8 Hotspot Actions, giữ nguyên 4 cổng nội thất fastDash).
  */
 export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProps> = ({
   onPressBanner,
@@ -40,7 +40,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
   const { gameTickets, pigFood, streakDays } = useGamificationStore();
   const [roomToast, setRoomToast] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const enterCafeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enterPortalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showRoomToast = (text: string) => {
     setRoomToast(text);
@@ -51,7 +51,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
   useEffect(() => {
     return () => {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-      if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
+      if (enterPortalTimerRef.current) clearTimeout(enterPortalTimerRef.current);
     };
   }, []);
 
@@ -61,31 +61,16 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     } else if (d.type === 'ROOM_ACTION') {
       if (d.text) showRoomToast(String(d.text));
-      if (d.id === 'saigon_cafe' && d.userTriggered && onEnterCafe) {
+      const triggerPortal = (cb?: () => void) => {
+        if (!cb) return;
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-        if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
-        enterCafeTimerRef.current = setTimeout(() => {
-          onEnterCafe();
-        }, 120);
-      } else if (d.id === 'ben_thanh_notre' && d.userTriggered && onEnterMarket) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-        if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
-        enterCafeTimerRef.current = setTimeout(() => {
-          onEnterMarket();
-        }, 120);
-      } else if (d.id === 'notre_dame_gate' && d.userTriggered && onEnterCathedral) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-        if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
-        enterCafeTimerRef.current = setTimeout(() => {
-          onEnterCathedral();
-        }, 120);
-      } else if (d.id === 'pagoda_gate' && d.userTriggered && onEnterPagoda) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-        if (enterCafeTimerRef.current) clearTimeout(enterCafeTimerRef.current);
-        enterCafeTimerRef.current = setTimeout(() => {
-          onEnterPagoda();
-        }, 120);
-      }
+        if (enterPortalTimerRef.current) clearTimeout(enterPortalTimerRef.current);
+        enterPortalTimerRef.current = setTimeout(() => cb(), 120);
+      };
+      if (d.id === 'saigon_cafe' && d.userTriggered && onEnterCafe) triggerPortal(onEnterCafe);
+      else if (d.id === 'ben_thanh_notre' && d.userTriggered && onEnterMarket) triggerPortal(onEnterMarket);
+      else if (d.id === 'notre_dame_gate' && d.userTriggered && onEnterCathedral) triggerPortal(onEnterCathedral);
+      else if (d.id === 'pagoda_gate' && d.userTriggered && onEnterPagoda) triggerPortal(onEnterPagoda);
     }
   };
 
@@ -114,810 +99,390 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     () =>
       buildOpenRoomEngineScript({
         canvasId: 'funCv',
-        worldWidth: 540,
-        worldHeight: 112,
-        viewWidth: 192,
-        viewHeight: 88,
-        walkBounds: { minX: 16, maxX: 524, minY: 66, maxY: 102 },
-        initialX: 244,
-        initialY: 74,
-        initialCamX: 120,
+        worldWidth: 1160,
+        worldHeight: 128,
+        viewWidth: 224,
+        viewHeight: 108,
+        walkBounds: { minX: 16, maxX: 892, minY: 70, maxY: 84 },
+        initialX: 468,
+        initialY: 76,
+        initialCamX: 356,
         initialCamY: 0,
-        speed: 40,
+        speed: 48,
         hotspots: [
           {
             id: 'pho_old_quarter',
-            x: 12,
-            y: 20,
+            x: 8,
+            y: 18,
             w: 88,
-            h: 46,
-            standX: 56,
-            standY: 74,
+            h: 52,
+            standX: 52,
+            standY: 76,
             standFace: -1,
             actionType: 'eat_snack',
-            bubbleText: `Phố Cổ Quán Phở · Kho cám: ${pigFood} cám`,
+            bubbleText: `Quán Phở Bò nóng hổi · Kho cám: ${pigFood} cám`,
           },
           {
             id: 'saigon_cafe',
-            x: 112,
-            y: 14,
-            w: 108,
-            h: 56,
-            standX: 164,
-            standY: 74,
+            x: 106,
+            y: 16,
+            w: 98,
+            h: 54,
+            standX: 155,
+            standY: 76,
             standFace: 1,
             actionType: 'sip_coffee',
             fastDash: true,
-            bubbleText: `Đang bước vào Tiệm CAFE...`,
+            bubbleText: 'Đang bước vào Tiệm CAFE...',
+          },
+          {
+            id: 'adidas_store',
+            x: 214,
+            y: 18,
+            w: 100,
+            h: 52,
+            standX: 264,
+            standY: 76,
+            standFace: 1,
+            actionType: 'look_window',
+            bubbleText: 'Cửa hàng Adidas 3 sọc · Diện đồ thể thao cực chất!',
           },
           {
             id: 'notre_dame_gate',
-            x: 224,
-            y: 12,
-            w: 38,
-            h: 54,
-            standX: 243,
-            standY: 74,
-            standFace: 1,
-            actionType: 'look_window',
-            fastDash: true,
-            bubbleText: `Đang bước vào Nhà Thờ Đức Bà Sài Gòn...`,
-          },
-          {
-            id: 'ben_thanh_notre',
-            x: 264,
-            y: 12,
-            w: 60,
-            h: 54,
-            standX: 292,
-            standY: 74,
-            standFace: 1,
-            actionType: 'look_window',
-            fastDash: true,
-            bubbleText: `Đang bước vào Chợ Bến Thành...`,
-          },
-          {
-            id: 'bitexco_landmark',
-            x: 332,
+            x: 324,
             y: 6,
-            w: 98,
-            h: 60,
-            standX: 378,
-            standY: 74,
-            standFace: 1,
-            actionType: 'play_arcade',
-            bubbleText: `Bitexco & Landmark 81 · ${gameTickets} vé sẵn sàng!`,
-          },
-          {
-            id: 'pagoda_gate',
-            x: 444,
-            y: 10,
-            w: 88,
-            h: 56,
-            standX: 486,
+            w: 80,
+            h: 64,
+            standX: 362,
             standY: 76,
             standFace: 1,
             actionType: 'look_window',
             fastDash: true,
-            bubbleText: `Đang bước vào Ngôi Chùa Cổ Kính...`,
+            bubbleText: 'Đang bước vào Nhà Thờ Đức Bà...',
+          },
+          {
+            id: 'ben_thanh_notre',
+            x: 414,
+            y: 8,
+            w: 112,
+            h: 62,
+            standX: 470,
+            standY: 76,
+            standFace: 1,
+            actionType: 'look_window',
+            fastDash: true,
+            bubbleText: 'Đang bước vào Chợ Bến Thành...',
+          },
+          {
+            id: 'thong_nhat_stadium',
+            x: 536,
+            y: 8,
+            w: 150,
+            h: 62,
+            standX: 611,
+            standY: 76,
+            standFace: 1,
+            actionType: 'jump_joy',
+            bubbleText: `SVĐ Thống Nhất rực đèn · Chuỗi ${streakDays} ngày cực sung!`,
+          },
+          {
+            id: 'pagoda_gate',
+            x: 696,
+            y: 8,
+            w: 144,
+            h: 62,
+            standX: 797,
+            standY: 76,
+            standFace: 1,
+            actionType: 'look_window',
+            fastDash: true,
+            bubbleText: 'Đang bước vào Ngôi Chùa cổ kính...',
+          },
+          {
+            id: 'bach_dang_wharf',
+            x: 856,
+            y: 16,
+            w: 300,
+            h: 110,
+            standX: 882,
+            standY: 76,
+            standFace: 1,
+            actionType: 'play_arcade',
+            bubbleText: `Bến Bạch Đằng · Cầu Ba Son & Cầu Đi Bộ · ${gameTickets} vé`,
           },
         ],
       }),
     [pigFood, streakDays, gameTickets]
   );
 
-  const htmlContent = useMemo(() => `<!DOCTYPE html>
+  const artScript = useMemo(() => buildSaigonPanoramaArtScript(), []);
+
+  const htmlContent = useMemo(() => `<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <style>
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #2B2118;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#funCv {
-  width: 100%;
-  height: 100%;
-  display: block;
-  image-rendering: pixelated;
-  image-rendering: -webkit-crisp-edges;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-  cursor: pointer;
-  touch-action: none;
-}
-</style>
-<script>
-window.onerror = function (msg, src, line) {
-  if (window.ReactNativeWebView) {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'CONSOLE_ERROR', error: String(msg), line: line }));
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #2B2118; }
+  canvas {
+    display: block; width: 100%; height: 100%;
+    image-rendering: pixelated;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: crisp-edges;
+    touch-action: none;
+    cursor: grab;
   }
-  return false;
-};
-</script>
+  canvas:active { cursor: grabbing; }
+</style>
 </head>
 <body>
-<canvas id="funCv" width="192" height="88" role="img" aria-label="Panorama 16-bit Việt Nam liền mạch: Phố Cổ Phở, Tiệm CAFE Bánh Mì, Chợ Bến Thành, Nhà Thờ Đức Bà, Bitexco, Landmark 81 và Nhà Sàn Bến Sông"></canvas>
-
+<canvas id="funCv" width="224" height="108"></canvas>
 <script>
 (function(){
-'use strict';
+var VW = 224, VH = 108, W = 1160, H = 128;
 
-var INK = '#2B2118';
-var WORLD_W = 540;
-var WORLD_H = 112;
-var VW = 192;
-var VH = 88;
-
-function notify(type) {
-  var msg = JSON.stringify({ type: type });
-  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-    window.ReactNativeWebView.postMessage(msg);
-  } else if (window.parent && window.parent !== window) {
-    window.parent.postMessage(msg, '*');
-  }
-}
+var PAL = {
+  ink: '#2B2118', pig: '#F596A8', pigHi: '#FDBAC7', pigSh: '#D96D85',
+  pigDk: '#B84E68', snout: '#FBC2CE', ear: '#DE7A90', cheek: '#F06A86',
+  coin: '#F4B93B', coinHi: '#FBE08A'
+};
 
 function R(c, x, y, w, h, col) {
   c.fillStyle = col;
   c.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
 }
-
 function E(c, cx, cy, rx, ry, col) {
   c.fillStyle = col;
-  for (var dy = -ry; dy <= ry; dy++) {
-    for (var dx = -rx; dx <= rx; dx++) {
-      if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1) {
-        c.fillRect(Math.round(cx + dx), Math.round(cy + dy), 1, 1);
+  var x0 = Math.floor(cx - rx), x1 = Math.ceil(cx + rx);
+  var y0 = Math.floor(cy - ry), y1 = Math.ceil(cy + ry);
+  for (var y = y0; y <= y1; y++) {
+    for (var x = x0; x <= x1; x++) {
+      var dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry;
+      if (dx * dx + dy * dy <= 1) c.fillRect(x, y, 1, 1);
+    }
+  }
+}
+function mk(w, h, fn) {
+  var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  var x = cv.getContext('2d'); x.imageSmoothingEnabled = false;
+  if (fn) fn(x);
+  return cv;
+}
+function shape4(c, draw, ink) {
+  var b = mk(c.canvas.width, c.canvas.height);
+  var bc = b.getContext('2d'); bc.imageSmoothingEnabled = false;
+  draw(bc);
+  var d = bc.getImageData(0, 0, b.width, b.height).data;
+  var bw = b.width, bh = b.height;
+  var hit = function(x, y) { return x >= 0 && y >= 0 && x < bw && y < bh && d[(y * bw + x) * 4 + 3] > 20; };
+  c.fillStyle = ink || PAL.ink;
+  for (var y = 0; y < bh; y++) {
+    for (var x = 0; x < bw; x++) {
+      if (!hit(x, y) && (hit(x - 1, y) || hit(x + 1, y) || hit(x, y - 1) || hit(x, y + 1))) {
+        c.fillRect(x, y, 1, 1);
       }
     }
   }
+  c.drawImage(b, 0, 0);
 }
-
-/* ========================================================
- * BẢNG MÀU TỰ ĐỘNG 3 KHUNG GIỜ (SÁNG / CHIỀU / TỐI)
- * ======================================================== */
-function getTimePalette() {
-  var h = new Date().getHours();
-  if (h >= 6 && h < 16) {
-    // SÁNG NẮNG XANH (Cảm hứng trực tiếp từ Hình 5 16-bit sáng rõ)
-    return {
-      mode: 'day',
-      sky: ['#78B9F7', '#8BC6FA', '#A1D3FC', '#B7DEFF', '#CCE8FF'],
-      cloudMain: '#FFFFFF',
-      cloudShade: '#DCEEFF',
-      skylineFar: '#7BA9DF',
-      skylineHi: '#93BFEA',
-      sun: '#FFF3B0',
-      winGlow: '#DCEEFA',
-      lampGlow: false,
-      road: '#5C5B66',
-      roadLine: '#FFFBF1',
-      sidewalk: '#EADBC4',
-      sidewalkLine: '#D1BC9B',
-      grass: '#69AD5A',
-      grassDark: '#4D8A43',
-      water: '#4EA0D8',
-      waterHi: '#8EC9E8'
-    };
-  }
-  if (h >= 16 && h < 19) {
-    // CHIỀU HOÀNG HÔN SÀI GÒN
-    return {
-      mode: 'sunset',
-      sky: ['#6A55A3', '#966FA8', '#D38896', '#F4A282', '#FBE0A0'],
-      cloudMain: '#FFF1DC',
-      cloudShade: '#F6C6C8',
-      skylineFar: '#6C548E',
-      skylineHi: '#866AA6',
-      sun: '#FFE89A',
-      winGlow: '#FFE08A',
-      lampGlow: true,
-      road: '#4A434D',
-      roadLine: '#FBE0A0',
-      sidewalk: '#DFC5A6',
-      sidewalkLine: '#BF9E7D',
-      grass: '#598F4E',
-      grassDark: '#3F6F39',
-      water: '#4B78A8',
-      waterHi: '#F4A282'
-    };
-  }
-  // TỐI ĐÈN PHỐ SÀI GÒN
-  return {
-    mode: 'night',
-    sky: ['#161A36', '#1F264D', '#2B3363', '#3A4278', '#4A5188'],
-    cloudMain: '#475084',
-    cloudShade: '#343C69',
-    skylineFar: '#232952',
-    skylineHi: '#343C70',
-    sun: '#FFF8D6',
-    winGlow: '#FFD966',
-    lampGlow: true,
-    road: '#34313D',
-    roadLine: '#E6D6A8',
-    sidewalk: '#A8947C',
-    sidewalkLine: '#85715B',
-    grass: '#35613B',
-    grassDark: '#26482C',
-    water: '#23426B',
-    waterHi: '#5A84B8'
-  };
-}
-
-var PAL_TIME = getTimePalette();
-
-/* ========================================================
- * SPRITE HEO CON 24×20 CHUẨN PROTOTYPE
- * ======================================================== */
-var PAL = { p: '#F9B8C4', s: '#E68FA2', n: '#F29AB0', h: '#FFDCE4', i: '#2B2118', g: '#F4B93B' };
-var hp = document.createElement('canvas'); hp.width = 24; hp.height = 20;
-var hpx = hp.getContext('2d'); hpx.imageSmoothingEnabled = false;
 
 function drawPigSprite(c, o) {
-  // 24x20 pig pixel shape
-  o = o || {};
-  var pose = o.pose || 'stand';
-  var f = o.frame || 0;
-  var I = PAL.i, P = PAL.p, S = PAL.s, N = PAL.n, H = PAL.h, G = PAL.g;
-  var by = pose === 'walk' ? (f % 2 ? 0 : 1) : 0;
-  var hx = pose === 'eat' ? 1 : 0, hy = pose === 'eat' ? 3 : by;
-
-  if (o.tail) {
-    R(c, 2, 10 + by, 2, 1, I); R(c, 1, 9 + by, 1, 2, I); R(c, 2, 8 + by, 1, 1, I);
-  } else {
-    R(c, 2, 11 + by, 2, 1, I); R(c, 1, 10 + by, 1, 1, I);
-  }
-  R(c, 4, 7 + by, 14, 9, I); R(c, 3, 8 + by, 16, 7, I);
-  R(c, 5, 8 + by, 12, 7, P); R(c, 4, 9 + by, 14, 5, P);
-  R(c, 6, 8 + by, 10, 2, H); R(c, 5, 13 + by, 12, 2, S);
-  R(c, 9, 8 + by, 4, 1, I); R(c, 9, 9 + by, 4, 1, G);
-
-  R(c, 14 + hx, 3 + hy, 3, 3, I); R(c, 15 + hx, 4 + hy, 1, 1, N);
-  R(c, 12 + hx, 4 + hy, 9, 9, I); R(c, 11 + hx, 5 + hy, 11, 7, I);
-  R(c, 13 + hx, 5 + hy, 7, 7, P); R(c, 12 + hx, 6 + hy, 9, 5, P);
-  R(c, 13 + hx, 5 + hy, 5, 2, H); R(c, 13 + hx, 11 + hy, 6, 1, S);
-
-  R(c, 19 + hx, 7 + hy, 4, 4, I); R(c, 20 + hx, 8 + hy, 2, 2, N);
-  R(c, 20 + hx, 8 + hy, 1, 1, I); R(c, 21 + hx, 9 + hy, 1, 1, I);
-
-  if (o.blink) {
-    R(c, 16 + hx, 8 + hy, 2, 1, I);
-  } else if (o.happy) {
-    R(c, 16 + hx, 8 + hy, 1, 1, I); R(c, 17 + hx, 7 + hy, 1, 1, I); R(c, 18 + hx, 8 + hy, 1, 1, I);
-  } else {
-    R(c, 16 + hx, 7 + hy, 2, 2, I); R(c, 16 + hx, 7 + hy, 1, 1, '#FFFFFF');
-  }
-  R(c, 14 + hx, 10 + hy, 2, 1, '#F27D94');
-
-  var L1 = pose === 'walk' ? (f % 2 ? 0 : -1) : 0;
-  var L2 = pose === 'walk' ? (f % 2 ? -1 : 0) : 0;
-  [[6, L1], [9, L2], [13, L2], [16, L1]].forEach(function(lg) {
-    R(c, lg[0], 15 + by + lg[1], 2, 4, I);
-    R(c, lg[0], 15 + by + lg[1], 1, 2, P);
-    R(c, lg[0], 18 + by + lg[1], 2, 1, I);
-  });
+  var step = o.step || 0, blink = !!o.blink, mood = o.mood || 'happy', ear = o.ear || 0;
+  var body = function(g) {
+    R(g, 3, 12, 1, 2, PAL.pigSh); R(g, 2, 11, 1, 2, PAL.pig);
+    R(g, 7, 15, 2, 3 - (step === 1 ? 1 : 0), PAL.pigSh);
+    R(g, 14, 15, 2, 3 - (step === 2 ? 1 : 0), PAL.pigSh);
+    E(g, 12, 12, 7.6, 5.2, PAL.pig);
+    R(g, 7, 14, 10, 2, PAL.pigSh);
+    R(g, 8, 8, 7, 2, PAL.pigHi);
+    R(g, 9, 15, 2, 3 - (step === 2 ? 1 : 0), PAL.pig);
+    R(g, 16, 15, 2, 3 - (step === 1 ? 1 : 0), PAL.pig);
+    R(g, 10, 5 + ear, 3, 3, PAL.pig); R(g, 11, 6 + ear, 1, 2, PAL.ear);
+    R(g, 15, 5 - ear, 3, 3, PAL.pig); R(g, 16, 6 - ear, 1, 2, PAL.ear);
+    R(g, 18, 10, 4, 4, PAL.snout); R(g, 19, 10, 2, 1, PAL.pigHi);
+    R(g, 11, 7, 4, 1, PAL.coin);
+  };
+  shape4(c, body, PAL.ink);
+  R(c, 7, 17 - (step === 1 ? 1 : 0), 2, 1, PAL.ink);
+  R(c, 9, 17 - (step === 2 ? 1 : 0), 2, 1, PAL.ink);
+  R(c, 14, 17 - (step === 2 ? 1 : 0), 2, 1, PAL.ink);
+  R(c, 16, 17 - (step === 1 ? 1 : 0), 2, 1, PAL.ink);
+  R(c, 19, 11, 1, 2, PAL.pigDk); R(c, 21, 11, 1, 2, PAL.pigDk);
+  R(c, 14, 12, 2, 1, PAL.cheek);
+  if (blink) { R(c, 15, 10, 2, 1, PAL.ink); }
+  else { R(c, 15, 9, 2, 2, PAL.ink); R(c, 15, 9, 1, 1, '#FFFFFF'); }
+  if (mood === 'happy') { R(c, 16, 13, 2, 1, PAL.ink); }
 }
 
-/* ========================================================
- * CÁC HÀM VẼ ĐỒ HỌA 16-BIT ĐỒNG NHẤT (0 VẾT GHÉP)
- * ======================================================== */
-var FB = { w: VW, h: VH, t: 0, last: 0, spk: [], boost: 0 };
+${artScript}
 
-function fbSky(x) {
-  var bands = PAL_TIME.sky;
-  var bh = Math.ceil(66 / bands.length);
-  for (var i = 0; i < bands.length; i++) {
-    R(x, 0, i * bh, WORLD_W, bh + 1, bands[i]);
+function fbSky(c, pal) {
+  var bandH = Math.ceil(66 / pal.sky.length);
+  for (var i = 0; i < pal.sky.length; i++) {
+    R(c, 0, i * bandH, W, bandH + 1, pal.sky[i]);
   }
-  // Mặt trời / Mặt trăng đặt bên phải thoáng đãng
-  if (PAL_TIME.mode === 'sunset') {
-    E(x, 386, 42, 18, 18, '#FCE8A6');
-    E(x, 386, 42, 14, 14, '#FFF8D6');
-  } else if (PAL_TIME.mode === 'day') {
-    E(x, 42, 14, 8, 8, PAL_TIME.sun);
-  } else {
-    E(x, 42, 14, 7, 7, '#FFF8D6');
-    E(x, 45, 12, 5, 5, PAL_TIME.sky[0]); // trăng khuyết
-  }
-}
-
-function drawTree16(c, cx, groundY, crownCol, hiCol, shCol, hasRedFlowers) {
-  // Thân cây có viền nâu mực
-  R(c, cx - 2, groundY - 12, 5, 12, INK);
-  R(c, cx - 1, groundY - 11, 3, 11, '#8C5B36');
-  R(c, cx - 1, groundY - 11, 1, 11, '#B37B4E');
-  // Tán lá 3 tầng giống Hình 5
-  E(c, cx, groundY - 19, 10, 10, INK);
-  E(c, cx, groundY - 19, 9, 9, shCol);
-  E(c, cx - 1, groundY - 21, 8, 7, crownCol);
-  E(c, cx - 2, groundY - 24, 5, 4, hiCol);
-  if (hasRedFlowers) {
-    [[-5, -22], [3, -24], [0, -18], [5, -19], [-3, -15]].forEach(function(fl) {
-      R(c, cx + fl[0], groundY + fl[1], 2, 2, '#E0452B');
-      R(c, cx + fl[0], groundY + fl[1], 1, 1, '#FF8A65');
-    });
-  }
-}
-
-function drawLamp16(c, lx, groundY) {
-  R(c, lx - 1, groundY - 20, 3, 20, INK);
-  R(c, lx, groundY - 19, 1, 19, '#6C7385');
-  R(c, lx - 2, groundY - 2, 5, 2, INK);
-  // Đèn chóp cổ điển
-  R(c, lx - 3, groundY - 25, 7, 5, INK);
-  R(c, lx - 2, groundY - 24, 5, 3, PAL_TIME.lampGlow ? '#FFE08A' : '#FFFBF1');
-  R(c, lx - 2, groundY - 26, 5, 1, INK);
-  if (PAL_TIME.lampGlow) {
-    c.save();
-    c.globalAlpha = 0.22;
-    E(c, lx, groundY - 22, 9, 8, '#FFE08A');
-    c.restore();
-  }
-}
-
-function drawPerson16(c, px, groundY, shirtCol, pantsCol, hasNonLa) {
-  R(c, px, groundY - 4, 2, 4, pantsCol);
-  R(c, px + 2, groundY - 4, 2, 4, pantsCol);
-  R(c, px, groundY - 8, 4, 4, shirtCol);
-  R(c, px + 1, groundY - 11, 2, 3, '#F4C9A0');
-  if (hasNonLa) {
-    R(c, px - 1, groundY - 12, 6, 1, '#E8C56E');
-    R(c, px, groundY - 13, 4, 1, '#F7DF94');
-    R(c, px + 1, groundY - 14, 2, 1, '#FFF1C2');
-  } else {
-    R(c, px + 1, groundY - 12, 2, 1, INK);
-  }
-}
-
-function buildSeamlessPanorama(c) {
-  // 1. BẦU TRỜI LIỀN MẠCH 540px
-  fbSky(c);
-
-  // 2. DÃY SKYLINE CAO ỐC XA LIỀN MẠCH 540px (Parallax depth chuẩn Hình 5)
-  var skyBlocks = [
-    [6, 30, 18], [26, 22, 14], [44, 34, 20], [68, 26, 16], [92, 32, 22],
-    [122, 24, 18], [148, 28, 24], [180, 20, 16], [204, 30, 20], [234, 26, 18],
-    [262, 32, 22], [296, 24, 18], [326, 28, 20], [362, 22, 16], [396, 26, 22],
-    [432, 30, 18], [462, 24, 20], [492, 28, 22], [520, 32, 18]
-  ];
-  skyBlocks.forEach(function(b) {
-    R(c, b[0], b[1], b[2], 66 - b[1], PAL_TIME.skylineFar);
-    R(c, b[0], b[1], 2, 66 - b[1], PAL_TIME.skylineHi);
-  });
-
-  // 3. KHU 1 (x: 0..112): PHỐ CỔ & QUÁN PHỞ VIỆT NAM
-  drawLamp16(c, 10, 66);
-  // Nhà ống vàng cổ điển
-  R(c, 20, 24, 66, 42, INK);
-  R(c, 21, 25, 52, 41, '#F5C96B'); // mặt tiền vàng ấm
-  R(c, 73, 25, 12, 41, '#D59C43'); // cạnh đổ bóng
-  // Mái ngói đỏ Việt Nam
-  R(c, 18, 20, 70, 5, INK);
-  R(c, 19, 21, 68, 3, '#C94B38');
-  R(c, 22, 17, 62, 4, '#DF644F');
-  // Cửa sổ chớp xanh trên tầng 2
-  [28, 52].forEach(function(wx) {
-    R(c, wx, 29, 12, 10, INK);
-    R(c, wx + 1, 30, 10, 8, '#4E8C57');
-    R(c, wx + 4, 31, 4, 6, PAL_TIME.winGlow);
-  });
-  // Bảng hiệu PHỞ nền kem viền nâu mực
-  R(c, 28, 41, 38, 8, INK);
-  R(c, 29, 42, 36, 6, '#FFFBF1');
-  R(c, 33, 44, 28, 2, '#C94B38');
-  // Mái hiên sọc đỏ-kem
-  R(c, 20, 49, 54, 5, INK);
-  for (var ax = 21; ax < 73; ax += 6) {
-    R(c, ax, 50, 3, 3, '#C94B38');
-    R(c, ax + 3, 50, 3, 3, '#FFFBF1');
-  }
-  // Quầy phở & cửa tầng trệt
-  R(c, 24, 54, 24, 12, INK); R(c, 25, 55, 22, 11, PAL_TIME.winGlow);
-  R(c, 52, 54, 16, 12, INK); R(c, 53, 55, 14, 11, '#8A5A34');
-  drawPerson16(c, 32, 66, '#FFFBF1', '#4B6FA5', true);
-  drawTree16(c, 98, 66, '#5EA353', '#82C76E', '#3F7A3A', false);
-
-  // 4. KHU 2 (x: 110..222): TIỆM CAFE TÁI HIỆN 1:1 THEO ẢNH 6 (CHUẨN SENIOR PIXEL ART)
-  // Cột đèn đường cổ điển + 2 biển mũi tên chỉ hướng (x: 112)
-  R(c, 111, 44, 2, 22, INK);
-  R(c, 109, 39, 6, 5, INK); R(c, 110, 40, 4, 3, PAL_TIME.lampGlow ? '#FFE08A' : '#FFFBF1');
-  R(c, 108, 47, 8, 3, '#FFFBF1'); R(c, 108, 47, 8, 1, INK); R(c, 115, 48, 1, 1, '#E0452B'); // biển chỉ hướng ->
-  R(c, 108, 51, 7, 3, '#FFFBF1'); R(c, 108, 51, 7, 1, INK); R(c, 108, 52, 1, 1, '#4B6FA5'); // biển chỉ hướng <-
-  // Bảng phấn menu chữ A vỉa hè (x: 116..122)
-  R(c, 116, 59, 6, 7, INK); R(c, 117, 60, 4, 5, '#3E3546'); R(c, 118, 61, 2, 1, '#FFFBF1'); R(c, 118, 63, 2, 1, '#FFE08A');
-
-  // Khối nhà chính Tiệm CAFE (x: 123..180, y: 20..66)
-  R(c, 123, 23, 57, 43, INK);
-  R(c, 124, 24, 50, 42, '#F7B267'); // mặt tiền kem cam ấm
-  R(c, 174, 24, 5, 42, '#E69138');  // cạnh đổ bóng
-  // Vương miện mái 2 tầng màu vàng kem
-  R(c, 128, 19, 42, 5, INK); R(c, 129, 20, 40, 3, '#FDE18E');
-  R(c, 136, 21, 26, 1, '#E69138');
-  // Bảng hiệu CAFE nền trắng viền nâu đỏ sắc nét
-  R(c, 130, 26, 38, 11, INK); R(c, 131, 27, 36, 9, '#FFFBF1');
-  R(c, 132, 28, 34, 7, '#FFFFFF');
-  // Chữ C-A-F-E pixel khối đỏ nâu (#8E3538)
-  R(c, 134, 29, 5, 1, '#8E3538'); R(c, 134, 29, 1, 5, '#8E3538'); R(c, 134, 33, 5, 1, '#8E3538'); // C
-  R(c, 141, 29, 5, 5, '#8E3538'); R(c, 142, 30, 3, 1, '#FFFFFF'); R(c, 142, 32, 3, 2, '#FFFFFF'); // A
-  R(c, 148, 29, 5, 1, '#8E3538'); R(c, 148, 29, 1, 5, '#8E3538'); R(c, 148, 31, 4, 1, '#8E3538'); // F
-  R(c, 155, 29, 5, 1, '#8E3538'); R(c, 155, 29, 1, 5, '#8E3538'); R(c, 155, 31, 4, 1, '#8E3538'); R(c, 155, 33, 5, 1, '#8E3538'); // E
-
-  // Mái hiên sọc Canvas xanh pastel - trắng - cam đất (y: 38..44)
-  R(c, 121, 38, 56, 6, INK);
-  for (var cx = 122; cx < 176; cx += 6) {
-    R(c, cx, 39, 3, 4, '#79A8DF');
-    R(c, cx + 3, 39, 3, 4, '#FFFBF1');
-  }
-  R(c, 122, 43, 54, 1, '#E69138'); // viền đổ bóng dưới mái hiên
-
-  // Cửa kính trưng bày lớn có vệt phản chiếu chéo (x: 126..155, y: 45..64)
-  R(c, 126, 45, 29, 19, INK);
-  R(c, 127, 46, 27, 17, '#A7D0F5');
-  // 2 vệt phản chiếu ánh sáng chéo trên kính
-  R(c, 131, 47, 5, 14, '#DCEEFF'); R(c, 136, 47, 2, 10, '#FFFFFF');
-  R(c, 143, 48, 4, 12, '#DCEEFF');
-  R(c, 140, 46, 1, 17, '#5B6B8C'); // thanh chia kính mảnh
-
-  // Bàn tròn ngoài hiên + 2 bạn ngồi uống cà phê vỉa hè (x: 129..151)
-  R(c, 135, 59, 10, 2, INK); R(c, 136, 59, 8, 1, '#FFFBF1'); // mặt bàn tròn
-  R(c, 139, 61, 2, 5, INK); // chân bàn
-  R(c, 137, 57, 2, 2, '#E69138'); R(c, 141, 57, 2, 2, '#E69138'); // 2 ly cà phê
-  drawPerson16(c, 129, 66, '#E0452B', '#2B2118', false); // bạn trái ngồi uống
-  drawPerson16(c, 146, 66, '#F4B93B', '#2B2118', false); // bạn phải ngồi uống
-
-  // Cửa chính gỗ trắng 2 cánh có phào chỉ (x: 158..173, y: 46..66)
-  R(c, 158, 46, 15, 20, INK);
-  R(c, 159, 47, 13, 19, '#FFFBF1');
-  R(c, 165, 47, 1, 19, '#8E7368'); // khe giữa 2 cánh
-  R(c, 160, 49, 4, 6, '#E2D4CC'); R(c, 167, 49, 4, 6, '#E2D4CC');
-  R(c, 160, 57, 4, 6, '#E2D4CC'); R(c, 167, 57, 4, 6, '#E2D4CC');
-
-  // Gian phụ bên phải tường cam đất + cửa sổ vòm tròn (x: 180..204, y: 34..66)
-  R(c, 180, 34, 24, 32, INK);
-  R(c, 181, 35, 22, 31, '#F29B52');
-  R(c, 180, 31, 24, 4, '#FDE18E'); // viền mái gian phụ
-  E(c, 192, 48, 7, 7, INK); E(c, 192, 48, 6, 6, '#A7D0F5');
-  R(c, 185, 48, 14, 10, '#A7D0F5'); R(c, 185, 58, 14, 1, INK);
-  R(c, 192, 42, 1, 16, '#5B6B8C'); R(c, 186, 51, 12, 1, '#5B6B8C'); // nan cửa vòm
-  // 2 bạn đứng trò chuyện trước cửa vòm
-  drawPerson16(c, 184, 66, '#4B6FA5', '#2B2118', false);
-  drawPerson16(c, 194, 66, '#E68FA2', '#2B2118', false);
-
-  // Cây tùng xoắn ốc pastel trong bồn gạch cạnh tiệm (x: 213, y: 27..66)
-  R(c, 207, 62, 12, 4, INK); R(c, 208, 63, 10, 3, '#A65434'); // bồn gạch
-  R(c, 211, 51, 4, 11, INK); R(c, 212, 52, 2, 10, '#B37B4E'); // thân cây
-  E(c, 213, 44, 7, 10, INK);
-  E(c, 213, 44, 6, 9, '#8CA8DC');
-  E(c, 212, 39, 5, 7, '#B8CCF2');
-  R(c, 210, 37, 4, 2, '#E4EEFF'); R(c, 211, 44, 5, 2, '#E4EEFF'); // vân xoắn sáng
-
-  // Nhãn nhỏ "[CAFE]" gợi ý chạm ở trên mái
-  R(c, 143, 12, 22, 6, INK); R(c, 144, 13, 20, 4, '#FFE08A');
-  R(c, 147, 14, 14, 2, '#2B2118');
-
-  // 5. KHU 3 (x: 224..328): CHỢ BẾN THÀNH & NHÀ THỜ ĐỨC BÀ
-  // Nhà Thờ Đức Bà tháp đôi gạch đỏ
-  R(c, 228, 36, 30, 30, INK); R(c, 229, 37, 28, 29, '#B85346');
-  R(c, 231, 20, 8, 17, INK); R(c, 232, 21, 6, 16, '#C96355');
-  R(c, 247, 20, 8, 17, INK); R(c, 248, 21, 6, 16, '#C96355');
-  // Chóp nhọn tháp đôi
-  R(c, 233, 15, 4, 5, '#4A5568'); R(c, 234, 12, 2, 3, '#4A5568');
-  R(c, 249, 15, 4, 5, '#4A5568'); R(c, 250, 12, 2, 3, '#4A5568');
-  // Cửa vòm nhà thờ
-  E(c, 243, 56, 5, 5, INK); R(c, 238, 56, 10, 10, '#6B312B');
-  // Chợ Bến Thành Cửa Nam
-  R(c, 266, 38, 54, 28, INK);
-  R(c, 267, 39, 52, 27, '#F5E6C8');
-  R(c, 264, 34, 58, 5, INK); R(c, 265, 35, 56, 3, '#C94B38'); // mái ngói đỏ chợ
-  // Tháp đồng hồ trung tâm
-  R(c, 284, 20, 18, 18, INK); R(c, 285, 21, 16, 17, '#F5E6C8');
-  R(c, 287, 16, 12, 5, '#C94B38'); R(c, 292, 11, 2, 6, INK);
-  R(c, 294, 11, 5, 3, '#E0452B'); R(c, 296, 12, 1, 1, '#F4B93B'); // cờ đỏ sao vàng
-  E(c, 293, 29, 5, 5, INK); E(c, 293, 29, 4, 4, '#FFFBF1');
-  R(c, 293, 26, 1, 3, INK); R(c, 293, 29, 3, 1, INK); // kim đồng hồ
-  // 3 cổng vòm chợ
-  [272, 289, 306].forEach(function(gx) {
-    R(c, gx, 52, 9, 14, INK); R(c, gx + 1, 53, 7, 13, '#7A5438');
-  });
-  drawPerson16(c, 276, 66, '#F4B93B', '#2B2118', true);
-  drawPerson16(c, 310, 66, '#5E9A57', '#2B2118', false);
-
-  // 6. KHU 4 (x: 330..438): ĐẠI LỘ BITEXCO & LANDMARK 81
-  drawLamp16(c, 336, 66);
-  // Tháp Bitexco + sân đỗ trực thăng tầng 52
-  R(c, 348, 16, 20, 50, INK);
-  R(c, 349, 17, 18, 49, '#5F7AA3');
-  R(c, 350, 18, 5, 48, '#8EC9E8'); // phản chiếu kính xanh
-  for (var by = 22; by < 62; by += 4) {
-    R(c, 350, by, 16, 1, PAL_TIME.winGlow);
-  }
-  R(c, 368, 30, 12, 3, INK); R(c, 368, 31, 11, 1, '#FFFBF1'); // sân đỗ trực thăng
-  // Tòa tháp Landmark 81
-  R(c, 392, 10, 14, 56, INK); R(c, 393, 11, 12, 55, '#4A6894');
-  R(c, 386, 24, 6, 42, INK); R(c, 387, 25, 5, 41, '#5F7AA3');
-  R(c, 406, 22, 6, 44, INK); R(c, 407, 23, 5, 43, '#3B5278');
-  R(c, 398, 4, 2, 7, '#8EC9E8'); // ăng-ten đỉnh
-  for (var ly = 16; ly < 62; ly += 4) {
-    R(c, 395, ly, 8, 1, PAL_TIME.winGlow);
-  }
-  drawTree16(c, 428, 66, '#5EA353', '#82C76E', '#3F7A3A', false);
-
-  // 7. KHU 5 (x: 440..540): NGÔI CHÙA VIỆT NAM CỔ KÍNH (BẢO THÁP MÁI CONG & CỔNG TAM QUAN — QĐ 220)
-  // Bảo Tháp 5 tầng mái đao cong đỏ rực (x: 444..476)
-  for (var pt = 0; pt < 5; pt++) {
-    var pw = 24 - pt * 3;
-    var px2 = 460 - (pw >> 1);
-    var py2 = 54 - pt * 8;
-    R(c, px2 + 2, py2, pw - 4, 8, INK); R(c, px2 + 3, py2 + 1, pw - 6, 6, '#F5B076');
-    R(c, 459, py2 + 2, 2, 4, '#5C2C1D');
-    R(c, px2 - 2, py2 - 2, pw + 4, 3, INK); R(c, px2 - 1, py2 - 1, pw + 2, 2, '#C94B38');
-    R(c, px2 - 3, py2 - 3, 2, 2, '#E0452B'); R(c, px2 + pw + 1, py2 - 3, 2, 2, '#E0452B');
-  }
-  R(c, 459, 10, 2, 8, '#F5CA72'); // đỉnh bảo tháp vàng
-  // Cổng Tam Quan mái ngói đỏ cong & Lư hương sân chùa (x: 476..522)
-  R(c, 478, 42, 40, 24, INK); R(c, 479, 43, 38, 23, '#E8D8BA');
-  R(c, 488, 48, 20, 18, INK); R(c, 489, 49, 18, 17, '#5C2C1D');
-  R(c, 494, 54, 8, 12, '#F5CA72'); // ánh vàng từ chánh điện
-  R(c, 474, 36, 48, 7, INK); R(c, 475, 37, 46, 5, '#C94B38');
-  R(c, 480, 31, 36, 6, INK); R(c, 481, 32, 34, 4, '#DC2626');
-  R(c, 490, 28, 16, 4, '#F5CA72'); // nóc Tam Quan vàng
-  // Cây bồ đề / phượng vĩ xanh rợp bóng bên chùa
-  drawTree16(c, 526, 66, '#4E8C47', '#6DB35E', '#356632', false);
-
-  // 8. VỈA HÈ LÁT GẠCH THỐNG NHẤT XUYÊN SUỐT 540px (y: 66..78)
-  R(c, 0, 66, WORLD_W, 1, INK);
-  R(c, 0, 67, WORLD_W, 11, PAL_TIME.sidewalk);
-  for (var sx = 0; sx < WORLD_W; sx += 12) {
-    R(c, sx, 67, 1, 11, PAL_TIME.sidewalkLine);
-  }
-  R(c, 0, 77, WORLD_W, 1, INK);
-
-  // 9. ĐẠI LỘ 2 LÀN XE XUYÊN SUỐT 540px (y: 78..97)
-  R(c, 0, 78, WORLD_W, 19, PAL_TIME.road);
-  for (var rx = 4; rx < WORLD_W; rx += 16) {
-    R(c, rx, 87, 8, 1, PAL_TIME.roadLine);
-  }
-  R(c, 0, 97, WORLD_W, 1, INK);
-
-  // 10. DẢI CỎ, LAN CAN BỜ SÔNG & MẶT NƯỚC SÀI GÒN XUYÊN SUỐT 540px (y: 98..112)
-  R(c, 0, 98, WORLD_W, 5, PAL_TIME.grass);
-  R(c, 0, 102, WORLD_W, 2, PAL_TIME.grassDark);
-  // Lan can trắng ven sông
-  R(c, 0, 99, WORLD_W, 1, '#FFFBF1');
-  for (var px = 6; px < WORLD_W; px += 14) {
-    R(c, px, 98, 2, 4, '#FFFBF1');
-  }
-  // Mặt sông Sài Gòn lấp lánh
-  R(c, 0, 104, WORLD_W, 8, PAL_TIME.water);
-  for (var wx = 8; wx < WORLD_W; wx += 22) {
-    R(c, wx, 106, 7, 1, PAL_TIME.waterHi);
-    R(c, wx + 10, 109, 5, 1, PAL_TIME.waterHi);
-  }
-}
-
-function fbStatic() {
-  var bg = document.createElement('canvas');
-  bg.width = WORLD_W;
-  bg.height = WORLD_H;
-  var x = bg.getContext('2d');
-  x.imageSmoothingEnabled = false;
-  buildSeamlessPanorama(x);
-  FB.bg = bg;
-}
-
-function fbSpark(x, cx, cy, r, col) {
-  R(x, cx - r, cy, r * 2 + 1, 1, col);
-  R(x, cx, cy - r, 1, r * 2 + 1, col);
-}
-
-function fbPlane(x, t) {
-  var px = Math.round(((t * 18) % (WORLD_W + 90)) - 45);
-  var py = 12 + Math.round(Math.sin(t * 0.9) * 2);
-  R(x, px - 14, py + 1, 12, 1, 'rgba(255,255,255,0.55)');
-  R(x, px, py, 16, 4, '#FFFFFF');
-  R(x, px + 14, py + 1, 3, 2, '#FFFFFF');
-  R(x, px, py - 3, 4, 4, '#0B5F8A');
-  R(x, px + 1, py - 2, 2, 2, '#F4B93B'); // bông sen vàng Vietnam Airlines
-  R(x, px + 6, py + 3, 6, 2, '#D0D6DC');
-}
-
-function fbBird(x, bx, by, t, ph) {
-  var flap = Math.sin(t * 8 + ph) > 0;
-  R(x, bx, by, 2, 1, INK);
-  R(x, bx - 2, by + (flap ? -1 : 1), 2, 1, INK);
-  R(x, bx + 2, by + (flap ? -1 : 1), 2, 1, INK);
-}
-
-function fbBus(x, bx, by, t, dir) {
-  x.save();
-  if (dir === -1) { x.translate(bx + 34, 0); x.scale(-1, 1); bx = 0; }
-  R(x, bx, by - 11, 34, 11, INK);
-  R(x, bx + 1, by - 10, 32, 9, '#2B8E6E'); // xe buýt xanh TP.HCM
-  R(x, bx + 1, by - 5, 32, 2, '#FFFBF1');
-  for (var i = 0; i < 4; i++) R(x, bx + 3 + i * 7, by - 9, 5, 4, '#DCEEFA');
-  R(x, bx + 31, by - 4, 2, 2, '#FFE08A');
-  E(x, bx + 7, by, 3, 3, INK); E(x, bx + 7, by, 1, 1, '#CFCFD8');
-  E(x, bx + 26, by, 3, 3, INK); E(x, bx + 26, by, 1, 1, '#CFCFD8');
-  x.restore();
-}
-
-function fbTaxi(x, bx, by, t, dir) {
-  x.save();
-  if (dir === -1) { x.translate(bx + 22, 0); x.scale(-1, 1); bx = 0; }
-  R(x, bx, by - 7, 22, 7, INK);
-  R(x, bx + 1, by - 6, 20, 5, '#FFFBF1');
-  R(x, bx + 4, by - 10, 12, 4, INK);
-  R(x, bx + 5, by - 9, 10, 3, '#DCEEFA');
-  R(x, bx + 1, by - 3, 20, 1, '#2B8E6E');
-  E(x, bx + 5, by, 2, 2, INK); E(x, bx + 17, by, 2, 2, INK);
-  x.restore();
-}
-
-function fbRider(x, bx, by, t, pig, dir, hat) {
-  x.save();
-  if (dir === -1) { x.translate(bx + 14, 0); x.scale(-1, 1); bx = 0; }
-  // Xe máy Việt Nam (ride) + người đội nón lá
-  R(x, bx + 2, by - 4, 10, 3, '#E0452B');
-  E(x, bx + 3, by, 2, 2, INK); E(x, bx + 11, by, 2, 2, INK);
-  R(x, bx + 5, by - 9, 4, 5, '#4B6FA5');
-  R(x, bx + 6, by - 11, 2, 2, '#F4C9A0');
-  if (hat !== false) {
-    R(x, bx + 4, by - 12, 6, 1, '#E8C56E'); // nón lá
-    R(x, bx + 5, by - 13, 4, 1, '#F7DF94');
-  }
-  x.restore();
-}
-
-function fbDraw(t) {
-  var x = FB.x;
-  var dt = Math.min(0.05, FB.dt || 0.016);
-  var rm = window.__openRoom ? window.__openRoom.state : null;
-  if (window.__openRoom) {
-    window.__openRoom.step(dt, performance.now());
-  }
-  var camX = rm ? Math.round(rm.camX) : 160;
-  var camY = rm ? Math.round(rm.camY) : 0;
-
-  x.save();
-  x.translate(-camX, -camY);
-
-  // 1. Vẽ toàn bộ Panorama liền mạch 540×112
-  x.drawImage(FB.bg, 0, 0);
-
-  // 2. Sao lấp lánh ban đêm
-  if (PAL_TIME.mode === 'night') {
-    for (var s = 0; s < 18; s++) {
-      var sx = (s * 31 + 9) % WORLD_W;
-      var sy = (s * 11 + 3) % 24;
-      if (((t * 2 + s) % 3) < 2) R(x, sx, sy, 1, 1, '#FFFBF1');
+  if (pal.mode === 'night') {
+    for (var s = 0; s < 36; s++) {
+      var sx = (s * 97 + 19) % W, sy = 3 + ((s * 31) % 28);
+      R(c, sx, sy, 1, 1, s % 3 === 0 ? '#FFE891' : '#FFFFFF');
     }
   }
-
-  // 3. Mây trôi mượt xuyên suốt 540px (tạo hình tròn bồng bềnh giống Hình 5)
-  var clouds = [
-    [18, 12, 7], [95, 18, 10], [185, 10, 6], [275, 16, 9], [370, 11, 8], [465, 17, 11]
-  ];
-  clouds.forEach(function(cl) {
-    var cx = ((cl[0] + t * cl[2]) % (WORLD_W + 40)) - 20;
-    var cy = cl[1];
-    R(x, cx, cy, 20, 4, PAL_TIME.cloudShade);
-    R(x, cx + 2, cy - 3, 14, 5, PAL_TIME.cloudMain);
-    R(x, cx + 5, cy - 5, 8, 3, PAL_TIME.cloudMain);
-    R(x, cx + 12, cy - 2, 7, 3, PAL_TIME.cloudMain);
-  });
-
-  // 4. Máy bay Vietnam Airlines + Chim bay + Đèn chớp Landmark 81 & Bitexco
-  fbPlane(x, t);
-  fbBird(x, 290 + Math.round(Math.sin(t * 0.7) * 18), 16, t, 0);
-  fbBird(x, 312 + Math.round(Math.cos(t * 0.6) * 14), 19, t, 1.5);
-  if ((t * 1.6) % 1 < 0.55) {
-    R(x, 398, 3, 2, 2, '#FF5A4D'); // Landmark 81 beacon
-    R(x, 357, 15, 2, 2, '#FF5A4D'); // Bitexco beacon
-  }
-
-  // 5. Thuyền gỗ trôi êm trên sông Sài Gòn (y = 106)
-  var boatX = Math.round(((t * 12) % (WORLD_W + 40)) - 20);
-  R(x, boatX, 105, 18, 4, INK); R(x, boatX + 1, 106, 16, 2, '#8A5A34');
-  R(x, boatX + 6, 102, 6, 3, '#FFFBF1');
-
-  // 6. Giao thông Việt Nam chạy XUYÊN SUỐT 540px (không còn cắt cụt!)
-  // Làn trên (đi sang Trái ←): Xe buýt xanh & Xe máy nón lá
-  var busX = Math.round(WORLD_W + 40 - ((t * 24) % (WORLD_W + 90)));
-  var motoX = Math.round(WORLD_W + 40 - (((t * 36) + 210) % (WORLD_W + 90)));
-  fbBus(x, busX, 85, t, -1);
-  fbRider(x, motoX, 86, t, false, -1, true);
-
-  // Làn dưới (đi sang Phải →): Taxi & Xe máy nón lá 2
-  var taxiX = Math.round(((t * 34 + 60) % (WORLD_W + 90)) - 40);
-  var moto2X = Math.round(((t * 42 + 320) % (WORLD_W + 90)) - 40);
-  fbTaxi(x, taxiX, 94, t, 1);
-  fbRider(x, moto2X, 95, t, false, 1, true);
-
-  // 7. Chú heo 24×20 đi dạo 2D trong Panorama
-  if (rm) {
-    var px = Math.round(rm.x - 12);
-    var py = Math.round(rm.y - 20 + (rm.action === 'jump_joy' || rm.action === 'play_arcade' ? -Math.abs(Math.sin(t * 10)) * 4 : 0));
-    hpx.clearRect(0, 0, 24, 20);
-    drawPigSprite(hpx, {
-      pose: rm.walking ? 'walk' : (rm.action === 'eat_snack' ? 'eat' : 'stand'),
-      frame: rm.walking ? (((t * 6) | 0) % 2) : 0,
-      happy: Boolean(rm.action) || FB.boost > 0,
-      blink: (t % 4) < 0.15,
-      tail: true
-    });
-    x.save();
-    if (rm.facing < 0) {
-      x.translate(px + 24, py);
-      x.scale(-1, 1);
-      x.drawImage(hp, 0, 0, 24, 20, 0, 0, 24, 20);
-    } else {
-      x.drawImage(hp, 0, 0, 24, 20, px, py, 24, 20);
-    }
-    x.restore();
-  }
-
-  // 8. Hạt lấp lánh khi chạm
-  FB.spk = FB.spk.filter(function(s) { return (s.l -= 0.03) > 0; });
-  FB.spk.forEach(function(s) {
-    s.x += s.vx;
-    s.y += s.vy;
-    fbSpark(x, Math.round(s.x), Math.round(s.y), s.l > 0.5 ? 2 : 1, s.c);
-  });
-  if (FB.boost > 0) FB.boost = Math.max(0, FB.boost - dt);
-
-  x.restore();
-
-  if (window.__openRoom) {
-    window.__openRoom.drawOverlays(x, performance.now());
-  }
-
-  R(x, 0, 0, FB.w, 1, INK);
-  R(x, 0, FB.h - 1, FB.w, 1, INK);
 }
+
+function fbStatic(pal) {
+  return mk(W, H, function(c) {
+    fbSky(c, pal);
+    drawFarSkyline(c, pal, W);
+    drawSaigonLandmarks(c, pal);
+    drawAvenueAndSidewalk(c, pal);
+    drawBachDangRiverStatic(c, pal);
+  });
+}
+
+function fbPlane(c, x, y, pal) {
+  x = Math.round(x); y = Math.round(y);
+  R(c, x, y + 2, 11, 2, '#FFFFFF');
+  R(c, x + 2, y, 2, 2, '#1D5AA6');
+  R(c, x + 3, y + 1, 1, 1, '#F4B93B');
+  R(c, x + 5, y + 3, 3, 1, '#CBD5E1');
+  if (pal.mode !== 'day') R(c, x + 11, y + 2, 1, 1, '#EF4444');
+}
+
+function fbBird(c, x, y, t) {
+  var flap = Math.sin(t * 7 + x * 0.2) > 0 ? 1 : 0;
+  R(c, x, y, 1, 1, '#2B2118');
+  R(c, x - 2, y - flap, 2, 1, '#2B2118');
+  R(c, x + 1, y - flap, 2, 1, '#2B2118');
+}
+
+function fbRider(c, x, y, col) {
+  R(c, x, y, 3, 3, col || '#8EC9E8');
+}
+
+function fbSpark(c, x, y, t) {
+  if (Math.sin(t * 5 + x) > 0.3) R(c, x, y, 2, 2, '#FFF7CC');
+}
+
+var FB = {
+  t: 0, last: 0, boost: 0, hour: new Date().getHours(), pal: null, bg: null,
+  planeX: 40,
+  clouds: [
+    { x: 40, y: 8, w: 26, sp: 3.5 },
+    { x: 220, y: 12, w: 32, sp: 2.8 },
+    { x: 440, y: 7, w: 28, sp: 3.2 },
+    { x: 690, y: 11, w: 30, sp: 2.5 },
+    { x: 960, y: 9, w: 26, sp: 3.0 }
+  ],
+  vehicles: [
+    // Làn 0 (trên, y ~ 88..94, đi sang trái dir: -1)
+    { kind: 'moto', lane: 0, dir: -1, x: 780, y: 90, w: 13, h: 9, sp: 38, col: '#E0452B', riderCol: '#2563EB', helmCol: '#FFFFFF' },
+    { kind: 'car', lane: 0, dir: -1, x: 670, y: 89, w: 24, h: 12, sp: 32, col: '#F8FAFC' },
+    { kind: 'police', lane: 0, dir: -1, x: 540, y: 89, w: 24, h: 12, sp: 40, col: '#FFFFFF' },
+    { kind: 'bus', lane: 0, dir: -1, x: 380, y: 88, w: 38, h: 14, sp: 24, col: '#2563EB' },
+    { kind: 'moto', lane: 0, dir: -1, x: 290, y: 91, w: 13, h: 9, sp: 42, col: '#16A34A', riderCol: '#F4B93B', helmCol: '#1E293B' },
+    { kind: 'truck', lane: 0, dir: -1, x: 180, y: 88, w: 30, h: 13, sp: 26, col: '#0284C7' },
+    { kind: 'car', lane: 0, dir: -1, x: 80, y: 89, w: 24, h: 12, sp: 34, col: '#DC2626' },
+    { kind: 'moto', lane: 0, dir: -1, x: 20, y: 91, w: 13, h: 9, sp: 36, col: '#F4B93B', riderCol: '#EC4899', helmCol: '#FFFFFF' },
+    // Làn 1 (dưới, y ~ 109..115, đi sang phải dir: 1)
+    { kind: 'moto', lane: 1, dir: 1, x: 40, y: 112, w: 13, h: 9, sp: 40, col: '#2563EB', riderCol: '#E0452B', helmCol: '#F4B93B' },
+    { kind: 'container', lane: 1, dir: 1, x: 140, y: 109, w: 45, h: 15, sp: 20, col: '#EA580C' },
+    { kind: 'car', lane: 1, dir: 1, x: 260, y: 110, w: 24, h: 12, sp: 34, col: '#1E3A8A' },
+    { kind: 'moto', lane: 1, dir: 1, x: 340, y: 113, w: 13, h: 9, sp: 44, col: '#FFFFFF', riderCol: '#16A34A', helmCol: '#E0452B' },
+    { kind: 'truck', lane: 1, dir: 1, x: 420, y: 109, w: 30, h: 13, sp: 27, col: '#16A34A' },
+    { kind: 'car', lane: 1, dir: 1, x: 560, y: 110, w: 24, h: 12, sp: 36, col: '#94A3B8' },
+    { kind: 'police', lane: 1, dir: 1, x: 660, y: 110, w: 24, h: 12, sp: 42, col: '#FFFFFF' },
+    { kind: 'bus', lane: 1, dir: 1, x: 760, y: 109, w: 38, h: 14, sp: 25, col: '#2563EB' }
+  ],
+  boats: [
+    { kind: 'cruise', dir: 1, x: 910, y: 80, w: 46, h: 15, sp: 9.5, phase: 0.4 },
+    { kind: 'waterbus', dir: -1, x: 1070, y: 97, w: 34, h: 12, sp: 13.5, phase: 1.8 },
+    { kind: 'barge', dir: 1, x: 960, y: 110, w: 50, h: 14, sp: 6.5, phase: 3.1 }
+  ]
+};
 
 function fbFrame(now) {
   var dt = Math.min(0.05, (now - FB.last) / 1000);
   FB.last = now;
-  FB.dt = dt;
-  FB.t += dt;
-  fbDraw(FB.t);
+  FB.t += dt * (1 + FB.boost * 1.1);
+  FB.boost = Math.max(0, FB.boost - dt * 1.4);
+
+  // Cập nhật mây & máy bay
+  FB.planeX += dt * 16;
+  if (FB.planeX > W + 30) FB.planeX = -30;
+  for (var ci = 0; ci < FB.clouds.length; ci++) {
+    FB.clouds[ci].x += FB.clouds[ci].sp * dt;
+    if (FB.clouds[ci].x > W + 40) FB.clouds[ci].x = -40;
+  }
+
+  // Cập nhật 6 loại xe cộ trên đại lộ (x: -55..875)
+  for (var vi = 0; vi < FB.vehicles.length; vi++) {
+    var v = FB.vehicles[vi];
+    v.x += v.dir * v.sp * dt * (1 + FB.boost * 0.4);
+    if (v.dir > 0 && v.x > 875) v.x = -v.w - 12;
+    if (v.dir < 0 && v.x < -v.w - 15) v.x = 875;
+  }
+
+  // Cập nhật tàu thuyền lớn trên Sông Bạch Đằng (x: 865..1175)
+  for (var bi = 0; bi < FB.boats.length; bi++) {
+    var b = FB.boats[bi];
+    b.x += b.dir * b.sp * dt;
+    if (b.dir > 0 && b.x > 1170) b.x = 876 - b.w;
+    if (b.dir < 0 && b.x < 874 - b.w) b.x = 1168;
+  }
+
+  var eng = window.OPEN_ROOM_ENGINE;
+  var cv = document.getElementById('funCv');
+  if (!cv || !FB.bg) { requestAnimationFrame(fbFrame); return; }
+  var ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  if (eng) eng.step(dt);
+  var camX = eng ? Math.round(eng.state.camX) : 356;
+  var camY = eng ? Math.round(eng.state.camY) : 0;
+
+  ctx.save();
+  ctx.translate(-camX, -camY);
+
+  // 1. Nền tĩnh 1160×128
+  ctx.drawImage(FB.bg, 0, 0);
+
+  // 2. Mây trôi, máy bay & đàn chim
+  for (var c2 = 0; c2 < FB.clouds.length; c2++) {
+    var cl = FB.clouds[c2];
+    E(ctx, cl.x, cl.y, cl.w * 0.45, 4, FB.pal.cloud);
+    E(ctx, cl.x + 6, cl.y + 1, cl.w * 0.35, 3, FB.pal.cloudSh);
+  }
+  fbPlane(ctx, FB.planeX, 7, FB.pal);
+  fbBird(ctx, (FB.t * 14 + 120) % W, 16 + Math.sin(FB.t * 2) * 2, FB.t);
+  fbBird(ctx, (FB.t * 14 + 132) % W, 19 + Math.cos(FB.t * 2) * 2, FB.t + 0.5);
+  fbSpark(ctx, 251, 3, FB.t); // Đèn đỉnh Bitexco
+  fbSpark(ctx, 797, 1, FB.t + 1.2); // Đèn đỉnh Landmark 81
+
+  // 3. Chú Heo Con đi dạo trên vỉa hè (y: 70..84)
+  if (eng) eng.drawPig(ctx, drawPigSprite);
+
+  // 4. Giao thông 2 làn (6 loại xe + CSGT áo vàng) & Sông Bạch Đằng (tàu thuyền lớn)
+  drawSaigonLiveTrafficAndRiver(ctx, FB.t, FB.pal, FB.vehicles, FB.boats);
+
+  // 5. Bong bóng lời thoại & chỉ thị biên
+  ctx.restore();
+  if (eng) {
+    eng.drawBubble(ctx);
+    eng.drawEdgeHints(ctx);
+  }
+
   requestAnimationFrame(fbFrame);
 }
 
 function funBanStart() {
-  FB.c = document.getElementById('funCv');
-  FB.x = FB.c.getContext('2d');
-  FB.x.imageSmoothingEnabled = false;
-  fbStatic();
-
-  FB.c.addEventListener('pointerdown', function() {
-    FB.boost = 1;
-    var rm = window.__openRoom ? window.__openRoom.state : null;
-    var sx = rm ? rm.x : 256;
-    var sy = rm ? rm.y - 10 : 66;
-    for (var i = 0; i < 10; i++) {
-      var a = Math.random() * 6.28;
-      FB.spk.push({
-        x: sx,
-        y: sy,
-        vx: Math.cos(a) * 1.2,
-        vy: Math.sin(a) * 1.2 - 0.3,
-        l: 1,
-        c: ['#FFFBF1', '#FFE08A', '#F9B8C4'][i % 3]
-      });
-    }
-  });
-
+  FB.hour = new Date().getHours();
+  FB.pal = fbTimePalette(FB.hour);
+  FB.bg = fbStatic(FB.pal);
+  var cv = document.getElementById('funCv');
+  if (cv) {
+    cv.addEventListener('pointerdown', function() { FB.boost = 1; }, { passive: true });
+  }
   FB.last = performance.now();
   requestAnimationFrame(fbFrame);
 }
@@ -929,11 +494,10 @@ if (document.readyState === 'loading') {
 } else {
   funBanStart();
 }
-
 })();
 </script>
 </body>
-</html>`, [openRoomScript]);
+</html>`, [openRoomScript, artScript]);
 
   return (
     <View style={styles.container}>
@@ -975,7 +539,7 @@ if (document.readyState === 'loading') {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    aspectRatio: 192 / 88,
+    aspectRatio: 224 / 108,
     borderRadius: 22,
     borderWidth: 3,
     borderColor: '#2B2118',

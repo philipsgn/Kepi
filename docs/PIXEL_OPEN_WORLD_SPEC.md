@@ -60,7 +60,7 @@ $$W_{\text{world}} \ge 2.75 \times W_{\text{view}} \quad (\text{chuẩn hóa } 3
 | 2 | **Hồ sơ (Văn Phòng Heo)** | `ProfileDeskBanner.tsx` | `176 × 80` | `432 × 128` | `3.93×` | Chặng 2 |
 | 3 | **Vườn (Sân Vườn & Mặt Tiền)** | `PixelGardenWebView.tsx` | `160 × 96` | `440 × 140` | `4.01×` | Chặng 3 |
 | 4 | **Nhà của bạn (Các Phòng)** | `PixelHouseWebView.tsx` | `160 × 96` | `480 × 132` | `4.13×` | Chặng 3 |
-| 5 | **Khám phá (Phố Sài Gòn)** | `EntertainmentBannerWebView.tsx` | `192 × 88` | `540 × 112` | `3.58×` | Hoàn thiện + Rà soát Chặng 4 |
+| 5 | **Khám phá (Đại Lộ Sài Gòn & Bến Bạch Đằng)** | `EntertainmentBannerWebView.tsx` + `hub/saigonPanoramaArt.ts` | `224 × 108` | `1160 × 128` | `6.14×` | Hoàn thiện (QĐ 221 — Skyline xa Bitexco & Landmark 81, 7 công trình mặt tiền: Quán Phở, Tiệm Cà Phê, Adidas Store, Nhà Thờ Đức Bà, Chợ Bến Thành, SVĐ Thống Nhất, Chùa Việt Nam; đại lộ 2 làn 6 loại xe + CSGT áo vàng; khu Sông Bạch Đằng: Cầu đi bộ, Cầu Ba Son, tàu thuyền lớn) |
 | 6 | **Trò chuyện (Quán Cà Phê)** | `CafeChatBannerWebView.tsx` + `cafe/*` | `180 × 120` | `720 × 176` | `5.87×` | Hoàn thiện (QĐ 218 — 6 khu ấm cúng: Barista phin, Thư viện 3 kệ sách + Sofa, Mini Coffee Workshop, Boutique quần áo, Cây thông & 3 quạt trần) |
 
 ---

@@ -4211,8 +4211,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const chatDocPath = path.join(__dirname, 'docs/screens/heocon/10-CHAT.md');
   const chatDocCode = fs.readFileSync(chatDocPath, 'utf8');
 
-  // 1. EntertainmentBannerWebView (192x88 Canvas Hoàng Hôn 60fps)
-  assert.ok(bannerViewCode.includes('width="192" height="88"'), 'EntertainmentBannerWebView must use 192x88 prototype canvas ratio');
+  // 1. EntertainmentBannerWebView (192x88 cũ hoặc 224x108 Đại Lộ Sài Gòn QĐ 221)
+  assert.ok(bannerViewCode.includes('width="192" height="88"') || bannerViewCode.includes('width="224" height="108"'), 'EntertainmentBannerWebView must use 192x88 or 224x108 prototype canvas ratio');
   assert.ok(bannerViewCode.includes('fbSky') && bannerViewCode.includes('fbStatic'), 'EntertainmentBannerWebView must port fbSky and fbStatic');
   assert.ok(bannerViewCode.includes('fbBird') && bannerViewCode.includes('fbSpark'), 'EntertainmentBannerWebView must port fbBird and fbSpark');
   assert.ok(bannerViewCode.includes('FB.boost = 1'), 'EntertainmentBannerWebView must support touch boost acceleration');
@@ -4736,11 +4736,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(pixelIconsCode.includes('export const PixelIconCrossRoad'), 'PixelIcons must export PixelIconCrossRoad');
   assert.ok(pixelIconsCode.includes('#4A4658') && (pixelIconsCode.includes('#FFFBF1') || pixelIconsCode.includes('#F4E7A8')), 'PixelIconCrossRoad must have asphalt and zebra stripe colors');
 
-  // 2. Banner Động Ngày 22: Canvas 192x88, 8 dải dither hoàng hôn, máy bay Vietnam Airlines, 5 địa danh Sài Gòn
-  assert.ok(bannerCode.includes('width="192" height="88"') || bannerCode.includes('192') && bannerCode.includes('88'), 'Banner canvas must be 192x88');
-  assert.ok(bannerCode.includes('fbPlane') && (bannerCode.includes('#2F6F8F') || bannerCode.includes('#1A6B8A') || bannerCode.includes('#0B5F8A')), 'Banner must render Vietnam Airlines plane with lotus gold and navy');
+  // 2. Banner Động Ngày 22 / QĐ 221: Canvas 192x88 hoặc 224x108, máy bay Vietnam Airlines, địa danh Sài Gòn
+  assert.ok(bannerCode.includes('width="192" height="88"') || bannerCode.includes('width="224" height="108"') || (bannerCode.includes('192') && bannerCode.includes('88')), 'Banner canvas must be 192x88 or 224x108');
+  assert.ok(bannerCode.includes('fbPlane') && (bannerCode.includes('#2F6F8F') || bannerCode.includes('#1A6B8A') || bannerCode.includes('#0B5F8A') || bannerCode.includes('#1D5AA6')), 'Banner must render Vietnam Airlines plane with lotus gold and navy');
   assert.ok((bannerCode.includes('fbLandmarks') || bannerCode.includes('fbStatic')) && bannerCode.includes('Bitexco'), 'Banner must render Saigon landmarks');
-  assert.ok(bannerCode.includes('fbRider') && bannerCode.includes('ride') && bannerCode.includes('walk'), 'Banner must render motorcycle ride and walking pig');
+  assert.ok(bannerCode.includes('fbRider') && (bannerCode.includes('ride') || bannerCode.includes('vehicles')) && bannerCode.includes('walk'), 'Banner must render traffic/ride and walking pig');
 
   // 3. Game Heo Qua Đường (PigCrossRoadGameView): 2.5D, 4 ải Sài Gòn, né xe máy, giơ tay chặn xe hơi
   assert.ok((crossRoadCode.includes('Bưu điện Thành phố') || crossRoadCode.includes('Bưu điện TP')) && crossRoadCode.includes('Chợ Bến Thành'), 'PigCrossRoadGameView must include Saigon landmark levels');
@@ -5080,13 +5080,33 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     );
   });
 
-  // 2. Sửa lỗi xe chạy ngược & khói xe cùng chiều bằng lật ngang dir = -1 (x.scale(-1, 1))
-  assert.ok(bannerCode.includes('function fbRider(x, bx, by, t, pig, dir, hat)') && bannerCode.includes('x.scale(-1, 1)'), 'fbRider must mirror horizontally when dir === -1 so headlights face forward and exhaust trails behind');
+  const saigonArtCode = fs.existsSync('src/components/chat/hub/saigonPanoramaArt.ts')
+    ? fs.readFileSync('src/components/chat/hub/saigonPanoramaArt.ts', 'utf8')
+    : '';
+  // 2. Sửa lỗi xe chạy ngược & khói xe cùng chiều bằng lật ngang dir = -1 (scale(-1, 1))
+  assert.ok(
+    (bannerCode.includes('function fbRider(x, bx, by, t, pig, dir, hat)') && bannerCode.includes('x.scale(-1, 1)')) ||
+      (saigonArtCode.includes('function drawVehicle') && saigonArtCode.includes('c.scale(-1, 1)')),
+    'Vehicle renderer must mirror horizontally when dir < 0 so headlights face forward'
+  );
 
-  // 3. Đội xe Việt Nam 2 chiều: Xe buýt xanh TP.HCM (fbBus), Ô tô Taxi Sài Gòn (fbTaxi), Xe máy nón lá
-  assert.ok(bannerCode.includes('function fbBus(x, bx, by, t, dir)') && (bannerCode.includes('fbBus(x, busX, 75, t, -1)') || bannerCode.includes('fbBus(x, busX, 85, t, -1)')), 'Banner must render TP.HCM green bus moving left cleanly');
-  assert.ok(bannerCode.includes('function fbTaxi(x, bx, by, t, dir)') && (bannerCode.includes('fbTaxi(x, taxiX, 81, t, 1)') || bannerCode.includes('fbTaxi(x, taxiX, 94, t, 1)')), 'Banner must render Saigon taxi moving right cleanly');
-  assert.ok(bannerCode.includes('fbRider(x, motoX, 76, t, false, -1, true)') || bannerCode.includes('fbRider(x, motoX, 86, t, false, -1, true)'), 'Banner must render Vietnamese conical-hat motorbike moving left with dir = -1');
+  // 3. Đội xe Việt Nam 2 chiều: Xe buýt, Ô tô, Xe máy (cũ hoặc nâng cấp 6 loại xe QĐ 221)
+  assert.ok(
+    (bannerCode.includes('function fbBus(x, bx, by, t, dir)') && (bannerCode.includes('fbBus(x, busX, 75, t, -1)') || bannerCode.includes('fbBus(x, busX, 85, t, -1)'))) ||
+      (bannerCode.includes("kind: 'bus'") && saigonArtCode.includes("v.kind === 'bus'")),
+    'Banner must render TP.HCM bus moving cleanly'
+  );
+  assert.ok(
+    (bannerCode.includes('function fbTaxi(x, bx, by, t, dir)') && (bannerCode.includes('fbTaxi(x, taxiX, 81, t, 1)') || bannerCode.includes('fbTaxi(x, taxiX, 94, t, 1)'))) ||
+      (bannerCode.includes("kind: 'car'") && saigonArtCode.includes("v.kind === 'car'")),
+    'Banner must render Saigon cars moving cleanly'
+  );
+  assert.ok(
+    bannerCode.includes('fbRider(x, motoX, 76, t, false, -1, true)') ||
+      bannerCode.includes('fbRider(x, motoX, 86, t, false, -1, true)') ||
+      (bannerCode.includes("kind: 'moto'") && saigonArtCode.includes("v.kind === 'moto'")),
+    'Banner must render Vietnamese motorbikes moving cleanly'
+  );
 
   // 4. Khôi phục khung Banner Neo-Brutalist tối giản nhẹ nhàng đồng bộ các tab khác
   assert.ok(bannerCode.includes('borderRadius: 22') && !bannerCode.includes('bevelOuter') && !bannerCode.includes('rivetTL'), 'EntertainmentBannerWebView must use clean minimalist neo-brutalist frame');
@@ -6519,9 +6539,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       profileBannerCode.includes('worldWidth: 420') &&
       profileBannerCode.includes('worldHeight: 160') &&
       profileBannerCode.includes('drawProfileWorldWings') &&
-      (funBannerCode.includes('worldWidth: 540') || funBannerCode.includes('worldWidth: 460')) &&
-      (funBannerCode.includes('worldHeight: 112') || funBannerCode.includes('worldHeight: 168')) &&
-      (funBannerCode.includes('buildSeamlessPanorama') || funBannerCode.includes('drawFunWorldWings')) &&
+      (funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540') || funBannerCode.includes('worldWidth: 460')) &&
+      (funBannerCode.includes('worldHeight: 128') || funBannerCode.includes('worldHeight: 112') || funBannerCode.includes('worldHeight: 168')) &&
+      (funBannerCode.includes('buildSaigonPanoramaArtScript') || funBannerCode.includes('buildSeamlessPanorama') || funBannerCode.includes('drawFunWorldWings')) &&
       streetBannerCode.includes('worldWidth: 584') &&
       (streetBannerCode.includes('worldHeight: 160') || streetBannerCode.includes('worldHeight: 172')) &&
       streetBannerCode.includes('drawLowerVietnamSquare') &&
@@ -6543,15 +6563,15 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
 
   assert.ok(
-    funBannerCode.includes('worldWidth: 540') &&
-      funBannerCode.includes('worldHeight: 112') &&
-      funBannerCode.includes('buildSeamlessPanorama') &&
-      funBannerCode.includes('getTimePalette') &&
+    (funBannerCode.includes('worldWidth: 1160') || funBannerCode.includes('worldWidth: 540')) &&
+      (funBannerCode.includes('worldHeight: 128') || funBannerCode.includes('worldHeight: 112')) &&
+      (funBannerCode.includes('buildSaigonPanoramaArtScript') || funBannerCode.includes('buildSeamlessPanorama')) &&
+      (funBannerCode.includes('fbTimePalette') || funBannerCode.includes('getTimePalette')) &&
       !funBannerCode.includes('drawFunWorldWings') &&
       hubCode.includes('paddingBottom: 120') &&
       decisionsCode.includes('202') &&
       chatDocCode.includes('202'),
-    'EntertainmentBannerWebView must use unified single-canvas 540x112 seamless panorama with 3-time-of-day palette and PixelHubDashboard must prevent bottom bar overlap'
+    'EntertainmentBannerWebView must use unified single-canvas seamless panorama with 3-time-of-day palette and PixelHubDashboard must prevent bottom bar overlap'
   );
 
   console.log('✅ Test 139 Passed: Panorama 16-Bit Việt Nam Liền Mạch 100% (540×112) & Chống Che Bottom Bar (Quyết định 202) Audit verified cleanly');
@@ -6612,12 +6632,19 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'pixelOpenRoomEngine, EntertainmentBannerWebView, and CafeChatBannerWebView must implement fastDash 300ms portal transition'
   );
 
+  const saigonHubArtCode = fs.existsSync('src/components/chat/hub/saigonPanoramaArt.ts')
+    ? fs.readFileSync('src/components/chat/hub/saigonPanoramaArt.ts', 'utf8')
+    : '';
+  const funAllCode = funCode + saigonHubArtCode;
   assert.ok(
-    funCode.includes('TIỆM CAFE TÁI HIỆN 1:1 THEO ẢNH 6') &&
-      funCode.includes('Cột đèn đường cổ điển') &&
-      funCode.includes('Bảng phấn menu chữ A') &&
-      funCode.includes('Cây tùng xoắn ốc pastel'),
-    'EntertainmentBannerWebView must render 1:1 Cafe exterior with striped awning, reflective glass, outdoor table, arched window, swirl pine tree, and direction lamp'
+    (funAllCode.includes('TIỆM CAFE TÁI HIỆN 1:1 THEO ẢNH 6') &&
+      funAllCode.includes('Cột đèn đường cổ điển') &&
+      funAllCode.includes('Bảng phấn menu chữ A') &&
+      funAllCode.includes('Cây tùng xoắn ốc pastel')) ||
+      (funAllCode.includes('TIỆM CÀ PHÊ SÀI GÒN') &&
+        funAllCode.includes('Mái hiên sọc đỏ - kem') &&
+        funAllCode.includes('Trụ đèn cổ điển')),
+    'EntertainmentBannerWebView must render Cafe exterior with striped awning, reflective glass, and street lamps'
   );
 
   const cafeArtCode = fs.readFileSync('src/components/chat/cafe/cafeInteriorArt.ts', 'utf8');
@@ -7308,4 +7335,63 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 157 Passed: Thay Nhà Sàn Bến Sông Bằng Ngôi Chùa Cổ Kính & Không Gian 2 Tầng Chánh Điện + Sân Chùa (640×560 — Quyết định 220) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 157 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (157/157)!');
+// =========================================================================
+// TEST 158: ĐẠI LỘ SÀI GÒN & BẾN BẠCH ĐẰNG PANORAMA 1160×128 / 224×108 (QĐ 221)
+// =========================================================================
+{
+  const funCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const artPath = 'src/components/chat/hub/saigonPanoramaArt.ts';
+  assert.ok(fs.existsSync(artPath), 'saigonPanoramaArt.ts must exist');
+  const artCode = fs.readFileSync(artPath, 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    funCode.includes('worldWidth: 1160') &&
+      funCode.includes('worldHeight: 128') &&
+      funCode.includes('viewWidth: 224') &&
+      funCode.includes('viewHeight: 108') &&
+      funCode.includes('buildSaigonPanoramaArtScript') &&
+      funCode.includes("id: 'pho_old_quarter'") &&
+      funCode.includes("id: 'saigon_cafe'") &&
+      funCode.includes("id: 'adidas_store'") &&
+      funCode.includes("id: 'notre_dame_gate'") &&
+      funCode.includes("id: 'ben_thanh_notre'") &&
+      funCode.includes("id: 'thong_nhat_stadium'") &&
+      funCode.includes("id: 'pagoda_gate'") &&
+      funCode.includes("id: 'bach_dang_wharf'") &&
+      funCode.includes("kind: 'police'") &&
+      funCode.includes("kind: 'container'") &&
+      funCode.includes("kind: 'bus'") &&
+      funCode.includes("kind: 'cruise'") &&
+      artCode.includes('drawFarSkyline') &&
+      artCode.includes('BITEXCO') &&
+      artCode.includes('LANDMARK 81') &&
+      artCode.includes('ADIDAS') &&
+      artCode.includes('THỐNG NHẤT') &&
+      artCode.includes('drawTrafficPolice') &&
+      artCode.includes('drawBachDangRiverStatic') &&
+      artCode.includes('CẦU BA SON') &&
+      artCode.includes('CẦU ĐI BỘ') &&
+      artCode.includes('drawRiverBoat') &&
+      decisionsCode.includes('221') &&
+      chatDocCode.includes('Quyết định 221') &&
+      specCode.includes('1160 × 128') &&
+      specCode.includes('QĐ 221'),
+    'Saigon Boulevard & Bach Dang Panorama 1160x128 (QD 221) with far Bitexco/Landmark 81, 7 landmarks, 6 vehicle types + traffic police, Bach Dang river bridges/boats, and docs must be synced'
+  );
+
+  const mArt = artCode.match(/return `([\s\S]*)`;\s*\}/);
+  assert.ok(mArt && mArt[1], 'Must extract saigonPanoramaArt script');
+  const mFun = funCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
+  assert.ok(mFun && mFun[1], 'Must find inline EntertainmentBannerWebView script');
+  const assembledFunJs = mFun[1]
+    .replace('${artScript}', mArt[1].replace(/\\`/g, '`'))
+    .replace('${openRoomScript}', '');
+  new Function(assembledFunJs);
+
+  console.log('✅ Test 158 Passed: Đại Lộ Sài Gòn & Bến Bạch Đằng Panorama (1160×128 / 224×108, 7 Công Trình, 6 Loại Xe + CSGT & Sông Bạch Đằng — Quyết định 221) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 158 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (158/158)!');
