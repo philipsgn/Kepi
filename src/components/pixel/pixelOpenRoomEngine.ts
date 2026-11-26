@@ -234,6 +234,16 @@ export function buildOpenRoomEngineScript(config: OpenRoomConfig): string {
 
     window.__openRoom = {
       state: state,
+      resize: function(nextVw, nextVh) {
+        if (typeof nextVw === 'number' && nextVw > 0) cfg.viewWidth = nextVw;
+        if (typeof nextVh === 'number' && nextVh > 0) cfg.viewHeight = nextVh;
+        maxCamX = Math.max(0, cfg.worldWidth - cfg.viewWidth);
+        maxCamY = Math.max(0, cfg.worldHeight - cfg.viewHeight);
+        state.camX = clamp(state.camX, 0, maxCamX);
+        state.camY = clamp(state.camY, 0, maxCamY);
+        state.targetCamX = clamp(state.targetCamX, 0, maxCamX);
+        state.targetCamY = clamp(state.targetCamY, 0, maxCamY);
+      },
       setHotspots: function(nextHotspots) {
         if (Array.isArray(nextHotspots)) cfg.hotspots = nextHotspots;
       },

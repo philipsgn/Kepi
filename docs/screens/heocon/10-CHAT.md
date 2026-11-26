@@ -405,3 +405,10 @@ Màn hình Tab 3 hiển thị:
   2. `y: 56..148`: 4 phân khu sạp hàng 3D chi tiết từng vật phẩm (cửa sắt xếp mắt cáo `drawAccordionGate` + hậu cảnh sạp Áo dài, hũ mứt nắp đỏ & hộp trà `LIÊN SÀI GÒN`, cổng vòm 3D `KHU ĂN UỐNG` + nồi nước lèo có bếp lửa + dừa tươi `Sạp 1044`, nồi hơi vải trắng `Bánh Cuốn 50K` & mặt bàn đá mài terrazzo + 12 chén `Bánh Bèo 20K` + chùm nem chua lá chuối).
   3. `y: 148..196`: Hành lang đi dạo chính, ghế đẩu inox có kiềng & thực khách `14×22`.
   4. `y: 196..280`: **4 Đảo Giữa Chợ Y-Sorted (`drawForegroundIslands`)** ở nửa dưới sàn (Đảo Lưu Niệm Nón Lá, Đảo Trái Cây `1029 Ngọc Hảo`, 2 Đảo Bàn Ăn Khu Ẩm Thực đầy món ăn & thực khách) để chú heo đi vòng quanh.
+
+## 32. Chợ Bến Thành Toàn Màn Hình RPG (`1024×360`), 2 Cổng Trước/Sau & Tấp Nập Du Khách (Quyết định 211)
+- **Fullscreen 100% không viền/không card (`BenThanhMarketView.tsx` & `ChatView.tsx`):** Bỏ hoàn toàn Header, nút `"Ra phố"` và thanh chip 4 khu ở đáy; canvas tràn 100% mép màn hình với duy nhất 1 nút tròn `[←]` bán trong suốt góc trên trái.
+- **Dynamic 1:1 Square Pixel Engine (`pixelOpenRoomEngine.ts`):** Bổ sung `window.__openRoom.resize(vw, vh)` tự tính `VW, VH` theo kích thước màn hình thực tế để pixel luôn vuông 1:1 trên mọi điện thoại.
+- **Đại Thế Giới `1024 × 360` & 2 Cổng Ra (`BenThanhMarketBannerWebView.tsx`):**
+  - **Cổng Trước (`exit_market`, `Cửa Số 1` bên trái)** và **Cổng Sau (`exit_back_gate`, `Cửa Bắc` bên phải)** đều bật `fastDash: true` để bước ra ngoài phố.
+  - **6 phân khu trên** (Cửa Số 1 ➔ Quần Áo `HƯƠNG TRINH` ➔ Đặc Sản `LIÊN SÀI GÒN & NGỌC HOA` ➔ Vòm `KHU ĂN UỐNG` Sạp 1044 ➔ `BÁNH CUỐN 50K & BÁNH BÈO 20K` ➔ `CỬA BẮC`) + **5 Đảo Giữa Chợ Y-Sorted** (Lưu Niệm, Trái Cây `1029`, 2 Đảo Bàn Ăn, Đảo Hoa Tươi & Gốm) + **20+ nhân vật** gồm cả **khách du lịch nước ngoài** (tóc vàng/balo du lịch/kính râm/máy ảnh) và người Việt tấp nập ở 2 hành lang song song.

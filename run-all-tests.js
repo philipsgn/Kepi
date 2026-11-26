@@ -6659,11 +6659,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   );
 
   assert.ok(
-    (marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680') || marketBannerCode.includes('worldWidth: 576')) &&
-      (marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152') || marketBannerCode.includes('worldHeight: 144')) &&
+    (marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680') || marketBannerCode.includes('worldWidth: 576')) &&
+      (marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152') || marketBannerCode.includes('worldHeight: 144')) &&
       marketBannerCode.includes('exit_market') &&
       marketBannerCode.includes('fastDash: true') &&
-      (marketViewCode.includes('Sạp Liên Sài Gòn') || marketViewCode.includes('Sạp Vải & Nón Lá')) &&
+      (marketViewCode.includes('fullscreenContainer') || marketViewCode.includes('Sạp Liên Sài Gòn') || marketViewCode.includes('Sạp Vải & Nón Lá')) &&
       decisionsCode.includes('205') &&
       chatDocCode.includes('576 × 144'),
     'BenThanhMarketBannerWebView & BenThanhMarketView must implement market interior with fastDash exit and sync docs for QD 205'
@@ -6758,8 +6758,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const marketViewCode = fs.readFileSync('src/components/chat/BenThanhMarketView.tsx', 'utf8');
 
   assert.ok(
-    (marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680')) &&
-      (marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152')) &&
+    (marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680')) &&
+      (marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152')) &&
       marketBannerCode.includes('initialCamX: 0') &&
       marketBannerCode.includes('WELCOME BEN THANH') &&
       marketBannerCode.includes('LIEN SAI GON') &&
@@ -6769,18 +6769,15 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       marketBannerCode.includes('BANH BEO 20K') &&
       marketBannerCode.includes('drawInoxStool') &&
       marketBannerCode.includes('pxText'),
-    'BenThanhMarketBannerWebView must implement 680x152 4-zone interior matching 7 reference photos with pxText signage and inox stools'
+    'BenThanhMarketBannerWebView must implement 4+ zone interior matching reference photos with pxText signage and inox stools'
   );
 
   assert.ok(
-    marketViewCode.includes('Cửa Số 1') &&
-      marketViewCode.includes('Sạp Liên Sài Gòn') &&
-      marketViewCode.includes('Khu Ăn Uống') &&
-      marketViewCode.includes('Bánh Cuốn & Bánh Bèo') &&
+    (marketViewCode.includes('fullscreenContainer') || marketViewCode.includes('Cửa Số 1')) &&
       decisionsCode.includes('208') &&
       chatDocCode.includes('680×152') &&
-      (specCode.includes('720 × 280') || specCode.includes('680 × 176') || specCode.includes('680 × 152')),
-    'BenThanhMarketView and docs must sync 4 real market zones and expanded dimensions for QD 208'
+      (specCode.includes('1024 × 360') || specCode.includes('720 × 280') || specCode.includes('680 × 176') || specCode.includes('680 × 152')),
+    'BenThanhMarketView and docs must sync real market zones and expanded dimensions for QD 208'
   );
 
   console.log('✅ Test 145 Passed: Tái Thiết Kế Lòng Chợ Bến Thành 680×152 Bám Sát 7 Ảnh Thực Tế (Quyết định 208) Audit verified cleanly');
@@ -6799,8 +6796,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(
     !marketBannerCode.includes('R(x-sp') &&
       (marketBannerCode.includes('R(x,fx-sp,67') || marketBannerCode.includes('R(x,fx-sp,57')) &&
-      (marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176')) &&
-      (marketBannerCode.includes('viewHeight: 240') || marketBannerCode.includes('viewHeight: 136')) &&
+      (marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176')) &&
+      (marketBannerCode.includes('viewHeight: 280') || marketBannerCode.includes('viewHeight: 240') || marketBannerCode.includes('viewHeight: 136')) &&
       marketBannerCode.includes('drawWalkingShoppers') &&
       !marketBannerCode.includes('toastRow'),
     'BenThanhMarketBannerWebView must fix R(x-sp) crash bug, extend world, add walking shoppers, and remove toastRow'
@@ -6809,11 +6806,11 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(
     !marketViewCode.includes('zoneCard') &&
       !marketViewCode.includes('statsCard') &&
-      marketViewCode.includes('immersiveBody') &&
+      (marketViewCode.includes('fullscreenContainer') || marketViewCode.includes('immersiveBody')) &&
       decisionsCode.includes('209') &&
       chatDocCode.includes('680×176') &&
-      (specCode.includes('720 × 280') || specCode.includes('680 × 176')),
-    'BenThanhMarketView must remove text/stats cards for full-focus immersive canvas + 1 bottom chip row and sync docs for QD 209'
+      (specCode.includes('1024 × 360') || specCode.includes('720 × 280') || specCode.includes('680 × 176')),
+    'BenThanhMarketView must remove text/stats cards for fullscreen immersive canvas and sync docs for QD 209'
   );
 
   // Verify inline JS syntax cleanly via Function constructor
@@ -6835,11 +6832,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
 
   assert.ok(
-    marketBannerCode.includes('worldWidth: 720') &&
-      marketBannerCode.includes('worldHeight: 280') &&
-      marketBannerCode.includes('viewWidth: 208') &&
-      marketBannerCode.includes('viewHeight: 240') &&
-      marketBannerCode.includes('aspectRatio: 208 / 240') &&
+    (marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720')) &&
+      (marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280')) &&
       marketBannerCode.includes('drawPerson16Bit') &&
       marketBannerCode.includes('drawAccordionGate') &&
       marketBannerCode.includes('drawRattanLamp') &&
@@ -6847,11 +6841,50 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       marketBannerCode.includes('ISLAND_Y') &&
       decisionsCode.includes('210') &&
       chatDocCode.includes('720×280') &&
-      specCode.includes('720 × 280'),
-    'BenThanhMarketBannerWebView must implement 720x280 4-layer 2.5D depth with 208x240 1:1 square pixels, 14x22 detailed sprites, foreground islands, and sync docs for QD 210'
+      (specCode.includes('1024 × 360') || specCode.includes('720 × 280')),
+    'BenThanhMarketBannerWebView must implement 4-layer 2.5D depth with 1:1 square pixels, 14x22 detailed sprites, foreground islands, and sync docs for QD 210'
   );
 
   console.log('✅ Test 147 Passed: Đại Tu Lòng Chợ Bến Thành 16-Bit 2.5D 4 Lớp & Pixel Vuông 1:1 (Quyết định 210) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 147 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (147/147)!');
+// ==========================================
+// TEST 148: CHỢ BẾN THÀNH TOÀN MÀN HÌNH RPG (1024×360), 2 CỔNG TRƯỚC/SAU & TẤP NẬP KHÁCH DU LỊCH (QUYẾT ĐỊNH 211)
+// ==========================================
+{
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const openRoomCode = fs.readFileSync('src/components/pixel/pixelOpenRoomEngine.ts', 'utf8');
+  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const marketViewCode = fs.readFileSync('src/components/chat/BenThanhMarketView.tsx', 'utf8');
+
+  assert.ok(
+    openRoomCode.includes('resize: function(nextVw, nextVh)') &&
+      marketBannerCode.includes('worldWidth: 1024') &&
+      marketBannerCode.includes('worldHeight: 360') &&
+      marketBannerCode.includes('applyResponsiveViewport') &&
+      marketBannerCode.includes('exit_market') &&
+      marketBannerCode.includes('exit_back_gate') &&
+      marketBannerCode.includes('CUA BAC') &&
+      marketBannerCode.includes('HUONG TRINH FASHION') &&
+      marketBannerCode.includes('HOA TUOI GOM SU') &&
+      marketBannerCode.includes('tourist:true'),
+    'BenThanhMarketBannerWebView must implement 1024x360 fullscreen RPG world with responsive 1:1 viewport, Front/Back exit gates, clothing/flower islands, and foreign tourists'
+  );
+
+  assert.ok(
+    marketViewCode.includes('fullscreenContainer') &&
+      marketViewCode.includes('floatingBackBtn') &&
+      !marketViewCode.includes('exitChip') &&
+      !marketViewCode.includes('chipsScroll') &&
+      decisionsCode.includes('211') &&
+      chatDocCode.includes('1024×360') &&
+      specCode.includes('1024 × 360'),
+    'BenThanhMarketView must be 100% edge-to-edge fullscreen without Ra phố button or bottom chips and sync docs for QD 211'
+  );
+
+  console.log('✅ Test 148 Passed: Chợ Bến Thành Toàn Màn Hình RPG (1024×360), 2 Cổng Trước/Sau & Tấp Nập Du Khách (Quyết định 211) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 148 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (148/148)!');

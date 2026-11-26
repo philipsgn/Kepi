@@ -476,7 +476,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
   if (activeSubView === 'market') {
     return (
-      <View style={[styles.container, { backgroundColor: screenBg, paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: '#3A2D25' }]}>
         <BenThanhMarketView onBack={() => setActiveSubView(marketReturnSubView)} />
       </View>
     );

@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ArrowLeft, DoorOpen, ShoppingBag, Sparkles, Utensils } from 'lucide-react-native';
+import React, { useMemo } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ArrowLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { useTheme } from '../../theme/ThemeContext';
 import { useTransactionStore } from '../../store/transactionStore';
 import { formatVND } from '../../utils/currency';
 import { BenThanhMarketBannerWebView } from './BenThanhMarketBannerWebView';
@@ -11,43 +11,15 @@ export interface BenThanhMarketViewProps {
   onBack: () => void;
 }
 
-const MARKET_ZONES = [
-  {
-    id: 0,
-    label: 'Cửa Số 1',
-    stallName: 'Cửa Số 1 · Welcome to Ben Thanh Market',
-    desc: 'Cổng sắt xếp kem xám, bảng đèn LED rực sáng, quầy đồng hồ WATCH và 2 chú bảo vệ thân thiện.',
-    kind: 'gate',
-  },
-  {
-    id: 1,
-    label: 'Sạp Liên Sài Gòn',
-    stallName: 'Sạp Liên Sài Gòn & Ngọc Hoa · Mái Vòm Vàng',
-    desc: 'Gian hàng trà, cà phê, bánh kẹo đặc sản dưới mái vòm bê tông vàng, giếng trời đỏ nâu và đèn mây tre đan.',
-    kind: 'shopping',
-  },
-  {
-    id: 2,
-    label: 'Khu Ăn Uống',
-    stallName: 'Cổng Vòm Khu Ăn Uống · Quầy Chữ L Sạp 1044',
-    desc: 'Cổng vòm cong chữ đỏ biểu tượng, quầy gạch trắng trưng bày dừa tươi và hàng ghế đẩu inox sáng bóng.',
-    kind: 'food',
-  },
-  {
-    id: 3,
-    label: 'Bánh Cuốn & Bánh Bèo',
-    stallName: 'Sạp Bánh Cuốn 50k · Bún Bò Huế · Bánh Bèo 20k',
-    desc: 'Nồi hơi tráng bánh cuốn bốc khói, mặt bàn đá mài vàng xếp đầy dĩa bánh bèo và nem chua lá chuối.',
-    kind: 'food',
-  },
-] as const;
-
+/**
+ * Màn Hình Chợ Bến Thành Toàn Màn Hình RPG (Quyết định 211)
+ * - 100% Fullscreen edge-to-edge không viền banner, không card chữ, không thanh chip đáy, không nút "Ra phố".
+ * - Đi ra tự nhiên bằng Cổng Trước (Cửa Số 1) hoặc Cổng Sau (Cửa Bắc) ngay trong lòng chợ.
+ * - Chỉ giữ 1 nút tròn nhỏ [←] bán trong suốt góc trên trái để thoát nhanh dự phòng.
+ */
 export const BenThanhMarketView: React.FC<BenThanhMarketViewProps> = ({ onBack }) => {
-  const { tokens, mode } = useTheme();
-  const isHeocon = mode === 'heocon' || !mode;
-  const screenBg = isHeocon ? '#F6EEDC' : tokens.bg || '#FFF5F7';
+  const insets = useSafeAreaInsets();
   const { transactions } = useTransactionStore();
-  const [selectedZone, setSelectedZone] = useState<number>(0);
 
   const marketStats = useMemo(() => {
     const confirmed = transactions.filter((t) => (t.status === 'CONFIRMED' || !t.status) && t.type !== 'INCOME');
@@ -74,186 +46,55 @@ export const BenThanhMarketView: React.FC<BenThanhMarketViewProps> = ({ onBack }
     };
   }, [transactions]);
 
-  const handleSelectZone = (idx: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedZone(idx);
-  };
-
   return (
-    <View style={[styles.container, { backgroundColor: screenBg }]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onBack();
-          }}
-          activeOpacity={0.8}
-          accessibilityLabel="Quay lại Quán quen"
-        >
-          <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
-        </TouchableOpacity>
+    <View style={styles.fullscreenContainer}>
+      <BenThanhMarketBannerWebView
+        active={true}
+        shoppingTotalText={marketStats.shoppingTotalText}
+        foodTotalText={marketStats.foodTotalText}
+        visitsCount={marketStats.visitsCount}
+        onExitToMap={onBack}
+      />
 
-        <Text style={styles.headerTitle}>Chợ Bến Thành</Text>
-
-        <TouchableOpacity
-          style={styles.exitChip}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onBack();
-          }}
-          activeOpacity={0.8}
-        >
-          <DoorOpen size={14} color="#2B2118" strokeWidth={2.2} />
-          <Text style={styles.exitChipText}>Ra phố</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.immersiveBody}>
-        <View style={styles.canvasArea}>
-          <BenThanhMarketBannerWebView
-            active={true}
-            shoppingTotalText={marketStats.shoppingTotalText}
-            foodTotalText={marketStats.foodTotalText}
-            visitsCount={marketStats.visitsCount}
-            selectedZone={selectedZone}
-            onExitToMap={onBack}
-            onSelectZoneFromCanvas={(z) => setSelectedZone(z)}
-          />
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.chipsScroll}
-          contentContainerStyle={styles.chipsRow}
-        >
-          {MARKET_ZONES.map((z) => {
-            const isActive = selectedZone === z.id;
-            const IconComp =
-              z.id === 0 ? DoorOpen : z.id === 1 ? ShoppingBag : z.id === 2 ? Utensils : Sparkles;
-            return (
-              <TouchableOpacity
-                key={z.id}
-                style={[styles.zoneChip, isActive && styles.zoneChipActive]}
-                onPress={() => handleSelectZone(z.id)}
-                activeOpacity={0.85}
-              >
-                <IconComp size={14} color={isActive ? '#2B2118' : '#6A5B4D'} strokeWidth={2.2} />
-                <Text style={[styles.zoneChipText, isActive && styles.zoneChipTextActive]}>{z.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
+      <TouchableOpacity
+        style={[styles.floatingBackBtn, { top: Math.max(insets.top, 10) + 6 }]}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onBack();
+        }}
+        activeOpacity={0.8}
+        accessibilityLabel="Quay lại"
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <ArrowLeft size={18} color="#2B2118" strokeWidth={2.8} />
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  fullscreenContainer: {
     flex: 1,
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#3A2D25',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 6,
-    paddingBottom: 10,
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    borderWidth: 2.5,
+  floatingBackBtn: {
+    position: 'absolute',
+    left: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
     borderColor: '#2B2118',
-    backgroundColor: '#FFFBF1',
+    backgroundColor: 'rgba(255, 251, 241, 0.82)',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#2B2118',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
+    shadowOpacity: 0.9,
     shadowRadius: 0,
-    elevation: 2,
-  },
-  headerTitle: {
-    flex: 1,
-    marginLeft: 12,
-    fontFamily: 'Baloo2_800ExtraBold',
-    fontWeight: '800',
-    fontSize: 22,
-    letterSpacing: 0.3,
-    color: '#2B2118',
-  },
-  exitChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-    borderRadius: 12,
-    borderWidth: 2.5,
-    borderColor: '#2B2118',
-    backgroundColor: '#FFE08A',
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
-  },
-  exitChipText: {
-    fontFamily: 'Nunito',
-    fontWeight: '800',
-    fontSize: 12,
-    color: '#2B2118',
-  },
-  immersiveBody: {
-    flex: 1,
-    paddingHorizontal: 14,
-    paddingBottom: 16,
-    gap: 12,
-  },
-  canvasArea: {
-    flex: 1,
-    width: '100%',
-  },
-  chipsScroll: {
-    flexGrow: 0,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 2,
-  },
-  zoneChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 14,
-    borderWidth: 2.5,
-    borderColor: '#2B2118',
-    backgroundColor: '#FFFBF1',
-  },
-  zoneChipActive: {
-    backgroundColor: '#FFE08A',
-    shadowColor: '#2B2118',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
-  },
-  zoneChipText: {
-    fontFamily: 'Nunito',
-    fontWeight: '700',
-    fontSize: 12,
-    color: '#6A5B4D',
-  },
-  zoneChipTextActive: {
-    color: '#2B2118',
-    fontWeight: '800',
+    elevation: 4,
+    zIndex: 20,
   },
 });
