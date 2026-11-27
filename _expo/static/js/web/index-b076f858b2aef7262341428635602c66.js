@@ -888,8 +888,9 @@ function createPhoTpsWorld() {
 
   return {
     t: 0,
-    doorOpen: 0.0,       // Cửa gỗ lá sách kính mờ luôn khép kín đẹp mắt (chuẩn RPG AAA — QĐ 238!)
-    doorTarget: 0.0,
+    leftDoorOpen: 0.0,   // Cánh trái luôn đóng kín cổ điển
+    rightDoorOpen: 0.0,  // Cánh phải hé mở nhỏ (~35°) khi khách NPC ra/vào hoặc Heo ra cửa (QĐ 239!)
+    rightDoorTarget: 0.0,
     exiting: false,
     exitFade: 0,
     pig: {
@@ -941,14 +942,24 @@ function clampPigWorldPos(w, nx, nz) {
 function stepPhoTpsWorld(w, dt) {
   w.t += dt;
 
-  // Hiệu ứng mở hé cửa & chuyển cảnh mượt Fade-Out khi chú Heo bấm Ra lại Đại Lộ Sài Gòn (QĐ 238)
-  if (w.exiting) {
-    w.doorTarget = 0.55;
-    w.exitFade = Math.min(1, w.exitFade + dt * 4.2);
-  } else {
-    w.doorTarget = 0.0;
+  // Chỉ hé mở duy nhất 1 cánh cửa phải (~35°) khi có khách NPC ra/vào sát cửa hoặc khi Heo ra cửa -> không xuyên gỗ! (QĐ 239)
+  var npcNearDoor = false;
+  for (var nci = 0; nci < w.customers.length; nci++) {
+    var ncu = w.customers[nci];
+    if (ncu.state !== 'DOOR_WAIT' && ncu.z < 1.65 && Math.abs(ncu.x - 0.55) < 1.35) {
+      npcNearDoor = true;
+      break;
+    }
   }
-  w.doorOpen += (w.doorTarget - w.doorOpen) * Math.min(1, dt * 6.5);
+  if (w.exiting) {
+    w.rightDoorTarget = 0.72;
+    w.exitFade = Math.min(1, w.exitFade + dt * 4.2);
+  } else if (npcNearDoor) {
+    w.rightDoorTarget = 0.62; // ~35 độ vừa đủ 1 người lách qua & hắt 1 luồng ánh sáng rực vào sàn!
+  } else {
+    w.rightDoorTarget = 0.0;
+  }
+  w.rightDoorOpen += (w.rightDoorTarget - w.rightDoorOpen) * Math.min(1, dt * 6.5);
 
   // Di chuyển Chú Heo Mascot
   var p = w.pig;
@@ -1002,7 +1013,7 @@ function stepPhoTpsWorld(w, dt) {
         if (freeSeat) {
           freeSeat.seat.occupant = c.id;
           c.tableId = freeSeat.tId; c.seatIdx = freeSeat.sId;
-          c.x = 0; c.z = 0.5;
+          c.x = 0.55; c.z = 0.28; // Lách đúng qua khe cánh cửa phải đang hé mở!
           c.state = 'WALK_TO_SEAT';
         } else c.timer = 3;
       }
@@ -1019,7 +1030,7 @@ function stepPhoTpsWorld(w, dt) {
         c.seated = false; c.state = 'LEAVE_TO_DOOR';
       }
     } else if (c.state === 'LEAVE_TO_DOOR') {
-      if (moveTowards2D(c, 0, 0.45, 2.3, dt)) {
+      if (moveTowards2D(c, 0.55, 0.28, 2.3, dt)) {
         c.state = 'DOOR_WAIT';
         c.timer = 4.5 + Math.random() * 5;
       }
@@ -1272,12 +1283,36 @@ function renderPhoTps3D(ctx, cam, w) {
     ctx.fillText('KÍNH CHÀO QUÝ KHÁCH', byeP.sx, byeP.sy + 3);
     ctx.restore();
   }
-  // Nền sáng ấm nhẹ phía sau cửa khi cửa hé mở trong lúc Fade-Out chuyển cảnh (không còn tranh phẳng giả!)
-  drawPoly3D(ctx, cam, [[-1.45,0,-0.04],[1.45,0,-0.04],[1.45,2.55,-0.04],[-1.45,2.55,-0.04]], '#FFF7DC', null, 0);
+  // Luồng ánh sáng ngược sáng trắng-vàng rực rỡ phía sau khe cửa (chỉ thấy luồng sáng, không lộ toàn cảnh ngoài — QĐ 239!)
+  drawPoly3D(ctx, cam, [[-1.45,0,-0.04],[1.45,0,-0.04],[1.45,2.55,-0.04],[-1.45,2.55,-0.04]], '#FFFDF0', null, 0);
+  drawPoly3D(ctx, cam, [[0.0,0,-0.03],[1.45,0,-0.03],[1.45,2.55,-0.03],[0.0,2.55,-0.03]], '#FFFFFF', null, 0);
   // Thảm chùi chân nâu đỏ & 2 Vệt nắng chiều xiên ấm áp đổ qua kính mờ xuống nền gạch bông!
   drawPoly3D(ctx, cam, [[-1.15,0.015,0.12],[1.15,0.015,0.12],[1.15,0.015,0.88],[-1.15,0.015,0.88]], '#8B3A2B', '#4A2C1A', 1.2);
   drawPoly3D(ctx, cam, [[-1.1,0.02,0.92],[-0.15,0.02,0.92],[-0.35,0.02,2.25],[-1.3,0.02,2.25]], 'rgba(255,232,168,0.28)', null, 0);
   drawPoly3D(ctx, cam, [[0.15,0.02,0.92],[1.1,0.02,0.92],[0.9,0.02,2.25],[-0.05,0.02,2.25]], 'rgba(255,232,168,0.28)', null, 0);
+  // Dải tia nắng mặt trời động bùng sáng hắt qua khe cánh cửa phải khi khách hé cửa đi ra/vào!
+  if (w.rightDoorOpen > 0.04) {
+    var sl = w.rightDoorOpen;
+    var beamAlpha = Math.min(0.58, 0.16 + sl * 0.52).toFixed(2);
+    var beamFarZ = 1.6 + sl * 2.4;
+    drawPoly3D(ctx, cam, [
+      [0.02, 0.025, 0.05],
+      [0.05 + sl * 1.15, 0.025, 0.05],
+      [-0.35 + sl * 1.35, 0.025, beamFarZ],
+      [-0.45, 0.025, beamFarZ]
+    ], 'rgba(255, 250, 224, ' + beamAlpha + ')', null, 0);
+    // Quầng sáng ngược sáng (bloom) ngay khe cửa hé mở
+    var slitP = projectPoint3D(cam, 0.45, 1.35, 0.12);
+    if (slitP && slitP.cz > 0.4) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(0.45, sl * 0.55);
+      ctx.fillStyle = '#FFFCE8';
+      ctx.beginPath();
+      ctx.ellipse(slitP.sx, slitP.sy, Math.max(10, slitP.scale * 0.42 * sl), Math.max(24, slitP.scale * 1.05), 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
 
   // 5. THU THẬP VẬT THỂ 3D ĐỂ Z-SORT (PAINTER'S ALGORITHM)
   var drawList = [];
@@ -1296,38 +1331,36 @@ function renderPhoTps3D(ctx, cam, w) {
     drawBox3D(ctx, cam, 1.95, 0.52, 0.45, 0.62, 0.55, 0.62, { top: '#4CAF50', front: '#2E7D32', side: '#1B5E20' });
   });
 
-  // 2 Cánh cửa gỗ lim lá sách có ô kính mờ sương chia ô cổ điển & tay nắm đồng vàng (khép kín chuẩn RPG AAA!)
-  var doorAng = w.doorOpen * 1.1;
+  // 2 Cánh cửa gỗ lim lá sách có ô kính mờ sương: Cánh trái luôn đóng kín, chỉ Cánh phải hé ~35° khi khách ra/vào! (QĐ 239)
+  var leftAng = w.leftDoorOpen * 1.0;
+  var rightAng = w.rightDoorOpen * 0.98;
   pushItem(-0.75, 0.08, function() {
-    var lx = -1.45 + Math.cos(doorAng) * 1.43;
-    var lz = Math.sin(doorAng) * 1.43;
+    var lx = -1.45 + Math.cos(leftAng) * 1.43;
+    var lz = Math.sin(leftAng) * 1.43;
     drawPoly3D(ctx, cam, [[-1.45,0,0],[lx,0,lz],[lx,2.54,lz],[-1.45,2.54,0]], '#5C341D', '#2B180E', 1.4);
-    // Ô kính mờ sương ấm áp có nan gỗ chia ô cổ điển phía trên
-    var gx0 = -1.30, gx1 = lx - Math.cos(doorAng) * 0.14;
-    var gz0 = 0.02, gz1 = lz - Math.sin(doorAng) * 0.14;
+    var gx0 = -1.30, gx1 = lx - Math.cos(leftAng) * 0.14;
+    var gz0 = 0.02, gz1 = lz - Math.sin(leftAng) * 0.14;
     drawPoly3D(ctx, cam, [[gx0,1.02,gz0],[gx1,1.02,gz1],[gx1,2.34,gz1],[gx0,2.34,gz0]], '#F7E7C4', '#3B2314', 1.2);
-    // Nan chia ô kính ngang & dọc
     drawPoly3D(ctx, cam, [[gx0,1.65,gz0+0.01],[gx1,1.65,gz1+0.01],[gx1,1.71,gz1+0.01],[gx0,1.71,gz0+0.01]], '#4A2C1A', null, 0);
-    // Các nan lá sách gỗ ngang phần dưới cửa
     for (var ly = 0.22; ly <= 0.82; ly += 0.2) {
       drawPoly3D(ctx, cam, [[gx0,ly,gz0+0.01],[gx1,ly,gz1+0.01],[gx1,ly+0.06,gz1+0.01],[gx0,ly+0.06,gz0+0.01]], '#3B2314', null, 0);
     }
-    var hx1 = -1.45 + Math.cos(doorAng) * 1.26, hz1 = Math.sin(doorAng) * 1.26;
+    var hx1 = -1.45 + Math.cos(leftAng) * 1.26, hz1 = Math.sin(leftAng) * 1.26;
     var hp1 = projectPoint3D(cam, hx1, 1.15, hz1 + 0.04);
     if (hp1 && hp1.cz > 0.35) { ctx.fillStyle = '#F4B93B'; ctx.fillRect(Math.round(hp1.sx - 2), Math.round(hp1.sy - 6), 4, 12); }
   });
   pushItem(0.75, 0.08, function() {
-    var rx = 1.45 - Math.cos(doorAng) * 1.43;
-    var rz = Math.sin(doorAng) * 1.43;
+    var rx = 1.45 - Math.cos(rightAng) * 1.43;
+    var rz = Math.sin(rightAng) * 1.43;
     drawPoly3D(ctx, cam, [[1.45,0,0],[rx,0,rz],[rx,2.54,rz],[1.45,2.54,0]], '#5C341D', '#2B180E', 1.4);
-    var gx0 = 1.30, gx1 = rx + Math.cos(doorAng) * 0.14;
-    var gz0 = 0.02, gz1 = rz - Math.sin(doorAng) * 0.14;
+    var gx0 = 1.30, gx1 = rx + Math.cos(rightAng) * 0.14;
+    var gz0 = 0.02, gz1 = rz - Math.sin(rightAng) * 0.14;
     drawPoly3D(ctx, cam, [[gx0,1.02,gz0],[gx1,1.02,gz1],[gx1,2.34,gz1],[gx0,2.34,gz0]], '#F7E7C4', '#3B2314', 1.2);
     drawPoly3D(ctx, cam, [[gx0,1.65,gz0+0.01],[gx1,1.65,gz1+0.01],[gx1,1.71,gz1+0.01],[gx0,1.71,gz0+0.01]], '#4A2C1A', null, 0);
     for (var ly2 = 0.22; ly2 <= 0.82; ly2 += 0.2) {
       drawPoly3D(ctx, cam, [[gx0,ly2,gz0+0.01],[gx1,ly2,gz1+0.01],[gx1,ly2+0.06,gz1+0.01],[gx0,ly2+0.06,gz0+0.01]], '#3B2314', null, 0);
     }
-    var hx2 = 1.45 - Math.cos(doorAng) * 1.26, hz2 = Math.sin(doorAng) * 1.26;
+    var hx2 = 1.45 - Math.cos(rightAng) * 1.26, hz2 = Math.sin(rightAng) * 1.26;
     var hp2 = projectPoint3D(cam, hx2, 1.15, hz2 + 0.04);
     if (hp2 && hp2.cz > 0.35) { ctx.fillStyle = '#F4B93B'; ctx.fillRect(Math.round(hp2.sx - 2), Math.round(hp2.sy - 6), 4, 12); }
   });
