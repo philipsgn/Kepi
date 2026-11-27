@@ -182,31 +182,242 @@ function drawBox3D(ctx, cam, cx, y0, cz, w, h, d, cols) {
   }
 }
 
-function drawLanternGlow3D(ctx, cam, wx, wy, wz, lanternCol, glowCol, radius) {
+function drawLanternGlow3D(ctx, cam, wx, wy, wz, lanternCol, glowCol, radius, topY) {
   var pr = projectPoint3D(cam, wx, wy, wz);
   if (!pr || pr.cz > 24) return;
-  var r = Math.max(3, Math.min(26, pr.scale * (radius || 0.2)));
-  // Quầng sáng vàng ấm tỏa ra quanh đèn lồng cổ truyền
+  var r = Math.max(3, Math.min(22, pr.scale * (radius || 0.18)));
+  var lw = Math.max(4, Math.round(r * 1.15));
+  var lh = Math.max(5, Math.round(r * 1.42));
   ctx.save();
-  ctx.globalAlpha = 0.24;
+  // Dây treo đen nối thẳng lên xà gỗ/trần nhà (không bao giờ bay lơ lửng!)
+  var topPr = projectPoint3D(cam, wx, topY || 3.85, wz);
+  if (topPr) {
+    ctx.strokeStyle = '#2B180E';
+    ctx.lineWidth = Math.max(1, Math.min(2, r * 0.12));
+    ctx.beginPath();
+    ctx.moveTo(Math.round(topPr.sx), Math.round(topPr.sy));
+    ctx.lineTo(Math.round(pr.sx), Math.round(pr.sy - lh * 0.5));
+    ctx.stroke();
+  }
+  // Quầng sáng vàng ấm tỏa ra quanh đèn lồng cổ truyền
+  ctx.globalAlpha = 0.22;
   ctx.fillStyle = glowCol || '#FFE49E';
   ctx.beginPath();
-  ctx.arc(pr.sx, pr.sy, r * 2.3, 0, Math.PI * 2);
+  ctx.arc(pr.sx, pr.sy, r * 2.1, 0, Math.PI * 2);
   ctx.fill();
   ctx.globalAlpha = 0.96;
-  // Thân đèn lồng pixel sắc nét có chóp gỗ & tua rua đỏ
-  var lw = Math.max(4, Math.round(r * 1.15));
-  var lh = Math.max(5, Math.round(r * 1.45));
+  // Thân đèn lồng bo tròn cổ điển có khung nan gỗ & tua rua đỏ
   ctx.fillStyle = '#2B2118';
-  ctx.fillRect(Math.round(pr.sx - lw * 0.5 - 1), Math.round(pr.sy - lh * 0.5 - 1), lw + 2, lh + 2);
+  ctx.beginPath();
+  ctx.ellipse(pr.sx, pr.sy, lw * 0.58, lh * 0.55, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = lanternCol || '#FFF3C4';
-  ctx.fillRect(Math.round(pr.sx - lw * 0.5), Math.round(pr.sy - lh * 0.5), lw, lh);
+  ctx.beginPath();
+  ctx.ellipse(pr.sx, pr.sy, lw * 0.48, lh * 0.46, 0, 0, Math.PI * 2);
+  ctx.fill();
   // Nắp gỗ trên dưới & tua rua đỏ
   ctx.fillStyle = '#4A2C1A';
-  ctx.fillRect(Math.round(pr.sx - lw * 0.45), Math.round(pr.sy - lh * 0.5 - 2), Math.max(2, Math.round(lw * 0.9)), 2);
-  ctx.fillRect(Math.round(pr.sx - lw * 0.45), Math.round(pr.sy + lh * 0.5), Math.max(2, Math.round(lw * 0.9)), 2);
+  ctx.fillRect(Math.round(pr.sx - lw * 0.32), Math.round(pr.sy - lh * 0.56), Math.max(2, Math.round(lw * 0.64)), 2);
+  ctx.fillRect(Math.round(pr.sx - lw * 0.32), Math.round(pr.sy + lh * 0.48), Math.max(2, Math.round(lw * 0.64)), 2);
   ctx.fillStyle = '#DC2626';
-  ctx.fillRect(Math.round(pr.sx - 1), Math.round(pr.sy + lh * 0.5 + 2), 2, Math.max(2, Math.round(r * 0.45)));
+  ctx.fillRect(Math.round(pr.sx - 1), Math.round(pr.sy + lh * 0.52), 2, Math.max(2, Math.round(r * 0.45)));
+  ctx.restore();
+}
+
+/* ==================== 2B. BỘ SPRITE PIXEL ART XOONG NỒI, NGUYÊN LIỆU & MÓN PHỞ TẢ THỰC (QĐ 234) ==================== */
+function drawPhoPotSprite3D(ctx, cam, wx, wy, wz, t, phase) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 22) return;
+  var u = Math.max(0.45, Math.min(3.4, pr.scale / 36));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  ctx.save();
+  // Bóng đáy nồi trên mặt bếp
+  ctx.fillStyle = 'rgba(30,41,59,0.28)';
+  ctx.beginPath(); ctx.ellipse(px, py + 1 * u, 13 * u, 4 * u, 0, 0, Math.PI * 2); ctx.fill();
+  // 2 Quai nồi inox cong 2 bên
+  ctx.strokeStyle = '#334155'; ctx.lineWidth = Math.max(1.5, 2 * u);
+  ctx.beginPath(); ctx.arc(px - 11.5 * u, py - 11 * u, 3 * u, Math.PI * 0.5, Math.PI * 1.5); ctx.stroke();
+  ctx.beginPath(); ctx.arc(px + 11.5 * u, py - 11 * u, 3 * u, -Math.PI * 0.5, Math.PI * 0.5); ctx.stroke();
+  // Thân nồi inox hình trụ tròn có ánh kim sáng bóng
+  ctx.fillStyle = '#64748B';
+  ctx.fillRect(Math.round(px - 11 * u), Math.round(py - 16 * u), Math.round(22 * u), Math.round(16 * u));
+  ctx.fillStyle = '#CBD5E1';
+  ctx.fillRect(Math.round(px - 9 * u), Math.round(py - 16 * u), Math.round(7 * u), Math.round(15 * u));
+  ctx.fillStyle = '#F8FAFC';
+  ctx.fillRect(Math.round(px - 7 * u), Math.round(py - 16 * u), Math.round(3 * u), Math.round(15 * u));
+  ctx.strokeStyle = '#1E293B'; ctx.lineWidth = 1.2;
+  ctx.strokeRect(Math.round(px - 11 * u), Math.round(py - 16 * u), Math.round(22 * u), Math.round(16 * u));
+  // Miệng nồi bầu dục + Nước dùng ninh xương vàng óng sủi tăm
+  ctx.fillStyle = '#E2E8F0';
+  ctx.beginPath(); ctx.ellipse(px, py - 16 * u, 11.5 * u, 4.2 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#C97A16';
+  ctx.beginPath(); ctx.ellipse(px, py - 16 * u, 9.5 * u, 3.1 * u, 0, 0, Math.PI * 2); ctx.fill();
+  // Hành củ nướng, hoa hồi & bọt sủi tăm trong nồi nước dùng
+  var bub = Math.sin(t * 7 + (phase || 0)) * 1.2 * u;
+  ctx.fillStyle = '#FEF08A';
+  ctx.beginPath(); ctx.arc(px - 3 * u, py - 16 * u + bub * 0.3, 1.5 * u, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px + 4 * u, py - 15.5 * u - bub * 0.3, 1.3 * u, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#22C55E';
+  ctx.fillRect(Math.round(px - 1 * u), Math.round(py - 17 * u), Math.max(2, Math.round(3 * u)), Math.max(1, Math.round(1.5 * u)));
+  // Cán vá múc nước dùng inox thò ra khỏi miệng nồi
+  ctx.strokeStyle = '#94A3B8'; ctx.lineWidth = Math.max(1.5, 2.2 * u);
+  ctx.beginPath(); ctx.moveTo(px + 3 * u, py - 16 * u); ctx.lineTo(px + 9 * u, py - 24 * u); ctx.stroke();
+  // 3 Làn khói nóng nghi ngút bốc lên từ nồi Phở!
+  for (var si = 0; si < 3; si++) {
+    var st = (t * 0.75 + si * 0.33 + (phase || 0)) % 1;
+    ctx.globalAlpha = (1 - st) * 0.55;
+    ctx.fillStyle = '#FFFDF7';
+    var sx = px + Math.sin(t * 3 + si * 2) * 3.5 * u + (si - 1) * 4 * u;
+    var sy = py - (20 + st * 18) * u;
+    ctx.beginPath(); ctx.arc(sx, sy, (2.2 + st * 2.5) * u, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawKitchenIngredientsSprite3D(ctx, cam, wx, wy, wz) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 22) return;
+  var u = Math.max(0.45, Math.min(3.2, pr.scale / 36));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  ctx.save();
+  // 1. Móc treo 2 miếng thịt bò tái & gầu vân mỡ đỏ hồng bên trái tủ kính
+  ctx.strokeStyle = '#475569'; ctx.lineWidth = Math.max(1, 1.2 * u);
+  ctx.beginPath(); ctx.moveTo(px - 18 * u, py - 24 * u); ctx.lineTo(px - 18 * u, py - 18 * u); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px - 9 * u, py - 24 * u); ctx.lineTo(px - 9 * u, py - 18 * u); ctx.stroke();
+  // Miếng thịt bò tái đỏ tươi + gân mỡ trắng
+  ctx.fillStyle = '#B91C1C';
+  ctx.beginPath(); ctx.ellipse(px - 18 * u, py - 13 * u, 3.8 * u, 6.2 * u, 0.1, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FCA5A5';
+  ctx.fillRect(Math.round(px - 19 * u), Math.round(py - 15 * u), Math.max(1, Math.round(2 * u)), Math.max(2, Math.round(5 * u)));
+  // Miếng thịt gầu bò vàng béo
+  ctx.fillStyle = '#991B1B';
+  ctx.beginPath(); ctx.ellipse(px - 9 * u, py - 13 * u, 4 * u, 5.8 * u, -0.1, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FEF3C7';
+  ctx.fillRect(Math.round(px - 11 * u), Math.round(py - 12 * u), Math.max(2, Math.round(4 * u)), Math.max(1, Math.round(2 * u)));
+  // 2. Rổ tre đựng Bánh Phở sợi trắng mềm ở giữa
+  ctx.fillStyle = '#B47B38';
+  ctx.beginPath(); ctx.ellipse(px + 2 * u, py - 3 * u, 7.5 * u, 3.6 * u, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FFFDF7';
+  ctx.beginPath(); ctx.ellipse(px + 2 * u, py - 5.2 * u, 6.4 * u, 3.2 * u, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#CBD5E1'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(px - 2 * u, py - 5 * u); ctx.lineTo(px + 6 * u, py - 5 * u); ctx.stroke();
+  // 3. Rổ hành lá & ngò gai xanh mướt bên phải
+  ctx.fillStyle = '#A16207';
+  ctx.beginPath(); ctx.ellipse(px + 16 * u, py - 3 * u, 6.5 * u, 3.2 * u, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#15803D';
+  ctx.beginPath(); ctx.ellipse(px + 16 * u, py - 5.5 * u, 5.8 * u, 3.5 * u, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#4ADE80';
+  ctx.beginPath(); ctx.arc(px + 14 * u, py - 6.5 * u, 2.2 * u, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px + 18 * u, py - 6 * u, 2.0 * u, 0, Math.PI * 2); ctx.fill();
+  // 4. Thớt gỗ nghiến tròn & dao phay sắt sắc bén phía trước
+  ctx.fillStyle = '#92400E';
+  ctx.beginPath(); ctx.ellipse(px - 13 * u, py - 1 * u, 6.5 * u, 2.5 * u, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#E2E8F0';
+  ctx.fillRect(Math.round(px - 16 * u), Math.round(py - 4 * u), Math.max(3, Math.round(6 * u)), Math.max(2, Math.round(3 * u)));
+  ctx.restore();
+}
+
+function drawPhoBowlSprite3D(ctx, cam, wx, wy, wz, bState, t, phase) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 20) return;
+  var u = Math.max(0.45, Math.min(3.2, pr.scale / 38));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  ctx.save();
+  // Đế bát & thân tô sứ trắng bo cong tròn trịa (không còn cục vuông!)
+  ctx.fillStyle = '#CBD5E1';
+  ctx.beginPath(); ctx.ellipse(px, py + 0.5 * u, 7.5 * u, 2.5 * u, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath(); ctx.arc(px, py - 3.5 * u, 7.5 * u, 0, Math.PI, false); ctx.fill();
+  ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(px, py - 4 * u, 7.5 * u, 3 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  // Hoa văn viền lam xanh Bát Tràng quanh miệng tô
+  ctx.strokeStyle = '#2563EB'; ctx.lineWidth = Math.max(1, 0.9 * u);
+  ctx.beginPath(); ctx.arc(px, py - 3.5 * u, 6.2 * u, 0.25, Math.PI - 0.25, false); ctx.stroke();
+  if (bState === 'full') {
+    // Nước dùng vàng trong + sợi bánh phở trắng + lát thịt bò tái hồng + hành ngò xanh!
+    ctx.fillStyle = '#D98A2B';
+    ctx.beginPath(); ctx.ellipse(px, py - 4 * u, 6.2 * u, 2.2 * u, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#F8FAFC';
+    ctx.fillRect(Math.round(px - 3.5 * u), Math.round(py - 4.5 * u), Math.max(2, Math.round(5 * u)), Math.max(1, Math.round(1.4 * u)));
+    ctx.fillStyle = '#E17A7A'; // Thịt bò tái
+    ctx.beginPath(); ctx.ellipse(px - 2 * u, py - 4.2 * u, 2.4 * u, 1.2 * u, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#16A34A'; // Hành lá & ngò gai xanh
+    ctx.beginPath(); ctx.arc(px + 2 * u, py - 4.2 * u, 1.8 * u, 0, Math.PI * 2); ctx.fill();
+    // Đôi đũa tre gác ngang miệng tô
+    ctx.strokeStyle = '#B45309'; ctx.lineWidth = Math.max(1, 1.1 * u);
+    ctx.beginPath(); ctx.moveTo(px - 8 * u, py - 6.5 * u); ctx.lineTo(px + 9 * u, py - 3.5 * u); ctx.stroke();
+    // Làn khói nóng bay lên từ tô Phở
+    var st = (t * 0.9 + (phase || 0)) % 1;
+    ctx.globalAlpha = (1 - st) * 0.55;
+    ctx.fillStyle = '#FFFDF7';
+    ctx.beginPath(); ctx.arc(px + Math.sin(t * 4) * 2 * u, py - (8 + st * 9) * u, (1.5 + st * 1.5) * u, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawBatTrangTeapotSprite3D(ctx, cam, wx, wy, wz) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 18) return;
+  var u = Math.max(0.4, Math.min(2.8, pr.scale / 38));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  ctx.save();
+  // Quai xách vòng cong trên đỉnh ấm trà Bát Tràng (Ảnh 8)
+  ctx.strokeStyle = '#475569'; ctx.lineWidth = Math.max(1, 1.3 * u);
+  ctx.beginPath(); ctx.arc(px, py - 8.5 * u, 4.2 * u, Math.PI, 0, false); ctx.stroke();
+  // Vòi ấm trà cong bên trái
+  ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = Math.max(1.5, 2.2 * u);
+  ctx.beginPath(); ctx.moveTo(px - 4.5 * u, py - 3 * u); ctx.lineTo(px - 8 * u, py - 6.5 * u); ctx.stroke();
+  // Thân ấm sứ tròn trắng họa tiết men lam xanh Bát Tràng
+  ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#1E293B'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(px, py - 4.5 * u, 5.2 * u, 4.8 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#1D4ED8';
+  ctx.fillRect(Math.round(px - 4.4 * u), Math.round(py - 5.5 * u), Math.max(2, Math.round(8.8 * u)), Math.max(1.5, Math.round(2.4 * u)));
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(Math.round(px - 1.5 * u), Math.round(py - 5 * u), Math.max(1, Math.round(3 * u)), Math.max(1, Math.round(1.2 * u)));
+  // Nắp ấm & 1 chén trà nhỏ bên cạnh
+  ctx.fillStyle = '#2563EB';
+  ctx.beginPath(); ctx.arc(px, py - 9.2 * u, 1.4 * u, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath(); ctx.ellipse(px + 8 * u, py - 1.5 * u, 2.4 * u, 1.8 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+function drawCondimentCaddySprite3D(ctx, cam, wx, wy, wz) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 18) return;
+  var u = Math.max(0.4, Math.min(2.8, pr.scale / 38));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  ctx.save();
+  // Chai nước tương đen nắp vàng + Chai tương ớt đỏ nắp xanh + Hũ giấm tỏi ớt ngâm hồng (Ảnh 8)
+  ctx.fillStyle = '#2B1508'; ctx.fillRect(Math.round(px - 5 * u), Math.round(py - 11 * u), Math.max(2, Math.round(3.2 * u)), Math.max(4, Math.round(8 * u)));
+  ctx.fillStyle = '#FACC15'; ctx.fillRect(Math.round(px - 4.6 * u), Math.round(py - 12.5 * u), Math.max(2, Math.round(2.4 * u)), Math.max(1.5, Math.round(2 * u)));
+  ctx.fillStyle = '#B91C1C'; ctx.fillRect(Math.round(px - 1 * u), Math.round(py - 10 * u), Math.max(2, Math.round(3 * u)), Math.max(4, Math.round(7 * u)));
+  ctx.fillStyle = '#16A34A'; ctx.fillRect(Math.round(px - 0.6 * u), Math.round(py - 11.5 * u), Math.max(2, Math.round(2.2 * u)), Math.max(1.5, Math.round(1.8 * u)));
+  ctx.fillStyle = '#F9A8D4'; ctx.fillRect(Math.round(px + 3 * u), Math.round(py - 7.5 * u), Math.max(2, Math.round(3.8 * u)), Math.max(3, Math.round(5 * u)));
+  // Rổ nhựa đỏ đựng gia vị phía trước
+  ctx.fillStyle = '#DC2626'; ctx.strokeStyle = '#7F1D1D'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(px + 0.5 * u, py - 2.5 * u, 7.5 * u, 3 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+function drawQuayAndHerbsSprite3D(ctx, cam, wx, wy, wz) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 18) return;
+  var u = Math.max(0.4, Math.min(2.8, pr.scale / 38));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  ctx.save();
+  // Đĩa rau giá xanh + chanh tươi bên trái
+  ctx.fillStyle = '#F8FAFC'; ctx.strokeStyle = '#94A3B8'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(px - 6 * u, py - 1 * u, 5.5 * u, 2.2 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#22C55E'; ctx.beginPath(); ctx.arc(px - 7.5 * u, py - 2 * u, 2.3 * u, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FEF9C3'; ctx.beginPath(); ctx.arc(px - 4 * u, py - 1.8 * u, 1.8 * u, 0, Math.PI * 2); ctx.fill();
+  // Đĩa quẩy nóng vàng giòn bên phải
+  ctx.fillStyle = '#F8FAFC';
+  ctx.beginPath(); ctx.ellipse(px + 6 * u, py - 1 * u, 5.5 * u, 2.2 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#C67D2E';
+  ctx.fillRect(Math.round(px + 2.5 * u), Math.round(py - 3.2 * u), Math.max(3, Math.round(7 * u)), Math.max(1.5, Math.round(2 * u)));
+  ctx.fillStyle = '#E6A14A';
+  ctx.fillRect(Math.round(px + 3 * u), Math.round(py - 4.4 * u), Math.max(3, Math.round(6 * u)), Math.max(1.5, Math.round(1.6 * u)));
   ctx.restore();
 }
 

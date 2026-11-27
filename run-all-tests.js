@@ -7867,7 +7867,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     tpsSpecCode.includes('Zero Exposed Sky') &&
-      specCode.includes('QĐ 232–233') &&
+      (specCode.includes('QĐ 232–234') || specCode.includes('QĐ 232–233')) &&
       chatDocCode.includes('Quyết định 233') &&
       decisionsCode.includes('Quyết định 233') &&
       engineCode.includes('function drawLanternGlow3D') &&
@@ -7875,21 +7875,50 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       sceneCode.includes('function navigatePigToRoom') &&
       sceneCode.includes('function drawPhoTableIngredients3D') &&
       sceneCode.includes('function drawHeritageChair3D') &&
-      sceneCode.includes('vip_room') &&
-      sceneCode.includes('tea_wc') &&
       sceneCode.includes('main_hall') &&
-      sceneCode.includes('BÌNH PHONG SONG GỖ') &&
-      sceneCode.includes('Ấm trà sứ Bát Tràng') &&
       sceneCode.includes('TRẦN NHÀ GỖ LIM KÍN 100%') &&
       phoBannerCode.includes('id="roomTabs"') &&
-      phoBannerCode.includes('data-room="vip_room"') &&
-      phoBannerCode.includes('data-room="tea_wc"') &&
       phoBannerCode.includes('navigatePigToRoom') &&
       phoBannerCode.includes('detectCurrentPhoRoom'),
-    'Pho Heritage 5-room overhaul (enclosed mahogany ceiling with zero exposed sky, 5 rooms + 2-way synced room tabs, Bat Trang tea & detailed Pho ingredients, lanterns, wooden screen, rounded Pig, and docs) must be synced for QD 233'
+    'Pho Heritage overhaul (enclosed mahogany ceiling with zero exposed sky, synced room tabs, detailed Pho ingredients, lanterns, wooden screen, rounded Pig, and docs) must be synced for QD 233/234'
   );
 
-  console.log('✅ Test 170 Passed: Đại Tu Quán Phở Cổ Truyền 5 Gian Phòng Phố Hội, Trần Gỗ Lim Kín 100%, Nguyên Liệu Phở & Thanh Tab Đồng Bộ (Quyết định 233) Audit verified cleanly');
+  console.log('✅ Test 170 Passed: Đại Tu Quán Phở Cổ Truyền Phố Hội, Trần Gỗ Lim Kín 100%, Nguyên Liệu Phở & Thanh Tab Đồng Bộ (Quyết định 233) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 170 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (170/170)!');
+// =========================================================================
+// TEST 171: TỐI ƯU QUÁN PHỞ TPS 3D GỌN MƯỢT 3 KHU (BỎ PHÒNG VIP), PHỐ CỔ ĐỐI DIỆN & SPRITE ĐỒ ĂN/XOONG NỒI TẢ THỰC (QĐ 234)
+// =========================================================================
+{
+  const tpsSpecCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
+
+  assert.ok(
+    tpsSpecCode.includes('QĐ 234') &&
+      specCode.includes('QĐ 232–234') &&
+      chatDocCode.includes('Quyết định 234') &&
+      decisionsCode.includes('Quyết định 234') &&
+      engineCode.includes('function drawPhoPotSprite3D') &&
+      engineCode.includes('function drawKitchenIngredientsSprite3D') &&
+      engineCode.includes('function drawPhoBowlSprite3D') &&
+      engineCode.includes('function drawBatTrangTeapotSprite3D') &&
+      engineCode.includes('function drawCondimentCaddySprite3D') &&
+      engineCode.includes('function drawQuayAndHerbsSprite3D') &&
+      sceneCode.includes('function drawOppositeOldQuarterStreet3D') &&
+      !sceneCode.includes('vip_room') &&
+      !phoBannerCode.includes('data-room="vip_room"') &&
+      phoBannerCode.includes('🏮 Sân Phố Cổ') &&
+      phoBannerCode.includes('🏛️ Sảnh Phở Chính') &&
+      phoBannerCode.includes('🔥 Bếp Lửa Phở'),
+    'Pho TPS 3D polish (compact 3-zone smooth layout without VIP room, opposite old-quarter street backdrop, tethered lanterns, realistic depth-scaled Pixel Art sprites for pots/bowls/ingredients/teapot, and docs) must be synced for QD 234'
+  );
+
+  console.log('✅ Test 171 Passed: Tối Ưu Quán Phở TPS 3D Gọn Mượt 3 Khu (Bỏ Phòng VIP), Phố Cổ Đối Diện & Sprite Đồ Ăn/Xoong Nồi Tả Thực (Quyết định 234) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 171 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (171/171)!');

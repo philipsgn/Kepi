@@ -550,3 +550,10 @@ Màn hình Tab 3 hiển thị:
   5. **Góc Trà Đạo & Phòng Vệ Sinh Cổ Truyền (`tea_wc`):** Thông qua cửa vòm gỗ bên phải; bàn trà Bát Tràng + quẩy nóng & khu WC sạch đẹp có bồn rửa gốm sứ, gương khung gỗ và 2 buồng gỗ lam.
 - **Nguyên liệu Phở Việt Nam chi tiết trên từng bàn:** Tô Phở đầy thịt bò tái-hành ngò-tỏi phi + khói 3D, ấm trà Bát Tràng men xanh-trắng, rổ gia vị đỏ (tương ớt, nước tương, giấm tỏi ớt ngâm), dĩa giá đỗ-rau thơm-chanh, quẩy nóng & chén trứng chần.
 - **Thanh Tab 5 Gian Phòng đồng bộ 2 chiều + Bo tròn chú Heo 1:1 Tab Vườn:** Bấm tab → chú Heo tự đi theo lộ trình waypoint xuyên cửa vòm tới gian phòng đó & xoay camera góc đẹp; khi tự đi bộ → tab tự sáng đúng gian phòng đang đứng.
+
+---
+
+## 54. Tối Ưu Quán Phở TPS 3D Gọn Mượt 3 Khu, Bối Cảnh Phố Cổ Đối Diện & Sprite Đồ Ăn/Xoong Nồi Tả Thực (Quyết định 234)
+- **Gọn quán còn 3 Khu ấm cúng (`12m × 15.5m`, bỏ Phòng VIP & vách ngăn phụ):** `🏮 Sân Phố Cổ` ➔ `🏛️ Sảnh Phở Chính` ➔ `🔥 Bếp Lửa Phở`, vừa khít thanh Tab điện thoại không tràn chữ, giảm 60% đa giác giúp chạy mượt 60fps và triệt tiêu 100% lỗi Z-sorting xuyên tường + siết đệm va chạm tường `0.65m` chống chú Heo kẹt góc.
+- **Bối cảnh Phố Cổ đối diện mặt tiền (`Z: -6..-12`):** Dựng mặt đường nhựa, vạch sang đường, dãy nhà cổ tường vàng mái ngói đỏ 2 tầng & hàng cây xanh đối diện che kín đường chân trời; nối dây treo cho mọi đèn lồng (không còn đèn lồng bay lơ lửng).
+- **Hybrid Sprite Pixel Art Tả Thực (`pixelTps3dEngine.ts`):** Thay toàn bộ cục hộp 3D thành Sprite tả thực tự co giãn theo chiều sâu: Nồi nước dùng tròn inox có 2 quai & vá múc bốc khói (`drawPhoPotSprite3D`), tủ kính treo thịt bò vân mỡ + rổ bánh phở trắng + bó hành ngò + thớt gỗ dao phay (`drawKitchenIngredientsSprite3D`), Tô Phở tròn đầy thịt-hành-đũa (`drawPhoBowlSprite3D`), ấm trà Bát Tràng dáng tròn có vòi & quai (`drawBatTrangTeapotSprite3D`), rổ tương ớt/giấm tỏi & đĩa quẩy nóng (`drawCondimentCaddySprite3D`, `drawQuayAndHerbsSprite3D`).

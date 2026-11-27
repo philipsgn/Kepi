@@ -22,8 +22,12 @@ Thay vì nhìn từ trên xuống phẳng (2D top-down) gây cảm giác tách b
    - Khi chú Heo ở ngoài sân/vỉa hè (`z < 0`): hiển thị bầu trời, tán cây, giàn hoa giấy & mặt tiền kiến trúc 2 tầng.
    - Khi chú Heo bước vào bên trong nhà (`z >= 0`): **cấm tuyệt đối để lộ bầu trời xanh phía trên tường**! Phải dựng trần nhà kín ấm cúng (trần kem + hệ xà gồ gỗ lim nâu sẫm phối cảnh 3D + giàn đèn lồng tỏa ánh sáng vàng ấm).
 5. **Quy chuẩn Đa Gian Phòng Đồng Bộ Thanh Tab 2 Chiều (Multi-Room Waypoint Tour — QĐ 233):**
-   - Không gian mở rộng thành nhiều gian phòng liên hoàn ngăn cách bằng cửa vòm/bình phong gỗ chạm.
-   - Thanh Tab chuyển phòng phía trên đồng bộ 2 chiều với vị trí chú Heo: bấm Tab → chú Heo tự đi theo lộ trình waypoint xuyên qua cửa vòm tới gian phòng đó + xoay camera góc đẹp; khi tự đi bộ bằng Tap-to-Walk → Tab tự động highlight sáng gian phòng chú Heo đang đứng!
+   - Không gian mở rộng thành nhiều khu vực liên hoàn; ưu tiên **3 khu gọn mượt** vừa khít 1 màn hình điện thoại (không chia vách ngăn thừa gây lag hay lỗi xuyên tường).
+   - Thanh Tab chuyển khu phía trên đồng bộ 2 chiều với vị trí chú Heo: bấm Tab → chú Heo tự đi theo lộ trình waypoint xuyên qua cửa tới khu đó + xoay camera góc đẹp; khi tự đi bộ bằng Tap-to-Walk → Tab tự động highlight sáng khu chú Heo đang đứng!
+6. **Quy chuẩn Hybrid 3D Room + Depth-Scaled Pixel Art Sprites & Phố Xá Đối Diện (QĐ 234):**
+   - **Cấm dùng hộp 3D thô cứng** cho xoong nồi, tô phở, nguyên liệu nấu ăn, ấm trà hay gia vị — bắt buộc vẽ bằng **Sprite Pixel Art tả thực tự co giãn theo chiều sâu `cz`** (`drawPhoPotSprite3D`, `drawPhoBowlSprite3D`, `drawBatTrangTeapotSprite3D`, `drawKitchenIngredientsSprite3D`...).
+   - **Chống chân trời trống rỗng & đèn lồng lơ lửng:** Khu vực sân ngoài trời bắt buộc có mặt đường nhựa, dãy nhà cổ đối diện và tán cây xanh che kín chân trời; mọi đèn lồng bắt buộc có dây treo nối lên mái/xà gỗ.
+   - **Đệm va chạm an toàn (`>= 0.65m`):** Cách tường và quầy ít nhất `0.65m` để chú Heo không bao giờ bị kẹt hay lún thân vào góc tường.
 
 ---
 

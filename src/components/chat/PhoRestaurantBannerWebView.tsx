@@ -101,8 +101,8 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
   }
   .room-tabs {
     position: fixed; top: 56px; left: 10px; right: 10px;
-    display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 4px;
-    scrollbar-width: none; z-index: 14;
+    display: flex; justify-content: center; gap: 6px; padding: 2px 2px 4px;
+    z-index: 14;
   }
   .room-tabs::-webkit-scrollbar { display: none; }
   .room-tab {
@@ -138,11 +138,9 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
 <canvas id="phoTpsCv" width="280" height="440"></canvas>
 <div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Chào mừng đến Phở Cổ Phố Hội!</div></div>
 <div id="roomTabs" class="room-tabs">
-  <button class="room-tab active" data-room="garden" type="button">🏮 Sân Vườn</button>
-  <button class="room-tab" data-room="main_hall" type="button">🏛️ Sảnh Chính</button>
-  <button class="room-tab" data-room="vip_room" type="button">✨ Phòng VIP</button>
-  <button class="room-tab" data-room="kitchen" type="button">🔥 Bếp Lửa</button>
-  <button class="room-tab" data-room="tea_wc" type="button">🍵 Trà & WC</button>
+  <button class="room-tab active" data-room="garden" type="button">🏮 Sân Phố Cổ</button>
+  <button class="room-tab" data-room="main_hall" type="button">🏛️ Sảnh Phở Chính</button>
+  <button class="room-tab" data-room="kitchen" type="button">🔥 Bếp Lửa Phở</button>
 </div>
 <div id="actionBar" class="action-bar" hidden>
   <button id="primaryActBtn" class="action-btn" type="button"></button>
@@ -347,7 +345,7 @@ function frame(now) {
   ctx.clearRect(0, 0, cv.width, cv.height);
 
   updateTpsCamera(cam, world.pig.x, world.pig.seated ? 0.38 : 0, world.pig.z, cv.width, cv.height, {
-    minX: -10.55, maxX: 10.55, minZ: -7.6, maxZ: 16.8
+    minX: -5.65, maxX: 5.65, minZ: -6.8, maxZ: 14.8
   });
   renderPhoTps3D(ctx, cam, world);
   syncHud();
