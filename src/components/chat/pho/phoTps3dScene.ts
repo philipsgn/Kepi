@@ -451,11 +451,10 @@ function renderPhoTps3D(ctx, cam, w) {
     ctx.fillText('PHỞ BÒ GIA TRUYỀN 1990', menuP.sx, menuP.sy + 3);
     ctx.restore();
   }
-  // Tranh Sài Gòn thập niên 90 đóng khung gỗ 2 bên tường
-  drawPoly3D(ctx, cam, [[-5.92,1.5,2.2],[-5.92,1.5,4.0],[-5.92,2.6,4.0],[-5.92,2.6,2.2]], '#C9A46B', '#3B2314', 2);
-  drawPoly3D(ctx, cam, [[-5.92,1.5,6.2],[-5.92,1.5,8.0],[-5.92,2.6,8.0],[-5.92,2.6,6.2]], '#C9A46B', '#3B2314', 2);
-  drawPoly3D(ctx, cam, [[5.92,1.5,4.0],[5.92,1.5,2.2],[5.92,2.6,2.2],[5.92,2.6,4.0]], '#C9A46B', '#3B2314', 2);
-  drawPoly3D(ctx, cam, [[5.92,1.5,8.0],[5.92,1.5,6.2],[5.92,2.6,6.2],[5.92,2.6,8.0]], '#C9A46B', '#3B2314', 2);
+  // Bộ sưu tập Mỹ thuật Pixel Art Văn Hóa Việt Nam điệu nghệ trên 3 bức tường (Trái, Phải & Đối Diện Bếp — QĐ 240!)
+  if (typeof drawPhoVnCultureWalls3D === 'function') {
+    drawPhoVnCultureWalls3D(ctx, cam, w.t);
+  }
 
   // Tường cửa ra vào phía sau lưng (Z = 0) — CHUẨN RPG AAA: CỬA GỖ LÁ SÁCH KÍNH MỜ ĐÓNG KÍN + VỆT NẮNG ĐỔ SÀN (QĐ 238!)
   drawPoly3D(ctx, cam, [[-6.0,0,0],[-1.45,0,0],[-1.45,3.85,0],[-6.0,3.85,0]], '#E0B04C', '#3B2314', 1.2);

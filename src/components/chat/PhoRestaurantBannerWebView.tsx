@@ -4,6 +4,7 @@ import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
 import { buildTps3dEngineScript } from '../pixel/pixelTps3dEngine';
 import { buildPhoTps3dSceneScript } from './pho/phoTps3dScene';
+import { buildPhoVnWallArtScript } from './pho/phoVnWallArt';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -64,6 +65,7 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
   };
 
   const tpsEngineScript = useMemo(() => buildTps3dEngineScript(), []);
+  const phoWallArtScript = useMemo(() => buildPhoVnWallArtScript(), []);
   const phoSceneScript = useMemo(() => buildPhoTps3dSceneScript(), []);
 
   const htmlContent = useMemo(
@@ -140,6 +142,7 @@ function postHost(obj) {
 }
 
 ${tpsEngineScript}
+${phoWallArtScript}
 ${phoSceneScript}
 
 var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.4, targetHeight: 0.98 });
@@ -307,7 +310,7 @@ requestAnimationFrame(frame);
 </script>
 </body>
 </html>`,
-    [tpsEngineScript, phoSceneScript]
+    [tpsEngineScript, phoWallArtScript, phoSceneScript]
   );
 
   if (!ready) return null;

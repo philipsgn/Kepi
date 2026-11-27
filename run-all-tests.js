@@ -8035,4 +8035,42 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 176 Passed: Hé Duy Nhất 1 Cánh Cửa (~35°) & Luồng Ánh Sáng Ngược Sáng Động Khi Khách NPC Ra Vào (Quyết định 239) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 176 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (176/176)!');
+// =========================================================================
+// TEST 177: BỘ SƯU TẬP MỸ THUẬT PIXEL ART VĂN HÓA VIỆT NAM TRÊN 3 BỨC TƯỜNG QUÁN PHỞ (QĐ 240)
+// =========================================================================
+{
+  const wallArtPath = 'src/components/chat/pho/phoVnWallArt.ts';
+  assert.ok(fs.existsSync(wallArtPath), 'src/components/chat/pho/phoVnWallArt.ts must exist');
+  const wallArtCode = fs.readFileSync(wallArtPath, 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  // Verify JS syntax of phoVnWallArt.ts via new Function
+  const mWall = wallArtCode.match(/return String\.raw`([\s\S]*?)`;/);
+  assert.ok(mWall && mWall[1], 'phoVnWallArt.ts must export String.raw script');
+  new Function(mWall[1]);
+
+  assert.ok(
+    chatDocCode.includes('QĐ 240') &&
+      decisionsCode.includes('Quyết định 240') &&
+      wallArtCode.includes('function drawPhoVnCultureWalls3D') &&
+      wallArtCode.includes('function drawLotusArt') &&
+      wallArtCode.includes('function drawCycloArt') &&
+      wallArtCode.includes('function drawNonLaAndDanNguyetArt') &&
+      wallArtCode.includes('function drawAoDaiArt') &&
+      wallArtCode.includes('function drawFlagAndApricotBlossomArt') &&
+      wallArtCode.includes('function drawPotteryShelfArt') &&
+      wallArtCode.includes('function drawQuangGanhPhoArt') &&
+      wallArtCode.includes('function drawSaigonSkylineAndClockArt') &&
+      wallArtCode.includes('ĐƯỜNG ĐỘC LẬP') &&
+      sceneCode.includes('drawPhoVnCultureWalls3D') &&
+      phoBannerCode.includes('buildPhoVnWallArtScript'),
+    'Vietnamese Culture Pixel Art Gallery on all 3 Pho walls (lotus, cyclo, non la & dan nguyet, street sign, ao dai, VN flag & apricot blossom, Bat Trang pottery & lacquerware, quang ganh, Saigon skyline & pendulum clock, and docs) must be synced for QD 240'
+  );
+
+  console.log('✅ Test 177 Passed: Bộ Sưu Tập Mỹ Thuật Pixel Art Văn Hóa Việt Nam Trên 3 Bức Tường Quán Phở (Quyết định 240) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 177 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (177/177)!');
