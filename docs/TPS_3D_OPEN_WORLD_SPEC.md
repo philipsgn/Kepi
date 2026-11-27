@@ -73,7 +73,8 @@ Mọi không gian mở nâng cấp lên chuẩn TPS 3D đều bắt buộc hỗ 
 | **3** | **Adidas Originals Hội An** (`adidasTps3dScene.ts`) | **Đã triển khai (QĐ 245)** | 3 phòng độc bản tách biệt (1 phòng = 1 khung cảnh): Sảnh Tầng 1 Hội An ↔ Phòng Thay Đồ & Gương Toàn Thân ↔ Lầu 2 Bộ Sưu Tập Việt Nam |
 | **4** | **Nhà Thờ Đức Bà Sài Gòn** (`cathedralTps3dScene.ts`) | **Đã triển khai (QĐ 245)** | 3 phòng độc bản tách biệt: Thánh Đường Chính Gothic ↔ Cung Thánh & Bàn Thờ Đá Hoa Cương ↔ Gác Đàn Ống Pipe Organ & Tháp Chuông |
 | **5** | **Ngôi Chùa Cổ Kính & Vườn Chùa** (`pagodaTps3dScene.ts`) | **Đã triển khai (QĐ 245)** | 3 phòng độc bản tách biệt: Vườn Chùa (Hồ Sen, Chùa Một Cột, Cây Đa, Tam Quan) ↔ Chánh Điện (Tượng Phật Vàng, Lư Hương) ↔ Tháp Chuông & Thiền Trà |
-| 6 | **Chợ Bến Thành / SVĐ Trống Đồng FIFA** | Đợt 2 tiếp theo | Nâng cấp đồng bộ Multi-Room TPS 3D |
+| **6** | **Chợ Bến Thành** (`marketTps3dScene.ts`) | **Đã triển khai (QĐ 246)** | 3 phòng độc bản tách biệt: Sảnh Cửa Nam & Sạp Vải Áo Dài ↔ Khu Ẩm Thực Trung Tâm Sạp 1044 ↔ Sảnh Trái Cây Nhiệt Đới & Đồ Lưu Niệm Nón Lá |
+| **7** | **Sân Vận Động Trống Đồng FIFA** (`stadiumTps3dScene.ts`) | **Đã triển khai (QĐ 246)** | 3 phòng độc bản tách biệt: Phòng Thay Đồ ĐT Việt Nam & Đường Hầm ↔ Đường Biên Sân Cỏ Trống Đồng & Trận 11v11 ↔ Phòng Cúp Vàng & Họp Báo FIFA |
 
 ---
 

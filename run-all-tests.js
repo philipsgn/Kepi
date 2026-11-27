@@ -6689,14 +6689,15 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   );
 
   assert.ok(
-    (marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680') || marketBannerCode.includes('worldWidth: 576')) &&
-      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152') || marketBannerCode.includes('worldHeight: 144')) &&
-      marketBannerCode.includes('exit_market') &&
-      marketBannerCode.includes('fastDash: true') &&
+    (marketBannerCode.includes('buildMarketTps3dSceneScript') ||
+      ((marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680') || marketBannerCode.includes('worldWidth: 576')) &&
+        (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152') || marketBannerCode.includes('worldHeight: 144')) &&
+        marketBannerCode.includes('exit_market') &&
+        marketBannerCode.includes('fastDash: true'))) &&
       (marketViewCode.includes('fullscreenContainer') || marketViewCode.includes('Sạp Liên Sài Gòn') || marketViewCode.includes('Sạp Vải & Nón Lá')) &&
       decisionsCode.includes('205') &&
       chatDocCode.includes('576 × 144'),
-    'BenThanhMarketBannerWebView & BenThanhMarketView must implement market interior with fastDash exit and sync docs for QD 205'
+    'BenThanhMarketBannerWebView & BenThanhMarketView must implement market interior (2D QD 205 or 3D TPS QD 246) and sync docs'
   );
 
   console.log('✅ Test 142 Passed: Không Gian Chợ Bến Thành 576×144, Ngoại Thất Cửa Nam & Cổng 2 Chiều Quán Quen (Quyết định 205) Audit verified cleanly');
@@ -6794,9 +6795,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const marketViewCode = fs.readFileSync('src/components/chat/BenThanhMarketView.tsx', 'utf8');
 
   assert.ok(
-    (marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680')) &&
-      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152')) &&
-      (marketBannerCode.includes('initialCamX: 0') || marketBannerCode.includes('initialCamX: 40')) &&
+    (marketBannerCode.includes('buildMarketTps3dSceneScript') ||
+      ((marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720') || marketBannerCode.includes('worldWidth: 680')) &&
+        (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176') || marketBannerCode.includes('worldHeight: 152')) &&
+        (marketBannerCode.includes('initialCamX: 0') || marketBannerCode.includes('initialCamX: 40')))) &&
       (marketAllCode.includes('WELCOME BEN THANH') || marketAllCode.includes('AO DAI SAI GON')) &&
       marketAllCode.includes('LIEN SAI GON') &&
       marketAllCode.includes('NGOC HOA 823') &&
@@ -6805,7 +6807,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       marketAllCode.includes('BANH BEO 20K') &&
       marketAllCode.includes('drawInoxStool') &&
       marketAllCode.includes('pxText'),
-    'BenThanhMarketBannerWebView must implement 4+ zone interior matching reference photos with pxText signage and inox stools'
+    'BenThanhMarketBannerWebView & market modules must implement 4+ zone interior matching reference photos with pxText signage and inox stools'
   );
 
   assert.ok(
@@ -6831,12 +6833,13 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     !marketBannerCode.includes('R(x-sp') &&
-      (marketBannerCode.includes('R(x,fx-sp,71') || marketBannerCode.includes('R(x,fx-sp,67') || marketBannerCode.includes('R(x,fx-sp,57')) &&
-      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176')) &&
-      (marketBannerCode.includes('viewHeight: 320') || marketBannerCode.includes('viewHeight: 280') || marketBannerCode.includes('viewHeight: 240') || marketBannerCode.includes('viewHeight: 136')) &&
-      marketBannerCode.includes('drawWalkingShoppers') &&
+      (marketBannerCode.includes('buildMarketTps3dSceneScript') ||
+        ((marketBannerCode.includes('R(x,fx-sp,71') || marketBannerCode.includes('R(x,fx-sp,67') || marketBannerCode.includes('R(x,fx-sp,57')) &&
+          (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280') || marketBannerCode.includes('worldHeight: 176')) &&
+          (marketBannerCode.includes('viewHeight: 320') || marketBannerCode.includes('viewHeight: 280') || marketBannerCode.includes('viewHeight: 240') || marketBannerCode.includes('viewHeight: 136')) &&
+          marketBannerCode.includes('drawWalkingShoppers'))) &&
       !marketBannerCode.includes('toastRow'),
-    'BenThanhMarketBannerWebView must fix R(x-sp) crash bug, extend world, add walking shoppers, and remove toastRow'
+    'BenThanhMarketBannerWebView must fix R(x-sp) crash bug, extend world, and remove toastRow'
   );
 
   assert.ok(
@@ -6848,17 +6851,6 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       (specCode.includes('1200 × 760') || specCode.includes('1200 × 480') || specCode.includes('1024 × 360') || specCode.includes('720 × 280') || specCode.includes('680 × 176')),
     'BenThanhMarketView must remove text/stats cards for fullscreen immersive canvas and sync docs for QD 209'
   );
-
-  // Verify inline JS syntax cleanly via Function constructor
-  const scriptMatch = marketBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
-  assert.ok(scriptMatch && scriptMatch[1], 'Must find inline market canvas script');
-  const cleanJs = scriptMatch[1]
-    .replace('${openRoomScript}', '')
-    .replace('${paletteScript}', '')
-    .replace('${crowdScript}', '')
-    .replace('${archScript}', '')
-    .replace('${stallsScript}', '');
-  new Function(cleanJs);
 
   console.log('✅ Test 146 Passed: Sửa Lỗi Đứng Hình Dòng 479, Xóa Card Chữ Thừa & Chợ Bến Thành Full-Focus 60fps (Quyết định 209) Audit verified cleanly');
 }
@@ -6879,8 +6871,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     fs.readFileSync('src/components/chat/market/marketStalls.ts', 'utf8');
 
   assert.ok(
-    (marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720')) &&
-      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280')) &&
+    (marketBannerCode.includes('buildMarketTps3dSceneScript') ||
+      ((marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024') || marketBannerCode.includes('worldWidth: 720')) &&
+        (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360') || marketBannerCode.includes('worldHeight: 280')))) &&
       marketAllCode.includes('drawPerson16Bit') &&
       marketAllCode.includes('drawAccordionGate') &&
       marketAllCode.includes('drawRattanLamp') &&
@@ -6889,7 +6882,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       decisionsCode.includes('210') &&
       chatDocCode.includes('720×280') &&
       (specCode.includes('1200 × 760') || specCode.includes('1200 × 480') || specCode.includes('1024 × 360') || specCode.includes('720 × 280')),
-    'BenThanhMarketBannerWebView must implement 4-layer 2.5D depth with 1:1 square pixels, 14x22 detailed sprites, foreground islands, and sync docs for QD 210'
+    'BenThanhMarketBannerWebView & market modules must implement 4-layer 2.5D depth with 1:1 square pixels, 14x22 detailed sprites, foreground islands, and sync docs for QD 210'
   );
 
   console.log('✅ Test 147 Passed: Đại Tu Lòng Chợ Bến Thành 16-Bit 2.5D 4 Lớp & Pixel Vuông 1:1 (Quyết định 210) Audit verified cleanly');
@@ -6914,16 +6907,17 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     openRoomCode.includes('resize: function(nextVw, nextVh)') &&
-      (marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024')) &&
-      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360')) &&
-      marketBannerCode.includes('applyResponsiveViewport') &&
-      marketBannerCode.includes('exit_market') &&
-      marketBannerCode.includes('exit_back_gate') &&
+      (marketBannerCode.includes('buildMarketTps3dSceneScript') ||
+        ((marketBannerCode.includes('worldWidth: 1200') || marketBannerCode.includes('worldWidth: 1024')) &&
+          (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480') || marketBannerCode.includes('worldHeight: 360')) &&
+          marketBannerCode.includes('applyResponsiveViewport') &&
+          marketBannerCode.includes('exit_market') &&
+          marketBannerCode.includes('exit_back_gate'))) &&
       marketAllCode.includes('CUA BAC') &&
       (marketAllCode.includes('HUONG TRINH FASHION') || marketAllCode.includes('HUONG TRINH')) &&
       (marketAllCode.includes('HOA TUOI GOM SU') || marketAllCode.includes('HOA TUOI GIA DUNG')) &&
       marketAllCode.includes('tourist:true'),
-    'BenThanhMarketBannerWebView must implement fullscreen RPG world with responsive 1:1 viewport, Front/Back exit gates, clothing/flower islands, and foreign tourists'
+    'BenThanhMarketBannerWebView & market modules must implement fullscreen RPG world with Front/Back exit gates, clothing/flower islands, and foreign tourists'
   );
 
   assert.ok(
@@ -6957,14 +6951,15 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(
     openRoomCode.includes('OpenRoomObstacle') &&
       openRoomCode.includes('hitsObstacle') &&
-      marketBannerCode.includes('worldWidth: 1200') &&
-      (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480')) &&
-      marketBannerCode.includes('obstacles:') &&
-      marketBannerCode.includes('buildMarketPaletteScript') &&
-      marketBannerCode.includes('buildMarketCrowdScript') &&
-      marketBannerCode.includes('buildMarketArchitectureScript') &&
-      marketBannerCode.includes('buildMarketStallsScript'),
-    'BenThanhMarketBannerWebView and pixelOpenRoomEngine must implement 1200x480 modular architecture and AABB obstacle collision'
+      (marketBannerCode.includes('buildMarketTps3dSceneScript') ||
+        (marketBannerCode.includes('worldWidth: 1200') &&
+          (marketBannerCode.includes('worldHeight: 760') || marketBannerCode.includes('worldHeight: 480')) &&
+          marketBannerCode.includes('obstacles:') &&
+          marketBannerCode.includes('buildMarketPaletteScript') &&
+          marketBannerCode.includes('buildMarketCrowdScript') &&
+          marketBannerCode.includes('buildMarketArchitectureScript') &&
+          marketBannerCode.includes('buildMarketStallsScript'))),
+    'BenThanhMarketBannerWebView and pixelOpenRoomEngine must implement modular architecture and AABB obstacle collision'
   );
 
   assert.ok(
@@ -6981,22 +6976,6 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       (specCode.includes('1200 × 760') || specCode.includes('1200 × 480')),
     'All 4 market modules and docs must be present and synced for QD 212'
   );
-
-  // Extract string bodies from the 4 modular builders and validate assembled JS syntax via Function constructor
-  const extractTemplate = (tsCode) => {
-    const m = tsCode.match(/return `([\s\S]*)`;\s*\}/);
-    assert.ok(m && m[1], 'Must extract template string from market module');
-    return m[1].replace(/\\`/g, '`').replace(/\$\{/g, '\\${');
-  };
-  const scriptMatch = marketBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
-  assert.ok(scriptMatch && scriptMatch[1], 'Must find inline market canvas script');
-  const assembledJs = scriptMatch[1]
-    .replace('${paletteScript}', extractTemplate(paletteCode))
-    .replace('${crowdScript}', extractTemplate(crowdCode))
-    .replace('${archScript}', extractTemplate(archCode))
-    .replace('${stallsScript}', extractTemplate(stallsCode))
-    .replace('${openRoomScript}', '');
-  new Function(assembledJs);
 
   console.log('✅ Test 149 Passed: Đại Tu Chợ Bến Thành 32-Bit Indie Game (1200×480), Mô-Đun 4 File, 3 Tầng Sạp & Va Chạm AABB (Quyết định 212) Audit verified cleanly');
 }
@@ -7028,16 +7007,17 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   );
 
   assert.ok(
-    marketBannerCode.includes("id: 'exit_market'") &&
-      marketBannerCode.includes('x: 0') &&
-      marketBannerCode.includes("id: 'exit_back_gate'") &&
-      (marketBannerCode.includes('x: 1128') || marketBannerCode.includes('x: 1152') || marketBannerCode.includes('x: 1172')) &&
-      marketBannerCode.includes("id: 'stall_aodai'") &&
-      marketBannerCode.includes("id: 'stall_thoitrang'") &&
+    (marketBannerCode.includes('buildMarketTps3dSceneScript') ||
+      (marketBannerCode.includes("id: 'exit_market'") &&
+        marketBannerCode.includes('x: 0') &&
+        marketBannerCode.includes("id: 'exit_back_gate'") &&
+        (marketBannerCode.includes('x: 1128') || marketBannerCode.includes('x: 1152') || marketBannerCode.includes('x: 1172')) &&
+        marketBannerCode.includes("id: 'stall_aodai'") &&
+        marketBannerCode.includes("id: 'stall_thoitrang'"))) &&
       decisionsCode.includes('213') &&
       chatDocCode.includes('Quyết định 213') &&
       (specCode.includes('QĐ 213') || specCode.includes('QĐ 214') || specCode.includes('QĐ 215') || specCode.includes('QĐ 216') || specCode.includes('QĐ 217')),
-    'BenThanhMarketBannerWebView hotspots, obstacles, and docs must sync QD 213'
+    'BenThanhMarketBannerWebView and docs must sync QD 213 / TPS 3D QD 246'
   );
 
   console.log('✅ Test 150 Passed: Cổng Vòm Dọc Hai Đầu Giấu Không Gian Ngoài, 7 Shop Bắc Kín Ngang & 12 Hàng Quán Sát Kề (Quyết định 213) Audit verified cleanly');
@@ -7050,10 +7030,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
   const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
   const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
-  const marketBannerCode = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
   const paletteCode = fs.readFileSync('src/components/chat/market/marketPalette.ts', 'utf8');
   const crowdCode = fs.readFileSync('src/components/chat/market/marketCrowd.ts', 'utf8');
-  const archCode = fs.readFileSync('src/components/chat/market/marketArchitecture.ts', 'utf8');
   const stallsCode = fs.readFileSync('src/components/chat/market/marketStalls.ts', 'utf8');
 
   assert.ok(
@@ -7073,21 +7051,6 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       (specCode.includes('QĐ 214') || specCode.includes('QĐ 215') || specCode.includes('QĐ 216') || specCode.includes('QĐ 217')),
     'Market modules and docs must implement 32-bit indie visual overhaul for QD 214'
   );
-
-  const extractTemplate = (tsCode) => {
-    const m = tsCode.match(/return `([\s\S]*)`;\s*\}/);
-    assert.ok(m && m[1], 'Must extract template string from market module');
-    return m[1].replace(/\\`/g, '`').replace(/\$\{/g, '\\${');
-  };
-  const scriptMatch = marketBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
-  assert.ok(scriptMatch && scriptMatch[1], 'Must find inline market canvas script');
-  const assembledJs = scriptMatch[1]
-    .replace('${paletteScript}', extractTemplate(paletteCode))
-    .replace('${crowdScript}', extractTemplate(crowdCode))
-    .replace('${archScript}', extractTemplate(archCode))
-    .replace('${stallsScript}', extractTemplate(stallsCode))
-    .replace('${openRoomScript}', '');
-  new Function(assembledJs);
 
   console.log('✅ Test 151 Passed: Nâng Cấp Đồ Họa Chợ Bến Thành Chuẩn Indie 32-Bit (Mái Hiên Vải Sọc, Cụm Hàng Hóa & Nhân Vật Đổ Bóng — Quyết định 214) Audit verified cleanly');
 }
@@ -7114,8 +7077,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       stallsCode.includes('NONG SAN RAU CU') &&
       stallsCode.includes('DUNG CU GIA DUNG') &&
       stallsCode.includes('DEP LAO QUAN AO') &&
-      marketBannerCode.includes("id: 'stall_newspaper'") &&
-      marketBannerCode.includes("id: 'stall_offering'") &&
+      (marketBannerCode.includes('buildMarketTps3dSceneScript') || (marketBannerCode.includes("id: 'stall_newspaper'") && marketBannerCode.includes("id: 'stall_offering'"))) &&
       (crowdCode.match(/shirt:/g) || []).length >= 20 &&
       decisionsCode.includes('215') &&
       chatDocCode.includes('Quyết định 215') &&
@@ -7153,7 +7115,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       crowdCode.includes('CROWD_WALKERS') &&
       (crowdCode.includes('mulberry32(21600)') || crowdCode.includes('mulberry32(21700)')) &&
       crowdCode.includes('rgba(255,248,214,0.58)') &&
-      marketBannerCode.includes('drawExtraMicroStalls') &&
+      (marketBannerCode.includes('buildMarketTps3dSceneScript') || marketBannerCode.includes('drawExtraMicroStalls')) &&
       decisionsCode.includes('216') &&
       chatDocCode.includes('Quyết định 216') &&
       (specCode.includes('QĐ 216') || specCode.includes('QĐ 217')),
@@ -7175,9 +7137,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const crowdCode = fs.readFileSync('src/components/chat/market/marketCrowd.ts', 'utf8');
 
   assert.ok(
-    marketBannerCode.includes('worldHeight: 760') &&
-      marketBannerCode.includes('stuffyState') &&
-      marketBannerCode.includes('breathe_gate') &&
+    (marketBannerCode.includes('buildMarketTps3dSceneScript') ||
+      (marketBannerCode.includes('worldHeight: 760') &&
+        marketBannerCode.includes('stuffyState') &&
+        marketBannerCode.includes('breathe_gate'))) &&
       stallsCode.includes('drawRow2Stalls') &&
       stallsCode.includes('drawRow3Stalls') &&
       stallsCode.includes('drawRow4Stalls') &&
@@ -7189,7 +7152,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       chatDocCode.includes('Quyết định 217') &&
       specCode.includes('1200 × 760') &&
       specCode.includes('QĐ 217'),
-    'Ben Thanh Market must implement 6-row maze (1200x760), 180 crowd, and stuffy pig flee-to-gate behavior for QD 217'
+    'Ben Thanh Market must implement 6-row maze (1200x760), 180 crowd, and stuffy pig flee-to-gate behavior for QD 217 / TPS 3D QD 246'
   );
 
   console.log('✅ Test 154 Passed: Mê Cung 6 Hàng Sạp (1200×760), 180 Người Chen Chúc & Chú Heo Ngộp Thở Chạy Ra Cổng (Quyết định 217) Audit verified cleanly');
@@ -7740,11 +7703,12 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       stadiumArtCode.includes('PHÒNG TRỌNG TÀI & ĐIỀU HÀNH VAR') &&
       stadiumArtCode.includes('PHÒNG HỌP BÁO & TRUYỀN THỐNG TRỐNG ĐỒNG') &&
       stadiumArtCode.includes('KHU NHÀ VỆ SINH HIỆN ĐẠI NAM / NỮ') &&
-      stadiumBannerCode.includes("canvasId: 'stadiumCv'") &&
-      stadiumBannerCode.includes('worldWidth: 840') &&
-      stadiumBannerCode.includes('worldHeight: 680') &&
+      (stadiumBannerCode.includes('buildStadiumTps3dSceneScript') ||
+        (stadiumBannerCode.includes("canvasId: 'stadiumCv'") &&
+          stadiumBannerCode.includes('worldWidth: 840') &&
+          stadiumBannerCode.includes('worldHeight: 680') &&
+          stadiumBannerCode.includes('eng.state'))) &&
       stadiumBannerCode.includes('<iframe') &&
-      stadiumBannerCode.includes('eng.state') &&
       !stadiumArtCode.includes('c.roundRect(') &&
       stadiumViewCode.includes('StadiumBannerWebView') &&
       funBannerCode.includes('onEnterStadium') &&
@@ -8355,4 +8319,86 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log(`✅ Test 182 Passed: Multi-Agent Đợt 1 Real-Frame 9-Room Smoke Test (Adidas[${aRes}] | Cathedral[${cRes}] | Pagoda[${pRes}], 0 NaN — Quyết định 245) Audit verified cleanly`);
 }
 
-console.log('\n🎉 ALL 182 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (182/182)!');
+// =========================================================================
+// TEST 183: MULTI-AGENT ĐỢT 2 — HEADLESS MOCK-CANVAS RENDER THẬT 6 PHÒNG (CHỢ BẾN THÀNH 3 + SVĐ TRỐNG ĐỒNG 3 — QĐ 246)
+// =========================================================================
+{
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const marketWall = fs.readFileSync('src/components/chat/market/marketWallArt.ts', 'utf8');
+  const marketScene = fs.readFileSync('src/components/chat/market/marketTps3dScene.ts', 'utf8');
+  const marketBanner = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+  const stadiumWall = fs.readFileSync('src/components/chat/stadium/stadiumWallArt.ts', 'utf8');
+  const stadiumScene = fs.readFileSync('src/components/chat/stadium/stadiumTps3dScene.ts', 'utf8');
+  const stadiumBanner = fs.readFileSync('src/components/chat/StadiumBannerWebView.tsx', 'utf8');
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDoc = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  const extractRaw = (src) => {
+    const m = src.match(/return String\.raw`([\s\S]*?)`;/);
+    assert.ok(m && m[1], 'Must export String.raw script');
+    return m[1];
+  };
+
+  function makeMockCtx() {
+    let calls = 0, nans = 0;
+    const chk = (...ns) => { for (const n of ns) if (typeof n === 'number' && !Number.isFinite(n)) nans++; };
+    return {
+      fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left', textBaseline: 'alphabetic', globalAlpha: 1,
+      save() {}, restore() {}, beginPath() {}, closePath() {}, clip() {},
+      translate(x, y) { chk(x, y); }, scale(x, y) { chk(x, y); }, rotate(a) { chk(a); },
+      moveTo(x, y) { chk(x, y); }, lineTo(x, y) { chk(x, y); },
+      quadraticCurveTo(a, b, c, d) { chk(a, b, c, d); }, bezierCurveTo(a, b, c, d, e, f) { chk(a, b, c, d, e, f); },
+      rect(x, y, w, h) { chk(x, y, w, h); },
+      arc(x, y, r) { chk(x, y, r); calls++; }, ellipse(x, y, rx, ry) { chk(x, y, rx, ry); calls++; },
+      fill() { calls++; }, stroke() { calls++; },
+      fillRect(x, y, w, h) { chk(x, y, w, h); calls++; }, strokeRect(x, y, w, h) { chk(x, y, w, h); calls++; },
+      fillText(_t, x, y, mw) { chk(x, y, mw); calls++; },
+      measureText(t) { return { width: String(t || '').length * 6 }; },
+      stats() { return { calls, nans }; },
+    };
+  }
+
+  function smokeTestVenue(name, wallSrc, sceneSrc, createFn, stepFn, renderFn, rooms) {
+    const counts = [];
+    for (const r of rooms) {
+      const ctx = makeMockCtx();
+      const fn = new Function(
+        'ctx',
+        extractRaw(engineCode) + '\n' + extractRaw(wallSrc) + '\n' + extractRaw(sceneSrc) + `\n
+        var st = ${createFn}();
+        st.room = '${r}';
+        var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.6, targetHeight: 0.92 });
+        var bounds = { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85 };
+        ${stepFn}(st, 0.016);
+        updateTpsCamera(cam, st.pig.x, 0, st.pig.z, 400, 720, bounds);
+        ${renderFn}(ctx, cam, st, 400, 720);
+        return unprojectFloorTap(cam, 200, 560);
+      `
+      );
+      const tap = fn(ctx);
+      const s = ctx.stats();
+      assert.strictEqual(s.nans, 0, `${name} [${r}] produced ${s.nans} NaN coords`);
+      assert.ok(s.calls > 80, `${name} [${r}] must draw > 80 3D primitives (got ${s.calls})`);
+      assert.ok(tap && Number.isFinite(tap.x) && Number.isFinite(tap.z), `${name} [${r}] unprojectFloorTap failed`);
+      counts.push(`${r}=${s.calls}`);
+    }
+    return counts.join(',');
+  }
+
+  const mRes = smokeTestVenue('Market', marketWall, marketScene, 'createMarketTpsState', 'stepMarketTps', 'renderMarketTpsScene', ['south_hall', 'food_court', 'fruit_craft']);
+  const sRes = smokeTestVenue('Stadium', stadiumWall, stadiumScene, 'createStadiumTpsState', 'stepStadiumTps', 'renderStadiumTpsScene', ['locker_tunnel', 'pitch_arena', 'trophy_vip']);
+
+  assert.ok(
+    tpsDoc.includes('QĐ 246') &&
+      chatDoc.includes('Quyết định 246') &&
+      decDoc.includes('Quyết định 246') &&
+      marketBanner.includes('buildMarketTps3dSceneScript') &&
+      stadiumBanner.includes('buildStadiumTps3dSceneScript'),
+    'Wave 2 Multi-Agent 2 venues (Ben Thanh Market, Trong Dong Stadium) and QD 246 docs must be synced'
+  );
+
+  console.log(`✅ Test 183 Passed: Multi-Agent Đợt 2 Real-Frame 6-Room Smoke Test (Market[${mRes}] | Stadium[${sRes}], 0 NaN — Quyết định 246) Audit verified cleanly`);
+}
+
+console.log('\n🎉 ALL 183 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (183/183)!');

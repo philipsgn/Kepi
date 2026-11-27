@@ -1,34 +1,36 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
-import { buildOpenRoomEngineScript } from '../pixel/pixelOpenRoomEngine';
-import { buildMarketPaletteScript } from './market/marketPalette';
-import { buildMarketCrowdScript } from './market/marketCrowd';
-import { buildMarketArchitectureScript } from './market/marketArchitecture';
-import { buildMarketStallsScript } from './market/marketStalls';
+import { buildTps3dEngineScript } from '../pixel/pixelTps3dEngine';
+import { buildMarketWallArtScript } from './market/marketWallArt';
+import { buildMarketTps3dSceneScript } from './market/marketTps3dScene';
+
+const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
 interface BenThanhMarketBannerWebViewProps {
   active?: boolean;
-  shoppingTotalText: string;
-  foodTotalText: string;
-  visitsCount: number;
+  shoppingTotalText?: string;
+  foodTotalText?: string;
+  visitsCount?: number;
   selectedZone?: number;
   onExitToMap?: () => void;
   onSelectZoneFromCanvas?: (zoneIdx: number) => void;
 }
 
 /**
- * Đại Thế Giới Lòng Chợ Bến Thành 32-Bit Indie Pixel Art (1200×480, Dynamic 1:1 Square Pixel — Quyết định 213)
- * - 2 Cổng Vòm Tròn Nằm Dọc 2 Đầu (Cửa Nam bên trái x: 0..72 & Cửa Bắc bên phải x: 1128..1200) giấu hoàn toàn không gian bên ngoài.
- * - Dãy Bắc kín ngang 7 shop sát vách nhau: Áo Dài Sài Gòn (từ Cửa 1 cũ) -> Hương Trinh -> Liên Sài Gòn -> Vòm Khu Ăn Uống -> Bánh Cuốn/Bèo -> Phở Bò -> Thời Trang Sài Gòn (từ Cửa Bắc cũ).
- * - Tầng Trung Tâm (6 đảo) & Tầng Nam (6 sạp) xếp sát sát kề kề nhau (khe hẻm 20px) + Va chạm AABB chuẩn xác.
+ * Chợ Bến Thành Sài Gòn 3 Phòng TPS 3D (Quyết định 246)
+ * - 3 Phòng riêng biệt 100% (1 Room = 1 Scene, fade 200ms):
+ *   1. 'south_hall'  — Sảnh Cửa Nam & Sạp Vải Áo Dài ("👘 Ướm thử Áo Dài & Lụa Bến Thành")
+ *   2. 'food_court'  — Khu Ẩm Thực Trung Tâm Sạp 1044 ("🥞 Thưởng thức Bánh Cuốn & Bánh Bèo Chợ Bến Thành")
+ *   3. 'fruit_craft' — Sảnh Trái Cây Nhiệt Đới & Đồ Lưu Niệm Nón Lá ("🥭 Chọn mua Xoài Cát & Quà Lưu Niệm")
+ * - Hỗ trợ song song Expo Go (SafeWebView) & Web PWA (<iframe srcDoc>).
  */
 export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewProps> = ({
   active = true,
-  shoppingTotalText,
-  foodTotalText,
-  visitsCount,
+  shoppingTotalText = '0đ',
+  foodTotalText = '0đ',
+  visitsCount = 0,
   selectedZone,
   onExitToMap,
   onSelectZoneFromCanvas,
@@ -36,6 +38,7 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
   const webViewRef = useRef<any>(null);
   const iframeRef = useRef<any>(null);
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [ready] = useState(true);
 
   useEffect(() => {
     return () => {
@@ -45,41 +48,34 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
 
   useEffect(() => {
     if (typeof selectedZone !== 'number') return;
-    const js = `window.__mkGo && window.__mkGo(${selectedZone}); true;`;
+    const roomMap = ['south_hall', 'south_hall', 'food_court', 'fruit_craft'];
+    const targetRoom = roomMap[selectedZone] || 'south_hall';
+    const js = `window.__mkGoRoom && window.__mkGoRoom('${targetRoom}'); true;`;
     if (Platform.OS === 'web') {
       try {
-        iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ type: 'GO_ZONE', zone: selectedZone }), '*');
+        iframeRef.current?.contentWindow?.postMessage(
+          JSON.stringify({ type: 'GO_ROOM', room: targetRoom }),
+          '*'
+        );
       } catch (_e) {}
       return;
     }
     webViewRef.current?.injectJavaScript?.(js);
   }, [selectedZone]);
 
-  useEffect(() => {
-    if (Platform.OS === 'web') return;
-    webViewRef.current?.injectJavaScript?.(
-      `window.__mkSetActive && window.__mkSetActive(${active ? 'true' : 'false'}); true;`
-    );
-  }, [active]);
-
   const handleRoomPayload = (d: any) => {
     if (!d) return;
     if (d.type === 'HAPTIC_LIGHT') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    } else if (d.type === 'ROOM_ACTION') {
-      if ((d.id === 'exit_market' || d.id === 'exit_back_gate') && d.userTriggered && onExitToMap) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-        if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
-        exitTimerRef.current = setTimeout(() => {
-          onExitToMap();
-        }, 120);
-      } else if (d.id === 'stall_liensaigon' && onSelectZoneFromCanvas) {
-        onSelectZoneFromCanvas(1);
-      } else if (d.id === 'arch_foodcourt' && onSelectZoneFromCanvas) {
-        onSelectZoneFromCanvas(2);
-      } else if (d.id === 'stall_banhcuon_banhbeo' && onSelectZoneFromCanvas) {
-        onSelectZoneFromCanvas(3);
-      }
+    } else if (d.type === 'HAPTIC_MEDIUM') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    } else if (d.type === 'ROOM_CHANGED' && onSelectZoneFromCanvas) {
+      const zIdx = d.room === 'food_court' ? 2 : d.room === 'fruit_craft' ? 3 : 1;
+      onSelectZoneFromCanvas(zIdx);
+    } else if (d.type === 'EXIT_MARKET' && onExitToMap) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = setTimeout(() => onExitToMap(), 120);
     }
   };
 
@@ -102,669 +98,373 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
     } catch (_e) {}
   };
 
-  const openRoomScript = useMemo(
-    () =>
-      buildOpenRoomEngineScript({
-        canvasId: 'mkCv',
-        worldWidth: 1200,
-        worldHeight: 760,
-        viewWidth: 220,
-        viewHeight: 320,
-        walkBounds: { minX: 16, maxX: 1184, minY: 168, maxY: 742 },
-        initialX: 180,
-        initialY: 186,
-        initialCamX: 40,
-        initialCamY: 40,
-        speed: 58,
-        obstacles: [
-          // Hàng 1: 9 shop Bắc (y: 120..166)
-          { x: 0, y: 120, w: 112, h: 46 },
-          { x: 116, y: 120, w: 128, h: 46 },
-          { x: 248, y: 120, w: 136, h: 46 },
-          { x: 388, y: 120, w: 144, h: 46 },
-          { x: 536, y: 120, w: 148, h: 46 },
-          { x: 688, y: 120, w: 132, h: 46 },
-          { x: 824, y: 120, w: 132, h: 46 },
-          { x: 960, y: 120, w: 124, h: 46 },
-          { x: 1088, y: 120, w: 112, h: 46 },
-          // Hàng 2 (y: 206..266)
-          { x: 54, y: 208, w: 140, h: 52 },
-          { x: 212, y: 218, w: 128, h: 50 },
-          { x: 358, y: 208, w: 126, h: 50 },
-          { x: 502, y: 220, w: 146, h: 48 },
-          { x: 666, y: 208, w: 120, h: 50 },
-          { x: 804, y: 218, w: 124, h: 50 },
-          { x: 946, y: 208, w: 190, h: 52 },
-          // Hàng 3 (y: 308..364)
-          { x: 42, y: 310, w: 146, h: 46 },
-          { x: 204, y: 318, w: 136, h: 46 },
-          { x: 356, y: 308, w: 142, h: 46 },
-          { x: 514, y: 316, w: 158, h: 46 },
-          { x: 688, y: 308, w: 144, h: 46 },
-          { x: 848, y: 318, w: 144, h: 46 },
-          { x: 1008, y: 310, w: 154, h: 46 },
-          // Hàng 4 (y: 406..464)
-          { x: 36, y: 414, w: 152, h: 46 },
-          { x: 204, y: 406, w: 146, h: 46 },
-          { x: 366, y: 416, w: 142, h: 46 },
-          { x: 524, y: 412, w: 160, h: 46 },
-          { x: 700, y: 406, w: 144, h: 46 },
-          { x: 860, y: 416, w: 144, h: 46 },
-          { x: 1020, y: 408, w: 156, h: 46 },
-          // Hàng 5 (y: 508..564)
-          { x: 44, y: 510, w: 148, h: 46 },
-          { x: 208, y: 518, w: 142, h: 46 },
-          { x: 366, y: 508, w: 146, h: 46 },
-          { x: 528, y: 516, w: 152, h: 46 },
-          { x: 696, y: 508, w: 146, h: 46 },
-          { x: 858, y: 518, w: 142, h: 46 },
-          { x: 1016, y: 510, w: 160, h: 46 },
-          // Hàng 6 (y: 608..668)
-          { x: 4, y: 608, w: 124, h: 52 },
-          { x: 144, y: 620, w: 132, h: 50 },
-          { x: 292, y: 610, w: 132, h: 52 },
-          { x: 440, y: 626, w: 154, h: 44 },
-          { x: 610, y: 610, w: 132, h: 52 },
-          { x: 758, y: 620, w: 134, h: 50 },
-          { x: 908, y: 610, w: 138, h: 52 },
-          { x: 1062, y: 618, w: 134, h: 52 },
-        ],
-        hotspots: [
-          {
-            id: 'exit_market',
-            x: 0,
-            y: 350,
-            w: 28,
-            h: 58,
-            standX: 34,
-            standY: 382,
-            standFace: -1,
-            actionType: 'jump_joy',
-            fastDash: true,
-            bubbleText: `Bước qua Cổng Vòm Nam ra phố...`,
-          },
-          {
-            id: 'exit_back_gate',
-            x: 1172,
-            y: 350,
-            w: 28,
-            h: 58,
-            standX: 1166,
-            standY: 382,
-            standFace: 1,
-            actionType: 'jump_joy',
-            fastDash: true,
-            bubbleText: `Bước qua Cổng Vòm Bắc ra phố...`,
-          },
-          {
-            id: 'stall_newspaper',
-            x: 0,
-            y: 56,
-            w: 112,
-            h: 110,
-            standX: 56,
-            standY: 184,
-            standFace: 1,
-            actionType: 'check_ledger',
-            bubbleText: `Sạp Báo Chí, Giấy Tờ & Vé Số Sài Gòn!`,
-          },
-          {
-            id: 'stall_aodai',
-            x: 116,
-            y: 56,
-            w: 128,
-            h: 110,
-            standX: 180,
-            standY: 184,
-            standFace: 1,
-            actionType: 'look_window',
-            bubbleText: `Áo Dài Sài Gòn & Đồng Hồ · Mua sắm ${shoppingTotalText}`,
-          },
-          {
-            id: 'stall_clothing',
-            x: 248,
-            y: 56,
-            w: 136,
-            h: 110,
-            standX: 316,
-            standY: 184,
-            standFace: 1,
-            actionType: 'check_ledger',
-            bubbleText: `Sạp Vải & Giày Dép Hương Trinh · Mua sắm ${shoppingTotalText}`,
-          },
-          {
-            id: 'stall_liensaigon',
-            x: 388,
-            y: 56,
-            w: 144,
-            h: 110,
-            standX: 460,
-            standY: 184,
-            standFace: 1,
-            actionType: 'check_ledger',
-            bubbleText: `Sạp Liên Sài Gòn & Ngọc Hoa 823 · Trà Cà Phê Đặc Sản`,
-          },
-          {
-            id: 'arch_foodcourt',
-            x: 536,
-            y: 44,
-            w: 148,
-            h: 122,
-            standX: 610,
-            standY: 184,
-            standFace: 1,
-            actionType: 'look_window',
-            bubbleText: `Khu Ăn Uống Sạp 1044 · ${visitsCount} quán quen`,
-          },
-          {
-            id: 'stall_banhcuon_banhbeo',
-            x: 688,
-            y: 56,
-            w: 132,
-            h: 110,
-            standX: 754,
-            standY: 184,
-            standFace: 1,
-            actionType: 'eat_snack',
-            bubbleText: `Bánh Cuốn 50K & Bánh Bèo 20K · Ăn uống ${foodTotalText}`,
-          },
-          {
-            id: 'stall_pho',
-            x: 824,
-            y: 56,
-            w: 132,
-            h: 110,
-            standX: 890,
-            standY: 184,
-            standFace: 1,
-            actionType: 'eat_snack',
-            bubbleText: `Phở Bò & Bún Bò Huế Nóng Hổi · Ăn uống ${foodTotalText}`,
-          },
-          {
-            id: 'stall_thoitrang',
-            x: 960,
-            y: 56,
-            w: 124,
-            h: 110,
-            standX: 1022,
-            standY: 184,
-            standFace: -1,
-            actionType: 'check_ledger',
-            bubbleText: `Shop Thời Trang Sài Gòn · Quần Áo & Túi Xách`,
-          },
-          {
-            id: 'stall_offering',
-            x: 1088,
-            y: 56,
-            w: 112,
-            h: 110,
-            standX: 1144,
-            standY: 184,
-            standFace: -1,
-            actionType: 'look_window',
-            bubbleText: `Sạp Đồ Cúng, Nhang Đèn & Vàng Mã Chợ Bến Thành!`,
-          },
-          {
-            id: 'island_fruit',
-            x: 54,
-            y: 224,
-            w: 140,
-            h: 60,
-            standX: 124,
-            standY: 306,
-            standFace: 1,
-            actionType: 'eat_snack',
-            bubbleText: `Trái Cây 1029 Ngọc Hảo · Xoài Cát, Thanh Long & Dừa Tươi!`,
-          },
-          {
-            id: 'island_seafood',
-            x: 212,
-            y: 238,
-            w: 128,
-            h: 56,
-            standX: 276,
-            standY: 312,
-            standFace: 1,
-            actionType: 'look_window',
-            bubbleText: `Hải Sản Tươi Đá Bào · Tôm Cua Mực Tươi Rói!`,
-          },
-          {
-            id: 'island_veg',
-            x: 358,
-            y: 226,
-            w: 126,
-            h: 58,
-            standX: 420,
-            standY: 306,
-            standFace: 1,
-            actionType: 'look_window',
-            bubbleText: `Nông Sản & Rau Củ Tươi Sạch Chợ Bến Thành!`,
-          },
-          {
-            id: 'island_dining',
-            x: 502,
-            y: 240,
-            w: 146,
-            h: 54,
-            standX: 575,
-            standY: 312,
-            standFace: 1,
-            actionType: 'sip_coffee',
-            bubbleText: `Bàn Ăn Khu Ẩm Thực 1 · Bún bò, Bánh xèo & Trà đá!`,
-          },
-          {
-            id: 'island_houseware',
-            x: 666,
-            y: 226,
-            w: 120,
-            h: 58,
-            standX: 726,
-            standY: 306,
-            standFace: 1,
-            actionType: 'check_ledger',
-            bubbleText: `Dụng Cụ Hằng Ngày & Đồ Gia Dụng Bếp Núc!`,
-          },
-          {
-            id: 'island_sandals',
-            x: 804,
-            y: 240,
-            w: 124,
-            h: 54,
-            standX: 866,
-            standY: 312,
-            standFace: 1,
-            actionType: 'check_ledger',
-            bubbleText: `Sạp Quần Áo & Dép Lào Giá Rẻ Đủ Màu Sắc!`,
-          },
-          {
-            id: 'island_souvenir',
-            x: 946,
-            y: 224,
-            w: 190,
-            h: 60,
-            standX: 1040,
-            standY: 306,
-            standFace: -1,
-            actionType: 'check_ledger',
-            bubbleText: `Lưu Niệm Sài Gòn · Nón Lá, Túi Cói & Gốm Bát Tràng!`,
-          },
-          {
-            id: 'south_offering',
-            x: 4,
-            y: 370,
-            w: 124,
-            h: 58,
-            standX: 66,
-            standY: 452,
-            standFace: 1,
-            actionType: 'look_window',
-            bubbleText: `Sạp Hoa Cúc Vàng & Đồ Cúng Nhang Đèn!`,
-          },
-          {
-            id: 'south_drinks',
-            x: 144,
-            y: 382,
-            w: 132,
-            h: 56,
-            standX: 210,
-            standY: 456,
-            standFace: 1,
-            actionType: 'sip_coffee',
-            bubbleText: `Xe Nước Mía & Dừa Xiêm Ướp Lạnh!`,
-          },
-          {
-            id: 'south_snacks',
-            x: 292,
-            y: 372,
-            w: 132,
-            h: 58,
-            standX: 358,
-            standY: 452,
-            standFace: 1,
-            actionType: 'eat_snack',
-            bubbleText: `Chè Ba Màu & Bánh Dân Gian Ngon Hết Sẩy!`,
-          },
-          {
-            id: 'south_dining',
-            x: 440,
-            y: 388,
-            w: 154,
-            h: 50,
-            standX: 517,
-            standY: 456,
-            standFace: 1,
-            actionType: 'sip_coffee',
-            bubbleText: `Dãy Bàn Ghế Nhựa Vỉa Hè Đông Nghẹt Du Khách!`,
-          },
-          {
-            id: 'south_dried',
-            x: 610,
-            y: 374,
-            w: 132,
-            h: 56,
-            standX: 676,
-            standY: 452,
-            standFace: 1,
-            actionType: 'check_ledger',
-            bubbleText: `Đồ Khô, Tôm Khô & Mắm Nêm Đặc Sản!`,
-          },
-          {
-            id: 'south_coffee',
-            x: 758,
-            y: 382,
-            w: 134,
-            h: 56,
-            standX: 825,
-            standY: 456,
-            standFace: 1,
-            actionType: 'sip_coffee',
-            bubbleText: `Cà Phê Sữa Đá & Sinh Tố Bơ Xoài!`,
-          },
-          {
-            id: 'south_flowers',
-            x: 908,
-            y: 372,
-            w: 138,
-            h: 58,
-            standX: 977,
-            standY: 452,
-            standFace: -1,
-            actionType: 'look_window',
-            bubbleText: `Hoa Tươi & Gốm Sơn Mài Chợ Bến Thành!`,
-          },
-          {
-            id: 'south_stationery',
-            x: 1062,
-            y: 382,
-            w: 134,
-            h: 56,
-            standX: 1129,
-            standY: 456,
-            standFace: -1,
-            actionType: 'check_ledger',
-            bubbleText: `Sạp Giấy Tờ, Sổ Tay, Báo Chí & Tạp Hóa!`,
-          },
-        ],
-      }),
-    [shoppingTotalText, foodTotalText, visitsCount]
-  );
-
-  const paletteScript = useMemo(() => buildMarketPaletteScript(), []);
-  const crowdScript = useMemo(() => buildMarketCrowdScript(), []);
-  const archScript = useMemo(() => buildMarketArchitectureScript(), []);
-  const stallsScript = useMemo(() => buildMarketStallsScript(), []);
+  const tpsEngineScript = useMemo(() => buildTps3dEngineScript(), []);
+  const marketWallArtScript = useMemo(() => buildMarketWallArtScript(), []);
+  const marketSceneScript = useMemo(() => buildMarketTps3dSceneScript(), []);
 
   const htmlContent = useMemo(
-    () => `<!DOCTYPE html>
+    () => `<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#3A2D25;display:flex;align-items:center;justify-content:center}
-#mkCv{
-  width:100%;
-  height:100%;
-  display:block;
-  image-rendering:pixelated;
-  image-rendering:-webkit-crisp-edges;
-  image-rendering:-moz-crisp-edges;
-  image-rendering:crisp-edges;
-  cursor:grab;
-  touch-action:none;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #2B180E; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  canvas {
+    display: block; width: 100%; height: 100%;
+    image-rendering: pixelated;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: crisp-edges;
+    touch-action: none;
+    cursor: grab;
+  }
+  canvas:active { cursor: grabbing; }
+  .room-switcher {
+    position: fixed; top: 14px; right: 12px; z-index: 16;
+    display: flex; gap: 4px;
+    background: rgba(43, 24, 14, 0.92);
+    border: 2.5px solid #2B180E;
+    border-radius: 14px;
+    padding: 3px;
+    box-shadow: 0 3px 0 #1A0E08;
+  }
+  .room-tab {
+    background: transparent; color: #F5E6C8;
+    border: none; border-radius: 10px;
+    padding: 5px 8px; font-size: 11px; font-weight: 900;
+    cursor: pointer; white-space: nowrap;
+  }
+  .room-tab.active {
+    background: #F4B93B; color: #2B180E;
+  }
+  .hud-toast {
+    position: fixed; top: 56px; left: 16px; right: 16px;
+    pointer-events: none; display: flex; justify-content: center; z-index: 10;
+  }
+  .hud-toast-pill {
+    background: rgba(255, 251, 241, 0.95);
+    border: 2.5px solid #2B2118;
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 11.5px; font-weight: 800; color: #2B2118;
+    box-shadow: 0 3px 0 #2B2118;
+    text-align: center; max-width: 340px;
+    transition: opacity 0.18s;
+  }
+  .action-bar {
+    position: fixed; bottom: 26px; left: 16px; right: 16px;
+    display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+    pointer-events: none; z-index: 15;
+  }
+  .action-btn {
+    pointer-events: auto;
+    background: #F4B93B; color: #2B2118;
+    border: 3px solid #2B2118; border-radius: 16px;
+    padding: 10px 18px; font-size: 14px; font-weight: 900;
+    box-shadow: 0 4px 0 #2B2118;
+    cursor: pointer; transition: transform 0.06s;
+  }
+  .action-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2B2118; }
+  .action-btn.sec { background: #FFFBF1; padding: 10px 14px; }
+  [hidden] { display: none !important; }
 </style>
-<script>
-window.onerror=function(msg,src,line){
-  if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(JSON.stringify({type:'CONSOLE_ERROR',error:String(msg),line:line}));}
-  return false;
-};
-</script>
 </head>
 <body>
-<canvas id="mkCv" width="220" height="320" role="img" aria-label="Đại thế giới Chợ Bến Thành 32-bit với 2 cổng Trước/Sau, 3 tầng sạp đặc quánh, hoa quả hải sản ẩm thực, đồ lưu niệm và dòng người du khách tấp nập"></canvas>
+<canvas id="marketCv"></canvas>
+<div class="room-switcher" id="roomSwitcher">
+  <button class="room-tab active" data-room="south_hall">Cửa Nam 👘</button>
+  <button class="room-tab" data-room="food_court">Ẩm Thực 🥞</button>
+  <button class="room-tab" data-room="fruit_craft">Trái Cây 🥭</button>
+</div>
+<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Chợ Bến Thành · Sài Gòn</div></div>
+<div class="action-bar">
+  <button id="mainActionBtn" class="action-btn" hidden></button>
+  <button id="secActionBtn" class="action-btn sec" hidden></button>
+</div>
 <script>
-(function(){
-'use strict';
-
-var WORLD_W=1200;
-var WORLD_H=760;
-var VW=220;
-var VH=320;
-
-${paletteScript}
-${crowdScript}
-${archScript}
-${stallsScript}
-
-var MK={bg:null,r2:null,r3:null,r4:null,r5:null,r6:null,t:0,last:0,dt:0,run:false,w:VW,h:VH};
-var stuffyState={meter:0,level:0,warned:false,fleeing:false,panting:false,pantUntil:0};
-
-function buildMarketInterior(){
-  var bg=document.createElement('canvas');bg.width=WORLD_W;bg.height=WORLD_H;
-  var x=bg.getContext('2d');x.imageSmoothingEnabled=false;
-
-  drawFloorAndCeiling(x,WORLD_W,WORLD_H);
-  drawSideArchGate(x,'left',WORLD_W,WORLD_H);
-  drawSideArchGate(x,'right',WORLD_W,WORLD_H);
-  drawNorthStalls(x);
-  MK.bg=bg;
-
-  MK.r2=mk(WORLD_W,WORLD_H,function(c){drawRow2Stalls(c);drawExtraMicroStalls(c);});
-  MK.r3=mk(WORLD_W,WORLD_H,function(c){drawRow3Stalls(c);});
-  MK.r4=mk(WORLD_W,WORLD_H,function(c){drawRow4Stalls(c);});
-  MK.r5=mk(WORLD_W,WORLD_H,function(c){drawRow5Stalls(c);});
-  MK.r6=mk(WORLD_W,WORLD_H,function(c){drawRow6Stalls(c);});
+window.onerror = function(msg, src, line, col) {
+  try {
+    var payload = JSON.stringify({ type: 'JS_ERROR', message: String(msg), line: line, col: col });
+    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(payload);
+    else if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*');
+  } catch(e) {}
+};
+function postRN(obj) {
+  try {
+    var s = JSON.stringify(obj);
+    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(s);
+    else if (window.parent && window.parent !== window) window.parent.postMessage(s, '*');
+  } catch(e) {}
 }
+${tpsEngineScript}
+${marketWallArtScript}
+${marketSceneScript}
+(function() {
+  var cv = document.getElementById('marketCv');
+  var ctx = cv.getContext('2d');
+  var toastPill = document.getElementById('toastPill');
+  var mainBtn = document.getElementById('mainActionBtn');
+  var secBtn = document.getElementById('secActionBtn');
+  var roomTabs = document.querySelectorAll('.room-tab');
 
-function drawLiveMarketEffects(x,t){
-  try{
-    x.save();
-    // Nắng xiên từ ô giếng trời mái chợ
-    x.globalAlpha=0.09;
-    for(var sk=36;sk<WORLD_W;sk+=120){
-      for(var dy=0;dy<110;dy+=3){R(x,sk+Math.round(dy*0.28),28+dy,42,3,'#FFF6D6');}
+  var W = 400, H = 720;
+  function resizeCanvas() {
+    var dw = Math.max(320, window.innerWidth || 390);
+    var dh = Math.max(480, window.innerHeight || 760);
+    var scale = dw > 460 ? 0.72 : 0.84;
+    W = Math.round(dw * scale);
+    H = Math.round(dh * scale);
+    cv.width = W; cv.height = H;
+    ctx.imageSmoothingEnabled = false;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  var st = createMarketTpsState();
+  var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.6, targetHeight: 0.92 });
+  var marketBounds = { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85 };
+  var currentAction = null;
+  var secAction = null;
+
+  window.__mkGoRoom = function(roomId) {
+    if (roomId && roomId !== st.room) {
+      triggerMarketRoom(st, roomId);
     }
-    // Ánh sáng ấm đèn mây tre & 2 vòm cổng hai đầu
-    x.globalAlpha=0.18+Math.sin(t*3)*0.04;
-    [148,296,448,604,756,904,1052].forEach(function(lx){E(x,lx,54,14,10,'#FFE08A');});
-    E(x,36,216,14,12,'#FFE08A');
-    E(x,1164,216,14,12,'#FFE08A');
-    x.restore();
+  };
+  window.addEventListener('message', function(ev) {
+    try {
+      var d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+      if (d && d.type === 'GO_ROOM' && d.room) window.__mkGoRoom(d.room);
+    } catch(_e) {}
+  });
 
-    // Quạt lồng sắt công nghiệp quay mượt 60fps
-    [354,604,798,966].forEach(function(fx){
-      E(x,fx,72,6,6,INK);E(x,fx,72,5,5,'#334155');
-      var sp=Math.max(1,Math.round(Math.abs(Math.sin(t*10+fx))*5));
-      R(x,fx-sp,71,sp*2,2,'#CBD5E1');
-    });
-
-    // Khói bếp bay từ Nồi nước lèo Khu Ẩm Thực, Bánh Cuốn, Phở Bò & Bàn Ăn
-    [[592,98],[706,92],[928,92],[955,94],[644,248],[696,248]].forEach(function(pt){
-      for(var i=0;i<3;i++){
-        var p=((t*0.95+i*0.33)%1);
-        var sy=pt[1]-Math.round(p*15), stx=pt[0]+Math.round(Math.sin(t*4+i*2)*1.8);
-        x.save();x.globalAlpha=0.72*(1-p);R(x,stx,sy,2,2,'#FFFBF1');x.restore();
-      }
-    });
-  }catch(_e){}
-}
-
-function mkDraw(t){
-  var x=MK.x;
-  var dt=Math.min(0.05,MK.dt||0.016);
-  var now=performance.now();
-  var rm=window.__openRoom?window.__openRoom.state:null;
-  if(window.__openRoom) window.__openRoom.step(dt,now);
-
-  // Cơ chế Chú Heo Ngộp Thở (chỉ tự chạy vọt ra sát cổng đứng thở phì phò, không tự thoát màn hình!)
-  if(rm){
-    var nearGate=(rm.x<=78||rm.x>=1122);
-    if(stuffyState.panting&&now>stuffyState.pantUntil){
-      stuffyState.panting=false;stuffyState.meter=0;stuffyState.level=0;stuffyState.warned=false;
-    }
-    if(stuffyState.fleeing){
-      if(nearGate||!rm.walking){
-        stuffyState.fleeing=false;stuffyState.panting=true;stuffyState.pantUntil=now+4500;
-        stuffyState.meter=0;stuffyState.level=0;stuffyState.warned=false;
-        rm.bubbleText='Phù... ra tới cổng mới thở nổi! Chạm cổng ra phố nha!';
-        rm.bubbleUntil=now+4200;
-      }
-    }else if(!nearGate&&!stuffyState.panting){
-      var nearCnt=countNearbyCrowd(rm.x,rm.y,t);
-      if(nearCnt>=2){stuffyState.meter=Math.min(1,stuffyState.meter+dt*(0.08+nearCnt*0.025));}
-      else{stuffyState.meter=Math.max(0,stuffyState.meter-dt*0.18);}
-      stuffyState.level=stuffyState.meter;
-      if(stuffyState.meter>=0.52&&!stuffyState.warned){
-        stuffyState.warned=true;
-        rm.bubbleText='Ngộp quá... đông nghẹt thở luôn!!';
-        rm.bubbleUntil=now+2600;
-      }
-      if(stuffyState.meter>=1){
-        stuffyState.fleeing=true;
-        var goLeft=(rm.x<WORLD_W/2);
-        var gateX=goLeft?42:1158;
-        rm.bubbleText='Chịu hết nổi rồi! Chạy ra cổng thở thôi!!';
-        rm.bubbleUntil=now+2600;
-        if(window.__openRoom&&window.__openRoom.walkTo){
-          window.__openRoom.walkTo(gateX,384,{id:'breathe_gate',standFace:goLeft?-1:1,fastDash:true,bubbleText:'Phù... ra tới cổng mới thở nổi! Chạm cổng ra phố nha!'});
-        }
-      }
-    }else{
-      stuffyState.meter=Math.max(0,stuffyState.meter-dt*0.35);
-      stuffyState.level=stuffyState.meter;
+  function syncRoomTabs() {
+    for (var i = 0; i < roomTabs.length; i++) {
+      var r = roomTabs[i].getAttribute('data-room');
+      if (r === st.room) roomTabs[i].classList.add('active');
+      else roomTabs[i].classList.remove('active');
     }
   }
 
-  var camX=rm?Math.round(rm.camX):0;
-  var camY=rm?Math.round(rm.camY):0;
+  for (var ti = 0; ti < roomTabs.length; ti++) {
+    (function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var targetRoom = btn.getAttribute('data-room');
+        if (targetRoom && targetRoom !== st.room) {
+          postRN({ type: 'HAPTIC_MEDIUM' });
+          postRN({ type: 'ROOM_CHANGED', room: targetRoom });
+          triggerMarketRoom(st, targetRoom);
+        }
+      });
+    })(roomTabs[ti]);
+  }
 
-  x.save();
-  x.translate(-camX,-camY);
-  x.drawImage(MK.bg,0,0);
-  drawLiveMarketEffects(x,t);
+  function updateContextButtons() {
+    var p = st.pig;
+    var act = null;
+    var sAct = null;
 
-  // Y-Sorting 6 tầng mê cung chợ (Hàng 2..Hàng 6 + 180 người + Chú Heo)
-  var pigY=rm?rm.y:186;
-  var events=[
-    {y:266,kind:'r2'},
-    {y:362,kind:'r3'},
-    {y:462,kind:'r4'},
-    {y:562,kind:'r5'},
-    {y:668,kind:'r6'},
-    {y:pigY,kind:'pig'}
-  ].sort(function(a,b){return a.y-b.y;});
+    syncRoomTabs();
 
-  var prevY=0;
-  events.forEach(function(ev){
-    drawWalkingShoppers(x,t,prevY,ev.y,camX,VW);
-    prevY=ev.y;
-    if(ev.kind==='pig') drawPigAt(x,rm,t,stuffyState);
-    else if(MK[ev.kind]) x.drawImage(MK[ev.kind],0,0);
-  });
-  drawWalkingShoppers(x,t,prevY,999,camX,VW);
-  x.restore();
+    if (st.room === 'south_hall') {
+      if (p.z > 10.6 && Math.abs(p.x) < 2.6) {
+        act = { id: 'go_room', room: 'food_court', label: '🥞 Vào Khu Ăn Uống Sạp 1044' };
+        sAct = { id: 'try_aodai', label: '👘 Ướm thử Áo Dài & Lụa Bến Thành' };
+      } else if (p.x > 2.3 && p.z >= 7.8 && p.z <= 12.2) {
+        act = { id: 'go_room', room: 'fruit_craft', label: '🥭 Sang Sảnh Trái Cây & Nón Lá' };
+        sAct = { id: 'try_aodai', label: '👘 Ướm thử Áo Dài & Lụa Bến Thành' };
+      } else if (p.z <= 2.15 && Math.abs(p.x) <= 2.35) {
+        act = { id: 'exit_market', label: '🚪 Ra Cửa Nam về Bản Đồ' };
+        sAct = { id: 'try_aodai', label: '👘 Ướm thử Áo Dài & Lụa Bến Thành' };
+      } else {
+        act = { id: 'try_aodai', label: '👘 Ướm thử Áo Dài & Lụa Bến Thành' };
+        sAct = { id: 'go_room', room: 'food_court', label: '🥞 Khu Ăn Uống →' };
+      }
+    } else if (st.room === 'food_court') {
+      if (p.z <= 2.3 && Math.abs(p.x) <= 2.4) {
+        act = { id: 'go_room', room: 'south_hall', label: '🚪 Về Sảnh Cửa Nam' };
+        sAct = { id: 'eat_banhcuon', label: '🥞 Thưởng thức Bánh Cuốn & Bánh Bèo Chợ Bến Thành' };
+      } else if (p.x > 2.3 && p.z >= 7.8 && p.z <= 12.2) {
+        act = { id: 'go_room', room: 'fruit_craft', label: '🥭 Sang Sảnh Trái Cây & Nón Lá' };
+        sAct = { id: 'eat_banhcuon', label: '🥞 Thưởng thức Bánh Cuốn & Bánh Bèo Chợ Bến Thành' };
+      } else {
+        act = { id: 'eat_banhcuon', label: '🥞 Thưởng thức Bánh Cuốn & Bánh Bèo Chợ Bến Thành' };
+        sAct = { id: 'go_room', room: 'fruit_craft', label: '🥭 Sảnh Trái Cây →' };
+      }
+    } else if (st.room === 'fruit_craft') {
+      if (p.z <= 2.3 && Math.abs(p.x) <= 2.4) {
+        act = { id: 'go_room', room: 'south_hall', label: '🚪 Về Sảnh Cửa Nam' };
+        sAct = { id: 'buy_mango', label: '🥭 Chọn mua Xoài Cát & Quà Lưu Niệm' };
+      } else if (p.x > 2.3 && p.z >= 7.8 && p.z <= 12.2) {
+        act = { id: 'go_room', room: 'food_court', label: '🥞 Sang Khu Ẩm Thực 1044' };
+        sAct = { id: 'buy_mango', label: '🥭 Chọn mua Xoài Cát & Quà Lưu Niệm' };
+      } else {
+        act = { id: 'buy_mango', label: '🥭 Chọn mua Xoài Cát & Quà Lưu Niệm' };
+        sAct = { id: 'go_room', room: 'south_hall', label: '👘 Sảnh Cửa Nam →' };
+      }
+    }
 
-  if(window.__openRoom) window.__openRoom.drawOverlays(x,now);
-}
+    currentAction = act;
+    secAction = sAct;
+    if (act) { mainBtn.textContent = act.label; mainBtn.hidden = false; }
+    else { mainBtn.hidden = true; }
+    if (sAct) { secBtn.textContent = sAct.label; secBtn.hidden = false; }
+    else { secBtn.hidden = true; }
+  }
 
-function mkFrame(now){
-  if(!MK.run)return;
-  var dt=Math.min(0.05,(now-MK.last)/1000);MK.last=now;MK.dt=dt;MK.t+=dt;
-  mkDraw(MK.t);requestAnimationFrame(mkFrame);
-}
+  function runAction(a) {
+    if (!a) return;
+    postRN({ type: 'HAPTIC_MEDIUM' });
+    if (a.id === 'go_room') {
+      postRN({ type: 'ROOM_CHANGED', room: a.room });
+      triggerMarketRoom(st, a.room);
+    } else if (a.id === 'try_aodai') {
+      st.pig.wearingAoDai = !st.pig.wearingAoDai;
+      st.pig.targetX = -3.2; st.pig.targetZ = 6.2; st.pig.walking = true;
+      st.toast = st.pig.wearingAoDai
+        ? 'Sạp Hương Trinh: Đã ướm thử Áo Dài Lụa Hà Đông thêu Hoa Sen & Nón Lá cực duyên! 👘✨'
+        : 'Đã xếp gọn Áo Dài Lụa & xem tiếp Đặc Sản Liên Sài Gòn 823!';
+      st.toastUntil = st.t + 4.4;
+    } else if (a.id === 'eat_banhcuon') {
+      st.pig.ateFood = true;
+      st.pig.eating = true;
+      st.pig.targetX = -0.38; st.pig.targetZ = 5.2; st.pig.walking = true;
+      st.toast = 'Sạp 1044: Bánh Cuốn Nóng tráng tay 50K, Bánh Bèo Huế tôm cháy 20K & Dừa Xiêm ngọt lịm! 🥞🥥';
+      st.toastUntil = st.t + 4.6;
+    } else if (a.id === 'buy_mango') {
+      st.pig.boughtFruit = true;
+      st.pig.targetX = 0.0; st.pig.targetZ = 4.6; st.pig.walking = true;
+      st.toast = 'Sạp 1029 Ngọc Hảo: Đã chọn Xoài Cát Hòa Lộc chín vàng, Nón Lá Bài Thơ & Bình Gốm Bát Tràng! 🥭👒';
+      st.toastUntil = st.t + 4.6;
+    } else if (a.id === 'exit_market') {
+      if (!st.exiting) {
+        st.exiting = true;
+        st.toast = 'Tạm biệt Chợ Bến Thành! Bước qua Cửa Số 1 · Cửa Nam ra phố...';
+        st.toastUntil = st.t + 2.2;
+        setTimeout(function() { postRN({ type: 'EXIT_MARKET' }); }, 240);
+      }
+    }
+  }
 
-function applyResponsiveViewport(){
-  var w=Math.max(240,window.innerWidth||360);
-  var h=Math.max(320,window.innerHeight||640);
-  var sc=Math.max(2,Math.round(w/192));
-  VW=Math.min(260,Math.max(168,Math.ceil(w/sc)));
-  VH=Math.min(356,Math.max(200,Math.ceil(h/sc)));
-  var cv=document.getElementById('mkCv');
-  if(cv){cv.width=VW;cv.height=VH;}
-  MK.w=VW;MK.h=VH;
-  if(MK.x) MK.x.imageSmoothingEnabled=false;
-  if(window.__openRoom&&window.__openRoom.resize) window.__openRoom.resize(VW,VH);
-}
+  mainBtn.addEventListener('click', function(e) { e.stopPropagation(); runAction(currentAction); });
+  secBtn.addEventListener('click', function(e) { e.stopPropagation(); runAction(secAction); });
 
-window.__mkGo=function(zoneIdx){
-  var targets=[{x:98,y:192},{x:266,y:192},{x:448,y:192},{x:654,y:192},{x:896,y:192},{x:1112,y:192}];
-  var tg=targets[zoneIdx]||targets[0];
-  if(window.__openRoom) window.__openRoom.walkTo(tg.x,tg.y,null);
-};
-window.__mkSetActive=function(v){
-  if(v&&!MK.run){MK.run=true;MK.last=performance.now();requestAnimationFrame(mkFrame);}
-  else if(!v){MK.run=false;}
-};
-window.addEventListener('message',function(ev){
-  try{
-    var d=typeof ev.data==='string'?JSON.parse(ev.data):ev.data;
-    if(d&&d.type==='GO_ZONE'&&typeof d.zone==='number') window.__mkGo(d.zone);
-  }catch(_e){}
-});
-window.addEventListener('resize',applyResponsiveViewport);
+  // Tap-to-Walk Raycast 3D & vuốt xoay camera 360° (không Joystick ảo)
+  var dragging = false, moved = false, lastX = 0, lastY = 0, startX = 0, startY = 0;
+  function getPt(e) {
+    if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+  function onDown(e) {
+    var pt = getPt(e);
+    dragging = true; moved = false; lastX = startX = pt.x; lastY = startY = pt.y;
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    var pt = getPt(e);
+    var dx = pt.x - lastX, dy = pt.y - lastY;
+    if (Math.hypot(pt.x - startX, pt.y - startY) > 7) moved = true;
+    cam.yaw -= dx * 0.0085;
+    cam.pitch = Math.max(-0.68, Math.min(-0.10, cam.pitch - dy * 0.0055));
+    lastX = pt.x; lastY = pt.y;
+    if (e.cancelable) e.preventDefault();
+  }
+  function onUp(e) {
+    if (!dragging) return;
+    dragging = false;
+    if (!moved) {
+      var pt = getPt(e);
+      var rect = cv.getBoundingClientRect();
+      var sx = ((pt.x - rect.left) / rect.width) * W;
+      var sy = ((pt.y - rect.top) / rect.height) * H;
+      var hit = unprojectFloorTap(cam, sx, sy);
+      if (hit) {
+        var cpos = clampMarketWalkPos(st, hit.x, hit.z);
+        st.pig.seated = false; st.pig.eating = false;
+        st.pig.targetX = cpos.x; st.pig.targetZ = cpos.z; st.pig.walking = true;
+        st.ripples.push({ x: cpos.x, z: cpos.z, t: 0 });
+        postRN({ type: 'HAPTIC_LIGHT' });
+      }
+    }
+  }
+  cv.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointermove', onMove, { passive: false });
+  window.addEventListener('pointerup', onUp);
+  cv.addEventListener('touchstart', onDown, { passive: false });
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('touchend', onUp);
 
-function mkStart(){
-  var cv=document.getElementById('mkCv');
-  MK.c=cv;MK.x=cv.getContext('2d');MK.x.imageSmoothingEnabled=false;
-  applyResponsiveViewport();
-  buildMarketInterior();
-  MK.run=true;MK.last=performance.now();
-  requestAnimationFrame(mkFrame);
-}
-
-${openRoomScript}
-
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mkStart);
-else mkStart();
-
+  var lastNow = performance.now();
+  function loop(now) {
+    var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));
+    lastNow = now;
+    stepMarketTps(st, dt);
+    updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, marketBounds);
+    renderMarketTpsScene(ctx, cam, st, W, H);
+    updateContextButtons();
+    if (st.toast && st.t < st.toastUntil) {
+      toastPill.textContent = st.toast;
+      toastPill.style.opacity = '1';
+    } else {
+      toastPill.style.opacity = '0';
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
 </html>`,
-    [openRoomScript, paletteScript, crowdScript, archScript, stallsScript]
+    [tpsEngineScript, marketWallArtScript, marketSceneScript, shoppingTotalText, foodTotalText, visitsCount]
   );
 
-  return (
-    <View style={styles.wrap}>
-      {Platform.OS === 'web' ? (
+  const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
+
+  if (!ready || !active) return null;
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.container}>
         <iframe
           ref={iframeRef}
+          title="Chợ Bến Thành Sài Gòn TPS 3D"
           srcDoc={htmlContent}
-          style={{ width: '100%', height: '100%', border: 'none', display: 'block' } as any}
-          title="Chợ Bến Thành Toàn Màn Hình"
+          style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
         />
-      ) : (
-        <WebView
-          ref={webViewRef}
-          source={{ html: htmlContent }}
-          style={styles.webView}
-          containerStyle={styles.webView}
-          scrollEnabled={false}
-          bounces={false}
-          onMessage={handleMessage}
-          originWhitelist={['*']}
-          javaScriptEnabled
-          domStorageEnabled
-          onContentProcessDidTerminate={() => webViewRef.current?.reload?.()}
-        />
-      )}
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <SafeWebView
+        ref={webViewRef}
+        source={memoizedSource}
+        originWhitelist={['*']}
+        javaScriptEnabled
+        domStorageEnabled
+        scrollEnabled={false}
+        bounces={false}
+        onMessage={handleMessage}
+        containerStyle={styles.webView}
+        style={styles.webView}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  wrap: {
+  container: {
     flex: 1,
     width: '100%',
-    height: '100%',
-    backgroundColor: '#3A2D25',
+    backgroundColor: '#2B180E',
   },
   webView: {
     flex: 1,
     width: '100%',
-    height: '100%',
-    backgroundColor: '#3A2D25',
+    backgroundColor: '#2B180E',
   },
 });
