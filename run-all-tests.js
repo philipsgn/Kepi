@@ -8064,13 +8064,35 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       wallArtCode.includes('function drawPotteryShelfArt') &&
       wallArtCode.includes('function drawQuangGanhPhoArt') &&
       wallArtCode.includes('function drawSaigonSkylineAndClockArt') &&
-      wallArtCode.includes('ĐƯỜNG ĐỘC LẬP') &&
+      wallArtCode.includes('function drawPhoMenuBoardArt') &&
       sceneCode.includes('drawPhoVnCultureWalls3D') &&
       phoBannerCode.includes('buildPhoVnWallArtScript'),
-    'Vietnamese Culture Pixel Art Gallery on all 3 Pho walls (lotus, cyclo, non la & dan nguyet, street sign, ao dai, VN flag & apricot blossom, Bat Trang pottery & lacquerware, quang ganh, Saigon skyline & pendulum clock, and docs) must be synced for QD 240'
+    'Vietnamese Culture Pixel Art Gallery on all 3 Pho walls (lotus, cyclo, non la & dan nguyet, Pho menu board, ao dai, VN flag & apricot blossom, Bat Trang pottery & lacquerware, quang ganh, Saigon skyline & pendulum clock, and docs) must be synced for QD 240'
   );
 
   console.log('✅ Test 177 Passed: Bộ Sưu Tập Mỹ Thuật Pixel Art Văn Hóa Việt Nam Trên 3 Bức Tường Quán Phở (Quyết định 240) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 177 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (177/177)!');
+// =========================================================================
+// TEST 178: BẢNG THỰC ĐƠN PHỞ ĐỎ SON VIỀN GỖ GỤ CHỮ VÀNG VINTAGE 90S — 0% TRÀN VIỀN (QĐ 241)
+// =========================================================================
+{
+  const wallArtCode = fs.readFileSync('src/components/chat/pho/phoVnWallArt.ts', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  assert.ok(
+    chatDocCode.includes('QĐ 240–241') &&
+      decisionsCode.includes('Quyết định 241') &&
+      !wallArtCode.includes('ĐƯỜNG ĐỘC LẬP') &&
+      wallArtCode.includes('function drawPhoMenuBoardArt') &&
+      wallArtCode.includes('THỰC ĐƠN PHỞ') &&
+      wallArtCode.includes('ctx.clip()') &&
+      wallArtCode.includes('safeW'),
+    'Vintage 90s Vermilion-Gold Pho Menu Board replacing overflowing street sign with polygon clip + maxWidth anti-overflow must be synced for QD 241'
+  );
+
+  console.log('✅ Test 178 Passed: Bảng Thực Đơn Phở Đỏ Son Viền Gỗ Gụ Chữ Vàng Vintage 90s 0% Tràn Viền (Quyết định 241) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 178 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (178/178)!');

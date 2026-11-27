@@ -1,9 +1,9 @@
 /**
- * Bộ Sưu Tập Mỹ Thuật Pixel Art Văn Hóa Việt Nam Trên 3 Bức Tường Quán Phở (Quyết định 240)
+ * Bộ Sưu Tập Mỹ Thuật Pixel Art Văn Hóa Việt Nam Trên 3 Bức Tường Quán Phở (Quyết định 240–241)
  * Thiết kế điệu nghệ lấy cảm hứng từ 2 bộ moodboard Văn hóa Việt Nam:
  * - Diềm hoa văn chữ Triện & viền chỉ cổ truyền chạy suốt 3 bức tường (Trái, Phải, Đối Diện Bếp).
- * - Tường Trái (X = -5.94): Biển đường xanh "ĐƯỜNG ĐỘC LẬP", Tranh Hoa Sen Hồng nhiều lớp cánh,
- *   Tranh Xe Xích Lô Đỏ-Vàng Sài Gòn, Bộ Nón Lá dây xanh + Đàn Nguyệt & Sáo Trúc treo tường.
+ * - Tường Trái (X = -5.94): Bảng Thực Đơn Phở Đỏ Son Viền Gỗ Gụ Chữ Vàng Vintage 90s (0% tràn viền),
+ *   Tranh Hoa Sen Hồng nhiều lớp cánh, Tranh Xe Xích Lô Đỏ-Vàng Sài Gòn, Bộ Nón Lá dây xanh + Đàn Nguyệt & Sáo Trúc.
  * - Tường Phải (X = +5.94): Tranh Áo Dài Trắng thêu Hoa Sen & Tem Bưu Chính, Tranh Cờ Đỏ Sao Vàng
  *   + Nón Lá + Cành Hoa Mai Vàng, Kệ Gỗ trưng bày Bình Gốm Bát Tràng men xanh + Chum Sành + Hộp Sơn Mài Đỏ.
  * - Tường Đối Diện Sau Bếp (Z = 14.72): 2 Câu Đối Đỏ Chữ Vàng hai bên bảng PHỞ 1990, Bích họa Quang Gánh
@@ -41,7 +41,69 @@ function drawWallFriezeBorders3D(ctx, cam) {
   }
 }
 
-/* ==================== 2. TÁC PHẨM TƯỜNG TRÁI (HOA SEN, XÍCH LÔ, NÓN LÁ & ĐÀN NGUYỆT, BIỂN ĐƯỜNG) ==================== */
+/* ==================== 2. TÁC PHẨM TƯỜNG TRÁI (BẢNG THỰC ĐƠN PHỞ 90S, HOA SEN, XÍCH LÔ, NÓN LÁ & ĐÀN NGUYỆT) ==================== */
+function drawPhoMenuBoardArt(ctx, cam) {
+  // Bảng Thực Đơn Đỏ Son Viền Gỗ Gụ Chữ Vàng Vintage 90s treo dọc cân hàng với tranh Hoa Sen (Y=1.45..2.75, Z=0.50..1.62)
+  drawPoly3D(ctx, cam, [[-5.93,1.45,0.50],[-5.93,1.45,1.62],[-5.93,2.75,1.62],[-5.93,2.75,0.50]], '#8B1A1A', '#4A2C1A', 2.4);
+  drawPoly3D(ctx, cam, [[-5.92,1.52,0.57],[-5.92,1.52,1.55],[-5.92,2.68,1.55],[-5.92,2.68,0.57]], '#991B1B', '#F4B93B', 1.1);
+  // Chiếu đúng 4 góc mặt trong để clip 100% chống tràn chữ ở mọi góc xoay 360° & khoảng cách
+  var pTL = projectPoint3D(cam, -5.91, 2.66, 0.59);
+  var pTR = projectPoint3D(cam, -5.91, 2.66, 1.53);
+  var pBR = projectPoint3D(cam, -5.91, 1.54, 1.53);
+  var pBL = projectPoint3D(cam, -5.91, 1.54, 0.59);
+  if (!pTL || !pTR || !pBR || !pBL) return;
+  if (pTL.cz < 0.5 || pTR.cz < 0.5 || pBR.cz < 0.5 || pBL.cz < 0.5) return;
+  var bw = Math.hypot(pTR.sx - pTL.sx, pTR.sy - pTL.sy);
+  var bh = Math.hypot(pBL.sx - pTL.sx, pBL.sy - pTL.sy);
+  if (bw < 16 || bh < 22) return;
+  var cx = (pTL.sx + pTR.sx + pBR.sx + pBL.sx) * 0.25;
+  var cy = (pTL.sy + pTR.sy + pBR.sy + pBL.sy) * 0.25;
+  var safeW = Math.max(10, bw * 0.82);
+
+  ctx.save();
+  // Khóa vùng vẽ tuyệt đối bên trong viền vàng của bảng
+  ctx.beginPath();
+  ctx.moveTo(pTL.sx, pTL.sy); ctx.lineTo(pTR.sx, pTR.sy);
+  ctx.lineTo(pBR.sx, pBR.sy); ctx.lineTo(pBL.sx, pBL.sy);
+  ctx.closePath(); ctx.clip();
+
+  // Họa tiết Bát Phở mini bốc khói trên đầu bảng
+  var bowlR = Math.max(2.5, Math.min(bw * 0.16, bh * 0.08));
+  var bowlY = cy - bh * 0.34;
+  ctx.fillStyle = '#FFFBF1'; ctx.strokeStyle = '#F4B93B'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.arc(cx, bowlY, bowlR, 0, Math.PI, false); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,251,241,0.75)'; ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - bowlR * 0.4, bowlY - 1.5); ctx.lineTo(cx - bowlR * 0.2, bowlY - bowlR * 0.9);
+  ctx.moveTo(cx + bowlR * 0.3, bowlY - 1.5); ctx.lineTo(cx + bowlR * 0.5, bowlY - bowlR * 0.9);
+  ctx.stroke();
+
+  // Tiêu đề 'THỰC ĐƠN PHỞ' chữ vàng ánh kim (khóa maxWidth = safeW -> 0% tràn viền)
+  var titlePx = Math.max(5, Math.min(11, Math.round(bh * 0.115)));
+  ctx.font = 'bold ' + titlePx + 'px monospace';
+  ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('THỰC ĐƠN PHỞ', cx, cy - bh * 0.17, safeW);
+
+  // Đường chỉ vàng ngăn cách tiêu đề và danh sách món
+  ctx.strokeStyle = '#F4B93B'; ctx.lineWidth = 0.9;
+  ctx.beginPath(); ctx.moveTo(cx - safeW * 0.46, cy - bh * 0.08); ctx.lineTo(cx + safeW * 0.46, cy - bh * 0.08); ctx.stroke();
+
+  // 4 món Phở kinh điển Vintage 90s căn 2 cột gọn gàng
+  var items = [['TÁI', '15K'], ['NẠM', '15K'], ['GẦU', '18K'], ['ĐẶC BIỆT', '25K']];
+  var rowPx = Math.max(4, Math.min(9, Math.round(bh * 0.092)));
+  ctx.font = 'bold ' + rowPx + 'px monospace';
+  var leftX = cx - safeW * 0.46;
+  var rightX = cx + safeW * 0.46;
+  for (var i = 0; i < items.length; i++) {
+    var ry = cy + bh * (0.04 + i * 0.125);
+    ctx.fillStyle = '#FFF7DF'; ctx.textAlign = 'left';
+    ctx.fillText(items[i][0], leftX, ry, safeW * 0.62);
+    ctx.fillStyle = '#FACC15'; ctx.textAlign = 'right';
+    ctx.fillText(items[i][1], rightX, ry, safeW * 0.32);
+  }
+  ctx.restore();
+}
+
 function drawLotusArt(ctx, a) {
   var u = a.u, fx = a.fx;
   ctx.save(); ctx.translate(a.sx, a.sy); ctx.scale(fx, 1);
@@ -214,16 +276,8 @@ function drawPhoVnCultureWalls3D(ctx, cam, t) {
   drawWallFriezeBorders3D(ctx, cam);
 
   // ---- TƯỜNG TRÁI (X = -5.94) ----
-  // 1. Biển tên đường xanh Việt Nam "ĐƯỜNG ĐỘC LẬP" (Z = 1.15)
-  drawPoly3D(ctx, cam, [[-5.93,2.35,0.65],[-5.93,2.35,1.65],[-5.93,2.85,1.65],[-5.93,2.85,0.65]], '#1D4ED8', '#FFFFFF', 1.4);
-  var stA = wallArtAnchor(cam, -5.91, 2.6, 1.15, 'x');
-  if (stA) {
-    ctx.save(); ctx.translate(stA.sx, stA.sy); ctx.scale(stA.fx, 1);
-    ctx.font = 'bold ' + Math.max(6, Math.round(6.5 * stA.u)) + 'px monospace';
-    ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center';
-    ctx.fillText('ĐƯỜNG ĐỘC LẬP', 0, 2);
-    ctx.restore();
-  }
+  // 1. Bảng Thực Đơn Phở Đỏ Son Viền Gỗ Gụ Chữ Vàng Vintage 90s ngay lối vào (Z = 0.50..1.62, 0% tràn viền)
+  drawPhoMenuBoardArt(ctx, cam);
   // 2. Tranh Hoa Sen Hồng Cổ Điển (Z = 2.8)
   drawPoly3D(ctx, cam, [[-5.93,1.45,2.0],[-5.93,1.45,3.6],[-5.93,2.75,3.6],[-5.93,2.75,2.0]], '#FAF0D7', '#4A2C1A', 2.2);
   var l1 = wallArtAnchor(cam, -5.91, 2.1, 2.8, 'x');
