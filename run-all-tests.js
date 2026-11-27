@@ -7838,7 +7838,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       sceneCode.includes('function triggerPhoAction') &&
       sceneCode.includes('function renderPhoTps3D') &&
       sceneCode.includes('PIG_ORDER') &&
-      (sceneCode.includes('open_door') || sceneCode.includes('doorOpen: 0.95') || sceneCode.includes('doorOpen: 0.0')) &&
+      (sceneCode.includes('open_door') || sceneCode.includes('rightDoorOpen') || sceneCode.includes('doorOpen: 0.0')) &&
       sceneCode.includes('sit_seat') &&
       sceneCode.includes('order_pho') &&
       sceneCode.includes('eat_pho') &&
@@ -8011,4 +8011,28 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 175 Passed: Camera Spring-Arm Raycast Chống Xuyên Tường 100% & Cửa Gỗ Lá Sách Kính Mờ Đóng Kín AAA (Quyết định 238) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 175 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (175/175)!');
+// =========================================================================
+// TEST 176: HÉ DUY NHẤT 1 CÁNH CỬA (~35°) & LUỒNG ÁNH SÁNG NGƯỢC SÁNG ĐỘNG KHI KHÁCH NPC RA VÀO (QĐ 239)
+// =========================================================================
+{
+  const tpsSpecCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+
+  assert.ok(
+    tpsSpecCode.includes('QĐ 239') &&
+      chatDocCode.includes('QĐ 238–239') &&
+      decisionsCode.includes('Quyết định 239') &&
+      sceneCode.includes('leftDoorOpen: 0.0') &&
+      sceneCode.includes('rightDoorOpen: 0.0') &&
+      sceneCode.includes('w.rightDoorTarget = 0.62') &&
+      sceneCode.includes('c.x = 0.55; c.z = 0.28') &&
+      sceneCode.includes('Dải tia nắng mặt trời động bùng sáng'),
+    'Cracked single right door (~35 deg) with dynamic backlit sunlight beam when NPC customers enter/exit must be synced for QD 239'
+  );
+
+  console.log('✅ Test 176 Passed: Hé Duy Nhất 1 Cánh Cửa (~35°) & Luồng Ánh Sáng Ngược Sáng Động Khi Khách NPC Ra Vào (Quyết định 239) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 176 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (176/176)!');
