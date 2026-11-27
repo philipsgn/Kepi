@@ -580,15 +580,14 @@ Màn hình Tab 3 hiển thị:
 
 ---
 
-## 57. Quán Cộng Cà Phê 2 Tầng WebGL 3D Chân Thực (Pixar / Studio Ghibli — Quyết định 242–247)
-- **Động Cơ WebGL 3D Thực Thụ Thuần Inline ([cafeWebgl3dEngine.ts](../../../src/components/chat/cafe/cafeWebgl3dEngine.ts) + Canvas2D Fallback):** Không phụ thuộc CDN mạng, chạy 60fps trên Web PWA, iOS & Android; chiếu phối cảnh Mesh 3D đa giác mượt (hình cầu, trụ, nón cụt, ly tiện tròn, lá dương xỉ, cửa chớp gỗ Pháp, lan can sắt rỉ), ánh sáng đèn Tungsten vàng ấm, nắng chiều vàng óng, hơi nước Espresso & hạt bụi lấp lánh trong tia nắng.
-- **Bộ Texture Thủ Tục Chân Thực (`buildCafeProceduralTextures`):** Tường vôi xanh rêu loang 1980s, vân gỗ gụ tối, gạch bông Đông Dương sờn nhẹ, vải Chăn Con Công đỏ-xanh-vàng, áo trấn thủ chần bông quả trám, tranh ảnh đen trắng 1980s, poster cổ động & bảng menu sơn tay.
-- **Nhân Vật Chú Heo 3D Khớp Nối & Đồng Bộ Toàn App:** Chú heo hồng bầu bĩnh Pixar (có khe xu vàng PigFly), khoác **Áo Trấn Thủ xanh lính chần bông**, **Kính tròn cổ**, **Túi vải bố đeo chéo**, và **cầm Mũ Cối xanh bộ đội** (đặt lên bàn gỗ khi ngồi ban công).
-- **Thế Giới 2 Tầng Liền Mạch + 4 Hành Động Điện Ảnh (`1..4`) + Tự Do TPS 360° ([cafeTps3dScene.ts](../../../src/components/chat/cafe/cafeTps3dScene.ts), [CafeTpsBannerWebView.tsx](../../../src/components/chat/CafeTpsBannerWebView.tsx)):**
-  1. **`1. Quầy Bartender Tầng 1` (`Y = 0`):** Góc máy Over-the-Shoulder; chú Heo vươn tay nhận **thẻ số bàn bằng gỗ** từ Barista, Barista thứ hai xay đá & nước cốt dừa, xung quanh đầy phin nhôm, lon sữa đặc, phích Rạng Đông, máy Espresso nhả hơi nước & bảng thực đơn.
-  2. **`2. Leo Cầu Thang Gỗ` (`Y: 0 → 3.4m`):** Góc máy Low-Angle Tracking; chú Heo bám tay vịn gỗ & ôm Mũ Cối bước thật từng bậc lên gác giữa khung ảnh B&W 1980s, poster & đèn tường đồng hổ phách, ánh sáng ban ngày tràn từ Tầng 2 xuống.
-  3. **`3. Băng Sảnh Tầng 2` (`Y = 3.4m`):** Góc máy Medium 3/4 Tracking; bước qua sàn **gạch bông** giữa bàn thấp, ghế mây đệm Chăn Con Công, khách ngồi uống cà phê cắn hạt hướng dương, **Góc Bàn Heo AI** (`💬 Trò chuyện cùng Heo AI`), hướng về cửa chớp gỗ Pháp mở đón tia nắng bụi bay.
-  4. **`4. Ngồi Ban Công Phố Cổ` (`Y = 3.4m, Z < 0`):** Góc máy góc chéo ban công hoàng hôn; chú Heo kéo ghế đẩu gỗ ngồi xuống, đặt Mũ Cối & Túi Vải lên bàn cạnh **ly Cà Phê Cốt Dừa** & **đĩa hạt hướng dương**, lan can sắt rỉ & **dương xỉ xanh rủ** nhìn xuống phố cổ tường vàng nắng chiều.
+## 57. Quán Cộng Cà Phê 2 Tầng WebGL 3D — Chú Heo 24×20 Đồng Bộ Toàn App, Di Chuyển Real-Time & 0% Card Viền (Quyết định 242–248)
+- **Động Cơ WebGL 3D Thực Thụ Thuần Inline ([cafeWebgl3dEngine.ts](../../../src/components/chat/cafe/cafeWebgl3dEngine.ts) + Canvas2D Fallback):** Không phụ thuộc CDN mạng, chạy 60fps trên Web PWA, iOS & Android; chiếu phối cảnh Mesh 3D đa giác mượt + **11 Texture Thủ Tục 1980s** (tường vôi xanh rêu loang, vân gỗ gụ, gạch bông Đông Dương, vải Chăn Con Công, lá dương xỉ, menu sơn tay, ảnh B&W 1980s, mặt tiền nhà Pháp vàng), ánh sáng Tungsten 2700K, nắng chiều ban công, hơi nước Espresso & hạt bụi nắng.
+- **Chú Heo Mascot Pixel Art 24×20 Đồng Bộ 100% Toàn App ([cafeVnWallArt.ts](../../../src/components/chat/cafe/cafeVnWallArt.ts)):** Sử dụng đúng tạo hình & bảng màu chú Heo hồng `#F9B8C4` + viền `#2B2118` + khe xu vàng `#F4B93B` + chuông vàng cổ (4 góc nhìn `back / front / left / right` × 2 nhịp bước + tư thế ngồi), render bằng **WebGL Depth-Tested Billboard (`gl.NEAREST`)** sắc nét từng hạt pixel & bị che khuất chuẩn xác sau quầy/bàn/lan can; riêng `Heo AI` đeo thêm kính tròn ngồi góc bàn Tầng 2.
+- **Giao Diện Siêu Sạch 0% Card Viền ([CafeTpsBannerWebView.tsx](../../../src/components/chat/CafeTpsBannerWebView.tsx)):** Xóa hoàn toàn `.hud-toast`, `.floor-pill`, `.seq-bar`, `.action-bar` và 2 tấm nắng phẳng trên trần Tầng 2 — chỉ giữ duy nhất nút **`[←]`** góc trên trái của `CafeTpsView`.
+- **Di Chuyển Real-Time Toàn Quán & Ấn Ghế Tự Ngồi ([cafeTps3dScene.ts](../../../src/components/chat/cafe/cafeTps3dScene.ts)):**
+  - Chạm bất kỳ vị trí nào (Tầng 1, Cầu thang gỗ 12 bậc, Sảnh Tầng 2, Ban Công): `planCafeRealtimePath` dựng chuỗi Waypoint liên hoàn dẫn chú Heo đi bộ **real-time 100% không cắt bỏ phân đoạn**, camera TPS bám mượt sau lưng & vuốt xoay 360° tự do.
+  - **Ấn vào bất kỳ ghế nào** (ghế Tầng 1, ghế mây Chăn Con Công Tầng 2, ghế gỗ Ban Công, ghế bàn Heo AI) ➔ chú Heo tự đi real-time tới đúng chiếc ghế đó (tự leo/xuống cầu thang nếu khác tầng) và **tự động ngồi xuống quay mặt vào bàn**; chạm chỗ khác tự đứng dậy đi tiếp.
+  - **Ấn vào Heo AI** ➔ đi tới ngồi đối diện mở Chat Heo AI; **ấn vào Quầy Bartender** ➔ đi tới nhận thẻ gỗ xem pha Cà Phê Cốt Dừa; **ấn vào Cửa Chính** ➔ bước ra cửa quay về Đại lộ Sài Gòn.
 
 ---
 

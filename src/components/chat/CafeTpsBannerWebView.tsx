@@ -15,11 +15,9 @@ interface CafeTpsBannerWebViewProps {
 }
 
 /**
- * Quán Cộng Cà Phê 2 Tầng WebGL 3D Chân Thực Pixar / Studio Ghibli (Quyết định 242–247)
- * - Động cơ WebGL 3D thuần inline (0 CDN mạng, 60fps trên Web PWA, iOS & Android) + Fallback Canvas2D.
- * - Nhân vật Chú Heo 3D khớp nối mặc Áo Trấn Thủ chần bông, Kính tròn cổ, Túi vải đeo chéo & Mũ Cối.
- * - Thế giới 2 tầng liền mạch + Ban công cây dương xỉ nhìn xuống phố cổ vàng nắng chiều.
- * - Hỗ trợ 4 Hành Động Điện Ảnh Liên Hoàn (Quầy Bartender ➔ Cầu Thang ➔ Sảnh Tầng 2 ➔ Ban Công) + Tự do 360°.
+ * Quán Cộng Cà Phê 2 Tầng WebGL 3D — Sạch Sẽ 0% Card Viền, Chú Heo 24×20 Đồng Bộ & Di Chuyển Real-Time (Quyết định 248)
+ * - Gỡ bỏ hoàn toàn mọi toast, pill, dải nút card viền và tấm nắng trần — màn hình 100% không gian 3D.
+ * - Chạm sàn / ghế / Quầy Bar / Heo AI / Cửa chính để chú Heo đi bộ real-time 2 tầng không cắt đoạn.
  */
 export const CafeTpsBannerWebView: React.FC<CafeTpsBannerWebViewProps> = ({
   onExitCafe,
@@ -83,84 +81,17 @@ export const CafeTpsBannerWebView: React.FC<CafeTpsBannerWebViewProps> = ({
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #2D3522; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #2D3522; }
   canvas {
     display: block; width: 100%; height: 100%;
     touch-action: none;
     cursor: grab;
   }
   canvas:active { cursor: grabbing; }
-  .hud-toast {
-    position: fixed; top: 14px; left: 66px; right: 106px;
-    pointer-events: none; display: flex; justify-content: center; z-index: 10;
-  }
-  .hud-toast-pill {
-    background: rgba(255, 251, 241, 0.94);
-    border: 2.5px solid #2B2118;
-    border-radius: 12px;
-    padding: 6px 11px;
-    font-size: 11px; font-weight: 800; color: #2B2118;
-    box-shadow: 0 3px 0 #2B2118;
-    text-align: center; max-width: 340px;
-  }
-  .floor-pill {
-    position: fixed; top: 14px; right: 12px; z-index: 16;
-    background: #3B4D2B; color: #FDE047;
-    border: 2.5px solid #2B2118; border-radius: 12px;
-    padding: 6px 10px; font-size: 11px; font-weight: 900;
-    box-shadow: 0 3px 0 #2B2118; cursor: pointer;
-  }
-  .floor-pill:active { transform: translateY(1px); }
-  .seq-bar {
-    position: fixed; bottom: 76px; left: 10px; right: 10px;
-    display: flex; justify-content: center; flex-wrap: nowrap; gap: 6px;
-    z-index: 16; pointer-events: none;
-  }
-  .seq-btn {
-    pointer-events: auto;
-    background: rgba(255, 251, 241, 0.92); color: #2B2118;
-    border: 2px solid #2B2118; border-radius: 11px;
-    padding: 6px 9px; font-size: 10.5px; font-weight: 800;
-    box-shadow: 0 2.5px 0 #2B2118; cursor: pointer; white-space: nowrap;
-  }
-  .seq-btn.active {
-    background: #F4B93B; color: #2B2118;
-  }
-  .seq-btn:active { transform: translateY(1px); }
-  .action-bar {
-    position: fixed; bottom: 20px; left: 14px; right: 14px;
-    display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;
-    pointer-events: none; z-index: 15;
-  }
-  .action-btn {
-    pointer-events: auto;
-    background: #F4B93B; color: #2B2118;
-    border: 3px solid #2B2118; border-radius: 15px;
-    padding: 9px 15px; font-size: 13px; font-weight: 900;
-    box-shadow: 0 3.5px 0 #2B2118;
-    cursor: pointer; transition: transform 0.06s;
-  }
-  .action-btn:active { transform: translateY(2px); box-shadow: 0 1.5px 0 #2B2118; }
-  .action-btn.ai { background: #4F6335; color: #FFFBF1; }
-  .action-btn.sec { background: #FFFBF1; padding: 9px 13px; }
-  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <canvas id="cafeCv"></canvas>
-<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Cộng Cà Phê 3D · Chế độ Pixar/Ghibli</div></div>
-<button id="floorPillBtn" class="floor-pill">Tầng 1 ☕</button>
-<div class="seq-bar">
-  <button id="act1Btn" class="seq-btn active">1. Quầy Bar</button>
-  <button id="act2Btn" class="seq-btn">2. Cầu Thang</button>
-  <button id="act3Btn" class="seq-btn">3. Tầng 2</button>
-  <button id="act4Btn" class="seq-btn">4. Ban Công</button>
-</div>
-<div class="action-bar">
-  <button id="aiChatBtn" class="action-btn ai">💬 Trò chuyện Heo AI</button>
-  <button id="freeBtn" class="action-btn sec" hidden>🧭 Tự do 360°</button>
-  <button id="exitBtn" class="action-btn sec">🚪 Ra Phố</button>
-</div>
 <script>
 window.onerror = function(msg, src, line, col) {
   try {
@@ -186,18 +117,6 @@ ${cafeSceneScript}
   var ctx = wgl ? null : cv.getContext('2d');
   if (wgl) buildCafeProceduralTextures(wgl);
 
-  var toastPill = document.getElementById('toastPill');
-  var floorPillBtn = document.getElementById('floorPillBtn');
-  var aiBtn = document.getElementById('aiChatBtn');
-  var freeBtn = document.getElementById('freeBtn');
-  var exitBtn = document.getElementById('exitBtn');
-  var actBtns = [
-    document.getElementById('act1Btn'),
-    document.getElementById('act2Btn'),
-    document.getElementById('act3Btn'),
-    document.getElementById('act4Btn')
-  ];
-
   var W = 400, H = 720;
   function resizeCanvas() {
     var dw = Math.max(320, window.innerWidth || 390);
@@ -212,60 +131,15 @@ ${cafeSceneScript}
   window.addEventListener('resize', resizeCanvas);
 
   var st = createCafeTpsState();
-  var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.6, targetHeight: 0.92 });
-  var cafeBounds = { minX: -5.5, maxX: 5.5, minZ: -2.2, maxZ: 14.0, maxY: 6.8 };
-
-  function syncUi() {
-    floorPillBtn.textContent = st.floor === 1 ? 'Tầng 1 ☕' : (st.pig.z < 0.2 ? 'Ban Công 🌿' : 'Tầng 2 🪜');
-    for (var i = 0; i < 4; i++) {
-      if (st.actionStep === i + 1) actBtns[i].classList.add('active');
-      else actBtns[i].classList.remove('active');
-    }
-    freeBtn.hidden = !st.cinematicCam;
-  }
-
-  for (var bIdx = 0; bIdx < 4; bIdx++) {
-    (function(stepIdx) {
-      actBtns[stepIdx - 1].addEventListener('click', function(e) {
-        e.stopPropagation();
-        postRN({ type: 'HAPTIC_MEDIUM' });
-        startCafeActionSequence(st, stepIdx);
-        syncUi();
-      });
-    })(bIdx + 1);
-  }
-
-  floorPillBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
+  st.onRequestOpenChat = function() {
     postRN({ type: 'HAPTIC_MEDIUM' });
-    startCafeActionSequence(st, st.floor === 1 ? 3 : 1);
-    syncUi();
-  });
-
-  freeBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    postRN({ type: 'HAPTIC_LIGHT' });
-    st.cinematicCam = false;
-    st.toast = 'Chế độ Tự do 360°! Chạm sàn để đi & vuốt xoay mọi góc nhìn 🧭';
-    st.toastUntil = st.t + 3.5;
-    syncUi();
-  });
-
-  aiBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
     postRN({ type: 'OPEN_AI_CHAT' });
-  });
+  };
+  var cam = createTpsCamera({ yaw: 0, pitch: -0.26, dist: 3.3, targetHeight: 0.92 });
+  var cafeBounds = { minX: -5.5, maxX: 5.5, minZ: -2.2, maxZ: 14.0, maxY: 6.8 };
+  var exitSent = false;
 
-  exitBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    if (!st.exiting) {
-      st.exiting = true;
-      postRN({ type: 'HAPTIC_MEDIUM' });
-      setTimeout(function() { postRN({ type: 'EXIT_CAFE' }); }, 180);
-    }
-  });
-
-  // Vuốt xoay camera 360° (tự động nhả góc máy điện ảnh) & Chạm sàn đi bộ Raycast 3D
+  // Vuốt xoay camera 360° & Chạm sàn / ghế / Heo AI / Quầy Bar / Cửa đi bộ real-time không cắt đoạn
   var dragging = false, moved = false, lastX = 0, lastY = 0, startX = 0, startY = 0;
   function getPt(e) {
     if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -280,10 +154,7 @@ ${cafeSceneScript}
     if (!dragging) return;
     var pt = getPt(e);
     var dx = pt.x - lastX, dy = pt.y - lastY;
-    if (Math.hypot(pt.x - startX, pt.y - startY) > 7) {
-      moved = true;
-      st.cinematicCam = false;
-    }
+    if (Math.hypot(pt.x - startX, pt.y - startY) > 7) moved = true;
     cam.yaw -= dx * 0.0085;
     cam.pitch = Math.max(-0.68, Math.min(-0.08, cam.pitch - dy * 0.0055));
     lastX = pt.x; lastY = pt.y;
@@ -297,17 +168,29 @@ ${cafeSceneScript}
       var rect = cv.getBoundingClientRect();
       var sx = ((pt.x - rect.left) / rect.width) * W;
       var sy = ((pt.y - rect.top) / rect.height) * H;
-      var hit = st.pig.y >= 1.9
-        ? unprojectCafePlane3D(cam, sx, sy, 3.4)
-        : unprojectFloorTap(cam, sx, sy);
-      if (hit) {
-        st.cinematicCam = false;
-        var cpos = clampCafeWalkPos(st, hit.x, hit.z);
-        st.pig.seated = false; st.pig.reachHand = 0; st.helmetOnTable = false;
-        st.pig.targetX = cpos.x; st.pig.targetZ = cpos.z; st.pig.walking = true;
-        st.ripples.push({ x: cpos.x, z: cpos.z, t: 0 });
-        postRN({ type: 'HAPTIC_LIGHT' });
-        syncUi();
+      var target = wgl ? pickCafeTarget3D(cam, st, sx, sy) : null;
+      if (!target) {
+        var hit = unprojectFloorTap(cam, sx, sy);
+        if (hit) target = { kind: 'floor', x: hit.x, y: 0, z: hit.z };
+      }
+      if (target) {
+        if (target.kind === 'chair' && target.chair) {
+          planCafeRealtimePath(st, target.x, target.y, target.z, target.chair.id, null);
+          st.ripples.push({ x: target.x, y: target.y, z: target.z, t: 0 });
+          postRN({ type: 'HAPTIC_MEDIUM' });
+        } else if (target.kind === 'bar') {
+          planCafeRealtimePath(st, target.x, 0, target.z, -1, 'order_bar');
+          st.ripples.push({ x: target.x, y: 0, z: target.z, t: 0 });
+          postRN({ type: 'HAPTIC_LIGHT' });
+        } else if (target.kind === 'exit') {
+          planCafeRealtimePath(st, target.x, 0, target.z, -1, 'exit_cafe');
+          st.ripples.push({ x: target.x, y: 0, z: target.z, t: 0 });
+          postRN({ type: 'HAPTIC_LIGHT' });
+        } else {
+          planCafeRealtimePath(st, target.x, target.y, target.z, -1, null);
+          st.ripples.push({ x: target.x, y: target.y, z: target.z, t: 0 });
+          postRN({ type: 'HAPTIC_LIGHT' });
+        }
       }
     }
   }
@@ -323,6 +206,10 @@ ${cafeSceneScript}
     var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));
     lastNow = now;
     stepCafeTps(st, dt);
+    if (st.exiting && !exitSent && st.exitFade >= 0.85) {
+      exitSent = true;
+      postRN({ type: 'EXIT_CAFE' });
+    }
     if (wgl) {
       cam.vw = W; cam.vh = H;
       cam.focal = (H * 0.5) / Math.tan(0.76 * 0.5);
@@ -330,13 +217,6 @@ ${cafeSceneScript}
     } else {
       updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, cafeBounds);
       renderCafeTpsScene(ctx, cam, st, W, H);
-    }
-    syncUi();
-    if (st.toast && st.t < st.toastUntil) {
-      toastPill.textContent = st.toast;
-      toastPill.style.opacity = '1';
-    } else {
-      toastPill.style.opacity = '0';
     }
     requestAnimationFrame(loop);
   }

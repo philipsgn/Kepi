@@ -216,6 +216,75 @@ function buildCafeProceduralTextures(webgl) {
     }
     webgl.registerTextureCanvas('colonialStreet', c, true);
   })();
+
+  // 11. Bộ Sprite Chú Heo Mascot Pixel Art 24×20 Đồng Bộ 100% Toàn App (QĐ 248, NEAREST 1:1!)
+  buildPigPixelBillboardTextures(webgl);
+}
+
+function buildPigPixelBillboardTextures(webgl) {
+  function drawPigSpriteSheet(view, stepDir, isAiCoach) {
+    var c = document.createElement('canvas'); c.width = 64; c.height = 64;
+    var g = c.getContext('2d');
+    g.clearRect(0, 0, 64, 64);
+    var u = 2, cx = 32, cy = 58;
+    function r(ox, oy, rw, rh, col) {
+      g.fillStyle = col;
+      g.fillRect(Math.round(cx + ox * u), Math.round(cy + oy * u), Math.round(rw * u), Math.round(rh * u));
+    }
+    var st = stepDir; // -1, 0, +1
+    if (view === 'back') {
+      r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, '#D96D85');
+      r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, '#D96D85');
+      r(-8, -18, 16, 15, '#2B2118'); r(-10, -16, 20, 11, '#2B2118');
+      r(-7, -17, 14, 13, '#F596A8'); r(-9, -15, 18, 9, '#F596A8');
+      r(-7, -17, 14, 4, '#FDBAC7');  r(-7, -6, 14, 2, '#D96D85');
+      r(-8, -22, 4, 5, '#2B2118');   r(-7, -21, 2, 3, '#F596A8');
+      r(4, -22, 4, 5, '#2B2118');    r(5, -21, 2, 3, '#F596A8');
+      r(-3, -16, 6, 2, '#2B2118');   r(-2, -16, 4, 1, '#F4B93B');
+      r(-2 + st, -11, 4, 3, '#2B2118'); r(-1 + st, -10, 2, 1, '#FDBAC7');
+    } else if (view === 'front') {
+      r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, '#F596A8');
+      r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, '#F596A8');
+      r(-8, -18, 16, 15, '#2B2118'); r(-10, -16, 20, 11, '#2B2118');
+      r(-7, -17, 14, 13, '#F596A8'); r(-9, -15, 18, 9, '#F596A8');
+      r(-7, -17, 14, 4, '#FDBAC7');
+      r(-8, -22, 4, 5, '#2B2118');   r(-7, -21, 2, 3, '#FDBAC7');
+      r(4, -22, 4, 5, '#2B2118');    r(5, -21, 2, 3, '#FDBAC7');
+      r(-6, -14, 3, 3, '#2B2118');   r(-5, -14, 1, 1, '#FFFFFF');
+      r(3, -14, 3, 3, '#2B2118');    r(4, -14, 1, 1, '#FFFFFF');
+      r(-4, -11, 8, 5, '#2B2118');   r(-3, -10, 6, 3, '#FBC2CE');
+      r(-2, -9, 1, 2, '#2B2118');    r(1, -9, 1, 2, '#2B2118');
+      r(-8, -10, 2, 2, '#F472B6');   r(6, -10, 2, 2, '#F472B6');
+      if (isAiCoach) {
+        // Kính tròn trí thức cho Heo AI
+        r(-6, -15, 5, 4, '#2B2118'); r(-5, -14, 3, 2, '#E0F2FE');
+        r(1, -15, 5, 4, '#2B2118');  r(2, -14, 3, 2, '#E0F2FE');
+        r(-1, -14, 2, 1, '#2B2118');
+      }
+    } else {
+      var dir = view === 'right' ? 1 : -1;
+      function sr(ox, oy, rw, rh, col) {
+        r(dir > 0 ? ox : -(ox + rw), oy, rw, rh, col);
+      }
+      sr(-7, -4 + st, 3, 4, '#2B2118'); sr(-6, -4 + st, 2, 3, '#D96D85');
+      sr(4, -4 - st, 3, 4, '#2B2118');  sr(5, -4 - st, 2, 3, '#F596A8');
+      sr(-9, -17, 17, 14, '#2B2118');   sr(-11, -15, 21, 10, '#2B2118');
+      sr(-8, -16, 15, 12, '#F596A8');   sr(-10, -14, 19, 8, '#F596A8');
+      sr(-8, -16, 15, 3, '#FDBAC7');    sr(-2, -17, 5, 2, '#F4B93B');
+      sr(2, -21, 4, 5, '#2B2118');      sr(3, -20, 2, 3, '#FDBAC7');
+      sr(9, -12, 4, 5, '#2B2118');      sr(10, -11, 2, 3, '#FBC2CE');
+      sr(5, -13, 2, 3, '#2B2118');      sr(-13, -12, 3, 3, '#2B2118');
+    }
+    return c;
+  }
+
+  var views = ['back', 'front', 'left', 'right'];
+  for (var vi = 0; vi < views.length; vi++) {
+    var vw = views[vi];
+    webgl.registerTextureCanvas('pig_' + vw + '_0', drawPigSpriteSheet(vw, 0, false), false, true);
+    webgl.registerTextureCanvas('pig_' + vw + '_1', drawPigSpriteSheet(vw, 1, false), false, true);
+  }
+  webgl.registerTextureCanvas('pig_ai_front', drawPigSpriteSheet('front', 0, true), false, true);
 }
 
 /* ==================== 2. FALLBACK CANVAS2D CHO HEADLESS SMOKE TEST ==================== */
