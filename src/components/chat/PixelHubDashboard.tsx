@@ -71,7 +71,7 @@ const __SLIM_ICONS_META = {
   ],
 };
 
-export type SubViewType = 'hub' | 'chat' | 'fly' | 'cross' | 'map' | 'market' | 'cathedral' | 'pagoda' | 'pho' | 'adidas' | 'stadium';
+export type SubViewType = 'hub' | 'chat' | 'cafe_tps' | 'fly' | 'cross' | 'map' | 'market' | 'cathedral' | 'pagoda' | 'pho' | 'adidas' | 'stadium';
 
 interface PixelHubDashboardProps {
   onSelectSubView: (view: SubViewType) => void;
@@ -211,7 +211,7 @@ export const PixelHubDashboard: React.FC<PixelHubDashboardProps> = ({
 
         <EntertainmentBannerWebView
           onEnterPho={() => handlePressCard('pho')}
-          onEnterCafe={() => handlePressCard('chat')}
+          onEnterCafe={() => handlePressCard('cafe_tps')}
           onEnterAdidas={() => handlePressCard('adidas')}
           onEnterStadium={() => handlePressCard('stadium')}
           onEnterMarket={() => handlePressCard('market')}

@@ -38,6 +38,7 @@ import { BenThanhMarketView } from '../chat/BenThanhMarketView';
 import { NotreDameCathedralView } from '../chat/NotreDameCathedralView';
 import { PagodaTempleView } from '../chat/PagodaTempleView';
 import { PhoRestaurantView } from '../chat/PhoRestaurantView';
+import { CafeTpsView } from '../chat/CafeTpsView';
 import { AdidasStoreView } from '../chat/AdidasStoreView';
 import { StadiumView } from '../chat/StadiumView';
 import { CafeChatBannerWebView } from '../chat/CafeChatBannerWebView';
@@ -507,6 +508,17 @@ export const ChatView: React.FC<ChatViewProps> = ({
     return (
       <View style={[styles.container, { backgroundColor: '#2B2118' }]}>
         <PhoRestaurantView onBack={() => setActiveSubView('hub')} />
+      </View>
+    );
+  }
+
+  if (activeSubView === 'cafe_tps') {
+    return (
+      <View style={[styles.container, { backgroundColor: '#364627' }]}>
+        <CafeTpsView
+          onBack={() => setActiveSubView('hub')}
+          onOpenChat={() => setActiveSubView('chat')}
+        />
       </View>
     );
   }

@@ -6603,7 +6603,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     funCode.includes('onEnterCafe') &&
-      hubCode.includes("onEnterCafe={() => handlePressCard('chat')}") &&
+      (hubCode.includes("onEnterCafe={() => handlePressCard('chat')}") ||
+        hubCode.includes("onEnterCafe={() => handlePressCard('cafe_tps')}")) &&
       chatViewCode.includes("onExitToHub={() => setActiveSubView('hub')}") &&
       openRoomCode.includes('userTriggered') &&
       decisionsCode.includes('203') &&
@@ -8095,4 +8096,57 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 178 Passed: Bảng Thực Đơn Phở Đỏ Son Viền Gỗ Gụ Chữ Vàng Vintage 90s 0% Tràn Viền (Quyết định 241) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 178 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (178/178)!');
+// =========================================================================
+// TEST 179: QUÁN CÀ PHÊ VIỆT NAM TPS 3D — CỘNG CÀ PHÊ BAO CẤP ẤM CÚNG & "ĐỘC LẬP - TỰ DO - HẠNH PHÚC" (QĐ 242)
+// =========================================================================
+{
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const wallCode = fs.readFileSync('src/components/chat/cafe/cafeVnWallArt.ts', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/cafe/cafeTps3dScene.ts', 'utf8');
+  const bannerCode = fs.readFileSync('src/components/chat/CafeTpsBannerWebView.tsx', 'utf8');
+  const viewCode = fs.readFileSync('src/components/chat/CafeTpsView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const tpsDocCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  // Verify JS syntax of all 3 inline WebView script builders via new Function
+  const mEng = engineCode.match(/return String\.raw`([\s\S]*?)`;/);
+  const mWall = wallCode.match(/return String\.raw`([\s\S]*?)`;/);
+  const mScene = sceneCode.match(/return String\.raw`([\s\S]*?)`;/);
+  assert.ok(mEng && mEng[1] && mWall && mWall[1] && mScene && mScene[1], 'Cafe TPS 3D modules must export String.raw scripts');
+  new Function(mEng[1] + '\n' + mWall[1] + '\n' + mScene[1]);
+
+  assert.ok(
+    tpsDocCode.includes('QĐ 242') &&
+      chatDocCode.includes('Quyết định 242') &&
+      decisionsCode.includes('Quyết định 242') &&
+      engineCode.includes('function drawCoconutCoffeeSprite3D') &&
+      engineCode.includes('function drawEnamelMugCoffeeSprite3D') &&
+      engineCode.includes('function drawCroissantPlateSprite3D') &&
+      engineCode.includes("h.role === 'barista'") &&
+      wallCode.includes('function drawCafeVnCultureWalls3D') &&
+      wallCode.includes('ĐỘC LẬP · TỰ DO') &&
+      wallCode.includes('THỰC ĐƠN CÀ PHÊ') &&
+      wallCode.includes('YÊU NƯỚC LÀ THI ĐUA') &&
+      wallCode.includes('CÀ PHÊ VIỆT NAM') &&
+      wallCode.includes('ctx.clip()') &&
+      sceneCode.includes('function createCafeTpsState') &&
+      sceneCode.includes('function renderCafeTpsScene') &&
+      sceneCode.includes('isAiCoach: true') &&
+      bannerCode.includes('buildCafeVnWallArtScript') &&
+      bannerCode.includes('buildCafeTps3dSceneScript') &&
+      bannerCode.includes('OPEN_AI_CHAT') &&
+      bannerCode.includes('cafeBounds') &&
+      viewCode.includes('CafeTpsBannerWebView') &&
+      hubCode.includes("'cafe_tps'") &&
+      chatViewCode.includes("activeSubView === 'cafe_tps'") &&
+      chatViewCode.includes('<CafeTpsView'),
+    'Vietnamese Cafe TPS 3D (Cong Ca Phe cozy olive-gold palette, Peacock Floral cushions, Coconut Coffee/Enamel Mug/Croissant sprites, olive-star Baristas, Doc Lap Tu Do Hanh Phuc wall art with clip anti-overflow, Heo AI table link, Spring-Arm collision & docs) must be synced for QD 242'
+  );
+
+  console.log('✅ Test 179 Passed: Quán Cà Phê Việt Nam TPS 3D — Cộng Cà Phê Bao Cấp Ấm Cúng & Độc Lập Tự Do Hạnh Phúc (Quyết định 242) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 179 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (179/179)!');

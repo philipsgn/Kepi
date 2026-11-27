@@ -683,6 +683,87 @@ function drawPigTps3D(ctx, cam, pig, t) {
     prRect(9, chY, 6, 1, '#D97706');
     prRect(9, chY + 2, 6, 1, '#F59E0B');
   }
+  // Kính tròn trí thức dành riêng cho Heo AI ngồi bàn cà phê (1:1 chú Heo toàn App — QĐ 242)
+  if (pig.isAiCoach && view === 'front') {
+    prRect(-6, -15, 5, 4, '#2B2118'); prRect(-5, -14, 3, 2, '#E0F2FE');
+    prRect(1, -15, 5, 4, '#2B2118');  prRect(2, -14, 3, 2, '#E0F2FE');
+    prRect(-1, -14, 2, 1, '#2B2118');
+  }
+}
+
+/* ==================== 3B. SPRITE ĐỒ UỐNG & BÁNH QUÁN CÀ PHÊ VIỆT NAM TẢ THỰC (QĐ 242) ==================== */
+function drawCoconutCoffeeSprite3D(ctx, cam, wx, wy, wz) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 16 || pr.cz < 0.4) return;
+  var u = Math.max(0.42, Math.min(2.6, pr.scale / 40));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  ctx.save();
+  // Bóng đế ly thủy tinh
+  ctx.fillStyle = 'rgba(43,33,24,0.28)';
+  ctx.beginPath(); ctx.ellipse(px, py + 1*u, 4.5*u, 1.6*u, 0, 0, Math.PI*2); ctx.fill();
+  // Thân ly thủy tinh cao chứa Cà Phê Cốt Dừa (lớp sữa dừa kem + dòng cà phê nâu)
+  ctx.fillStyle = '#F5E6D3'; ctx.strokeStyle = '#3F2E22'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(px - 4.2*u, py - 10*u); ctx.lineTo(px + 4.2*u, py - 10*u); ctx.lineTo(px + 3.2*u, py); ctx.lineTo(px - 3.2*u, py); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#9A5B2F';
+  ctx.fillRect(px - 3.4*u, py - 9.5*u, 6.8*u, 3.2*u); // Lớp cà phê phin rưới trên
+  // Tem CỘNG xanh-đỏ đặc trưng giữa thân ly
+  ctx.fillStyle = '#3F5A36'; ctx.fillRect(px - 2*u, py - 5.5*u, 4*u, 1.2*u);
+  ctx.fillStyle = '#B91C1C'; ctx.fillRect(px - 2*u, py - 4.2*u, 4*u, 1.0*u);
+  // Chóp kem tuyết cốt dừa trắng muốt bồng bềnh!
+  ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#D6D3D1'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.arc(px, py - 11.2*u, 4.1*u, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(px - 0.5*u, py - 14.2*u, 2.4*u, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawEnamelMugCoffeeSprite3D(ctx, cam, wx, wy, wz, t) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 16 || pr.cz < 0.4) return;
+  var u = Math.max(0.42, Math.min(2.6, pr.scale / 40));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  ctx.save();
+  // Đĩa lót gốm mộc nâu kem
+  ctx.fillStyle = '#D6C7B2'; ctx.strokeStyle = '#4A3B2C'; ctx.lineWidth = 0.9;
+  ctx.beginPath(); ctx.ellipse(px, py + 0.5*u, 6.2*u, 2.2*u, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  // Ca men sắt xanh lính (xanh cốm trầm) cổ điển thời bao cấp!
+  ctx.fillStyle = '#6B7B59'; ctx.strokeStyle = '#2B3522'; ctx.lineWidth = 1;
+  ctx.fillRect(px - 4.2*u, py - 7.5*u, 8.4*u, 7.5*u); ctx.strokeRect(px - 4.2*u, py - 7.5*u, 8.4*u, 7.5*u);
+  // Quai ca men bên phải
+  ctx.strokeStyle = '#556544'; ctx.lineWidth = Math.max(1.2, 1.5*u);
+  ctx.beginPath(); ctx.arc(px + 4.4*u, py - 3.8*u, 2.2*u, -Math.PI/2, Math.PI/2); ctx.stroke();
+  // Miệng ca viền trắng + nước cà phê đen sánh
+  ctx.fillStyle = '#FFFBF1';
+  ctx.beginPath(); ctx.ellipse(px, py - 7.5*u, 4.3*u, 1.4*u, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#3B1E0F';
+  ctx.beginPath(); ctx.ellipse(px, py - 7.5*u, 3.4*u, 1.0*u, 0, 0, Math.PI*2); ctx.fill();
+  // Làn khói cà phê phin nóng bay lên nhẹ nhàng
+  var st = ((t || 0) * 1.4) % 1;
+  ctx.strokeStyle = 'rgba(255,250,235,' + (0.65 * (1 - st)).toFixed(2) + ')';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(px, py - 9*u - st*4*u); ctx.lineTo(px + Math.sin((t||0)*3)*1.5*u, py - 13*u - st*4*u); ctx.stroke();
+  ctx.restore();
+}
+
+function drawCroissantPlateSprite3D(ctx, cam, wx, wy, wz) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 16 || pr.cz < 0.4) return;
+  var u = Math.max(0.42, Math.min(2.6, pr.scale / 40));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  ctx.save();
+  // Đĩa sứ hoa văn xanh cổ điển
+  ctx.fillStyle = '#F8FAFC'; ctx.strokeStyle = '#1E3A8A'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(px, py, 8.2*u, 3.2*u, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  // Bánh Sừng Bò (Croissant) vàng ruộm cong nhiều khía bơ
+  ctx.fillStyle = '#D97706'; ctx.strokeStyle = '#78350F'; ctx.lineWidth = 0.9;
+  ctx.beginPath(); ctx.ellipse(px - 0.5*u, py - 2.2*u, 6.2*u, 2.8*u, -0.1, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#F59E0B';
+  ctx.beginPath(); ctx.ellipse(px - 0.5*u, py - 2.7*u, 4.2*u, 1.7*u, -0.1, 0, Math.PI*2); ctx.fill();
+  // Chén inox sữa đặc chấm bên cạnh!
+  ctx.fillStyle = '#CBD5E1'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.ellipse(px + 5.8*u, py + 1.2*u, 2.6*u, 1.4*u, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#FEF3C7';
+  ctx.beginPath(); ctx.ellipse(px + 5.8*u, py + 0.8*u, 1.9*u, 0.9*u, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
 }
 
 /* ==================== 4. NHÂN VẬT CON NGƯỜI 3D CHI TIẾT (ĐẦU BẾP / PHỤC VỤ / KHÁCH HÀNG) ==================== */
@@ -718,10 +799,11 @@ function drawHumanTps3D(ctx, cam, h, t) {
     hr(-4, -5, 8, 5, '#1E293B');
   }
 
-  // Thân áo + Tạp dề cổ điển đẹp mắt (Đầu bếp / Phục vụ — QĐ 236)
+  // Thân áo + Tạp dề cổ điển đẹp mắt (Đầu bếp / Phục vụ / Barista Xanh Lính — QĐ 236 & QĐ 242)
   var isAnyChef = h.role === 'chef' || h.role === 'chef_butcher' || h.role === 'chef_noodle';
+  var isBarista = h.role === 'barista' || h.role === 'cafe_waiter';
   hr(-6, -21, 12, 13, '#2B2118');
-  hr(-5, -20, 10, 11, h.shirt || '#3B82F6');
+  hr(-5, -20, 10, 11, isBarista ? '#4A5D36' : (h.shirt || '#3B82F6'));
   if (isAnyChef) {
     hr(-4, -19, 8, 10, '#FFFDF7');
     hr(-5, -16, 10, 1, '#94A3B8');
@@ -732,9 +814,15 @@ function drawHumanTps3D(ctx, cam, h, t) {
     hr(-4, -17, 8, 9, '#991B1B'); // Thân tạp dề đỏ đô cổ điển
     hr(-5, -14, 10, 1, '#FACC15'); // Dây thắt eo chỉ vàng
     hr(-3, -12, 6, 3, '#7F1D1D');  // Túi tạp dề trước bụng
+  } else if (isBarista) {
+    // Đồng phục Barista Cộng Cà Phê: Áo xanh bộ đội + biểu tượng vạch đỏ ngôi sao vàng giữa ngực + tạp dề xanh rêu!
+    hr(-2, -18, 4, 2, '#DC2626'); // Dải đỏ biểu tượng trước ngực
+    hr(-1, -18, 2, 2, '#FACC15'); // Ngôi sao vàng giữa ngực
+    hr(-4, -13, 8, 5, '#364627'); // Tạp dề xanh lính thắt eo
+    hr(-5, -13, 10, 1, '#26331B');
   }
 
-  // Tay cầm muôi nấu / dao thái thịt / vợt trụng phở / bưng tô phở
+  // Tay cầm muôi nấu / dao thái thịt / vợt trụng phở / pha chế cà phê / bưng khay
   if (h.role === 'chef') {
     var lad = Math.round(Math.sin(t * 6) * 2);
     hr(5, -17 + lad, 4, 2, '#FCD5B5');
@@ -747,6 +835,14 @@ function drawHumanTps3D(ctx, cam, h, t) {
     var dip = Math.round(Math.sin(t * 5 + 1) * 2.5);
     hr(5, -17 + dip, 4, 2, '#FCD5B5');
     hr(8, -19 + dip, 3, 6, '#D98A36'); // Vợt tre trụng bánh phở!
+  } else if (h.role === 'barista') {
+    var brew = Math.round(Math.sin(t * 5 + (h.phase || 0)) * 2);
+    hr(5, -17 + brew, 4, 2, '#FCD5B5');
+    hr(8, -20 + brew, 4, 5, '#94A3B8'); // Phin cà phê / bình lắc cốt dừa
+  } else if (h.carryCoffee) {
+    hr(4, -16, 4, 2, '#FCD5B5');
+    hr(5, -18, 8, 2, '#5C341D'); // Khay gỗ bưng Cà Phê Cốt Dừa
+    hr(7, -22, 3, 4, '#FFFFFF');
   } else if (h.carryBowl) {
     hr(4, -16, 4, 2, '#FCD5B5');
     hr(5, -19, 7, 4, '#FFFDF7'); // Tô phở bưng trên tay
@@ -761,6 +857,11 @@ function drawHumanTps3D(ctx, cam, h, t) {
     // Mũ đầu bếp cao trắng nổi bật
     hr(-5, -37, 10, 6, '#2B2118');
     hr(-4, -36, 8, 5, '#FFFFFF');
+  } else if (isBarista) {
+    // Mũ vải xanh bộ đội đồng phục Cộng Cà Phê (1:1 ảnh mẫu!)
+    hr(-5, -34, 10, 4, '#2B2118');
+    hr(-4, -33, 8, 3, '#556B3E');
+    hr(-4, -31, 9, 1, '#3B4D2B');
   }
   if (showFace) {
     hr(-3, -27, 2, 2, '#2B2118'); hr(1, -27, 2, 2, '#2B2118'); // Đôi mắt
