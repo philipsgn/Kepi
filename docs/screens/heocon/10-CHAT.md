@@ -509,3 +509,22 @@ Màn hình Tab 3 hiển thị:
 - **Adidas Originals Hội An (`saigonPanoramaArt.ts`, `x: 214..314`):** Mở rộng bảng hiệu Logo 3 Sọc + chữ `ADIDAS` sắc nét, phóng to Tượng Cỏ Ba Lá Trefoil viền LED trắng góc phải, bổ sung tranh bích họa Hội An trên tường, bậc tam cấp đá hoa văn & 2 bồn hoa giấy tím-hồng rủ 2 bên sân.
 - **SVĐ Thống Nhất (`drawWavingVietnamFlag`):** Nâng cấp lá cờ Việt Nam lên cỡ lớn **`26 × 17` px** có **ngôi sao vàng 5 cánh sắc nét** & hiệu ứng sóng vải uốn lượn bay phấp phới 60fps kèm 2 cờ phướn 2 bên khán đài.
 - **Khu Chùa Cổ Kính Hùng Vĩ 3 Lớp Chiều Sâu (`x: 688..856`):** Lớp sau gồm rặng cây xanh xa rợp bóng, Bảo Tháp 7 tầng & **Chùa Một Cột (Diên Hựu Tự) trên hồ sen hồng** rõ nét; mặt tiền chính giữa là **Cổng Tam Quan 2 tầng mái đao cong đầu rồng** + lư hương đồng bốc khói trầm 60fps; tiền cảnh trước sân là **Cây Đa cổ thụ tán rộng có rễ buông** uy nghi.
+
+---
+
+## 51. Không Gian Toàn Màn Hình Sân Vận Động Trống Đồng Chuẩn Quốc Tế FIFA (`840 × 680` — Quyết định 231)
+- **Kiến trúc Module:** [`stadiumInteriorArt.ts`](../../../src/components/chat/stadium/stadiumInteriorArt.ts) + [`StadiumBannerWebView.tsx`](../../../src/components/chat/StadiumBannerWebView.tsx) + [`StadiumView.tsx`](../../../src/components/chat/StadiumView.tsx), kết nối 2 chiều từ hotspot `thong_nhat_stadium` trên Hub Tab Khám phá (`onEnterStadium` + `fastDash: true`, đồng thời nâng cấp dải mái vòm Trống Đồng Đông Sơn trên mặt tiền SVĐ Hub).
+- **Nửa trên (`y: 0..420`) — Chảo Lửa Sân Vận Động Trống Đồng:**
+  - Mái vòm khán đài Bắc đúc hoa văn **Mặt Trời & Chim Lạc Trống Đồng Đông Sơn** ánh đồng–đỏ son + bảng tỷ số LED sống động (`VN - AWAY`) + 4 trụ đèn pha LED 4 góc.
+  - Khán đài phủ ghế **Đỏ–Vàng ghép hình Cờ Đỏ Sao Vàng khổng lồ** + khán giả cổ vũ nhịp sóng 60fps.
+  - Đường pitch chạy điền kinh **6 làn đỏ gạch** kẻ vạch trắng số làn `1..6` bao quanh sân cỏ FIFA `480×216` sọc xanh 2 màu mượt mà, khắc chìm Mặt Trời Trống Đồng giữa vòng tròn trung tâm, 2 khung thành lưới trắng 3D & 4 cờ góc bay phấp phới.
+  - **Trận đấu 11v11 chuẩn FIFA (60fps AI):** 22 cầu thủ (Đội Tuyển Việt Nam Đỏ–Vàng sơ đồ 4-3-3 vs Đội Khách Xanh–Trắng sơ đồ 4-4-2) di chuyển chiến thuật, chuyền bóng, sút cầu môn, thủ môn bay người cản phá, hiệu ứng GOAL! + 3 trọng tài quốc tế FIFA (1 trọng tài chính + 2 trọng tài biên phất cờ).
+  - **2 Khu kỹ thuật HLV & Dự bị:** Cabin mái vòm kính cong, ghế bọc da, 5 cầu thủ dự bị mặc áo bib, bình nước & HLV đứng chỉ đạo sát đường biên.
+- **Nửa dưới (`y: 420..680`) — 7 Phòng Hậu Trường Chuẩn FIFA:**
+  1. **Đường Hầm Cầu Thủ (Player Tunnel)** chính giữa kết nối hành lang hậu trường thẳng ra sân cỏ cho Heo Mascot đi bộ xuyên qua.
+  2. **Phòng Thay Đồ Đội Tuyển Việt Nam** (11 tủ áo đỏ, ghế băng, sa bàn 4-3-3, khu tắm).
+  3. **Phòng Thay Đồ Đội Khách** (tương xứng chuẩn FIFA, 11 tủ áo xanh, sa bàn 4-4-2, khu tắm).
+  4. **Phòng Hồi Sức & Y Tế Thể Thao** (2 giường vật lý trị liệu, 2 bể ngâm nước đá Cryo, tủ thuốc chữ thập đỏ, AED, cáng cứu thương & bác sĩ).
+  5. **Phòng Trọng Tài & Điều Hành VAR** (khu nghỉ trọng tài + trạm 4 màn hình VAR sáng đèn & kỹ thuật viên).
+  6. **Phòng Họp Báo & Truyền Thống Trống Đồng** (bục họp báo FIFA + dãy ghế phóng viên + tủ kính trưng bày Trống Đồng Đông Sơn & Cúp Vàng).
+  7. **Khu Nhà Vệ Sinh Hiện Đại Nam/Nữ** (phân khu Nam xanh & Nữ hồng, buồng vệ sinh, bồn rửa tay đá & gương soi).

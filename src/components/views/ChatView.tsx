@@ -39,6 +39,7 @@ import { NotreDameCathedralView } from '../chat/NotreDameCathedralView';
 import { PagodaTempleView } from '../chat/PagodaTempleView';
 import { PhoRestaurantView } from '../chat/PhoRestaurantView';
 import { AdidasStoreView } from '../chat/AdidasStoreView';
+import { StadiumView } from '../chat/StadiumView';
 import { CafeChatBannerWebView } from '../chat/CafeChatBannerWebView';
 
 const __REGRESSION_META = {
@@ -514,6 +515,14 @@ export const ChatView: React.FC<ChatViewProps> = ({
     return (
       <View style={[styles.container, { backgroundColor: '#181B22' }]}>
         <AdidasStoreView onBack={() => setActiveSubView('hub')} />
+      </View>
+    );
+  }
+
+  if (activeSubView === 'stadium') {
+    return (
+      <View style={[styles.container, { backgroundColor: '#1E293B' }]}>
+        <StadiumView onBack={() => setActiveSubView('hub')} />
       </View>
     );
   }

@@ -7767,4 +7767,58 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 167 Passed: Tinh Chỉnh Mỹ Thuật 3 Landmark Hub Banner — Adidas Sắc Nét, Cờ VN Cỡ Lớn & Chùa 3 Lớp + Chùa Một Cột + Cây Đa (Quyết định 230) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 167 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (167/167)!');
+// =========================================================================
+// TEST 168: KHÔNG GIAN TOÀN MÀN HÌNH SÂN VẬN ĐỘNG TRỐNG ĐỒNG CHUẨN QUỐC TẾ FIFA (840×680 — QĐ 231)
+// =========================================================================
+{
+  const stadiumArtCode = fs.readFileSync('src/components/chat/stadium/stadiumInteriorArt.ts', 'utf8');
+  const stadiumBannerCode = fs.readFileSync('src/components/chat/StadiumBannerWebView.tsx', 'utf8');
+  const stadiumViewCode = fs.readFileSync('src/components/chat/StadiumView.tsx', 'utf8');
+  const funBannerCode = fs.readFileSync('src/components/chat/EntertainmentBannerWebView.tsx', 'utf8');
+  const hubCode = fs.readFileSync('src/components/chat/PixelHubDashboard.tsx', 'utf8');
+  const chatViewCode = fs.readFileSync('src/components/views/ChatView.tsx', 'utf8');
+  const saigonArtCode = fs.readFileSync('src/components/chat/hub/saigonPanoramaArt.ts', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  // Verify JS syntax of stadiumInteriorArt.ts payload via new Function
+  const mArt = stadiumArtCode.match(/return String\.raw`([\s\S]*?)`;/);
+  assert.ok(mArt && mArt[1], 'stadiumInteriorArt.ts must export String.raw canvas script');
+  new Function(mArt[1]);
+
+  assert.ok(
+    stadiumArtCode.includes('function drawDongSonSun') &&
+      stadiumArtCode.includes('function drawChimLacMotif') &&
+      stadiumArtCode.includes('function drawNorthStandAndTrongDongRoof') &&
+      stadiumArtCode.includes('function drawRunningTrackAndFifaPitch') &&
+      stadiumArtCode.includes('function drawTechnicalBenchesAndDugouts') &&
+      stadiumArtCode.includes('function drawFifaBackstageRooms') &&
+      stadiumArtCode.includes('function createFootballMatchState') &&
+      stadiumArtCode.includes('function stepFootballMatch') &&
+      stadiumArtCode.includes('function drawFootballMatchLive') &&
+      stadiumArtCode.includes('PHÒNG THAY ĐỒ ĐỘI TUYỂN VIỆT NAM') &&
+      stadiumArtCode.includes('PHÒNG THAY ĐỒ ĐỘI KHÁCH') &&
+      stadiumArtCode.includes('PHÒNG HỒI SỨC & Y TẾ THỂ THAO CRYO') &&
+      stadiumArtCode.includes('PHÒNG TRỌNG TÀI & ĐIỀU HÀNH VAR') &&
+      stadiumArtCode.includes('PHÒNG HỌP BÁO & TRUYỀN THỐNG TRỐNG ĐỒNG') &&
+      stadiumArtCode.includes('KHU NHÀ VỆ SINH HIỆN ĐẠI NAM / NỮ') &&
+      stadiumBannerCode.includes("canvasId: 'stadiumCv'") &&
+      stadiumBannerCode.includes('worldWidth: 840') &&
+      stadiumBannerCode.includes('worldHeight: 680') &&
+      stadiumBannerCode.includes('<iframe') &&
+      stadiumViewCode.includes('StadiumBannerWebView') &&
+      funBannerCode.includes('onEnterStadium') &&
+      hubCode.includes("'stadium'") &&
+      chatViewCode.includes('StadiumView') &&
+      saigonArtCode.includes('Trống Đồng Đông Sơn') &&
+      decisionsCode.includes('Quyết định 231') &&
+      chatDocCode.includes('Quyết định 231') &&
+      specCode.includes('QĐ 231'),
+    'Trong Dong FIFA Stadium (840x680, 11v11 match + 3 refs, red-gold VN flag stands, 6-lane track, 7 FIFA backstage rooms, 2-way Hub portal, and docs) must be synced for QD 231'
+  );
+
+  console.log('✅ Test 168 Passed: Không Gian Toàn Màn Hình Sân Vận Động Trống Đồng Chuẩn Quốc Tế FIFA (840×680 — Quyết định 231) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 168 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (168/168)!');

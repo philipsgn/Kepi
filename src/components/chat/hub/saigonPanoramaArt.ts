@@ -437,10 +437,14 @@ function drawSaigonLandmarks(c, pal) {
   for (var fxi = 562; fxi < 660; fxi += 3) {
     R(c, fxi, 28 + (fxi % 2), 2, 2, fanCols[fxi % fanCols.length]);
   }
-  // Mái vòm khán đài A trắng-xanh dương cong mềm
+  // Mái vòm khán đài A đúc hoa văn Trống Đồng Đông Sơn (ánh đồng-đỏ son — QĐ 231)
   R(c, 538, 34, 146, 8, '#E6EEF5');
-  R(c, 542, 31, 138, 4, '#FFFFFF');
-  R(c, 538, 34, 146, 2, '#1D5AA6'); // Viền xanh biểu tượng SVĐ
+  R(c, 542, 31, 138, 4, '#9A631B'); // Mái vòm đồng cổ Trống Đồng
+  R(c, 544, 32, 134, 1, '#F3C969'); // Chỉ vàng đồng ánh kim
+  for (var tdm = 548; tdm < 672; tdm += 12) {
+    R(c, tdm, 33, 6, 1, '#B8291E'); // Họa tiết Chim Lạc & Mặt Trời Trống Đồng
+  }
+  R(c, 538, 34, 146, 2, '#B8291E'); // Viền đỏ son biểu tượng SVĐ Trống Đồng
   R(c, 538, 41, 146, 2, '#2B2118');
   // Khối mặt tiền khán đài A & cổng chính
   R(c, 540, 43, 142, 25, '#EEF2F5');

@@ -21,6 +21,7 @@ interface EntertainmentBannerWebViewProps {
   onEnterAdidas?: () => void;
   onEnterMarket?: () => void;
   onEnterCathedral?: () => void;
+  onEnterStadium?: () => void;
   onEnterPagoda?: () => void;
 }
 
@@ -37,6 +38,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
   onEnterAdidas,
   onEnterMarket,
   onEnterCathedral,
+  onEnterStadium,
   onEnterPagoda,
 }) => {
   const { tokens } = useTheme();
@@ -76,6 +78,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
       else if (d.id === 'adidas_store' && d.userTriggered && onEnterAdidas) triggerPortal(onEnterAdidas);
       else if (d.id === 'ben_thanh_notre' && d.userTriggered && onEnterMarket) triggerPortal(onEnterMarket);
       else if (d.id === 'notre_dame_gate' && d.userTriggered && onEnterCathedral) triggerPortal(onEnterCathedral);
+      else if (d.id === 'thong_nhat_stadium' && d.userTriggered && onEnterStadium) triggerPortal(onEnterStadium);
       else if (d.id === 'pagoda_gate' && d.userTriggered && onEnterPagoda) triggerPortal(onEnterPagoda);
     }
   };
@@ -90,7 +93,7 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
     };
     window.addEventListener('message', onWebMsg);
     return () => window.removeEventListener('message', onWebMsg);
-  }, [onEnterPho, onEnterCafe, onEnterAdidas, onEnterMarket, onEnterCathedral, onEnterPagoda]);
+  }, [onEnterPho, onEnterCafe, onEnterAdidas, onEnterMarket, onEnterCathedral, onEnterStadium, onEnterPagoda]);
 
   const handleMessage = (event: any) => {
     try {
@@ -191,7 +194,8 @@ export const EntertainmentBannerWebView: React.FC<EntertainmentBannerWebViewProp
             standY: 82,
             standFace: 1,
             actionType: 'jump_joy',
-            bubbleText: `SVĐ Thống Nhất rực đèn · Chuỗi ${streakDays} ngày cực sung!`,
+            fastDash: true,
+            bubbleText: 'Đang bước vào Sân Vận Động Trống Đồng FIFA...',
           },
           {
             id: 'pagoda_gate',
