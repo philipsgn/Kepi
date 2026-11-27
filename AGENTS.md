@@ -27,8 +27,9 @@
 * **Trước khi code BẤT KỲ màn hình/UI nào**, Agent bắt buộc đọc theo thứ tự:
   1. `docs/STYLE_HEOCON.md` — ngôn ngữ thiết kế chung (token, viền 3px, bóng cứng 0-blur, thang chữ, giọng văn heo).
   2. `docs/VIETNAM_PIXEL_ART_BIBLE.md` — **Bộ Công Thức Chuẩn Pixel Art Việt Nam** (Quyết định 224: chắt lọc từ `spritefusion-pixel-snapper` & `pixelium-design` OKLab, Thước Tỷ Lệ Vàng Việt Nam, Luật Đường Xá/Xe Cộ/Cầu/Người Đi Đứng & Blueprint Quán Phở, Quán Cà Phê, SVĐ Thống Nhất, Adidas Store). Ưu tiên tái sử dụng helper dùng chung tại `src/components/pixel/vnPixelArtKit.ts`.
-  3. `docs/screens/heocon/` — đặc tả screen-unit nhỏ tương ứng (xem `00-INDEX.md` để chọn đúng file).
-  4. `prototype/Ví Heo Con.html` — code đồ họa gốc, đặc biệt với mọi màn có pixel art (port theo `docs/screens/heocon/01-PIXEL-GFX-PORT.md`).
+  3. `docs/TPS_3D_OPEN_WORLD_SPEC.md` — **Chuẩn Góc Nhìn Thứ 3 Nhập Vai 3D Pixel-Art (TPS kiểu PUBG — Quyết định 232):** Bắt buộc áp dụng cho mọi không gian nội thất khi chú Heo Mascot đi vào (Camera sau lưng 360°, Tap-to-Walk Raycast sàn 3D không Joystick ảo, Multi-Angle Pig Sprite, mở cửa 2 cánh, ngồi ghế/tương tác dịch vụ & khám phá hậu trường). Tái sử dụng Engine dùng chung `src/components/pixel/pixelTps3dEngine.ts`.
+  4. `docs/screens/heocon/` — đặc tả screen-unit nhỏ tương ứng (xem `00-INDEX.md` để chọn đúng file).
+  5. `prototype/Ví Heo Con.html` — code đồ họa gốc, đặc biệt với mọi màn có pixel art (port theo `docs/screens/heocon/01-PIXEL-GFX-PORT.md`).
 * **Quy tắc port pixel art:** giữ nguyên hex/bảng màu (`C`, `PAL`), tọa độ logic, seed `mulberry32`; chỉ được đổi API vẽ (canvas → PNG generator / RN View) và scale 4× nearest-neighbor; ≤ 32 màu; cấm làm mờ/anti-alias. Mọi lệch so với prototype phải ghi vào `docs/DECISIONS.md` kèm lý do.
 * **Token-only:** cấm hard-code hex trong component — mọi màu qua `src/theme/tokens.ts` (bảng `heoconTokens`).
 * **Giữ nguyên 100% tính năng & logic:** re-skin chỉ thay da; không đổi store/data contract/luồng nghiệp vụ.

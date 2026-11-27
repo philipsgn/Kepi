@@ -528,3 +528,12 @@ Màn hình Tab 3 hiển thị:
   5. **Phòng Trọng Tài & Điều Hành VAR** (khu nghỉ trọng tài + trạm 4 màn hình VAR sáng đèn & kỹ thuật viên).
   6. **Phòng Họp Báo & Truyền Thống Trống Đồng** (bục họp báo FIFA + dãy ghế phóng viên + tủ kính trưng bày Trống Đồng Đông Sơn & Cúp Vàng).
   7. **Khu Nhà Vệ Sinh Hiện Đại Nam/Nữ** (phân khu Nam xanh & Nữ hồng, buồng vệ sinh, bồn rửa tay đá & gương soi).
+
+---
+
+## 52. Chuẩn Góc Nhìn Thứ 3 Nhập Vai (TPS 3D Kiểu PUBG) & Nâng Cấp Quán Phở Cổ Truyền (Quyết định 232)
+- **Tài liệu chuẩn toàn app:** [`docs/TPS_3D_OPEN_WORLD_SPEC.md`](../../TPS_3D_OPEN_WORLD_SPEC.md) + Engine dùng chung [`pixelTps3dEngine.ts`](../../../src/components/pixel/pixelTps3dEngine.ts) (Canvas2D 3D Perspective Projection thuần JS, 0 phụ thuộc mạng/WebGL, 60fps).
+- **Nâng cấp tiên phong tại Quán Phở Cổ Truyền ([`phoTps3dScene.ts`](../../../src/components/chat/pho/phoTps3dScene.ts) + [`PhoRestaurantBannerWebView.tsx`](../../../src/components/chat/PhoRestaurantBannerWebView.tsx)):**
+  - **Camera TPS Sau Lưng 360°:** Đặt sau lưng & hơi cao trên vai chú Heo, vuốt màn hình xoay tự do 360° ngắm toàn quán 3D có chiều sâu xa-gần (sàn gạch bông phối cảnh, tường vàng cổ điển, 3 quạt treo tường quay, bàn inox & ghế nhựa 3D, quầy bếp mở).
+  - **Điều khiển tối giản không Joystick ảo:** Chạm điểm trên sàn/vật thể (`3D Raycast Tap-to-Walk`) để chú Heo đi tới; nút Context Action Pill nổi gọn ở đáy màn hình chỉ hiện khi gần vật thể tương tác (`[Mở cửa vào quán]`, `[Ngồi xuống]`, `[Gọi Phở Tái Nạm]`, `[Ăn Phở]`, `[Đứng dậy]`, `[Xem đầu bếp nấu]`, `[Ra vỉa hè]`).
+  - **Chu trình nhập vai thực tế 100%:** Xuất phát ngoài vỉa hè trước biển `PHỞ BÒ GIA TRUYỀN` ➔ mở cửa gỗ–kính 2 cánh xoay bản lề 90° bước vào quán ➔ tìm ghế trống ngồi xuống ➔ gọi Phở (phục vụ chạy tới nhận món, báo bếp, đầu bếp trụng bánh chan nước dùng bốc khói, phục vụ bưng ra đặt lên bàn cho Heo ăn xì xụp) ➔ đứng dậy tự do đi vào khu vực bếp đứng cạnh xem đầu bếp nấu ăn, nhân viên bưng bê & khách hàng đẩy cửa ra vào thực tế.

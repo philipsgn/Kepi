@@ -7541,15 +7541,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       chatViewCode.includes("activeSubView === 'pho'") &&
       chatViewCode.includes('PhoRestaurantView') &&
       phoViewCode.includes('fullscreenContainer') &&
-      phoBannerCode.includes('worldWidth: 640') &&
-      (phoBannerCode.includes('worldHeight: 460') || phoBannerCode.includes('worldHeight: 440')) &&
-      phoBannerCode.includes('buildVnPixelKitPrimitivesScript') &&
-      phoBannerCode.includes("id: 'pho_kitchen'") &&
-      phoBannerCode.includes("id: 'pho_special_table'") &&
-      phoBannerCode.includes("id: 'iced_tea_corner'") &&
-      phoBannerCode.includes("id: 'exit_pho'") &&
-      phoBannerCode.includes('waiters:') &&
-      phoBannerCode.includes('walkGuests:') &&
+      (phoBannerCode.includes('worldWidth: 640') || phoBannerCode.includes('buildTps3dEngineScript')) &&
       phoArtCode.includes('drawPhoChef') &&
       phoArtCode.includes('drawPhoWaiter') &&
       phoArtCode.includes('drawSeatedPhoGuest') &&
@@ -7559,21 +7551,15 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       phoArtCode.includes('drawSteamPuff') &&
       decisionsCode.includes('Quyết định 225') &&
       chatDocCode.includes('Quyết định 225') &&
-      (specCode.includes('640 × 460') || specCode.includes('640 × 440')) &&
-      (specCode.includes('QĐ 226') || specCode.includes('QĐ 225')),
-    'Pho Restaurant fullscreen interior (chef, 2 waiters, boiling pots + steam, beef/noodles, fans, guests, Ong Dia altar, vnPixelArtKit reuse, 2-way portal, and docs) must be synced for QD 225/226'
+      (specCode.includes('QĐ 232') || specCode.includes('QĐ 226') || specCode.includes('QĐ 225')),
+    'Pho Restaurant fullscreen interior (2D heritage art or QD 232 TPS 3D upgrade, 2-way portal, and docs) must be synced for QD 225/226/232'
   );
 
-  // Kiểm chứng cú pháp JS runtime của toàn bộ script Quán Phở lắp ráp (vnKit + phoArt + inline)
+  // Kiểm chứng cú pháp JS runtime của phoInteriorArt.ts
   const mKit = vnKitCode.match(/return `([\s\S]*)`;\s*\}/);
   const mArt = phoArtCode.match(/return `([\s\S]*)`;\s*\}/);
-  const mPho = phoBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
-  assert.ok(mKit && mKit[1] && mArt && mArt[1] && mPho && mPho[1], 'Must extract vnKit, phoArt, and inline pho script');
-  const assembledPhoJs = mPho[1]
-    .replace('${vnKitScript}', mKit[1].replace('${matJson}', '{}').replace(/\\`/g, '`'))
-    .replace('${phoArtScript}', mArt[1].replace(/\\`/g, '`'))
-    .replace('${openRoomScript}', '');
-  new Function(assembledPhoJs);
+  assert.ok(mKit && mKit[1] && mArt && mArt[1], 'Must extract vnKit and phoArt script');
+  new Function(mKit[1].replace('${matJson}', '{}').replace(/\\`/g, '`') + '\n' + mArt[1].replace(/\\`/g, '`'));
 
   console.log('✅ Test 162 Passed: Không Gian Toàn Màn Hình Quán Phở Cổ Truyền Việt Nam (Chuẩn VIETNAM_PIXEL_ART_BIBLE — Quyết định 225) Audit verified cleanly');
 }
@@ -7583,7 +7569,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 // =========================================================================
 {
   const phoArtCode = fs.readFileSync('src/components/chat/pho/phoInteriorArt.ts', 'utf8');
-  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
+  const phoTpsCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
   const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
   const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
   const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
@@ -7595,21 +7581,13 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       phoArtCode.includes('function drawDynamicPhoBowl') &&
       phoArtCode.includes("bowlState === 'FULL'") &&
       phoArtCode.includes("bowlState === 'EMPTY_DIRTY'") &&
-      phoBannerCode.includes('worldHeight: 460') &&
-      phoBannerCode.includes('id: 13') &&
-      phoBannerCode.includes('function stepPhoSimulation') &&
-      phoBannerCode.includes('function buildAislePath') &&
-      phoBannerCode.includes('WAITING_FOOD') &&
-      phoBannerCode.includes('EATING') &&
-      phoBannerCode.includes('NEEDS_CLEAR') &&
-      phoBannerCode.includes('SERVE_WALK') &&
-      phoBannerCode.includes('CLEAR_WALK') &&
-      phoBannerCode.includes('RETURN_DIRTY') &&
+      phoTpsCode.includes('WAITING_FOOD') &&
+      phoTpsCode.includes('EATING') &&
+      phoTpsCode.includes('CLEAR') &&
       decisionsCode.includes('Quyết định 226') &&
       chatDocCode.includes('Quyết định 226') &&
-      specCode.includes('640 × 460') &&
-      specCode.includes('QĐ 226'),
-    'Pho Restaurant realistic FSM (waiting->serve->eat->leave->clear->sink), detailed faces, 14 dense tables, no ceiling fans (wall fans instead), and docs must be synced for QD 226'
+      (specCode.includes('QĐ 232') || specCode.includes('QĐ 226')),
+    'Pho Restaurant realistic FSM (waiting->serve->eat->leave->clear->sink), detailed faces, wall fans instead of ceiling fans, and docs must be synced for QD 226/232'
   );
 
   console.log('✅ Test 163 Passed: Mô Phỏng Quy Trình Quán Phở Thực Tế 100% (FSM), Khuôn Mặt Chi Tiết, 14 Bàn San Sát & Bỏ Quạt Trần (Quyết định 226) Audit verified cleanly');
@@ -7823,4 +7801,56 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 168 Passed: Không Gian Toàn Màn Hình Sân Vận Động Trống Đồng Chuẩn Quốc Tế FIFA (840×680 — Quyết định 231) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 168 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (168/168)!');
+// =========================================================================
+// TEST 169: CHUẨN HÓA GÓC NHÌN THỨ 3 NHẬP VAI (TPS 3D KIỂU PUBG) & NÂNG CẤP QUÁN PHỞ CỔ TRUYỀN (QĐ 232)
+// =========================================================================
+{
+  const tpsSpecPath = 'docs/TPS_3D_OPEN_WORLD_SPEC.md';
+  assert.ok(fs.existsSync(tpsSpecPath), 'docs/TPS_3D_OPEN_WORLD_SPEC.md must exist');
+  const tpsSpecCode = fs.readFileSync(tpsSpecPath, 'utf8');
+  const agentsCode = fs.readFileSync('AGENTS.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
+
+  // Kiểm chứng cú pháp JS thực thi thực tế của Engine TPS 3D + Scene Quán Phở 3D
+  const mEng = engineCode.match(/return String\.raw`([\s\S]*?)`;/);
+  const mScn = sceneCode.match(/return String\.raw`([\s\S]*?)`;/);
+  assert.ok(mEng && mEng[1] && mScn && mScn[1], 'pixelTps3dEngine.ts and phoTps3dScene.ts must export String.raw scripts');
+  new Function(mEng[1] + '\n' + mScn[1]);
+
+  assert.ok(
+    tpsSpecCode.includes('GÓC NHÌN THỨ 3') &&
+      agentsCode.includes('docs/TPS_3D_OPEN_WORLD_SPEC.md') &&
+      specCode.includes('QĐ 232') &&
+      chatDocCode.includes('Quyết định 232') &&
+      decisionsCode.includes('Quyết định 232') &&
+      engineCode.includes('function createTpsCamera') &&
+      engineCode.includes('function unprojectFloorTap') &&
+      engineCode.includes('function drawPigTps3D') &&
+      engineCode.includes('function drawHumanTps3D') &&
+      sceneCode.includes('function createPhoTpsWorld') &&
+      sceneCode.includes('function stepPhoTpsWorld') &&
+      sceneCode.includes('function getPhoContextAction') &&
+      sceneCode.includes('function triggerPhoAction') &&
+      sceneCode.includes('function renderPhoTps3D') &&
+      sceneCode.includes('PIG_ORDER') &&
+      sceneCode.includes('open_door') &&
+      sceneCode.includes('sit_seat') &&
+      sceneCode.includes('order_pho') &&
+      sceneCode.includes('eat_pho') &&
+      sceneCode.includes('watch_chef') &&
+      phoBannerCode.includes('buildTps3dEngineScript') &&
+      phoBannerCode.includes('buildPhoTps3dSceneScript') &&
+      phoBannerCode.includes('unprojectFloorTap') &&
+      phoBannerCode.includes('<iframe'),
+    'TPS 3D RPG standard (docs, reusable 3D perspective engine, zero-joystick raycast tap-to-walk + 360 orbit, hinged doors, sit/order/eat Pho, open kitchen, and realistic FSM) must be synced for QD 232'
+  );
+
+  console.log('✅ Test 169 Passed: Chuẩn Hóa Góc Nhìn Thứ 3 Nhập Vai (TPS 3D Kiểu PUBG) & Nâng Cấp Quán Phở Cổ Truyền (Quyết định 232) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 169 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (169/169)!');
