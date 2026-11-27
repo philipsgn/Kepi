@@ -7260,10 +7260,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       chatViewCode.includes("activeSubView === 'cathedral'") &&
       chatViewCode.includes('NotreDameCathedralView') &&
       ndViewCode.includes('fullscreenContainer') &&
-      ndBannerCode.includes('worldWidth: 640') &&
-      ndBannerCode.includes('worldHeight: 520') &&
-      ndBannerCode.includes('obstacles:') &&
-      ndBannerCode.includes("id: 'exit_cathedral'") &&
+      (ndBannerCode.includes('buildCathedralTps3dSceneScript') || (ndBannerCode.includes('worldWidth: 640') && ndBannerCode.includes('worldHeight: 520'))) &&
       ndArtCode.includes('drawStainedGlass') &&
       ndArtCode.includes('drawChandelier') &&
       ndArtCode.includes('drawCathedralPewsLayer') &&
@@ -7272,19 +7269,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       chatDocCode.includes('Quyết định 219') &&
       specCode.includes('640 × 520') &&
       specCode.includes('QĐ 219'),
-    'Notre Dame Cathedral 640x520 fullscreen interior, 2-way Hub portal, stained glass, chandeliers, congregation pews, and docs must be synced for QD 219'
+    'Notre Dame Cathedral fullscreen interior (2D QD 219 or 3D TPS QD 245), 2-way Hub portal, stained glass, chandeliers, congregation pews, and docs must be synced'
   );
 
-  const mArt = ndArtCode.match(/return `([\s\S]*)`;\s*\}/);
-  assert.ok(mArt && mArt[1], 'Must extract cathedralInteriorArt script');
-  const mNd = ndBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
-  assert.ok(mNd && mNd[1], 'Must find inline cathedral script');
-  const assembledNdJs = mNd[1]
-    .replace('${cathedralArtScript}', mArt[1].replace(/\\`/g, '`'))
-    .replace('${openRoomScript}', '');
-  new Function(assembledNdJs);
-
-  console.log('✅ Test 156 Passed: Không Gian Toàn Màn Hình Nội Thất Nhà Thờ Đức Bà Sài Gòn (640×520, Cổ Kính Châu Âu & Đèn Vàng Lung Linh — Quyết định 219) Audit verified cleanly');
+  console.log('✅ Test 156 Passed: Không Gian Toàn Màn Hình Nội Thất Nhà Thờ Đức Bà Sài Gòn (Quyết định 219 / TPS 3D QĐ 245) Audit verified cleanly');
 }
 
 // ==========================================
@@ -7309,11 +7297,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       chatViewCode.includes("activeSubView === 'pagoda'") &&
       chatViewCode.includes('PagodaTempleView') &&
       pgViewCode.includes('fullscreenContainer') &&
-      pgBannerCode.includes('worldWidth: 640') &&
-      pgBannerCode.includes('worldHeight: 560') &&
-      pgBannerCode.includes("id: 'buddha_altar'") &&
-      pgBannerCode.includes("id: 'courtyard_incense'") &&
-      pgBannerCode.includes("id: 'exit_pagoda'") &&
+      (pgBannerCode.includes('buildPagodaTps3dSceneScript') || (pgBannerCode.includes('worldWidth: 640') && pgBannerCode.includes('worldHeight: 560'))) &&
       pgArtCode.includes('drawWorshipper') &&
       pgArtCode.includes('drawPagodaBg') &&
       pgArtCode.includes('drawPagodaLiveEffects') &&
@@ -7321,19 +7305,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       chatDocCode.includes('Quyết định 220') &&
       specCode.includes('640 × 560') &&
       specCode.includes('QĐ 220'),
-    'Pagoda Temple 640x560 2-level interior, Hub replacement for stilt river, Buddha altar, bowing worshippers, incense smoke, and docs must be synced for QD 220'
+    'Pagoda Temple fullscreen interior (2D QD 220 or 3D TPS QD 245), Hub replacement for stilt river, Buddha altar, bowing worshippers, incense smoke, and docs must be synced'
   );
 
-  const mArt = pgArtCode.match(/return `([\s\S]*)`;\s*\}/);
-  assert.ok(mArt && mArt[1], 'Must extract pagodaInteriorArt script');
-  const mPg = pgBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
-  assert.ok(mPg && mPg[1], 'Must find inline pagoda script');
-  const assembledPgJs = mPg[1]
-    .replace('${pagodaArtScript}', mArt[1].replace(/\\`/g, '`'))
-    .replace('${openRoomScript}', '');
-  new Function(assembledPgJs);
-
-  console.log('✅ Test 157 Passed: Thay Nhà Sàn Bến Sông Bằng Ngôi Chùa Cổ Kính & Không Gian 2 Tầng Chánh Điện + Sân Chùa (640×560 — Quyết định 220) Audit verified cleanly');
+  console.log('✅ Test 157 Passed: Thay Nhà Sàn Bến Sông Bằng Ngôi Chùa Cổ Kính & Không Gian Chánh Điện + Vườn Chùa (Quyết định 220 / TPS 3D QĐ 245) Audit verified cleanly');
 }
 
 // =========================================================================
@@ -7624,13 +7599,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       chatViewCode.includes("activeSubView === 'adidas'") &&
       chatViewCode.includes('AdidasStoreView') &&
       adViewCode.includes('fullscreenContainer') &&
-      adBannerCode.includes('worldWidth: 640') &&
-      adBannerCode.includes('worldHeight: 560') &&
-      adBannerCode.includes('buildVnPixelKitPrimitivesScript') &&
-      adBannerCode.includes("id: 'adidas_sneaker_wall'") &&
-      adBannerCode.includes("id: 'adidas_fitting_mirror'") &&
-      adBannerCode.includes("id: 'adidas_checkout'") &&
-      adBannerCode.includes("id: 'exit_adidas'") &&
+      (adBannerCode.includes('buildAdidasTps3dSceneScript') || (adBannerCode.includes('worldWidth: 640') && adBannerCode.includes('worldHeight: 560'))) &&
       adArtCode.includes('drawThreeStripesLogo') &&
       adArtCode.includes('drawFootwearWall') &&
       (adArtCode.includes('drawAdiletteSlideLarge') || adArtCode.includes('drawAdiletteSlide')) &&
@@ -7642,21 +7611,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       decisionsCode.includes('Quyết định 227') &&
       chatDocCode.includes('Quyết định 227') &&
       (specCode.includes('QĐ 229') || specCode.includes('QĐ 228') || specCode.includes('QĐ 227')),
-    'Adidas Flagship 2-story 640x560 interior (3-stripes sneakers/slides/clothes, 7 mannequins, LED stairs, 2 staff, shoppers, 2-way portal, and docs) must be synced for QD 227-229'
+    'Adidas Flagship 2-story interior (2D QD 227-229 or 3D TPS QD 245) and docs must be synced'
   );
 
-  // Kiểm chứng cú pháp JS runtime của toàn bộ script Adidas lắp ráp (vnKit + adArt + inline)
-  const mKit = vnKitCode.match(/return `([\s\S]*)`;\s*\}/);
-  const mArt = adArtCode.match(/return `([\s\S]*)`;\s*\}/);
-  const mAd = adBannerCode.match(/<script>\s*(\(function\(\)\{[\s\S]*?\}\)\(\);)\s*<\/script>/);
-  assert.ok(mKit && mKit[1] && mArt && mArt[1] && mAd && mAd[1], 'Must extract vnKit, adArt, and inline adidas script');
-  const assembledAdJs = mAd[1]
-    .replace('${vnKitScript}', mKit[1].replace('${matJson}', '{}').replace(/\\`/g, '`'))
-    .replace('${adidasArtScript}', mArt[1].replace(/\\`/g, '`'))
-    .replace('${openRoomScript}', '');
-  new Function(assembledAdJs);
-
-  console.log('✅ Test 164 Passed: Không Gian Toàn Màn Hình Adidas Flagship Brand Center 2 Tầng (640×560 — Quyết định 227) Audit verified cleanly');
+  console.log('✅ Test 164 Passed: Không Gian Toàn Màn Hình Adidas Flagship Brand Center 2 Tầng (Quyết định 227 / TPS 3D QĐ 245) Audit verified cleanly');
 }
 
 // =========================================================================
@@ -7682,7 +7640,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       adArtCode.includes('function drawFootballRack') &&
       adArtCode.includes('function drawAccessoryShelf') &&
       adArtCode.includes('function drawDetailedMannequin') &&
-      adBannerCode.includes("id: 'adidas_football_zone'") &&
+      (adBannerCode.includes('buildAdidasTps3dSceneScript') || adBannerCode.includes("id: 'adidas_football_zone'")) &&
       decisionsCode.includes('Quyết định 228') &&
       chatDocCode.includes('Quyết định 228') &&
       (specCode.includes('QĐ 229') || specCode.includes('QĐ 228')),
@@ -8310,4 +8268,91 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 181 Passed: Quán Cộng Cà Phê 2 Tầng Độc Bản Khác 100% Quán Phở (Quyết định 244) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 181 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (181/181)!');
+// =========================================================================
+// TEST 182: MULTI-AGENT ĐỢT 1 — HEADLESS MOCK-CANVAS RENDER THẬT 9 PHÒNG (ADIDAS 3 + NHÀ THỜ 3 + CHÙA 3 — QĐ 245)
+// =========================================================================
+{
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const adidasWall = fs.readFileSync('src/components/chat/adidas/adidasWallArt.ts', 'utf8');
+  const adidasScene = fs.readFileSync('src/components/chat/adidas/adidasTps3dScene.ts', 'utf8');
+  const adidasBanner = fs.readFileSync('src/components/chat/AdidasStoreBannerWebView.tsx', 'utf8');
+  const cathWall = fs.readFileSync('src/components/chat/cathedral/cathedralWallArt.ts', 'utf8');
+  const cathScene = fs.readFileSync('src/components/chat/cathedral/cathedralTps3dScene.ts', 'utf8');
+  const cathBanner = fs.readFileSync('src/components/chat/NotreDameCathedralBannerWebView.tsx', 'utf8');
+  const pagodaWall = fs.readFileSync('src/components/chat/pagoda/pagodaWallArt.ts', 'utf8');
+  const pagodaScene = fs.readFileSync('src/components/chat/pagoda/pagodaTps3dScene.ts', 'utf8');
+  const pagodaBanner = fs.readFileSync('src/components/chat/PagodaTempleBannerWebView.tsx', 'utf8');
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDoc = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  const extractRaw = (src) => {
+    const m = src.match(/return String\.raw`([\s\S]*?)`;/);
+    assert.ok(m && m[1], 'Must export String.raw script');
+    return m[1];
+  };
+
+  function makeMockCtx() {
+    let calls = 0, nans = 0;
+    const chk = (...ns) => { for (const n of ns) if (typeof n === 'number' && !Number.isFinite(n)) nans++; };
+    return {
+      fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left', textBaseline: 'alphabetic', globalAlpha: 1,
+      save() {}, restore() {}, beginPath() {}, closePath() {}, clip() {},
+      translate(x, y) { chk(x, y); }, scale(x, y) { chk(x, y); }, rotate(a) { chk(a); },
+      moveTo(x, y) { chk(x, y); }, lineTo(x, y) { chk(x, y); },
+      quadraticCurveTo(a, b, c, d) { chk(a, b, c, d); }, bezierCurveTo(a, b, c, d, e, f) { chk(a, b, c, d, e, f); },
+      rect(x, y, w, h) { chk(x, y, w, h); },
+      arc(x, y, r) { chk(x, y, r); calls++; }, ellipse(x, y, rx, ry) { chk(x, y, rx, ry); calls++; },
+      fill() { calls++; }, stroke() { calls++; },
+      fillRect(x, y, w, h) { chk(x, y, w, h); calls++; }, strokeRect(x, y, w, h) { chk(x, y, w, h); calls++; },
+      fillText(_t, x, y, mw) { chk(x, y, mw); calls++; },
+      measureText(t) { return { width: String(t || '').length * 6 }; },
+      stats() { return { calls, nans }; },
+    };
+  }
+
+  function smokeTestVenue(name, wallSrc, sceneSrc, createFn, stepFn, renderFn, rooms) {
+    const counts = [];
+    for (const r of rooms) {
+      const ctx = makeMockCtx();
+      const fn = new Function(
+        'ctx',
+        extractRaw(engineCode) + '\n' + extractRaw(wallSrc) + '\n' + extractRaw(sceneSrc) + `\n
+        var st = ${createFn}();
+        st.room = '${r}';
+        var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.6, targetHeight: 0.92 });
+        var bounds = { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85 };
+        ${stepFn}(st, 0.016);
+        updateTpsCamera(cam, st.pig.x, 0, st.pig.z, 400, 720, bounds);
+        ${renderFn}(ctx, cam, st, 400, 720);
+        return unprojectFloorTap(cam, 200, 560);
+      `
+      );
+      const tap = fn(ctx);
+      const s = ctx.stats();
+      assert.strictEqual(s.nans, 0, `${name} [${r}] produced ${s.nans} NaN coords`);
+      assert.ok(s.calls > 80, `${name} [${r}] must draw > 80 3D primitives (got ${s.calls})`);
+      assert.ok(tap && Number.isFinite(tap.x) && Number.isFinite(tap.z), `${name} [${r}] unprojectFloorTap failed`);
+      counts.push(`${r}=${s.calls}`);
+    }
+    return counts.join(',');
+  }
+
+  const aRes = smokeTestVenue('Adidas', adidasWall, adidasScene, 'createAdidasTpsState', 'stepAdidasTps', 'renderAdidasTpsScene', ['hall', 'fitting', 'upper']);
+  const cRes = smokeTestVenue('Cathedral', cathWall, cathScene, 'createCathedralTpsState', 'stepCathedralTps', 'renderCathedralTpsScene', ['nave', 'sanctuary', 'belfry']);
+  const pRes = smokeTestVenue('Pagoda', pagodaWall, pagodaScene, 'createPagodaTpsState', 'stepPagodaTps', 'renderPagodaTpsScene', ['garden', 'main_hall', 'bell_tea']);
+
+  assert.ok(
+    tpsDoc.includes('QĐ 245') &&
+      chatDoc.includes('Quyết định 245') &&
+      decDoc.includes('Quyết định 245') &&
+      adidasBanner.includes('buildAdidasTps3dSceneScript') &&
+      cathBanner.includes('buildCathedralTps3dSceneScript') &&
+      pagodaBanner.includes('buildPagodaTps3dSceneScript'),
+    'Wave 1 Multi-Agent 3 venues (Adidas, Cathedral, Pagoda) and QD 245 docs must be synced'
+  );
+
+  console.log(`✅ Test 182 Passed: Multi-Agent Đợt 1 Real-Frame 9-Room Smoke Test (Adidas[${aRes}] | Cathedral[${cRes}] | Pagoda[${pRes}], 0 NaN — Quyết định 245) Audit verified cleanly`);
+}
+
+console.log('\n🎉 ALL 182 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (182/182)!');

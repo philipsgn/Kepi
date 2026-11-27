@@ -1,9 +1,12 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
-import { buildOpenRoomEngineScript } from '../pixel/pixelOpenRoomEngine';
-import { buildCathedralInteriorArtScript } from './cathedral/cathedralInteriorArt';
+import { buildTps3dEngineScript } from '../pixel/pixelTps3dEngine';
+import { buildCathedralWallArtScript } from './cathedral/cathedralWallArt';
+import { buildCathedralTps3dSceneScript } from './cathedral/cathedralTps3dScene';
+
+const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
 interface NotreDameCathedralBannerWebViewProps {
   active?: boolean;
@@ -11,10 +14,10 @@ interface NotreDameCathedralBannerWebViewProps {
 }
 
 /**
- * Không Gian Toàn Màn Hình Nội Thất Nhà Thờ Đức Bà Sài Gòn (640×520, Dynamic 1:1 Square Pixel — Quyết định 219)
- * - Kiến trúc cổ kính hoài niệm Châu Âu (Gothic-Romanesque): 3 tầng vòm gân vàng đất, 3 cửa kính màu stained-glass,
- *   Cung Thánh lung linh, 2 chùm đèn pha lê vàng rực, 2 hành lang phụ cột vòm, 2 cánh 8 hàng ghế gỗ + ~60 người dự lễ.
- * - Va chạm AABB quanh Cung Thánh & 2 khối ghế gỗ để Heo Con (24×20) đi dọc lối đi giữa & 2 hành lang phụ.
+ * Nhà Thờ Đức Bà Sài Gòn — 3 Phòng TPS 3D Độc Lập (Quyết định 245)
+ * - 3 Phòng riêng biệt (200ms fade): Thánh Đường Chính ('nave') · Cung Thánh ('sanctuary') · Gác Đàn & Tháp Chuông ('belfry').
+ * - Camera TPS 360° Spring-Arm 6 mặt phẳng chống xuyên tường, Tap-to-Walk Raycast 3D không Joystick ảo.
+ * - Hỗ trợ song song React Native SafeWebView (Expo Go / iOS Fabric) & Web PWA (<iframe srcDoc>).
  */
 export const NotreDameCathedralBannerWebView: React.FC<NotreDameCathedralBannerWebViewProps> = ({
   active = true,
@@ -23,6 +26,7 @@ export const NotreDameCathedralBannerWebView: React.FC<NotreDameCathedralBannerW
   const webViewRef = useRef<any>(null);
   const iframeRef = useRef<any>(null);
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [ready] = useState(true);
 
   useEffect(() => {
     return () => {
@@ -31,7 +35,15 @@ export const NotreDameCathedralBannerWebView: React.FC<NotreDameCathedralBannerW
   }, []);
 
   useEffect(() => {
-    if (Platform.OS === 'web') return;
+    if (Platform.OS === 'web') {
+      try {
+        iframeRef.current?.contentWindow?.postMessage(
+          JSON.stringify({ type: 'SET_ACTIVE', active }),
+          '*'
+        );
+      } catch (_e) {}
+      return;
+    }
     webViewRef.current?.injectJavaScript?.(
       `window.__ndSetActive && window.__ndSetActive(${active ? 'true' : 'false'}); true;`
     );
@@ -41,14 +53,12 @@ export const NotreDameCathedralBannerWebView: React.FC<NotreDameCathedralBannerW
     if (!d) return;
     if (d.type === 'HAPTIC_LIGHT') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    } else if (d.type === 'ROOM_ACTION') {
-      if (d.id === 'exit_cathedral' && d.userTriggered && onExitToHub) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-        if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
-        exitTimerRef.current = setTimeout(() => {
-          onExitToHub();
-        }, 120);
-      }
+    } else if (d.type === 'HAPTIC_MEDIUM') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    } else if (d.type === 'EXIT_CATHEDRAL' && onExitToHub) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = setTimeout(() => onExitToHub(), 120);
     }
   };
 
@@ -71,304 +81,338 @@ export const NotreDameCathedralBannerWebView: React.FC<NotreDameCathedralBannerW
     } catch (_e) {}
   };
 
-  const openRoomScript = useMemo(
-    () =>
-      buildOpenRoomEngineScript({
-        canvasId: 'ndCv',
-        worldWidth: 640,
-        worldHeight: 520,
-        viewWidth: 220,
-        viewHeight: 320,
-        walkBounds: { minX: 28, maxX: 612, minY: 206, maxY: 496 },
-        initialX: 320,
-        initialY: 368,
-        initialCamX: 210,
-        initialCamY: 160,
-        speed: 48,
-        obstacles: [
-          // 2 cánh 8 hàng ghế gỗ đánh bóng (chừa lối đi giữa x: 272..368 & 2 hành lang phụ x: 28..106, 534..612)
-          { x: 112, y: 224, w: 156, h: 224 },
-          { x: 372, y: 224, w: 156, h: 224 },
-        ],
-        hotspots: [
-          {
-            id: 'sanctuary_altar',
-            x: 214,
-            y: 132,
-            w: 212,
-            h: 74,
-            standX: 320,
-            standY: 214,
-            standFace: 1,
-            actionType: 'look_window',
-            bubbleText: `Cung Thánh Nhà Thờ Đức Bà · Ánh đèn vàng ấm áp & trang nghiêm!`,
-          },
-          {
-            id: 'stained_glass',
-            x: 230,
-            y: 20,
-            w: 180,
-            h: 64,
-            standX: 320,
-            standY: 224,
-            standFace: 1,
-            actionType: 'look_window',
-            bubbleText: `Kính màu Stained-Glass Châu Âu cổ kính rực rỡ ánh nắng!`,
-          },
-          {
-            id: 'left_pews',
-            x: 112,
-            y: 224,
-            w: 156,
-            h: 224,
-            standX: 286,
-            standY: 332,
-            standFace: -1,
-            actionType: 'check_ledger',
-            bubbleText: `Hàng ghế gỗ đánh bóng cổ điển · Mọi người đang cầu nguyện bình yên`,
-          },
-          {
-            id: 'right_pews',
-            x: 372,
-            y: 224,
-            w: 156,
-            h: 224,
-            standX: 354,
-            standY: 332,
-            standFace: 1,
-            actionType: 'check_ledger',
-            bubbleText: `Góc ghế cánh phải dưới ánh đèn chùm vàng lung linh`,
-          },
-          {
-            id: 'exit_cathedral',
-            x: 274,
-            y: 468,
-            w: 92,
-            h: 52,
-            standX: 320,
-            standY: 472,
-            standFace: 1,
-            actionType: 'jump_joy',
-            fastDash: true,
-            bubbleText: `Bước qua cổng vòm ra lại phố Sài Gòn...`,
-          },
-        ],
-      }),
-    []
-  );
-
-  const cathedralArtScript = useMemo(() => buildCathedralInteriorArtScript(), []);
+  const tpsEngineScript = useMemo(() => buildTps3dEngineScript(), []);
+  const cathedralWallArtScript = useMemo(() => buildCathedralWallArtScript(), []);
+  const cathedralSceneScript = useMemo(() => buildCathedralTps3dSceneScript(), []);
 
   const htmlContent = useMemo(
-    () => `<!DOCTYPE html>
+    () => `<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#3A2D25;display:flex;align-items:center;justify-content:center}
-#ndCv{
-  width:100%;
-  height:100%;
-  display:block;
-  image-rendering:pixelated;
-  image-rendering:-webkit-crisp-edges;
-  image-rendering:-moz-crisp-edges;
-  image-rendering:crisp-edges;
-  cursor:grab;
-  touch-action:none;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #3B2820; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  canvas {
+    display: block; width: 100%; height: 100%;
+    image-rendering: pixelated;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: crisp-edges;
+    touch-action: none;
+    cursor: grab;
+  }
+  canvas:active { cursor: grabbing; }
+  .hud-toast {
+    position: fixed; top: 16px; left: 68px; right: 132px;
+    pointer-events: none; display: flex; justify-content: center; z-index: 10;
+  }
+  .room-pill {
+    position: fixed; top: 16px; right: 12px; z-index: 16;
+    background: #7F1D1D; color: #FDE047;
+    border: 2.5px solid #2B2118; border-radius: 12px;
+    padding: 6px 10px; font-size: 11px; font-weight: 900;
+    box-shadow: 0 3px 0 #2B2118; cursor: pointer;
+    white-space: nowrap;
+  }
+  .room-pill:active { transform: translateY(1px); }
+  .hud-toast-pill {
+    background: rgba(255, 251, 241, 0.95);
+    border: 2.5px solid #2B2118;
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 11.5px; font-weight: 800; color: #2B2118;
+    box-shadow: 0 3px 0 #2B2118;
+    text-align: center; max-width: 340px;
+  }
+  .action-bar {
+    position: fixed; bottom: 26px; left: 16px; right: 16px;
+    display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+    pointer-events: none; z-index: 15;
+  }
+  .action-btn {
+    pointer-events: auto;
+    background: #F4B93B; color: #2B2118;
+    border: 3px solid #2B2118; border-radius: 16px;
+    padding: 10px 18px; font-size: 14px; font-weight: 900;
+    box-shadow: 0 4px 0 #2B2118;
+    cursor: pointer; transition: transform 0.06s;
+  }
+  .action-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2B2118; }
+  .action-btn.sec { background: #FFFBF1; padding: 10px 14px; }
+  [hidden] { display: none !important; }
 </style>
-<script>
-window.onerror=function(msg,src,line){
-  if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(JSON.stringify({type:'CONSOLE_ERROR',error:String(msg),line:line}));}
-  return false;
-};
-</script>
 </head>
 <body>
-<canvas id="ndCv" width="220" height="320" role="img" aria-label="Nội thất Nhà Thờ Đức Bà Sài Gòn cổ kính Châu Âu với 3 tầng vòm gân vàng, kính màu, đèn chùm lung linh và ~60 người dự lễ"></canvas>
+<canvas id="ndCv"></canvas>
+<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Thánh Đường Chính · Nhà Thờ Đức Bà</div></div>
+<button id="roomPillBtn" class="room-pill">Thánh Đường ⛪</button>
+<div class="action-bar">
+  <button id="mainActionBtn" class="action-btn" hidden></button>
+  <button id="secActionBtn" class="action-btn sec" hidden></button>
+</div>
 <script>
-(function(){
-'use strict';
-
-var INK='#2B2118';
-var WORLD_W=640;
-var WORLD_H=520;
-var VW=220;
-var VH=320;
-
-function R(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
-function E(c,cx,cy,rx,ry,col){
-  c.fillStyle=col;
-  for(var dy=-ry;dy<=ry;dy++)for(var dx=-rx;dx<=rx;dx++)
-    if((dx*dx)/(rx*rx)+(dy*dy)/(ry*ry)<=1)c.fillRect(Math.round(cx+dx),Math.round(cy+dy),1,1);
-}
-
-// Sprite Heo Con 24×20 chuẩn Tab Vườn
-var PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',h:'#FFE3E8',k:'#2B2118',g:'#F4B93B',G:'#B97A14',w:'#FFFFFF'};
-var hp=document.createElement('canvas');hp.width=24;hp.height=20;
-var hpx=hp.getContext('2d');hpx.imageSmoothingEnabled=false;
-function drawPigSprite(c,o){
-  o=o||{};
-  var pose=o.pose||'stand', f=o.frame||0, by=pose==='walk'?(f%2?0:1):0;
-  var hx=pose==='eat'?1:0, hy=pose==='eat'?3:by;
-  var I=PAL.k,P=PAL.p,S=PAL.s,N=PAL.n,H=PAL.h,G=PAL.g;
-  if(o.tail){R(c,2,10+by,2,1,I);R(c,1,9+by,1,2,I);R(c,2,8+by,1,1,I);}
-  else{R(c,2,11+by,2,1,I);R(c,1,10+by,1,1,I);}
-  R(c,4,7+by,14,9,I);R(c,3,8+by,16,7,I);
-  R(c,5,8+by,12,7,P);R(c,4,9+by,14,5,P);
-  R(c,6,8+by,10,2,H);R(c,5,13+by,12,2,S);
-  R(c,9,8+by,4,1,I);R(c,9,9+by,4,1,G);
-  R(c,14+hx,3+hy,3,3,I);R(c,15+hx,4+hy,1,1,N);
-  R(c,12+hx,4+hy,9,9,I);R(c,11+hx,5+hy,11,7,I);
-  R(c,13+hx,5+hy,7,7,P);R(c,12+hx,6+hy,9,5,P);
-  R(c,13+hx,5+hy,5,2,H);R(c,13+hx,11+hy,6,1,S);
-  R(c,19+hx,7+hy,4,4,I);R(c,20+hx,8+hy,2,2,N);
-  R(c,20+hx,8+hy,1,1,I);R(c,21+hx,9+hy,1,1,I);
-  if(o.blink){R(c,16+hx,8+hy,2,1,I);}
-  else if(o.happy){R(c,16+hx,8+hy,1,1,I);R(c,17+hx,7+hy,1,1,I);R(c,18+hx,8+hy,1,1,I);}
-  else{R(c,16+hx,7+hy,2,2,I);R(c,16+hx,7+hy,1,1,PAL.w);}
-  R(c,14+hx,10+hy,2,1,'#F27D94');
-  var L1=pose==='walk'?(f%2?0:-1):0, L2=pose==='walk'?(f%2?-1:0):0;
-  [[6,L1,P],[9,L2,P],[13,L2,S],[16,L1,S]].forEach(function(lg){
-    R(c,lg[0],15+by+lg[1],2,4,I);R(c,lg[0],15+by+lg[1],1,2,lg[2]);R(c,lg[0],18+by+lg[1],2,1,I);
-  });
-}
-
-${cathedralArtScript}
-
-var ND={bg:null,pews:null,t:0,last:0,dt:0,run:false,w:VW,h:VH};
-
-function buildCathedral(){
-  var bg=document.createElement('canvas');bg.width=WORLD_W;bg.height=WORLD_H;
-  var x=bg.getContext('2d');x.imageSmoothingEnabled=false;
-  drawCathedralBg(x,WORLD_W,WORLD_H);
-  ND.bg=bg;
-
-  var pw=document.createElement('canvas');pw.width=WORLD_W;pw.height=WORLD_H;
-  var px=pw.getContext('2d');px.imageSmoothingEnabled=false;
-  drawCathedralPewsLayer(px);
-  ND.pews=pw;
-}
-
-function drawPigAt(x,rm,t){
-  if(!rm)return;
-  var px=Math.round(rm.x-12), jumpY=(rm.action==='jump_joy'?-Math.abs(Math.sin(t*10))*4:0), py=Math.round(rm.y-20+jumpY);
-  E(x,Math.round(rm.x),Math.round(rm.y)-1,11,3,'rgba(43,33,24,0.24)');
-  hpx.clearRect(0,0,24,20);
-  drawPigSprite(hpx,{pose:rm.walking?'walk':'stand',frame:rm.walking?(((t*6)|0)%2):0,happy:Boolean(rm.action),blink:(t%4)<0.15,tail:Math.floor(t*3)%2===1});
-  x.save();
-  if(rm.facing<0){x.translate(px+24,py);x.scale(-1,1);x.drawImage(hp,0,0,24,20,0,0,24,20);}
-  else x.drawImage(hp,0,0,24,20,px,py,24,20);
-  x.restore();
-}
-
-function ndDraw(t){
-  var x=ND.x;
-  var dt=Math.min(0.05,ND.dt||0.016);
-  var rm=window.__openRoom?window.__openRoom.state:null;
-  if(window.__openRoom) window.__openRoom.step(dt,performance.now());
-  var camX=rm?Math.round(rm.camX):210;
-  var camY=rm?Math.round(rm.camY):160;
-
-  x.save();
-  x.translate(-camX,-camY);
-  x.drawImage(ND.bg,0,0);
-  x.drawImage(ND.pews,0,0);
-  drawPigAt(x,rm,t);
-  drawCathedralLiveEffects(x,t);
-  x.restore();
-
-  if(window.__openRoom) window.__openRoom.drawOverlays(x,performance.now());
-}
-
-function ndFrame(now){
-  if(!ND.run)return;
-  var dt=Math.min(0.05,(now-ND.last)/1000);ND.last=now;ND.dt=dt;ND.t+=dt;
-  ndDraw(ND.t);requestAnimationFrame(ndFrame);
-}
-
-function applyResponsiveViewport(){
-  var w=Math.max(240,window.innerWidth||360);
-  var h=Math.max(320,window.innerHeight||640);
-  var sc=Math.max(2,Math.round(w/192));
-  VW=Math.min(260,Math.max(168,Math.ceil(w/sc)));
-  VH=Math.min(356,Math.max(200,Math.ceil(h/sc)));
-  var cv=document.getElementById('ndCv');
-  if(cv){cv.width=VW;cv.height=VH;}
-  ND.w=VW;ND.h=VH;
-  if(ND.x) ND.x.imageSmoothingEnabled=false;
-  if(window.__openRoom&&window.__openRoom.resize) window.__openRoom.resize(VW,VH);
-}
-
-window.__ndSetActive=function(v){
-  if(v&&!ND.run){ND.run=true;ND.last=performance.now();requestAnimationFrame(ndFrame);}
-  else if(!v){ND.run=false;}
+window.onerror = function(msg, src, line, col) {
+  try {
+    var payload = JSON.stringify({ type: 'JS_ERROR', message: String(msg), line: line, col: col });
+    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(payload);
+    else if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*');
+  } catch(e) {}
 };
-window.addEventListener('resize',applyResponsiveViewport);
-
-function ndStart(){
-  var cv=document.getElementById('ndCv');
-  ND.c=cv;ND.x=cv.getContext('2d');ND.x.imageSmoothingEnabled=false;
-  applyResponsiveViewport();
-  buildCathedral();
-  ND.run=true;ND.last=performance.now();
-  requestAnimationFrame(ndFrame);
+function postRN(obj) {
+  try {
+    var s = JSON.stringify(obj);
+    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(s);
+    else if (window.parent && window.parent !== window) window.parent.postMessage(s, '*');
+  } catch(e) {}
 }
+${tpsEngineScript}
+${cathedralWallArtScript}
+${cathedralSceneScript}
+(function() {
+  var cv = document.getElementById('ndCv');
+  var ctx = cv.getContext('2d');
+  var toastPill = document.getElementById('toastPill');
+  var roomPillBtn = document.getElementById('roomPillBtn');
+  var mainBtn = document.getElementById('mainActionBtn');
+  var secBtn = document.getElementById('secActionBtn');
 
-${openRoomScript}
+  var W = 400, H = 720;
+  function resizeCanvas() {
+    var dw = Math.max(320, window.innerWidth || 390);
+    var dh = Math.max(480, window.innerHeight || 760);
+    var scale = dw > 460 ? 0.72 : 0.84;
+    W = Math.round(dw * scale);
+    H = Math.round(dh * scale);
+    cv.width = W; cv.height = H;
+    ctx.imageSmoothingEnabled = false;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ndStart);
-else ndStart();
+  var st = createCathedralTpsState();
+  var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.6, targetHeight: 0.92 });
+  var cathedralBounds = { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85 };
+  var currentAction = null;
+  var secAction = null;
+  var isRunning = true;
 
+  var roomOrder = ['nave', 'sanctuary', 'belfry'];
+  var roomLabels = {
+    nave: 'Thánh Đường ⛪',
+    sanctuary: 'Cung Thánh 🕯️',
+    belfry: 'Tháp Chuông 🔔'
+  };
+
+  function updateContextButtons() {
+    var p = st.pig;
+    var act = null;
+    var sAct = null;
+
+    roomPillBtn.textContent = roomLabels[st.room] || 'Thánh Đường ⛪';
+
+    if (st.room === 'nave') {
+      if (Math.abs(p.x) <= 2.35 && p.z >= 10.8) {
+        act = { id: 'go_room', target: 'sanctuary', label: '🕯️ Bước vào Cung Thánh' };
+      } else if (p.x <= -1.75 && p.z >= 10.2) {
+        act = { id: 'go_room', target: 'belfry', label: '🔔 Lên Gác Đàn & Tháp Chuông' };
+      } else if (p.z <= 1.95 && Math.abs(p.x) <= 2.45) {
+        act = { id: 'exit_cathedral', label: '🚪 Ra lại Đại Lộ Sài Gòn' };
+      }
+    } else if (st.room === 'sanctuary') {
+      if (p.z >= 6.4) {
+        act = { id: 'light_candle', label: '🕯️ Thắp nến cầu bình an' };
+      }
+      if (p.z <= 2.35 && Math.abs(p.x) <= 2.65) {
+        if (!act) act = { id: 'go_room', target: 'nave', label: '⛪ Quay lại Thánh Đường' };
+        else sAct = { id: 'go_room', target: 'nave', label: '⛪ Về Thánh Đường' };
+      }
+    } else if (st.room === 'belfry') {
+      var dBell = Math.hypot(p.x - 2.0, p.z - 6.8);
+      if (dBell <= 3.15) {
+        act = { id: 'ring_bell', label: '🔔 Kéo chuông Nhà Thờ' };
+      } else if (p.z >= 9.6 && p.x >= -1.8 && p.x <= 4.0) {
+        act = { id: 'inspect_organ', label: '🎵 Ngắm Đàn Ống Pipe Organ' };
+      }
+      if (p.x <= -1.75 && p.z >= 10.0) {
+        if (!act) act = { id: 'go_room', target: 'nave', label: '🪜 Xuống Thánh Đường Chính' };
+        else sAct = { id: 'go_room', target: 'nave', label: '🪜 Xuống Thánh Đường' };
+      }
+    }
+
+    currentAction = act;
+    secAction = sAct;
+    if (act) { mainBtn.textContent = act.label; mainBtn.hidden = false; }
+    else { mainBtn.hidden = true; }
+    if (sAct) { secBtn.textContent = sAct.label; secBtn.hidden = false; }
+    else { secBtn.hidden = true; }
+  }
+
+  function runAction(a) {
+    if (!a) return;
+    postRN({ type: 'HAPTIC_MEDIUM' });
+    if (a.id === 'go_room') {
+      triggerCathedralRoom(st, a.target);
+    } else if (a.id === 'light_candle') {
+      lightCathedralCandle(st);
+    } else if (a.id === 'ring_bell') {
+      ringCathedralBell(st);
+    } else if (a.id === 'inspect_organ') {
+      st.organGlow = 1.0;
+      st.toast = '🎵 Đại Phong Cầm 1880 cổ điển với hàng chục ống đồng vàng vang âm trầm ấm!';
+      st.toastUntil = st.t + 4.2;
+    } else if (a.id === 'exit_cathedral') {
+      if (!st.exiting) {
+        st.exiting = true;
+        st.toast = 'Tạm biệt Nhà Thờ Đức Bà! Ra lại Đại Lộ Sài Gòn...';
+        st.toastUntil = st.t + 2.0;
+        setTimeout(function() { postRN({ type: 'EXIT_CATHEDRAL' }); }, 240);
+      }
+    }
+  }
+
+  mainBtn.addEventListener('click', function(e) { e.stopPropagation(); runAction(currentAction); });
+  secBtn.addEventListener('click', function(e) { e.stopPropagation(); runAction(secAction); });
+  roomPillBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    postRN({ type: 'HAPTIC_MEDIUM' });
+    var idx = roomOrder.indexOf(st.room);
+    var nextRoom = roomOrder[(idx + 1) % roomOrder.length];
+    triggerCathedralRoom(st, nextRoom);
+  });
+
+  // Cử chỉ chạm sàn đi bộ (Tap-to-Walk Raycast 3D) & vuốt xoay camera 360° (không Joystick ảo)
+  var dragging = false, moved = false, lastX = 0, lastY = 0, startX = 0, startY = 0;
+  function getPt(e) {
+    if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+  function onDown(e) {
+    var pt = getPt(e);
+    dragging = true; moved = false; lastX = startX = pt.x; lastY = startY = pt.y;
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    var pt = getPt(e);
+    var dx = pt.x - lastX, dy = pt.y - lastY;
+    if (Math.hypot(pt.x - startX, pt.y - startY) > 7) moved = true;
+    cam.yaw -= dx * 0.0085;
+    cam.pitch = Math.max(-0.68, Math.min(-0.10, cam.pitch - dy * 0.0055));
+    lastX = pt.x; lastY = pt.y;
+    if (e.cancelable) e.preventDefault();
+  }
+  function onUp(e) {
+    if (!dragging) return;
+    dragging = false;
+    if (!moved) {
+      var pt = getPt(e);
+      var rect = cv.getBoundingClientRect();
+      var sx = ((pt.x - rect.left) / rect.width) * W;
+      var sy = ((pt.y - rect.top) / rect.height) * H;
+      var hit = unprojectFloorTap(cam, sx, sy);
+      if (hit) {
+        var cpos = clampCathedralWalkPos(st, hit.x, hit.z);
+        st.pig.targetX = cpos.x; st.pig.targetZ = cpos.z; st.pig.walking = true;
+        st.ripples.push({ x: cpos.x, z: cpos.z, t: 0 });
+        postRN({ type: 'HAPTIC_LIGHT' });
+      }
+    }
+  }
+  cv.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointermove', onMove, { passive: false });
+  window.addEventListener('pointerup', onUp);
+  cv.addEventListener('touchstart', onDown, { passive: false });
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('touchend', onUp);
+
+  var lastNow = performance.now();
+  function loop(now) {
+    if (!isRunning) return;
+    var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));
+    lastNow = now;
+    stepCathedralTps(st, dt);
+    updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, cathedralBounds);
+    renderCathedralTpsScene(ctx, cam, st, W, H);
+    updateContextButtons();
+    if (st.toast && st.t < st.toastUntil) {
+      toastPill.textContent = st.toast;
+      toastPill.style.opacity = '1';
+    } else {
+      toastPill.style.opacity = '0';
+    }
+    requestAnimationFrame(loop);
+  }
+
+  window.__ndSetActive = function(v) {
+    if (v && !isRunning) {
+      isRunning = true;
+      lastNow = performance.now();
+      requestAnimationFrame(loop);
+    } else if (!v) {
+      isRunning = false;
+    }
+  };
+  window.addEventListener('message', function(ev) {
+    try {
+      var d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+      if (d && d.type === 'SET_ACTIVE') window.__ndSetActive(!!d.active);
+    } catch(e) {}
+  });
+
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
 </html>`,
-    [openRoomScript, cathedralArtScript]
+    [tpsEngineScript, cathedralWallArtScript, cathedralSceneScript]
   );
 
-  return (
-    <View style={styles.wrap}>
-      {Platform.OS === 'web' ? (
+  const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
+
+  if (!ready) return null;
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.container}>
         <iframe
           ref={iframeRef}
+          title="Nhà Thờ Đức Bà Sài Gòn TPS 3D"
           srcDoc={htmlContent}
           style={{ width: '100%', height: '100%', border: 'none', display: 'block' } as any}
-          title="Nhà Thờ Đức Bà Sài Gòn Toàn Màn Hình"
         />
-      ) : (
-        <WebView
-          ref={webViewRef}
-          source={{ html: htmlContent }}
-          style={styles.webView}
-          containerStyle={styles.webView}
-          scrollEnabled={false}
-          bounces={false}
-          onMessage={handleMessage}
-          originWhitelist={['*']}
-          javaScriptEnabled
-          domStorageEnabled
-          onContentProcessDidTerminate={() => webViewRef.current?.reload?.()}
-        />
-      )}
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <SafeWebView
+        ref={webViewRef}
+        source={memoizedSource}
+        originWhitelist={['*']}
+        javaScriptEnabled
+        domStorageEnabled
+        scrollEnabled={false}
+        bounces={false}
+        onMessage={handleMessage}
+        containerStyle={styles.webView}
+        style={styles.webView}
+        onContentProcessDidTerminate={() => webViewRef.current?.reload?.()}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  wrap: {
+  container: {
     flex: 1,
     width: '100%',
-    height: '100%',
-    backgroundColor: '#3A2D25',
+    backgroundColor: '#3B2820',
   },
   webView: {
     flex: 1,
     width: '100%',
-    height: '100%',
-    backgroundColor: '#3A2D25',
+    backgroundColor: '#3B2820',
   },
 });

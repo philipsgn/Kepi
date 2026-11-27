@@ -70,9 +70,10 @@ Mọi không gian mở nâng cấp lên chuẩn TPS 3D đều bắt buộc hỗ 
 | :---: | :--- | :---: | :--- |
 | **1** | **Quán Phở Cổ Truyền** (`phoTps3dScene.ts`) | **Đã triển khai (QĐ 232–241)** | Chuẩn TPS 3D Interior-Only: Spring-Arm 6 mặt phẳng, Vintage 90s, 3 mặt tường Văn hóa VN |
 | **2** | **Cộng Cà Phê 2 Tầng** (`cafeTps3dScene.ts`) | **Đã triển khai (QĐ 242–244)** | Kiến trúc độc bản 2 tầng (0% trùng bố cục Quán Phở): Tầng 1 bất đối xứng (Quầy Bar tủ lưới dọc tường phải + PICK UP HERE, cửa sổ rèm xanh tường trái, ghế bành Chăn Con Công, Tường Sách khổng lồ, Cầu thang gỗ 3D) ↔ Tầng 2 (tường xanh rêu Cộng, rèm vải bố thắt nút, bàn dài cộng đồng, Kệ Ziczac Phích Rạng Đông, Đài Đỏ + Điện thoại quay số, Góc Heo AI) |
-| 3 | **Cửa Hàng Adidas Hội An** | Kế hoạch tiếp theo | Mở cửa kính Hội An, dạo giữa kệ giày/áo 3D, thử áo trước gương |
-| 4 | **Sân Vận Động Trống Đồng FIFA** | Kế hoạch tiếp theo | Đi xuyên đường hầm 3D ra đường pitch, đứng sát biên xem trận 11v11 |
-| 5 | **Chùa / Nhà Thờ / Chợ Bến Thành** | Kế hoạch tiếp theo | Nâng cấp đồng bộ dùng chung `pixelTps3dEngine.ts` |
+| **3** | **Adidas Originals Hội An** (`adidasTps3dScene.ts`) | **Đã triển khai (QĐ 245)** | 3 phòng độc bản tách biệt (1 phòng = 1 khung cảnh): Sảnh Tầng 1 Hội An ↔ Phòng Thay Đồ & Gương Toàn Thân ↔ Lầu 2 Bộ Sưu Tập Việt Nam |
+| **4** | **Nhà Thờ Đức Bà Sài Gòn** (`cathedralTps3dScene.ts`) | **Đã triển khai (QĐ 245)** | 3 phòng độc bản tách biệt: Thánh Đường Chính Gothic ↔ Cung Thánh & Bàn Thờ Đá Hoa Cương ↔ Gác Đàn Ống Pipe Organ & Tháp Chuông |
+| **5** | **Ngôi Chùa Cổ Kính & Vườn Chùa** (`pagodaTps3dScene.ts`) | **Đã triển khai (QĐ 245)** | 3 phòng độc bản tách biệt: Vườn Chùa (Hồ Sen, Chùa Một Cột, Cây Đa, Tam Quan) ↔ Chánh Điện (Tượng Phật Vàng, Lư Hương) ↔ Tháp Chuông & Thiền Trà |
+| 6 | **Chợ Bến Thành / SVĐ Trống Đồng FIFA** | Đợt 2 tiếp theo | Nâng cấp đồng bộ Multi-Room TPS 3D |
 
 ---
 

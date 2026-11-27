@@ -1,9 +1,12 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
-import { buildOpenRoomEngineScript } from '../pixel/pixelOpenRoomEngine';
-import { buildPagodaInteriorArtScript } from './pagoda/pagodaInteriorArt';
+import { buildTps3dEngineScript } from '../pixel/pixelTps3dEngine';
+import { buildPagodaWallArtScript } from './pagoda/pagodaWallArt';
+import { buildPagodaTps3dSceneScript } from './pagoda/pagodaTps3dScene';
+
+const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
 interface PagodaTempleBannerWebViewProps {
   active?: boolean;
@@ -11,9 +14,10 @@ interface PagodaTempleBannerWebViewProps {
 }
 
 /**
- * Không Gian Toàn Màn Hình Ngôi Chùa Việt Nam Cổ Kính 2 Tầng (640×560, Dynamic 1:1 — Quyết định 220)
- * - Nửa trên: Chánh Điện Tượng Phật Thích Ca thếp vàng, hào quang, trần ô hoa sen mạ vàng, Trống Bát Nhã, Đại Hồng Chung & Phật tử cúi lạy.
- * - Nửa dưới: Sân Chùa cổ kính, bậc tam cấp, Lư Hương Đồng Khổng Lồ nghi ngút khói trầm, Bảo Tháp mái cong đỏ rực & Cổng Tam Quan ra phố.
+ * Ngôi Chùa Cổ Kính & Vườn Chùa 3 Phòng TPS 3D (Quyết định 245)
+ * - 3 Phòng riêng biệt hoàn toàn: Vườn Chùa Thanh Tịnh ('garden') · Chánh Điện Trang Nghiêm ('main_hall') · Tháp Chuông & Thiền Trà ('bell_tea').
+ * - Camera Spring-Arm 6 mặt phẳng chống xuyên tường, Tap-to-Walk Raycast 3D, xoay camera 360°.
+ * - Hỗ trợ song song Expo Go (SafeWebView) & Web PWA (<iframe srcDoc>).
  */
 export const PagodaTempleBannerWebView: React.FC<PagodaTempleBannerWebViewProps> = ({
   active = true,
@@ -22,6 +26,7 @@ export const PagodaTempleBannerWebView: React.FC<PagodaTempleBannerWebViewProps>
   const webViewRef = useRef<any>(null);
   const iframeRef = useRef<any>(null);
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [ready] = useState(true);
 
   useEffect(() => {
     return () => {
@@ -30,7 +35,15 @@ export const PagodaTempleBannerWebView: React.FC<PagodaTempleBannerWebViewProps>
   }, []);
 
   useEffect(() => {
-    if (Platform.OS === 'web') return;
+    if (Platform.OS === 'web') {
+      try {
+        iframeRef.current?.contentWindow?.postMessage(
+          JSON.stringify({ type: 'SET_ACTIVE', active: !!active }),
+          '*'
+        );
+      } catch (_e) {}
+      return;
+    }
     webViewRef.current?.injectJavaScript?.(
       `window.__pgSetActive && window.__pgSetActive(${active ? 'true' : 'false'}); true;`
     );
@@ -40,14 +53,12 @@ export const PagodaTempleBannerWebView: React.FC<PagodaTempleBannerWebViewProps>
     if (!d) return;
     if (d.type === 'HAPTIC_LIGHT') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    } else if (d.type === 'ROOM_ACTION') {
-      if (d.id === 'exit_pagoda' && d.userTriggered && onExitToHub) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-        if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
-        exitTimerRef.current = setTimeout(() => {
-          onExitToHub();
-        }, 120);
-      }
+    } else if (d.type === 'HAPTIC_MEDIUM') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    } else if (d.type === 'EXIT_PAGODA' && onExitToHub) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = setTimeout(() => onExitToHub(), 120);
     }
   };
 
@@ -70,316 +81,371 @@ export const PagodaTempleBannerWebView: React.FC<PagodaTempleBannerWebViewProps>
     } catch (_e) {}
   };
 
-  const openRoomScript = useMemo(
-    () =>
-      buildOpenRoomEngineScript({
-        canvasId: 'pgCv',
-        worldWidth: 640,
-        worldHeight: 560,
-        viewWidth: 220,
-        viewHeight: 320,
-        walkBounds: { minX: 24, maxX: 616, minY: 208, maxY: 536 },
-        initialX: 320,
-        initialY: 368,
-        initialCamX: 210,
-        initialCamY: 180,
-        speed: 46,
-        obstacles: [
-          // Lan can ngăn Chánh Điện & Sân Chùa (chừa bậc thang giữa x: 264..376)
-          { x: 0, y: 310, w: 262, h: 18 },
-          { x: 378, y: 310, w: 262, h: 18 },
-          // Lư Hương Khổng Lồ giữa sân
-          { x: 296, y: 394, w: 48, h: 42 },
-          // Bảo Tháp bên trái & Lầu Trống bên phải
-          { x: 44, y: 452, w: 106, h: 40 },
-          { x: 488, y: 444, w: 104, h: 44 },
-        ],
-        hotspots: [
-          {
-            id: 'buddha_altar',
-            x: 204,
-            y: 48,
-            w: 232,
-            h: 158,
-            standX: 320,
-            standY: 224,
-            standFace: 1,
-            actionType: 'eat_snack',
-            bubbleText: `Nam Mô A Di Đà Phật · Chúc bạn tâm an, giữ ví vững vàng!`,
-          },
-          {
-            id: 'prajna_drum',
-            x: 28,
-            y: 144,
-            w: 56,
-            h: 64,
-            standX: 64,
-            standY: 226,
-            standFace: -1,
-            actionType: 'look_window',
-            bubbleText: `Trống Bát Nhã ngân vang thanh tịnh khắp chánh điện`,
-          },
-          {
-            id: 'great_bell',
-            x: 556,
-            y: 138,
-            w: 56,
-            h: 68,
-            standX: 578,
-            standY: 226,
-            standFace: 1,
-            actionType: 'look_window',
-            bubbleText: `Thỉnh Đại Hồng Chung vang vọng · Tâm hồn nhẹ nhõm an yên...`,
-          },
-          {
-            id: 'courtyard_incense',
-            x: 294,
-            y: 386,
-            w: 52,
-            h: 50,
-            standX: 320,
-            standY: 448,
-            standFace: 1,
-            actionType: 'eat_snack',
-            bubbleText: `Thắp nén hương trầm cầu bình an & sức khỏe cho gia đình!`,
-          },
-          {
-            id: 'stupa_tower',
-            x: 42,
-            y: 332,
-            w: 112,
-            h: 158,
-            standX: 168,
-            standY: 456,
-            standFace: -1,
-            actionType: 'look_window',
-            bubbleText: `Bảo Tháp cổ kính mái đao cong đỏ rực giữa sân chùa thanh tịnh`,
-          },
-          {
-            id: 'exit_pagoda',
-            x: 266,
-            y: 504,
-            w: 108,
-            h: 56,
-            standX: 320,
-            standY: 514,
-            standFace: 1,
-            actionType: 'jump_joy',
-            fastDash: true,
-            bubbleText: `Bước qua Cổng Tam Quan ra lại phố Sài Gòn...`,
-          },
-        ],
-      }),
-    []
-  );
-
-  const pagodaArtScript = useMemo(() => buildPagodaInteriorArtScript(), []);
+  const tpsEngineScript = useMemo(() => buildTps3dEngineScript(), []);
+  const pagodaWallArtScript = useMemo(() => buildPagodaWallArtScript(), []);
+  const pagodaSceneScript = useMemo(() => buildPagodaTps3dSceneScript(), []);
 
   const htmlContent = useMemo(
-    () => `<!DOCTYPE html>
+    () => `<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#3A2D25;display:flex;align-items:center;justify-content:center}
-#pgCv{
-  width:100%;
-  height:100%;
-  display:block;
-  image-rendering:pixelated;
-  image-rendering:-webkit-crisp-edges;
-  image-rendering:-moz-crisp-edges;
-  image-rendering:crisp-edges;
-  cursor:grab;
-  touch-action:none;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #4A2418; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  canvas {
+    display: block; width: 100%; height: 100%;
+    image-rendering: pixelated;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: crisp-edges;
+    touch-action: none;
+    cursor: grab;
+  }
+  canvas:active { cursor: grabbing; }
+  .hud-toast {
+    position: fixed; top: 16px; left: 68px; right: 118px;
+    pointer-events: none; display: flex; justify-content: center; z-index: 10;
+  }
+  .room-pill {
+    position: fixed; top: 16px; right: 12px; z-index: 16;
+    background: #7F1D1D; color: #FDE047;
+    border: 2.5px solid #2B2118; border-radius: 12px;
+    padding: 6px 10px; font-size: 11px; font-weight: 900;
+    box-shadow: 0 3px 0 #2B2118; cursor: pointer;
+  }
+  .room-pill:active { transform: translateY(1px); }
+  .hud-toast-pill {
+    background: rgba(255, 251, 241, 0.95);
+    border: 2.5px solid #2B2118;
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 11.5px; font-weight: 800; color: #2B2118;
+    box-shadow: 0 3px 0 #2B2118;
+    text-align: center; max-width: 340px;
+  }
+  .action-bar {
+    position: fixed; bottom: 26px; left: 16px; right: 16px;
+    display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+    pointer-events: none; z-index: 15;
+  }
+  .action-btn {
+    pointer-events: auto;
+    background: #F4B93B; color: #2B2118;
+    border: 3px solid #2B2118; border-radius: 16px;
+    padding: 10px 18px; font-size: 14px; font-weight: 900;
+    box-shadow: 0 4px 0 #2B2118;
+    cursor: pointer; transition: transform 0.06s;
+  }
+  .action-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2B2118; }
+  .action-btn.sacred { background: #991B1B; color: #FDE047; }
+  .action-btn.sec { background: #FFFBF1; padding: 10px 14px; }
+  [hidden] { display: none !important; }
 </style>
-<script>
-window.onerror=function(msg,src,line){
-  if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(JSON.stringify({type:'CONSOLE_ERROR',error:String(msg),line:line}));}
-  return false;
-};
-</script>
 </head>
 <body>
-<canvas id="pgCv" width="220" height="320" role="img" aria-label="Ngôi chùa Việt Nam cổ kính 2 tầng gồm Chánh Điện tượng Phật thếp vàng, khói trầm hương, Phật tử cúi lạy và Sân Chùa Bảo Tháp"></canvas>
+<canvas id="pgCv"></canvas>
+<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Vườn Chùa Thanh Tịnh</div></div>
+<button id="roomPillBtn" class="room-pill">Vườn Chùa 🪷</button>
+<div class="action-bar">
+  <button id="mainActionBtn" class="action-btn" hidden></button>
+  <button id="secActionBtn" class="action-btn sec" hidden></button>
+</div>
 <script>
-(function(){
-'use strict';
-
-var INK='#2B2118';
-var WORLD_W=640;
-var WORLD_H=560;
-var VW=220;
-var VH=320;
-
-function R(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
-function E(c,cx,cy,rx,ry,col){
-  c.fillStyle=col;
-  for(var dy=-ry;dy<=ry;dy++)for(var dx=-rx;dx<=rx;dx++)
-    if((dx*dx)/(rx*rx)+(dy*dy)/(ry*ry)<=1)c.fillRect(Math.round(cx+dx),Math.round(cy+dy),1,1);
-}
-
-// Sprite Heo Con 24×20 chuẩn Tab Vườn
-var PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',h:'#FFE3E8',k:'#2B2118',g:'#F4B93B',G:'#B97A14',w:'#FFFFFF'};
-var hp=document.createElement('canvas');hp.width=24;hp.height=20;
-var hpx=hp.getContext('2d');hpx.imageSmoothingEnabled=false;
-function drawPigSprite(c,o){
-  o=o||{};
-  var pose=o.pose||'stand', f=o.frame||0, by=pose==='walk'?(f%2?0:1):0;
-  var hx=pose==='eat'?1:0, hy=pose==='eat'?3:by;
-  var I=PAL.k,P=PAL.p,S=PAL.s,N=PAL.n,H=PAL.h,G=PAL.g;
-  if(o.tail){R(c,2,10+by,2,1,I);R(c,1,9+by,1,2,I);R(c,2,8+by,1,1,I);}
-  else{R(c,2,11+by,2,1,I);R(c,1,10+by,1,1,I);}
-  R(c,4,7+by,14,9,I);R(c,3,8+by,16,7,I);
-  R(c,5,8+by,12,7,P);R(c,4,9+by,14,5,P);
-  R(c,6,8+by,10,2,H);R(c,5,13+by,12,2,S);
-  R(c,9,8+by,4,1,I);R(c,9,9+by,4,1,G);
-  R(c,14+hx,3+hy,3,3,I);R(c,15+hx,4+hy,1,1,N);
-  R(c,12+hx,4+hy,9,9,I);R(c,11+hx,5+hy,11,7,I);
-  R(c,13+hx,5+hy,7,7,P);R(c,12+hx,6+hy,9,5,P);
-  R(c,13+hx,5+hy,5,2,H);R(c,13+hx,11+hy,6,1,S);
-  R(c,19+hx,7+hy,4,4,I);R(c,20+hx,8+hy,2,2,N);
-  R(c,20+hx,8+hy,1,1,I);R(c,21+hx,9+hy,1,1,I);
-  if(o.blink){R(c,16+hx,8+hy,2,1,I);}
-  else if(o.happy){R(c,16+hx,8+hy,1,1,I);R(c,17+hx,7+hy,1,1,I);R(c,18+hx,8+hy,1,1,I);}
-  else{R(c,16+hx,7+hy,2,2,I);R(c,16+hx,7+hy,1,1,PAL.w);}
-  R(c,14+hx,10+hy,2,1,'#F27D94');
-  var L1=pose==='walk'?(f%2?0:-1):0, L2=pose==='walk'?(f%2?-1:0):0;
-  [[6,L1,P],[9,L2,P],[13,L2,S],[16,L1,S]].forEach(function(lg){
-    R(c,lg[0],15+by+lg[1],2,4,I);R(c,lg[0],15+by+lg[1],1,2,lg[2]);R(c,lg[0],18+by+lg[1],2,1,I);
-  });
-}
-
-${pagodaArtScript}
-
-var PG={bg:null,t:0,last:0,dt:0,run:false,w:VW,h:VH};
-
-function buildPagoda(){
-  var bg=document.createElement('canvas');bg.width=WORLD_W;bg.height=WORLD_H;
-  var x=bg.getContext('2d');x.imageSmoothingEnabled=false;
-  drawPagodaBg(x,WORLD_W,WORLD_H);
-  PG.bg=bg;
-}
-
-function drawPigAt(x,rm,t){
-  if(!rm)return;
-  var bow=(rm.action==='eat_snack');
-  var px=Math.round(rm.x-12), jumpY=(rm.action==='jump_joy'?-Math.abs(Math.sin(t*10))*4:0), py=Math.round(rm.y-20+jumpY);
-  E(x,Math.round(rm.x),Math.round(rm.y)-1,11,3,'rgba(43,33,24,0.24)');
-  hpx.clearRect(0,0,24,20);
-  drawPigSprite(hpx,{pose:rm.walking?'walk':(bow?'eat':'stand'),frame:rm.walking?(((t*6)|0)%2):0,happy:Boolean(rm.action)&&!bow,blink:(t%4)<0.15,tail:Math.floor(t*3)%2===1});
-  x.save();
-  if(rm.facing<0){x.translate(px+24,py);x.scale(-1,1);x.drawImage(hp,0,0,24,20,0,0,24,20);}
-  else x.drawImage(hp,0,0,24,20,px,py,24,20);
-  x.restore();
-}
-
-function pgDraw(t){
-  var x=PG.x;
-  var dt=Math.min(0.05,PG.dt||0.016);
-  var rm=window.__openRoom?window.__openRoom.state:null;
-  if(window.__openRoom) window.__openRoom.step(dt,performance.now());
-  var camX=rm?Math.round(rm.camX):210;
-  var camY=rm?Math.round(rm.camY):180;
-
-  x.save();
-  x.translate(-camX,-camY);
-  x.drawImage(PG.bg,0,0);
-  drawPagodaLiveEffects(x,t);
-  drawPigAt(x,rm,t);
-  x.restore();
-
-  if(window.__openRoom) window.__openRoom.drawOverlays(x,performance.now());
-}
-
-function pgFrame(now){
-  if(!PG.run)return;
-  var dt=Math.min(0.05,(now-PG.last)/1000);PG.last=now;PG.dt=dt;PG.t+=dt;
-  pgDraw(PG.t);requestAnimationFrame(pgFrame);
-}
-
-function applyResponsiveViewport(){
-  var w=Math.max(240,window.innerWidth||360);
-  var h=Math.max(320,window.innerHeight||640);
-  var sc=Math.max(2,Math.round(w/192));
-  VW=Math.min(260,Math.max(168,Math.ceil(w/sc)));
-  VH=Math.min(356,Math.max(200,Math.ceil(h/sc)));
-  var cv=document.getElementById('pgCv');
-  if(cv){cv.width=VW;cv.height=VH;}
-  PG.w=VW;PG.h=VH;
-  if(PG.x) PG.x.imageSmoothingEnabled=false;
-  if(window.__openRoom&&window.__openRoom.resize) window.__openRoom.resize(VW,VH);
-}
-
-window.__pgSetActive=function(v){
-  if(v&&!PG.run){PG.run=true;PG.last=performance.now();requestAnimationFrame(pgFrame);}
-  else if(!v){PG.run=false;}
+window.onerror = function(msg, src, line, col) {
+  try {
+    var payload = JSON.stringify({ type: 'JS_ERROR', message: String(msg), line: line, col: col });
+    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(payload);
+    else if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*');
+  } catch(e) {}
 };
-window.addEventListener('resize',applyResponsiveViewport);
-
-function pgStart(){
-  var cv=document.getElementById('pgCv');
-  PG.c=cv;PG.x=cv.getContext('2d');PG.x.imageSmoothingEnabled=false;
-  applyResponsiveViewport();
-  buildPagoda();
-  PG.run=true;PG.last=performance.now();
-  requestAnimationFrame(pgFrame);
+function postRN(obj) {
+  try {
+    var s = JSON.stringify(obj);
+    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(s);
+    else if (window.parent && window.parent !== window) window.parent.postMessage(s, '*');
+  } catch(e) {}
 }
+${tpsEngineScript}
+${pagodaWallArtScript}
+${pagodaSceneScript}
+(function() {
+  var cv = document.getElementById('pgCv');
+  var ctx = cv.getContext('2d');
+  var toastPill = document.getElementById('toastPill');
+  var roomPillBtn = document.getElementById('roomPillBtn');
+  var mainBtn = document.getElementById('mainActionBtn');
+  var secBtn = document.getElementById('secActionBtn');
 
-${openRoomScript}
+  var W = 400, H = 720;
+  function resizeCanvas() {
+    var dw = Math.max(320, window.innerWidth || 390);
+    var dh = Math.max(480, window.innerHeight || 760);
+    var scale = dw > 460 ? 0.72 : 0.84;
+    W = Math.round(dw * scale);
+    H = Math.round(dh * scale);
+    cv.width = W; cv.height = H;
+    ctx.imageSmoothingEnabled = false;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',pgStart);
-else pgStart();
+  var st = createPagodaTpsState();
+  var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.6, targetHeight: 0.92 });
+  var pagodaBounds = { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85 };
+  var currentAction = null;
+  var secAction = null;
+  var isActive = true;
+  var ROOM_ORDER = ['garden', 'main_hall', 'bell_tea'];
 
+  window.__pgSetActive = function(v) {
+    isActive = !!v;
+    if (isActive) {
+      lastNow = performance.now();
+      requestAnimationFrame(loop);
+    }
+  };
+  window.addEventListener('message', function(ev) {
+    try {
+      var d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+      if (d && d.type === 'SET_ACTIVE') window.__pgSetActive(d.active);
+    } catch(_e) {}
+  });
+
+  function getRoomPillLabel(room) {
+    if (room === 'main_hall') return 'Chánh Điện 🙏';
+    if (room === 'bell_tea') return 'Thiền Trà 🔔';
+    return 'Vườn Chùa 🪷';
+  }
+
+  function updateContextButtons() {
+    var p = st.pig;
+    var act = null;
+    var sAct = null;
+
+    roomPillBtn.textContent = getRoomPillLabel(st.room);
+
+    if (st.room === 'garden') {
+      if (p.z <= 2.1 && Math.abs(p.x) <= 2.4) {
+        act = { id: 'exit_pagoda', label: '🚪 Ra lại Đại Lộ Sài Gòn' };
+      } else if (p.z >= 11.3 && Math.abs(p.x) <= 2.3) {
+        act = { id: 'go_room', roomId: 'main_hall', label: '🙏 Bước vào Chánh Điện', sacred: true };
+      } else if (p.z >= 11.3 && p.x > 2.3) {
+        act = { id: 'go_room', roomId: 'bell_tea', label: '🔔 Sang Tháp Chuông & Thiền Trà' };
+      } else if (p.x <= -0.2 && p.z >= 3.2 && p.z <= 10.2) {
+        act = { id: 'admire_lotus', label: '🪷 Ngắm Hồ Sen & Chùa Một Cột' };
+      } else if (p.x >= 2.2 && p.z >= 4.5 && p.z <= 9.2) {
+        act = { id: 'rest_banyan', label: '🌳 Đứng dưới tán Cây Đa Cổ Thụ' };
+      }
+    } else if (st.room === 'main_hall') {
+      if (p.z >= 7.2 && Math.abs(p.x) <= 2.9) {
+        act = { id: 'offer_incense', label: '🙏 Dâng hương cầu bình an', sacred: true };
+      } else if (p.z <= 2.1 && Math.abs(p.x) <= 2.4) {
+        act = { id: 'go_room', roomId: 'garden', label: '🪷 Ra lại Vườn Chùa' };
+      }
+    } else if (st.room === 'bell_tea') {
+      if (p.seated) {
+        act = { id: 'sip_tea', label: '🍵 Nhâm nhi trà sen nóng' };
+        sAct = { id: 'stand_up', label: '🚶 Đứng dậy' };
+      } else if (p.x <= -0.3 && p.z >= 7.8) {
+        act = { id: 'ring_bell', label: '🔔 Thỉnh Đại Hồng Chung', sacred: true };
+      } else if (p.x >= 0.3 && p.z >= 6.6 && p.z <= 10.6) {
+        act = { id: 'sit_tea', label: '🍵 Ngồi thưởng Thiền Trà' };
+      } else if (p.z <= 2.1 && Math.abs(p.x) <= 2.4) {
+        act = { id: 'go_room', roomId: 'garden', label: '🪷 Ra lại Vườn Chùa' };
+      }
+    }
+
+    currentAction = act;
+    secAction = sAct;
+    if (act) {
+      mainBtn.textContent = act.label;
+      mainBtn.className = act.sacred ? 'action-btn sacred' : 'action-btn';
+      mainBtn.hidden = false;
+    } else {
+      mainBtn.hidden = true;
+    }
+    if (sAct) {
+      secBtn.textContent = sAct.label;
+      secBtn.hidden = false;
+    } else {
+      secBtn.hidden = true;
+    }
+  }
+
+  function runAction(a) {
+    if (!a) return;
+    var p = st.pig;
+    postRN({ type: 'HAPTIC_MEDIUM' });
+    if (a.id === 'go_room') {
+      triggerPagodaRoom(st, a.roomId);
+    } else if (a.id === 'offer_incense') {
+      st.incenseGlow = 4.5;
+      p.yaw = 0;
+      p.walking = false;
+      st.toast = 'Nam Mô A Di Đà Phật 🙏 Hương trầm tỏa ngát cầu bình an & giữ ví vững vàng!';
+      st.toastUntil = st.t + 4.5;
+    } else if (a.id === 'ring_bell') {
+      st.bellRingTimer = 3.2;
+      st.bellSwingPhase = 0;
+      p.yaw = Math.atan2(-2.6 - p.x, 10.5 - p.z);
+      p.walking = false;
+      st.toast = 'Boong... 🔔 Tiếng Đại Hồng Chung ngân vang, tâm hồn nhẹ nhõm an yên!';
+      st.toastUntil = st.t + 4.5;
+    } else if (a.id === 'sit_tea') {
+      p.x = 1.15; p.z = 8.4; p.yaw = Math.PI / 2;
+      p.seated = true; p.walking = false; p.eating = false;
+      st.toast = 'Ngồi bên bộ ấm trà Bát Tràng & bức thư pháp TÂM AN thật thanh tịnh 🍵';
+      st.toastUntil = st.t + 4.2;
+    } else if (a.id === 'sip_tea') {
+      p.eating = true;
+      st.toast = 'Chén trà sen nóng ấm thơm dịu, tâm an vạn sự lành 🍵🪷';
+      st.toastUntil = st.t + 3.8;
+    } else if (a.id === 'stand_up') {
+      p.seated = false; p.eating = false;
+      p.x = 0.55; p.z = 8.4;
+    } else if (a.id === 'admire_lotus') {
+      st.toast = 'Chùa Một Cột uy nghi giữa Hồ Sen hồng nở rộ dưới nắng vàng 🪷';
+      st.toastUntil = st.t + 4.0;
+    } else if (a.id === 'rest_banyan') {
+      st.toast = 'Gió mát dưới tán Cây Đa Cổ Thụ rợp bóng sân chùa thanh tịnh 🌳';
+      st.toastUntil = st.t + 4.0;
+    } else if (a.id === 'exit_pagoda') {
+      if (!st.exiting) {
+        st.exiting = true;
+        st.toast = 'Bước qua Cổng Tam Quan ra lại Đại Lộ Sài Gòn...';
+        st.toastUntil = st.t + 2.0;
+        setTimeout(function() { postRN({ type: 'EXIT_PAGODA' }); }, 240);
+      }
+    }
+  }
+
+  mainBtn.addEventListener('click', function(e) { e.stopPropagation(); runAction(currentAction); });
+  secBtn.addEventListener('click', function(e) { e.stopPropagation(); runAction(secAction); });
+  roomPillBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    postRN({ type: 'HAPTIC_MEDIUM' });
+    var idx = ROOM_ORDER.indexOf(st.room);
+    var nextRoom = ROOM_ORDER[(idx + 1) % ROOM_ORDER.length];
+    triggerPagodaRoom(st, nextRoom);
+  });
+
+  // Cử chỉ chạm sàn đi bộ (Tap-to-Walk Raycast 3D) & vuốt xoay camera 360°
+  var dragging = false, moved = false, lastX = 0, lastY = 0, startX = 0, startY = 0;
+  function getPt(e) {
+    if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+  function onDown(e) {
+    var pt = getPt(e);
+    dragging = true; moved = false; lastX = startX = pt.x; lastY = startY = pt.y;
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    var pt = getPt(e);
+    var dx = pt.x - lastX, dy = pt.y - lastY;
+    if (Math.hypot(pt.x - startX, pt.y - startY) > 7) moved = true;
+    cam.yaw -= dx * 0.0085;
+    cam.pitch = Math.max(-0.68, Math.min(-0.10, cam.pitch - dy * 0.0055));
+    lastX = pt.x; lastY = pt.y;
+    if (e.cancelable) e.preventDefault();
+  }
+  function onUp(e) {
+    if (!dragging) return;
+    dragging = false;
+    if (!moved) {
+      var pt = getPt(e);
+      var rect = cv.getBoundingClientRect();
+      var sx = ((pt.x - rect.left) / rect.width) * W;
+      var sy = ((pt.y - rect.top) / rect.height) * H;
+      var hit = unprojectFloorTap(cam, sx, sy);
+      if (hit) {
+        var cpos = clampPagodaWalkPos(st, hit.x, hit.z);
+        if (st.pig.seated) { st.pig.seated = false; st.pig.eating = false; }
+        st.pig.targetX = cpos.x; st.pig.targetZ = cpos.z; st.pig.walking = true;
+        st.ripples.push({ x: cpos.x, z: cpos.z, t: 0 });
+        postRN({ type: 'HAPTIC_LIGHT' });
+      }
+    }
+  }
+  cv.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointermove', onMove, { passive: false });
+  window.addEventListener('pointerup', onUp);
+  cv.addEventListener('touchstart', onDown, { passive: false });
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('touchend', onUp);
+
+  var lastNow = performance.now();
+  function loop(now) {
+    if (!isActive) return;
+    var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));
+    lastNow = now;
+    stepPagodaTps(st, dt);
+    updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, pagodaBounds);
+    renderPagodaTpsScene(ctx, cam, st, W, H);
+    updateContextButtons();
+    if (st.toast && st.t < st.toastUntil) {
+      toastPill.textContent = st.toast;
+      toastPill.style.opacity = '1';
+    } else {
+      toastPill.style.opacity = '0';
+    }
+    requestAnimationFrame(loop);
+  }
+  if (isActive) requestAnimationFrame(loop);
 })();
 </script>
 </body>
 </html>`,
-    [openRoomScript, pagodaArtScript]
+    [tpsEngineScript, pagodaWallArtScript, pagodaSceneScript]
   );
 
-  return (
-    <View style={styles.wrap}>
-      {Platform.OS === 'web' ? (
+  const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
+
+  if (!ready) return null;
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.container}>
         <iframe
           ref={iframeRef}
+          title="Ngôi Chùa Cổ Kính & Vườn Chùa TPS 3D"
           srcDoc={htmlContent}
           style={{ width: '100%', height: '100%', border: 'none', display: 'block' } as any}
-          title="Ngôi Chùa Việt Nam Cổ Kính Toàn Màn Hình"
         />
-      ) : (
-        <WebView
-          ref={webViewRef}
-          source={{ html: htmlContent }}
-          style={styles.webView}
-          containerStyle={styles.webView}
-          scrollEnabled={false}
-          bounces={false}
-          onMessage={handleMessage}
-          originWhitelist={['*']}
-          javaScriptEnabled
-          domStorageEnabled
-          onContentProcessDidTerminate={() => webViewRef.current?.reload?.()}
-        />
-      )}
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <SafeWebView
+        ref={webViewRef}
+        source={memoizedSource}
+        originWhitelist={['*']}
+        javaScriptEnabled
+        domStorageEnabled
+        scrollEnabled={false}
+        bounces={false}
+        onMessage={handleMessage}
+        containerStyle={styles.webView}
+        style={styles.webView}
+        onContentProcessDidTerminate={() => webViewRef.current?.reload?.()}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  wrap: {
+  container: {
     flex: 1,
     width: '100%',
-    height: '100%',
-    backgroundColor: '#3A2D25',
+    backgroundColor: '#4A2418',
   },
   webView: {
     flex: 1,
     width: '100%',
-    height: '100%',
-    backgroundColor: '#3A2D25',
+    backgroundColor: '#4A2418',
   },
 });

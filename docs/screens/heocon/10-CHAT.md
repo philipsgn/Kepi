@@ -594,3 +594,14 @@ Màn hình Tab 3 hiển thị:
     - **Bàn Gỗ Dài Cộng Đồng** cùng 6 ghế gỗ đệm Chăn Con Công bày Cà Phê Cốt Dừa, Ca men sắt xanh lính & Bánh Sừng Bò chấm sữa đặc.
     - **Tường Trái:** **Kệ Gỗ Ziczac Nghệ Thuật** đựng **Phích Nước Rạng Đông**, sách cổ & bảng `CỘNG CÀ PHÊ · ĐỘC LẬP · TỰ DO · HẠNH PHÚC`.
     - **Tường Phải:** **Dãy Cửa Sổ Song Gỗ Dọc** + Bàn Bar song gỗ + Kệ khăn thổ cẩm đặt **Đài Radio Đỏ Cổ + Điện Thoại Quay Số Đen + Đồng Hồ Báo Thức** + **Góc Bàn Heo AI Đeo Kính** + Cầu thang xuống Tầng 1.
+
+---
+
+## 58. Multi-Agent TPS 3D Đợt 1 — 3 Công Trình Đa Phòng Độc Bản (Adidas Hội An, Nhà Thờ Đức Bà & Chùa Cổ — Quyết định 245)
+- **Nguyên tắc kiến trúc 1 Phòng = 1 Khung Cảnh (`Interior-Only Multi-Room TPS 3D`):** Không gộp nhiều ngăn phòng vào chung 1 khung hình; chuyển phòng qua cửa/vòm/cầu thang bằng fade mượt 200ms + nút đổi phòng góc trên phải.
+- **Adidas Originals Hội An ([adidasTps3dScene.ts](../../../src/components/chat/adidas/adidasTps3dScene.ts), [adidasWallArt.ts](../../../src/components/chat/adidas/adidasWallArt.ts), [AdidasStoreBannerWebView.tsx](../../../src/components/chat/AdidasStoreBannerWebView.tsx)):**
+  - `hall` (Sảnh Tầng 1 tường vàng Hội An, gạch bông, lồng đèn lụa, tường kệ giày 3 sọc & nhân viên) ↔ `fitting` (Phòng Thay Đồ rèm nhung, gương toàn thân thử áo khoác 3 sọc) ↔ `upper` (Lầu 2 Bộ Sưu Tập Việt Nam & Quầy Thu Ngân).
+- **Nhà Thờ Đức Bà Sài Gòn ([cathedralTps3dScene.ts](../../../src/components/chat/cathedral/cathedralTps3dScene.ts), [cathedralWallArt.ts](../../../src/components/chat/cathedral/cathedralWallArt.ts), [NotreDameCathedralBannerWebView.tsx](../../../src/components/chat/NotreDameCathedralBannerWebView.tsx)):**
+  - `nave` (Thánh Đường Chính gạch đỏ Marseille, vòm Gothic, cửa kính màu Rose Window, 2 dãy ghế gỗ & thảm đỏ) ↔ `sanctuary` (Cung Thánh đá hoa cương, Tượng Đức Mẹ Hòa Bình, thắp nến cầu bình an) ↔ `belfry` (Gác Đàn Ống Pipe Organ & Tháp Chuông Đồng tương tác kéo chuông).
+- **Ngôi Chùa Cổ Kính & Vườn Chùa ([pagodaTps3dScene.ts](../../../src/components/chat/pagoda/pagodaTps3dScene.ts), [pagodaWallArt.ts](../../../src/components/chat/pagoda/pagodaWallArt.ts), [PagodaTempleBannerWebView.tsx](../../../src/components/chat/PagodaTempleBannerWebView.tsx)):**
+  - `garden` (Vườn Chùa gạch tàu đỏ, Hồ Sen + Chùa Một Cột, Cây Đa cổ thụ & Cổng Tam Quan) ↔ `main_hall` (Chánh Điện cột sơn son thếp vàng, Tượng Phật Vàng đài sen, Lư Hương dâng hương) ↔ `bell_tea` (Tháp Chuông Đại Hồng Chung thỉnh chuông & Góc Thiền Trà ấm chén Bát Tràng + thư pháp `TÂM AN`).
