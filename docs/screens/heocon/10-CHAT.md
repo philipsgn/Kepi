@@ -580,20 +580,15 @@ Màn hình Tab 3 hiển thị:
 
 ---
 
-## 57. Quán Cộng Cà Phê 2 Tầng TPS 3D Độc Bản — Kiến Trúc Khác Biệt 100% Quán Phở (Quyết định 242–244)
-- **Điều hướng thông minh (`PixelHubDashboard.tsx` & `ChatView.tsx`):**
-  - Chạm tiệm `CAFE` trên Đại Lộ Sài Gòn (`onEnterCafe` ➔ `'cafe_tps'`) mở **Quán Cộng Cà Phê 2 Tầng TPS 3D Toàn Màn Hình (`CafeTpsView` + `CafeTpsBannerWebView`)** chuẩn Interior-Only, không thanh Tab card, Camera Spring-Arm 6 mặt phẳng chống xuyên tường (`wallMargin = 0.38m`).
-  - Thẻ `Heo AI` tiếp tục mở màn Trò chuyện (`'chat'`); trên **Tầng 2** có **Góc Bàn Heo AI** (Heo AI đeo kính 1:1 chú Heo toàn App) cho phép chú Heo lại gần bấm `💬 Trò chuyện cùng Heo AI` chuyển thẳng sang màn Chat.
-- **Bố Cục 2 Tầng Độc Bản Không Trùng Lặp Quán Phở ([cafeTps3dScene.ts](../../../src/components/chat/cafe/cafeTps3dScene.ts) & [cafeVnWallArt.ts](../../../src/components/chat/cafe/cafeVnWallArt.ts)):**
-  - **Tầng 1 (Trệt — `floor: 1`, Sàn Xi Măng Mài Xám-Xanh, Bất Đối Xứng):**
-    - **Dọc Tường Phải (`X = +3.6..+5.8`):** Quầy Bar dài khung gỗ tủ lưới mắt cáo mặt bê tông đá mài, biển treo hồng-đỏ **`PICK UP HERE`**, 2 Barista áo xanh bộ đội ngôi sao vàng & mũ vải + 1 Phục vụ.
-    - **Dọc Tường Trái (`X = -5.94`):** Khung cửa sổ kính lớn rèm xanh cốm rủ 2 bên ngắm tán cây xanh + dãy bàn dài cửa sổ.
-    - **Giữa phòng & Tường Cuối:** 2 bàn tròn cổ + **ghế bành gỗ tay cong gối Chăn Con Công**, quạt sắt đứng, **Kệ Sách Xếp Chồng Khổng Lồ** trên tường xi măng loang, biển gỗ tròn **`ĐI NHẸ NÓI KHẼ`**, bảng **`ĐỘC LẬP · TỰ DO · HẠNH PHÚC`**, tủ gỗ điện thoại quay số/cassette, cửa xanh lính hé 1 cánh (~35°) đón tia nắng động, và **Cầu Thang Gỗ 3D 7 Bậc** lên Lầu 2 (chuyển tầng fade 200ms).
-  - **Tầng 2 (Lầu Trên — `floor: 2`, Sàn Gỗ Mộc, Tường Xanh Rêu Cộng `#4F6335`):**
-    - Trần mái gỗ nghiêng xà gồ + **Rèm Vải Bố Nâu Thắt Nút Rủ Giữa Phòng** + cột bê tông thô nhám.
-    - **Bàn Gỗ Dài Cộng Đồng** cùng 6 ghế gỗ đệm Chăn Con Công bày Cà Phê Cốt Dừa, Ca men sắt xanh lính & Bánh Sừng Bò chấm sữa đặc.
-    - **Tường Trái:** **Kệ Gỗ Ziczac Nghệ Thuật** đựng **Phích Nước Rạng Đông**, sách cổ & bảng `CỘNG CÀ PHÊ · ĐỘC LẬP · TỰ DO · HẠNH PHÚC`.
-    - **Tường Phải:** **Dãy Cửa Sổ Song Gỗ Dọc** + Bàn Bar song gỗ + Kệ khăn thổ cẩm đặt **Đài Radio Đỏ Cổ + Điện Thoại Quay Số Đen + Đồng Hồ Báo Thức** + **Góc Bàn Heo AI Đeo Kính** + Cầu thang xuống Tầng 1.
+## 57. Quán Cộng Cà Phê 2 Tầng WebGL 3D Chân Thực (Pixar / Studio Ghibli — Quyết định 242–247)
+- **Động Cơ WebGL 3D Thực Thụ Thuần Inline ([cafeWebgl3dEngine.ts](../../../src/components/chat/cafe/cafeWebgl3dEngine.ts) + Canvas2D Fallback):** Không phụ thuộc CDN mạng, chạy 60fps trên Web PWA, iOS & Android; chiếu phối cảnh Mesh 3D đa giác mượt (hình cầu, trụ, nón cụt, ly tiện tròn, lá dương xỉ, cửa chớp gỗ Pháp, lan can sắt rỉ), ánh sáng đèn Tungsten vàng ấm, nắng chiều vàng óng, hơi nước Espresso & hạt bụi lấp lánh trong tia nắng.
+- **Bộ Texture Thủ Tục Chân Thực (`buildCafeProceduralTextures`):** Tường vôi xanh rêu loang 1980s, vân gỗ gụ tối, gạch bông Đông Dương sờn nhẹ, vải Chăn Con Công đỏ-xanh-vàng, áo trấn thủ chần bông quả trám, tranh ảnh đen trắng 1980s, poster cổ động & bảng menu sơn tay.
+- **Nhân Vật Chú Heo 3D Khớp Nối & Đồng Bộ Toàn App:** Chú heo hồng bầu bĩnh Pixar (có khe xu vàng PigFly), khoác **Áo Trấn Thủ xanh lính chần bông**, **Kính tròn cổ**, **Túi vải bố đeo chéo**, và **cầm Mũ Cối xanh bộ đội** (đặt lên bàn gỗ khi ngồi ban công).
+- **Thế Giới 2 Tầng Liền Mạch + 4 Hành Động Điện Ảnh (`1..4`) + Tự Do TPS 360° ([cafeTps3dScene.ts](../../../src/components/chat/cafe/cafeTps3dScene.ts), [CafeTpsBannerWebView.tsx](../../../src/components/chat/CafeTpsBannerWebView.tsx)):**
+  1. **`1. Quầy Bartender Tầng 1` (`Y = 0`):** Góc máy Over-the-Shoulder; chú Heo vươn tay nhận **thẻ số bàn bằng gỗ** từ Barista, Barista thứ hai xay đá & nước cốt dừa, xung quanh đầy phin nhôm, lon sữa đặc, phích Rạng Đông, máy Espresso nhả hơi nước & bảng thực đơn.
+  2. **`2. Leo Cầu Thang Gỗ` (`Y: 0 → 3.4m`):** Góc máy Low-Angle Tracking; chú Heo bám tay vịn gỗ & ôm Mũ Cối bước thật từng bậc lên gác giữa khung ảnh B&W 1980s, poster & đèn tường đồng hổ phách, ánh sáng ban ngày tràn từ Tầng 2 xuống.
+  3. **`3. Băng Sảnh Tầng 2` (`Y = 3.4m`):** Góc máy Medium 3/4 Tracking; bước qua sàn **gạch bông** giữa bàn thấp, ghế mây đệm Chăn Con Công, khách ngồi uống cà phê cắn hạt hướng dương, **Góc Bàn Heo AI** (`💬 Trò chuyện cùng Heo AI`), hướng về cửa chớp gỗ Pháp mở đón tia nắng bụi bay.
+  4. **`4. Ngồi Ban Công Phố Cổ` (`Y = 3.4m, Z < 0`):** Góc máy góc chéo ban công hoàng hôn; chú Heo kéo ghế đẩu gỗ ngồi xuống, đặt Mũ Cối & Túi Vải lên bàn cạnh **ly Cà Phê Cốt Dừa** & **đĩa hạt hướng dương**, lan can sắt rỉ & **dương xỉ xanh rủ** nhìn xuống phố cổ tường vàng nắng chiều.
 
 ---
 
