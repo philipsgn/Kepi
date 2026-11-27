@@ -234,11 +234,16 @@ function drawSaigonLandmarks(c, pal) {
   R(c, 109, 62, 5, 6, '#A65432'); R(c, 108, 58, 7, 5, '#4A8C3F');
   R(c, 194, 62, 5, 6, '#A65432'); R(c, 193, 58, 7, 5, '#4A8C3F');
 
-  // ---- 3. CỬA HÀNG ADIDAS ORIGINALS HỘI AN (x: 214..314, y: 12..68) — 1:1 4 ẢNH THỰC TẾ QĐ 229 ----
+  // ---- 3. CỬA HÀNG ADIDAS ORIGINALS HỘI AN (x: 214..314, y: 12..68) — 1:1 4 ẢNH THỰC TẾ QĐ 229 & NÂNG CẤP HỘI HỌA QĐ 230 ----
   // Nhà cổ 2 tầng tường vàng nghệ Hội An rực rỡ (#E6A825 / #F4C042)
   R(c, 216, 14, 94, 54, '#E6A825');
   R(c, 216, 14, 94, 3, '#4A2C1A'); // Gờ mái cổ nâu sẫm
   R(c, 216, 17, 94, 2, '#FFFBF1'); // Phào chỉ trắng cổ điển
+  // Họa tiết diềm hoa văn Hội An trên phào mái
+  for (var hf = 220; hf < 306; hf += 6) {
+    R(c, hf, 17, 2, 1, '#C93424');
+    R(c, hf + 3, 18, 2, 1, '#1D5AA6');
+  }
   R(c, 216, 14, 2, 54, '#2B2118');
   R(c, 308, 14, 2, 54, '#2B2118');
   // TẦNG 2: 3 Vòm cong viền trắng + Ban công con tiện trắng + Chùm đèn lồng nhiều màu (Ảnh 1 & 4)
@@ -254,13 +259,15 @@ function drawSaigonLandmarks(c, pal) {
     // Ban công con tiện trắng cổ điển chạy dọc đáy vòm
     R(c, ax2, 33, 24, 5, '#FFFBF1');
     for (var bal = ax2 + 2; bal < ax2 + 22; bal += 4) R(c, bal, 34, 2, 3, '#8F6E42');
-    // Chùm đèn lồng lụa Hội An nhiều màu treo dưới 3 vòm (Ảnh 1 & 4)
+    // Chùm đèn lồng lụa Hội An nhiều màu có tua rua treo dưới 3 vòm (Ảnh 1 & 4)
     R(c, ax2 + 5, 24, 4, 4, lanCols[(ai2 * 2) % 4]);
-    R(c, ax2 + 12, 25, 5, 5, lanCols[(ai2 * 2 + 1) % 4]);
-    R(c, ax2 + 17, 23, 3, 4, lanCols[(ai2 + 2) % 4]);
+    R(c, ax2 + 6, 28, 1, 2, '#E0452B');
+    R(c, ax2 + 11, 24, 5, 5, lanCols[(ai2 * 2 + 1) % 4]);
+    R(c, ax2 + 13, 29, 1, 2, '#F4B93B');
+    R(c, ax2 + 18, 23, 3, 4, lanCols[(ai2 + 2) % 4]);
     if (isDark) {
-      c.save(); c.globalAlpha = 0.28;
-      E(c, ax2 + 12, 27, 8, 6, '#FFE08A');
+      c.save(); c.globalAlpha = 0.3;
+      E(c, ax2 + 12, 27, 9, 6, '#FFE08A');
       c.restore();
     }
   }
@@ -269,30 +276,76 @@ function drawSaigonLandmarks(c, pal) {
   R(c, 214, 42, 98, 1, '#2B2118');
   for (var ng = 216; ng < 310; ng += 4) R(c, ng, 39, 2, 3, '#A89B91'); // Đầu ngói ống sáng
 
-  // TẦNG 1: Bảng hiệu đen viền LED trắng gắn Logo Cỏ Ba Lá (Trefoil) + Cửa lá sách gỗ nâu (Ảnh 1 & 3)
-  R(c, 251, 43, 24, 9, '#181B22');
-  R(c, 252, 44, 22, 7, '#23272F');
-  R(c, 251, 43, 24, 1, '#FFFFFF'); R(c, 251, 51, 24, 1, '#FFFFFF'); // Viền đèn trắng
-  // Logo Cỏ Ba Lá Trefoil trắng phát sáng trên bảng hiệu (ADIDAS)
-  R(c, 262, 45, 2, 4, '#FFFFFF');
-  R(c, 259, 46, 2, 3, '#FFFFFF'); R(c, 265, 46, 2, 3, '#FFFFFF');
-  R(c, 259, 48, 8, 1, '#181B22');
-  // Cửa chính sáng đèn vàng ấm lộ mannequin bên trong + bậc tam cấp đá
-  R(c, 253, 52, 20, 16, '#2B2118');
-  R(c, 255, 53, 16, 15, isDark ? '#F5C469' : '#FCE7B2');
-  R(c, 261, 58, 4, 7, '#181B22'); R(c, 262, 56, 2, 2, '#FFFBF1'); // Mannequin giữa cửa
-  // 2 Cửa kính + Cửa lá sách gỗ nâu mở 2 bên (trái & phải)
-  R(c, 224, 48, 22, 18, '#3B2314'); R(c, 228, 50, 14, 14, isDark ? '#F5C469' : '#DCE9F2');
-  R(c, 230, 56, 10, 6, '#FFFFFF'); // Giá quần áo bên cửa trái
-  R(c, 280, 48, 22, 18, '#3B2314'); R(c, 284, 50, 14, 14, isDark ? '#A5B4FC' : '#DCE9F2');
-  // 2 Bụi cây dây leo xanh rủ 2 bên mép nhà cổ (Ảnh 1 & 3)
-  R(c, 214, 44, 5, 24, '#2E7D32'); R(c, 215, 46, 2, 20, '#4CAF50');
-  R(c, 307, 44, 5, 24, '#2E7D32'); R(c, 308, 46, 2, 20, '#4CAF50');
-  // TƯỢNG LOGO CỎ BA LÁ (TREFOIL) ĐEN VIỀN LED TRẮNG KHỔNG LỒ GÓC PHẢI MẶT TIỀN (1:1 Ảnh 1 & 3!)
-  R(c, 287, 54, 4, 12, '#FFFFFF'); R(c, 288, 55, 2, 10, '#181B22'); // Cánh lá giữa
-  R(c, 280, 57, 7, 9, '#FFFFFF');  R(c, 281, 58, 5, 7, '#181B22');  // Cánh lá trái
-  R(c, 291, 57, 7, 9, '#FFFFFF');  R(c, 292, 58, 5, 7, '#181B22');  // Cánh lá phải
-  R(c, 281, 61, 16, 1, '#FFFFFF'); R(c, 282, 63, 14, 1, '#FFFFFF'); R(c, 284, 65, 10, 1, '#FFFFFF'); // 3 sọc LED trắng!
+  // TẦNG 1: Bảng hiệu ADIDAS Đen viền LED trắng SIÊU RÕ NÉT (3 sọc Performance + chữ ADIDAS sắc bén — QĐ 230)
+  R(c, 238, 42, 50, 11, '#111318');
+  R(c, 238, 42, 50, 1, '#FFFFFF'); R(c, 238, 52, 50, 1, '#FFFFFF');
+  R(c, 238, 42, 1, 11, '#FFFFFF'); R(c, 287, 42, 1, 11, '#FFFFFF');
+  // Logo 3 Sọc bậc thang trắng sắc nét bên trái bảng hiệu
+  R(c, 241, 48, 2, 3, '#FFFFFF');
+  R(c, 244, 46, 2, 5, '#FFFFFF');
+  R(c, 247, 44, 2, 7, '#FFFFFF');
+  // Chữ pixel "ADIDAS" rõ từng ký tự (3×5px, khoảng cách 1px, bắt đầu từ x=253, y=45)
+  // A (253..256)
+  R(c, 254, 45, 2, 1, '#FFFFFF'); R(c, 253, 46, 1, 4, '#FFFFFF'); R(c, 256, 46, 1, 4, '#FFFFFF'); R(c, 254, 47, 2, 1, '#FFFFFF');
+  // D (258..261)
+  R(c, 258, 45, 1, 5, '#FFFFFF'); R(c, 259, 45, 2, 1, '#FFFFFF'); R(c, 259, 49, 2, 1, '#FFFFFF'); R(c, 261, 46, 1, 3, '#FFFFFF');
+  // I (263..265)
+  R(c, 263, 45, 3, 1, '#FFFFFF'); R(c, 264, 46, 1, 3, '#FFFFFF'); R(c, 263, 49, 3, 1, '#FFFFFF');
+  // D (267..270)
+  R(c, 267, 45, 1, 5, '#FFFFFF'); R(c, 268, 45, 2, 1, '#FFFFFF'); R(c, 268, 49, 2, 1, '#FFFFFF'); R(c, 270, 46, 1, 3, '#FFFFFF');
+  // A (272..275)
+  R(c, 273, 45, 2, 1, '#FFFFFF'); R(c, 272, 46, 1, 4, '#FFFFFF'); R(c, 275, 46, 1, 4, '#FFFFFF'); R(c, 273, 47, 2, 1, '#FFFFFF');
+  // S (277..280)
+  R(c, 278, 45, 3, 1, '#FFFFFF'); R(c, 277, 46, 1, 1, '#FFFFFF'); R(c, 278, 47, 2, 1, '#FFFFFF'); R(c, 280, 48, 1, 1, '#FFFFFF'); R(c, 277, 49, 3, 1, '#FFFFFF');
+
+  // Họa tiết hội họa gốm sứ Hội An trang trí 2 trụ tường vàng tầng 1 (QĐ 230)
+  R(c, 219, 45, 4, 4, '#1D5AA6'); R(c, 220, 46, 2, 2, '#FFFBF1');
+  R(c, 245, 55, 3, 10, '#C93424'); R(c, 246, 56, 1, 8, '#FFE066');
+  R(c, 275, 55, 3, 10, '#C93424'); R(c, 276, 56, 1, 8, '#FFE066');
+
+  // Cửa chính sáng đèn vàng ấm lộ mannequin áo 3 sọc bên trong + bậc tam cấp đá
+  R(c, 250, 53, 24, 15, '#2B2118');
+  R(c, 252, 54, 20, 14, isDark ? '#F5C469' : '#FCE7B2');
+  // Mannequin mặc áo thể thao đỏ-trắng 3 sọc nổi bật giữa cửa
+  R(c, 260, 56, 4, 2, '#FFFBF1');
+  R(c, 259, 58, 6, 5, '#E0452B'); R(c, 260, 59, 1, 3, '#FFFFFF'); R(c, 262, 59, 1, 3, '#FFFFFF'); R(c, 264, 59, 1, 3, '#FFFFFF');
+  R(c, 260, 63, 2, 4, '#181B22'); R(c, 262, 63, 2, 4, '#181B22');
+  // Bậc tam cấp đá & thảm gạch bông Hội An họa tiết ngay trước cửa (y: 66..68)
+  R(c, 248, 66, 28, 2, '#CBD5E1');
+  R(c, 250, 67, 24, 1, '#94A3B8');
+
+  // Cửa kính + Cửa lá sách gỗ nâu bên trái (trưng bày quần áo & giày)
+  R(c, 222, 50, 22, 16, '#3B2314'); R(c, 225, 52, 16, 12, isDark ? '#F5C469' : '#DCE9F2');
+  R(c, 227, 56, 4, 6, '#181B22'); R(c, 232, 56, 4, 6, '#E0452B'); R(c, 237, 56, 3, 6, '#FFFFFF');
+  // Cửa kính bên phải phía sau tượng Trefoil
+  R(c, 280, 50, 24, 16, '#3B2314'); R(c, 283, 52, 18, 12, isDark ? '#A5B4FC' : '#DCE9F2');
+
+  // 2 Bụi dây leo & giàn hoa giấy Hội An hồng rực 2 bên mặt tiền (QĐ 230)
+  R(c, 213, 44, 6, 24, '#2E7D32'); R(c, 214, 46, 3, 20, '#4CAF50');
+  R(c, 214, 46, 2, 2, '#EC4899'); R(c, 216, 51, 2, 2, '#F472B6'); R(c, 213, 56, 2, 2, '#EC4899'); R(c, 215, 61, 2, 2, '#FBCFE8');
+  R(c, 307, 44, 6, 24, '#2E7D32'); R(c, 308, 46, 3, 20, '#4CAF50');
+  R(c, 308, 47, 2, 2, '#EC4899'); R(c, 310, 52, 2, 2, '#F472B6'); R(c, 307, 58, 2, 2, '#EC4899'); R(c, 309, 62, 2, 2, '#FBCFE8');
+  // 2 Đèn lồng đỏ treo tay sắt 2 bên cửa tầng 1
+  R(c, 245, 48, 3, 4, '#E0452B'); R(c, 246, 49, 1, 2, '#FFE066');
+  R(c, 276, 48, 3, 4, '#E0452B'); R(c, 277, 49, 1, 2, '#FFE066');
+
+  // TƯỢNG LOGO CỎ BA LÁ (TREFOIL) ĐEN VIỀN LED TRẮNG KHỔNG LỒ SẮC NÉT GÓC PHẢI MẶT TIỀN (1:1 Ảnh 1 & 3 — QĐ 230!)
+  // Bệ đá đen nâng tượng
+  R(c, 286, 66, 12, 2, '#2B2118');
+  // Cánh lá giữa nhọn cao (x: 289..295, y: 50..65)
+  R(c, 291, 50, 2, 2, '#FFFFFF');
+  R(c, 290, 52, 4, 2, '#FFFFFF'); R(c, 291, 52, 2, 2, '#111318');
+  R(c, 289, 54, 6, 12, '#FFFFFF'); R(c, 290, 55, 4, 10, '#111318');
+  // Cánh lá trái xòe rộng (x: 280..289, y: 54..65)
+  R(c, 280, 54, 4, 2, '#FFFFFF');
+  R(c, 280, 56, 9, 9, '#FFFFFF'); R(c, 281, 57, 7, 7, '#111318');
+  // Cánh lá phải xòe rộng (x: 295..304, y: 54..65)
+  R(c, 300, 54, 4, 2, '#FFFFFF');
+  R(c, 295, 56, 9, 9, '#FFFFFF'); R(c, 296, 57, 7, 7, '#111318');
+  // 3 Dải sọc LED trắng phát sáng sắc nét cắt ngang toàn bộ 3 cánh lá Trefoil!
+  R(c, 281, 59, 22, 1, '#FFFFFF');
+  R(c, 282, 61, 20, 1, '#FFFFFF');
+  R(c, 284, 63, 16, 1, '#FFFFFF');
 
   // ---- 4. NHÀ THỜ ĐỨC BÀ SÀI GÒN (x: 324..404, y: 6..68) — Cổng vào Cathedral QĐ 219 ----
   var ndBrick = '#B54B34', ndHi = '#CE6046', ndDk = '#873321', ndCream = '#EFE2C8';
@@ -408,43 +461,114 @@ function drawSaigonLandmarks(c, pal) {
   // Quả bóng pixel trang trí trên cổng
   E(c, 611, 56, 3, 3, '#FFFFFF'); R(c, 611, 56, 1, 1, '#2B2118');
 
-  // ---- 7. CHÙA VIỆT NAM CỔ KÍNH (x: 696..840, y: 12..68) — Cổng vào Pagoda QĐ 220 ----
-  // Bảo Tháp 5 tầng mái đao cong đỏ-vàng phía sau bên trái
-  var px = 716;
-  R(c, px + 14, 6, 2, 6, '#F4B93B'); // Đỉnh tháp vàng
-  for (var pt = 0; pt < 5; pt++) {
-    var py = 12 + pt * 9;
-    var pw = 14 + pt * 4;
+  // ---- 7. CHÙA VIỆT NAM CỔ KÍNH HÙNG VĨ (x: 688..856, y: 4..68) — 3 LỚP: CÂY XANH XA + CHÙA MỘT CỘT + TAM QUAN + CÂY ĐA (QĐ 230) ----
+  // Lớp 1A: Rặng cây xanh xa mướt mắt bao quanh khuôn viên chùa
+  for (var txp = 690; txp <= 852; txp += 11) {
+    var th = 14 + ((txp * 7) % 9);
+    E(c, txp + 4, 64 - th, 9, 7, '#2A6338');
+    E(c, txp + 3, 62 - th, 7, 5, '#3C8547');
+    E(c, txp + 5, 60 - th, 4, 3, '#55A45C');
+  }
+  R(c, 688, 58, 168, 10, '#2A6338');
+
+  // Lớp 1B (Trái hậu cảnh): Bảo Tháp 7 tầng mái đao cong đỏ-vàng cao vút (x: 702..734)
+  var px = 704;
+  R(c, px + 14, 4, 2, 6, '#F4B93B'); // Đỉnh tháp vàng
+  R(c, px + 13, 6, 4, 1, '#FFF3B0');
+  for (var pt = 0; pt < 7; pt++) {
+    var py = 10 + pt * 7;
+    var pw = 10 + pt * 3;
     var pLeft = px + 15 - Math.floor(pw / 2);
-    // Mái đao cong đỏ
-    R(c, pLeft - 3, py + 2, pw + 6, 3, '#C93424');
-    R(c, pLeft - 4, py + 1, 3, 2, '#F4B93B'); // Đầu đao cong trái
-    R(c, pLeft + pw + 1, py + 1, 3, 2, '#F4B93B'); // Đầu đao cong phải
-    R(c, pLeft, py + 5, pw, 5, '#F0C778'); // Thân tầng vàng
-    R(c, pLeft + Math.floor(pw / 2) - 1, py + 6, 3, 3, '#3B2116');
+    R(c, pLeft - 3, py + 1, pw + 6, 3, '#C93424'); // Mái đao cong đỏ
+    R(c, pLeft - 4, py, 3, 2, '#F4B93B');         // Đầu đao cong trái
+    R(c, pLeft + pw + 1, py, 3, 2, '#F4B93B');    // Đầu đao cong phải
+    R(c, pLeft, py + 4, pw, 4, '#F0C778');        // Thân tầng vàng
+    R(c, pLeft + Math.floor(pw / 2) - 1, py + 5, 2, 2, '#3B2116');
   }
-  // Cổng Tam Quan mái ngói đỏ-vàng (x: 758..834)
-  R(c, 760, 42, 72, 26, '#F5E1B8');
-  R(c, 756, 35, 80, 7, '#B83224');
-  R(c, 764, 29, 64, 6, '#D13E2C');
-  R(c, 755, 34, 4, 2, '#F4B93B'); R(c, 833, 34, 4, 2, '#F4B93B'); // Đầu đao cong
-  R(c, 762, 28, 4, 2, '#F4B93B'); R(c, 826, 28, 4, 2, '#F4B93B');
-  // 4 Cột gỗ đỏ sơn son thếp vàng
-  var pCols = [764, 782, 808, 826];
+
+  // Lớp 1C (Phải hậu cảnh rõ nét): CHÙA MỘT CỘT (DIÊN HỰU TỰ) trên Hồ Sen (x: 806..854, y: 24..68)
+  // Hồ sen xanh ngọc & bờ kè đá
+  R(c, 806, 56, 48, 12, '#2B7A88');
+  R(c, 808, 57, 44, 9, '#3FA3B0');
+  R(c, 806, 66, 48, 2, '#CBD5E1'); // Bờ kè đá hồ sen
+  // Lá sen xanh & hoa sen hồng nở trên mặt hồ
+  E(c, 814, 62, 4, 2, '#3D8C40'); R(c, 813, 60, 2, 2, '#F472B6');
+  E(c, 822, 64, 4, 2, '#2E7D32');
+  E(c, 840, 62, 5, 2, '#3D8C40'); R(c, 840, 60, 2, 2, '#FBCFE8');
+  E(c, 848, 64, 3, 2, '#2E7D32'); R(c, 847, 62, 2, 2, '#EC4899');
+  // Trụ đá tròn duy nhất dựng giữa hồ (x: 827..833, y: 46..61) + hệ thống con sơn gỗ xòe đỡ đài sen
+  R(c, 827, 46, 6, 15, '#94A3B8');
+  R(c, 828, 46, 2, 15, '#E2E8F0'); // Ánh sáng trụ đá
+  R(c, 825, 59, 10, 2, '#64748B'); // Chân đế trụ dưới mặt nước
+  // Hệ thống cột chống (con sơn) xòe 2 bên
+  R(c, 822, 44, 16, 2, '#6E3B23');
+  R(c, 824, 46, 3, 2, '#5C2F1A'); R(c, 833, 46, 3, 2, '#5C2F1A');
+  // Liên Hoa Đài vuông cổ kính + Mái cong 2 tầng đỏ vàng
+  R(c, 820, 36, 20, 9, '#8C3B24');
+  R(c, 822, 38, 16, 6, '#F5E1B8');
+  R(c, 827, 39, 6, 5, isDark ? '#F5C469' : '#3B2116'); // Cửa điện thờ Chùa Một Cột
+  // Mái tầng dưới
+  R(c, 814, 32, 32, 4, '#B83224');
+  R(c, 812, 31, 4, 2, '#F4B93B'); R(c, 844, 31, 4, 2, '#F4B93B');
+  // Mái tầng trên & búp sen vàng trên đỉnh
+  R(c, 819, 27, 22, 5, '#D13E2C');
+  R(c, 817, 26, 4, 2, '#F4B93B'); R(c, 839, 26, 4, 2, '#F4B93B');
+  R(c, 829, 23, 2, 4, '#F4B93B'); R(c, 828, 24, 4, 1, '#FFF3B0');
+
+  // Lớp 2 (Trung cảnh): MẶT TIỀN CỔNG TAM QUAN HÙNG VĨ 2 TẦNG MÁI ĐAO CONG (x: 734..806, y: 18..68)
+  // Khối tường Tam Quan lớn
+  R(c, 738, 38, 64, 30, '#F5E1B8');
+  R(c, 738, 38, 2, 30, '#2B2118'); R(c, 800, 38, 2, 30, '#2B2118');
+  // Mái đao cong tầng 1 (rộng 76px)
+  R(c, 732, 31, 76, 7, '#B83224');
+  R(c, 732, 37, 76, 1, '#2B2118');
+  R(c, 729, 29, 5, 3, '#F4B93B'); R(c, 806, 29, 5, 3, '#F4B93B'); // Đầu đao cong uốn lượn
+  // Cổ lâu tầng 2 có cửa sổ tròn chữ Thọ
+  R(c, 748, 25, 44, 6, '#F0C778');
+  R(c, 766, 26, 8, 4, '#9E261B'); R(c, 768, 27, 4, 2, '#F4B93B');
+  // Mái đao cong tầng 2 & Lưỡng long chầu nguyệt trên đỉnh nóc
+  R(c, 742, 20, 56, 6, '#D13E2C');
+  R(c, 739, 18, 5, 3, '#F4B93B'); R(c, 796, 18, 5, 3, '#F4B93B');
+  R(c, 766, 16, 8, 4, '#F4B93B'); R(c, 769, 15, 2, 2, '#E0452B'); // Biểu tượng đỉnh mái chùa
+  // 4 Cột gỗ đỏ sơn son thếp vàng cao lớn + chân tảng đá
+  var pCols = [742, 756, 780, 794];
   for (var ci = 0; ci < pCols.length; ci++) {
-    R(c, pCols[ci], 42, 4, 26, '#9E261B');
-    R(c, pCols[ci] + 1, 42, 1, 26, '#D64535');
+    R(c, pCols[ci], 38, 4, 28, '#9E261B');
+    R(c, pCols[ci] + 1, 38, 1, 28, '#D64535');
+    R(c, pCols[ci] - 1, 66, 6, 2, '#CBD5E1');
   }
-  // Cổng chính giữa & 2 cổng phụ
-  R(c, 786, 48, 22, 20, '#2B2118');
-  R(c, 788, 50, 18, 18, isDark ? '#F5C469' : '#4E2C1B');
-  R(c, 793, 55, 8, 13, '#2B1910');
-  // Bảng hoành phi vàng
-  R(c, 788, 43, 18, 4, '#2B2118'); R(c, 789, 44, 16, 2, '#F4B93B');
-  // Lư hương nhỏ & 2 cây bonsai
-  R(c, 745, 60, 8, 8, '#8C5E3C'); R(c, 746, 59, 6, 2, '#F4B93B');
-  R(c, 700, 61, 6, 7, '#A65432'); E(c, 703, 56, 6, 5, '#3A7D3C');
-  R(c, 834, 61, 6, 7, '#A65432'); E(c, 837, 56, 6, 5, '#3A7D3C');
+  // Cổng chính giữa uy nghiêm & 2 cổng phụ 2 bên
+  R(c, 760, 44, 20, 24, '#2B2118');
+  R(c, 762, 46, 16, 22, isDark ? '#F5C469' : '#4E2C1B');
+  R(c, 766, 51, 8, 17, '#2B1910');
+  R(c, 747, 50, 8, 18, '#3B2116'); // Cổng phụ trái
+  R(c, 785, 50, 8, 18, '#3B2116'); // Cổng phụ phải
+  // Bảng hoành phi sơn son thếp vàng nổi bật
+  R(c, 759, 39, 22, 5, '#2B2118'); R(c, 760, 40, 20, 3, '#F4B93B'); R(c, 763, 41, 14, 1, '#9E261B');
+  // Bậc tam cấp đá & Lư hương đồng lớn chính giữa sân chùa
+  R(c, 758, 66, 24, 2, '#CBD5E1');
+  R(c, 765, 59, 10, 7, '#7C4F2B'); R(c, 766, 58, 8, 2, '#F4B93B'); R(c, 764, 60, 2, 3, '#F4B93B'); R(c, 774, 60, 2, 3, '#F4B93B');
+
+  // Lớp 3 (Tiền cảnh trái): CÂY ĐA CỔ THỤ TÁN RỘNG & RỄ PHỤ RỦ XUỐNG TRƯỚC CHÙA (x: 688..734, y: 24..68)
+  // Thân cây đa xù xì & bệ rễ cổ thụ
+  R(c, 706, 44, 10, 24, '#5C3A21');
+  R(c, 708, 44, 3, 24, '#7C4F2B');
+  R(c, 702, 62, 18, 6, '#4A2D18'); // Gốc đa bạnh rộng
+  R(c, 698, 43, 26, 4, '#5C3A21'); // Cành lớn vươn ngang
+  // Rễ phụ cây đa rủ xuống mềm mại
+  R(c, 699, 46, 1, 14, '#7C4F2B');
+  R(c, 703, 46, 1, 16, '#6E452A');
+  R(c, 719, 46, 1, 15, '#7C4F2B');
+  R(c, 723, 45, 1, 12, '#6E452A');
+  // Tán lá Cây Đa cổ thụ dày nhiều tầng màu xanh mượt
+  E(c, 711, 38, 22, 11, '#1B5E20');
+  E(c, 701, 36, 13, 8, '#2E7D32');
+  E(c, 721, 37, 13, 8, '#2E7D32');
+  E(c, 711, 31, 17, 9, '#388E3C');
+  E(c, 707, 29, 10, 5, '#4CAF50');
+  E(c, 716, 30, 8, 4, '#66BB6A');
+  // Đèn đá cổ nhỏ trước cổng phải
+  R(c, 801, 59, 4, 9, '#94A3B8'); R(c, 800, 57, 6, 2, '#64748B'); R(c, 802, 60, 2, 2, isDark ? '#FFE08A' : '#E2E8F0');
 }
 
 /* ==================== 3. VỈA HÈ RỘNG + ĐẠI LỘ 2 LÀN (x: 0..868, y: 68..164) ==================== */
@@ -462,8 +586,15 @@ function drawAvenueAndSidewalk(c, pal) {
     R(c, kx, 94, 6, 2, '#F5F5F5');
     R(c, kx + 6, 94, 6, 2, '#2B2118');
   }
-  // Hàng cây xanh & đèn đường dọc vỉa hè (đặt khe giữa các công trình)
-  var lampXs = [100, 208, 318, 408, 530, 690, 846];
+  // Sân gạch bông họa tiết Hội An nghệ thuật ngay trước cửa hàng Adidas (x: 242..282, y: 69..76 — QĐ 230)
+  R(c, 242, 69, 40, 7, '#F5E8C8');
+  R(c, 242, 69, 40, 1, '#C93424'); R(c, 242, 75, 40, 1, '#C93424');
+  for (var mx = 244; mx < 280; mx += 6) {
+    R(c, mx, 71, 4, 3, '#1D5AA6');
+    R(c, mx + 1, 72, 2, 1, '#FFFBF1');
+  }
+  // Hàng cây xanh & đèn đường dọc vỉa hè (đặt khe giữa các công trình, không che Cây Đa & Chùa Một Cột)
+  var lampXs = [100, 208, 318, 408, 530, 686, 858];
   for (var li = 0; li < lampXs.length; li++) {
     var lx = lampXs[li];
     // Trụ đèn cổ điển
@@ -871,23 +1002,74 @@ function drawBridgePedestrians(c, pedestrians, t) {
   }
 }
 
+// Hàm vẽ Lá Cờ Đỏ Sao Vàng Việt Nam cỡ lớn bay phấp phới 60fps trên SVĐ Thống Nhất (QĐ 230)
+function drawWavingVietnamFlag(c, x, y, w, h, poleH, t, withStar) {
+  // Cột cờ thép sáng & quả cầu vàng trên đỉnh
+  R(c, x - 1, y - 1, 2, poleH + 1, '#94A3B8');
+  R(c, x - 1, y - 1, 1, poleH, '#F8FAFC');
+  R(c, x - 2, y - 3, 3, 3, '#F4B93B');
+  // Thân lá cờ đỏ uốn lượn theo sóng sin 60fps
+  for (var dx = 0; dx < w; dx++) {
+    var phase = t * 6.5 - dx * 0.28;
+    var wave = Math.sin(phase);
+    var amp = (dx / w) * 2.4;
+    var dy = Math.round(wave * amp);
+    var col = wave > 0.45 ? '#EF4444' : (wave < -0.45 ? '#B91C1C' : '#DA251D');
+    R(c, x + 1 + dx, y + dy, 1, h, col);
+    // Viền mảnh sắc nét trên/dưới lá cờ
+    R(c, x + 1 + dx, y + dy, 1, 1, '#991B1B');
+  }
+  if (withStar) {
+    // Ngôi sao vàng 5 cánh sắc nét giữa lá cờ, lượn theo đúng sóng tại tâm lá cờ
+    var cx = x + 1 + Math.floor(w / 2);
+    var midWave = Math.sin(t * 6.5 - (w / 2) * 0.28);
+    var cy = y + Math.floor(h / 2) + Math.round(midWave * 1.2);
+    if (w >= 20) {
+      // Ngôi sao 5 cánh cỡ lớn (9×9px) sắc bén
+      c.save();
+      c.fillStyle = '#FFFF00';
+      c.beginPath();
+      for (var spi = 0; spi < 10; spi++) {
+        var r = spi % 2 === 0 ? 4.8 : 2.0;
+        var ang = -Math.PI / 2 + (spi * Math.PI) / 5;
+        var sx = Math.round(cx + Math.cos(ang) * r);
+        var sy = Math.round(cy + Math.sin(ang) * r);
+        if (spi === 0) c.moveTo(sx, sy); else c.lineTo(sx, sy);
+      }
+      c.closePath();
+      c.fill();
+      // Củng cố tâm sao rõ nét từng pixel
+      R(c, cx - 1, cy - 1, 3, 3, '#FFFF00');
+      R(c, cx, cy - 4, 1, 2, '#FFFF00');
+      c.restore();
+    } else {
+      // Ngôi sao nhỏ cho cờ phụ 2 bên cánh
+      R(c, cx, cy - 2, 1, 5, '#FFFF00');
+      R(c, cx - 2, cy, 5, 1, '#FFFF00');
+      R(c, cx - 1, cy - 1, 3, 3, '#FFFF00');
+    }
+  }
+}
+
 function drawSaigonLiveTrafficAndRiver(c, t, pal, vehicles, boats, pedestrians, pigState, drawPigFn) {
   var isDark = pal.mode !== 'day';
 
-  // 1. Khói nồi Phở bốc lên (x: 74, y: 55)
+  // 1. Khói nồi Phở bốc lên (x: 74, y: 55) & Khói hương Chùa cổ kính (x: 770, y: 57)
   for (var si = 0; si < 3; si++) {
     var st = (t * 0.9 + si * 0.33) % 1;
     c.save();
     c.globalAlpha = (1 - st) * 0.55;
     R(c, 73 + Math.round(Math.sin(t * 2.5 + si) * 2), Math.round(55 - st * 14), 3, 2, '#FFFDF7');
+    // Khói hương thanh tịnh bay lên từ lư hương đồng trước Tam Quan Chùa
+    R(c, 769 + Math.round(Math.sin(t * 2.0 + si * 1.3) * 2), Math.round(57 - st * 16), 2, 2, '#F1F5F9');
     c.restore();
   }
 
-  // 2. Cờ đỏ sao vàng bay phấp phới trên SVĐ Thống Nhất (x: 611, y: 18)
-  R(c, 610, 17, 1, 14, '#CBD5E1');
-  var fWave = Math.sin(t * 6) > 0 ? 1 : 0;
-  R(c, 611, 17, 9, 6, '#DA251D');
-  R(c, 615, 19 + fWave, 2, 2, '#FFFF00');
+  // 2. Cờ đỏ sao vàng Việt Nam CỠ LỚN bay phấp phới đầy tự hào trên SVĐ Thống Nhất (QĐ 230)
+  drawWavingVietnamFlag(c, 608, 3, 26, 17, 25, t, true);
+  // 2 Lá cờ Việt Nam phụ bay phấp phới 2 bên khán đài SVĐ
+  drawWavingVietnamFlag(c, 558, 12, 12, 8, 16, t + 0.8, true);
+  drawWavingVietnamFlag(c, 658, 12, 12, 8, 16, t + 1.5, true);
 
   // 3. Quầng đèn pha SVĐ Thống Nhất lấp lánh
   if (isDark) {

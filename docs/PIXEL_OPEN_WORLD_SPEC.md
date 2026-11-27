@@ -62,7 +62,7 @@ $$W_{\text{world}} \ge 2.75 \times W_{\text{view}} \quad (\text{chuẩn hóa } 3
 | 2 | **Hồ sơ (Văn Phòng Heo)** | `ProfileDeskBanner.tsx` | `176 × 80` | `432 × 128` | `3.93×` | Chặng 2 |
 | 3 | **Vườn (Sân Vườn & Mặt Tiền)** | `PixelGardenWebView.tsx` | `160 × 96` | `440 × 140` | `4.01×` | Chặng 3 |
 | 4 | **Nhà của bạn (Các Phòng)** | `PixelHouseWebView.tsx` | `160 × 96` | `480 × 132` | `4.13×` | Chặng 3 |
-| 5 | **Khám phá (Đại Lộ Sài Gòn & 2 Bờ Sông Bạch Đằng – Thủ Thiêm)** | `EntertainmentBannerWebView.tsx` + `hub/saigonPanoramaArt.ts` | `224 × 116` | `1360 × 164` | `8.59×` | Hoàn thiện (QĐ 223 — 2 bờ sông Bến Bạch Đằng ↔ Thủ Thiêm; Cầu Đi Bộ riêng tầng trên chỉ đi bộ; Cầu Ba Son riêng tầng đường dẫn cho xe máy/xe hơi/xe tải lưu thông; đồng bộ 1:1 dáng Heo Tab Vườn + Heo đội mũ bảo hiểm lái xe máy tránh va chạm 0%) |
+| 5 | **Khám phá (Đại Lộ Sài Gòn & 2 Bờ Sông Bạch Đằng – Thủ Thiêm)** | `EntertainmentBannerWebView.tsx` + `hub/saigonPanoramaArt.ts` | `224 × 116` | `1360 × 164` | `8.59×` | Hoàn thiện (QĐ 223–230 — 2 bờ sông Bến Bạch Đằng ↔ Thủ Thiêm; Cầu Đi Bộ & Cầu Ba Son tách biệt; Heo 1:1 lái xe máy tránh va chạm 0%; Adidas Hội An logo sắc nét + bích họa + hoa giấy; Cờ Đỏ Sao Vàng 5 cánh 26×17 bay phấp phới SVĐ Thống Nhất; Khu Chùa hùng vĩ 3 lớp với Cây Đa cổ thụ & Chùa Một Cột trên hồ sen) |
 | 6 | **Trò chuyện (Quán Cà Phê)** | `CafeChatBannerWebView.tsx` + `cafe/*` | `180 × 120` | `720 × 176` | `5.87×` | Hoàn thiện (QĐ 218 — 6 khu ấm cúng: Barista phin, Thư viện 3 kệ sách + Sofa, Mini Coffee Workshop, Boutique quần áo, Cây thông & 3 quạt trần) |
 
 ---

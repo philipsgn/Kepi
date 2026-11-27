@@ -7741,4 +7741,30 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 166 Passed: Đồng Bộ 1:1 4 Ảnh Thực Tế Adidas Originals Hội An Cho Mặt Tiền Banner & Bên Trong Store (Quyết định 229) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 166 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (166/166)!');
+// =========================================================================
+// TEST 167: TINH CHỈNH MỸ THUẬT 3 LANDMARK TRÊN HUB BANNER: ADIDAS SẮC NÉT, CỜ VN CỠ LỚN & CHÙA 3 LỚP + CHÙA MỘT CỘT + CÂY ĐA (QĐ 230)
+// =========================================================================
+{
+  const saigonArtCode = fs.readFileSync('src/components/chat/hub/saigonPanoramaArt.ts', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    saigonArtCode.includes('function drawWavingVietnamFlag') &&
+      saigonArtCode.includes('drawWavingVietnamFlag(c, 608, 3, 26, 17, 25, t, true)') &&
+      saigonArtCode.includes('CHÙA MỘT CỘT (DIÊN HỰU TỰ)') &&
+      saigonArtCode.includes('CÂY ĐA CỔ THỤ TÁN RỘNG') &&
+      saigonArtCode.includes('MẶT TIỀN CỔNG TAM QUAN HÙNG VĨ') &&
+      saigonArtCode.includes('Sân gạch bông họa tiết Hội An') &&
+      saigonArtCode.includes('giàn hoa giấy Hội An') &&
+      decisionsCode.includes('Quyết định 230') &&
+      chatDocCode.includes('Quyết định 230') &&
+      specCode.includes('QĐ 223–230'),
+    'Hub Panorama art polish (sharp Adidas logo + Hoi An murals/courtyard/bougainvillea, large waving Vietnam flag on Thong Nhat Stadium, 3-layer Grand Pagoda + One Pillar Pagoda + Ancient Banyan Tree, and docs) must be synced for QD 230'
+  );
+
+  console.log('✅ Test 167 Passed: Tinh Chỉnh Mỹ Thuật 3 Landmark Hub Banner — Adidas Sắc Nét, Cờ VN Cỡ Lớn & Chùa 3 Lớp + Chùa Một Cột + Cây Đa (Quyết định 230) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 167 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (167/167)!');
