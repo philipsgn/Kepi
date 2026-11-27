@@ -493,3 +493,10 @@ Màn hình Tab 3 hiển thị:
   - *Tầng 2 (`y: 0..274`):* Sàn bê tông mài xám sáng, Hero Wall Logo 3 Sọc phát sáng, Tường giày Sneaker (Superstar, Samba, Gazelle, Ultraboost) & dép Adilette 3 sọc có đèn LED hắt từng ngăn, 4 giá treo quần áo 3 sọc, 4 Mannequin đứng bục đá Terrazzo rọi spotlight, Phòng thử đồ VIP + Gương LED.
   - *Cầu thang kính cường lực LED (`x: 266..374, y: 246..312`):* Nối liền Tầng 1 ↔ Tầng 2 (AABB lan can 2 bên ép chú Heo đi đúng qua cầu thang).
   - *Tầng 1 (`y: 280..560`):* 2 đảo trưng bày quần áo & dép 3 sọc + bục Limited Sneaker, 3 Mannequin mặt tiền, Quầy thu ngân đá đen-trắng logo 3 sọc + hộp giày & túi giấy 3 sọc, 2 Nhân viên đồng phục Polo đen 3 sọc (1 tại quầy, 1 đi tuần qua 2 tầng), 7 khách hàng mua sắm xách túi 3 sọc & 4 điểm tương tác cho chú Heo 1:1.
+
+### 48. Đại Tu Adidas Hội An Heritage Design Art — Dày Đặc 80% & Sắc Nét Từng Món Đồ (`640×560` — Quyết định 228)
+- **Thẩm Mỹ Adidas Hội An Heritage:** Thay sàn bê tông xám trống trải bằng **Sàn gỗ lim ván dài ấm áp + Lối đi trung tâm lát gạch bông Hội An `16×16`**, tường vàng kem phố cổ, khung gỗ lim nâu sẫm & **8 đèn lồng lụa Hội An** phát sáng ấm 60fps đan xen **Logo 3 Sọc Đen–Trắng**.
+- **Hình Dáng Sắc Nét Từng Sản Phẩm (Mật Độ Dày Đặc 80% Không Gian):**
+  - *Khu Bóng Đá (Thảm cỏ xanh nhân tạo):* `drawFootballBoot` (giày đá banh có đinh tán dưới đế), `drawSportsTee` (áo đấu có tay xòe + cổ V + số áo), `drawFootballRack` (6 quả bóng đá Adidas).
+  - *Khu Chạy Bộ & Polo/Apparel:* `drawRunningShoe` (giày chạy bộ đế Boost dày cong mũi), `drawPoloShirt` (áo Polo cổ bẻ có trụ nút & 2 tay áo xòe), `drawTrackPants` (quần Jogger & Short 3 sọc tách rõ 2 ống quần).
+  - *Khu Originals, Dép & Phụ Kiện:* `drawLifestyleSneaker`, `drawAdiletteSlideLarge`, `drawAccessoryShelf` (Balo 3 sọc, Mũ lưỡi trai 3 sọc, Chồng hộp giày), `drawDetailedMannequin` (7 Mannequin dáng cân đối mặc full outfit).

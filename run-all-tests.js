@@ -7654,16 +7654,16 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       adBannerCode.includes("id: 'exit_adidas'") &&
       adArtCode.includes('drawThreeStripesLogo') &&
       adArtCode.includes('drawFootwearWall') &&
-      adArtCode.includes('drawAdiletteSlide') &&
-      adArtCode.includes('drawClothingRack') &&
-      adArtCode.includes('drawMannequin') &&
+      (adArtCode.includes('drawAdiletteSlideLarge') || adArtCode.includes('drawAdiletteSlide')) &&
+      (adArtCode.includes('drawDenseApparelRack') || adArtCode.includes('drawClothingRack')) &&
+      (adArtCode.includes('drawDetailedMannequin') || adArtCode.includes('drawMannequin')) &&
       adArtCode.includes('drawAdidasStaff') &&
       adArtCode.includes('drawAdidasShopper') &&
       adArtCode.includes('CẦU THANG KÍNH') &&
       decisionsCode.includes('Quyết định 227') &&
       chatDocCode.includes('Quyết định 227') &&
-      specCode.includes('QĐ 227'),
-    'Adidas Flagship 2-story 640x560 interior (3-stripes sneakers/slides/clothes, 7 mannequins, glass LED stairs, 2 staff, shoppers, 2-way portal, and docs) must be synced for QD 227'
+      (specCode.includes('QĐ 228') || specCode.includes('QĐ 227')),
+    'Adidas Flagship 2-story 640x560 interior (3-stripes sneakers/slides/clothes, 7 mannequins, LED stairs, 2 staff, shoppers, 2-way portal, and docs) must be synced for QD 227/228'
   );
 
   // Kiểm chứng cú pháp JS runtime của toàn bộ script Adidas lắp ráp (vnKit + adArt + inline)
@@ -7677,7 +7677,40 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     .replace('${openRoomScript}', '');
   new Function(assembledAdJs);
 
-  console.log('✅ Test 164 Passed: Không Gian Toàn Màn Hình Adidas Flagship Brand Center 2 Tầng (640×560, Minimalist Luxury — Quyết định 227) Audit verified cleanly');
+  console.log('✅ Test 164 Passed: Không Gian Toàn Màn Hình Adidas Flagship Brand Center 2 Tầng (640×560 — Quyết định 227) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 164 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (164/164)!');
+// =========================================================================
+// TEST 165: ĐẠI TU ADIDAS HỘI AN HERITAGE DESIGN ART — DÀY ĐẶC 80% & SẮC NÉT TỪNG MÓN ĐỒ (QĐ 228)
+// =========================================================================
+{
+  const adArtCode = fs.readFileSync('src/components/chat/adidas/adidasInteriorArt.ts', 'utf8');
+  const adBannerCode = fs.readFileSync('src/components/chat/AdidasStoreBannerWebView.tsx', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    adArtCode.includes('function drawHoiAnWoodAndTileFloor') &&
+      adArtCode.includes('function drawHoiAnLantern') &&
+      adArtCode.includes('function drawPoloShirt') &&
+      adArtCode.includes('function drawSportsTee') &&
+      adArtCode.includes('function drawTrackPants') &&
+      adArtCode.includes('function drawFootballBoot') &&
+      adArtCode.includes('function drawRunningShoe') &&
+      adArtCode.includes('function drawLifestyleSneaker') &&
+      adArtCode.includes('function drawAdiletteSlideLarge') &&
+      adArtCode.includes('function drawFootballRack') &&
+      adArtCode.includes('function drawAccessoryShelf') &&
+      adArtCode.includes('function drawDetailedMannequin') &&
+      adBannerCode.includes("id: 'adidas_football_zone'") &&
+      decisionsCode.includes('Quyết định 228') &&
+      chatDocCode.includes('Quyết định 228') &&
+      specCode.includes('QĐ 228'),
+    'Adidas Hoi An Heritage overhaul (warm wood + tile floor, 8 lanterns, turf football zone, detailed polo/tees/pants/cleats/running/slides/balls/backpacks/mannequins, and docs) must be synced for QD 228'
+  );
+
+  console.log('✅ Test 165 Passed: Đại Tu Adidas Hội An Heritage Design Art — Dày Đặc 80% & Sắc Nét Từng Món Đồ (Quyết định 228) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 165 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (165/165)!');

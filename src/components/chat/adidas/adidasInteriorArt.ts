@@ -1,14 +1,15 @@
 /**
- * Đồ họa Pixel Art Cửa Hàng Adidas Flagship Brand Center 2 Tầng (640 × 560 — Quyết định 227)
- * Phong cách: Architectural Minimalist Luxury (Sàn bê tông mài xám sáng, gỗ sồi ấm, thép đen mờ, đèn LED hắt kệ)
- * Tuân thủ 100% docs/VIETNAM_PIXEL_ART_BIBLE.md & tái sử dụng vnPixelArtKit.ts:
- *  - Tầng 2 (y: 0..274): Hero Wall Logo 3 Sọc LED, Tường giày Sneaker & dép Adilette 3 sọc, 4 giá quần áo 3 sọc, 4 Mannequin spotlight, Phòng thử đồ VIP + Gương LED
- *  - Cầu thang kính cường lực LED (x: 266..374, y: 248..312) nối liền Tầng 1 ↔ Tầng 2
- *  - Tầng 1 (y: 280..560): 2 Đảo đá Terrazzo quần áo & dép 3 sọc, 3 Mannequin mặt tiền, Quầy thu ngân Flagship + hộp giày/túi 3 sọc, 2 Nhân viên Adidas & 7 khách hàng
+ * Đồ họa Pixel Art Cửa Hàng Adidas Hội An Heritage 2 Tầng (640 × 560 — Quyết định 228)
+ * Phong cách: Adidas Hội An Heritage Design Art — Dày đặc ~80% không gian, ấm áp, sắc nét từng món đồ:
+ *  - Sàn gỗ lim ván dài ấm áp + Lối đi trung tâm lát Gạch Bông Hội An 16×16 + Tường vàng kem phố cổ + 8 Đèn lồng lụa vàng ấm
+ *  - Khu Bóng Đá (Thảm cỏ xanh nhân tạo): Giày bóng đá có đinh tán (Predator/F50), Áo đấu có tay + số áo, Giá 6 quả bóng đá
+ *  - Khu Chạy Bộ: Giày chạy bộ đế Boost cong khí động học, Áo thun thể thao & Quần Short chạy bộ
+ *  - Khu Polo & Apparel: Áo Polo cổ bẻ có trụ nút & 2 tay áo xòe, Áo thun thể thao, Quần Jogger 3 sọc tách rõ 2 ống quần
+ *  - Khu Originals & Phụ Kiện: Superstar/Samba/Gazelle, Dép Adilette 3 sọc, Balo 3 sọc, Mũ lưỡi trai, Chồng hộp giày & 7 Mannequin dáng đẹp
  */
 export function buildAdidasInteriorArtScript(): string {
   return `
-/* Khuôn mặt người pixel chi tiết chuẩn QĐ 226 (mắt sáng trắng, má hồng, miệng, 4 kiểu tóc) */
+/* Khuôn mặt người pixel chi tiết chuẩn (mắt sáng trắng, má hồng, miệng, 4 kiểu tóc) */
 function drawAdidasHumanFace(c, cx, cy, opt) {
   var skin = (opt && opt.skin) || '#FFD5B5';
   var hair = (opt && opt.hair) || '#1E242E';
@@ -42,18 +43,23 @@ function drawAdidasHumanFace(c, cx, cy, opt) {
   }
 }
 
-/* Sàn bê tông mài xám sáng Minimalist Luxury (32×32 ô giãn nở tinh tế) */
-function drawPolishedConcreteFloor(c, x0, y0, w, h) {
-  R(c, x0, y0, w, h, '#E6E9EE');
-  for (var gy = y0; gy < y0 + h; gy += 32) {
-    R(c, x0, gy, w, 1, 'rgba(30,36,46,0.07)');
+/* Sàn gỗ lim ván dài Hội An ấm áp + Lối đi trung tâm lát Gạch Bông Hội An 16×16 */
+function drawHoiAnWoodAndTileFloor(c, x0, y0, w, h) {
+  R(c, x0, y0, w, h, '#C9A276');
+  for (var py = y0; py < y0 + h; py += 8) {
+    R(c, x0, py, w, 1, 'rgba(74,44,26,0.22)');
+    if (((py - y0) / 8) % 2 === 0) R(c, x0, py + 1, w, 7, '#CFA97E');
+    for (var px = x0 + ((py * 7) % 36); px < x0 + w; px += 44) {
+      R(c, px, py, 1, 8, 'rgba(74,44,26,0.18)');
+    }
   }
-  for (var gx = x0; gx < x0 + w; gx += 32) {
-    R(c, gx, y0, 1, h, 'rgba(30,36,46,0.07)');
-  }
+  // Dải lối đi trung tâm lát gạch bông Hội An 16×16 nối thẳng cầu thang & cửa chính
+  drawTileFloorIndochine(c, 256, y0, 128, h);
+  R(c, 255, y0, 2, h, '#4A2C1A');
+  R(c, 383, y0, 2, h, '#4A2C1A');
 }
 
-/* Logo 3 Sọc Performance chuẩn tối giản (3 thanh chéo nâng bậc) */
+/* Logo 3 Sọc Performance chuẩn tối giản */
 function drawThreeStripesLogo(c, x, y, scale, col) {
   scale = scale || 1;
   R(c, x, y + 6 * scale, 4 * scale, 5 * scale, col);
@@ -61,331 +67,439 @@ function drawThreeStripesLogo(c, x, y, scale, col) {
   R(c, x + 12 * scale, y, 4 * scale, 11 * scale, col);
 }
 
-/* Đôi giày Sneaker 3 sọc chi tiết (Superstar, Samba, Gazelle, Ultraboost) */
-function drawMiniSneaker(c, x, y, bodyCol, stripeCol, soleCol) {
-  R(c, x, y + 4, 11, 2, soleCol || '#FFFFFF'); // Đế giày
-  R(c, x + 1, y + 1, 8, 3, bodyCol);           // Thân giày
-  R(c, x + 8, y + 2, 3, 2, bodyCol);           // Mũi giày
-  // 3 sọc mini đặc trưng trên thân giày
-  R(c, x + 3, y + 2, 1, 2, stripeCol);
-  R(c, x + 5, y + 2, 1, 2, stripeCol);
-  R(c, x + 7, y + 2, 1, 2, stripeCol);
+/* Đèn lồng lụa Hội An treo ấm áp (vàng, đỏ cam, kem) */
+function drawHoiAnLantern(c, cx, cy, col, t) {
+  R(c, cx, cy - 8, 1, 4, '#2B2118');
+  R(c, cx - 2, cy - 4, 5, 2, '#2B2118');
+  E(c, cx, cy + 1, 5.5, 5, '#2B2118');
+  E(c, cx, cy + 1, 4.5, 4, col);
+  R(c, cx - 1, cy - 2, 2, 6, 'rgba(255,255,255,0.35)');
+  R(c, cx - 2, cy + 5, 5, 2, '#2B2118');
+  R(c, cx, cy + 7, 1, 3, '#F4B93B'); // Tua rua vàng
+  if (typeof t === 'number') {
+    c.save();
+    c.globalAlpha = 0.18 + Math.sin(t * 2.5 + cx) * 0.04;
+    E(c, cx, cy + 1, 16, 12, '#FFE08A');
+    c.restore();
+  }
 }
 
-/* Đôi dép Adilette 3 sọc đặc trưng Adidas */
-function drawAdiletteSlide(c, x, y, baseCol, stripeCol) {
-  R(c, x, y + 3, 9, 3, baseCol);               // Đế dép
-  R(c, x + 2, y + 1, 5, 3, baseCol);           // Quai ngang
-  R(c, x + 3, y + 1, 1, 3, stripeCol);         // 3 sọc trên quai dép
-  R(c, x + 5, y + 1, 1, 3, stripeCol);
+/* ==================== BỘ SPRITE SẢN PHẨM ADIDAS TO RÕ, SẮC NÉT TỪNG MÓN ==================== */
+
+/* 1. Áo Polo Thể Thao (18×19) — Cổ bẻ, trụ nút ngực, 2 tay áo ngắn xòe rõ ràng + 3 sọc vai */
+function drawPoloShirt(c, x, y, col, collarCol, stripeCol) {
+  // Móc treo kim loại
+  R(c, x + 8, y, 2, 2, '#64748B');
+  // 2 Tay áo xòe ngang rõ ràng
+  R(c, x, y + 3, 4, 7, '#181B22'); R(c, x + 1, y + 4, 3, 5, col);
+  R(c, x + 14, y + 3, 4, 7, '#181B22'); R(c, x + 14, y + 4, 3, 5, col);
+  // Thân áo Polo
+  R(c, x + 3, y + 2, 12, 16, '#181B22');
+  R(c, x + 4, y + 3, 10, 14, col);
+  // Cổ bẻ Polo & trụ nút ngực đặc trưng
+  R(c, x + 6, y + 2, 6, 3, collarCol);
+  R(c, x + 8, y + 5, 2, 4, collarCol);
+  R(c, x + 8, y + 6, 1, 1, '#181B22'); R(c, x + 8, y + 8, 1, 1, '#181B22');
+  // 3 sọc chạy dọc vai & tay áo
+  R(c, x + 1, y + 4, 3, 1, stripeCol); R(c, x + 14, y + 4, 3, 1, stripeCol);
+  R(c, x + 1, y + 6, 3, 1, stripeCol); R(c, x + 14, y + 6, 3, 1, stripeCol);
+  // Logo mini bên ngực phải
+  R(c, x + 11, y + 7, 2, 2, stripeCol);
 }
 
-/* Tường Giày Sneaker & Dép Adilette 3 Sọc có dải LED hắt từng ngăn */
-function drawFootwearWall(c, wx, wy, ww, wh, mode) {
-  R(c, wx, wy, ww, wh, '#181B22');             // Khung thép đen mờ
-  R(c, wx + 2, wy + 2, ww - 4, wh - 4, '#D4B48C'); // Hậu gỗ sồi ấm
+/* 2. Áo Thun Thể Thao / Áo Đấu Bóng Đá (18×19) — Cổ V, 2 tay xòe, 3 sọc vai & số áo */
+function drawSportsTee(c, x, y, col, stripeCol, hasNumber) {
+  R(c, x + 8, y, 2, 2, '#64748B');
+  R(c, x, y + 3, 4, 7, '#181B22'); R(c, x + 1, y + 4, 3, 5, col);
+  R(c, x + 14, y + 3, 4, 7, '#181B22'); R(c, x + 14, y + 4, 3, 5, col);
+  R(c, x + 3, y + 2, 12, 16, '#181B22');
+  R(c, x + 4, y + 3, 10, 14, col);
+  // Cổ chữ V thể thao
+  R(c, x + 7, y + 3, 4, 2, stripeCol);
+  R(c, x + 8, y + 4, 2, 2, '#181B22');
+  // 3 sọc vai sắc nét
+  R(c, x + 1, y + 4, 4, 1, stripeCol); R(c, x + 13, y + 4, 4, 1, stripeCol);
+  R(c, x + 1, y + 6, 3, 1, stripeCol); R(c, x + 14, y + 6, 3, 1, stripeCol);
+  if (hasNumber) {
+    // Số áo bóng đá "10" / sọc ngang ngực nổi bật
+    R(c, x + 6, y + 8, 2, 6, stripeCol);
+    R(c, x + 9, y + 8, 4, 6, stripeCol);
+    R(c, x + 10, y + 9, 2, 4, col);
+  } else {
+    // Logo 3 sọc giữa ngực áo thun
+    R(c, x + 6, y + 10, 1, 2, stripeCol);
+    R(c, x + 8, y + 9, 1, 3, stripeCol);
+    R(c, x + 10, y + 8, 1, 4, stripeCol);
+  }
+}
+
+/* 3. Quần Jogger Dài / Quần Short Thể Thao 3 Sọc (14×19 hoặc 14×13) — Tách rõ 2 ống quần */
+function drawTrackPants(c, x, y, col, stripeCol, isShort) {
+  var h = isShort ? 12 : 18;
+  // Cạp quần chun rút dây
+  R(c, x + 1, y + 1, 12, 3, '#181B22');
+  R(c, x + 2, y + 2, 10, 2, col);
+  R(c, x + 6, y + 2, 2, 2, stripeCol); // Dây rút trắng
+  // Ống quần trái & phải tách rõ khe giữa
+  R(c, x + 1, y + 4, 6, h - 3, '#181B22'); R(c, x + 2, y + 4, 4, h - 4, col);
+  R(c, x + 7, y + 4, 6, h - 3, '#181B22'); R(c, x + 8, y + 4, 4, h - 4, col);
+  // 3 Sọc dọc chạy 2 bên hông quần
+  R(c, x + 2, y + 4, 1, h - 5, stripeCol);
+  R(c, x + 11, y + 4, 1, h - 5, stripeCol);
+}
+
+/* 4. Giày Bóng Đá Predator / F50 (18×10) — Có HÀNG ĐINH TÁN DƯỚI ĐẾ + 3 sọc chéo */
+function drawFootballBoot(c, x, y, col, stripeCol) {
+  // Cổ giày ôm & thân mũi thuôn tốc độ
+  R(c, x + 1, y, 6, 4, '#181B22'); R(c, x + 2, y + 1, 4, 3, col);
+  R(c, x + 1, y + 2, 14, 5, '#181B22');
+  R(c, x + 2, y + 3, 12, 3, col);
+  R(c, x + 13, y + 4, 4, 3, col); // Mũi giày vót nhọn
+  // 3 Sọc chéo đặc trưng giày đá banh
+  R(c, x + 5, y + 3, 1, 3, stripeCol);
+  R(c, x + 7, y + 3, 1, 3, stripeCol);
+  R(c, x + 9, y + 3, 1, 3, stripeCol);
+  // Đế cứng & 4 ĐINH TÁN BÓNG ĐÁ sắc nét bên dưới!
+  R(c, x + 1, y + 7, 16, 1, '#111419');
+  R(c, x + 2, y + 8, 2, 2, '#E2E8F0');
+  R(c, x + 6, y + 8, 2, 2, '#E2E8F0');
+  R(c, x + 11, y + 8, 2, 2, '#E2E8F0');
+  R(c, x + 15, y + 8, 2, 2, '#E2E8F0');
+}
+
+/* 5. Giày Chạy Bộ Ultraboost / Adizero (18×10) — Đế Boost dày cong mũi khí động học */
+function drawRunningShoe(c, x, y, col, stripeCol) {
+  R(c, x + 1, y + 1, 13, 5, '#181B22');
+  R(c, x + 2, y + 2, 11, 3, col);
+  R(c, x + 12, y + 3, 5, 3, col);
+  // 3 Sọc bên thân lưới chạy bộ
+  R(c, x + 5, y + 2, 1, 3, stripeCol);
+  R(c, x + 7, y + 2, 1, 3, stripeCol);
+  R(c, x + 9, y + 2, 1, 3, stripeCol);
+  // Đế bọt Boost trắng dày cong vút lên mũi giày
+  R(c, x, y + 6, 16, 3, '#FFFFFF');
+  R(c, x + 15, y + 5, 3, 3, '#FFFFFF');
+  R(c, x + 1, y + 9, 15, 1, '#F97316'); // Đế ngoài cao su Continental cam
+}
+
+/* 6. Giày Lifestyle Originals (Superstar / Samba / Gazelle — 18×10) */
+function drawLifestyleSneaker(c, x, y, col, stripeCol, soleCol) {
+  R(c, x + 1, y + 1, 14, 5, '#181B22');
+  R(c, x + 2, y + 2, 12, 4, col);
+  R(c, x + 13, y + 3, 4, 3, '#FFFFFF'); // Mũi vỏ sò Superstar / Samba
+  R(c, x + 5, y + 2, 1, 4, stripeCol);
+  R(c, x + 7, y + 2, 1, 4, stripeCol);
+  R(c, x + 9, y + 2, 1, 4, stripeCol);
+  R(c, x + 1, y + 6, 16, 3, soleCol || '#FFFFFF'); // Đế phẳng hoặc đế Gum
+  R(c, x + 1, y + 9, 16, 1, '#181B22');
+}
+
+/* 7. Dép Adilette 3 Sọc cỡ lớn (14×8) */
+function drawAdiletteSlideLarge(c, x, y, col, stripeCol) {
+  R(c, x, y + 4, 14, 4, '#181B22');
+  R(c, x + 1, y + 5, 12, 2, col);
+  // Quai dép bản to có 3 sọc rõ ràng
+  R(c, x + 3, y + 1, 8, 5, '#181B22');
+  R(c, x + 4, y + 2, 6, 4, col);
+  R(c, x + 5, y + 2, 1, 4, stripeCol);
+  R(c, x + 7, y + 2, 1, 4, stripeCol);
+  R(c, x + 9, y + 2, 1, 4, stripeCol);
+}
+
+/* 8. Giá Đựng 6 Quả Bóng Đá Adidas (Khu Bóng Đá) */
+function drawFootballRack(c, rx, ry) {
+  R(c, rx, ry, 52, 34, '#181B22');
+  R(c, rx + 2, ry + 2, 48, 30, '#334155');
+  R(c, rx + 2, ry + 16, 48, 2, '#181B22');
+  var balls = [
+    [rx + 10, ry + 9, '#FFFFFF', '#181B22'],
+    [rx + 26, ry + 9, '#FDE047', '#DC2626'],
+    [rx + 42, ry + 9, '#FFFFFF', '#2563EB'],
+    [rx + 10, ry + 25, '#38BDF8', '#181B22'],
+    [rx + 26, ry + 25, '#FFFFFF', '#181B22'],
+    [rx + 42, ry + 25, '#FB923C', '#181B22']
+  ];
+  for (var bi = 0; bi < balls.length; bi++) {
+    var b = balls[bi];
+    E(c, b[0], b[1], 6, 6, '#181B22');
+    E(c, b[0], b[1], 5, 5, b[2]);
+    R(c, b[0] - 2, b[1] - 2, 3, 3, b[3]);
+    R(c, b[0] + 1, b[1] + 1, 2, 2, b[3]);
+  }
+}
+
+/* 9. Kệ Phụ Kiện (Balo 3 sọc, Mũ lưỡi trai 3 sọc & Chồng hộp giày xanh/đen) */
+function drawAccessoryShelf(c, ax, ay, aw) {
+  R(c, ax, ay, aw, 44, '#2B180E');
+  R(c, ax + 2, ay + 2, aw - 4, 40, '#8A5634'); // Kệ gỗ Hội An ấm
+  R(c, ax + 2, ay + 22, aw - 4, 2, '#2B180E');
+  // Tầng trên: 3 Balo thể thao 3 sọc + 2 Mũ lưỡi trai
+  var packs = [[ax + 8, '#181B22', '#FFFFFF'], [ax + 28, '#1D4ED8', '#FFFFFF'], [ax + 48, '#DC2626', '#FFFFFF']];
+  for (var pi = 0; pi < packs.length; pi++) {
+    var pk = packs[pi];
+    R(c, pk[0], ay + 5, 14, 15, '#181B22');
+    R(c, pk[0] + 1, ay + 6, 12, 13, pk[1]);
+    R(c, pk[0] + 3, ay + 8, 2, 9, pk[2]); R(c, pk[0] + 6, ay + 8, 2, 9, pk[2]); R(c, pk[0] + 9, ay + 8, 2, 9, pk[2]);
+  }
+  // Mũ lưỡi trai 3 sọc
+  var caps = [[ax + 70, '#181B22', '#FFFFFF'], [ax + 88, '#FFFFFF', '#181B22']];
+  for (var ci = 0; ci < caps.length; ci++) {
+    var cp = caps[ci];
+    E(c, cp[0] + 6, ay + 14, 6, 5, '#181B22'); E(c, cp[0] + 6, ay + 14, 5, 4, cp[1]);
+    R(c, cp[0] + 9, ay + 16, 6, 2, cp[1]); // Lưỡi trai
+    R(c, cp[0] + 5, ay + 12, 1, 3, cp[2]); R(c, cp[0] + 7, ay + 12, 1, 3, cp[2]);
+  }
+  // Tầng dưới: Chồng hộp giày xanh Originals & đen 3 sọc
+  for (var hx = ax + 8; hx < ax + aw - 22; hx += 22) {
+    var hc = ((hx - ax) / 22) % 2 === 0 ? '#1D4ED8' : '#181B22';
+    R(c, hx, ay + 27, 18, 12, '#111419');
+    R(c, hx + 1, ay + 28, 16, 10, hc);
+    R(c, hx + 3, ay + 31, 12, 1, '#FFFFFF');
+    R(c, hx + 3, ay + 33, 12, 1, '#FFFFFF');
+    R(c, hx + 3, ay + 35, 12, 1, '#FFFFFF');
+  }
+}
+
+/* 10. Kệ Sào Quần Áo Đầy Ắp (dùng drawPoloShirt / drawSportsTee / drawTrackPants to sắc nét) */
+function drawDenseApparelRack(c, rx, ry, rw, kind) {
+  R(c, rx + 2, ry + 26, rw - 4, 4, 'rgba(43,24,14,0.25)');
+  R(c, rx, ry, rw, 3, '#2B180E'); // Thanh sào gỗ-thép
+  R(c, rx, ry, 2, 26, '#2B180E'); R(c, rx + rw - 2, ry, 2, 26, '#2B180E');
+  R(c, rx + 2, ry + 23, rw - 4, 2, '#6B4226');
+  var palettes = [
+    ['#FFFFFF', '#181B22', '#181B22'],
+    ['#181B22', '#FFFFFF', '#FFFFFF'],
+    ['#DC2626', '#FFFFFF', '#FFFFFF'],
+    ['#2563EB', '#FFFFFF', '#FFFFFF'],
+    ['#16A34A', '#FFFFFF', '#FFFFFF'],
+    ['#F59E0B', '#181B22', '#181B22'],
+    ['#F5F0E6', '#181B22', '#181B22']
+  ];
+  var idx = 0;
+  var stepX = kind === 'pants' || kind === 'shorts' ? 16 : 20;
+  for (var ix = rx + 4; ix <= rx + rw - stepX - 2; ix += stepX) {
+    var p = palettes[idx % palettes.length];
+    idx++;
+    if (kind === 'polo') drawPoloShirt(c, ix, ry + 4, p[0], p[1], p[2]);
+    else if (kind === 'jersey') drawSportsTee(c, ix, ry + 4, p[0], p[2], true);
+    else if (kind === 'tee') drawSportsTee(c, ix, ry + 4, p[0], p[2], false);
+    else if (kind === 'shorts') drawTrackPants(c, ix, ry + 6, p[0], p[2], true);
+    else drawTrackPants(c, ix, ry + 4, p[0], p[2], false);
+  }
+}
+
+/* 11. Kệ Tường Giày & Dép Dày Đặc (Bóng đá có đinh / Chạy bộ Boost / Originals / Dép Adilette) */
+function drawFootwearWall(c, wx, wy, ww, wh, category) {
+  R(c, wx, wy, ww, wh, '#2B180E');
+  R(c, wx + 2, wy + 2, ww - 4, wh - 4, '#6B4226'); // Gỗ lim Hội An ấm
   var rows = 3;
   var rowH = Math.floor((wh - 6) / rows);
-  var shoes = [
-    ['#FFFFFF', '#181B22', '#F8FAFC'], // Superstar trắng 3 sọc đen
-    ['#181B22', '#FFFFFF', '#B47B44'], // Samba đen 3 sọc trắng đế gum
-    ['#DC2626', '#FFFFFF', '#FFFDF7'], // Gazelle đỏ 3 sọc trắng
-    ['#2563EB', '#FFFFFF', '#F8FAFC'], // Originals xanh cobalt
-    ['#E5DFD3', '#181B22', '#D4A373'], // Campus kem tối giản
-    ['#16A34A', '#FFFFFF', '#F8FAFC']  // Gazelle xanh lá
-  ];
-  var slides = [
-    ['#181B22', '#FFFFFF'],
-    ['#1E3A8A', '#FFFFFF'],
-    ['#F5F0E6', '#181B22'],
-    ['#DC2626', '#FFFFFF']
+  var cols = [
+    ['#F97316', '#181B22', '#FFFFFF'], // Cam Neon Predator
+    ['#181B22', '#FFFFFF', '#B47B44'], // Đen 3 sọc trắng
+    ['#FFFFFF', '#181B22', '#F8FAFC'], // Trắng Superstar
+    ['#2563EB', '#FFFFFF', '#FFFFFF'], // Xanh Cobalt
+    ['#DC2626', '#FFFFFF', '#FFFFFF'], // Đỏ Thể Thao
+    ['#22C55E', '#181B22', '#FFFFFF']  // Xanh Neon F50
   ];
   for (var r = 0; r < rows; r++) {
     var sy = wy + 4 + r * rowH;
-    // Dải LED trắng ấm hắt sáng bên trên từng ngăn kệ
-    R(c, wx + 3, sy, ww - 6, 1, '#FFF9E6');
-    // Thanh kệ gỗ đen
-    R(c, wx + 3, sy + rowH - 3, ww - 6, 2, '#181B22');
-    for (var sx = wx + 6; sx < wx + ww - 14; sx += 15) {
-      if (mode === 'slides' || r === 2) {
-        var sl = slides[(r + sx) % slides.length];
-        drawAdiletteSlide(c, sx, sy + rowH - 9, sl[0], sl[1]);
-      } else {
-        var sh = shoes[(r * 3 + Math.floor(sx / 15)) % shoes.length];
-        drawMiniSneaker(c, sx, sy + rowH - 9, sh[0], sh[1], sh[2]);
-      }
+    R(c, wx + 3, sy, ww - 6, 1, '#FFE891'); // LED vàng ấm hắt sáng từng ngăn
+    R(c, wx + 3, sy + rowH - 2, ww - 6, 2, '#2B180E');
+    var sxStep = category === 'slides' ? 18 : 22;
+    for (var sx = wx + 5; sx <= wx + ww - sxStep - 2; sx += sxStep) {
+      var cl = cols[(r * 3 + Math.floor(sx / sxStep)) % cols.length];
+      var itemY = sy + rowH - 12;
+      if (category === 'football') drawFootballBoot(c, sx, itemY, cl[0], cl[1]);
+      else if (category === 'running') drawRunningShoe(c, sx, itemY, cl[0], cl[1]);
+      else if (category === 'slides') drawAdiletteSlideLarge(c, sx, itemY + 2, cl[0], cl[1]);
+      else if (r === 2) drawAdiletteSlideLarge(c, sx + 2, itemY + 2, cl[0], cl[1]);
+      else drawLifestyleSneaker(c, sx, itemY, cl[0], cl[1], cl[2]);
     }
   }
 }
 
-/* Giá treo quần & áo 3 sọc thép đen tối giản */
-function drawClothingRack(c, rx, ry, rw, kind) {
-  R(c, rx + 2, ry + 26, rw - 4, 4, 'rgba(24,27,34,0.18)'); // Bóng sàn
-  // Khung thép đen mờ
-  R(c, rx, ry, rw, 3, '#181B22');
-  R(c, rx, ry, 2, 26, '#181B22');
-  R(c, rx + rw - 2, ry, 2, 26, '#181B22');
-  R(c, rx + 2, ry + 24, rw - 4, 2, '#475569');
-  var cols = kind === 'pants'
-    ? ['#181B22', '#1E3A8A', '#334155', '#181B22', '#475569']
-    : ['#181B22', '#DC2626', '#FFFFFF', '#2563EB', '#E5DFD3', '#16A34A'];
-  var idx = 0;
-  for (var ix = rx + 5; ix < rx + rw - 11; ix += 11) {
-    var col = cols[idx % cols.length];
-    var stripe = (col === '#FFFFFF' || col === '#E5DFD3') ? '#181B22' : '#FFFFFF';
-    idx++;
-    if (kind === 'pants') {
-      // Quần Jogger / Short thể thao 3 sọc dọc ống quần
-      R(c, ix, ry + 4, 8, 17, '#181B22');
-      R(c, ix + 1, ry + 5, 6, 15, col);
-      R(c, ix + 4, ry + 11, 1, 9, '#E6E9EE'); // Khe giữa 2 ống quần
-      R(c, ix + 1, ry + 6, 1, 13, stripe);    // Sọc 3 sọc chạy dọc ống
-      R(c, ix + 6, ry + 6, 1, 13, stripe);
-    } else {
-      // Áo khoác SST Track Jacket / Hoodie 3 sọc
-      R(c, ix, ry + 4, 9, 15, '#181B22');
-      R(c, ix + 1, ry + 5, 7, 13, col);
-      R(c, ix + 2, ry + 5, 1, 12, stripe);    // 3 sọc dọc tay/thân áo
-      R(c, ix + 4, ry + 5, 1, 12, stripe);
-      R(c, ix + 6, ry + 5, 1, 12, stripe);
-    }
-  }
-}
-
-/* Mannequin đứng bục đá Terrazzo mặc full outfit 3 sọc sang trọng */
-function drawMannequin(c, mx, my, topCol, botCol, stripeCol, shoeCol) {
-  // Bục đá Terrazzo tròn/vuông tối giản có viền đen
-  R(c, mx - 11, my + 2, 22, 9, 'rgba(24,27,34,0.20)');
-  R(c, mx - 10, my, 20, 8, '#181B22');
-  R(c, mx - 9, my + 1, 18, 6, '#F1F5F9');
-  R(c, mx - 9, my + 1, 18, 2, '#FFFFFF');
-  // Đôi giày Sneaker 3 sọc dưới chân mannequin
-  R(c, mx - 5, my - 2, 4, 3, shoeCol); R(c, mx + 1, my - 2, 4, 3, shoeCol);
-  // Quần Jogger 3 sọc
-  R(c, mx - 5, my - 11, 4, 9, '#181B22'); R(c, mx - 4, my - 10, 3, 8, botCol);
-  R(c, mx + 1, my - 11, 4, 9, '#181B22'); R(c, mx + 1, my - 10, 3, 8, botCol);
-  R(c, mx - 4, my - 10, 1, 7, stripeCol); R(c, mx + 3, my - 10, 1, 7, stripeCol);
-  // Áo khoác / Hoodie 3 sọc
-  R(c, mx - 6, my - 22, 12, 12, '#181B22');
-  R(c, mx - 5, my - 21, 10, 10, topCol);
-  R(c, mx - 5, my - 20, 1, 8, stripeCol); R(c, mx + 4, my - 20, 1, 8, stripeCol);
-  // Logo 3 sọc mini trước ngực
-  R(c, mx - 2, my - 17, 1, 2, stripeCol); R(c, mx, my - 18, 1, 3, stripeCol); R(c, mx + 2, my - 19, 1, 4, stripeCol);
-  // Đầu mannequin trắng nhám Minimalist (không vẽ mặt người thật để phân biệt rõ với khách!)
-  R(c, mx - 4, my - 29, 8, 7, '#181B22');
-  R(c, mx - 3, my - 28, 6, 5, '#F8FAFC');
-  R(c, mx - 2, my - 27, 2, 2, '#E2E8F0');
-}
-
-/* Đảo trưng bày đá Terrazzo Tầng 1 (gấp áo thun, quần & dép 3 sọc) */
-function drawDisplayIsland(c, ix, iy, iw, ih) {
-  R(c, ix + 3, iy + ih - 1, iw - 4, 5, 'rgba(24,27,34,0.18)');
-  R(c, ix, iy, iw, ih, '#181B22');
-  R(c, ix + 1, iy + 1, iw - 2, ih - 2, '#F1F5F9');
-  R(c, ix + 2, iy + 2, iw - 4, 4, '#FFFFFF');
-  // Chồng áo thun gấp gọn 3 sọc bên trái đảo
-  var stacks = [
-    [ix + 8, iy + 8, '#181B22', '#FFFFFF'],
-    [ix + 28, iy + 8, '#FFFFFF', '#181B22'],
-    [ix + 48, iy + 8, '#DC2626', '#FFFFFF'],
-    [ix + 68, iy + 8, '#2563EB', '#FFFFFF']
-  ];
-  for (var si = 0; si < stacks.length; si++) {
-    var st = stacks[si];
-    R(c, st[0], st[1], 14, 12, '#181B22');
-    R(c, st[0] + 1, st[1] + 1, 12, 10, st[2]);
-    R(c, st[0] + 3, st[1] + 3, 2, 6, st[3]);
-    R(c, st[0] + 6, st[1] + 3, 2, 6, st[3]);
-    R(c, st[0] + 9, st[1] + 3, 2, 6, st[3]);
-  }
-  // Hàng giày & dép Adilette 3 sọc trưng bày phía dưới đảo
-  drawMiniSneaker(c, ix + 10, iy + 25, '#FFFFFF', '#181B22', '#E2E8F0');
-  drawMiniSneaker(c, ix + 28, iy + 25, '#181B22', '#FFFFFF', '#B47B44');
-  drawAdiletteSlide(c, ix + 48, iy + 25, '#181B22', '#FFFFFF');
-  drawAdiletteSlide(c, ix + 64, iy + 25, '#1E3A8A', '#FFFFFF');
+/* 12. Mannequin Nghệ Thuật Dáng Đẹp (Vai rộng, tay xuôi, mặc full outfit 3 sọc trên bục gỗ Hội An) */
+function drawDetailedMannequin(c, mx, my, topCol, botCol, stripeCol, shoeCol) {
+  R(c, mx - 13, my + 2, 26, 9, 'rgba(43,24,14,0.28)');
+  // Bục gỗ lim viền vàng ấm Hội An
+  R(c, mx - 12, my, 24, 9, '#2B180E');
+  R(c, mx - 11, my + 1, 22, 7, '#8A5634');
+  R(c, mx - 11, my + 1, 22, 2, '#D4B48C');
+  // Đôi giày sneaker dưới chân
+  R(c, mx - 6, my - 3, 5, 4, shoeCol); R(c, mx + 1, my - 3, 5, 4, shoeCol);
+  // Quần thể thao 3 sọc tách 2 ống
+  R(c, mx - 6, my - 13, 5, 10, '#181B22'); R(c, mx - 5, my - 12, 3, 9, botCol);
+  R(c, mx + 1, my - 13, 5, 10, '#181B22'); R(c, mx + 2, my - 12, 3, 9, botCol);
+  R(c, mx - 5, my - 12, 1, 8, stripeCol); R(c, mx + 4, my - 12, 1, 8, stripeCol);
+  // 2 Tay mannequin xuôi tự nhiên mặc áo có 3 sọc tay
+  R(c, mx - 10, my - 23, 4, 10, '#181B22'); R(c, mx - 9, my - 22, 3, 8, topCol);
+  R(c, mx + 6, my - 23, 4, 10, '#181B22'); R(c, mx + 6, my - 22, 3, 8, topCol);
+  // Thân áo Polo / Track Jacket 3 sọc
+  R(c, mx - 6, my - 24, 12, 12, '#181B22');
+  R(c, mx - 5, my - 23, 10, 10, topCol);
+  R(c, mx - 9, my - 22, 1, 7, stripeCol); R(c, mx + 8, my - 22, 1, 7, stripeCol);
+  // Logo 3 sọc sắc nét trước ngực
+  R(c, mx - 2, my - 19, 1, 2, stripeCol); R(c, mx, my - 20, 1, 3, stripeCol); R(c, mx + 2, my - 21, 1, 4, stripeCol);
+  // Cổ & đầu mannequin trắng nhám nghệ thuật
+  R(c, mx - 2, my - 26, 4, 2, '#E2E8F0');
+  R(c, mx - 4, my - 33, 8, 7, '#181B22');
+  R(c, mx - 3, my - 32, 6, 5, '#FFFBF1');
 }
 
 function drawAdidasStaticBg(c) {
-  // ===== TẦNG 2: PERFORMANCE GALLERY & VIP LOUNGE (y: 0..274) =====
-  drawPolishedConcreteFloor(c, 14, 58, 612, 214);
-  // Tường bao Tầng 2 tối giản trắng xám
-  R(c, 0, 0, 640, 58, '#F8FAFC');
-  R(c, 0, 0, 640, 5, '#181B22');
-  R(c, 0, 56, 640, 2, '#181B22');
-  // Tường dọc 2 bên trái/phải xuyên suốt 2 tầng
-  R(c, 0, 0, 14, 560, '#CBD5E1'); R(c, 14, 0, 2, 560, '#181B22');
-  R(c, 626, 0, 14, 560, '#CBD5E1'); R(c, 624, 0, 2, 560, '#181B22');
+  // ===== TẦNG 2: KHU BÓNG ĐÁ, CHẠY BỘ & POLO/ÁO THUN (y: 0..274) =====
+  drawHoiAnWoodAndTileFloor(c, 14, 58, 612, 214);
+  // Tường vàng kem phố cổ Hội An + Dầm gỗ lim nâu sẫm
+  R(c, 0, 0, 640, 58, VN_MAT.wallYellow.mid);
+  R(c, 0, 0, 640, 6, '#4A2C1A');
+  R(c, 0, 56, 640, 2, '#2B180E');
+  R(c, 0, 0, 14, 560, '#8A5634'); R(c, 14, 0, 2, 560, '#2B180E');
+  R(c, 626, 0, 14, 560, '#8A5634'); R(c, 624, 0, 2, 560, '#2B180E');
 
-  // HERO BRAND WALL TẦNG 2 (x: 214..426, y: 7..54) — Logo 3 Sọc phát sáng sang trọng
-  R(c, 214, 7, 212, 47, '#181B22');
-  R(c, 216, 9, 208, 43, '#111419');
-  R(c, 218, 10, 204, 1, '#FFF9E6'); // Dải LED hắt trần
-  drawThreeStripesLogo(c, 250, 18, 2, '#FFFFFF');
-  // Chữ pixel "ADIDAS" trắng tinh khiết
-  R(c, 298, 24, 96, 4, '#FFFFFF');
-  R(c, 306, 33, 80, 2, '#94A3B8'); // Subtitle tối giản "BRAND CENTER"
+  // HERO WALL HỘI AN × ADIDAS (x: 222..418, y: 7..54)
+  R(c, 222, 7, 196, 47, '#2B180E');
+  R(c, 224, 9, 192, 43, '#181B22');
+  R(c, 226, 10, 188, 2, '#F4B93B'); // Viền vàng Hội An sang trọng
+  drawThreeStripesLogo(c, 252, 18, 2, '#FFFFFF');
+  R(c, 298, 24, 92, 4, '#FFFFFF');   // ADIDAS
+  R(c, 304, 33, 80, 2, '#F4B93B');   // HOI AN HERITAGE
 
-  // Tường Giày Sneaker & Dép Adilette 3 Sọc hai bên Hero Wall (Tầng 2)
-  drawFootwearWall(c, 26, 10, 178, 56, 'sneakers');
-  drawFootwearWall(c, 436, 10, 178, 56, 'slides');
+  // KHU BÓNG ĐÁ TRÊN THẢM CỎ NHÂN TẠO XANH (Góc trái Tầng 2: x: 20..244, y: 66..256)
+  R(c, 20, 68, 222, 186, '#2E7D32');
+  for (var gx = 20; gx < 242; gx += 22) R(c, gx, 68, 11, 186, '#388E3C'); // Sọc cỏ sân bóng
+  R(c, 20, 68, 222, 2, '#FFFFFF'); R(c, 20, 252, 222, 2, '#FFFFFF'); // Đường biên trắng
+  // Kệ Giày Bóng Đá Predator/F50 có đinh tán (tường trái trên)
+  drawFootwearWall(c, 22, 10, 192, 56, 'football');
+  // 2 Sào Áo Đấu Bóng Đá có tay + số áo & Quần Short đá banh + Giá 6 Quả Bóng Đá
+  drawDenseApparelRack(c, 26, 78, 148, 'jersey');
+  drawFootballRack(c, 182, 76);
+  drawDenseApparelRack(c, 26, 138, 148, 'shorts');
+  drawDetailedMannequin(c, 212, 166, '#DC2626', '#181B22', '#FFFFFF', '#F97316'); // Mannequin Bóng Đá
+  drawDenseApparelRack(c, 26, 198, 148, 'polo');
+  drawDetailedMannequin(c, 212, 232, '#FFFFFF', '#181B22', '#181B22', '#181B22'); // Mannequin Polo trắng
 
-  // Phòng Thử Đồ VIP & Gương Toàn Thân Viền LED (Góc trái Tầng 2: x: 24..140, y: 84..168)
-  R(c, 24, 84, 112, 76, '#181B22');
-  R(c, 26, 86, 108, 72, '#E2E8F0');
-  R(c, 26, 86, 46, 72, '#475569'); // Rèm phòng thử đồ xám sang trọng
-  for (var rx = 32; rx < 70; rx += 8) R(c, rx, 86, 2, 72, '#334155');
-  // Gương toàn thân viền LED phát sáng
-  R(c, 84, 92, 36, 56, '#181B22');
-  R(c, 85, 93, 34, 54, '#FFFDF5'); // Viền đèn LED gương
-  R(c, 87, 95, 30, 50, '#BAE6FD'); // Mặt gương phản chiếu
-  linePx(c, 91, 104, 105, 98, '#FFFFFF');
-  linePx(c, 92, 122, 112, 112, '#FFFFFF');
-  // Ghế băng da đen thử giày trước gương
-  R(c, 146, 134, 46, 16, '#181B22'); R(c, 148, 136, 42, 12, '#27272A');
+  // KHU CHẠY BỘ & POLO/ÁO THUN (Góc phải Tầng 2: x: 396..620, y: 66..256)
+  // Kệ Giày Chạy Bộ Ultraboost / Adizero đế Boost cong (tường phải trên)
+  drawFootwearWall(c, 426, 10, 192, 56, 'running');
+  // Phòng Thử Đồ VIP & Gương LED viền vàng ấm (góc trên phải x: 526..618, y: 74..148)
+  R(c, 526, 74, 92, 72, '#2B180E');
+  R(c, 528, 76, 88, 68, '#F5E6C8');
+  R(c, 528, 76, 38, 68, '#6B4226'); // Rèm gỗ-lụa Hội An
+  R(c, 574, 82, 34, 54, '#2B180E'); R(c, 575, 83, 32, 52, '#FFF9E6'); R(c, 577, 85, 28, 48, '#BAE6FD');
+  // 3 Sào Áo Thun Thể Thao, Quần Jogger 3 Sọc & Kệ Phụ Kiện Balo/Mũ
+  drawDenseApparelRack(c, 398, 78, 120, 'tee');
+  drawDenseApparelRack(c, 398, 138, 120, 'pants');
+  drawAccessoryShelf(c, 504, 158, 114);
+  drawDenseApparelRack(c, 398, 198, 98, 'polo');
+  drawDetailedMannequin(c, 564, 236, '#2563EB', '#1E293B', '#FFFFFF', '#FFFFFF'); // Mannequin Chạy Bộ
+  // Thêm 1 Mannequin ngay lối lên cầu thang Tầng 2
+  drawDetailedMannequin(c, 320, 118, '#181B22', '#181B22', '#FFFFFF', '#FFFFFF');
 
-  // 4 Giá treo quần & áo 3 sọc ở Tầng 2 (nhiều quần & nhiều áo)
-  drawClothingRack(c, 210, 86, 98, 'tops');
-  drawClothingRack(c, 332, 86, 98, 'pants');
-  drawClothingRack(c, 456, 86, 152, 'tops');
-  drawClothingRack(c, 456, 150, 152, 'pants');
+  // ===== BAN CÔNG GỖ CHẠM HỘI AN & CẦU THANG GỖ ĐÈN LED (y: 266..312) =====
+  R(c, 16, 266, 250, 22, '#2B180E');
+  R(c, 16, 268, 250, 12, '#8A5634');
+  for (var bx = 22; bx < 260; bx += 14) R(c, bx, 270, 6, 8, '#D4B48C'); // Hoa văn con tiện gỗ Hội An
+  R(c, 374, 266, 250, 22, '#2B180E');
+  R(c, 374, 268, 250, 12, '#8A5634');
+  for (var bx2 = 380; bx2 < 618; bx2 += 14) R(c, bx2, 270, 6, 8, '#D4B48C');
 
-  // 4 Mannequin Spotlight Tầng 2 (Set Đỏ-Trắng, Đen-Trắng, Xanh Originals, Kem Minimalist)
-  drawMannequin(c, 170, 198, '#DC2626', '#181B22', '#FFFFFF', '#FFFFFF');
-  drawMannequin(c, 244, 198, '#181B22', '#181B22', '#FFFFFF', '#FFFFFF');
-  drawMannequin(c, 396, 198, '#2563EB', '#1E293B', '#FFFFFF', '#F8FAFC');
-  drawMannequin(c, 532, 224, '#F5F0E6', '#334155', '#181B22', '#181B22');
-
-  // ===== DẢI PHÂN TẦNG BAN CÔNG KÍNH & CẦU THANG KÍNH LED (y: 266..306) =====
-  // Lan can kính cường lực 2 bên cầu thang (chặn AABB để Heo đi đúng qua cầu thang!)
-  R(c, 16, 266, 250, 22, '#181B22');
-  R(c, 16, 268, 250, 12, '#93C5FD'); // Kính cường lực trong xanh
-  R(c, 16, 280, 250, 6, '#334155');  // Dầm sàn thép đen
-  R(c, 374, 266, 250, 22, '#181B22');
-  R(c, 374, 268, 250, 12, '#93C5FD');
-  R(c, 374, 280, 250, 6, '#334155');
-
-  // CẦU THANG KÍNH & BẬC GỖ SỒI HẮT LED NỐI LIỀN TẦNG 1 ↔ TẦNG 2 (x: 266..374, y: 248..314)
-  R(c, 266, 248, 108, 66, '#181B22');
+  // CẦU THANG KÍNH & BẬC GỖ LIM HẮT LED NỐI TẦNG 1 ↔ TẦNG 2 (x: 266..374, y: 248..314)
+  R(c, 266, 248, 108, 66, '#2B180E');
   for (var st = 0; st < 8; st++) {
     var sty = 250 + st * 8;
-    R(c, 270, sty, 100, 7, '#D4B48C');      // Bậc gỗ sồi ấm
-    R(c, 270, sty, 100, 1, '#FFF9E6');      // Đèn LED hắt cạnh bậc cầu thang
-    R(c, 270, sty + 6, 100, 1, '#8A5634');  // Bóng gầm bậc
+    R(c, 270, sty, 100, 7, '#B58A5D');
+    R(c, 270, sty, 100, 1, '#FFE891'); // LED vàng ấm hắt bậc
+    R(c, 270, sty + 6, 100, 1, '#4A2C1A');
   }
-  // Tay vịn kính cường lực 2 bên cầu thang
-  R(c, 266, 248, 4, 66, '#38BDF8');
-  R(c, 370, 248, 4, 66, '#38BDF8');
+  R(c, 266, 248, 4, 66, '#F4B93B'); R(c, 370, 248, 4, 66, '#F4B93B');
 
-  // ===== TẦNG 1: ORIGINALS FLAGSHIP, ĐẢO TRƯNG BÀY & QUẦY CHECKOUT (y: 288..560) =====
-  drawPolishedConcreteFloor(c, 14, 288, 612, 256);
+  // ===== TẦNG 1: ORIGINALS, DÉP ADILETTE, POLO, PHỤ KIỆN & CHECKOUT (y: 288..560) =====
+  drawHoiAnWoodAndTileFloor(c, 14, 288, 612, 256);
 
-  // 2 Đảo Trưng Bày Đá Terrazzo Tầng 1 (Gấp quần áo + giày dép 3 sọc)
-  drawDisplayIsland(c, 42, 336, 94, 42);
-  drawDisplayIsland(c, 504, 336, 94, 42);
+  // BÊN TRÁI TẦNG 1 (x: 22..246): Dày đặc Sào Áo Polo, Áo Thun, Quần 3 sọc & Kệ Phụ Kiện
+  drawDenseApparelRack(c, 24, 304, 148, 'polo');
+  drawDenseApparelRack(c, 24, 362, 148, 'tee');
+  drawAccessoryShelf(c, 180, 302, 66);
+  drawDenseApparelRack(c, 180, 362, 66, 'pants');
+  drawDetailedMannequin(c, 214, 434, '#16A34A', '#181B22', '#FFFFFF', '#FFFFFF');
 
-  // Thêm 2 giá quần áo 3 sọc bên hông Tầng 1
-  drawClothingRack(c, 160, 338, 86, 'tops');
-  drawClothingRack(c, 394, 338, 86, 'pants');
+  // BÊN PHẢI TẦNG 1 (x: 394..618): Tường Giày Originals (Superstar/Samba/Gazelle) + Tường Dép Adilette + Đảo Giày Bóng Đá
+  drawFootwearWall(c, 396, 298, 222, 60, 'originals');
+  drawFootwearWall(c, 396, 366, 140, 56, 'slides');
+  drawFootballRack(c, 546, 376); // Giá bóng đá thứ 2 ngay Tầng 1
+  drawDenseApparelRack(c, 396, 432, 134, 'jersey');
+  drawDetailedMannequin(c, 558, 456, '#181B22', '#FFFFFF', '#181B22', '#181B22');
+  drawDetailedMannequin(c, 594, 456, '#DC2626', '#181B22', '#FFFFFF', '#FFFFFF');
 
-  // 3 Mannequin Mặt Tiền Tầng 1 (rọi spotlight thu hút đại lộ)
-  drawMannequin(c, 420, 444, '#181B22', '#181B22', '#FFFFFF', '#FFFFFF');
-  drawMannequin(c, 488, 444, '#DC2626', '#FFFFFF', '#181B22', '#181B22');
-  drawMannequin(c, 556, 444, '#16A34A', '#181B22', '#FFFFFF', '#FFFFFF');
+  // QUẦY THU NGÂN GỖ HỘI AN × LOGO 3 SỌC (x: 24..188, y: 454..520)
+  R(c, 24, 456, 164, 58, '#2B180E');
+  R(c, 26, 458, 160, 22, '#F5E6C8'); // Mặt quầy gỗ sáng
+  R(c, 26, 480, 160, 32, '#181B22'); // Mặt đứng đen 3 sọc
+  drawThreeStripesLogo(c, 96, 486, 1, '#FFFFFF');
+  R(c, 38, 462, 20, 12, '#1E293B'); R(c, 40, 464, 16, 7, '#38BDF8');
+  R(c, 130, 460, 18, 12, '#1D4ED8'); R(c, 132, 463, 14, 2, '#FFFFFF');
+  R(c, 150, 460, 16, 12, '#181B22'); R(c, 152, 463, 12, 2, '#FFFFFF');
+  R(c, 170, 460, 10, 14, '#FFFFFF'); R(c, 173, 464, 1, 6, '#181B22'); R(c, 175, 464, 1, 6, '#181B22');
 
-  // QUẦY THU NGÂN FLAGSHIP MINIMALIST (Góc trái dưới Tầng 1: x: 28..194, y: 448..518)
-  R(c, 28, 452, 164, 56, '#181B22');
-  R(c, 30, 454, 160, 22, '#F8FAFC');          // Mặt đá trắng tối giản
-  R(c, 30, 476, 160, 30, '#181B22');          // Mặt đứng đen mờ sang trọng
-  drawThreeStripesLogo(c, 98, 482, 1, '#FFFFFF'); // Logo 3 sọc trắng phát sáng trước quầy
-  // Máy POS tối giản + Chồng hộp giày Adidas xanh Originals & đen + Túi giấy trắng 3 sọc
-  R(c, 42, 458, 20, 12, '#1E293B'); R(c, 44, 460, 16, 7, '#38BDF8');
-  R(c, 134, 456, 18, 12, '#1D4ED8'); R(c, 136, 459, 14, 2, '#FFFFFF'); // Hộp giày xanh Originals
-  R(c, 154, 456, 16, 12, '#181B22'); R(c, 156, 459, 12, 2, '#FFFFFF'); // Hộp giày đen
-  R(c, 174, 456, 10, 14, '#FFFFFF'); R(c, 177, 460, 1, 6, '#181B22'); R(c, 179, 460, 1, 6, '#181B22'); // Túi giấy 3 sọc
+  // Kệ Hộp Giày & Dép phụ góc phải dưới (x: 420..616, y: 492..534)
+  drawAccessoryShelf(c, 420, 490, 196);
 
-  // Cây Bàng Singapore xanh tối giản 2 góc cửa & góc cầu thang
-  var plants = [[224, 496], [414, 496], [244, 240], [394, 240]];
-  for (var pli = 0; pli < plants.length; pli++) {
-    var pl = plants[pli];
-    R(c, pl[0] - 6, pl[1], 12, 12, '#181B22'); R(c, pl[0] - 5, pl[1] + 1, 10, 10, '#F8FAFC');
-    E(c, pl[0], pl[1] - 5, 9, 7, '#15803D'); E(c, pl[0] - 2, pl[1] - 7, 5, 4, '#22C55E');
-  }
-
-  // CỬA KÍNH TỰ ĐỘNG MẶT TIỀN & LỐI RA ĐẠI LỘ (y: 536..560)
-  R(c, 16, 542, 244, 18, '#181B22'); R(c, 18, 544, 240, 12, '#BAE6FD');
-  R(c, 380, 542, 244, 18, '#181B22'); R(c, 382, 544, 240, 12, '#BAE6FD');
-  // Thảm lối ra cửa kính đen-trắng tối giản (x: 260..380)
-  R(c, 260, 532, 120, 28, '#CBD5E1');
+  // CỬA KÍNH MẶT TIỀN & CỔNG RA ĐẠI LỘ (y: 536..560)
+  R(c, 16, 542, 244, 18, '#2B180E'); R(c, 18, 544, 240, 12, '#BAE6FD');
+  R(c, 380, 542, 244, 18, '#2B180E'); R(c, 382, 544, 240, 12, '#BAE6FD');
+  R(c, 260, 532, 120, 28, '#D4B48C');
   R(c, 274, 538, 92, 16, '#181B22');
   drawThreeStripesLogo(c, 310, 541, 1, '#FFFFFF');
 }
 
-/* 2 Nhân viên Adidas mặc áo Polo đen 3 sọc trắng trên vai */
+/* 2 Nhân viên Adidas mặc áo Polo đen 3 sọc trắng */
 function drawAdidasStaff(c, st, t) {
   var x = Math.round(st.x), y = Math.round(st.y);
   var step = st.moving ? (Math.floor(t * 9 + st.phase) % 2) : 0;
   drawContactShadow(c, x, y + 1, 6, 2.5);
-  // Quần thể thao đen 3 sọc trắng
-  R(c, x - 3, y - 6 + step, 3, 6, '#181B22');
-  R(c, x + 1, y - 6 + (1 - step), 3, 6, '#181B22');
+  R(c, x - 3, y - 6 + step, 3, 6, '#181B22'); R(c, x + 1, y - 6 + (1 - step), 3, 6, '#181B22');
   R(c, x - 3, y - 5, 1, 4, '#FFFFFF'); R(c, x + 3, y - 5, 1, 4, '#FFFFFF');
-  // Áo Polo Adidas đen 3 sọc trắng trên vai + bảng tên trắng
-  R(c, x - 5, y - 15, 10, 10, '#111419');
-  R(c, x - 4, y - 14, 8, 8, '#181B22');
+  R(c, x - 5, y - 15, 10, 10, '#111419'); R(c, x - 4, y - 14, 8, 8, '#181B22');
   R(c, x - 4, y - 14, 1, 5, '#FFFFFF'); R(c, x + 3, y - 14, 1, 5, '#FFFFFF');
-  R(c, x + 1, y - 11, 2, 2, '#F8FAFC'); // Bảng tên nhân viên
-  drawAdidasHumanFace(c, x, y - 20, {
-    hair: st.hair,
-    hairStyle: st.hairStyle,
-    faceDir: st.faceX,
-    backView: st.faceY < 0
-  });
+  R(c, x + 1, y - 11, 2, 2, '#F8FAFC');
+  drawAdidasHumanFace(c, x, y - 20, { hair: st.hair, hairStyle: st.hairStyle, faceDir: st.faceX, backView: st.faceY < 0 });
 }
 
-/* Khách hàng mua sắm Adidas (có khách cầm túi giấy trắng 3 sọc!) */
+/* Khách hàng mua sắm Adidas (có khách cầm túi giấy trắng 3 sọc) */
 function drawAdidasShopper(c, sh, t) {
   var x = Math.round(sh.x), y = Math.round(sh.y);
   var step = sh.moving ? (Math.floor(t * 8 + sh.phase) % 2) : 0;
   drawContactShadow(c, x, y + 1, 6, 2.5);
-  R(c, x - 3, y - 6 + step, 3, 6, '#334155');
-  R(c, x + 1, y - 6 + (1 - step), 3, 6, '#334155');
-  R(c, x - 5, y - 15, 10, 10, VN_MAT.ink);
-  R(c, x - 4, y - 14, 8, 8, sh.shirt);
-  drawAdidasHumanFace(c, x, y - 20, {
-    hair: sh.hair,
-    hairStyle: sh.hairStyle,
-    faceDir: sh.faceX,
-    backView: sh.faceY < 0
-  });
-  // Túi giấy Adidas trắng 3 sọc trên tay khách đã mua đồ
+  R(c, x - 3, y - 6 + step, 3, 6, '#334155'); R(c, x + 1, y - 6 + (1 - step), 3, 6, '#334155');
+  R(c, x - 5, y - 15, 10, 10, VN_MAT.ink); R(c, x - 4, y - 14, 8, 8, sh.shirt);
+  drawAdidasHumanFace(c, x, y - 20, { hair: sh.hair, hairStyle: sh.hairStyle, faceDir: sh.faceX, backView: sh.faceY < 0 });
   if (sh.hasBag) {
     var bx = sh.faceX >= 0 ? x + 5 : x - 11;
-    R(c, bx, y - 9, 7, 8, '#181B22');
-    R(c, bx + 1, y - 8, 5, 6, '#FFFFFF');
+    R(c, bx, y - 9, 7, 8, '#181B22'); R(c, bx + 1, y - 8, 5, 6, '#FFFFFF');
     R(c, bx + 2, y - 6, 1, 3, '#181B22'); R(c, bx + 4, y - 6, 1, 3, '#181B22');
   }
 }
 
 function drawAdidasLiveEntities(c, t, staffList, shoppers, pigState, drawPigFn) {
-  // 1. Quầng đèn Spotlight sang trọng rọi nhẹ trên 7 Mannequin & Hero Wall Logo 3 Sọc
-  c.save();
-  c.globalAlpha = 0.14 + Math.sin(t * 2.2) * 0.03;
-  var spots = [
-    [170, 190], [244, 190], [396, 190], [532, 216],
-    [420, 436], [488, 436], [556, 436]
+  // 1. 8 Đèn Lồng Lụa Hội An treo tỏa ánh sáng vàng ấm 60fps
+  var lanterns = [
+    [252, 64, '#F59E0B'], [388, 64, '#E0452B'],
+    [252, 244, '#E0452B'], [388, 244, '#F59E0B'],
+    [252, 316, '#F59E0B'], [388, 316, '#E0452B'],
+    [252, 514, '#E0452B'], [388, 514, '#F59E0B']
   ];
-  for (var sp = 0; sp < spots.length; sp++) {
-    E(c, spots[sp][0], spots[sp][1], 18, 12, '#FFF9E6');
-  }
-  c.restore();
-
-  // Ánh sáng lấp lánh nhẹ trên Logo 3 Sọc Hero Wall & Gương VIP
-  if (Math.sin(t * 4) > 0.4) {
-    R(c, 274, 16, 2, 2, '#FFFFFF');
-    R(c, 102, 108, 2, 2, '#FFFFFF');
+  for (var li = 0; li < lanterns.length; li++) {
+    drawHoiAnLantern(c, lanterns[li][0], lanterns[li][1], lanterns[li][2], t);
   }
 
-  // 2. Y-Sorting toàn bộ nhân vật (2 Nhân viên Adidas + 7 Khách mua sắm + Chú Heo Mascot 1:1)
+  // 2. Ánh sáng lấp lánh trên Logo 3 Sọc Hero Wall & Gương VIP
+  if (Math.sin(t * 4) > 0.35) {
+    R(c, 274, 16, 2, 2, '#FFE891');
+    R(c, 588, 98, 2, 2, '#FFFFFF');
+  }
+
+  // 3. Y-Sorting toàn bộ nhân vật (2 Nhân viên + 7 Khách mua sắm + Chú Heo 1:1)
   var drawList = [];
   for (var si = 0; si < staffList.length; si++) {
     (function(st) { drawList.push({ y: st.y, fn: function() { drawAdidasStaff(c, st, t); } }); })(staffList[si]);
@@ -399,12 +513,12 @@ function drawAdidasLiveEntities(c, t, staffList, shoppers, pigState, drawPigFn) 
   drawList.sort(function(a, b) { return a.y - b.y; });
   for (var di = 0; di < drawList.length; di++) drawList[di].fn();
 
-  // 3. Hiệu ứng lấp lánh ngôi sao khi Chú Heo đứng trước Gương Thử Đồ VIP hoặc ngắm Sneaker Wall
+  // 4. Hiệu ứng ngôi sao lấp lánh khi Chú Heo tương tác thử đồ / ngắm giày
   if (pigState && (pigState.action === 'look_window' || pigState.action === 'jump_joy')) {
     var hx = Math.round(pigState.x), hy = Math.round(pigState.y - 26);
     var pulse = Math.round(Math.sin(t * 7) * 2);
     R(c, hx - 8, hy + pulse, 3, 1, '#F4B93B'); R(c, hx - 7, hy - 1 + pulse, 1, 3, '#F4B93B');
-    R(c, hx + 6, hy - pulse, 3, 1, '#38BDF8'); R(c, hx + 7, hy - 1 - pulse, 1, 3, '#38BDF8');
+    R(c, hx + 6, hy - pulse, 3, 1, '#FFFFFF'); R(c, hx + 7, hy - 1 - pulse, 1, 3, '#FFFFFF');
   }
 }
 `;

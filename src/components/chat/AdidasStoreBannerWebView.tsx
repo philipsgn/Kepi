@@ -13,11 +13,10 @@ interface AdidasStoreBannerWebViewProps {
 }
 
 /**
- * Cửa Hàng Adidas Flagship Brand Center 2 Tầng Toàn Màn Hình (640 × 560 — Quyết định 227)
- * Phong cách Architectural Minimalist Luxury:
- *  - Tầng 2 (y: 0..274): Hero Wall Logo 3 Sọc LED, Tường giày Sneaker & dép Adilette 3 sọc, 4 giá quần áo 3 sọc, 4 Mannequin spotlight, Phòng thử đồ VIP + Gương LED
- *  - Cầu thang kính LED trung tâm (x: 266..374, y: 248..312) nối liền 2 tầng (AABB lan can 2 bên)
- *  - Tầng 1 (y: 280..560): 2 Đảo Terrazzo quần áo & dép 3 sọc, 3 Mannequin mặt tiền, Quầy thu ngân Flagship, 2 Nhân viên Adidas & 7 khách mua sắm xách túi 3 sọc
+ * Cửa Hàng Adidas Hội An Heritage 2 Tầng Toàn Màn Hình (640 × 560 — Quyết định 228)
+ * Dày đặc 80% không gian với đầy đủ: Khu Bóng Đá (thảm cỏ xanh, giày đinh Predator/F50, áo đấu, bóng đá),
+ * Khu Chạy Bộ (giày Boost cong, áo thun, quần short), Khu Polo & Quần 3 sọc, Tường Originals & Dép Adilette,
+ * Phụ kiện (Balo, Mũ, Hộp giày), 7 Mannequin dáng đẹp, 8 Đèn lồng Hội An & 2 Nhân viên Adidas.
  */
 export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> = ({
   onExitAdidas,
@@ -88,59 +87,81 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
         initialCamY: 165,
         speed: 60,
         obstacles: [
-          // Tầng 2: Phòng thử đồ VIP, 4 giá treo quần áo & ghế thử giày
-          { x: 22, y: 80, w: 118, h: 82 },
-          { x: 144, y: 132, w: 50, h: 20 },
-          { x: 208, y: 84, w: 102, h: 30 },
-          { x: 330, y: 84, w: 102, h: 30 },
-          { x: 454, y: 84, w: 156, h: 30 },
-          { x: 454, y: 148, w: 156, h: 30 },
-          // Dải lan can kính phân tầng 2 bên cầu thang (chỉ mở lối cầu thang kính ở x: 266..374!)
+          // Tầng 2 Trái (Khu Bóng Đá: 3 sào áo đấu/short/polo + giá bóng đá)
+          { x: 24, y: 76, w: 152, h: 30 },
+          { x: 180, y: 74, w: 56, h: 38 },
+          { x: 24, y: 136, w: 152, h: 30 },
+          { x: 24, y: 196, w: 152, h: 30 },
+          // Tầng 2 Phải (Khu Chạy Bộ & Phòng thử đồ VIP)
+          { x: 396, y: 76, w: 124, h: 30 },
+          { x: 524, y: 72, w: 96, h: 76 },
+          { x: 396, y: 136, w: 124, h: 30 },
+          { x: 502, y: 156, w: 118, h: 48 },
+          { x: 396, y: 196, w: 102, h: 30 },
+          // Ban công gỗ chạm 2 bên cầu thang (mở lối cầu thang gỗ x: 266..374)
           { x: 14, y: 264, w: 252, h: 26 },
           { x: 374, y: 264, w: 252, h: 26 },
-          // Tầng 1: 2 Đảo đá Terrazzo, 2 giá treo quần áo & Quầy thu ngân Flagship
-          { x: 40, y: 334, w: 98, h: 46 },
-          { x: 502, y: 334, w: 98, h: 46 },
-          { x: 158, y: 336, w: 90, h: 30 },
-          { x: 392, y: 336, w: 90, h: 30 },
-          { x: 26, y: 450, w: 168, h: 60 },
+          // Tầng 1 Trái (Polo/Áo thun/Phụ kiện + Quầy Thu Ngân Hội An)
+          { x: 22, y: 300, w: 152, h: 32 },
+          { x: 178, y: 300, w: 70, h: 48 },
+          { x: 22, y: 360, w: 152, h: 32 },
+          { x: 178, y: 360, w: 70, h: 32 },
+          { x: 22, y: 454, w: 168, h: 62 },
+          // Tầng 1 Phải (Tường Originals, Dép Adilette, Bóng đá, Sào áo đấu & Kệ hộp giày)
+          { x: 394, y: 296, w: 226, h: 64 },
+          { x: 394, y: 364, w: 144, h: 60 },
+          { x: 544, y: 374, w: 56, h: 38 },
+          { x: 394, y: 430, w: 138, h: 30 },
+          { x: 418, y: 488, w: 200, h: 48 },
         ],
         hotspots: [
           {
+            id: 'adidas_football_zone',
+            x: 20,
+            y: 10,
+            w: 220,
+            h: 240,
+            standX: 274,
+            standY: 160,
+            standFace: -1,
+            actionType: 'jump_joy',
+            bubbleText: 'Khu Bóng Đá thảm cỏ xanh · Giày đinh Predator & Áo đấu cực chất!',
+          },
+          {
             id: 'adidas_sneaker_wall',
-            x: 24,
-            y: 8,
-            w: 592,
-            h: 62,
-            standX: 320,
-            standY: 136,
+            x: 396,
+            y: 10,
+            w: 222,
+            h: 64,
+            standX: 366,
+            standY: 124,
             standFace: 1,
             actionType: 'look_window',
-            bubbleText: 'Tường Sneaker Superstar, Samba & Dép Adilette 3 sọc quá chất!',
+            bubbleText: 'Khu Giày Chạy Bộ đế Boost & Dép Adilette 3 sọc đầy đủ mẫu!',
           },
           {
             id: 'adidas_fitting_mirror',
-            x: 24,
-            y: 84,
-            w: 116,
-            h: 80,
-            standX: 110,
-            standY: 178,
-            standFace: -1,
+            x: 524,
+            y: 74,
+            w: 94,
+            h: 74,
+            standX: 376,
+            standY: 184,
+            standFace: 1,
             actionType: 'jump_joy',
-            bubbleText: 'Soi gương LED VIP · Lên đồ 3 sọc cực bảnh bao!',
+            bubbleText: 'Phòng thử đồ Hội An VIP · Lên áo Polo 3 sọc cực bảnh bao!',
           },
           {
             id: 'adidas_checkout',
-            x: 28,
-            y: 448,
-            w: 166,
-            h: 64,
-            standX: 214,
-            standY: 482,
+            x: 24,
+            y: 454,
+            w: 168,
+            h: 62,
+            standX: 272,
+            standY: 484,
             standFace: -1,
             actionType: 'look_window',
-            bubbleText: 'Nhân viên Adidas: Chào mừng bạn đến Adidas Brand Center!',
+            bubbleText: 'Nhân viên Adidas Hội An: Chào mừng bạn ghé chọn giày & áo 3 sọc!',
           },
           {
             id: 'exit_adidas',
@@ -171,7 +192,7 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #181B22; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #2B180E; }
   canvas {
     display: block; width: 100%; height: 100%;
     image-rendering: pixelated;
@@ -193,37 +214,37 @@ ${adidasArtScript}
 
 var ADIDAS = {
   t: 0, last: 0, bg: null, pigSprites: null,
-  // 2 Nhân viên Adidas đồng phục Polo đen 3 sọc (1 đứng quầy thu ngân, 1 đi tuần 2 tầng qua cầu thang kính)
+  // 2 Nhân viên Adidas đồng phục Polo đen 3 sọc (1 tại quầy thu ngân, 1 đi tuần 2 tầng dọc lối gạch bông)
   staff: [
     {
-      x: 92, y: 446, moving: false, faceX: 0, faceY: 1,
+      x: 92, y: 450, moving: false, faceX: 0, faceY: 1,
       hair: '#1E242E', hairStyle: 1, phase: 0.2, patrol: null
     },
     {
       x: 320, y: 318, moving: true, faceX: 0, faceY: -1, sp: 28,
       hair: '#2B2118', hairStyle: 0, phase: 1.5, wpIdx: 0,
       patrol: [
-        { x: 320, y: 318 }, { x: 320, y: 226 }, { x: 430, y: 226 },
-        { x: 430, y: 132 }, { x: 320, y: 132 }, { x: 320, y: 318 },
-        { x: 266, y: 416 }, { x: 380, y: 416 }
+        { x: 320, y: 318 }, { x: 320, y: 228 }, { x: 274, y: 228 },
+        { x: 274, y: 150 }, { x: 366, y: 150 }, { x: 366, y: 228 },
+        { x: 320, y: 228 }, { x: 320, y: 420 }, { x: 278, y: 420 }, { x: 366, y: 420 }
       ]
     }
   ],
-  // 7 Khách hàng mua sắm trên 2 tầng (khách ngắm giày, soi gương, xách túi giấy 3 sọc)
+  // 7 Khách hàng mua sắm dọc hành lang gạch bông & các khu hàng
   shoppers: [
-    { x: 196, y: 140, sp: 20, shirt: '#3B82F6', hair: '#2B2118', hairStyle: 2, phase: 0.4, hasBag: false, wpIdx: 0, moving: true, faceX: 1, faceY: 0,
-      patrol: [{ x: 196, y: 140 }, { x: 318, y: 140 }, { x: 318, y: 230 }, { x: 196, y: 230 }] },
-    { x: 454, y: 232, sp: 18, shirt: '#EC4899', hair: '#3B2618', hairStyle: 1, phase: 1.3, hasBag: false, wpIdx: 0, moving: true, faceX: -1, faceY: 0,
-      patrol: [{ x: 454, y: 232 }, { x: 586, y: 232 }, { x: 586, y: 196 }, { x: 454, y: 196 }] },
-    { x: 112, y: 226, sp: 16, shirt: '#10B981', hair: '#1E293B', hairStyle: 3, phase: 2.1, hasBag: false, wpIdx: 0, moving: true, faceX: 0, faceY: -1,
-      patrol: [{ x: 112, y: 226 }, { x: 112, y: 182 }, { x: 204, y: 182 }, { x: 204, y: 226 }] },
-    { x: 276, y: 412, sp: 24, shirt: '#F59E0B', hair: '#2B2118', hairStyle: 0, phase: 0.8, hasBag: true, wpIdx: 0, moving: true, faceX: 1, faceY: 0,
-      patrol: [{ x: 276, y: 412 }, { x: 356, y: 412 }, { x: 356, y: 526 }, { x: 276, y: 526 }] },
-    { x: 468, y: 398, sp: 19, shirt: '#6366F1', hair: '#4A3222', hairStyle: 2, phase: 2.9, hasBag: true, wpIdx: 0, moving: true, faceX: -1, faceY: 0,
-      patrol: [{ x: 468, y: 398 }, { x: 588, y: 398 }, { x: 588, y: 506 }, { x: 468, y: 506 }] },
-    { x: 224, y: 472, sp: 0, shirt: '#EF4444', hair: '#2B2118', hairStyle: 1, phase: 3.4, hasBag: true, moving: false, faceX: -1, faceY: 0, patrol: null },
-    { x: 316, y: 518, sp: 22, shirt: '#0EA5E9', hair: '#1E293B', hairStyle: 3, phase: 4.0, hasBag: false, wpIdx: 0, moving: true, faceX: 0, faceY: -1,
-      patrol: [{ x: 316, y: 518 }, { x: 316, y: 386 }, { x: 256, y: 386 }, { x: 256, y: 518 }] }
+    { x: 272, y: 184, sp: 18, shirt: '#3B82F6', hair: '#2B2118', hairStyle: 2, phase: 0.4, hasBag: false, wpIdx: 0, moving: true, faceX: -1, faceY: 0,
+      patrol: [{ x: 272, y: 184 }, { x: 272, y: 124 }, { x: 362, y: 124 }, { x: 362, y: 184 }] },
+    { x: 366, y: 236, sp: 16, shirt: '#EC4899', hair: '#3B2618', hairStyle: 1, phase: 1.3, hasBag: false, wpIdx: 0, moving: true, faceX: 1, faceY: 0,
+      patrol: [{ x: 366, y: 236 }, { x: 366, y: 174 }, { x: 278, y: 174 }, { x: 278, y: 236 }] },
+    { x: 294, y: 360, sp: 20, shirt: '#10B981', hair: '#1E293B', hairStyle: 3, phase: 2.1, hasBag: false, wpIdx: 0, moving: true, faceX: 0, faceY: -1,
+      patrol: [{ x: 294, y: 360 }, { x: 358, y: 360 }, { x: 358, y: 468 }, { x: 294, y: 468 }] },
+    { x: 276, y: 416, sp: 24, shirt: '#F59E0B', hair: '#2B2118', hairStyle: 0, phase: 0.8, hasBag: true, wpIdx: 0, moving: true, faceX: 1, faceY: 0,
+      patrol: [{ x: 276, y: 416 }, { x: 352, y: 416 }, { x: 352, y: 524 }, { x: 276, y: 524 }] },
+    { x: 374, y: 472, sp: 19, shirt: '#6366F1', hair: '#4A3222', hairStyle: 2, phase: 2.9, hasBag: true, wpIdx: 0, moving: true, faceX: -1, faceY: 0,
+      patrol: [{ x: 374, y: 472 }, { x: 374, y: 334 }, { x: 276, y: 334 }, { x: 276, y: 472 }] },
+    { x: 224, y: 486, sp: 0, shirt: '#EF4444', hair: '#2B2118', hairStyle: 1, phase: 3.4, hasBag: true, moving: false, faceX: -1, faceY: 0, patrol: null },
+    { x: 320, y: 518, sp: 22, shirt: '#0EA5E9', hair: '#1E293B', hairStyle: 3, phase: 4.0, hasBag: false, wpIdx: 0, moving: true, faceX: 0, faceY: -1,
+      patrol: [{ x: 320, y: 518 }, { x: 320, y: 350 }, { x: 274, y: 350 }, { x: 274, y: 518 }] }
   ]
 };
 
@@ -352,7 +373,7 @@ if (document.readyState === 'loading') {
       {Platform.OS === 'web' ? (
         <iframe
           srcDoc={htmlContent}
-          style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#181B22' } as any}
+          style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#2B180E' } as any}
         />
       ) : (
         <SafeWebView
@@ -387,31 +408,31 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-    backgroundColor: '#181B22',
+    backgroundColor: '#2B180E',
   },
   webView: {
     flex: 1,
     width: '100%',
     height: '100%',
-    backgroundColor: '#181B22',
+    backgroundColor: '#2B180E',
   },
   roomToast: {
     position: 'absolute',
     top: 56,
     alignSelf: 'center',
     maxWidth: '86%',
-    backgroundColor: '#181B22',
+    backgroundColor: '#2B180E',
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: '#F4B93B',
   },
   roomToastText: {
     fontFamily: 'Nunito_700Bold',
     fontWeight: '800',
     fontSize: 12,
-    color: '#FFFFFF',
+    color: '#FFFBF1',
     textAlign: 'center',
   },
 });
