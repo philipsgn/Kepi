@@ -18,15 +18,14 @@ Thay vì nhìn từ trên xuống phẳng (2D top-down) gây cảm giác tách b
    - **Xoay tự do 360°:** Người dùng vuốt ngang/dọc màn hình để xoay góc nhìn 360° xung quanh chú Heo — xoay ra phía trước sẽ thấy thẳng gương mặt đáng yêu của chú Heo!
 3. **Sắp xếp chiều sâu chuẩn vật lý (Painter's Algorithm / Z-Sorting):**
    - Toàn bộ khối 3D (bàn, ghế, quầy bếp, nồi phở, cánh cửa xoay bản lề) và thực thể sống (Chú Heo, Đầu bếp, Nhân viên phục vụ, Khách hàng) đều được sắp xếp từ **xa nhất → gần camera nhất** theo tọa độ không gian camera (`cz`) trước khi vẽ, đảm bảo chú Heo đi sau bàn bị bàn che đúng thực tế và đi trước bàn nổi bật hoàn toàn.
-4. **Quy chuẩn Trần Nhà Kín 100% Trong Nhà (Zero Exposed Sky — QĐ 233):**
-   - Khi chú Heo ở ngoài sân/vỉa hè (`z < 0`): hiển thị bầu trời, tán cây, giàn hoa giấy & mặt tiền kiến trúc 2 tầng.
-   - Khi chú Heo bước vào bên trong nhà (`z >= 0`): **cấm tuyệt đối để lộ bầu trời xanh phía trên tường**! Phải dựng trần nhà kín ấm cúng (trần kem + hệ xà gồ gỗ lim nâu sẫm phối cảnh 3D + giàn đèn lồng tỏa ánh sáng vàng ấm).
-5. **Quy chuẩn Đa Gian Phòng Đồng Bộ Thanh Tab 2 Chiều (Multi-Room Waypoint Tour — QĐ 233):**
-   - Không gian mở rộng thành nhiều khu vực liên hoàn; ưu tiên **3 khu gọn mượt** vừa khít 1 màn hình điện thoại (không chia vách ngăn thừa gây lag hay lỗi xuyên tường).
-   - Thanh Tab chuyển khu phía trên đồng bộ 2 chiều với vị trí chú Heo: bấm Tab → chú Heo tự đi theo lộ trình waypoint xuyên qua cửa tới khu đó + xoay camera góc đẹp; khi tự đi bộ bằng Tap-to-Walk → Tab tự động highlight sáng khu chú Heo đang đứng!
-6. **Quy chuẩn Hybrid 3D Room + Depth-Scaled Pixel Art Sprites & Phố Xá Đối Diện (QĐ 234):**
-   - **Cấm dùng hộp 3D thô cứng** cho xoong nồi, tô phở, nguyên liệu nấu ăn, ấm trà hay gia vị — bắt buộc vẽ bằng **Sprite Pixel Art tả thực tự co giãn theo chiều sâu `cz`** (`drawPhoPotSprite3D`, `drawPhoBowlSprite3D`, `drawBatTrangTeapotSprite3D`, `drawKitchenIngredientsSprite3D`...).
-   - **Chống chân trời trống rỗng & đèn lồng lơ lửng (QĐ 234–235):** Mặt tiền mọi không gian mở phải đồng bộ 1:1 với Banner Tab Khám phá (liền mái không hở trời xanh + dãy công trình kế bên trải dài 2 phía, ví dụ Tiệm CAFE sát Quán Phở), vỉa hè/đại lộ/sông Bạch Đằng kéo dài xuyên suốt `X = -65m..+65m` có xe cộ chạy trên đường & tàu bè chạy trên sông + bờ Thủ Thiêm khép kín 100% đường chân trời 360°; mọi đèn lồng có dây treo nối lên mái/xà gỗ.
+4. **Quy chuẩn Interior-Only TPS 3D & Trần Nhà Kín 100% (Zero Exterior, Zero Exposed Sky — QĐ 236):**
+   - **Loại bỏ hoàn toàn cảnh mặt tiền & bối cảnh ngoài trời** bên trong màn TPS 3D (vì mặt tiền, đại lộ xe cộ và sông Bạch Đằng đã có đầy đủ trên Hub Banner Tab Khám phá).
+   - Khi chú Heo ở Tab Khám phá chạm vào cửa bất kỳ quán/cửa hàng nào → **xuất hiện ngay tại ngưỡng cửa 2 cánh đang mở hướng thẳng vào toàn bộ nội thất 3D bên trong** (giảm 50% đa giác, siêu mượt 60fps, **0% mảng trời xanh mất liên kết ở cả 360°**).
+   - Toàn bộ 4 bức tường + trần nhà kín 100% (trần gỗ lim + xà gồ + quạt trần quay + đèn thả ánh vàng vintage 90s); khi xoay ra sau lưng là cửa gỗ kính mờ ấm áp với nút `[🚪 Ra lại Đại Lộ Sài Gòn]`.
+5. **Quy chuẩn Giao Diện Tối Giản Không Thanh Tab Card Phía Trên (Clean Fullscreen Interior — QĐ 236):**
+   - **Bỏ hẳn thanh Tab card phía trên** để khung hình 3D thoáng đãng 100%; người dùng tự do chạm sàn đi (Raycast Tap-to-Walk) + vuốt xoay 360° + dùng nút Context Action Pill gọn ở cạnh dưới.
+6. **Quy chuẩn Hybrid 3D Room + Depth-Scaled Pixel Art Sprites (QĐ 234–236):**
+   - **Cấm dùng hộp 3D thô cứng** cho xoong nồi, tô phở, nguyên liệu nấu ăn, ấm trà hay gia vị — bắt buộc vẽ bằng **Sprite Pixel Art tả thực tự co giãn theo chiều sâu `cz`** (`drawPhoPotSprite3D`, `drawPhoBowlSprite3D` đầy đủ đũa tre & muỗng sứ, `drawBatTrangTeapotSprite3D`, `drawKitchenIngredientsSprite3D` thịt bò tươi sống vân mỡ, `drawCeilingFan3D`, `drawVintageLamp3D`).
    - **Đệm va chạm an toàn (`>= 0.65m`):** Cách tường và quầy ít nhất `0.65m` để chú Heo không bao giờ bị kẹt hay lún thân vào góc tường.
 
 ---

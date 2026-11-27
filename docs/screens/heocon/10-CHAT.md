@@ -564,3 +564,14 @@ Màn hình Tab 3 hiển thị:
 - **Mặt tiền Quán Phở 1:1 Banner Tab Khám phá (`Z = 0`):** Tường kem vàng 2 tầng liền mạch, **mái ngói đỏ liền suốt `X = -6..+6`** (hết hoàn toàn khe hở trời xanh giữa mái), 2 cửa sổ lá sách xanh rêu tầng 2, biển đỏ-vàng `PHỞ` & cửa gỗ 2 cánh xoay bản lề.
 - **Dãy công trình kế bên trải dài 2 phía (`X: -60..+60`):** Sát bên phải là **Tiệm `CAFE` mái hiên sọc đỏ-trắng & 3 cửa sổ xanh** giống hệt Tab Khám phá; sát bên trái là dãy nhà cổ Sài Gòn → xoay 360° không hở khoảng không xanh.
 - **Vỉa hè thoáng mở ➔ Đại lộ xe cộ ➔ Sông Bạch Đằng có tàu bè ➔ Bờ Thủ Thiêm:** Vỉa hè lát gạch bó vỉa trắng-đen mở rộng suốt `X = -65..+65`, Đại lộ 2 làn có **5 xe máy/taxi/xe buýt Sài Gòn chạy 2 chiều 60fps** (`drawRoadVehicleSprite3D`), bờ kè Bến Bạch Đằng, **Sông Bạch Đằng sóng lấp lánh có 3 tàu Waterbus & thuyền chạy 60fps** (`drawRiverBoatSprite3D`), và bờ công viên Thủ Thiêm xanh mướt khép kín 100% đường chân trời!
+
+---
+
+## 56. Chuẩn Hóa TPS 3D Interior-Only & Nâng Cấp Quán Phở Vintage 90s Ấm Cúng (Quyết định 236)
+- **Kiến trúc Interior-Only toàn hệ thống:** Khi chú Heo chạm vào cửa bất kỳ quán nào ở Tab Khám phá → mở ngay khung cảnh ngưỡng cửa 2 cánh đang mở hướng thẳng vào nội thất 3D bên trong; loại bỏ hoàn toàn cảnh mặt tiền & đường phố ngoài trời trong màn TPS 3D (giảm 50% đa giác, hết lag, 0% hở trời xanh) và **bỏ hẳn thanh Tab card phía trên** để khung hình 100% thoáng đãng.
+- **Nội thất Quán Phở Vintage 90s ấm cúng ([phoTps3dScene.ts](../../../src/components/chat/pho/phoTps3dScene.ts) & [pixelTps3dEngine.ts](../../../src/components/pixel/pixelTps3dEngine.ts)):**
+  - Bỏ bình phong chắn giữa lối đi để nhìn xuyên suốt từ cửa vào Sảnh & Bếp Lửa.
+  - **2 Quạt trần Vintage 3 cánh (`drawCeilingFan3D`)** quay mượt 60fps + **6 đèn thả chụp men ánh vàng 90s (`drawVintageLamp3D`)** + lớp phủ ánh sáng vàng mật ong ấm cúng.
+  - **3 Nhân viên Bếp sống động:** Bếp trưởng múc 2 nồi nước dùng inox tròn bốc khói, Phụ bếp thái lát thịt bò tươi sống trên thớt gỗ, Phụ bếp trụng bánh phở rắc hành ngò.
+  - **2 Nhân viên Phục vụ mặc tạp dề cổ điển đẹp mắt** (dây đeo cổ, nơ eo & túi trước) chạy FSM bưng phở & dọn bàn.
+  - **Món Phở chân thực & đũa muỗng đầy đủ:** Tô Phở sứ viền lam đầy lát thịt bò tươi sống, hành ngò, có cả **đũa tre + muỗng sứ trắng**, kèm **ống đũa muỗng đầy đủ** trên từng bàn ăn!

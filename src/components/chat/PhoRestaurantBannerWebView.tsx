@@ -12,13 +12,11 @@ interface PhoRestaurantBannerWebViewProps {
 }
 
 /**
- * Quán Phở Cổ Truyền — Góc Nhìn Thứ 3 Nhập Vai 3D Kiểu PUBG (Quyết định 232)
+ * Quán Phở Vintage 90s — Góc Nhìn Thứ 3 TPS 3D Interior-Only (Quyết định 236)
  * Tuân thủ 100% docs/TPS_3D_OPEN_WORLD_SPEC.md:
- * - Camera 3D sau lưng chú Heo xoay tự do 360° (vuốt màn hình xoay, không Joystick ảo).
- * - Chạm điểm trên sàn 3D (Raycast Tap-to-Walk) để chú Heo đi lại tự do, hỗ trợ thêm phím WASD trên Web.
- * - Chu trình nhập vai thực tế: Xuất phát ngoài vỉa hè ➔ Mở cửa gỗ-kính 2 cánh xoay 90° bước vào quán
- *   ➔ Chọn ghế trống ngồi ➔ Gọi Phở Tái Nạm (Phục vụ tới nhận đơn ➔ Báo bếp ➔ Đầu bếp múc nước dùng bốc khói
- *   ➔ Phục vụ bưng ra tận bàn cho Heo ăn!) ➔ Đứng dậy tự do vào khu Bếp xem Đầu bếp nấu ăn & khách ra vào.
+ * - Không gian 100% nội thất (bỏ bối cảnh ngoài trời & bỏ hẳn thanh Tab card phía trên).
+ * - Mở màn ngay ngưỡng cửa 2 cánh đang mở hướng thẳng vào Sảnh Phở & Bếp Lửa 3 Đầu bếp.
+ * - Điều khiển Zero-Joystick: Chạm sàn Raycast 3D để đi + Vuốt xoay camera 360° + Context Action Pill đáy màn hình.
  */
 export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProps> = ({
   onExitPho,
@@ -87,34 +85,17 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
   }
   canvas:active { cursor: grabbing; }
   .hud-toast {
-    position: fixed; top: 14px; left: 66px; right: 12px;
+    position: fixed; top: 16px; left: 68px; right: 14px;
     pointer-events: none; display: flex; justify-content: center; z-index: 10;
   }
   .hud-toast-pill {
     background: rgba(255, 251, 241, 0.94);
     border: 2.5px solid #2B2118;
     border-radius: 12px;
-    padding: 5px 10px;
-    font-size: 11px; font-weight: 800; color: #2B2118;
-    box-shadow: 0 2px 0 #2B2118;
+    padding: 6px 12px;
+    font-size: 11.5px; font-weight: 800; color: #2B2118;
+    box-shadow: 0 3px 0 #2B2118;
     text-align: center; max-width: 340px;
-  }
-  .room-tabs {
-    position: fixed; top: 56px; left: 10px; right: 10px;
-    display: flex; justify-content: center; gap: 6px; padding: 2px 2px 4px;
-    z-index: 14;
-  }
-  .room-tabs::-webkit-scrollbar { display: none; }
-  .room-tab {
-    flex: 0 0 auto;
-    background: rgba(255, 251, 241, 0.92); color: #2B2118;
-    border: 2.5px solid #2B2118; border-radius: 12px;
-    padding: 5px 10px; font-size: 11px; font-weight: 900;
-    box-shadow: 0 2px 0 #2B2118; cursor: pointer; white-space: nowrap;
-  }
-  .room-tab.active {
-    background: #F4B93B; color: #2B2118;
-    transform: translateY(-1px);
   }
   .action-bar {
     position: fixed; bottom: 26px; left: 16px; right: 16px;
@@ -136,12 +117,7 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
 </head>
 <body>
 <canvas id="phoTpsCv" width="280" height="440"></canvas>
-<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Chào mừng đến Phở Cổ Phố Hội!</div></div>
-<div id="roomTabs" class="room-tabs">
-  <button class="room-tab active" data-room="garden" type="button">🏮 Vỉa Hè &amp; Sông</button>
-  <button class="room-tab" data-room="main_hall" type="button">🏛️ Sảnh Phở Chính</button>
-  <button class="room-tab" data-room="kitchen" type="button">🔥 Bếp Lửa Phở</button>
-</div>
+<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Chào mừng đến Phở Vintage 90s!</div></div>
 <div id="actionBar" class="action-bar" hidden>
   <button id="primaryActBtn" class="action-btn" type="button"></button>
   <button id="secActBtn" class="action-btn sec" type="button" hidden></button>
@@ -166,33 +142,18 @@ function postHost(obj) {
 ${tpsEngineScript}
 ${phoSceneScript}
 
-var cam = createTpsCamera({ yaw: 0, pitch: -0.34, dist: 3.9, targetHeight: 0.95 });
+var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.4, targetHeight: 0.98 });
 var world = createPhoTpsWorld();
 var currentAction = null;
 var lastToast = '';
-var lastRoomId = '';
 var lastTime = performance.now();
 var keys = {};
 
 var cv = document.getElementById('phoTpsCv');
 var toastEl = document.getElementById('toastPill');
-var roomTabsEl = document.getElementById('roomTabs');
 var actionBar = document.getElementById('actionBar');
 var primaryBtn = document.getElementById('primaryActBtn');
 var secBtn = document.getElementById('secActBtn');
-
-if (roomTabsEl) {
-  roomTabsEl.addEventListener('click', function(e) {
-    var btn = e.target && e.target.closest ? e.target.closest('.room-tab') : null;
-    if (!btn) return;
-    e.stopPropagation();
-    var rid = btn.getAttribute('data-room');
-    if (rid) {
-      postHost({ type: 'HAPTIC_LIGHT' });
-      navigatePigToRoom(world, cam, rid);
-    }
-  });
-}
 
 function syncViewport() {
   if (!cv) return;
@@ -208,9 +169,7 @@ function syncViewport() {
   }
 }
 
-// Cảm ứng & Chuột chuẩn Zero-Joystick: Chạm (< 8px) = Raycast Tap-to-Walk; Vuốt (>= 8px) = Xoay Camera 360°!
 var ptr = { down: false, id: null, sx: 0, sy: 0, lx: 0, ly: 0, moved: 0 };
-
 function onDown(x, y, id) {
   ptr.down = true; ptr.id = id; ptr.sx = x; ptr.sy = y; ptr.lx = x; ptr.ly = y; ptr.moved = 0;
 }
@@ -221,7 +180,7 @@ function onMove(x, y) {
   ptr.moved += Math.hypot(dx, dy);
   if (ptr.moved >= 6) {
     cam.yaw = normalizeAngle(cam.yaw + dx * 0.0085);
-    cam.pitch = Math.max(-0.68, Math.min(-0.14, cam.pitch - dy * 0.0045));
+    cam.pitch = Math.max(-0.65, Math.min(-0.12, cam.pitch - dy * 0.0045));
   }
 }
 function onUp(x, y) {
@@ -237,8 +196,6 @@ function onUp(x, y) {
         world.toastText = 'Heo đang ngồi ghế! Bấm Gọi Phở hoặc Đứng dậy nhé!';
       } else {
         var clamped = clampPigWorldPos(world, hit.x, hit.z);
-        world.pig.waypoints = [];
-        world.desiredCamYaw = null;
         world.pig.tx = clamped.x;
         world.pig.tz = clamped.z;
         world.pig.walking = true;
@@ -261,7 +218,6 @@ window.addEventListener('pointerup', function(e) {
 });
 window.addEventListener('pointercancel', function() { ptr.down = false; });
 
-// Hỗ trợ thêm phím WASD / Mũi tên cho người dùng Web desktop
 window.addEventListener('keydown', function(e) { keys[e.key.toLowerCase()] = true; });
 window.addEventListener('keyup', function(e) { keys[e.key.toLowerCase()] = false; });
 
@@ -288,16 +244,6 @@ function syncHud() {
     lastToast = world.toastText;
     toastEl.textContent = lastToast;
   }
-  var curRoom = detectCurrentPhoRoom(world.pig.x, world.pig.z);
-  if (curRoom !== lastRoomId && roomTabsEl) {
-    lastRoomId = curRoom;
-    var btns = roomTabsEl.querySelectorAll('.room-tab');
-    for (var bi = 0; bi < btns.length; bi++) {
-      var rid = btns[bi].getAttribute('data-room');
-      if (rid === curRoom) btns[bi].classList.add('active');
-      else btns[bi].classList.remove('active');
-    }
-  }
   var act = getPhoContextAction(world);
   currentAction = act;
   if (!act) {
@@ -318,7 +264,6 @@ function frame(now) {
   var dt = Math.min(0.05, (now - lastTime) / 1000);
   lastTime = now;
 
-  // Hỗ trợ di chuyển bằng phím WASD theo hướng Camera TPS
   if (!world.pig.seated) {
     var fwd = (keys['w'] || keys['arrowup'] ? 1 : 0) - (keys['s'] || keys['arrowdown'] ? 1 : 0);
     var strafe = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
@@ -336,7 +281,7 @@ function frame(now) {
     }
   }
 
-  stepPhoTpsWorld(world, dt, cam);
+  stepPhoTpsWorld(world, dt);
   syncViewport();
 
   var ctx = cv.getContext('2d');
@@ -344,8 +289,9 @@ function frame(now) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, cv.width, cv.height);
 
+  // Giữ camera gọn trong nội thất (cho phép lùi nhẹ về z = -1.6 ngay sau khung cửa để ngắm toàn cảnh ngưỡng cửa như Hình 1!)
   updateTpsCamera(cam, world.pig.x, world.pig.seated ? 0.38 : 0, world.pig.z, cv.width, cv.height, {
-    minX: -5.65, maxX: 5.65, minZ: -6.8, maxZ: 14.8
+    minX: -5.65, maxX: 5.65, minZ: -1.6, maxZ: 14.4
   });
   renderPhoTps3D(ctx, cam, world);
   syncHud();
@@ -370,7 +316,7 @@ requestAnimationFrame(frame);
       {Platform.OS === 'web' ? (
         <iframe
           srcDoc={htmlContent}
-          title="Quán Phở Cổ Truyền — Góc Nhìn Thứ 3 TPS 3D"
+          title="Quán Phở Vintage 90s — Góc Nhìn Thứ 3 TPS 3D"
           style={{
             width: '100%',
             height: '100%',

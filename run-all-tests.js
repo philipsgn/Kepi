@@ -7551,7 +7551,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       phoArtCode.includes('drawSteamPuff') &&
       decisionsCode.includes('Quyết định 225') &&
       chatDocCode.includes('Quyết định 225') &&
-      (specCode.includes('QĐ 232') || specCode.includes('QĐ 226') || specCode.includes('QĐ 225')),
+      (specCode.includes('QĐ 236') || specCode.includes('QĐ 232') || specCode.includes('QĐ 226') || specCode.includes('QĐ 225')),
     'Pho Restaurant fullscreen interior (2D heritage art or QD 232 TPS 3D upgrade, 2-way portal, and docs) must be synced for QD 225/226/232'
   );
 
@@ -7586,7 +7586,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       phoTpsCode.includes('CLEAR') &&
       decisionsCode.includes('Quyết định 226') &&
       chatDocCode.includes('Quyết định 226') &&
-      (specCode.includes('QĐ 232') || specCode.includes('QĐ 226')),
+      (specCode.includes('QĐ 236') || specCode.includes('QĐ 232') || specCode.includes('QĐ 226')),
     'Pho Restaurant realistic FSM (waiting->serve->eat->leave->clear->sink), detailed faces, wall fans instead of ceiling fans, and docs must be synced for QD 226/232'
   );
 
@@ -7825,7 +7825,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(
     tpsSpecCode.includes('GÓC NHÌN THỨ 3') &&
       agentsCode.includes('docs/TPS_3D_OPEN_WORLD_SPEC.md') &&
-      specCode.includes('QĐ 232') &&
+      (specCode.includes('QĐ 236') || specCode.includes('QĐ 232')) &&
       chatDocCode.includes('Quyết định 232') &&
       decisionsCode.includes('Quyết định 232') &&
       engineCode.includes('function createTpsCamera') &&
@@ -7838,7 +7838,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       sceneCode.includes('function triggerPhoAction') &&
       sceneCode.includes('function renderPhoTps3D') &&
       sceneCode.includes('PIG_ORDER') &&
-      sceneCode.includes('open_door') &&
+      (sceneCode.includes('open_door') || sceneCode.includes('doorOpen: 0.95')) &&
       sceneCode.includes('sit_seat') &&
       sceneCode.includes('order_pho') &&
       sceneCode.includes('eat_pho') &&
@@ -7847,14 +7847,14 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       phoBannerCode.includes('buildPhoTps3dSceneScript') &&
       phoBannerCode.includes('unprojectFloorTap') &&
       phoBannerCode.includes('<iframe'),
-    'TPS 3D RPG standard (docs, reusable 3D perspective engine, zero-joystick raycast tap-to-walk + 360 orbit, hinged doors, sit/order/eat Pho, open kitchen, and realistic FSM) must be synced for QD 232'
+    'TPS 3D RPG standard (docs, reusable 3D perspective engine, zero-joystick raycast tap-to-walk + 360 orbit, hinged doors, sit/order/eat Pho, open kitchen, and realistic FSM) must be synced for QD 232/236'
   );
 
   console.log('✅ Test 169 Passed: Chuẩn Hóa Góc Nhìn Thứ 3 Nhập Vai (TPS 3D Kiểu PUBG) & Nâng Cấp Quán Phở Cổ Truyền (Quyết định 232) Audit verified cleanly');
 }
 
 // =========================================================================
-// TEST 170: ĐẠI TU QUÁN PHỞ CỔ TRUYỀN 5 GIAN PHÒNG PHỐ HỘI, TRẦN GỖ LIM KÍN 100%, NGUYÊN LIỆU PHỞ & THANH TAB ĐỒNG BỘ (QĐ 233)
+// TEST 170: ĐẠI TU QUÁN PHỞ CỔ TRUYỀN PHỐ HỘI, TRẦN GỖ LIM KÍN 100%, NGUYÊN LIỆU PHỞ (QĐ 233)
 // =========================================================================
 {
   const tpsSpecCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
@@ -7863,31 +7863,24 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
   const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
   const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
-  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
 
   assert.ok(
     tpsSpecCode.includes('Zero Exposed Sky') &&
-      (specCode.includes('QĐ 232–235') || specCode.includes('QĐ 232–234') || specCode.includes('QĐ 232–233')) &&
+      (specCode.includes('QĐ 236') || specCode.includes('QĐ 232–235') || specCode.includes('QĐ 232–233')) &&
       chatDocCode.includes('Quyết định 233') &&
       decisionsCode.includes('Quyết định 233') &&
       engineCode.includes('function drawLanternGlow3D') &&
-      sceneCode.includes('function detectCurrentPhoRoom') &&
-      sceneCode.includes('function navigatePigToRoom') &&
       sceneCode.includes('function drawPhoTableIngredients3D') &&
       sceneCode.includes('function drawHeritageChair3D') &&
-      sceneCode.includes('main_hall') &&
-      sceneCode.includes('TRẦN NHÀ GỖ LIM KÍN 100%') &&
-      phoBannerCode.includes('id="roomTabs"') &&
-      phoBannerCode.includes('navigatePigToRoom') &&
-      phoBannerCode.includes('detectCurrentPhoRoom'),
-    'Pho Heritage overhaul (enclosed mahogany ceiling with zero exposed sky, synced room tabs, detailed Pho ingredients, lanterns, wooden screen, rounded Pig, and docs) must be synced for QD 233/234'
+      (sceneCode.includes('TRẦN GỖ LIM VINTAGE 90S KÍN 100%') || sceneCode.includes('TRẦN NHÀ GỖ LIM KÍN 100%')),
+    'Pho Heritage overhaul (enclosed mahogany ceiling with zero exposed sky, detailed Pho ingredients, lanterns, rounded Pig, and docs) must be synced for QD 233/236'
   );
 
-  console.log('✅ Test 170 Passed: Đại Tu Quán Phở Cổ Truyền Phố Hội, Trần Gỗ Lim Kín 100%, Nguyên Liệu Phở & Thanh Tab Đồng Bộ (Quyết định 233) Audit verified cleanly');
+  console.log('✅ Test 170 Passed: Đại Tu Quán Phở Cổ Truyền Phố Hội, Trần Gỗ Lim Kín 100%, Nguyên Liệu Phở (Quyết định 233) Audit verified cleanly');
 }
 
 // =========================================================================
-// TEST 171: TỐI ƯU QUÁN PHỞ TPS 3D GỌN MƯỢT 3 KHU (BỎ PHÒNG VIP), PHỐ CỔ ĐỐI DIỆN & SPRITE ĐỒ ĂN/XOONG NỒI TẢ THỰC (QĐ 234)
+// TEST 171: TỐI ƯU QUÁN PHỞ TPS 3D GỌN MƯỢT (BỎ PHÒNG VIP) & SPRITE ĐỒ ĂN/XOONG NỒI TẢ THỰC (QĐ 234)
 // =========================================================================
 {
   const tpsSpecCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
@@ -7896,11 +7889,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
   const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
   const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
-  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
 
   assert.ok(
     tpsSpecCode.includes('QĐ 234') &&
-      (specCode.includes('QĐ 232–235') || specCode.includes('QĐ 232–234')) &&
+      (specCode.includes('QĐ 236') || specCode.includes('QĐ 232–235') || specCode.includes('QĐ 232–234')) &&
       chatDocCode.includes('Quyết định 234') &&
       decisionsCode.includes('Quyết định 234') &&
       engineCode.includes('function drawPhoPotSprite3D') &&
@@ -7909,19 +7901,34 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       engineCode.includes('function drawBatTrangTeapotSprite3D') &&
       engineCode.includes('function drawCondimentCaddySprite3D') &&
       engineCode.includes('function drawQuayAndHerbsSprite3D') &&
-      (sceneCode.includes('function drawSaigonAvenueAndBachDang3D') || sceneCode.includes('function drawOppositeOldQuarterStreet3D')) &&
-      !sceneCode.includes('vip_room') &&
-      !phoBannerCode.includes('data-room="vip_room"') &&
-      phoBannerCode.includes('🏛️ Sảnh Phở Chính') &&
-      phoBannerCode.includes('🔥 Bếp Lửa Phở'),
-    'Pho TPS 3D polish (compact 3-zone smooth layout without VIP room, realistic street/river backdrop, tethered lanterns, realistic depth-scaled Pixel Art sprites for pots/bowls/ingredients/teapot, and docs) must be synced for QD 234/235'
+      !sceneCode.includes('vip_room'),
+    'Pho TPS 3D polish (compact smooth layout without VIP room, realistic depth-scaled Pixel Art sprites for pots/bowls/ingredients/teapot, and docs) must be synced for QD 234/236'
   );
 
-  console.log('✅ Test 171 Passed: Tối Ưu Quán Phở TPS 3D Gọn Mượt 3 Khu (Bỏ Phòng VIP), Phố Cổ Đối Diện & Sprite Đồ Ăn/Xoong Nồi Tả Thực (Quyết định 234) Audit verified cleanly');
+  console.log('✅ Test 171 Passed: Tối Ưu Quán Phở TPS 3D Gọn Mượt (Bỏ Phòng VIP) & Sprite Đồ Ăn/Xoong Nồi Tả Thực (Quyết định 234) Audit verified cleanly');
 }
 
 // =========================================================================
-// TEST 172: ĐỒNG BỘ 1:1 MẶT TIỀN QUÁN PHỞ TAB KHÁM PHÁ, ĐẠI LỘ XE CỘ 60FPS & SÔNG BẠCH ĐẰNG CÓ TÀU BÈ — 0% MẢNG TRỜI XANH MẤT LIÊN KẾT (QĐ 235)
+// TEST 172: SPRITE XE CỘ & TÀU BÈ TRONG ENGINE DÙNG CHUNG & ĐỒNG BỘ TÀI LIỆU QĐ 235
+// =========================================================================
+{
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+
+  assert.ok(
+    chatDocCode.includes('Quyết định 235') &&
+      decisionsCode.includes('Quyết định 235') &&
+      engineCode.includes('function drawRoadVehicleSprite3D') &&
+      engineCode.includes('function drawRiverBoatSprite3D'),
+    'Reusable road vehicle & river boat 3D sprites and QD 235 docs must be present'
+  );
+
+  console.log('✅ Test 172 Passed: Sprite Xe Cộ & Tàu Bè Trong Engine Dùng Chung & Tài Liệu (Quyết định 235) Audit verified cleanly');
+}
+
+// =========================================================================
+// TEST 173: CHUẨN HÓA TPS 3D INTERIOR-ONLY (BỎ NGOÀI TRỜI & BỎ TAB CARD) & QUÁN PHỞ VINTAGE 90S (QĐ 236)
 // =========================================================================
 {
   const tpsSpecCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
@@ -7933,22 +7940,27 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
 
   assert.ok(
-    tpsSpecCode.includes('QĐ 234–235') &&
-      specCode.includes('QĐ 232–235') &&
-      chatDocCode.includes('Quyết định 235') &&
-      decisionsCode.includes('Quyết định 235') &&
-      engineCode.includes('function drawRoadVehicleSprite3D') &&
-      engineCode.includes('function drawRiverBoatSprite3D') &&
-      sceneCode.includes('function drawSaigonAvenueAndBachDang3D') &&
-      sceneCode.includes('TIỆM CAFE MÁI HIÊN SỌC ĐỎ-TRẮNG') &&
-      sceneCode.includes('SÔNG BẠCH ĐẰNG') &&
-      sceneCode.includes('BỜ CÔNG VIÊN THỦ THIÊM') &&
-      sceneCode.includes('Mái ngói đỏ liền suốt') &&
-      phoBannerCode.includes('🏮 Vỉa Hè &amp; Sông'),
-    'Pho TPS 3D Hub-synced facade (continuous red roof, adjacent Cafe, live Saigon Avenue traffic, Bach Dang River with boats, Thu Thiem horizon, zero disconnected sky voids, and docs) must be synced for QD 235'
+    tpsSpecCode.includes('Interior-Only TPS 3D') &&
+      tpsSpecCode.includes('QĐ 236') &&
+      specCode.includes('QĐ 236') &&
+      chatDocCode.includes('Quyết định 236') &&
+      decisionsCode.includes('Quyết định 236') &&
+      engineCode.includes('function drawCeilingFan3D') &&
+      engineCode.includes('function drawVintageLamp3D') &&
+      engineCode.includes('Chiếc muỗng sứ trắng') &&
+      engineCode.includes('Ống đựng đũa tre & muỗng inox') &&
+      engineCode.includes('Tạp dề vintage nâu-đỏ') &&
+      sceneCode.includes('chef_butcher') &&
+      sceneCode.includes('chef_noodle') &&
+      sceneCode.includes('PHỞ BÒ GIA TRUYỀN 1990') &&
+      sceneCode.includes('drawCeilingFan3D') &&
+      sceneCode.includes('drawVintageLamp3D') &&
+      !sceneCode.includes('drawSaigonAvenueAndBachDang3D') &&
+      !phoBannerCode.includes('id="roomTabs"'),
+    'Interior-Only TPS 3D standard & Vintage 90s Pho Restaurant (3 chefs, 2 styled-apron waiters, ceiling fans, 90s golden lamps, realistic beef & chopsticks+spoon, zero exterior & zero top tab bar, and docs) must be synced for QD 236'
   );
 
-  console.log('✅ Test 172 Passed: Đồng Bộ 1:1 Mặt Tiền Quán Phở Tab Khám Phá, Đại Lộ Xe Cộ 60fps & Sông Bạch Đằng Có Tàu Bè — 0% Mảng Trời Xanh Mất Liên Kết (Quyết định 235) Audit verified cleanly');
+  console.log('✅ Test 173 Passed: Chuẩn Hóa TPS 3D Interior-Only (Bỏ Ngoài Trời & Bỏ Tab Card) & Quán Phở Vintage 90s (Quyết định 236) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 172 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (172/172)!');
+console.log('\n🎉 ALL 173 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (173/173)!');

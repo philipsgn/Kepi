@@ -343,9 +343,15 @@ function drawPhoBowlSprite3D(ctx, cam, wx, wy, wz, bState, t, phase) {
     ctx.beginPath(); ctx.ellipse(px - 2 * u, py - 4.2 * u, 2.4 * u, 1.2 * u, 0.2, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#16A34A'; // Hành lá & ngò gai xanh
     ctx.beginPath(); ctx.arc(px + 2 * u, py - 4.2 * u, 1.8 * u, 0, Math.PI * 2); ctx.fill();
-    // Đôi đũa tre gác ngang miệng tô
+    // Đôi đũa tre + Muỗng sứ trắng đầy đủ gác trên miệng tô Phở (QĐ 236!)
     ctx.strokeStyle = '#B45309'; ctx.lineWidth = Math.max(1, 1.1 * u);
     ctx.beginPath(); ctx.moveTo(px - 8 * u, py - 6.5 * u); ctx.lineTo(px + 9 * u, py - 3.5 * u); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px - 8 * u, py - 5.2 * u); ctx.lineTo(px + 9 * u, py - 2.3 * u); ctx.stroke();
+    // Chiếc muỗng sứ trắng tinh gác bên trái tô
+    ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#64748B'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.ellipse(px - 5 * u, py - 4.4 * u, 2.2 * u, 1.3 * u, -0.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = Math.max(1.2, 1.4 * u);
+    ctx.beginPath(); ctx.moveTo(px - 6.5 * u, py - 5 * u); ctx.lineTo(px - 10 * u, py - 8 * u); ctx.stroke();
     // Làn khói nóng bay lên từ tô Phở
     var st = (t * 0.9 + (phase || 0)) % 1;
     ctx.globalAlpha = (1 - st) * 0.55;
@@ -397,6 +403,15 @@ function drawCondimentCaddySprite3D(ctx, cam, wx, wy, wz) {
   // Rổ nhựa đỏ đựng gia vị phía trước
   ctx.fillStyle = '#DC2626'; ctx.strokeStyle = '#7F1D1D'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.ellipse(px + 0.5 * u, py - 2.5 * u, 7.5 * u, 3 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  // Ống đựng đũa tre & muỗng inox đầy đủ ngay bên cạnh rổ gia vị (QĐ 236)
+  ctx.fillStyle = '#B45309'; ctx.strokeStyle = '#451A03';
+  ctx.fillRect(Math.round(px + 9 * u), Math.round(py - 8 * u), Math.max(3, Math.round(5.5 * u)), Math.max(4, Math.round(7.5 * u)));
+  ctx.strokeRect(Math.round(px + 9 * u), Math.round(py - 8 * u), Math.max(3, Math.round(5.5 * u)), Math.max(4, Math.round(7.5 * u)));
+  ctx.strokeStyle = '#F59E0B'; ctx.lineWidth = Math.max(1, 1.1 * u);
+  ctx.beginPath(); ctx.moveTo(px + 10.5 * u, py - 8 * u); ctx.lineTo(px + 10 * u, py - 12.5 * u); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px + 12.2 * u, py - 8 * u); ctx.lineTo(px + 12.5 * u, py - 12.5 * u); ctx.stroke();
+  ctx.fillStyle = '#E2E8F0';
+  ctx.beginPath(); ctx.arc(px + 13.8 * u, py - 11.5 * u, 1.3 * u, 0, Math.PI * 2); ctx.fill(); // Đầu muỗng inox
   ctx.restore();
 }
 
@@ -418,6 +433,64 @@ function drawQuayAndHerbsSprite3D(ctx, cam, wx, wy, wz) {
   ctx.fillRect(Math.round(px + 2.5 * u), Math.round(py - 3.2 * u), Math.max(3, Math.round(7 * u)), Math.max(1.5, Math.round(2 * u)));
   ctx.fillStyle = '#E6A14A';
   ctx.fillRect(Math.round(px + 3 * u), Math.round(py - 4.4 * u), Math.max(3, Math.round(6 * u)), Math.max(1.5, Math.round(1.6 * u)));
+  ctx.restore();
+}
+
+function drawCeilingFan3D(ctx, cam, wx, wy, wz, t, phase) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 24 || pr.cz < 0.6) return;
+  var u = Math.max(0.45, Math.min(3.2, pr.scale / 36));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  var topPr = projectPoint3D(cam, wx, wy + 0.42, wz);
+  ctx.save();
+  // Ty treo quạt trần gắn lên xà gỗ
+  if (topPr) {
+    ctx.strokeStyle = '#4A2C1A'; ctx.lineWidth = Math.max(1.5, 2.2 * u);
+    ctx.beginPath(); ctx.moveTo(topPr.sx, topPr.sy); ctx.lineTo(px, py); ctx.stroke();
+  }
+  // 3 Cánh quạt trần vintage quay 60fps theo góc nhìn phối cảnh bầu dục
+  var baseAng = t * 5.2 + (phase || 0);
+  for (var i = 0; i < 3; i++) {
+    var a = baseAng + (i * Math.PI * 2) / 3;
+    var bx = Math.cos(a) * 24 * u;
+    var by = Math.sin(a) * 6.5 * u;
+    ctx.strokeStyle = '#5C341D'; ctx.lineWidth = Math.max(2.5, 4.5 * u);
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + bx, py + by); ctx.stroke();
+    ctx.strokeStyle = '#D99B26'; ctx.lineWidth = Math.max(1, 1.5 * u);
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + bx * 0.9, py + by * 0.9); ctx.stroke();
+  }
+  // Bầu động cơ quạt đồng cổ giữa
+  ctx.fillStyle = '#8C5418'; ctx.strokeStyle = '#2B180E'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(px, py, 5.5 * u, 2.6 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+function drawVintageLamp3D(ctx, cam, wx, wy, wz, topY) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 24 || pr.cz < 0.5) return;
+  var u = Math.max(0.42, Math.min(3.0, pr.scale / 36));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  var topPr = projectPoint3D(cam, wx, topY || 3.85, wz);
+  ctx.save();
+  if (topPr) {
+    ctx.strokeStyle = '#2B180E'; ctx.lineWidth = Math.max(1, 1.4 * u);
+    ctx.beginPath(); ctx.moveTo(topPr.sx, topPr.sy); ctx.lineTo(px, py - 4 * u); ctx.stroke();
+  }
+  // Quầng sáng vàng ấm vintage thập niên 90 lan tỏa
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = '#FFD97D';
+  ctx.beginPath(); ctx.arc(px, py + 2 * u, 20 * u, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 0.98;
+  // Bóng đèn sợi đốt vàng ấm bên dưới chao đèn
+  ctx.fillStyle = '#FFF9C4';
+  ctx.beginPath(); ctx.arc(px, py + 2 * u, 3.5 * u, 0, Math.PI * 2); ctx.fill();
+  // Chao đèn chụp men xanh lá cổ điển Sài Gòn 90s viền đồng
+  ctx.fillStyle = '#1E5B3A'; ctx.strokeStyle = '#2B180E'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(px - 9 * u, py + 1 * u);
+  ctx.quadraticCurveTo(px, py - 8 * u, px + 9 * u, py + 1 * u);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
   ctx.restore();
 }
 
@@ -627,21 +700,35 @@ function drawHumanTps3D(ctx, cam, h, t) {
     hr(-4, -5, 8, 5, '#1E293B');
   }
 
-  // Thân áo + Tạp dề (Đầu bếp / Phục vụ)
+  // Thân áo + Tạp dề cổ điển đẹp mắt (Đầu bếp / Phục vụ — QĐ 236)
+  var isAnyChef = h.role === 'chef' || h.role === 'chef_butcher' || h.role === 'chef_noodle';
   hr(-6, -21, 12, 13, '#2B2118');
   hr(-5, -20, 10, 11, h.shirt || '#3B82F6');
-  if (h.role === 'chef') {
+  if (isAnyChef) {
     hr(-4, -19, 8, 10, '#FFFDF7');
     hr(-5, -16, 10, 1, '#94A3B8');
+    hr(-3, -18, 2, 1, '#DC2626'); // Nút áo bếp truyền thống
   } else if (h.role === 'waiter') {
-    hr(-4, -17, 8, 8, '#B91C1C'); // Tạp dề đỏ nhân viên quán Phở
+    // Tạp dề vintage nâu-đỏ đẹp mắt có dây đeo cổ, nơ thắt eo & túi trước!
+    hr(-3, -20, 1, 3, '#7F1D1D'); hr(2, -20, 1, 3, '#7F1D1D'); // 2 Dây đeo cổ tạp dề
+    hr(-4, -17, 8, 9, '#991B1B'); // Thân tạp dề đỏ đô cổ điển
+    hr(-5, -14, 10, 1, '#FACC15'); // Dây thắt eo chỉ vàng
+    hr(-3, -12, 6, 3, '#7F1D1D');  // Túi tạp dề trước bụng
   }
 
-  // Tay cầm muôi nấu / bưng tô phở
+  // Tay cầm muôi nấu / dao thái thịt / vợt trụng phở / bưng tô phở
   if (h.role === 'chef') {
     var lad = Math.round(Math.sin(t * 6) * 2);
     hr(5, -17 + lad, 4, 2, '#FCD5B5');
     hr(8, -19 + lad, 2, 7, '#CBD5E1'); // Muôi inox múc nước dùng
+  } else if (h.role === 'chef_butcher') {
+    var chop = Math.round(Math.abs(Math.sin(t * 8)) * 3);
+    hr(5, -18 - chop, 4, 2, '#FCD5B5');
+    hr(8, -21 - chop, 4, 4, '#E2E8F0'); // Dao phay thái thịt bò tươi sống!
+  } else if (h.role === 'chef_noodle') {
+    var dip = Math.round(Math.sin(t * 5 + 1) * 2.5);
+    hr(5, -17 + dip, 4, 2, '#FCD5B5');
+    hr(8, -19 + dip, 3, 6, '#D98A36'); // Vợt tre trụng bánh phở!
   } else if (h.carryBowl) {
     hr(4, -16, 4, 2, '#FCD5B5');
     hr(5, -19, 7, 4, '#FFFDF7'); // Tô phở bưng trên tay
@@ -652,7 +739,7 @@ function drawHumanTps3D(ctx, cam, h, t) {
   hr(-5, -31, 10, 10, '#2B2118');
   hr(-4, -30, 8, 8, '#FFD8B8');
   hr(-4, -31, 8, 3, h.hair || '#2B2118');
-  if (h.role === 'chef') {
+  if (isAnyChef) {
     // Mũ đầu bếp cao trắng nổi bật
     hr(-5, -37, 10, 6, '#2B2118');
     hr(-4, -36, 8, 5, '#FFFFFF');
