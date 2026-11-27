@@ -8149,4 +8149,123 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 179 Passed: Quán Cà Phê Việt Nam TPS 3D — Cộng Cà Phê Bao Cấp Ấm Cúng & Độc Lập Tự Do Hạnh Phúc (Quyết định 242) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 179 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (179/179)!');
+// =========================================================================
+// TEST 180: HEADLESS MOCK-CANVAS REAL-FRAME SMOKE TEST CHO MỌI QUÁN TPS 3D (CHỐNG MÀN HÌNH TRỐNG / NaN — QĐ 243)
+// =========================================================================
+{
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const phoWallCode = fs.readFileSync('src/components/chat/pho/phoVnWallArt.ts', 'utf8');
+  const phoSceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+  const cafeWallCode = fs.readFileSync('src/components/chat/cafe/cafeVnWallArt.ts', 'utf8');
+  const cafeSceneCode = fs.readFileSync('src/components/chat/cafe/cafeTps3dScene.ts', 'utf8');
+  const cafeBannerCode = fs.readFileSync('src/components/chat/CafeTpsBannerWebView.tsx', 'utf8');
+  const tpsDocCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  const extractRaw = (src) => {
+    const m = src.match(/return String\.raw`([\s\S]*?)`;/);
+    assert.ok(m && m[1], 'Must export String.raw script');
+    return m[1];
+  };
+
+  function createMockCtx() {
+    let drawCalls = 0;
+    let nanHits = 0;
+    const checkFinite = (...nums) => {
+      for (const n of nums) {
+        if (typeof n === 'number' && !Number.isFinite(n)) nanHits++;
+      }
+    };
+    const ctx = {
+      fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left', textBaseline: 'alphabetic', globalAlpha: 1,
+      save() {}, restore() {}, beginPath() {}, closePath() {}, clip() {},
+      translate(x, y) { checkFinite(x, y); },
+      scale(x, y) { checkFinite(x, y); },
+      rotate(a) { checkFinite(a); },
+      moveTo(x, y) { checkFinite(x, y); },
+      lineTo(x, y) { checkFinite(x, y); },
+      quadraticCurveTo(a, b, c, d) { checkFinite(a, b, c, d); },
+      bezierCurveTo(a, b, c, d, e, f) { checkFinite(a, b, c, d, e, f); },
+      rect(x, y, w, h) { checkFinite(x, y, w, h); },
+      arc(x, y, r) { checkFinite(x, y, r); drawCalls++; },
+      ellipse(x, y, rx, ry) { checkFinite(x, y, rx, ry); drawCalls++; },
+      fill() { drawCalls++; },
+      stroke() { drawCalls++; },
+      fillRect(x, y, w, h) { checkFinite(x, y, w, h); drawCalls++; },
+      strokeRect(x, y, w, h) { checkFinite(x, y, w, h); drawCalls++; },
+      fillText(_t, x, y, mw) { checkFinite(x, y, mw); drawCalls++; },
+      measureText(t) { return { width: String(t || '').length * 6 }; },
+      getStats() { return { drawCalls, nanHits }; },
+    };
+    return ctx;
+  }
+
+  // 1. Chạy thật 1 frame render cho Quán Cà Phê TPS 3D
+  const cafeCtx = createMockCtx();
+  const cafeRunner = new Function(
+    'ctx',
+    extractRaw(engineCode) +
+      '\n' +
+      extractRaw(cafeWallCode) +
+      '\n' +
+      extractRaw(cafeSceneCode) +
+      `\n
+      var st = createCafeTpsState();
+      var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.6, targetHeight: 0.92 });
+      var bounds = { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85 };
+      stepCafeTps(st, 0.016);
+      updateTpsCamera(cam, st.pig.x, 0, st.pig.z, 400, 720, bounds);
+      renderCafeTpsScene(ctx, cam, st, 400, 720);
+      var tap = unprojectFloorTap(cam, 200, 560);
+      return { focal: cam.focal, tap: tap };
+    `
+  );
+  const cafeRes = cafeRunner(cafeCtx);
+  const cafeStats = cafeCtx.getStats();
+  assert.ok(Number.isFinite(cafeRes.focal) && cafeRes.focal > 100, 'Cafe TPS camera focal must be finite > 100');
+  assert.ok(cafeRes.tap && Number.isFinite(cafeRes.tap.x) && Number.isFinite(cafeRes.tap.z), 'Cafe unprojectFloorTap must return finite floor coords');
+  assert.strictEqual(cafeStats.nanHits, 0, 'Cafe TPS 3D render must produce 0 NaN coordinates');
+  assert.ok(cafeStats.drawCalls > 80, 'Cafe TPS 3D render must draw > 80 primitives (got ' + cafeStats.drawCalls + ')');
+
+  // 2. Chạy thật 1 frame render cho Quán Phở TPS 3D
+  const phoCtx = createMockCtx();
+  const phoRunner = new Function(
+    'ctx',
+    extractRaw(engineCode) +
+      '\n' +
+      extractRaw(phoWallCode) +
+      '\n' +
+      extractRaw(phoSceneCode) +
+      `\n
+      var st = createPhoTpsWorld();
+      var cam = createTpsCamera({ yaw: 0, pitch: -0.30, dist: 3.7, targetHeight: 0.92 });
+      var bounds = { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85 };
+      stepPhoTpsWorld(st, 0.016);
+      updateTpsCamera(cam, st.pig.x, 0, st.pig.z, 400, 720, bounds);
+      renderPhoTps3D(ctx, cam, st);
+      var tap = unprojectFloorTap(cam, 200, 560);
+      return { focal: cam.focal, tap: tap };
+    `
+  );
+  const phoRes = phoRunner(phoCtx);
+  const phoStats = phoCtx.getStats();
+  assert.ok(Number.isFinite(phoRes.focal) && phoRes.focal > 100, 'Pho TPS camera focal must be finite > 100');
+  assert.ok(phoRes.tap && Number.isFinite(phoRes.tap.x) && Number.isFinite(phoRes.tap.z), 'Pho unprojectFloorTap must return finite floor coords');
+  assert.strictEqual(phoStats.nanHits, 0, 'Pho TPS 3D render must produce 0 NaN coordinates');
+  assert.ok(phoStats.drawCalls > 80, 'Pho TPS 3D render must draw > 80 primitives (got ' + phoStats.drawCalls + ')');
+
+  // 3. Xác thực chống hồi quy chữ ký hàm trong CafeTpsBannerWebView & Docs QĐ 243
+  assert.ok(
+    !cafeBannerCode.includes('screenToFloor3D') &&
+      cafeBannerCode.includes('unprojectFloorTap(cam, sx, sy)') &&
+      cafeBannerCode.includes('updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, cafeBounds)') &&
+      cafeBannerCode.includes('createTpsCamera({ yaw: 0, pitch: -0.28') &&
+      tpsDocCode.includes('QUYẾT ĐỊNH 243') &&
+      decisionsCode.includes('Quyết định 243'),
+    'CafeTpsBannerWebView signatures and QD 243 3-layer safeguard docs must be synced'
+  );
+
+  console.log('✅ Test 180 Passed: Headless Mock-Canvas Real-Frame Smoke Test (Pho=' + phoStats.drawCalls + ' calls, Cafe=' + cafeStats.drawCalls + ' calls, 0 NaN — Quyết định 243) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 180 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (180/180)!');

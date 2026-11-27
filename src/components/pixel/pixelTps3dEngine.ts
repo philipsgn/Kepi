@@ -37,9 +37,13 @@ function normalizeAngle(a) {
 }
 
 function updateTpsCamera(cam, targetX, targetY, targetZ, vw, vh, bounds) {
-  cam.vw = vw;
-  cam.vh = vh;
-  cam.focal = Math.min(vw, vh) * cam.fovFactor;
+  // Tự phòng thủ chống truyền thiếu targetY (QĐ 243): đảm bảo vw/vh luôn là số hữu hạn > 0
+  if (typeof vh !== 'number' && typeof vw === 'number' && typeof targetZ === 'number') {
+    bounds = vh; vh = vw; vw = targetZ; targetZ = targetY; targetY = 0;
+  }
+  cam.vw = (typeof vw === 'number' && isFinite(vw) && vw > 0) ? vw : (cam.vw || 360);
+  cam.vh = (typeof vh === 'number' && isFinite(vh) && vh > 0) ? vh : (cam.vh || 640);
+  cam.focal = Math.min(cam.vw, cam.vh) * cam.fovFactor;
   var sy = Math.sin(cam.yaw), cy = Math.cos(cam.yaw);
   var sp = Math.sin(cam.pitch), cp = Math.cos(cam.pitch);
   cam.F.x = sy * cp;
@@ -179,10 +183,11 @@ function drawBox3D(ctx, cam, cx, y0, cz, w, h, d, cols) {
   var x0 = cx - w * 0.5, x1 = cx + w * 0.5;
   var y1 = y0 + h;
   var z0 = cz - d * 0.5, z1 = cz + d * 0.5;
-  var cTop = cols.top || '#E2E8F0';
-  var cFront = cols.front || '#CBD5E1';
-  var cSide = cols.side || '#94A3B8';
-  var stroke = cols.stroke || '#2B2118';
+  var isArr = Array.isArray(cols);
+  var cTop = isArr ? (cols[0] || '#E2E8F0') : ((cols && cols.top) || '#E2E8F0');
+  var cFront = isArr ? (cols[1] || cols[0] || '#CBD5E1') : ((cols && cols.front) || '#CBD5E1');
+  var cSide = isArr ? (cols[2] || cols[1] || '#94A3B8') : ((cols && cols.side) || '#94A3B8');
+  var stroke = (!isArr && cols && cols.stroke) ? cols.stroke : '#2B2118';
 
   // Vẽ các mặt hướng về phía camera (back-face culling chuẩn 3D)
   if (cam.pos.z < z0) {

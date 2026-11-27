@@ -169,7 +169,7 @@ ${cafeSceneScript}
   window.addEventListener('resize', resizeCanvas);
 
   var st = createCafeTpsState();
-  var cam = createTpsCamera(0, 0.34, 3.6);
+  var cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.6, targetHeight: 0.92 });
   var cafeBounds = { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85 };
   var currentAction = null;
   var secAction = null;
@@ -292,7 +292,7 @@ ${cafeSceneScript}
     var dx = pt.x - lastX, dy = pt.y - lastY;
     if (Math.hypot(pt.x - startX, pt.y - startY) > 7) moved = true;
     cam.yaw -= dx * 0.0085;
-    cam.pitch = Math.max(0.14, Math.min(0.68, cam.pitch + dy * 0.0055));
+    cam.pitch = Math.max(-0.68, Math.min(-0.10, cam.pitch - dy * 0.0055));
     lastX = pt.x; lastY = pt.y;
     if (e.cancelable) e.preventDefault();
   }
@@ -304,7 +304,7 @@ ${cafeSceneScript}
       var rect = cv.getBoundingClientRect();
       var sx = ((pt.x - rect.left) / rect.width) * W;
       var sy = ((pt.y - rect.top) / rect.height) * H;
-      var hit = screenToFloor3D(cam, sx, sy);
+      var hit = unprojectFloorTap(cam, sx, sy);
       if (hit) {
         var cpos = clampCafeWalkPos(st, hit.x, hit.z);
         if (st.pig.seated) { st.pig.seated = false; st.pig.seatTableId = -1; st.pig.eating = false; }
@@ -326,7 +326,7 @@ ${cafeSceneScript}
     var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));
     lastNow = now;
     stepCafeTps(st, dt);
-    updateTpsCamera(cam, st.pig.x, st.pig.z, W, H, cafeBounds);
+    updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, cafeBounds);
     renderCafeTpsScene(ctx, cam, st, W, H);
     updateContextButtons();
     if (st.toast && st.t < st.toastUntil) {

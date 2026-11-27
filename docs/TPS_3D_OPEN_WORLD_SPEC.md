@@ -73,3 +73,13 @@ Mọi không gian mở nâng cấp lên chuẩn TPS 3D đều bắt buộc hỗ 
 | 3 | **Cửa Hàng Adidas Hội An** | Kế hoạch tiếp theo | Mở cửa kính Hội An, dạo giữa kệ giày/áo 3D, thử áo trước gương |
 | 4 | **Sân Vận Động Trống Đồng FIFA** | Kế hoạch tiếp theo | Đi xuyên đường hầm 3D ra đường pitch, đứng sát biên xem trận 11v11 |
 | 5 | **Chùa / Nhà Thờ / Chợ Bến Thành** | Kế hoạch tiếp theo | Nâng cấp đồng bộ dùng chung `pixelTps3dEngine.ts` |
+
+---
+
+## 6. QUY TẮC BẢO VỆ 3 LỚP CHỐNG LỖI MÀN HÌNH TRƠN / `NaN` CHO MỌI QUÁN TPS 3D (QUYẾT ĐỊNH 243)
+1. **Hợp đồng tham số chuẩn của `pixelTps3dEngine.ts`:**
+   - `createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.6 })` (truyền object `opts`, `pitch` âm nhìn xuống sàn `[-0.68, -0.10]`).
+   - `updateTpsCamera(cam, targetX, targetY, targetZ, vw, vh, bounds)` (đủ 7 tham số, tự phòng thủ nếu `vw/vh` không phải số hữu hạn).
+   - `unprojectFloorTap(cam, sx, sy)` (Raycast chạm sàn chuẩn).
+   - `drawBox3D(ctx, cam, cx, y0, cz, w, h, d, { top, front, side, stroke })` (tâm `(cx, y0, cz)` + object màu; engine tự phòng thủ nếu truyền mảng 3 màu).
+2. **Bắt buộc Kiểm Thử Chạy Thật 1 Frame Render (Headless Mock-Canvas Smoke Test trong `run-all-tests.js`):** Mọi quán TPS 3D (Phở, Cà Phê và mọi quán tương lai) bắt buộc phải có test chạy thật `createState() -> step(0.016) -> updateTpsCamera(...) -> render(mockCtx, cam, st, 400, 720)` kiểm chứng **0 lỗi runtime, 0 tọa độ `NaN`, và vẽ được > 50 hình chiếu 3D**.

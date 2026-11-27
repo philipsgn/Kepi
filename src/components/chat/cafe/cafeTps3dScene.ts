@@ -247,12 +247,12 @@ function renderCafeTpsScene(ctx, cam, st, W, H) {
   var rx1 = 1.35 - Math.cos(rAng) * 1.33, rz1 = 0.02 + Math.sin(rAng) * 1.33;
   drawPoly3D(ctx, cam, [[1.35, 0, 0.02], [rx1, 0, rz1], [rx1, 2.70, rz1], [1.35, 2.70, 0.02]], '#3B4D2B', '#1E2916', 1.6);
 
-  // Thảm chùi chân & 2 chậu cây xanh nhiệt đới 2 bên cửa vào
+  // Thảm chùi chân & 2 chậu cây xanh nhiệt đới 2 bên cửa vào (dùng tâm cx, y0, cz chuẩn drawBox3D!)
   drawPoly3D(ctx, cam, [[-1.05, 0.012, 0.12], [1.05, 0.012, 0.12], [1.05, 0.012, 0.72], [-1.05, 0.012, 0.72]], '#7F1D1D', '#F4B93B', 1);
-  drawBox3D(ctx, cam, -2.15, 0, 0.35, 0.55, 0.45, 0.55, ['#8C4A27', '#A65E34', '#6E371B']);
-  drawBox3D(ctx, cam, -2.25, 0.45, 0.25, 0.75, 0.75, 0.75, ['#3F6212', '#4D7C0F', '#365314']);
-  drawBox3D(ctx, cam, 1.60, 0, 0.35, 0.55, 0.45, 0.55, ['#8C4A27', '#A65E34', '#6E371B']);
-  drawBox3D(ctx, cam, 1.50, 0.45, 0.25, 0.75, 0.75, 0.75, ['#3F6212', '#4D7C0F', '#365314']);
+  drawBox3D(ctx, cam, -1.95, 0, 0.60, 0.52, 0.45, 0.52, { top: '#8C4A27', front: '#A65E34', side: '#6E371B', stroke: '#2B180E' });
+  drawBox3D(ctx, cam, -1.95, 0.45, 0.60, 0.72, 0.72, 0.72, { top: '#4D7C0F', front: '#3F6212', side: '#365314', stroke: '#1E2916' });
+  drawBox3D(ctx, cam, 1.95, 0, 0.60, 0.52, 0.45, 0.52, { top: '#8C4A27', front: '#A65E34', side: '#6E371B', stroke: '#2B180E' });
+  drawBox3D(ctx, cam, 1.95, 0.45, 0.60, 0.72, 0.72, 0.72, { top: '#4D7C0F', front: '#3F6212', side: '#365314', stroke: '#1E2916' });
 
   // 4. Mỹ thuật 3 Mặt Tường Văn Hóa Việt Nam & Cộng Cà Phê Bao Cấp (cafeVnWallArt.ts)
   if (typeof drawCafeVnCultureWalls3D === 'function') {
@@ -289,10 +289,10 @@ function renderCafeTpsScene(ctx, cam, st, W, H) {
     items.push({ d: d, fn: fn });
   }
 
-  // Quầy Bar Đá Mài (Z = 11.6..12.5) + 2 Barista áo xanh lính ngôi sao vàng
+  // Quầy Bar Đá Mài (tâm X=0, Z=12.0) + 2 Barista áo xanh lính ngôi sao vàng
   pushItem(0, 12.0, function() {
-    drawBox3D(ctx, cam, -4.2, 0, 11.6, 8.4, 1.02, 0.85, ['#4A5D36', '#5A6E43', '#364627']);
-    drawBox3D(ctx, cam, -4.3, 1.02, 11.52, 8.6, 0.12, 1.0, ['#C7B8A1', '#DDD0BC', '#A3947E']); // Mặt đá mài terrazzo
+    drawBox3D(ctx, cam, 0, 0, 12.0, 8.4, 1.02, 0.85, { top: '#4A5D36', front: '#5A6E43', side: '#364627', stroke: '#26331B' });
+    drawBox3D(ctx, cam, 0, 1.02, 12.0, 8.6, 0.12, 1.0, { top: '#DDD0BC', front: '#C7B8A1', side: '#A3947E', stroke: '#4A3B2C' }); // Mặt đá mài terrazzo
     drawCoconutCoffeeSprite3D(ctx, cam, -2.5, 1.15, 11.95);
     drawEnamelMugCoffeeSprite3D(ctx, cam, 0.0, 1.15, 11.95, st.t);
     drawCroissantPlateSprite3D(ctx, cam, 2.4, 1.15, 11.95);
@@ -306,15 +306,15 @@ function renderCafeTpsScene(ctx, cam, st, W, H) {
   for (var ti = 0; ti < st.tables.length; ti++) {
     (function(tb) {
       pushItem(tb.x, tb.z, function() {
-        // Mặt bàn gỗ nâu & 4 chân
-        drawBox3D(ctx, cam, tb.x - 0.62, 0.68, tb.z - 0.48, 1.24, 0.08, 0.96, ['#7C4F2B', '#966137', '#5C341D']);
-        drawBox3D(ctx, cam, tb.x - 0.56, 0, tb.z - 0.42, 0.10, 0.68, 0.10, ['#4A2C1A', '#5C341D', '#2B180E']);
-        drawBox3D(ctx, cam, tb.x + 0.46, 0, tb.z - 0.42, 0.10, 0.68, 0.10, ['#4A2C1A', '#5C341D', '#2B180E']);
-        drawBox3D(ctx, cam, tb.x - 0.56, 0, tb.z + 0.32, 0.10, 0.68, 0.10, ['#4A2C1A', '#5C341D', '#2B180E']);
-        drawBox3D(ctx, cam, tb.x + 0.46, 0, tb.z + 0.32, 0.10, 0.68, 0.10, ['#4A2C1A', '#5C341D', '#2B180E']);
+        // Mặt bàn gỗ nâu & 4 chân (tâm cx, y0, cz chuẩn drawBox3D!)
+        drawBox3D(ctx, cam, tb.x, 0.68, tb.z, 1.24, 0.08, 0.96, { top: '#966137', front: '#7C4F2B', side: '#5C341D', stroke: '#2B180E' });
+        drawBox3D(ctx, cam, tb.x - 0.50, 0, tb.z - 0.36, 0.10, 0.68, 0.10, { top: '#4A2C1A', front: '#5C341D', side: '#2B180E', stroke: '#2B180E' });
+        drawBox3D(ctx, cam, tb.x + 0.50, 0, tb.z - 0.36, 0.10, 0.68, 0.10, { top: '#4A2C1A', front: '#5C341D', side: '#2B180E', stroke: '#2B180E' });
+        drawBox3D(ctx, cam, tb.x - 0.50, 0, tb.z + 0.36, 0.10, 0.68, 0.10, { top: '#4A2C1A', front: '#5C341D', side: '#2B180E', stroke: '#2B180E' });
+        drawBox3D(ctx, cam, tb.x + 0.50, 0, tb.z + 0.36, 0.10, 0.68, 0.10, { top: '#4A2C1A', front: '#5C341D', side: '#2B180E', stroke: '#2B180E' });
         // Ghế gỗ + Đệm Chăn Con Công Đỏ-Vàng-Xanh rực rỡ!
-        drawBox3D(ctx, cam, tb.chairX - 0.28, 0, tb.chairZ - 0.26, 0.56, 0.42, 0.52, ['#5C341D', '#6E3F24', '#3B2314']);
-        drawBox3D(ctx, cam, tb.chairX - 0.25, 0.42, tb.chairZ - 0.23, 0.50, 0.08, 0.46, ['#DC2626', '#EF4444', '#991B1B']);
+        drawBox3D(ctx, cam, tb.chairX, 0, tb.chairZ, 0.54, 0.42, 0.50, { top: '#6E3F24', front: '#5C341D', side: '#3B2314', stroke: '#2B180E' });
+        drawBox3D(ctx, cam, tb.chairX, 0.42, tb.chairZ, 0.48, 0.08, 0.44, { top: '#EF4444', front: '#DC2626', side: '#991B1B', stroke: '#7F1D1D' });
         // Đồ uống & bánh trên mặt bàn
         if (tb.hasCoffee) {
           drawCoconutCoffeeSprite3D(ctx, cam, tb.x - 0.24, 0.77, tb.z - 0.08);
