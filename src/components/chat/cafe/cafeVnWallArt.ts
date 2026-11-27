@@ -1,17 +1,18 @@
 /**
- * Bộ Sưu Tập Mỹ Thuật Pixel Art Văn Hóa Việt Nam & Cộng Cà Phê Bao Cấp Trên 3 Bức Tường (Quyết định 242)
- * Lấy cảm hứng 1:1 từ 6 ảnh mẫu Cộng Cà Phê & không gian cà phê Việt Nam ấm cúng (tông vàng ấm, xanh cốm, gỗ nâu, Chăn Con Công):
- * - Tường Trái (X = -5.94): Bảng Thực Đơn Cà Phê xanh bộ đội chữ vàng, Bảng Gỗ Khẩu Hiệu "ĐỘC LẬP · TỰ DO · HẠNH PHÚC",
- *   và Tường Khung Ảnh Sài Gòn & Việt Nam Xưa (10 khung ảnh đa kích cỡ).
- * - Tường Phải (X = +5.94): Bảng Gỗ "YÊU NƯỚC LÀ THI ĐUA", Gương Khung Gỗ Cổ & Kệ Sách Bao Cấp,
- *   và Góc Tán Dù + Gối Tựa Chăn Con Công Đỏ/Xanh.
- * - Tường Đối Diện Quầy Bar (Z = 14.72): Dải Rèm Vải Xanh Cốm rủ mềm, Biển Gỗ "CÀ PHÊ VIỆT NAM · 1975",
- *   Lá Cờ Đỏ Sao Vàng & Kệ Ca Men Sắt / Phin Cà Phê.
- * - 100% bảng chữ áp dụng khóa 4 góc ctx.clip() + safeW (maxWidth) chống tràn viền ở mọi góc xoay 360°.
+ * Bộ Sưu Tập Mỹ Thuật 2 Tầng Độc Bản Quán Cộng Cà Phê TPS 3D (Quyết định 242–244)
+ * Bám sát 1:1 5 ảnh thực tế Cộng Cà Phê — khác hoàn toàn 100% Quán Phở:
+ * - Tầng 1 (drawCafeFloor1Walls3D): Cửa sổ kính lớn rèm xanh cốm dọc tường trái ngắm tán cây xanh;
+ *   Quầy Bar dọc tường phải + biển hồng-đỏ "PICK UP HERE" + "THỰC ĐƠN CÀ PHÊ";
+ *   Tường cuối xi măng loang với Kệ Sách Xếp Chồng Khổng Lồ, Biển tròn "ĐI NHẸ NÓI KHẼ",
+ *   Bảng "ĐỘC LẬP · TỰ DO · HẠNH PHÚC" & biển chỉ lối "LÊN LẦU 2 ↑".
+ * - Tầng 2 (drawCafeFloor2Walls3D): Tường xanh rêu Cộng (#4F6335) với Kệ Gỗ Ziczac đựng Phích Nước Rạng Đông
+ *   (tường trái); Dãy Cửa Sổ Song Gỗ Dọc rèm ren nhìn ra phố chiều (tường phải);
+ *   Bảng "YÊU NƯỚC LÀ THI ĐUA", Khung vải Chăn Con Công & biển "XUỐNG TẦNG 1 ↓" (tường cuối).
+ * - 100% bảng chữ áp dụng khóa 4 góc ctx.clip() + safeW (maxWidth) chống tràn viền mọi góc xoay 360°.
  */
 export function buildCafeVnWallArtScript(): string {
   return String.raw`
-/* ==================== 1. HELPER KHÓA KHUNG 4 GÓC CHỐNG TRÀN CHỮ 100% (QĐ 242) ==================== */
+/* ==================== 1. HELPER KHÓA KHUNG 4 GÓC CHỐNG TRÀN CHỮ 100% ==================== */
 function drawClippedWallQuad(ctx, cam, pts, bgCol, borderCol, lineW, drawInner) {
   drawPoly3D(ctx, cam, pts, bgCol, borderCol, lineW || 2);
   var p0 = projectPoint3D(cam, pts[0][0], pts[0][1], pts[0][2]);
@@ -34,7 +35,6 @@ function drawClippedWallQuad(ctx, cam, pts, bgCol, borderCol, lineW, drawInner) 
   ctx.restore();
 }
 
-/* ==================== 2. HỌA TIẾT CHĂN CON CÔNG (HOA ĐỎ-XANH-VÀNG BAO CẤP) ==================== */
 function drawPeacockFloralPattern(ctx, cx, cy, w, h) {
   ctx.fillStyle = '#B91C1C';
   ctx.fillRect(cx - w * 0.5, cy - h * 0.5, w, h);
@@ -45,205 +45,244 @@ function drawPeacockFloralPattern(ctx, cx, cy, w, h) {
       var fx = cx - w * 0.5 + (c + 0.5) * cw;
       var fy = cy - h * 0.5 + (r + 0.5) * ch;
       var rad = Math.max(1.5, Math.min(cw, ch) * 0.34);
-      // Lá xanh cốm
       ctx.fillStyle = '#4D7C0F';
       ctx.beginPath(); ctx.arc(fx - rad * 0.6, fy + rad * 0.4, rad * 0.65, 0, Math.PI * 2); ctx.fill();
-      // Hoa mẫu đơn hồng-đỏ rực rỡ
       ctx.fillStyle = (r + c) % 2 === 0 ? '#F43F5E' : '#FB7185';
       ctx.beginPath(); ctx.arc(fx, fy, rad, 0, Math.PI * 2); ctx.fill();
-      // Nhụy vàng chanh
       ctx.fillStyle = '#FACC15';
       ctx.beginPath(); ctx.arc(fx, fy, rad * 0.38, 0, Math.PI * 2); ctx.fill();
     }
   }
 }
 
-/* ==================== 3. TƯỜNG TRÁI: THỰC ĐƠN, ĐỘC LẬP TỰ DO HẠNH PHÚC & KHUNG ẢNH XƯA ==================== */
-function drawCafeLeftWallArt(ctx, cam) {
-  // 1. Bảng Thực Đơn Cà Phê xanh bộ đội chữ vàng (ngay lối vào Z=0.55..1.65)
+/* ==================== 2. TẦNG 1: CỬA SỔ RÈM XANH (TRÁI) · QUẦY BAR PICK UP HERE (PHẢI) · TƯỜNG SÁCH KHỔNG LỒ (CUỐI) ==================== */
+function drawCafeFloor1Walls3D(ctx, cam) {
+  // ---- TƯỜNG TRÁI (X = -5.94): Dãy Cửa Sổ Kính Lớn Rèm Xanh Cốm ngắm tán cây xanh (1:1 ảnh 3!) ----
+  var winStarts = [1.6, 4.7, 7.8];
+  for (var wi = 0; wi < winStarts.length; wi++) {
+    var zs = winStarts[wi], ze = zs + 2.75;
+    drawClippedWallQuad(
+      ctx, cam,
+      [[-5.93, 3.25, zs], [-5.93, 3.25, ze], [-5.93, 1.05, ze], [-5.93, 1.05, zs]],
+      '#93C5FD', '#4A2C1A', 2.4,
+      function(cx, cy, bw, bh) {
+        // Bầu trời sáng dịu + tán lá cây xanh mướt bên ngoài cửa kính Cộng
+        ctx.fillStyle = '#BFDBFE'; ctx.fillRect(cx - bw*0.5, cy - bh*0.5, bw, bh*0.48);
+        ctx.fillStyle = '#4D7C0F'; ctx.fillRect(cx - bw*0.5, cy - bh*0.02, bw, bh*0.52);
+        ctx.fillStyle = '#65A30D';
+        ctx.beginPath();
+        ctx.arc(cx - bw*0.25, cy + bh*0.05, Math.min(bw, bh)*0.24, 0, Math.PI*2);
+        ctx.arc(cx + bw*0.18, cy - bh*0.04, Math.min(bw, bh)*0.28, 0, Math.PI*2);
+        ctx.fill();
+        // Đố cửa gỗ chia ô & ánh phản chiếu kính chéo
+        ctx.strokeStyle = '#5C341D'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - bh*0.5); ctx.lineTo(cx, cy + bh*0.5);
+        ctx.moveTo(cx - bw*0.5, cy); ctx.lineTo(cx + bw*0.5, cy);
+        ctx.stroke();
+        // Rèm vải xanh cốm rủ 2 bên mép cửa sổ
+        ctx.fillStyle = '#4F6335';
+        ctx.fillRect(cx - bw*0.5, cy - bh*0.5, bw*0.14, bh);
+        ctx.fillRect(cx + bw*0.36, cy - bh*0.5, bw*0.14, bh);
+      }
+    );
+  }
+
+  // ---- TƯỜNG PHẢI (X = +5.94 — Sau Quầy Bar Dài): Biển PICK UP HERE + THỰC ĐƠN CÀ PHÊ + Kệ Phin ----
   drawClippedWallQuad(
     ctx, cam,
-    [[-5.93, 2.75, 0.55], [-5.93, 2.75, 1.65], [-5.93, 1.45, 1.65], [-5.93, 1.45, 0.55]],
-    '#364627', '#4A2C1A', 2.4,
+    [[5.93, 3.15, 4.10], [5.93, 3.15, 2.75], [5.93, 1.70, 2.75], [5.93, 1.70, 4.10]],
+    '#9F1239', '#4C0519', 2.2,
     function(cx, cy, bw, bh, safeW) {
-      ctx.strokeStyle = '#D9B45A'; ctx.lineWidth = 1;
-      ctx.strokeRect(cx - bw * 0.44, cy - bh * 0.44, bw * 0.88, bh * 0.88);
-      var tPx = Math.max(5, Math.min(11, Math.round(bh * 0.115)));
+      var p1 = Math.max(5, Math.min(12, Math.round(bh * 0.16)));
+      ctx.font = 'bold ' + p1 + 'px monospace';
+      ctx.fillStyle = '#FFF1F2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('PICK', cx, cy - bh * 0.24, safeW);
+      ctx.fillText('UP', cx, cy, safeW);
+      ctx.fillStyle = '#FDE047';
+      ctx.fillText('HERE', cx, cy + bh * 0.24, safeW);
+    }
+  );
+  drawClippedWallQuad(
+    ctx, cam,
+    [[5.93, 3.18, 7.60], [5.93, 3.18, 4.55], [5.93, 1.72, 4.55], [5.93, 1.72, 7.60]],
+    '#364627', '#D9B45A', 2.2,
+    function(cx, cy, bw, bh, safeW) {
+      var tPx = Math.max(5, Math.min(12, Math.round(bh * 0.15)));
       ctx.font = 'bold ' + tPx + 'px monospace';
       ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('THỰC ĐƠN CÀ PHÊ', cx, cy - bh * 0.28, safeW);
-      ctx.strokeStyle = '#D9B45A';
-      ctx.beginPath(); ctx.moveTo(cx - safeW * 0.45, cy - bh * 0.18); ctx.lineTo(cx + safeW * 0.45, cy - bh * 0.18); ctx.stroke();
-      var rows = [['CỐT DỪA', '35K'], ['BẠC XỈU', '25K'], ['PHIN ĐEN', '20K'], ['SỪNG BÒ', '28K']];
-      var rPx = Math.max(4, Math.min(9, Math.round(bh * 0.092)));
+      ctx.fillText('CỘNG CÀ PHÊ · THỰC ĐƠN', cx, cy - bh * 0.30, safeW);
+      var rows = [['CÀ PHÊ CỐT DỪA', '35K'], ['BẠC XỈU', '25K'], ['PHIN ĐEN ĐÁ', '20K'], ['BÁNH SỪNG BÒ', '28K']];
+      var rPx = Math.max(4, Math.min(9, Math.round(bh * 0.11)));
       ctx.font = 'bold ' + rPx + 'px monospace';
-      for (var i = 0; i < rows.length; i++) {
-        var ry = cy - bh * 0.05 + i * bh * 0.135;
+      for (var ri = 0; ri < rows.length; ri++) {
+        var ry = cy - bh * 0.08 + ri * bh * 0.145;
         ctx.fillStyle = '#FFFBF1'; ctx.textAlign = 'left';
-        ctx.fillText(rows[i][0], cx - safeW * 0.45, ry, safeW * 0.62);
+        ctx.fillText(rows[ri][0], cx - safeW * 0.46, ry, safeW * 0.68);
         ctx.fillStyle = '#FACC15'; ctx.textAlign = 'right';
-        ctx.fillText(rows[i][1], cx + safeW * 0.45, ry, safeW * 0.32);
+        ctx.fillText(rows[ri][1], cx + safeW * 0.46, ry, safeW * 0.28);
+      }
+    }
+  );
+  // Kệ ca men sắt xanh lính & phin cà phê sau quầy Bar (Z = 8.0..10.6)
+  drawClippedWallQuad(
+    ctx, cam,
+    [[5.93, 3.12, 10.60], [5.93, 3.12, 8.05], [5.93, 1.78, 8.05], [5.93, 1.78, 10.60]],
+    '#4A2C1A', '#2B180E', 2.0,
+    function(cx, cy, bw, bh) {
+      ctx.fillStyle = '#2B180E'; ctx.fillRect(cx - bw*0.46, cy + bh*0.02, bw*0.92, Math.max(2, bh*0.07));
+      for (var mi = 0; mi < 5; mi++) {
+        ctx.fillStyle = '#6B7B59';
+        ctx.fillRect(cx - bw*0.42 + mi * bw*0.18, cy - bh*0.30, bw*0.12, bh*0.28);
+      }
+      for (var ji = 0; ji < 4; ji++) {
+        ctx.fillStyle = ji % 2 === 0 ? '#94A3B8' : '#D97706';
+        ctx.fillRect(cx - bw*0.40 + ji * bw*0.22, cy + bh*0.14, bw*0.14, bh*0.28);
       }
     }
   );
 
-  // 2. Bảng Gỗ Khẩu Hiệu Văn Hóa Việt Nam: "VIỆT NAM - ĐỘC LẬP · TỰ DO · HẠNH PHÚC" (Z=2.1..4.2)
+  // ---- TƯỜNG CUỐI TẦNG 1 (Z = 14.72): Tường Sách Xếp Chồng Khổng Lồ + ĐI NHẸ NÓI KHẼ + LÊN LẦU 2 (1:1 ảnh 5!) ----
+  // 1. Kệ Sách Xếp Chồng Khổng Lồ (X = -1.8..+5.1, Y = 2.38..3.35)
   drawClippedWallQuad(
     ctx, cam,
-    [[-5.93, 2.78, 2.10], [-5.93, 2.78, 4.20], [-5.93, 1.58, 4.20], [-5.93, 1.58, 2.10]],
-    '#6B4226', '#3B2314', 2.4,
+    [[-1.85, 3.35, 14.72], [5.15, 3.35, 14.72], [5.15, 2.38, 14.72], [-1.85, 2.38, 14.72]],
+    '#7D8276', '#3B2314', 1.6,
+    function(cx, cy, bw, bh) {
+      // Thanh kệ gỗ đỡ đáy
+      ctx.fillStyle = '#4A2C1A'; ctx.fillRect(cx - bw*0.5, cy + bh*0.36, bw, bh*0.14);
+      // 14 chồng sách cổ xếp cao thấp khác nhau màu giấy cũ nâu-kem-be!
+      var stackCols = ['#D6C1A3', '#C4A882', '#E5D5BC', '#B5966D', '#DFCBB0'];
+      var nStacks = 14, sw = (bw * 0.94) / nStacks;
+      for (var si = 0; si < nStacks; si++) {
+        var sx = cx - bw*0.47 + si * sw;
+        var layers = 5 + ((si * 3) % 4);
+        var lh = (bh * 0.78) / 8;
+        for (var li = 0; li < layers; li++) {
+          ctx.fillStyle = stackCols[(si + li) % stackCols.length];
+          ctx.strokeStyle = '#5C4632'; ctx.lineWidth = 0.6;
+          var by = cy + bh*0.36 - (li + 1) * lh;
+          ctx.fillRect(sx + 0.5, by, sw - 1.5, lh - 0.5);
+          ctx.strokeRect(sx + 0.5, by, sw - 1.5, lh - 0.5);
+        }
+      }
+    }
+  );
+
+  // 2. Biển Gỗ Tròn "ĐI NHẸ NÓI KHẼ" (1:1 ảnh 5! X = -0.9, Y = 1.65)
+  drawClippedWallQuad(
+    ctx, cam,
+    [[-1.55, 2.08, 14.72], [-0.35, 2.08, 14.72], [-0.35, 1.18, 14.72], [-1.55, 1.18, 14.72]],
+    'rgba(0,0,0,0)', null, 0,
     function(cx, cy, bw, bh, safeW) {
-      // Vệt vân ván gỗ ngang mộc mạc (giống ảnh mẫu 1 & 3)
-      ctx.strokeStyle = 'rgba(43,24,14,0.35)'; ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(cx - bw * 0.5, cy - bh * 0.15); ctx.lineTo(cx + bw * 0.5, cy - bh * 0.15);
-      ctx.moveTo(cx - bw * 0.5, cy + bh * 0.18); ctx.lineTo(cx + bw * 0.5, cy + bh * 0.18);
-      ctx.stroke();
-      // Ngôi sao vàng nhỏ trên đầu bảng
-      ctx.fillStyle = '#FACC15';
-      ctx.beginPath(); ctx.arc(cx, cy - bh * 0.33, Math.max(2, bh * 0.06), 0, Math.PI * 2); ctx.fill();
-      var p1 = Math.max(5, Math.min(11, Math.round(bh * 0.14)));
-      var p2 = Math.max(5, Math.min(13, Math.round(bh * 0.17)));
+      var r = Math.min(bw, bh) * 0.44;
+      ctx.fillStyle = '#8F6A42'; ctx.strokeStyle = '#4A2C1A'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      var px = Math.max(4, Math.min(9, Math.round(r * 0.34)));
+      ctx.font = 'bold ' + px + 'px monospace';
+      ctx.fillStyle = '#FFFBF1'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('ĐI NHẸ', cx, cy - r * 0.22, safeW * 0.75);
+      ctx.fillText('NÓI KHẼ', cx, cy + r * 0.22, safeW * 0.75);
+    }
+  );
+
+  // 3. Khung Ảnh Gia Đình Xưa (X = 0.6..2.0, Y = 1.18..2.22)
+  drawClippedWallQuad(
+    ctx, cam,
+    [[0.45, 2.22, 14.72], [1.85, 2.22, 14.72], [1.85, 1.15, 14.72], [0.45, 1.15, 14.72]],
+    '#E5D8C0', '#4A2C1A', 2.2,
+    function(cx, cy, bw, bh) {
+      for (var p = -1; p <= 1; p++) {
+        ctx.fillStyle = '#44403C';
+        ctx.beginPath(); ctx.arc(cx + p * bw * 0.22, cy - bh * 0.08, Math.min(bw, bh) * 0.10, 0, Math.PI * 2); ctx.fill();
+        ctx.fillRect(cx + p * bw * 0.22 - bw * 0.09, cy + bh * 0.04, bw * 0.18, bh * 0.34);
+      }
+    }
+  );
+
+  // 4. Bảng Gỗ Văn Hóa "VIỆT NAM · ĐỘC LẬP · TỰ DO · HẠNH PHÚC" (X = 2.4..5.1, Y = 1.20..2.22)
+  drawClippedWallQuad(
+    ctx, cam,
+    [[2.35, 2.22, 14.72], [5.15, 2.22, 14.72], [5.15, 1.20, 14.72], [2.35, 1.20, 14.72]],
+    '#5C341D', '#2B180E', 2.2,
+    function(cx, cy, bw, bh, safeW) {
+      var p1 = Math.max(5, Math.min(11, Math.round(bh * 0.18)));
+      var p2 = Math.max(5, Math.min(12, Math.round(bh * 0.21)));
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.fillText('VIỆT NAM', cx, cy - bh * 0.16, safeW);
-      ctx.font = 'bold ' + p2 + 'px monospace';
-      ctx.fillStyle = '#FFF8E7';
-      ctx.fillText('ĐỘC LẬP · TỰ DO', cx, cy + bh * 0.06, safeW);
+      ctx.font = 'bold ' + p1 + 'px monospace'; ctx.fillStyle = '#FDE047';
+      ctx.fillText('★ VIỆT NAM ★', cx, cy - bh * 0.24, safeW);
+      ctx.font = 'bold ' + p2 + 'px monospace'; ctx.fillStyle = '#FFFBF1';
+      ctx.fillText('ĐỘC LẬP · TỰ DO', cx, cy + bh * 0.02, safeW);
       ctx.fillStyle = '#FDE047';
       ctx.fillText('HẠNH PHÚC', cx, cy + bh * 0.28, safeW);
     }
   );
 
-  // 3. Tường Khung Ảnh Sài Gòn & Việt Nam Xưa (10 khung ảnh đa kích cỡ giống ảnh mẫu 1!)
-  var frames = [
-    [4.7, 2.25, 5.55, 2.95, '#D6C7B2', '#4A2C1A', 'sepia'],
-    [5.7, 2.35, 6.45, 2.92, '#E2D5C1', '#2B180E', 'bw'],
-    [6.6, 2.20, 7.55, 2.98, '#D9C5A0', '#7C4F2B', 'street'],
-    [7.7, 2.30, 8.55, 2.90, '#CBD5C0', '#3B2314', 'bw'],
-    [8.7, 2.25, 9.55, 2.95, '#E8D8B9', '#5C341D', 'sepia'],
-    [4.75, 1.35, 5.75, 2.10, '#E2D5C1', '#2B180E', 'street'],
-    [5.9, 1.40, 6.75, 2.18, '#D6C7B2', '#5C341D', 'sepia'],
-    [6.9, 1.35, 7.80, 2.08, '#F5E6D3', '#4A2C1A', 'bw'],
-    [7.95, 1.42, 8.80, 2.15, '#D9C5A0', '#7C4F2B', 'street'],
-    [8.95, 1.38, 9.65, 2.12, '#E8D8B9', '#2B180E', 'sepia']
-  ];
-  for (var fi = 0; fi < frames.length; fi++) {
-    var fr = frames[fi];
-    (function(f) {
-      drawClippedWallQuad(
-        ctx, cam,
-        [[-5.93, f[3], f[0]], [-5.93, f[3], f[2]], [-5.93, f[1], f[2]], [-5.93, f[1], f[0]]],
-        f[4], f[5], 1.8,
-        function(cx, cy, bw, bh) {
-          if (f[6] === 'street') {
-            ctx.fillStyle = '#94A3B8'; ctx.fillRect(cx - bw*0.42, cy - bh*0.42, bw*0.84, bh*0.45);
-            ctx.fillStyle = '#57534E'; ctx.fillRect(cx - bw*0.42, cy + bh*0.03, bw*0.84, bh*0.39);
-            ctx.fillStyle = '#FFFBF1'; ctx.fillRect(cx - bw*0.18, cy - bh*0.18, bw*0.36, bh*0.26);
-          } else if (f[6] === 'sepia') {
-            ctx.fillStyle = '#8C6239'; ctx.beginPath(); ctx.arc(cx, cy - bh*0.1, Math.min(bw, bh)*0.18, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#5C3A21'; ctx.fillRect(cx - bw*0.22, cy + bh*0.08, bw*0.44, bh*0.32);
-          } else {
-            ctx.fillStyle = '#334155'; ctx.fillRect(cx - bw*0.35, cy - bh*0.25, bw*0.28, bh*0.55);
-            ctx.fillStyle = '#475569'; ctx.fillRect(cx + bw*0.05, cy - bh*0.32, bw*0.30, bh*0.62);
-          }
-        }
-      );
-    })(fr);
-  }
-}
-
-/* ==================== 4. TƯỜNG PHẢI: BẢNG CỔ ĐỘNG, GƯƠNG CỔ, KỆ SÁCH & GÓC CHĂN CON CÔNG ==================== */
-function drawCafeRightWallArt(ctx, cam) {
-  // 1. Bảng Gỗ Cổ Động "YÊU NƯỚC LÀ THI ĐUA · THI ĐUA LÀ YÊU NƯỚC" (1:1 ảnh mẫu 6!)
+  // 5. Biển Chỉ Lối "LÊN LẦU 2 ↑" trên đầu cầu thang gỗ (X = -4.9..-2.4, Y = 2.75..3.35)
   drawClippedWallQuad(
     ctx, cam,
-    [[5.93, 2.75, 3.00], [5.93, 2.75, 1.15], [5.93, 1.68, 1.15], [5.93, 1.68, 3.00]],
-    '#5C341D', '#2B180E', 2.2,
+    [[-4.95, 3.38, 14.72], [-2.35, 3.38, 14.72], [-2.35, 2.76, 14.72], [-4.95, 2.76, 14.72]],
+    '#3B4D2B', '#F4B93B', 2.0,
     function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(11, Math.round(bh * 0.16)));
+      var px = Math.max(5, Math.min(12, Math.round(bh * 0.34)));
       ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#F5EAD3'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('YÊU NƯỚC LÀ THI ĐUA', cx, cy - bh * 0.14, safeW);
-      ctx.fillStyle = '#FDE047';
-      ctx.fillText('THI ĐUA LÀ YÊU NƯỚC', cx, cy + bh * 0.16, safeW);
-    }
-  );
-
-  // 2. Gương Khung Gỗ Cổ & Kệ Sách Bao Cấp (Z=3.5..6.1)
-  drawClippedWallQuad(
-    ctx, cam,
-    [[5.93, 2.82, 4.75], [5.93, 2.82, 3.60], [5.93, 1.50, 3.60], [5.93, 1.50, 4.75]],
-    '#C7B28E', '#5C341D', 2.4,
-    function(cx, cy, bw, bh) {
-      // Ánh phản chiếu chéo mềm trên gương cổ
-      ctx.fillStyle = 'rgba(255,248,220,0.45)';
-      ctx.beginPath(); ctx.moveTo(cx - bw*0.35, cy - bh*0.45); ctx.lineTo(cx + bw*0.05, cy - bh*0.45);
-      ctx.lineTo(cx - bw*0.25, cy + bh*0.45); ctx.lineTo(cx - bw*0.45, cy + bh*0.45); ctx.closePath(); ctx.fill();
-    }
-  );
-  // Kệ sách bao cấp 2 tầng kế gương (Z=5.0..6.3)
-  drawClippedWallQuad(
-    ctx, cam,
-    [[5.93, 2.75, 6.30], [5.93, 2.75, 5.05], [5.93, 1.55, 5.05], [5.93, 1.55, 6.30]],
-    '#4A2C1A', '#2B180E', 2.0,
-    function(cx, cy, bw, bh) {
-      var bookCols = ['#B91C1C', '#4D7C0F', '#D97706', '#1D4ED8', '#7C2D12', '#3F6212'];
-      for (var row = 0; row < 2; row++) {
-        var by = cy - bh * 0.34 + row * bh * 0.44;
-        ctx.fillStyle = '#2B180E'; ctx.fillRect(cx - bw*0.44, by + bh*0.28, bw*0.88, Math.max(2, bh*0.06));
-        for (var bi = 0; bi < 6; bi++) {
-          ctx.fillStyle = bookCols[(bi + row * 2) % bookCols.length];
-          ctx.fillRect(cx - bw*0.40 + bi * bw*0.135, by, bw*0.105, bh*0.27);
-        }
-      }
-    }
-  );
-
-  // 3. Khung Vải Chăn Con Công & Gối Tựa Đỏ/Xanh Góc Sofa (Z=6.8..9.6)
-  drawClippedWallQuad(
-    ctx, cam,
-    [[5.93, 2.78, 9.45], [5.93, 2.78, 7.05], [5.93, 1.55, 7.05], [5.93, 1.55, 9.45]],
-    '#B91C1C', '#4A2C1A', 2.4,
-    function(cx, cy, bw, bh) {
-      drawPeacockFloralPattern(ctx, cx, cy, bw, bh);
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('🪜 LÊN LẦU 2 ↑', cx, cy, safeW);
     }
   );
 }
 
-/* ==================== 5. TƯỜNG QUẦY BAR ĐỐI DIỆN: RÈM XANH CỐM, BIỂN CÀ PHÊ VIỆT NAM & CỜ ĐỎ SAO VÀNG ==================== */
-function drawCafeBackBarWallArt(ctx, cam) {
-  // 1. Dải Rèm Vải Xanh Cốm / Xanh Bộ Đội rủ dọc phía trên quầy Bar (1:1 ảnh mẫu 2!)
-  var drapes = [-5.4, -4.1, -2.8, 2.8, 4.1, 5.4];
-  for (var di = 0; di < drapes.length; di++) {
-    var dx = drapes[di];
-    var col = di % 2 === 0 ? '#658044' : '#7D9B56';
-    drawPoly3D(ctx, cam, [[dx - 0.55, 2.68, 14.70], [dx + 0.55, 2.68, 14.70], [dx + 0.55, 3.82, 14.70], [dx - 0.55, 3.82, 14.70]], col, '#3F5229', 1.2);
-  }
-
-  // 2. Biển Gỗ Lớn "CÀ PHÊ VIỆT NAM · 1975" trung tâm trên quầy Bar (0% tràn chữ)
+/* ==================== 3. TẦNG 2: KỆ ZICZAC PHÍCH RẠNG ĐÔNG (TRÁI) · SONG GỖ DỌC (PHẢI) · CHĂN CON CÔNG (CUỐI) ==================== */
+function drawCafeFloor2Walls3D(ctx, cam) {
+  // ---- TƯỜNG TRÁI (X = -5.94 — Tường Xanh Rêu Cộng): Bảng CỘNG + Kệ Gỗ Ziczac Phích Nước Rạng Đông (1:1 ảnh 4!) ----
   drawClippedWallQuad(
     ctx, cam,
-    [[-2.35, 3.45, 14.72], [2.35, 3.45, 14.72], [2.35, 2.55, 14.72], [-2.35, 2.55, 14.72]],
-    '#3B4D2B', '#F4B93B', 2.4,
+    [[-5.93, 2.95, 0.85], [-5.93, 2.95, 2.75], [-5.93, 1.80, 2.75], [-5.93, 1.80, 0.85]],
+    '#6B4226', '#2B180E', 2.2,
     function(cx, cy, bw, bh, safeW) {
-      var p1 = Math.max(6, Math.min(14, Math.round(bh * 0.30)));
-      var p2 = Math.max(4, Math.min(9, Math.round(bh * 0.17)));
+      var p1 = Math.max(5, Math.min(11, Math.round(bh * 0.20)));
+      var p2 = Math.max(4, Math.min(9, Math.round(bh * 0.16)));
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.font = 'bold ' + p1 + 'px monospace';
+      ctx.font = 'bold ' + p1 + 'px monospace'; ctx.fillStyle = '#FDE047';
+      ctx.fillText('CỘNG CÀ PHÊ', cx, cy - bh * 0.18, safeW);
+      ctx.font = 'bold ' + p2 + 'px monospace'; ctx.fillStyle = '#FFFBF1';
+      ctx.fillText('ĐỘC LẬP · TỰ DO', cx, cy + bh * 0.08, safeW);
       ctx.fillStyle = '#FDE047';
-      ctx.fillText('CÀ PHÊ VIỆT NAM', cx, cy - bh * 0.14, safeW);
-      ctx.font = 'bold ' + p2 + 'px monospace';
-      ctx.fillStyle = '#FFFBF1';
-      ctx.fillText('★ ĐỘC LẬP · TỰ DO · HẠNH PHÚC ★', cx, cy + bh * 0.22, safeW);
+      ctx.fillText('HẠNH PHÚC', cx, cy + bh * 0.30, safeW);
     }
   );
 
-  // 3. Lá Cờ Đỏ Sao Vàng trang trọng bên trái quầy Bar (X=-4.6..-3.0, Y=1.55..2.45)
+  // Kệ Gỗ Ziczac Nghệ Thuật đựng Phích Nước Rạng Đông, sách & đèn bão (Z = 3.2..7.5, Y = 1.65..3.15 — 1:1 ảnh 4!)
   drawClippedWallQuad(
     ctx, cam,
-    [[-4.75, 2.45, 14.72], [-3.15, 2.45, 14.72], [-3.15, 1.55, 14.72], [-4.75, 1.55, 14.72]],
+    [[-5.93, 3.15, 3.20], [-5.93, 3.15, 7.50], [-5.93, 1.62, 7.50], [-5.93, 1.62, 3.20]],
+    'rgba(43,24,14,0.18)', '#4A2C1A', 1.8,
+    function(cx, cy, bw, bh) {
+      // Các thanh gỗ ngang-dọc Ziczac bất đối xứng
+      ctx.fillStyle = '#5C341D';
+      ctx.fillRect(cx - bw*0.46, cy - bh*0.18, bw*0.62, bh*0.06);
+      ctx.fillRect(cx - bw*0.12, cy + bh*0.12, bw*0.58, bh*0.06);
+      ctx.fillRect(cx - bw*0.46, cy + bh*0.40, bw*0.92, bh*0.07);
+      ctx.fillRect(cx - bw*0.24, cy - bh*0.44, bw*0.04, bh*0.86);
+      ctx.fillRect(cx + bw*0.18, cy - bh*0.44, bw*0.04, bh*0.86);
+      // Phích Nước Rạng Đông hoa đỏ (trái trên!)
+      ctx.fillStyle = '#DC2626'; ctx.fillRect(cx - bw*0.40, cy - bh*0.42, bw*0.11, bh*0.24);
+      ctx.fillStyle = '#FACC15'; ctx.fillRect(cx - bw*0.38, cy - bh*0.34, bw*0.07, bh*0.08);
+      // Sách cổ xếp nghiêng & Ca men sắt & Đèn bão
+      var bCols = ['#D97706', '#FFFBF1', '#B91C1C', '#65A30D'];
+      for (var bi = 0; bi < 4; bi++) {
+        ctx.fillStyle = bCols[bi];
+        ctx.fillRect(cx + bw*0.24 + bi * bw*0.055, cy - bh*0.08, bw*0.045, bh*0.20);
+      }
+      ctx.fillStyle = '#6B7B59'; ctx.fillRect(cx - bw*0.16, cy + bh*0.18, bw*0.09, bh*0.22);
+      ctx.fillStyle = '#F59E0B'; ctx.beginPath(); ctx.arc(cx + bw*0.34, cy + bh*0.28, Math.min(bw, bh)*0.08, 0, Math.PI*2); ctx.fill();
+    }
+  );
+
+  // Lá Cờ Đỏ Sao Vàng trang trọng góc tường trái Tầng 2 (Z = 8.1..9.9)
+  drawClippedWallQuad(
+    ctx, cam,
+    [[-5.93, 2.92, 8.10], [-5.93, 2.92, 9.90], [-5.93, 1.88, 9.90], [-5.93, 1.88, 8.10]],
     '#DA251D', '#7F1D1D', 1.6,
     function(cx, cy, bw, bh) {
       ctx.fillStyle = '#FFFF00';
@@ -259,43 +298,72 @@ function drawCafeBackBarWallArt(ctx, cam) {
     }
   );
 
-  // 4. Kệ Trưng Bày Ca Men Sắt Xanh Lính & Hũ Hạt Cà Phê bên phải quầy Bar (X=3.1..4.9)
+  // ---- TƯỜNG PHẢI (X = +5.94): Dãy Cửa Sổ Song Gỗ Dọc rèm ren nhìn ra phố chiều (1:1 ảnh 4!) ----
   drawClippedWallQuad(
     ctx, cam,
-    [[3.15, 2.45, 14.72], [4.95, 2.45, 14.72], [4.95, 1.55, 14.72], [3.15, 1.55, 14.72]],
-    '#4A2C1A', '#2B180E', 1.8,
+    [[5.93, 3.30, 10.60], [5.93, 3.30, 1.80], [5.93, 1.05, 1.80], [5.93, 1.05, 10.60]],
+    '#1E293B', '#4A2C1A', 2.4,
     function(cx, cy, bw, bh) {
-      ctx.fillStyle = '#2B180E'; ctx.fillRect(cx - bw*0.46, cy + bh*0.02, bw*0.92, Math.max(2, bh*0.07));
-      // 4 Ca men sắt xanh lính hàng trên
-      for (var mi = 0; mi < 4; mi++) {
-        ctx.fillStyle = '#6B7B59';
-        ctx.fillRect(cx - bw*0.40 + mi * bw*0.22, cy - bh*0.32, bw*0.14, bh*0.30);
+      // Ánh phố chiều tà lung linh vàng-xanh dịu ngoài song gỗ
+      ctx.fillStyle = '#334155'; ctx.fillRect(cx - bw*0.5, cy - bh*0.5, bw, bh*0.55);
+      ctx.fillStyle = '#1E293B'; ctx.fillRect(cx - bw*0.5, cy + bh*0.05, bw, bh*0.45);
+      var lights = [[-0.35, -0.05, '#FDE047'], [-0.15, 0.12, '#FB923C'], [0.08, -0.08, '#FDE047'], [0.28, 0.08, '#38BDF8'], [0.38, -0.02, '#FACC15']];
+      for (var li = 0; li < lights.length; li++) {
+        ctx.fillStyle = lights[li][2];
+        ctx.beginPath(); ctx.arc(cx + lights[li][0]*bw, cy + lights[li][1]*bh, Math.max(2, bh*0.06), 0, Math.PI*2); ctx.fill();
       }
-      // 3 Hũ cà phê rang xay & phin inox hàng dưới
-      for (var ji = 0; ji < 3; ji++) {
-        ctx.fillStyle = ji === 1 ? '#D97706' : '#94A3B8';
-        ctx.fillRect(cx - bw*0.36 + ji * bw*0.28, cy + bh*0.12, bw*0.18, bh*0.30);
+      // 12 song gỗ dọc đều tăm tắp kiểu nhà cổ Hà Nội/Sài Gòn
+      ctx.fillStyle = '#3B2314';
+      for (var bi = 0; bi < 12; bi++) {
+        ctx.fillRect(cx - bw*0.46 + bi * (bw*0.92 / 11), cy - bh*0.5, Math.max(1.5, bw*0.018), bh);
       }
+      // Rèm ren mỏng kem rủ phía trên
+      ctx.fillStyle = 'rgba(255,248,225,0.36)';
+      ctx.fillRect(cx - bw*0.5, cy - bh*0.5, bw, bh*0.24);
+    }
+  );
+
+  // ---- TƯỜNG CUỐI TẦNG 2 (Z = 14.72): YÊU NƯỚC LÀ THI ĐUA · CHĂN CON CÔNG · XUỐNG TẦNG 1 ↓ ----
+  drawClippedWallQuad(
+    ctx, cam,
+    [[-4.95, 3.38, 14.72], [-2.35, 3.38, 14.72], [-2.35, 2.76, 14.72], [-4.95, 2.76, 14.72]],
+    '#3B4D2B', '#F4B93B', 2.0,
+    function(cx, cy, bw, bh, safeW) {
+      var px = Math.max(5, Math.min(12, Math.round(bh * 0.34)));
+      ctx.font = 'bold ' + px + 'px monospace';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('🪜 XUỐNG TẦNG 1 ↓', cx, cy, safeW);
+    }
+  );
+  drawClippedWallQuad(
+    ctx, cam,
+    [[-1.65, 2.95, 14.72], [1.85, 2.95, 14.72], [1.85, 1.75, 14.72], [-1.65, 1.75, 14.72]],
+    '#5C341D', '#2B180E', 2.2,
+    function(cx, cy, bw, bh, safeW) {
+      var px = Math.max(5, Math.min(12, Math.round(bh * 0.17)));
+      ctx.font = 'bold ' + px + 'px monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#FFFBF1'; ctx.fillText('YÊU NƯỚC LÀ THI ĐUA', cx, cy - bh * 0.15, safeW);
+      ctx.fillStyle = '#FDE047'; ctx.fillText('THI ĐUA LÀ YÊU NƯỚC', cx, cy + bh * 0.17, safeW);
+    }
+  );
+  drawClippedWallQuad(
+    ctx, cam,
+    [[2.45, 2.95, 14.72], [5.15, 2.95, 14.72], [5.15, 1.65, 14.72], [2.45, 1.65, 14.72]],
+    '#B91C1C', '#4A2C1A', 2.4,
+    function(cx, cy, bw, bh) {
+      drawPeacockFloralPattern(ctx, cx, cy, bw, bh);
     }
   );
 }
 
-/* ==================== 6. HÀM TỔNG VẼ TOÀN BỘ MỸ THUẬT 3 TƯỜNG QUÁN CÀ PHÊ (QĐ 242) ==================== */
-function drawCafeVnCultureWalls3D(ctx, cam) {
-  // Diềm chỉ xanh cốm cổ điển chạy dọc đầu tường & len gỗ 3 bức tường
-  var friezes = [
-    [[-5.95, 3.48, 0.2], [-5.95, 3.48, 14.6], [-5.95, 3.58, 14.6], [-5.95, 3.58, 0.2]],
-    [[5.95, 3.48, 14.6], [5.95, 3.48, 0.2], [5.95, 3.58, 0.2], [5.95, 3.58, 14.6]],
-    [[-5.95, 3.48, 14.74], [5.95, 3.48, 14.74], [5.95, 3.58, 14.74], [-5.95, 3.58, 14.74]],
-    [[-5.95, 0.96, 0.2], [-5.95, 0.96, 14.6], [-5.95, 1.04, 14.6], [-5.95, 1.04, 0.2]],
-    [[5.95, 0.96, 14.6], [5.95, 0.96, 0.2], [5.95, 1.04, 0.2], [5.95, 1.04, 14.6]]
-  ];
-  for (var i = 0; i < friezes.length; i++) {
-    drawPoly3D(ctx, cam, friezes[i], '#4A5D36', '#D9B45A', 1);
+/* ==================== 4. HÀM ĐIỀU PHỐI MỸ THUẬT TƯỜNG THEO TẦNG (1 HOẶC 2) ==================== */
+function drawCafeVnCultureWalls3D(ctx, cam, floor) {
+  if (floor === 2) {
+    drawCafeFloor2Walls3D(ctx, cam);
+  } else {
+    drawCafeFloor1Walls3D(ctx, cam);
   }
-  drawCafeLeftWallArt(ctx, cam);
-  drawCafeRightWallArt(ctx, cam);
-  drawCafeBackBarWallArt(ctx, cam);
 }
 `;
 }

@@ -69,7 +69,7 @@ Mọi không gian mở nâng cấp lên chuẩn TPS 3D đều bắt buộc hỗ 
 | Thứ tự | Không gian | Trạng thái | Ghi chú |
 | :---: | :--- | :---: | :--- |
 | **1** | **Quán Phở Cổ Truyền** (`phoTps3dScene.ts`) | **Đã triển khai (QĐ 232–241)** | Chuẩn TPS 3D Interior-Only: Spring-Arm 6 mặt phẳng, Vintage 90s, 3 mặt tường Văn hóa VN |
-| **2** | **Quán Cà Phê Việt Nam** (`cafeTps3dScene.ts`) | **Đã triển khai (QĐ 242)** | Chuẩn TPS 3D Interior-Only: Cộng Cà Phê Bao Cấp ấm cúng (Vàng – Xanh cốm – Chăn Con Công), 2 Barista xanh lính, Cà Phê Cốt Dừa & Croissant, Góc Bàn Heo AI |
+| **2** | **Cộng Cà Phê 2 Tầng** (`cafeTps3dScene.ts`) | **Đã triển khai (QĐ 242–244)** | Kiến trúc độc bản 2 tầng (0% trùng bố cục Quán Phở): Tầng 1 bất đối xứng (Quầy Bar tủ lưới dọc tường phải + PICK UP HERE, cửa sổ rèm xanh tường trái, ghế bành Chăn Con Công, Tường Sách khổng lồ, Cầu thang gỗ 3D) ↔ Tầng 2 (tường xanh rêu Cộng, rèm vải bố thắt nút, bàn dài cộng đồng, Kệ Ziczac Phích Rạng Đông, Đài Đỏ + Điện thoại quay số, Góc Heo AI) |
 | 3 | **Cửa Hàng Adidas Hội An** | Kế hoạch tiếp theo | Mở cửa kính Hội An, dạo giữa kệ giày/áo 3D, thử áo trước gương |
 | 4 | **Sân Vận Động Trống Đồng FIFA** | Kế hoạch tiếp theo | Đi xuyên đường hầm 3D ra đường pitch, đứng sát biên xem trận 11v11 |
 | 5 | **Chùa / Nhà Thờ / Chợ Bến Thành** | Kế hoạch tiếp theo | Nâng cấp đồng bộ dùng chung `pixelTps3dEngine.ts` |

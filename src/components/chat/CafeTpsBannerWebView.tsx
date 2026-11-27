@@ -90,9 +90,17 @@ export const CafeTpsBannerWebView: React.FC<CafeTpsBannerWebViewProps> = ({
   }
   canvas:active { cursor: grabbing; }
   .hud-toast {
-    position: fixed; top: 16px; left: 68px; right: 14px;
+    position: fixed; top: 16px; left: 68px; right: 98px;
     pointer-events: none; display: flex; justify-content: center; z-index: 10;
   }
+  .floor-pill {
+    position: fixed; top: 16px; right: 12px; z-index: 16;
+    background: #3B4D2B; color: #FDE047;
+    border: 2.5px solid #2B2118; border-radius: 12px;
+    padding: 6px 10px; font-size: 11px; font-weight: 900;
+    box-shadow: 0 3px 0 #2B2118; cursor: pointer;
+  }
+  .floor-pill:active { transform: translateY(1px); }
   .hud-toast-pill {
     background: rgba(255, 251, 241, 0.95);
     border: 2.5px solid #2B2118;
@@ -123,7 +131,8 @@ export const CafeTpsBannerWebView: React.FC<CafeTpsBannerWebViewProps> = ({
 </head>
 <body>
 <canvas id="cafeCv"></canvas>
-<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Chào mừng đến Cà Phê Việt Nam!</div></div>
+<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Cộng Cà Phê · Tầng 1</div></div>
+<button id="floorPillBtn" class="floor-pill">Tầng 1 🪜</button>
 <div class="action-bar">
   <button id="mainActionBtn" class="action-btn" hidden></button>
   <button id="aiChatBtn" class="action-btn ai" hidden>💬 Trò chuyện cùng Heo AI</button>
@@ -151,6 +160,7 @@ ${cafeSceneScript}
   var cv = document.getElementById('cafeCv');
   var ctx = cv.getContext('2d');
   var toastPill = document.getElementById('toastPill');
+  var floorPillBtn = document.getElementById('floorPillBtn');
   var mainBtn = document.getElementById('mainActionBtn');
   var aiBtn = document.getElementById('aiChatBtn');
   var secBtn = document.getElementById('secActionBtn');
@@ -179,11 +189,14 @@ ${cafeSceneScript}
     var act = null;
     var sAct = null;
     var showAi = false;
+    var tables = getActiveCafeTables(st);
 
-    // Kiểm tra gần Góc Bàn Heo AI (Bàn 5: X=3.3, Z=9.0)
-    var dAi = Math.hypot(p.x - st.aiCoachPig.x, p.z - st.aiCoachPig.z);
-    if (dAi < 2.6 || (p.seated && p.seatTableId === 5)) {
-      showAi = true;
+    floorPillBtn.textContent = st.floor === 1 ? 'Tầng 1 🪜' : 'Lầu 2 🪜';
+
+    // Kiểm tra gần Góc Bàn Heo AI trên Tầng 2
+    if (st.floor === 2) {
+      var dAi = Math.hypot(p.x - st.aiCoachPig.x, p.z - st.aiCoachPig.z);
+      if (dAi < 2.6 || (p.seated && p.seatTableId === 3)) showAi = true;
     }
 
     if (p.seated) {
@@ -194,24 +207,31 @@ ${cafeSceneScript}
       }
       sAct = { id: 'stand_up', label: '🚶 Đứng dậy' };
     } else {
-      // Kiểm tra gần bàn trống
+      // Kiểm tra gần chân Cầu Thang Gỗ 3D góc sau trái (X < -1.4, Z > 9.2)
+      var nearStairs = (p.x < -1.35 && p.z > 9.15);
       var nearTb = null, bestD = 1.95;
-      for (var i = 0; i < st.tables.length; i++) {
-        var tb = st.tables[i];
+      for (var i = 0; i < tables.length; i++) {
+        var tb = tables[i];
         var d = Math.hypot(p.x - tb.chairX, p.z - tb.chairZ);
         if (d < bestD && (!tb.occupiedBy || tb.isAiTable)) {
           bestD = d; nearTb = tb;
         }
       }
-      if (nearTb) {
+      if (nearStairs) {
+        act = {
+          id: 'switch_floor',
+          targetFloor: st.floor === 1 ? 2 : 1,
+          label: st.floor === 1 ? '🪜 Bước lên Lầu 2 (Gác Xanh)' : '🪜 Xuống Tầng 1 (Quầy Bar)'
+        };
+      } else if (nearTb) {
         act = {
           id: 'sit_table',
           tableId: nearTb.id,
           label: nearTb.isAiTable ? '🪑 Ngồi chung bàn Heo AI' : '☕ Ngồi uống Cà Phê'
         };
-      } else if (p.z >= 9.6) {
-        act = { id: 'watch_barista', label: '👀 Xem Barista pha Cà Phê Phin' };
-      } else if (p.z <= 1.85 && Math.abs(p.x) <= 2.35) {
+      } else if (st.floor === 1 && p.x >= 2.1 && p.z >= 2.5 && p.z <= 10.6) {
+        act = { id: 'watch_barista', label: '👀 Xem Barista pha Cà Phê Cốt Dừa' };
+      } else if (st.floor === 1 && p.z <= 1.85 && Math.abs(p.x) <= 2.35) {
         act = { id: 'exit_cafe', label: '🚪 Ra lại Đại Lộ Sài Gòn' };
       }
     }
@@ -228,23 +248,32 @@ ${cafeSceneScript}
   function runAction(a) {
     if (!a) return;
     var p = st.pig;
+    var tables = getActiveCafeTables(st);
     postRN({ type: 'HAPTIC_MEDIUM' });
-    if (a.id === 'sit_table') {
-      var tb = st.tables[a.tableId];
+    if (a.id === 'switch_floor') {
+      triggerCafeFloorSwitch(st, a.targetFloor);
+    } else if (a.id === 'sit_table') {
+      var tb = tables[a.tableId];
+      if (!tb) return;
       p.x = tb.chairX; p.z = tb.chairZ;
       p.yaw = Math.atan2(tb.x - tb.chairX, tb.z - tb.chairZ);
       p.seated = true; p.walking = false; p.seatTableId = tb.id;
       p.drinkReady = !!tb.isAiTable; p.orderSent = false; p.eating = false;
       st.toast = tb.isAiTable
-        ? 'Heo AI chào bạn! Bấm nút xanh để trò chuyện về chi tiêu nhé 💬'
+        ? 'Heo AI chào bạn trên Lầu 2! Bấm nút xanh để trò chuyện nhé 💬'
         : 'Đệm Chăn Con Công êm quá! Gọi ngay ly Cà Phê Cốt Dừa nhé ☕';
       st.toastUntil = st.t + 4.0;
     } else if (a.id === 'order_coffee') {
       p.orderSent = true;
-      st.waiter.state = 'delivering';
-      st.waiter.targetTable = p.seatTableId;
-      st.waiter.carryCoffee = true;
-      st.toast = 'Barista áo xanh lính đang pha Cà Phê Cốt Dừa & nướng Bánh Sừng Bò...';
+      if (st.floor === 1) {
+        st.waiter.state = 'delivering';
+        st.waiter.targetTable = p.seatTableId;
+        st.waiter.carryCoffee = true;
+        st.toast = 'Barista áo xanh lính đang pha Cà Phê Cốt Dừa & nướng Bánh Sừng Bò...';
+      } else {
+        p.drinkReady = true; p.eating = true;
+        st.toast = 'Cà Phê Cốt Dừa & Bánh Sừng Bò trên Lầu 2 nóng hổi quá đã! ☕🥐';
+      }
       st.toastUntil = st.t + 4.0;
     } else if (a.id === 'sip_coffee') {
       p.eating = true;
@@ -255,13 +284,13 @@ ${cafeSceneScript}
       p.seatTableId = -1;
       p.z = Math.max(0.8, p.z - 0.5);
     } else if (a.id === 'watch_barista') {
-      p.targetX = 0; p.targetZ = 10.6; p.walking = true;
-      st.toast = '2 Barista áo xanh bộ đội đang đánh kem cốt dừa & châm phin thơm lừng!';
+      p.targetX = 2.6; p.targetZ = 6.6; p.walking = true;
+      st.toast = '2 Barista áo xanh bộ đội đang đánh kem cốt dừa & châm phin tại quầy lưới!';
       st.toastUntil = st.t + 4.0;
     } else if (a.id === 'exit_cafe') {
       if (!st.exiting) {
         st.exiting = true;
-        st.toast = 'Tạm biệt Quán Cà Phê Việt Nam! Ra lại Đại Lộ Sài Gòn...';
+        st.toast = 'Tạm biệt Cộng Cà Phê! Ra lại Đại Lộ Sài Gòn...';
         st.toastUntil = st.t + 2.0;
         setTimeout(function() { postRN({ type: 'EXIT_CAFE' }); }, 240);
       }
@@ -270,6 +299,11 @@ ${cafeSceneScript}
 
   mainBtn.addEventListener('click', function(e) { e.stopPropagation(); runAction(currentAction); });
   secBtn.addEventListener('click', function(e) { e.stopPropagation(); runAction(secAction); });
+  floorPillBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    postRN({ type: 'HAPTIC_MEDIUM' });
+    triggerCafeFloorSwitch(st, st.floor === 1 ? 2 : 1);
+  });
   aiBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     postRN({ type: 'OPEN_AI_CHAT' });

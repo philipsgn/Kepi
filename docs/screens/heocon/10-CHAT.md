@@ -580,15 +580,17 @@ Màn hình Tab 3 hiển thị:
 
 ---
 
-## 57. Quán Cà Phê Việt Nam TPS 3D — Cộng Cà Phê Bao Cấp Ấm Cúng (Vàng Ấm, Xanh Cốm & "Độc Lập - Tự Do - Hạnh Phúc" — Quyết định 242)
+## 57. Quán Cộng Cà Phê 2 Tầng TPS 3D Độc Bản — Kiến Trúc Khác Biệt 100% Quán Phở (Quyết định 242–244)
 - **Điều hướng thông minh (`PixelHubDashboard.tsx` & `ChatView.tsx`):**
-  - Chạm tiệm `CAFE` trên Đại Lộ Sài Gòn (`onEnterCafe` ➔ `'cafe_tps'`) mở **Quán Cà Phê TPS 3D Toàn Màn Hình (`CafeTpsView` + `CafeTpsBannerWebView`)** chuẩn Interior-Only, không thanh Tab card, Camera Spring-Arm 6 mặt phẳng chống xuyên tường (`wallMargin = 0.38m`).
-  - Thẻ `Heo AI` tiếp tục mở màn Trò chuyện (`'chat'`); ngay bên trong Quán Cà Phê 3D có **Góc Bàn Heo AI** (Heo AI đeo kính 1:1 chú Heo toàn App) cho phép chú Heo lại gần bấm `💬 Trò chuyện cùng Heo AI` chuyển thẳng sang màn Chat.
-- **Không gian Cộng Cà Phê Bao Cấp Ấm Cúng (`12m × 14.8m` — [cafeTps3dScene.ts](../../../src/components/chat/cafe/cafeTps3dScene.ts) & [cafeVnWallArt.ts](../../../src/components/chat/cafe/cafeVnWallArt.ts)):**
-  - Tường vàng đất ấm `#D8B268` + trần gỗ kín rủ **dải rèm vải xanh cốm/bộ đội** (`#5A6E43`, `#7D9B56`), 2 quạt trần 3 cánh quay 60fps, 6 đèn thả vàng mật ong & chao dù vải **Chăn Con Công**.
-  - Cửa gỗ xanh lính kính mờ đóng kín có thảm chùi chân & 2 chậu cây; khách NPC ra/vào **hé nhẹ duy nhất 1 cánh cửa phải (~35°)** đón luồng ánh sáng ngược sáng + tia nắng động trên sàn gạch bông; bấm ra cửa kích hoạt chuyển cảnh Fade-Out `240ms`.
-  - **3 Mặt Tường Văn Hóa Việt Nam (100% chống tràn chữ `ctx.clip()` + `safeW`):**
-    - Tường Trái: Bảng Thực Đơn Cà Phê (`THỰC ĐƠN CÀ PHÊ`: Cốt Dừa 35K, Bạc Xỉu 25K, Phin Đen 20K, Sừng Bò 28K), Bảng Gỗ Khẩu Hiệu **`ĐỘC LẬP · TỰ DO · HẠNH PHÚC`**, và cụm 10+ khung ảnh Sài Gòn/Việt Nam xưa.
-    - Tường Phải: Băng ghế gỗ dài đặt **gối tựa Chăn Con Công đỏ/xanh**, Bảng Gỗ **`YÊU NƯỚC LÀ THI ĐUA`**, Gương gỗ cổ, Kệ sách bao cấp & Góc Bàn Heo AI.
-    - Tường Quầy Bar Đối Diện: Dải rèm vải xanh cốm, Biển gỗ **`CÀ PHÊ VIỆT NAM · 1975`**, Lá Cờ Đỏ Sao Vàng & kệ trưng bày ca men sắt/phin cà phê.
-  - **Quầy Bar Đá Mài, 2 Barista Áo Xanh Lính Sao Vàng & Món Tả Thực (`pixelTps3dEngine.ts`):** 2 Barista & 1 Phục vụ mặc áo xanh bộ đội có ngôi sao vàng & mũ vải; Sprite món co giãn theo chiều sâu gồm **Cà Phê Cốt Dừa kem tuyết (`drawCoconutCoffeeSprite3D`)**, **Ca men sắt xanh lính pha phin (`drawEnamelMugCoffeeSprite3D`)** và **Bánh Sừng Bò chấm sữa đặc (`drawCroissantPlateSprite3D`)**.
+  - Chạm tiệm `CAFE` trên Đại Lộ Sài Gòn (`onEnterCafe` ➔ `'cafe_tps'`) mở **Quán Cộng Cà Phê 2 Tầng TPS 3D Toàn Màn Hình (`CafeTpsView` + `CafeTpsBannerWebView`)** chuẩn Interior-Only, không thanh Tab card, Camera Spring-Arm 6 mặt phẳng chống xuyên tường (`wallMargin = 0.38m`).
+  - Thẻ `Heo AI` tiếp tục mở màn Trò chuyện (`'chat'`); trên **Tầng 2** có **Góc Bàn Heo AI** (Heo AI đeo kính 1:1 chú Heo toàn App) cho phép chú Heo lại gần bấm `💬 Trò chuyện cùng Heo AI` chuyển thẳng sang màn Chat.
+- **Bố Cục 2 Tầng Độc Bản Không Trùng Lặp Quán Phở ([cafeTps3dScene.ts](../../../src/components/chat/cafe/cafeTps3dScene.ts) & [cafeVnWallArt.ts](../../../src/components/chat/cafe/cafeVnWallArt.ts)):**
+  - **Tầng 1 (Trệt — `floor: 1`, Sàn Xi Măng Mài Xám-Xanh, Bất Đối Xứng):**
+    - **Dọc Tường Phải (`X = +3.6..+5.8`):** Quầy Bar dài khung gỗ tủ lưới mắt cáo mặt bê tông đá mài, biển treo hồng-đỏ **`PICK UP HERE`**, 2 Barista áo xanh bộ đội ngôi sao vàng & mũ vải + 1 Phục vụ.
+    - **Dọc Tường Trái (`X = -5.94`):** Khung cửa sổ kính lớn rèm xanh cốm rủ 2 bên ngắm tán cây xanh + dãy bàn dài cửa sổ.
+    - **Giữa phòng & Tường Cuối:** 2 bàn tròn cổ + **ghế bành gỗ tay cong gối Chăn Con Công**, quạt sắt đứng, **Kệ Sách Xếp Chồng Khổng Lồ** trên tường xi măng loang, biển gỗ tròn **`ĐI NHẸ NÓI KHẼ`**, bảng **`ĐỘC LẬP · TỰ DO · HẠNH PHÚC`**, tủ gỗ điện thoại quay số/cassette, cửa xanh lính hé 1 cánh (~35°) đón tia nắng động, và **Cầu Thang Gỗ 3D 7 Bậc** lên Lầu 2 (chuyển tầng fade 200ms).
+  - **Tầng 2 (Lầu Trên — `floor: 2`, Sàn Gỗ Mộc, Tường Xanh Rêu Cộng `#4F6335`):**
+    - Trần mái gỗ nghiêng xà gồ + **Rèm Vải Bố Nâu Thắt Nút Rủ Giữa Phòng** + cột bê tông thô nhám.
+    - **Bàn Gỗ Dài Cộng Đồng** cùng 6 ghế gỗ đệm Chăn Con Công bày Cà Phê Cốt Dừa, Ca men sắt xanh lính & Bánh Sừng Bò chấm sữa đặc.
+    - **Tường Trái:** **Kệ Gỗ Ziczac Nghệ Thuật** đựng **Phích Nước Rạng Đông**, sách cổ & bảng `CỘNG CÀ PHÊ · ĐỘC LẬP · TỰ DO · HẠNH PHÚC`.
+    - **Tường Phải:** **Dãy Cửa Sổ Song Gỗ Dọc** + Bàn Bar song gỗ + Kệ khăn thổ cẩm đặt **Đài Radio Đỏ Cổ + Điện Thoại Quay Số Đen + Đồng Hồ Báo Thức** + **Góc Bàn Heo AI Đeo Kính** + Cầu thang xuống Tầng 1.

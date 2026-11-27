@@ -8128,9 +8128,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       engineCode.includes("h.role === 'barista'") &&
       wallCode.includes('function drawCafeVnCultureWalls3D') &&
       wallCode.includes('ĐỘC LẬP · TỰ DO') &&
-      wallCode.includes('THỰC ĐƠN CÀ PHÊ') &&
+      wallCode.includes('CỘNG CÀ PHÊ') &&
       wallCode.includes('YÊU NƯỚC LÀ THI ĐUA') &&
-      wallCode.includes('CÀ PHÊ VIỆT NAM') &&
       wallCode.includes('ctx.clip()') &&
       sceneCode.includes('function createCafeTpsState') &&
       sceneCode.includes('function renderCafeTpsScene') &&
@@ -8200,10 +8199,12 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     return ctx;
   }
 
-  // 1. Chạy thật 1 frame render cho Quán Cà Phê TPS 3D
-  const cafeCtx = createMockCtx();
+  // 1. Chạy thật 1 frame render cho Quán Cộng Cà Phê TPS 3D CẢ TẦNG 1 LẪN TẦNG 2!
+  const cafeF1Ctx = createMockCtx();
+  const cafeF2Ctx = createMockCtx();
   const cafeRunner = new Function(
-    'ctx',
+    'ctx1',
+    'ctx2',
     extractRaw(engineCode) +
       '\n' +
       extractRaw(cafeWallCode) +
@@ -8215,17 +8216,26 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       var bounds = { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85 };
       stepCafeTps(st, 0.016);
       updateTpsCamera(cam, st.pig.x, 0, st.pig.z, 400, 720, bounds);
-      renderCafeTpsScene(ctx, cam, st, 400, 720);
-      var tap = unprojectFloorTap(cam, 200, 560);
-      return { focal: cam.focal, tap: tap };
+      renderCafeTpsScene(ctx1, cam, st, 400, 720);
+      var tap1 = unprojectFloorTap(cam, 200, 560);
+      // Chuyển lên Tầng 2 & render thật frame Tầng 2!
+      st.floor = 2; st.pig.x = 0; st.pig.z = 2.0;
+      stepCafeTps(st, 0.016);
+      updateTpsCamera(cam, st.pig.x, 0, st.pig.z, 400, 720, bounds);
+      renderCafeTpsScene(ctx2, cam, st, 400, 720);
+      var tap2 = unprojectFloorTap(cam, 200, 560);
+      return { focal: cam.focal, tap1: tap1, tap2: tap2 };
     `
   );
-  const cafeRes = cafeRunner(cafeCtx);
-  const cafeStats = cafeCtx.getStats();
+  const cafeRes = cafeRunner(cafeF1Ctx, cafeF2Ctx);
+  const cafeF1Stats = cafeF1Ctx.getStats();
+  const cafeF2Stats = cafeF2Ctx.getStats();
   assert.ok(Number.isFinite(cafeRes.focal) && cafeRes.focal > 100, 'Cafe TPS camera focal must be finite > 100');
-  assert.ok(cafeRes.tap && Number.isFinite(cafeRes.tap.x) && Number.isFinite(cafeRes.tap.z), 'Cafe unprojectFloorTap must return finite floor coords');
-  assert.strictEqual(cafeStats.nanHits, 0, 'Cafe TPS 3D render must produce 0 NaN coordinates');
-  assert.ok(cafeStats.drawCalls > 80, 'Cafe TPS 3D render must draw > 80 primitives (got ' + cafeStats.drawCalls + ')');
+  assert.ok(cafeRes.tap1 && Number.isFinite(cafeRes.tap1.x) && cafeRes.tap2 && Number.isFinite(cafeRes.tap2.x), 'Cafe unprojectFloorTap must return finite coords on both floors');
+  assert.strictEqual(cafeF1Stats.nanHits, 0, 'Cafe Floor 1 render must produce 0 NaN coordinates');
+  assert.strictEqual(cafeF2Stats.nanHits, 0, 'Cafe Floor 2 render must produce 0 NaN coordinates');
+  assert.ok(cafeF1Stats.drawCalls > 100, 'Cafe Floor 1 must draw > 100 primitives (got ' + cafeF1Stats.drawCalls + ')');
+  assert.ok(cafeF2Stats.drawCalls > 100, 'Cafe Floor 2 must draw > 100 primitives (got ' + cafeF2Stats.drawCalls + ')');
 
   // 2. Chạy thật 1 frame render cho Quán Phở TPS 3D
   const phoCtx = createMockCtx();
@@ -8265,7 +8275,39 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'CafeTpsBannerWebView signatures and QD 243 3-layer safeguard docs must be synced'
   );
 
-  console.log('✅ Test 180 Passed: Headless Mock-Canvas Real-Frame Smoke Test (Pho=' + phoStats.drawCalls + ' calls, Cafe=' + cafeStats.drawCalls + ' calls, 0 NaN — Quyết định 243) Audit verified cleanly');
+  console.log('✅ Test 180 Passed: Headless Mock-Canvas Real-Frame Smoke Test (Pho=' + phoStats.drawCalls + ', CafeF1=' + cafeF1Stats.drawCalls + ', CafeF2=' + cafeF2Stats.drawCalls + ', 0 NaN — Quyết định 243) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 180 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (180/180)!');
+// =========================================================================
+// TEST 181: QUÁN CỘNG CÀ PHÊ 2 TẦNG ĐỘC BẢN (KHÁC 100% QUÁN PHỞ — QĐ 244)
+// =========================================================================
+{
+  const wallCode = fs.readFileSync('src/components/chat/cafe/cafeVnWallArt.ts', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/cafe/cafeTps3dScene.ts', 'utf8');
+  const bannerCode = fs.readFileSync('src/components/chat/CafeTpsBannerWebView.tsx', 'utf8');
+  const tpsDocCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+
+  assert.ok(
+    tpsDocCode.includes('QĐ 242–244') &&
+      chatDocCode.includes('Quyết định 242–244') &&
+      decisionsCode.includes('Quyết định 244') &&
+      wallCode.includes('function drawCafeFloor1Walls3D') &&
+      wallCode.includes('function drawCafeFloor2Walls3D') &&
+      wallCode.includes('PICK') &&
+      wallCode.includes('ĐI NHẸ') &&
+      wallCode.includes('LÊN LẦU 2') &&
+      wallCode.includes('XUỐNG TẦNG 1') &&
+      sceneCode.includes('function drawCafeStaircase3D') &&
+      sceneCode.includes('function drawBurlapCanopy3D') &&
+      sceneCode.includes('function triggerCafeFloorSwitch') &&
+      bannerCode.includes('floorPillBtn') &&
+      bannerCode.includes('switch_floor'),
+    'Cong Ca Phe 2-Floor unique architecture (Floor 1 right-wall mesh bar + PICK UP HERE + giant book wall + DI NHE NOI KHE + 3D wooden stairs <-> Floor 2 olive walls + burlap canopy + communal table + zigzag Rang Dong shelf + red radio + Heo AI) must be synced for QD 244'
+  );
+
+  console.log('✅ Test 181 Passed: Quán Cộng Cà Phê 2 Tầng Độc Bản Khác 100% Quán Phở (Quyết định 244) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 181 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (181/181)!');
