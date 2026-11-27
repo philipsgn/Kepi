@@ -87,17 +87,34 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
   }
   canvas:active { cursor: grabbing; }
   .hud-toast {
-    position: fixed; top: 16px; left: 68px; right: 16px;
+    position: fixed; top: 14px; left: 66px; right: 12px;
     pointer-events: none; display: flex; justify-content: center; z-index: 10;
   }
   .hud-toast-pill {
     background: rgba(255, 251, 241, 0.94);
-    border: 3px solid #2B2118;
-    border-radius: 14px;
-    padding: 6px 12px;
-    font-size: 12px; font-weight: 800; color: #2B2118;
-    box-shadow: 0 3px 0 #2B2118;
+    border: 2.5px solid #2B2118;
+    border-radius: 12px;
+    padding: 5px 10px;
+    font-size: 11px; font-weight: 800; color: #2B2118;
+    box-shadow: 0 2px 0 #2B2118;
     text-align: center; max-width: 340px;
+  }
+  .room-tabs {
+    position: fixed; top: 56px; left: 10px; right: 10px;
+    display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 4px;
+    scrollbar-width: none; z-index: 14;
+  }
+  .room-tabs::-webkit-scrollbar { display: none; }
+  .room-tab {
+    flex: 0 0 auto;
+    background: rgba(255, 251, 241, 0.92); color: #2B2118;
+    border: 2.5px solid #2B2118; border-radius: 12px;
+    padding: 5px 10px; font-size: 11px; font-weight: 900;
+    box-shadow: 0 2px 0 #2B2118; cursor: pointer; white-space: nowrap;
+  }
+  .room-tab.active {
+    background: #F4B93B; color: #2B2118;
+    transform: translateY(-1px);
   }
   .action-bar {
     position: fixed; bottom: 26px; left: 16px; right: 16px;
@@ -119,7 +136,14 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
 </head>
 <body>
 <canvas id="phoTpsCv" width="280" height="440"></canvas>
-<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Chạm sàn để đi · Vuốt để xoay góc nhìn 360°</div></div>
+<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Chào mừng đến Phở Cổ Phố Hội!</div></div>
+<div id="roomTabs" class="room-tabs">
+  <button class="room-tab active" data-room="garden" type="button">🏮 Sân Vườn</button>
+  <button class="room-tab" data-room="main_hall" type="button">🏛️ Sảnh Chính</button>
+  <button class="room-tab" data-room="vip_room" type="button">✨ Phòng VIP</button>
+  <button class="room-tab" data-room="kitchen" type="button">🔥 Bếp Lửa</button>
+  <button class="room-tab" data-room="tea_wc" type="button">🍵 Trà & WC</button>
+</div>
 <div id="actionBar" class="action-bar" hidden>
   <button id="primaryActBtn" class="action-btn" type="button"></button>
   <button id="secActBtn" class="action-btn sec" type="button" hidden></button>
@@ -148,14 +172,29 @@ var cam = createTpsCamera({ yaw: 0, pitch: -0.34, dist: 3.9, targetHeight: 0.95 
 var world = createPhoTpsWorld();
 var currentAction = null;
 var lastToast = '';
+var lastRoomId = '';
 var lastTime = performance.now();
 var keys = {};
 
 var cv = document.getElementById('phoTpsCv');
 var toastEl = document.getElementById('toastPill');
+var roomTabsEl = document.getElementById('roomTabs');
 var actionBar = document.getElementById('actionBar');
 var primaryBtn = document.getElementById('primaryActBtn');
 var secBtn = document.getElementById('secActBtn');
+
+if (roomTabsEl) {
+  roomTabsEl.addEventListener('click', function(e) {
+    var btn = e.target && e.target.closest ? e.target.closest('.room-tab') : null;
+    if (!btn) return;
+    e.stopPropagation();
+    var rid = btn.getAttribute('data-room');
+    if (rid) {
+      postHost({ type: 'HAPTIC_LIGHT' });
+      navigatePigToRoom(world, cam, rid);
+    }
+  });
+}
 
 function syncViewport() {
   if (!cv) return;
@@ -200,6 +239,8 @@ function onUp(x, y) {
         world.toastText = 'Heo đang ngồi ghế! Bấm Gọi Phở hoặc Đứng dậy nhé!';
       } else {
         var clamped = clampPigWorldPos(world, hit.x, hit.z);
+        world.pig.waypoints = [];
+        world.desiredCamYaw = null;
         world.pig.tx = clamped.x;
         world.pig.tz = clamped.z;
         world.pig.walking = true;
@@ -249,6 +290,16 @@ function syncHud() {
     lastToast = world.toastText;
     toastEl.textContent = lastToast;
   }
+  var curRoom = detectCurrentPhoRoom(world.pig.x, world.pig.z);
+  if (curRoom !== lastRoomId && roomTabsEl) {
+    lastRoomId = curRoom;
+    var btns = roomTabsEl.querySelectorAll('.room-tab');
+    for (var bi = 0; bi < btns.length; bi++) {
+      var rid = btns[bi].getAttribute('data-room');
+      if (rid === curRoom) btns[bi].classList.add('active');
+      else btns[bi].classList.remove('active');
+    }
+  }
   var act = getPhoContextAction(world);
   currentAction = act;
   if (!act) {
@@ -287,7 +338,7 @@ function frame(now) {
     }
   }
 
-  stepPhoTpsWorld(world, dt);
+  stepPhoTpsWorld(world, dt, cam);
   syncViewport();
 
   var ctx = cv.getContext('2d');
@@ -295,8 +346,8 @@ function frame(now) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, cv.width, cv.height);
 
-  updateTpsCamera(cam, world.pig.x, world.pig.seated ? 0.35 : 0, world.pig.z, cv.width, cv.height, {
-    minX: -5.85, maxX: 5.85, minZ: -6.2, maxZ: 14.2
+  updateTpsCamera(cam, world.pig.x, world.pig.seated ? 0.38 : 0, world.pig.z, cv.width, cv.height, {
+    minX: -10.55, maxX: 10.55, minZ: -7.6, maxZ: 16.8
   });
   renderPhoTps3D(ctx, cam, world);
   syncHud();

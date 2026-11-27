@@ -537,3 +537,16 @@ Màn hình Tab 3 hiển thị:
   - **Camera TPS Sau Lưng 360°:** Đặt sau lưng & hơi cao trên vai chú Heo, vuốt màn hình xoay tự do 360° ngắm toàn quán 3D có chiều sâu xa-gần (sàn gạch bông phối cảnh, tường vàng cổ điển, 3 quạt treo tường quay, bàn inox & ghế nhựa 3D, quầy bếp mở).
   - **Điều khiển tối giản không Joystick ảo:** Chạm điểm trên sàn/vật thể (`3D Raycast Tap-to-Walk`) để chú Heo đi tới; nút Context Action Pill nổi gọn ở đáy màn hình chỉ hiện khi gần vật thể tương tác (`[Mở cửa vào quán]`, `[Ngồi xuống]`, `[Gọi Phở Tái Nạm]`, `[Ăn Phở]`, `[Đứng dậy]`, `[Xem đầu bếp nấu]`, `[Ra vỉa hè]`).
   - **Chu trình nhập vai thực tế 100%:** Xuất phát ngoài vỉa hè trước biển `PHỞ BÒ GIA TRUYỀN` ➔ mở cửa gỗ–kính 2 cánh xoay bản lề 90° bước vào quán ➔ tìm ghế trống ngồi xuống ➔ gọi Phở (phục vụ chạy tới nhận món, báo bếp, đầu bếp trụng bánh chan nước dùng bốc khói, phục vụ bưng ra đặt lên bàn cho Heo ăn xì xụp) ➔ đứng dậy tự do đi vào khu vực bếp đứng cạnh xem đầu bếp nấu ăn, nhân viên bưng bê & khách hàng đẩy cửa ra vào thực tế.
+
+---
+
+## 53. Đại Tu Quán Phở Cổ Truyền 5 Gian Phòng Phố Hội Ấm Áp & Thanh Tab Tham Quan Đồng Bộ (Quyết định 233)
+- **Trần nhà kín ấm áp 100% (Chữa dứt điểm lỗi lộ bầu trời):** Khi chú Heo ở trong nhà (`z >= 0`), dựng trần kem ấm + hệ xà gồ gỗ lim nâu sẫm phối cảnh 3D + đèn lồng trụ vuông ánh vàng ấm trên cột vàng nghệ & đèn thả mây tre đan.
+- **Không gian 5 gian phòng liên hoàn (`22m × 24m`):**
+  1. **Sân Vườn & Mặt Tiền Phố Hội (`garden`):** Hàng rào gạch nung + gạch bông gió xanh ngọc, vòm dây leo & hoa giấy hồng, dây đèn lồng lụa nhiều màu, bàn gỗ ngoài trời, giá menu & cửa gỗ 2 cánh xoay bản lề 90°.
+  2. **Sảnh Chính Phố Hội (`main_hall`):** Sàn gạch bông Indochine điểm hoa văn xanh ngọc, cột vàng nghệ đèn lồng, vòm gỗ lim con tiện, bình phong song gỗ chạm, tranh phố cổ đóng khung, 6 bàn gỗ lim & ghế đệm xanh rêu bày đầy đủ mâm Phở Việt Nam.
+  3. **Gian Phòng VIP Cổ Kính (`vip_room`):** Thông qua cửa vòm gỗ bên trái, tường gạch nung trần, đèn mây tre, 2 bàn tiệc gỗ lim dài có bình hoa sen & bộ ấm chén Bát Tràng men xanh.
+  4. **Bếp Lửa Ninh Xương & Quầy Nguyên Liệu (`kitchen`):** Lối mở vào bếp cho Heo đứng sát xem Đầu bếp nấu ăn; tủ kính trưng bày thịt bò tái/nạm/gầu, bánh phở, hành ngò, thớt gỗ, 2 nồi nước dùng sôi bốc khói 3D & bồn rửa inox.
+  5. **Góc Trà Đạo & Phòng Vệ Sinh Cổ Truyền (`tea_wc`):** Thông qua cửa vòm gỗ bên phải; bàn trà Bát Tràng + quẩy nóng & khu WC sạch đẹp có bồn rửa gốm sứ, gương khung gỗ và 2 buồng gỗ lam.
+- **Nguyên liệu Phở Việt Nam chi tiết trên từng bàn:** Tô Phở đầy thịt bò tái-hành ngò-tỏi phi + khói 3D, ấm trà Bát Tràng men xanh-trắng, rổ gia vị đỏ (tương ớt, nước tương, giấm tỏi ớt ngâm), dĩa giá đỗ-rau thơm-chanh, quẩy nóng & chén trứng chần.
+- **Thanh Tab 5 Gian Phòng đồng bộ 2 chiều + Bo tròn chú Heo 1:1 Tab Vườn:** Bấm tab → chú Heo tự đi theo lộ trình waypoint xuyên cửa vòm tới gian phòng đó & xoay camera góc đẹp; khi tự đi bộ → tab tự sáng đúng gian phòng đang đứng.

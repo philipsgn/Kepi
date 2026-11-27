@@ -18,6 +18,12 @@ Thay vì nhìn từ trên xuống phẳng (2D top-down) gây cảm giác tách b
    - **Xoay tự do 360°:** Người dùng vuốt ngang/dọc màn hình để xoay góc nhìn 360° xung quanh chú Heo — xoay ra phía trước sẽ thấy thẳng gương mặt đáng yêu của chú Heo!
 3. **Sắp xếp chiều sâu chuẩn vật lý (Painter's Algorithm / Z-Sorting):**
    - Toàn bộ khối 3D (bàn, ghế, quầy bếp, nồi phở, cánh cửa xoay bản lề) và thực thể sống (Chú Heo, Đầu bếp, Nhân viên phục vụ, Khách hàng) đều được sắp xếp từ **xa nhất → gần camera nhất** theo tọa độ không gian camera (`cz`) trước khi vẽ, đảm bảo chú Heo đi sau bàn bị bàn che đúng thực tế và đi trước bàn nổi bật hoàn toàn.
+4. **Quy chuẩn Trần Nhà Kín 100% Trong Nhà (Zero Exposed Sky — QĐ 233):**
+   - Khi chú Heo ở ngoài sân/vỉa hè (`z < 0`): hiển thị bầu trời, tán cây, giàn hoa giấy & mặt tiền kiến trúc 2 tầng.
+   - Khi chú Heo bước vào bên trong nhà (`z >= 0`): **cấm tuyệt đối để lộ bầu trời xanh phía trên tường**! Phải dựng trần nhà kín ấm cúng (trần kem + hệ xà gồ gỗ lim nâu sẫm phối cảnh 3D + giàn đèn lồng tỏa ánh sáng vàng ấm).
+5. **Quy chuẩn Đa Gian Phòng Đồng Bộ Thanh Tab 2 Chiều (Multi-Room Waypoint Tour — QĐ 233):**
+   - Không gian mở rộng thành nhiều gian phòng liên hoàn ngăn cách bằng cửa vòm/bình phong gỗ chạm.
+   - Thanh Tab chuyển phòng phía trên đồng bộ 2 chiều với vị trí chú Heo: bấm Tab → chú Heo tự đi theo lộ trình waypoint xuyên qua cửa vòm tới gian phòng đó + xoay camera góc đẹp; khi tự đi bộ bằng Tap-to-Walk → Tab tự động highlight sáng gian phòng chú Heo đang đứng!
 
 ---
 

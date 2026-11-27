@@ -182,20 +182,48 @@ function drawBox3D(ctx, cam, cx, y0, cz, w, h, d, cols) {
   }
 }
 
-/* ==================== 3. CHÚ HEO MASCOT 4 GÓC NHÌN TPS (SAU LƯNG PUBG / NGHIÊNG / CHÍNH DIỆN / NGỒI) ==================== */
+function drawLanternGlow3D(ctx, cam, wx, wy, wz, lanternCol, glowCol, radius) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 24) return;
+  var r = Math.max(3, Math.min(26, pr.scale * (radius || 0.2)));
+  // Quầng sáng vàng ấm tỏa ra quanh đèn lồng cổ truyền
+  ctx.save();
+  ctx.globalAlpha = 0.24;
+  ctx.fillStyle = glowCol || '#FFE49E';
+  ctx.beginPath();
+  ctx.arc(pr.sx, pr.sy, r * 2.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 0.96;
+  // Thân đèn lồng pixel sắc nét có chóp gỗ & tua rua đỏ
+  var lw = Math.max(4, Math.round(r * 1.15));
+  var lh = Math.max(5, Math.round(r * 1.45));
+  ctx.fillStyle = '#2B2118';
+  ctx.fillRect(Math.round(pr.sx - lw * 0.5 - 1), Math.round(pr.sy - lh * 0.5 - 1), lw + 2, lh + 2);
+  ctx.fillStyle = lanternCol || '#FFF3C4';
+  ctx.fillRect(Math.round(pr.sx - lw * 0.5), Math.round(pr.sy - lh * 0.5), lw, lh);
+  // Nắp gỗ trên dưới & tua rua đỏ
+  ctx.fillStyle = '#4A2C1A';
+  ctx.fillRect(Math.round(pr.sx - lw * 0.45), Math.round(pr.sy - lh * 0.5 - 2), Math.max(2, Math.round(lw * 0.9)), 2);
+  ctx.fillRect(Math.round(pr.sx - lw * 0.45), Math.round(pr.sy + lh * 0.5), Math.max(2, Math.round(lw * 0.9)), 2);
+  ctx.fillStyle = '#DC2626';
+  ctx.fillRect(Math.round(pr.sx - 1), Math.round(pr.sy + lh * 0.5 + 2), 2, Math.max(2, Math.round(r * 0.45)));
+  ctx.restore();
+}
+
+/* ==================== 3. CHÚ HEO MASCOT BO TRÒN 4 GÓC NHÌN TPS (1:1 TAB VƯỜN — QĐ 233) ==================== */
 function drawPigTps3D(ctx, cam, pig, t) {
-  var liftY = pig.seated ? 0.36 : 0;
+  var liftY = pig.seated ? 0.42 : 0;
   var pr = projectPoint3D(cam, pig.x, liftY, pig.z);
   if (!pr) return;
-  var unit = Math.max(0.55, Math.min(4.2, pr.scale / 36));
+  var unit = Math.max(0.55, Math.min(4.0, pr.scale / 36));
   var px = Math.round(pr.sx);
   var py = Math.round(pr.sy);
-  var bounce = pig.walking ? Math.round(Math.abs(Math.sin(t * 11)) * 2.2 * unit) : (pig.eating ? Math.round(Math.abs(Math.sin(t * 7)) * 1.4 * unit) : 0);
+  var bounce = pig.walking ? Math.round(Math.abs(Math.sin(t * 11)) * 2.1 * unit) : (pig.eating ? Math.round(Math.abs(Math.sin(t * 7)) * 1.4 * unit) : 0);
   var rel = normalizeAngle(pig.yaw - cam.yaw);
   var absRel = Math.abs(rel);
   var view = absRel < 0.78 ? 'back' : (absRel > 2.32 ? 'front' : (rel > 0 ? 'right' : 'left'));
   var blink = (t % 3.8) < 0.14;
-  var step = pig.walking ? Math.round(Math.sin(t * 12) * 1.6 * unit) : 0;
+  var step = pig.walking ? Math.round(Math.sin(t * 12) * 1.5 * unit) : 0;
 
   function prRect(ox, oy, rw, rh, col) {
     ctx.fillStyle = col;
@@ -206,69 +234,75 @@ function drawPigTps3D(ctx, cam, pig, t) {
   ctx.save();
   ctx.fillStyle = 'rgba(43,33,24,0.28)';
   ctx.beginPath();
-  ctx.ellipse(px, Math.round(py + 1 * unit), Math.max(4, 10 * unit), Math.max(2, 3.6 * unit), 0, 0, Math.PI * 2);
+  ctx.ellipse(px, Math.round(py + 1 * unit), Math.max(4, 9.5 * unit), Math.max(2, 3.4 * unit), 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
   if (view === 'back') {
-    // GÓC NHÌN SAU LƯNG ĐẶC TRƯNG KIỂU PUBG: 2 tai vểnh, lưng hồng, khe nhét tiền vàng & đuôi xoắn!
-    prRect(-7, -4 + step * 0.4, 4, 4, '#2B2118'); prRect(-6, -4 + step * 0.4, 2, 3, '#D96D85');
-    prRect(3, -4 - step * 0.4, 4, 4, '#2B2118');  prRect(4, -4 - step * 0.4, 2, 3, '#D96D85');
-    // Thân sau tròn bầu bĩnh
-    prRect(-10, -17, 20, 14, '#2B2118');
-    prRect(-9, -16, 18, 12, '#F596A8');
-    prRect(-8, -16, 16, 4, '#FDBAC7'); // Ánh sáng trên lưng
-    prRect(-8, -6, 16, 2, '#D96D85');  // Bóng bụng dưới
-    // 2 Tai vểnh 2 bên đầu
-    prRect(-9, -21, 5, 5, '#2B2118'); prRect(-8, -20, 3, 3, '#F596A8');
-    prRect(4, -21, 5, 5, '#2B2118');  prRect(5, -20, 3, 3, '#F596A8');
-    // Khe nhét tiền vàng đặc trưng trên đỉnh lưng Heo Đất!
-    prRect(-3, -15, 6, 2, '#2B2118');
-    prRect(-2, -16, 4, 2, '#F4B93B');
-    // Đuôi xoắn lắc lư dễ thương phía sau
+    // GÓC SAU LƯNG BO TRÒN BẦU BĨNH KIỂU PUBG (1:1 Bảng màu Heo Con Tab Vườn!)
+    prRect(-6, -4 + step * 0.4, 4, 4, '#2B2118'); prRect(-5, -4 + step * 0.4, 2, 3, '#D96D85');
+    prRect(2, -4 - step * 0.4, 4, 4, '#2B2118');  prRect(3, -4 - step * 0.4, 2, 3, '#D96D85');
+    // Thân tròn bo góc 4 cạnh (không vuông cứng!)
+    prRect(-8, -18, 16, 15, '#2B2118');
+    prRect(-10, -16, 20, 11, '#2B2118');
+    prRect(-7, -17, 14, 13, '#F596A8');
+    prRect(-9, -15, 18, 9, '#F596A8');
+    prRect(-7, -17, 14, 4, '#FDBAC7'); // Vệt sáng hồng phấn đỉnh lưng
+    prRect(-7, -6, 14, 2, '#D96D85');  // Bóng tròn dưới bụng
+    // 2 Tai vểnh bo tròn dễ thương
+    prRect(-8, -22, 4, 5, '#2B2118'); prRect(-7, -21, 2, 3, '#F596A8');
+    prRect(4, -22, 4, 5, '#2B2118');  prRect(5, -21, 2, 3, '#F596A8');
+    // Khe nhét tiền xu vàng lấp lánh trên lưng Heo Đất
+    prRect(-3, -16, 6, 2, '#2B2118');
+    prRect(-2, -16, 4, 1, '#F4B93B');
+    // Đuôi xoắn cong lắc lư cực yêu
     var wag = Math.round(Math.sin(t * 9) * 1.2);
-    prRect(-2 + wag, -10, 4, 3, '#2B2118');
-    prRect(-1 + wag, -9, 2, 1, '#FDBAC7');
+    prRect(-2 + wag, -11, 4, 3, '#2B2118');
+    prRect(-1 + wag, -10, 2, 1, '#FDBAC7');
   } else if (view === 'front') {
-    // GÓC CHÍNH DIỆN (khi người dùng xoay camera ra trước mặt ngắm chú Heo!)
-    prRect(-7, -4 + step * 0.4, 4, 4, '#2B2118'); prRect(-6, -4 + step * 0.4, 2, 3, '#F596A8');
-    prRect(3, -4 - step * 0.4, 4, 4, '#2B2118');  prRect(4, -4 - step * 0.4, 2, 3, '#F596A8');
-    prRect(-10, -17, 20, 14, '#2B2118');
-    prRect(-9, -16, 18, 12, '#F596A8');
-    prRect(-8, -16, 16, 4, '#FDBAC7');
-    prRect(-9, -21, 5, 5, '#2B2118'); prRect(-8, -20, 3, 3, '#FDBAC7');
-    prRect(4, -21, 5, 5, '#2B2118');  prRect(5, -20, 3, 3, '#FDBAC7');
-    // Đôi mắt đen chớp chớp
+    // GÓC CHÍNH DIỆN BO TRÒN DỄ THƯƠNG 1:1 TAB VƯỜN
+    prRect(-6, -4 + step * 0.4, 4, 4, '#2B2118'); prRect(-5, -4 + step * 0.4, 2, 3, '#F596A8');
+    prRect(2, -4 - step * 0.4, 4, 4, '#2B2118');  prRect(3, -4 - step * 0.4, 2, 3, '#F596A8');
+    prRect(-8, -18, 16, 15, '#2B2118');
+    prRect(-10, -16, 20, 11, '#2B2118');
+    prRect(-7, -17, 14, 13, '#F596A8');
+    prRect(-9, -15, 18, 9, '#F596A8');
+    prRect(-7, -17, 14, 4, '#FDBAC7');
+    prRect(-8, -22, 4, 5, '#2B2118'); prRect(-7, -21, 2, 3, '#FDBAC7');
+    prRect(4, -22, 4, 5, '#2B2118');  prRect(5, -21, 2, 3, '#FDBAC7');
+    // Đôi mắt đen long lanh chớp chớp
     if (blink) {
       prRect(-6, -12, 3, 1, '#2B2118'); prRect(3, -12, 3, 1, '#2B2118');
     } else {
-      prRect(-6, -13, 3, 3, '#2B2118'); prRect(-5, -13, 1, 1, '#FFFFFF');
-      prRect(3, -13, 3, 3, '#2B2118');  prRect(4, -13, 1, 1, '#FFFFFF');
+      prRect(-6, -14, 3, 3, '#2B2118'); prRect(-5, -14, 1, 1, '#FFFFFF');
+      prRect(3, -14, 3, 3, '#2B2118');  prRect(4, -14, 1, 1, '#FFFFFF');
     }
-    // Mũi hồng 2 lỗ & má hồng
-    prRect(-4, -10, 8, 5, '#2B2118'); prRect(-3, -9, 6, 3, '#FBC2CE');
-    prRect(-2, -8, 1, 2, '#2B2118');  prRect(1, -8, 1, 2, '#2B2118');
-    prRect(-8, -9, 2, 2, '#F472B6');  prRect(6, -9, 2, 2, '#F472B6');
+    // Mũi hồng bầu 2 lỗ & má ửng hồng
+    prRect(-4, -11, 8, 5, '#2B2118'); prRect(-3, -10, 6, 3, '#FBC2CE');
+    prRect(-2, -9, 1, 2, '#2B2118');  prRect(1, -9, 1, 2, '#2B2118');
+    prRect(-8, -10, 2, 2, '#F472B6'); prRect(6, -10, 2, 2, '#F472B6');
   } else {
-    // GÓC NGHIÊNG TRÁI / PHẢI (bám dáng Heo 24×20 chuẩn Tab Vườn!)
+    // GÓC NGHIÊNG TRÁI / PHẢI BO TRÒN 1:1 TAB VƯỜN
     var dir = view === 'right' ? 1 : -1;
     function sr(ox, oy, rw, rh, col) {
       var ax = dir > 0 ? ox : -(ox + rw);
       prRect(ax, oy, rw, rh, col);
     }
-    sr(-8, -4 + step * 0.4, 3, 4, '#2B2118'); sr(-7, -4 + step * 0.4, 2, 3, '#D96D85');
+    sr(-7, -4 + step * 0.4, 3, 4, '#2B2118'); sr(-6, -4 + step * 0.4, 2, 3, '#D96D85');
     sr(4, -4 - step * 0.4, 3, 4, '#2B2118');  sr(5, -4 - step * 0.4, 2, 3, '#F596A8');
-    sr(-11, -16, 21, 13, '#2B2118');
-    sr(-10, -15, 19, 11, '#F596A8');
-    sr(-9, -15, 17, 3, '#FDBAC7');
-    sr(-2, -16, 5, 2, '#F4B93B'); // Khe tiền vàng
-    sr(2, -20, 5, 5, '#2B2118'); sr(3, -19, 3, 3, '#FDBAC7'); // Tai
-    sr(9, -12, 4, 6, '#2B2118'); sr(10, -11, 2, 4, '#FBC2CE'); // Mõm
+    sr(-9, -17, 17, 14, '#2B2118');
+    sr(-11, -15, 21, 10, '#2B2118');
+    sr(-8, -16, 15, 12, '#F596A8');
+    sr(-10, -14, 19, 8, '#F596A8');
+    sr(-8, -16, 15, 3, '#FDBAC7');
+    sr(-2, -17, 5, 2, '#F4B93B'); // Khe tiền vàng
+    sr(2, -21, 4, 5, '#2B2118'); sr(3, -20, 2, 3, '#FDBAC7'); // Tai bo tròn
+    sr(9, -12, 4, 5, '#2B2118'); sr(10, -11, 2, 3, '#FBC2CE'); // Mõm
     sr(5, -13, 2, blink ? 1 : 3, '#2B2118'); // Mắt
-    sr(-13, -11, 3, 3, '#2B2118'); // Đuôi
+    sr(-13, -12, 3, 3, '#2B2118'); // Đuôi xoắn
   }
 
-  // Hiệu ứng đũa & bọt niềm vui khi chú Heo đang ăn phở!
+  // Đũa tre khi chú Heo đang ăn Phở xì xụp!
   if (pig.eating) {
     var chY = -12 + Math.round(Math.sin(t * 10) * 1.5);
     prRect(9, chY, 6, 1, '#D97706');

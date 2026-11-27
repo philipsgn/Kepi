@@ -7853,4 +7853,43 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 169 Passed: Chuẩn Hóa Góc Nhìn Thứ 3 Nhập Vai (TPS 3D Kiểu PUBG) & Nâng Cấp Quán Phở Cổ Truyền (Quyết định 232) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 169 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (169/169)!');
+// =========================================================================
+// TEST 170: ĐẠI TU QUÁN PHỞ CỔ TRUYỀN 5 GIAN PHÒNG PHỐ HỘI, TRẦN GỖ LIM KÍN 100%, NGUYÊN LIỆU PHỞ & THANH TAB ĐỒNG BỘ (QĐ 233)
+// =========================================================================
+{
+  const tpsSpecCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
+
+  assert.ok(
+    tpsSpecCode.includes('Zero Exposed Sky') &&
+      specCode.includes('QĐ 232–233') &&
+      chatDocCode.includes('Quyết định 233') &&
+      decisionsCode.includes('Quyết định 233') &&
+      engineCode.includes('function drawLanternGlow3D') &&
+      sceneCode.includes('function detectCurrentPhoRoom') &&
+      sceneCode.includes('function navigatePigToRoom') &&
+      sceneCode.includes('function drawPhoTableIngredients3D') &&
+      sceneCode.includes('function drawHeritageChair3D') &&
+      sceneCode.includes('vip_room') &&
+      sceneCode.includes('tea_wc') &&
+      sceneCode.includes('main_hall') &&
+      sceneCode.includes('BÌNH PHONG SONG GỖ') &&
+      sceneCode.includes('Ấm trà sứ Bát Tràng') &&
+      sceneCode.includes('TRẦN NHÀ GỖ LIM KÍN 100%') &&
+      phoBannerCode.includes('id="roomTabs"') &&
+      phoBannerCode.includes('data-room="vip_room"') &&
+      phoBannerCode.includes('data-room="tea_wc"') &&
+      phoBannerCode.includes('navigatePigToRoom') &&
+      phoBannerCode.includes('detectCurrentPhoRoom'),
+    'Pho Heritage 5-room overhaul (enclosed mahogany ceiling with zero exposed sky, 5 rooms + 2-way synced room tabs, Bat Trang tea & detailed Pho ingredients, lanterns, wooden screen, rounded Pig, and docs) must be synced for QD 233'
+  );
+
+  console.log('✅ Test 170 Passed: Đại Tu Quán Phở Cổ Truyền 5 Gian Phòng Phố Hội, Trần Gỗ Lim Kín 100%, Nguyên Liệu Phở & Thanh Tab Đồng Bộ (Quyết định 233) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 170 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (170/170)!');
