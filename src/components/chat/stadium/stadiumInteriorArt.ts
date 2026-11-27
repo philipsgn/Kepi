@@ -154,6 +154,21 @@ function drawSideStands(c) {
 }
 
 /* ==================== 2. ĐƯỜNG PITCH 6 LÀN ĐỎ + SÂN CỎ FIFA + 2 KHUNG THÀNH + KHU KỸ THUẬT ==================== */
+function traceRoundedRect(c, x, y, w, h, r) {
+  var rr = Math.min(r, w / 2, h / 2);
+  c.beginPath();
+  c.moveTo(x + rr, y);
+  c.lineTo(x + w - rr, y);
+  c.quadraticCurveTo(x + w, y, x + w, y + rr);
+  c.lineTo(x + w, y + h - rr);
+  c.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+  c.lineTo(x + rr, y + h);
+  c.quadraticCurveTo(x, y + h, x, y + h - rr);
+  c.lineTo(x, y + rr);
+  c.quadraticCurveTo(x, y, x + rr, y);
+  c.closePath();
+}
+
 function drawRunningTrackAndFifaPitch(c) {
   // Nền bê tông bao quanh sân
   R(c, 68, 82, 704, 332, '#94A3B8');
@@ -161,8 +176,7 @@ function drawRunningTrackAndFifaPitch(c) {
   // Đường pitch chạy điền kinh chuẩn quốc tế 6 làn đỏ gạch (x: 74..766, y: 86..374)
   c.save();
   c.fillStyle = '#C2412D';
-  c.beginPath();
-  c.roundRect(74, 86, 692, 288, 72);
+  traceRoundedRect(c, 74, 86, 692, 288, 72);
   c.fill();
   c.lineWidth = 2;
   c.strokeStyle = '#7F1D1D';
@@ -172,8 +186,7 @@ function drawRunningTrackAndFifaPitch(c) {
   c.strokeStyle = 'rgba(255,255,255,0.68)';
   for (var lane = 1; lane <= 5; lane++) {
     var pad = lane * 5;
-    c.beginPath();
-    c.roundRect(74 + pad, 86 + pad, 692 - pad * 2, 288 - pad * 2, Math.max(12, 72 - pad));
+    traceRoundedRect(c, 74 + pad, 86 + pad, 692 - pad * 2, 288 - pad * 2, Math.max(12, 72 - pad));
     c.stroke();
   }
   c.restore();

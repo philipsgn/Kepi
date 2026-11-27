@@ -304,7 +304,9 @@ function stadiumFrame(now) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, cv.width, cv.height);
 
-  var st = window.__openRoom ? window.__openRoom.step(dt, now) : { x: 420, y: 368, camX: 280, camY: 70, facing: 1, walking: false };
+  var eng = window.__openRoom;
+  if (eng && eng.step) eng.step(dt, now);
+  var st = (eng && eng.state) ? eng.state : { x: 420, y: 368, camX: 280, camY: 70, facing: 1, walking: false };
   ctx.save();
   ctx.translate(-Math.round(st.camX), -Math.round(st.camY));
   if (STADIUM.bg) ctx.drawImage(STADIUM.bg, 0, 0);
@@ -312,8 +314,8 @@ function stadiumFrame(now) {
   drawPigInStadium(ctx, st, STADIUM.t);
   ctx.restore();
 
-  if (window.__openRoom && window.__openRoom.drawOverlays) {
-    window.__openRoom.drawOverlays(ctx, now);
+  if (eng && eng.drawOverlays) {
+    eng.drawOverlays(ctx, now);
   }
   requestAnimationFrame(stadiumFrame);
 }

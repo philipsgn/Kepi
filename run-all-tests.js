@@ -7807,6 +7807,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       stadiumBannerCode.includes('worldWidth: 840') &&
       stadiumBannerCode.includes('worldHeight: 680') &&
       stadiumBannerCode.includes('<iframe') &&
+      stadiumBannerCode.includes('eng.state') &&
+      !stadiumArtCode.includes('c.roundRect(') &&
       stadiumViewCode.includes('StadiumBannerWebView') &&
       funBannerCode.includes('onEnterStadium') &&
       hubCode.includes("'stadium'") &&
