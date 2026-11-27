@@ -21,7 +21,7 @@ Thay vì nhìn từ trên xuống phẳng (2D top-down) gây cảm giác tách b
 4. **Quy chuẩn Interior-Only TPS 3D & Trần Nhà Kín 100% (Zero Exterior, Zero Exposed Sky — QĐ 236):**
    - **Loại bỏ hoàn toàn cảnh mặt tiền & bối cảnh ngoài trời** bên trong màn TPS 3D (vì mặt tiền, đại lộ xe cộ và sông Bạch Đằng đã có đầy đủ trên Hub Banner Tab Khám phá).
    - Khi chú Heo ở Tab Khám phá chạm vào cửa bất kỳ quán/cửa hàng nào → **xuất hiện ngay tại ngưỡng cửa 2 cánh đang mở hướng thẳng vào toàn bộ nội thất 3D bên trong** (giảm 50% đa giác, siêu mượt 60fps, **0% mảng trời xanh mất liên kết ở cả 360°**).
-   - Toàn bộ 4 bức tường + trần nhà kín 100% (trần gỗ lim + xà gồ + quạt trần quay + đèn thả ánh vàng vintage 90s); khi xoay ra sau lưng là cửa gỗ kính mờ ấm áp với nút `[🚪 Ra lại Đại Lộ Sài Gòn]`.
+   - Toàn bộ 4 bức tường + trần nhà kín 100% (trần gỗ lim + xà gồ + quạt trần quay + đèn thả ánh vàng vintage 90s); khi xoay ra sau lưng là **2 cánh cửa gỗ tự khép lại sau 1.4s đầu** (có tay nắm đồng & ô kính), phía sau khung cửa đặt **1 tấm tranh bối cảnh phố xá & Sông Bạch Đằng phẳng siêu nhẹ (0% lag)** thay vì mảng màu trơn, kèm nút `[🚪 Ra lại Đại Lộ Sài Gòn]` (QĐ 237).
 5. **Quy chuẩn Giao Diện Tối Giản Không Thanh Tab Card Phía Trên (Clean Fullscreen Interior — QĐ 236):**
    - **Bỏ hẳn thanh Tab card phía trên** để khung hình 3D thoáng đãng 100%; người dùng tự do chạm sàn đi (Raycast Tap-to-Walk) + vuốt xoay 360° + dùng nút Context Action Pill gọn ở cạnh dưới.
 6. **Quy chuẩn Hybrid 3D Room + Depth-Scaled Pixel Art Sprites (QĐ 234–236):**

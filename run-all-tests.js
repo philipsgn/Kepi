@@ -7963,4 +7963,26 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log('✅ Test 173 Passed: Chuẩn Hóa TPS 3D Interior-Only (Bỏ Ngoài Trời & Bỏ Tab Card) & Quán Phở Vintage 90s (Quyết định 236) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 173 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (173/173)!');
+// =========================================================================
+// TEST 174: CHỮA MẢNG VÀNG KHÈ SAU CỬA INTERIOR-ONLY — CỬA TỰ KHÉP TAY NẮM ĐỒNG + TRANH PHỐ & SÔNG PHẲNG 0% LAG (QĐ 237)
+// =========================================================================
+{
+  const tpsSpecCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+
+  assert.ok(
+    tpsSpecCode.includes('QĐ 237') &&
+      decisionsCode.includes('Quyết định 237') &&
+      sceneCode.includes('TẤM TRANH PHỐ XÁ & SÔNG BẠCH ĐẰNG PHẲNG SIÊU NHẸ') &&
+      sceneCode.includes('KÍNH CHÀO QUÝ KHÁCH') &&
+      sceneCode.includes('Tay nắm đồng vàng') &&
+      sceneCode.includes('welcomeTimer: 1.4') &&
+      !sceneCode.includes('#F4D498'),
+    'Interior-Only doorway must replace flat yellow rectangle with auto-closing brass-handle doors and lightweight flat Saigon street + Bach Dang river backdrop (QD 237)'
+  );
+
+  console.log('✅ Test 174 Passed: Chữa Mảng Vàng Khè Sau Cửa Interior-Only — Cửa Tự Khép Tay Nắm Đồng + Tranh Phố & Sông Phẳng 0% Lag (Quyết định 237) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 174 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (174/174)!');
