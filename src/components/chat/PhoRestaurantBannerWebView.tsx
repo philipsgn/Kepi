@@ -138,7 +138,7 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
 <canvas id="phoTpsCv" width="280" height="440"></canvas>
 <div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Chào mừng đến Phở Cổ Phố Hội!</div></div>
 <div id="roomTabs" class="room-tabs">
-  <button class="room-tab active" data-room="garden" type="button">🏮 Sân Phố Cổ</button>
+  <button class="room-tab active" data-room="garden" type="button">🏮 Vỉa Hè &amp; Sông</button>
   <button class="room-tab" data-room="main_hall" type="button">🏛️ Sảnh Phở Chính</button>
   <button class="room-tab" data-room="kitchen" type="button">🔥 Bếp Lửa Phở</button>
 </div>

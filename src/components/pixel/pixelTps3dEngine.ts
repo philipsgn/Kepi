@@ -421,6 +421,79 @@ function drawQuayAndHerbsSprite3D(ctx, cam, wx, wy, wz) {
   ctx.restore();
 }
 
+/* ==================== 2C. SPRITE XE CỘ ĐẠI LỘ SÀI GÒN & TÀU THUYỀN SÔNG BẠCH ĐẰNG 60FPS (QĐ 235) ==================== */
+function drawRoadVehicleSprite3D(ctx, cam, v) {
+  var pr = projectPoint3D(cam, v.x, 0, v.z);
+  if (!pr || pr.cz > 55 || pr.cz < 0.8) return;
+  var u = Math.max(0.35, Math.min(3.2, pr.scale / 36));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  var d = v.dir || 1;
+  ctx.save();
+  ctx.translate(px, py);
+  if (d < 0) ctx.scale(-1, 1);
+  if (v.kind === 'bus') {
+    // Xe buýt Sài Gòn xanh-trắng chuẩn Tab Khám phá
+    ctx.fillStyle = 'rgba(15,23,42,0.35)'; ctx.fillRect(-30*u, -1*u, 60*u, 3*u);
+    ctx.fillStyle = '#1D4ED8'; ctx.strokeStyle = '#1E293B'; ctx.lineWidth = 1;
+    ctx.fillRect(-28*u, -24*u, 56*u, 20*u); ctx.strokeRect(-28*u, -24*u, 56*u, 20*u);
+    ctx.fillStyle = '#F8FAFC'; ctx.fillRect(-28*u, -13*u, 56*u, 5*u);
+    ctx.fillStyle = '#BAE6FD';
+    for (var wi = -24; wi <= 16; wi += 10) ctx.fillRect(wi*u, -21*u, 7*u, 6*u);
+    ctx.fillStyle = '#111827';
+    ctx.beginPath(); ctx.arc(-16*u, -3*u, 4*u, 0, Math.PI*2); ctx.arc(16*u, -3*u, 4*u, 0, Math.PI*2); ctx.fill();
+  } else if (v.kind === 'taxi') {
+    // Taxi Sài Gòn xanh lá / trắng
+    ctx.fillStyle = 'rgba(15,23,42,0.35)'; ctx.fillRect(-20*u, -1*u, 40*u, 3*u);
+    ctx.fillStyle = v.col || '#16A34A'; ctx.strokeStyle = '#1E293B'; ctx.lineWidth = 1;
+    ctx.fillRect(-18*u, -12*u, 36*u, 9*u); ctx.strokeRect(-18*u, -12*u, 36*u, 9*u);
+    ctx.fillRect(-11*u, -19*u, 20*u, 7*u); ctx.strokeRect(-11*u, -19*u, 20*u, 7*u);
+    ctx.fillStyle = '#BAE6FD'; ctx.fillRect(-9*u, -17*u, 7*u, 5*u); ctx.fillRect(0*u, -17*u, 7*u, 5*u);
+    ctx.fillStyle = '#FACC15'; ctx.fillRect(-3*u, -21*u, 6*u, 2*u);
+    ctx.fillStyle = '#111827';
+    ctx.beginPath(); ctx.arc(-11*u, -3*u, 3.2*u, 0, Math.PI*2); ctx.arc(11*u, -3*u, 3.2*u, 0, Math.PI*2); ctx.fill();
+  } else {
+    // Xe máy Việt Nam + người đội mũ bảo hiểm
+    ctx.fillStyle = 'rgba(15,23,42,0.32)'; ctx.fillRect(-10*u, -1*u, 20*u, 2.5*u);
+    ctx.fillStyle = '#111827';
+    ctx.beginPath(); ctx.arc(-6*u, -3*u, 2.8*u, 0, Math.PI*2); ctx.arc(6*u, -3*u, 2.8*u, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = v.col || '#DC2626'; ctx.fillRect(-7*u, -10*u, 14*u, 5*u);
+    ctx.fillStyle = '#22C55E'; ctx.fillRect(-3*u, -17*u, 6*u, 7*u); // Áo người lái
+    ctx.fillStyle = '#FACC15'; ctx.beginPath(); ctx.arc(0, -19.5*u, 3*u, 0, Math.PI*2); ctx.fill(); // Mũ bảo hiểm
+  }
+  ctx.restore();
+}
+
+function drawRiverBoatSprite3D(ctx, cam, b, t) {
+  var pr = projectPoint3D(cam, b.x, 0.1, b.z);
+  if (!pr || pr.cz > 85 || pr.cz < 1.2) return;
+  var u = Math.max(0.32, Math.min(2.6, pr.scale / 34));
+  var bob = Math.sin(t * 3.5 + (b.phase || 0)) * 1.4 * u;
+  var px = Math.round(pr.sx), py = Math.round(pr.sy + bob);
+  var d = b.dir || 1;
+  ctx.save();
+  ctx.translate(px, py);
+  if (d < 0) ctx.scale(-1, 1);
+  // Vệt sóng bọt trắng rẽ nước sông Bạch Đằng
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.fillRect(-34*u, 0, 56*u, 2.2*u);
+  if (b.kind === 'waterbus') {
+    // Tàu Saigon Waterbus vàng-trắng-xanh đặc trưng Sông Bạch Đằng!
+    ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#1E293B'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-24*u, -8*u); ctx.lineTo(26*u, -8*u); ctx.lineTo(31*u, -2*u); ctx.lineTo(-22*u, 1*u); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#FACC15'; ctx.fillRect(-20*u, -16*u, 38*u, 8*u); ctx.strokeRect(-20*u, -16*u, 38*u, 8*u);
+    ctx.fillStyle = '#0284C7';
+    for (var wi = -16; wi <= 10; wi += 8) ctx.fillRect(wi*u, -14*u, 5.5*u, 4*u);
+    ctx.fillStyle = '#DC2626'; ctx.fillRect(-22*u, -4*u, 48*u, 2*u);
+  } else {
+    // Thuyền gỗ / Tàu du lịch sông Sài Gòn
+    ctx.fillStyle = '#7C4F2B'; ctx.strokeStyle = '#2B180E'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-18*u, -6*u); ctx.lineTo(20*u, -6*u); ctx.lineTo(24*u, 0); ctx.lineTo(-16*u, 1*u); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#F5EAD3'; ctx.fillRect(-10*u, -13*u, 20*u, 7*u);
+    ctx.fillStyle = '#DC2626'; ctx.fillRect(-12*u, -15*u, 24*u, 2.5*u);
+  }
+  ctx.restore();
+}
+
 /* ==================== 3. CHÚ HEO MASCOT BO TRÒN 4 GÓC NHÌN TPS (1:1 TAB VƯỜN — QĐ 233) ==================== */
 function drawPigTps3D(ctx, cam, pig, t) {
   var liftY = pig.seated ? 0.42 : 0;

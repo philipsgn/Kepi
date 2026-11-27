@@ -7867,7 +7867,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     tpsSpecCode.includes('Zero Exposed Sky') &&
-      (specCode.includes('QĐ 232–234') || specCode.includes('QĐ 232–233')) &&
+      (specCode.includes('QĐ 232–235') || specCode.includes('QĐ 232–234') || specCode.includes('QĐ 232–233')) &&
       chatDocCode.includes('Quyết định 233') &&
       decisionsCode.includes('Quyết định 233') &&
       engineCode.includes('function drawLanternGlow3D') &&
@@ -7900,7 +7900,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 
   assert.ok(
     tpsSpecCode.includes('QĐ 234') &&
-      specCode.includes('QĐ 232–234') &&
+      (specCode.includes('QĐ 232–235') || specCode.includes('QĐ 232–234')) &&
       chatDocCode.includes('Quyết định 234') &&
       decisionsCode.includes('Quyết định 234') &&
       engineCode.includes('function drawPhoPotSprite3D') &&
@@ -7909,16 +7909,46 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       engineCode.includes('function drawBatTrangTeapotSprite3D') &&
       engineCode.includes('function drawCondimentCaddySprite3D') &&
       engineCode.includes('function drawQuayAndHerbsSprite3D') &&
-      sceneCode.includes('function drawOppositeOldQuarterStreet3D') &&
+      (sceneCode.includes('function drawSaigonAvenueAndBachDang3D') || sceneCode.includes('function drawOppositeOldQuarterStreet3D')) &&
       !sceneCode.includes('vip_room') &&
       !phoBannerCode.includes('data-room="vip_room"') &&
-      phoBannerCode.includes('🏮 Sân Phố Cổ') &&
       phoBannerCode.includes('🏛️ Sảnh Phở Chính') &&
       phoBannerCode.includes('🔥 Bếp Lửa Phở'),
-    'Pho TPS 3D polish (compact 3-zone smooth layout without VIP room, opposite old-quarter street backdrop, tethered lanterns, realistic depth-scaled Pixel Art sprites for pots/bowls/ingredients/teapot, and docs) must be synced for QD 234'
+    'Pho TPS 3D polish (compact 3-zone smooth layout without VIP room, realistic street/river backdrop, tethered lanterns, realistic depth-scaled Pixel Art sprites for pots/bowls/ingredients/teapot, and docs) must be synced for QD 234/235'
   );
 
   console.log('✅ Test 171 Passed: Tối Ưu Quán Phở TPS 3D Gọn Mượt 3 Khu (Bỏ Phòng VIP), Phố Cổ Đối Diện & Sprite Đồ Ăn/Xoong Nồi Tả Thực (Quyết định 234) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 171 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (171/171)!');
+// =========================================================================
+// TEST 172: ĐỒNG BỘ 1:1 MẶT TIỀN QUÁN PHỞ TAB KHÁM PHÁ, ĐẠI LỘ XE CỘ 60FPS & SÔNG BẠCH ĐẰNG CÓ TÀU BÈ — 0% MẢNG TRỜI XANH MẤT LIÊN KẾT (QĐ 235)
+// =========================================================================
+{
+  const tpsSpecCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
+
+  assert.ok(
+    tpsSpecCode.includes('QĐ 234–235') &&
+      specCode.includes('QĐ 232–235') &&
+      chatDocCode.includes('Quyết định 235') &&
+      decisionsCode.includes('Quyết định 235') &&
+      engineCode.includes('function drawRoadVehicleSprite3D') &&
+      engineCode.includes('function drawRiverBoatSprite3D') &&
+      sceneCode.includes('function drawSaigonAvenueAndBachDang3D') &&
+      sceneCode.includes('TIỆM CAFE MÁI HIÊN SỌC ĐỎ-TRẮNG') &&
+      sceneCode.includes('SÔNG BẠCH ĐẰNG') &&
+      sceneCode.includes('BỜ CÔNG VIÊN THỦ THIÊM') &&
+      sceneCode.includes('Mái ngói đỏ liền suốt') &&
+      phoBannerCode.includes('🏮 Vỉa Hè &amp; Sông'),
+    'Pho TPS 3D Hub-synced facade (continuous red roof, adjacent Cafe, live Saigon Avenue traffic, Bach Dang River with boats, Thu Thiem horizon, zero disconnected sky voids, and docs) must be synced for QD 235'
+  );
+
+  console.log('✅ Test 172 Passed: Đồng Bộ 1:1 Mặt Tiền Quán Phở Tab Khám Phá, Đại Lộ Xe Cộ 60fps & Sông Bạch Đằng Có Tàu Bè — 0% Mảng Trời Xanh Mất Liên Kết (Quyết định 235) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 172 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (172/172)!');

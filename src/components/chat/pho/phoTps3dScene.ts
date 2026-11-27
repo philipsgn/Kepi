@@ -15,7 +15,7 @@ export function buildPhoTps3dSceneScript(): string {
   return String.raw`
 /* ==================== 1. CẤU HÌNH 3 KHU GỌN MƯỢT & DẪN ĐƯỜNG WAYPOINT ĐỒNG BỘ TAB ==================== */
 var PHO_ROOM_DESTS = {
-  garden:    { x: 0.0, z: -2.6, yaw: 0.0,  camYaw: 0.0,   label: '🏮 Sân Phố Cổ Phở Gia Truyền' },
+  garden:    { x: 0.0, z: -2.4, yaw: 0.0,  camYaw: 0.0,   label: '🏮 Vỉa Hè Quán Phở & Sông Bạch Đằng' },
   main_hall: { x: 0.0, z: 2.8,  yaw: 0.0,  camYaw: 0.0,   label: '🏛️ Sảnh Phở Chính Ấm Cúng' },
   kitchen:   { x: 0.6, z: 12.6, yaw: -1.1, camYaw: -0.65, label: '🔥 Bếp Lửa Phở & Quầy Nguyên Liệu' }
 };
@@ -144,7 +144,21 @@ function createPhoTpsWorld() {
     waiters: waiters,
     chef: chef,
     customers: customers,
-    toastText: 'Chào mừng đến Phở Cổ Phố Hội! Chạm sàn để đi hoặc bấm Tab trên để tham quan'
+    // 5 Xe cộ chạy 2 chiều 60fps trên Đại Lộ Sài Gòn trước mặt tiền quán Phở (QĐ 235)
+    vehicles: [
+      { kind: 'moto', x: -16, z: -5.9, sp: 6.2, dir: 1,  col: '#DC2626' },
+      { kind: 'taxi', x: 6,   z: -5.9, sp: 5.4, dir: 1,  col: '#16A34A' },
+      { kind: 'bus',  x: 18,  z: -8.7, sp: 4.5, dir: -1, col: '#1D4ED8' },
+      { kind: 'moto', x: -4,  z: -8.7, sp: 6.6, dir: -1, col: '#2563EB' },
+      { kind: 'taxi', x: -24, z: -8.7, sp: 5.2, dir: -1, col: '#F8FAFC' }
+    ],
+    // 3 Tàu Waterbus & thuyền chạy 2 chiều 60fps trên Sông Bạch Đằng bên kia đường (QĐ 235)
+    boats: [
+      { kind: 'waterbus', x: -22, z: -18.5, sp: 2.8, dir: 1,  phase: 0.2 },
+      { kind: 'boat',     x: 16,  z: -24.5, sp: 2.1, dir: -1, phase: 1.5 },
+      { kind: 'waterbus', x: 34,  z: -29.5, sp: 2.5, dir: -1, phase: 2.8 }
+    ],
+    toastText: 'Mặt tiền Quán Phở nhìn ra Đại Lộ Sài Gòn & Sông Bạch Đằng · Chạm sàn để đi!'
   };
 }
 
@@ -256,6 +270,20 @@ function stepPhoTpsWorld(w, dt, cam) {
 
   w.chef.x = -1.8 + Math.sin(w.t * 0.9) * 1.3;
   w.chef.moving = Math.abs(Math.cos(w.t * 0.9)) > 0.3;
+
+  // Cập nhật xe cộ chạy 60fps trên Đại Lộ Sài Gòn & tàu bè chạy trên Sông Bạch Đằng (QĐ 235)
+  for (var vi = 0; vi < w.vehicles.length; vi++) {
+    var v = w.vehicles[vi];
+    v.x += v.dir * v.sp * dt;
+    if (v.dir > 0 && v.x > 38) v.x = -38;
+    else if (v.dir < 0 && v.x < -38) v.x = 38;
+  }
+  for (var bi = 0; bi < w.boats.length; bi++) {
+    var b = w.boats[bi];
+    b.x += b.dir * b.sp * dt;
+    if (b.dir > 0 && b.x > 52) b.x = -52;
+    else if (b.dir < 0 && b.x < -52) b.x = 52;
+  }
 
   // FSM Khách hàng NPC ra vào cửa & ăn Phở thực tế 100%
   for (var i = 0; i < w.customers.length; i++) {
@@ -481,48 +509,66 @@ function drawHeritageChair3D(ctx, cam, se) {
   drawBox3D(ctx, cam, se.x, 0.46, backZ, 0.54, 0.50, 0.08, { top: '#5C341D', front: '#4A2C1A', side: '#3B2314' });
 }
 
-function drawOppositeOldQuarterStreet3D(ctx, cam) {
-  // Mặt đường nhựa phố cổ đối diện quán (Z: -5.4 .. -10.4) -> không còn khoảng không bầu trời trống (Hình 4!)
-  drawPoly3D(ctx, cam, [[-14,0,-5.4],[14,0,-5.4],[14,0,-10.4],[-14,0,-10.4]], '#475569', '#334155', 1);
-  // Vạch kẻ đường trắng giữa phố
-  for (var rx = -10; rx <= 10; rx += 3.2) {
-    drawPoly3D(ctx, cam, [[rx,0.01,-7.7],[rx+1.6,0.01,-7.7],[rx+1.6,0.01,-8.0],[rx,0.01,-8.0]], '#F8FAFC', null, 0);
+function drawSaigonAvenueAndBachDang3D(ctx, cam, w) {
+  // 1. Vỉa hè Sài Gòn trải dài vô tận 2 bên (X: -65..+65, Z: 0..-4.3) -> 0% mảng trời xanh mất liên kết!
+  drawPoly3D(ctx, cam, [[-65,0,0],[65,0,0],[65,0,-4.3],[-65,0,-4.3]], '#DFCFB2', null, 0);
+  // Bó vỉa vạch trắng-đen chuẩn Banner Tab Khám phá (Z: -4.3..-4.65)
+  drawPoly3D(ctx, cam, [[-65,0.01,-4.3],[65,0.01,-4.3],[65,0.01,-4.65],[-65,0.01,-4.65]], '#2B2118', null, 0);
+  for (var kx = -28; kx <= 28; kx += 2.4) {
+    drawPoly3D(ctx, cam, [[kx,0.02,-4.3],[kx+1.2,0.02,-4.3],[kx+1.2,0.02,-4.65],[kx,0.02,-4.65]], '#F8FAFC', null, 0);
   }
-  // Vỉa hè bên kia đường (Z: -10.4 .. -11.8)
-  drawPoly3D(ctx, cam, [[-14,0,-10.4],[14,0,-10.4],[14,0,-11.8],[-14,0,-11.8]], '#DFCFB2', '#94A3B8', 1);
-  // Dãy 3 nhà Phố Cổ tường vàng nghệ mái ngói đỏ đối diện (Z = -11.8) che kín chân trời!
-  var houses = [
-    { x0: -12, x1: -4.2, col: '#E6B34B', roof: '#B83224' },
-    { x0: -4.2, x1: 4.2, col: '#DFAA3E', roof: '#A62D20' },
-    { x0: 4.2, x1: 12,  col: '#E8BC5A', roof: '#B83224' }
-  ];
-  for (var hi = 0; hi < houses.length; hi++) {
-    var h = houses[hi];
-    drawPoly3D(ctx, cam, [[h.x0,0,-11.8],[h.x1,0,-11.8],[h.x1,5.2,-11.8],[h.x0,5.2,-11.8]], h.col, '#4A2C1A', 1.2);
-    drawPoly3D(ctx, cam, [[h.x0,5.2,-11.8],[h.x1,5.2,-11.8],[h.x1,6.4,-12.4],[h.x0,6.4,-12.4]], h.roof, '#3B1E10', 1);
-    // Cửa sổ gỗ lá sách nhà phố cổ đối diện
-    var mx = (h.x0 + h.x1) * 0.5;
-    drawPoly3D(ctx, cam, [[mx-1.2,2.8,-11.75],[mx+1.2,2.8,-11.75],[mx+1.2,4.3,-11.75],[mx-1.2,4.3,-11.75]], '#4A2C1A', '#FFFBF1', 1);
-    drawPoly3D(ctx, cam, [[mx-1.4,0.1,-11.75],[mx+1.4,0.1,-11.75],[mx+1.4,2.2,-11.75],[mx-1.4,2.2,-11.75]], '#5C341D', '#2B180E', 1);
+  // 2. Đại lộ Sài Gòn 2 làn xe (Z: -4.65..-10.6, X: -70..+70)
+  drawPoly3D(ctx, cam, [[-70,0,-4.65],[70,0,-4.65],[70,0,-10.6],[-70,0,-10.6]], '#3B424C', '#2B2118', 1);
+  for (var rx = -34; rx <= 34; rx += 3.6) {
+    drawPoly3D(ctx, cam, [[rx,0.01,-7.45],[rx+1.8,0.01,-7.45],[rx+1.8,0.01,-7.75],[rx,0.01,-7.75]], '#FACC15', null, 0);
   }
-  // Hàng cây xanh rợp bóng bên kia đường
-  var treeXs = [-7.8, -1.2, 6.2];
-  for (var ti = 0; ti < treeXs.length; ti++) {
-    var tp = projectPoint3D(cam, treeXs[ti], 2.8, -10.8);
-    if (tp && tp.cz > 0.5) {
-      var tr = Math.max(12, Math.min(68, tp.scale * 1.15));
-      ctx.save();
-      ctx.fillStyle = '#5C3A21';
-      ctx.fillRect(Math.round(tp.sx - tr * 0.14), Math.round(tp.sy), Math.round(tr * 0.28), Math.round(tr * 1.1));
-      ctx.fillStyle = '#1E5B2E';
-      ctx.beginPath(); ctx.arc(tp.sx, tp.sy - tr * 0.1, tr * 0.9, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#2E7D32';
-      ctx.beginPath(); ctx.arc(tp.sx - tr * 0.25, tp.sy - tr * 0.25, tr * 0.65, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#4CAF50';
-      ctx.beginPath(); ctx.arc(tp.sx + tr * 0.22, tp.sy - tr * 0.35, tr * 0.45, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-    }
+  // 3. Bờ kè Bến Bạch Đằng lát đá + cây xanh ven sông (Z: -10.6..-12.8, X: -75..+75)
+  drawPoly3D(ctx, cam, [[-75,0,-10.6],[75,0,-10.6],[75,0,-12.8],[-75,0,-12.8]], '#CBD5E1', '#64748B', 1);
+  drawPoly3D(ctx, cam, [[-75,0,-12.8],[75,0,-12.8],[75,0.75,-12.8],[-75,0.75,-12.8]], '#94A3B8', '#475569', 1); // Lan can bờ kè
+  // 4. SÔNG BẠCH ĐẰNG rộng lớn lấp lánh sóng (Z: -12.8..-35.0, X: -85..+85)
+  drawPoly3D(ctx, cam, [[-85,0,-12.8],[85,0,-12.8],[85,0,-35.0],[-85,0,-35.0]], '#3B8CB8', null, 0);
+  // Vệt sóng lấp lánh chạy nhẹ trên mặt sông Bạch Đằng
+  for (var wi = 0; wi < 12; wi++) {
+    var wx = -32 + ((wi * 9.5 + w.t * (wi % 2 === 0 ? 1.4 : -1.2)) % 64 + 64) % 64;
+    var wz = -15.5 - (wi % 5) * 3.8;
+    drawPoly3D(ctx, cam, [[wx,0.02,wz],[wx+2.4,0.02,wz],[wx+2.4,0.02,wz-0.25],[wx,0.02,wz-0.25]], 'rgba(224,242,254,0.55)', null, 0);
   }
+  // 5. BỜ CÔNG VIÊN THỦ THIÊM xanh mướt & dãy skyline xa khép kín 100% đường chân trời (Z: -35.0..-42.0)
+  drawPoly3D(ctx, cam, [[-95,0,-35.0],[95,0,-35.0],[95,2.2,-35.5],[-95,2.2,-35.5]], '#3B8249', null, 0);
+  drawPoly3D(ctx, cam, [[-95,2.2,-35.5],[95,2.2,-35.5],[95,4.8,-36.0],[-95,4.8,-36.0]], '#7AA7CE', null, 0);
+  // 6. Vẽ 3 Tàu Waterbus & thuyền chạy 60fps trên Sông Bạch Đằng (từ xa tới gần)
+  var sortedBoats = w.boats.slice().sort(function(a, b) { return a.z - b.z; });
+  for (var bi = 0; bi < sortedBoats.length; bi++) {
+    drawRiverBoatSprite3D(ctx, cam, sortedBoats[bi], w.t);
+  }
+  // 7. Vẽ 5 Xe máy / Taxi / Xe buýt chạy 60fps trên Đại Lộ Sài Gòn
+  var sortedVehs = w.vehicles.slice().sort(function(a, b) { return a.z - b.z; });
+  for (var vi = 0; vi < sortedVehs.length; vi++) {
+    drawRoadVehicleSprite3D(ctx, cam, sortedVehs[vi]);
+  }
+  // 8. Dãy công trình kế bên Quán Phở (Z = 0, kéo dài 2 phía -> 0% hở trời xanh khi xoay trái/phải!)
+  // BÊN PHẢI (X: +6..+22): TIỆM CAFE MÁI HIÊN SỌC ĐỎ-TRẮNG 1:1 BANNER TAB KHÁM PHÁ!
+  drawPoly3D(ctx, cam, [[6.0,0,0],[22.0,0,0],[22.0,5.2,0],[6.0,5.2,0]], '#F2DBAE', '#2B2118', 1.2);
+  drawPoly3D(ctx, cam, [[6.0,5.2,0],[22.0,5.2,0],[22.0,5.8,-0.4],[6.0,5.8,-0.4]], '#5C3A21', '#2B2118', 1);
+  // 3 Cửa sổ xanh tầng 2 của Tiệm CAFE
+  var cafeWinXs = [8.5, 13.0, 17.5];
+  for (var cwi = 0; cwi < 3; cwi++) {
+    var cwx = cafeWinXs[cwi];
+    drawPoly3D(ctx, cam, [[cwx,3.2,-0.04],[cwx+2.4,3.2,-0.04],[cwx+2.4,4.4,-0.04],[cwx,4.4,-0.04]], '#5B8FB9', '#2B2118', 1.2);
+  }
+  // Biển nâu CAFE + Mái hiên sọc đỏ-trắng đặc trưng!
+  drawPoly3D(ctx, cam, [[9.0,2.2,-0.05],[19.0,2.2,-0.05],[19.0,2.9,-0.05],[9.0,2.9,-0.05]], '#4A2C1A', '#2B2118', 1.2);
+  for (var ax = 6.4; ax < 21.6; ax += 1.2) {
+    var isRed = Math.floor(ax * 2) % 2 === 0;
+    drawPoly3D(ctx, cam, [[ax,1.65,-0.35],[ax+1.2,1.65,-0.35],[ax+1.2,2.2,0],[ax,2.2,0]], isRed ? '#D93829' : '#FFFDF7', '#2B2118', 0.8);
+  }
+  drawPoly3D(ctx, cam, [[7.0,0.05,-0.04],[12.0,0.05,-0.04],[12.0,1.65,-0.04],[7.0,1.65,-0.04]], '#A9C8D9', '#2B2118', 1);
+  drawPoly3D(ctx, cam, [[15.0,0.05,-0.04],[20.8,0.05,-0.04],[20.8,1.65,-0.04],[15.0,1.65,-0.04]], '#A9C8D9', '#2B2118', 1);
+  drawPoly3D(ctx, cam, [[12.5,0.05,-0.04],[14.5,0.05,-0.04],[14.5,1.65,-0.04],[12.5,1.65,-0.04]], '#6E452A', '#2B2118', 1);
+  // Dãy nhà phố kéo dài xa bên phải (X: +22..+60) & bên trái (X: -60..-6) khép kín 100% chân trời!
+  drawPoly3D(ctx, cam, [[22.0,0,0],[60.0,0,0],[60.0,5.4,0],[22.0,5.4,0]], '#E6A825', '#2B2118', 1);
+  drawPoly3D(ctx, cam, [[-60.0,0,0],[-6.0,0,0],[-6.0,5.2,0],[-60.0,5.2,0]], '#E8CF9E', '#2B2118', 1);
+  drawPoly3D(ctx, cam, [[-60.0,5.2,0],[-6.0,5.2,0],[-6.0,6.0,-0.4],[-60.0,6.0,-0.4]], '#B83224', '#2B2118', 1);
 }
 
 function renderPhoTps3D(ctx, cam, w) {
@@ -536,14 +582,15 @@ function renderPhoTps3D(ctx, cam, w) {
     ctx.fillStyle = '#8C7A65';
     ctx.fillRect(0, Math.round(vh * 0.55), vw, vh);
   } else {
-    var skyGrad = ctx.createLinearGradient(0, 0, 0, Math.round(vh * 0.55));
-    skyGrad.addColorStop(0, '#72B9F5');
-    skyGrad.addColorStop(1, '#DCEEFF');
+    var skyGrad = ctx.createLinearGradient(0, 0, 0, Math.round(vh * 0.52));
+    skyGrad.addColorStop(0, '#6AB5F5');
+    skyGrad.addColorStop(1, '#CFE8FF');
     ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, vw, Math.round(vh * 0.55));
-    ctx.fillStyle = '#94A3B8';
-    ctx.fillRect(0, Math.round(vh * 0.55), vw, vh);
-    drawOppositeOldQuarterStreet3D(ctx, cam);
+    ctx.fillRect(0, 0, vw, Math.round(vh * 0.52));
+    // Nền mặt nước/vỉa hè dưới đường chân trời (không bao giờ hở trời xanh bên dưới chân trời!)
+    ctx.fillStyle = '#3B8CB8';
+    ctx.fillRect(0, Math.round(vh * 0.52), vw, vh);
+    drawSaigonAvenueAndBachDang3D(ctx, cam, w);
   }
 
   // 2. SÀN GẠCH BÔNG INDOCHINE 3 KHU (giảm 60% đa giác, siêu mượt 60fps!)
@@ -615,42 +662,48 @@ function renderPhoTps3D(ctx, cam, w) {
     drawList.push({ cz: cp.cz, fn: fn });
   }
 
-  // Hàng rào gạch nung + gạch bông gió xanh ngọc khép kín 2 bên cổng Sân Phố Cổ (Z = -5.2)
-  pushItem(-3.7, -5.2, function() {
-    drawBox3D(ctx, cam, -3.7, 0, -5.2, 4.6, 0.92, 0.34, { top: '#C45B37', front: '#A64626', side: '#8A361A' });
-    drawBox3D(ctx, cam, -3.7, 0.34, -5.2, 0.65, 0.38, 0.38, { top: '#3B7A57', front: '#2F6F5B', side: '#1E4D3B' });
-    drawBox3D(ctx, cam, -1.5, 0, -5.2, 0.45, 1.35, 0.45, { top: '#FFFBF1', front: '#D99B26', side: '#C98C1E' }); // Trụ cổng trái
+  // 2 Cột đèn đường Sài Gòn trên vỉa hè (bỏ hàng rào gạch chắn tầm nhìn -> nhìn thẳng ra Đại lộ & Sông Bạch Đằng!)
+  pushItem(-5.2, -4.0, function() {
+    drawBox3D(ctx, cam, -5.2, 0, -4.0, 0.16, 3.3, 0.16, { top: '#475569', front: '#334155', side: '#1E293B' });
+    drawBox3D(ctx, cam, -5.2, 3.25, -4.0, 0.75, 0.14, 0.16, { top: '#475569', front: '#334155', side: '#1E293B' });
   });
-  pushItem(3.7, -5.2, function() {
-    drawBox3D(ctx, cam, 3.7, 0, -5.2, 4.6, 0.92, 0.34, { top: '#C45B37', front: '#A64626', side: '#8A361A' });
-    drawBox3D(ctx, cam, 3.7, 0.34, -5.2, 0.65, 0.38, 0.38, { top: '#3B7A57', front: '#2F6F5B', side: '#1E4D3B' });
-    drawBox3D(ctx, cam, 1.5, 0, -5.2, 0.45, 1.35, 0.45, { top: '#FFFBF1', front: '#D99B26', side: '#C98C1E' }); // Trụ cổng phải
+  pushItem(5.2, -4.0, function() {
+    drawBox3D(ctx, cam, 5.2, 0, -4.0, 0.16, 3.3, 0.16, { top: '#475569', front: '#334155', side: '#1E293B' });
+    drawBox3D(ctx, cam, 5.2, 3.25, -4.0, 0.75, 0.14, 0.16, { top: '#475569', front: '#334155', side: '#1E293B' });
   });
 
-  // Giàn xà gỗ hiên Sân Phố Cổ (Z = -1.6, Y = 3.45) để treo dây đèn lồng KHÔNG BAO GIỜ LƠ LỬNG!
-  pushItem(0, -1.6, function() {
-    drawBox3D(ctx, cam, 0, 3.42, -1.6, 11.8, 0.16, 0.18, { top: '#4A2C1A', front: '#3B2314', side: '#2B180E' });
+  // Giàn xà gỗ hiên quán Phở (Z = -1.5, Y = 3.25) treo đèn lồng nối thẳng vào mặt tiền
+  pushItem(0, -1.5, function() {
+    drawBox3D(ctx, cam, 0, 3.22, -1.5, 11.8, 0.14, 0.16, { top: '#4A2C1A', front: '#3B2314', side: '#2B180E' });
   });
 
-  // Mặt tiền Phố Hội vàng nghệ + Mái ngói đỏ + Biển PHỞ CỔ PHỐ HỘI + Hoa giấy hồng (Z = 0)
+  // MẶT TIỀN QUÁN PHỞ 2 TẦNG 1:1 BANNER TAB KHÁM PHÁ (MÁI NGÓI ĐỎ LIỀN SUỐT X:-6..+6 — 0% HỞ TRỜI XANH!)
   pushItem(-3.7, 0, function() {
-    drawPoly3D(ctx, cam, [[-6.0,0,0],[-1.45,0,0],[-1.45,3.85,0],[-6.0,3.85,0]], '#D99B26', '#3B2314', 1.2);
-    drawPoly3D(ctx, cam, [[-6.0,3.85,0],[-1.45,3.85,0],[-1.45,4.6,-0.5],[-6.0,4.6,-0.5]], '#B83224', '#3B2314', 1);
-    drawPoly3D(ctx, cam, [[-5.1,0.85,-0.04],[-2.1,0.85,-0.04],[-2.1,2.35,-0.04],[-5.1,2.35,-0.04]], 'rgba(255,243,196,0.65)', '#4A2C1A', 1.6);
+    drawPoly3D(ctx, cam, [[-6.0,0,0],[-1.45,0,0],[-1.45,2.6,0],[-6.0,2.6,0]], '#F2DBAE', '#2B2118', 1.2);
+    drawPoly3D(ctx, cam, [[-5.1,0.7,-0.04],[-2.1,0.7,-0.04],[-2.1,2.2,-0.04],[-5.1,2.2,-0.04]], '#C9E1EE', '#4A2C1A', 1.5);
   });
   pushItem(3.7, 0, function() {
-    drawPoly3D(ctx, cam, [[1.45,0,0],[6.0,0,0],[6.0,3.85,0],[1.45,3.85,0]], '#D99B26', '#3B2314', 1.2);
-    drawPoly3D(ctx, cam, [[1.45,3.85,0],[6.0,3.85,0],[6.0,4.6,-0.5],[1.45,4.6,-0.5]], '#B83224', '#3B2314', 1);
-    drawPoly3D(ctx, cam, [[2.1,0.85,-0.04],[5.1,0.85,-0.04],[5.1,2.35,-0.04],[2.1,2.35,-0.04]], 'rgba(255,243,196,0.65)', '#4A2C1A', 1.6);
+    drawPoly3D(ctx, cam, [[1.45,0,0],[6.0,0,0],[6.0,2.6,0],[1.45,2.6,0]], '#F2DBAE', '#2B2118', 1.2);
+    drawPoly3D(ctx, cam, [[2.1,0.7,-0.04],[5.1,0.7,-0.04],[5.1,2.2,-0.04],[2.1,2.2,-0.04]], '#C9E1EE', '#4A2C1A', 1.5);
   });
-  pushItem(0, -0.06, function() {
-    drawPoly3D(ctx, cam, [[-2.6,2.6,-0.06],[2.6,2.6,-0.06],[2.6,3.55,-0.06],[-2.6,3.55,-0.06]], '#4A2C1A', '#F4B93B', 1.6);
-    var signP = projectPoint3D(cam, 0, 3.08, -0.09);
-    if (signP && signP.cz > 0.5 && signP.cz < 16) {
+  // Tầng 2 liền mạch (Y: 2.55..5.2) + 2 Cửa sổ lá sách xanh rêu + Mái ngói đỏ liền suốt + Biển đỏ-vàng PHỞ!
+  pushItem(0, -0.05, function() {
+    // Tường tầng 2 liền mạch không có khe hở trên cửa!
+    drawPoly3D(ctx, cam, [[-6.0,2.55,0],[6.0,2.55,0],[6.0,5.2,0],[-6.0,5.2,0]], '#F2DBAE', '#2B2118', 1.2);
+    // 2 Cửa sổ lá sách xanh rêu đặc trưng tầng 2 (1:1 Banner Tab Khám phá!)
+    drawPoly3D(ctx, cam, [[-4.4,3.6,-0.04],[-1.6,3.6,-0.04],[-1.6,4.7,-0.04],[-4.4,4.7,-0.04]], '#3F6A44', '#2B2118', 1.4);
+    drawPoly3D(ctx, cam, [[1.6,3.6,-0.04],[4.4,3.6,-0.04],[4.4,4.7,-0.04],[1.6,4.7,-0.04]], '#3F6A44', '#2B2118', 1.4);
+    // Mái ngói đỏ liền suốt từ X = -6.2 đến +6.2 (tuyệt đối KHÔNG hở bầu trời ở giữa!)
+    drawPoly3D(ctx, cam, [[-6.2,5.2,0],[6.2,5.2,0],[6.2,6.1,-0.5],[-6.2,6.1,-0.5]], '#C93424', '#2B2118', 1.2);
+    // Biển hiệu đỏ-vàng PHỞ nổi bật ngay trên cửa ra vào
+    drawPoly3D(ctx, cam, [[-3.4,2.55,-0.06],[3.4,2.55,-0.06],[3.4,3.35,-0.06],[-3.4,3.35,-0.06]], '#C93424', '#2B2118', 1.5);
+    drawPoly3D(ctx, cam, [[-3.2,2.68,-0.07],[3.2,2.68,-0.07],[3.2,3.22,-0.07],[-3.2,3.22,-0.07]], '#B8291E', '#F4B93B', 1);
+    var signP = projectPoint3D(cam, 0, 2.95, -0.09);
+    if (signP && signP.cz > 0.5 && signP.cz < 18) {
       ctx.save();
-      ctx.font = 'bold ' + Math.max(7, Math.min(18, Math.round(signP.scale * 0.26))) + 'px monospace';
+      ctx.font = 'bold ' + Math.max(8, Math.min(20, Math.round(signP.scale * 0.30))) + 'px monospace';
       ctx.fillStyle = '#FACC15'; ctx.textAlign = 'center';
-      ctx.fillText('PHỞ CỔ PHỐ HỘI', signP.sx, signP.sy + 3);
+      ctx.fillText('PHỞ GIA TRUYỀN', signP.sx, signP.sy + 3);
       ctx.restore();
     }
   });

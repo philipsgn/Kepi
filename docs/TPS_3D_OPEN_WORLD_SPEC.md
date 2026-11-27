@@ -26,7 +26,7 @@ Thay vì nhìn từ trên xuống phẳng (2D top-down) gây cảm giác tách b
    - Thanh Tab chuyển khu phía trên đồng bộ 2 chiều với vị trí chú Heo: bấm Tab → chú Heo tự đi theo lộ trình waypoint xuyên qua cửa tới khu đó + xoay camera góc đẹp; khi tự đi bộ bằng Tap-to-Walk → Tab tự động highlight sáng khu chú Heo đang đứng!
 6. **Quy chuẩn Hybrid 3D Room + Depth-Scaled Pixel Art Sprites & Phố Xá Đối Diện (QĐ 234):**
    - **Cấm dùng hộp 3D thô cứng** cho xoong nồi, tô phở, nguyên liệu nấu ăn, ấm trà hay gia vị — bắt buộc vẽ bằng **Sprite Pixel Art tả thực tự co giãn theo chiều sâu `cz`** (`drawPhoPotSprite3D`, `drawPhoBowlSprite3D`, `drawBatTrangTeapotSprite3D`, `drawKitchenIngredientsSprite3D`...).
-   - **Chống chân trời trống rỗng & đèn lồng lơ lửng:** Khu vực sân ngoài trời bắt buộc có mặt đường nhựa, dãy nhà cổ đối diện và tán cây xanh che kín chân trời; mọi đèn lồng bắt buộc có dây treo nối lên mái/xà gỗ.
+   - **Chống chân trời trống rỗng & đèn lồng lơ lửng (QĐ 234–235):** Mặt tiền mọi không gian mở phải đồng bộ 1:1 với Banner Tab Khám phá (liền mái không hở trời xanh + dãy công trình kế bên trải dài 2 phía, ví dụ Tiệm CAFE sát Quán Phở), vỉa hè/đại lộ/sông Bạch Đằng kéo dài xuyên suốt `X = -65m..+65m` có xe cộ chạy trên đường & tàu bè chạy trên sông + bờ Thủ Thiêm khép kín 100% đường chân trời 360°; mọi đèn lồng có dây treo nối lên mái/xà gỗ.
    - **Đệm va chạm an toàn (`>= 0.65m`):** Cách tường và quầy ít nhất `0.65m` để chú Heo không bao giờ bị kẹt hay lún thân vào góc tường.
 
 ---
