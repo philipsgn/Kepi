@@ -7662,8 +7662,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       adArtCode.includes('CẦU THANG KÍNH') &&
       decisionsCode.includes('Quyết định 227') &&
       chatDocCode.includes('Quyết định 227') &&
-      (specCode.includes('QĐ 228') || specCode.includes('QĐ 227')),
-    'Adidas Flagship 2-story 640x560 interior (3-stripes sneakers/slides/clothes, 7 mannequins, LED stairs, 2 staff, shoppers, 2-way portal, and docs) must be synced for QD 227/228'
+      (specCode.includes('QĐ 229') || specCode.includes('QĐ 228') || specCode.includes('QĐ 227')),
+    'Adidas Flagship 2-story 640x560 interior (3-stripes sneakers/slides/clothes, 7 mannequins, LED stairs, 2 staff, shoppers, 2-way portal, and docs) must be synced for QD 227-229'
   );
 
   // Kiểm chứng cú pháp JS runtime của toàn bộ script Adidas lắp ráp (vnKit + adArt + inline)
@@ -7706,11 +7706,39 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       adBannerCode.includes("id: 'adidas_football_zone'") &&
       decisionsCode.includes('Quyết định 228') &&
       chatDocCode.includes('Quyết định 228') &&
-      specCode.includes('QĐ 228'),
-    'Adidas Hoi An Heritage overhaul (warm wood + tile floor, 8 lanterns, turf football zone, detailed polo/tees/pants/cleats/running/slides/balls/backpacks/mannequins, and docs) must be synced for QD 228'
+      (specCode.includes('QĐ 229') || specCode.includes('QĐ 228')),
+    'Adidas Hoi An Heritage overhaul (warm wood + tile floor, 8 lanterns, turf football zone, detailed polo/tees/pants/cleats/running/slides/balls/backpacks/mannequins, and docs) must be synced for QD 228/229'
   );
 
   console.log('✅ Test 165 Passed: Đại Tu Adidas Hội An Heritage Design Art — Dày Đặc 80% & Sắc Nét Từng Món Đồ (Quyết định 228) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 165 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (165/165)!');
+// =========================================================================
+// TEST 166: ĐỒNG BỘ 1:1 4 ẢNH THỰC TẾ ADIDAS ORIGINALS HỘI AN CHO MẶT TIỀN BANNER & BÊN TRONG STORE (QĐ 229)
+// =========================================================================
+{
+  const saigonArtCode = fs.readFileSync('src/components/chat/hub/saigonPanoramaArt.ts', 'utf8');
+  const adArtCode = fs.readFileSync('src/components/chat/adidas/adidasInteriorArt.ts', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const specCode = fs.readFileSync('docs/PIXEL_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    saigonArtCode.includes('CỬA HÀNG ADIDAS ORIGINALS HỘI AN') &&
+      saigonArtCode.includes('TƯỢNG LOGO CỎ BA LÁ (TREFOIL)') &&
+      saigonArtCode.includes('Mái ngói âm dương Hội An') &&
+      saigonArtCode.includes('Ban công con tiện trắng') &&
+      adArtCode.includes('function drawTrefoilLogo') &&
+      adArtCode.includes('function drawTrefoilLantern') &&
+      adArtCode.includes('HERO WALL "ADIDAS HOI AN"') &&
+      adArtCode.includes('LAN CAN CON TIỆN GỖ ĐEN CỔ ĐIỂN') &&
+      decisionsCode.includes('Quyết định 229') &&
+      chatDocCode.includes('Quyết định 229') &&
+      specCode.includes('QĐ 229'),
+    'Adidas Originals Hoi An 4-photo sync (2-story golden Hoi An facade + Trefoil LED on Hub banner, ADIDAS HOI AN hero wall + 3 Trefoil lanterns + black wooden balusters inside store, and docs) must be synced for QD 229'
+  );
+
+  console.log('✅ Test 166 Passed: Đồng Bộ 1:1 4 Ảnh Thực Tế Adidas Originals Hội An Cho Mặt Tiền Banner & Bên Trong Store (Quyết định 229) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 166 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (166/166)!');

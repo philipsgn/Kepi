@@ -67,6 +67,39 @@ function drawThreeStripesLogo(c, x, y, scale, col) {
   R(c, x + 12 * scale, y, 4 * scale, 11 * scale, col);
 }
 
+/* Logo Cỏ Ba Lá Adidas Originals (Trefoil) đen viền LED trắng (1:1 Ảnh 1 & 3) */
+function drawTrefoilLogo(c, cx, cy, s, fillCol, outlineCol) {
+  s = s || 1;
+  // Viền LED trắng phát sáng xung quanh 3 cánh lá
+  E(c, cx, cy - 4 * s, 4 * s, 7 * s, outlineCol);
+  E(c, cx - 6 * s, cy, 6 * s, 4 * s, outlineCol);
+  E(c, cx + 6 * s, cy, 6 * s, 4 * s, outlineCol);
+  // Thân 3 cánh lá đen
+  E(c, cx, cy - 4 * s, 3 * s, 6 * s, fillCol);
+  E(c, cx - 6 * s, cy, 5 * s, 3 * s, fillCol);
+  E(c, cx + 6 * s, cy, 5 * s, 3 * s, fillCol);
+  // 3 Sọc ngang trắng cắt qua 3 cánh lá đặc trưng Trefoil
+  R(c, cx - 10 * s, cy, 20 * s, s, outlineCol);
+  R(c, cx - 9 * s, cy + 2 * s, 18 * s, s, outlineCol);
+  R(c, cx - 7 * s, cy + 4 * s, 14 * s, s, outlineCol);
+}
+
+/* Đèn Lồng Cỏ Ba Lá (Trefoil Lantern) họa tiết gấm hoa Hội An có tua rua (1:1 Ảnh 2) */
+function drawTrefoilLantern(c, cx, cy, colA, colB, tasselCol) {
+  R(c, cx, cy - 11, 1, 5, '#4A2C1A'); // Dây treo đèn lồng
+  // 3 cánh lá gấm hoa Hội An
+  E(c, cx, cy - 3, 4, 6, '#2B180E'); E(c, cx, cy - 3, 3, 5, colA);
+  E(c, cx - 6, cy, 5, 4, '#2B180E'); E(c, cx - 6, cy, 4, 3, colB);
+  E(c, cx + 6, cy, 5, 4, '#2B180E'); E(c, cx + 6, cy, 4, 3, colB);
+  // Họa tiết sọc trắng & chấm hoa gấm
+  R(c, cx - 9, cy, 18, 1, '#FFFBF1');
+  R(c, cx - 7, cy + 2, 14, 1, '#FFFBF1');
+  R(c, cx - 1, cy - 4, 2, 2, '#F4B93B');
+  // Dây tua rua rủ dài
+  R(c, cx, cy + 4, 1, 6, tasselCol);
+  R(c, cx - 1, cy + 7, 3, 3, tasselCol);
+}
+
 /* Đèn lồng lụa Hội An treo ấm áp (vàng, đỏ cam, kem) */
 function drawHoiAnLantern(c, cx, cy, col, t) {
   R(c, cx, cy - 8, 1, 4, '#2B2118');
@@ -357,13 +390,21 @@ function drawAdidasStaticBg(c) {
   R(c, 0, 0, 14, 560, '#8A5634'); R(c, 14, 0, 2, 560, '#2B180E');
   R(c, 626, 0, 14, 560, '#8A5634'); R(c, 624, 0, 2, 560, '#2B180E');
 
-  // HERO WALL HỘI AN × ADIDAS (x: 222..418, y: 7..54)
+  // HERO WALL "ADIDAS HOI AN" + 3 ĐÈN LỒNG CỎ BA LÁ GẤM HOA HỘI AN (1:1 Ảnh 2: x: 222..418, y: 7..54)
   R(c, 222, 7, 196, 47, '#2B180E');
-  R(c, 224, 9, 192, 43, '#181B22');
-  R(c, 226, 10, 188, 2, '#F4B93B'); // Viền vàng Hội An sang trọng
-  drawThreeStripesLogo(c, 252, 18, 2, '#FFFFFF');
-  R(c, 298, 24, 92, 4, '#FFFFFF');   // ADIDAS
-  R(c, 304, 33, 80, 2, '#F4B93B');   // HOI AN HERITAGE
+  R(c, 224, 9, 192, 43, '#DFB448'); // Tường vàng nghệ Hội An ấm áp
+  // Quầng đèn spotlight rọi tròn dịu lên chữ "ADIDAS HOI AN"
+  c.save(); c.globalAlpha = 0.35; E(c, 354, 28, 48, 20, '#FFF9D6'); c.restore();
+  // 3 Đèn Lồng Cỏ Ba Lá gấm hoa Hội An treo bên trái tường (xanh lá-đỏ, xanh dương-vàng, đỏ-trắng)
+  drawTrefoilLantern(c, 244, 24, '#15803D', '#E0452B', '#181B22');
+  drawTrefoilLantern(c, 274, 28, '#1D4ED8', '#F4B93B', '#181B22');
+  drawTrefoilLantern(c, 258, 39, '#DC2626', '#FFFDF7', '#DC2626');
+  // Chữ nghệ thuật màu cam viền xanh cổ điển "ADIDAS" & "HOI AN" (Ảnh 2)
+  R(c, 310, 19, 86, 7, '#0F4C5C'); // Bóng xanh cổ điển
+  R(c, 309, 18, 86, 7, '#EA580C'); // Chữ cam ADIDAS nổi bật
+  R(c, 314, 31, 78, 8, '#0F4C5C');
+  R(c, 313, 30, 78, 8, '#EA580C'); // Chữ cam HOI AN nổi bật
+  R(c, 311, 20, 82, 1, '#FDE68A'); R(c, 315, 32, 74, 1, '#FDE68A');
 
   // KHU BÓNG ĐÁ TRÊN THẢM CỎ NHÂN TẠO XANH (Góc trái Tầng 2: x: 20..244, y: 66..256)
   R(c, 20, 68, 222, 186, '#2E7D32');
@@ -396,13 +437,21 @@ function drawAdidasStaticBg(c) {
   // Thêm 1 Mannequin ngay lối lên cầu thang Tầng 2
   drawDetailedMannequin(c, 320, 118, '#181B22', '#181B22', '#FFFFFF', '#FFFFFF');
 
-  // ===== BAN CÔNG GỖ CHẠM HỘI AN & CẦU THANG GỖ ĐÈN LED (y: 266..312) =====
-  R(c, 16, 266, 250, 22, '#2B180E');
-  R(c, 16, 268, 250, 12, '#8A5634');
-  for (var bx = 22; bx < 260; bx += 14) R(c, bx, 270, 6, 8, '#D4B48C'); // Hoa văn con tiện gỗ Hội An
-  R(c, 374, 266, 250, 22, '#2B180E');
-  R(c, 374, 268, 250, 12, '#8A5634');
-  for (var bx2 = 380; bx2 < 618; bx2 += 14) R(c, bx2, 270, 6, 8, '#D4B48C');
+  // ===== LAN CAN CON TIỆN GỖ ĐEN CỔ ĐIỂN (1:1 Ảnh 2) & CẦU THANG GỖ ĐÈN LED (y: 266..312) =====
+  R(c, 16, 266, 250, 22, '#DFB448'); // Nền tường vàng Hội An phía sau con tiện
+  R(c, 16, 266, 250, 3, '#181B22');  // Tay vịn gỗ đen trên
+  R(c, 16, 284, 250, 4, '#181B22');  // Đế lan can đen dưới
+  for (var bx = 22; bx < 260; bx += 12) {
+    R(c, bx, 269, 4, 15, '#181B22'); // Trụ con tiện gỗ đen
+    R(c, bx - 1, 273, 6, 5, '#181B22'); // Bầu con tiện uốn cổ điển (Ảnh 2)
+  }
+  R(c, 374, 266, 250, 22, '#DFB448');
+  R(c, 374, 266, 250, 3, '#181B22');
+  R(c, 374, 284, 250, 4, '#181B22');
+  for (var bx2 = 380; bx2 < 618; bx2 += 12) {
+    R(c, bx2, 269, 4, 15, '#181B22');
+    R(c, bx2 - 1, 273, 6, 5, '#181B22');
+  }
 
   // CẦU THANG KÍNH & BẬC GỖ LIM HẮT LED NỐI TẦNG 1 ↔ TẦNG 2 (x: 266..374, y: 248..314)
   R(c, 266, 248, 108, 66, '#2B180E');
@@ -445,12 +494,14 @@ function drawAdidasStaticBg(c) {
   // Kệ Hộp Giày & Dép phụ góc phải dưới (x: 420..616, y: 492..534)
   drawAccessoryShelf(c, 420, 490, 196);
 
-  // CỬA KÍNH MẶT TIỀN & CỔNG RA ĐẠI LỘ (y: 536..560)
+  // CỬA KÍNH MẶT TIỀN, TƯỢNG LOGO CỎ BA LÁ LED KHỔNG LỒ & CỔNG RA ĐẠI LỘ (y: 510..560 — 1:1 Ảnh 1 & 3)
   R(c, 16, 542, 244, 18, '#2B180E'); R(c, 18, 544, 240, 12, '#BAE6FD');
   R(c, 380, 542, 244, 18, '#2B180E'); R(c, 382, 544, 240, 12, '#BAE6FD');
   R(c, 260, 532, 120, 28, '#D4B48C');
   R(c, 274, 538, 92, 16, '#181B22');
-  drawThreeStripesLogo(c, 310, 541, 1, '#FFFFFF');
+  drawTrefoilLogo(c, 320, 545, 1, '#181B22', '#FFFFFF'); // Logo Trefoil viền LED trắng trên thảm cửa
+  // Tượng Logo Cỏ Ba Lá (Trefoil) đen viền LED trắng khổng lồ check-in ngay góc phải cửa kính (Ảnh 1 & 3)
+  drawTrefoilLogo(c, 404, 524, 1.8, '#181B22', '#FFFFFF');
 }
 
 /* 2 Nhân viên Adidas mặc áo Polo đen 3 sọc trắng */
@@ -482,12 +533,12 @@ function drawAdidasShopper(c, sh, t) {
 }
 
 function drawAdidasLiveEntities(c, t, staffList, shoppers, pigState, drawPigFn) {
-  // 1. 8 Đèn Lồng Lụa Hội An treo tỏa ánh sáng vàng ấm 60fps
+  // 1. 8 Đèn Lồng Lụa Hội An nhiều màu (trắng, đỏ, vàng, xanh ngọc — 1:1 Ảnh 1 & 4) tỏa ánh sáng ấm 60fps
   var lanterns = [
-    [252, 64, '#F59E0B'], [388, 64, '#E0452B'],
-    [252, 244, '#E0452B'], [388, 244, '#F59E0B'],
-    [252, 316, '#F59E0B'], [388, 316, '#E0452B'],
-    [252, 514, '#E0452B'], [388, 514, '#F59E0B']
+    [252, 64, '#FFFDF7'], [388, 64, '#E0452B'],
+    [252, 244, '#F59E0B'], [388, 244, '#4ADE80'],
+    [252, 316, '#E0452B'], [388, 316, '#FFFDF7'],
+    [252, 514, '#4ADE80'], [388, 514, '#F59E0B']
   ];
   for (var li = 0; li < lanterns.length; li++) {
     drawHoiAnLantern(c, lanterns[li][0], lanterns[li][1], lanterns[li][2], t);

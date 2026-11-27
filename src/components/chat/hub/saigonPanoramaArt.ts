@@ -234,59 +234,65 @@ function drawSaigonLandmarks(c, pal) {
   R(c, 109, 62, 5, 6, '#A65432'); R(c, 108, 58, 7, 5, '#4A8C3F');
   R(c, 194, 62, 5, 6, '#A65432'); R(c, 193, 58, 7, 5, '#4A8C3F');
 
-  // ---- 3. CỬA HÀNG QUẦN ÁO ADIDAS (x: 214..314, y: 18..68) — MỚI ----
-  R(c, 215, 20, 96, 48, '#23272F'); // Mặt tiền hiện đại đen-xám
-  R(c, 215, 20, 96, 2, '#111419');
-  R(c, 215, 20, 2, 48, '#111419');
-  R(c, 309, 20, 2, 48, '#111419');
-  // Khung nhôm xám bạc kiến trúc flagship
-  R(c, 217, 22, 92, 14, '#181B22');
-  R(c, 217, 36, 92, 2, '#C8D2DE');
-  // Logo 3 sọc chéo Adidas trắng (Performance Mountains) sắc nét
-  R(c, 232, 31, 3, 3, '#FFFFFF');
-  R(c, 236, 28, 3, 6, '#FFFFFF');
-  R(c, 240, 25, 3, 9, '#FFFFFF');
-  // Chữ pixel "ADIDAS" màu trắng
-  R(c, 249, 28, 3, 5, '#FFFFFF'); R(c, 250, 29, 1, 1, '#181B22'); R(c, 250, 31, 1, 2, '#181B22');
-  R(c, 254, 28, 3, 5, '#FFFFFF'); R(c, 255, 29, 1, 3, '#181B22');
-  R(c, 259, 28, 2, 5, '#FFFFFF');
-  R(c, 263, 28, 3, 5, '#FFFFFF'); R(c, 264, 29, 1, 3, '#181B22');
-  R(c, 268, 28, 3, 5, '#FFFFFF'); R(c, 269, 29, 1, 1, '#181B22'); R(c, 269, 31, 1, 2, '#181B22');
-  R(c, 273, 28, 3, 5, '#FFFFFF'); R(c, 274, 29, 2, 1, '#181B22'); R(c, 273, 31, 2, 1, '#181B22');
-  // 3 sọc trắng trang trí chạy dọc mép phải cửa hàng
-  R(c, 295, 23, 2, 12, '#FFFFFF');
-  R(c, 299, 23, 2, 12, '#FFFFFF');
-  R(c, 303, 23, 2, 12, '#FFFFFF');
-  // Tủ kính trưng bày lớn sáng đèn spotlight
-  R(c, 219, 39, 32, 27, '#D7E7F2'); // Kính trái
-  R(c, 220, 40, 30, 25, isDark ? '#F5E9C8' : '#E5F0F7');
-  // Đèn spotlight trần
-  R(c, 225, 40, 4, 2, '#FFF8D6'); R(c, 239, 40, 4, 2, '#FFF8D6');
-  // 2 Ma-nơ-canh mặc áo khoác thể thao 3 sọc
-  // Ma-nơ-canh 1 (áo đỏ 3 sọc trắng)
-  R(c, 225, 46, 4, 4, '#E8DCC8'); // Đầu
-  R(c, 223, 50, 8, 9, '#D93B30'); // Áo khoác đỏ
-  R(c, 225, 51, 1, 7, '#FFFFFF'); R(c, 228, 51, 1, 7, '#FFFFFF');
-  R(c, 225, 59, 4, 6, '#1E242E'); // Quần thể thao đen
-  // Ma-nơ-canh 2 (áo đen 3 sọc trắng)
-  R(c, 238, 46, 4, 4, '#E8DCC8');
-  R(c, 236, 50, 8, 9, '#1F242D');
-  R(c, 238, 51, 1, 7, '#FFFFFF'); R(c, 241, 51, 1, 7, '#FFFFFF');
-  R(c, 238, 59, 4, 6, '#3B639C');
-  // Cửa kính tự động chính giữa
-  R(c, 254, 41, 20, 27, '#111419');
-  R(c, 255, 42, 18, 26, isDark ? '#E8D8A8' : '#95B5CE');
-  R(c, 263, 42, 2, 26, '#23272F');
-  R(c, 261, 53, 1, 5, '#FFFFFF'); R(c, 266, 53, 1, 5, '#FFFFFF');
-  // Kính phải: Kệ giày sneaker nhiều màu
-  R(c, 277, 39, 30, 27, '#D7E7F2');
-  R(c, 278, 40, 28, 25, isDark ? '#F5E9C8' : '#E5F0F7');
-  R(c, 280, 47, 24, 2, '#2B2118'); // Kệ trên
-  R(c, 282, 44, 5, 3, '#FFFFFF'); R(c, 289, 44, 5, 3, '#E0452B'); R(c, 296, 44, 5, 3, '#2563EB');
-  R(c, 280, 55, 24, 2, '#2B2118'); // Kệ giữa
-  R(c, 282, 52, 5, 3, '#1E242E'); R(c, 289, 52, 5, 3, '#F4B93B'); R(c, 296, 52, 5, 3, '#22C55E');
-  R(c, 280, 62, 24, 2, '#2B2118'); // Kệ dưới
-  R(c, 284, 59, 6, 3, '#FFFFFF'); R(c, 293, 59, 6, 3, '#D93B30');
+  // ---- 3. CỬA HÀNG ADIDAS ORIGINALS HỘI AN (x: 214..314, y: 12..68) — 1:1 4 ẢNH THỰC TẾ QĐ 229 ----
+  // Nhà cổ 2 tầng tường vàng nghệ Hội An rực rỡ (#E6A825 / #F4C042)
+  R(c, 216, 14, 94, 54, '#E6A825');
+  R(c, 216, 14, 94, 3, '#4A2C1A'); // Gờ mái cổ nâu sẫm
+  R(c, 216, 17, 94, 2, '#FFFBF1'); // Phào chỉ trắng cổ điển
+  R(c, 216, 14, 2, 54, '#2B2118');
+  R(c, 308, 14, 2, 54, '#2B2118');
+  // TẦNG 2: 3 Vòm cong viền trắng + Ban công con tiện trắng + Chùm đèn lồng nhiều màu (Ảnh 1 & 4)
+  var archXs = [221, 250, 279];
+  var lanCols = ['#FFFDF7', '#E0452B', '#F4B93B', '#4ADE80'];
+  for (var ai2 = 0; ai2 < 3; ai2++) {
+    var ax2 = archXs[ai2];
+    R(c, ax2, 20, 24, 18, '#3B2314');           // Hốc hành lang tầng 2
+    R(c, ax2, 19, 24, 2, '#FFFBF1');            // Viền vòm trắng trên
+    R(c, ax2 + 2, 21, 20, 2, '#FFFBF1');        // Vòm cong trắng
+    R(c, ax2, 21, 2, 17, '#F4C042');            // Cột vàng trái
+    R(c, ax2 + 22, 21, 2, 17, '#F4C042');       // Cột vàng phải
+    // Ban công con tiện trắng cổ điển chạy dọc đáy vòm
+    R(c, ax2, 33, 24, 5, '#FFFBF1');
+    for (var bal = ax2 + 2; bal < ax2 + 22; bal += 4) R(c, bal, 34, 2, 3, '#8F6E42');
+    // Chùm đèn lồng lụa Hội An nhiều màu treo dưới 3 vòm (Ảnh 1 & 4)
+    R(c, ax2 + 5, 24, 4, 4, lanCols[(ai2 * 2) % 4]);
+    R(c, ax2 + 12, 25, 5, 5, lanCols[(ai2 * 2 + 1) % 4]);
+    R(c, ax2 + 17, 23, 3, 4, lanCols[(ai2 + 2) % 4]);
+    if (isDark) {
+      c.save(); c.globalAlpha = 0.28;
+      E(c, ax2 + 12, 27, 8, 6, '#FFE08A');
+      c.restore();
+    }
+  }
+  // Mái ngói âm dương Hội An nhô ra giữa Tầng 1 & Tầng 2 (y: 38..43)
+  R(c, 214, 38, 98, 4, '#57463B');
+  R(c, 214, 42, 98, 1, '#2B2118');
+  for (var ng = 216; ng < 310; ng += 4) R(c, ng, 39, 2, 3, '#A89B91'); // Đầu ngói ống sáng
+
+  // TẦNG 1: Bảng hiệu đen viền LED trắng gắn Logo Cỏ Ba Lá (Trefoil) + Cửa lá sách gỗ nâu (Ảnh 1 & 3)
+  R(c, 251, 43, 24, 9, '#181B22');
+  R(c, 252, 44, 22, 7, '#23272F');
+  R(c, 251, 43, 24, 1, '#FFFFFF'); R(c, 251, 51, 24, 1, '#FFFFFF'); // Viền đèn trắng
+  // Logo Cỏ Ba Lá Trefoil trắng phát sáng trên bảng hiệu (ADIDAS)
+  R(c, 262, 45, 2, 4, '#FFFFFF');
+  R(c, 259, 46, 2, 3, '#FFFFFF'); R(c, 265, 46, 2, 3, '#FFFFFF');
+  R(c, 259, 48, 8, 1, '#181B22');
+  // Cửa chính sáng đèn vàng ấm lộ mannequin bên trong + bậc tam cấp đá
+  R(c, 253, 52, 20, 16, '#2B2118');
+  R(c, 255, 53, 16, 15, isDark ? '#F5C469' : '#FCE7B2');
+  R(c, 261, 58, 4, 7, '#181B22'); R(c, 262, 56, 2, 2, '#FFFBF1'); // Mannequin giữa cửa
+  // 2 Cửa kính + Cửa lá sách gỗ nâu mở 2 bên (trái & phải)
+  R(c, 224, 48, 22, 18, '#3B2314'); R(c, 228, 50, 14, 14, isDark ? '#F5C469' : '#DCE9F2');
+  R(c, 230, 56, 10, 6, '#FFFFFF'); // Giá quần áo bên cửa trái
+  R(c, 280, 48, 22, 18, '#3B2314'); R(c, 284, 50, 14, 14, isDark ? '#A5B4FC' : '#DCE9F2');
+  // 2 Bụi cây dây leo xanh rủ 2 bên mép nhà cổ (Ảnh 1 & 3)
+  R(c, 214, 44, 5, 24, '#2E7D32'); R(c, 215, 46, 2, 20, '#4CAF50');
+  R(c, 307, 44, 5, 24, '#2E7D32'); R(c, 308, 46, 2, 20, '#4CAF50');
+  // TƯỢNG LOGO CỎ BA LÁ (TREFOIL) ĐEN VIỀN LED TRẮNG KHỔNG LỒ GÓC PHẢI MẶT TIỀN (1:1 Ảnh 1 & 3!)
+  R(c, 287, 54, 4, 12, '#FFFFFF'); R(c, 288, 55, 2, 10, '#181B22'); // Cánh lá giữa
+  R(c, 280, 57, 7, 9, '#FFFFFF');  R(c, 281, 58, 5, 7, '#181B22');  // Cánh lá trái
+  R(c, 291, 57, 7, 9, '#FFFFFF');  R(c, 292, 58, 5, 7, '#181B22');  // Cánh lá phải
+  R(c, 281, 61, 16, 1, '#FFFFFF'); R(c, 282, 63, 14, 1, '#FFFFFF'); R(c, 284, 65, 10, 1, '#FFFFFF'); // 3 sọc LED trắng!
 
   // ---- 4. NHÀ THỜ ĐỨC BÀ SÀI GÒN (x: 324..404, y: 6..68) — Cổng vào Cathedral QĐ 219 ----
   var ndBrick = '#B54B34', ndHi = '#CE6046', ndDk = '#873321', ndCream = '#EFE2C8';
