@@ -7838,7 +7838,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       sceneCode.includes('function triggerPhoAction') &&
       sceneCode.includes('function renderPhoTps3D') &&
       sceneCode.includes('PIG_ORDER') &&
-      (sceneCode.includes('open_door') || sceneCode.includes('doorOpen: 0.95')) &&
+      (sceneCode.includes('open_door') || sceneCode.includes('doorOpen: 0.95') || sceneCode.includes('doorOpen: 0.0')) &&
       sceneCode.includes('sit_seat') &&
       sceneCode.includes('order_pho') &&
       sceneCode.includes('eat_pho') &&
@@ -7972,17 +7972,43 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
 
   assert.ok(
-    tpsSpecCode.includes('QĐ 237') &&
-      decisionsCode.includes('Quyết định 237') &&
-      sceneCode.includes('TẤM TRANH PHỐ XÁ & SÔNG BẠCH ĐẰNG PHẲNG SIÊU NHẸ') &&
+    decisionsCode.includes('Quyết định 237') &&
       sceneCode.includes('KÍNH CHÀO QUÝ KHÁCH') &&
-      sceneCode.includes('Tay nắm đồng vàng') &&
-      sceneCode.includes('welcomeTimer: 1.4') &&
       !sceneCode.includes('#F4D498'),
-    'Interior-Only doorway must replace flat yellow rectangle with auto-closing brass-handle doors and lightweight flat Saigon street + Bach Dang river backdrop (QD 237)'
+    'Interior-Only doorway must not use flat yellow rectangle #F4D498 and must keep vintage welcome plaque (QD 237/238)'
   );
 
-  console.log('✅ Test 174 Passed: Chữa Mảng Vàng Khè Sau Cửa Interior-Only — Cửa Tự Khép Tay Nắm Đồng + Tranh Phố & Sông Phẳng 0% Lag (Quyết định 237) Audit verified cleanly');
+  console.log('✅ Test 174 Passed: Chữa Mảng Vàng Khè Sau Cửa Interior-Only (Quyết định 237) Audit verified cleanly');
 }
 
-console.log('\n🎉 ALL 174 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (174/174)!');
+// =========================================================================
+// TEST 175: CAMERA SPRING-ARM RAYCAST CHỐNG XUYÊN TƯỜNG 100% & CỬA GỖ LÁ SÁCH KÍNH MỜ ĐÓNG KÍN AAA (QĐ 238)
+// =========================================================================
+{
+  const tpsSpecCode = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDocCode = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const engineCode = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+  const phoBannerCode = fs.readFileSync('src/components/chat/PhoRestaurantBannerWebView.tsx', 'utf8');
+
+  assert.ok(
+    tpsSpecCode.includes('QĐ 238') &&
+      chatDocCode.includes('QĐ 238') &&
+      decisionsCode.includes('Quyết định 238') &&
+      engineCode.includes('SPRING-ARM RAYCAST 6 MẶT PHẲNG') &&
+      engineCode.includes('var wallMargin = 0.38') &&
+      engineCode.includes('cam.curDist') &&
+      phoBannerCode.includes('minZ: 0.0') &&
+      !phoBannerCode.includes('minZ: -1.6') &&
+      sceneCode.includes('CỬA GỖ LÁ SÁCH KÍNH MỜ ĐÓNG KÍN') &&
+      sceneCode.includes('Thảm chùi chân nâu đỏ') &&
+      sceneCode.includes('exitFade') &&
+      !sceneCode.includes('TẤM TRANH PHỐ XÁ'),
+    'TPS 3D AAA upgrade (6-plane Spring-Arm camera collision preventing wall clipping, closed frosted louvered doors + floor sunbeams + doormat + fade-out exit transition, and docs) must be synced for QD 238'
+  );
+
+  console.log('✅ Test 175 Passed: Camera Spring-Arm Raycast Chống Xuyên Tường 100% & Cửa Gỗ Lá Sách Kính Mờ Đóng Kín AAA (Quyết định 238) Audit verified cleanly');
+}
+
+console.log('\n🎉 ALL 175 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (175/175)!');

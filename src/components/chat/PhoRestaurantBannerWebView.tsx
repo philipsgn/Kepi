@@ -224,7 +224,8 @@ window.addEventListener('keyup', function(e) { keys[e.key.toLowerCase()] = false
 function handleActionClick(actId, seatRef) {
   postHost({ type: 'HAPTIC_MEDIUM' });
   if (actId === 'exit_pho') {
-    postHost({ type: 'EXIT_PHO' });
+    world.exiting = true;
+    setTimeout(function() { postHost({ type: 'EXIT_PHO' }); }, 240);
     return;
   }
   triggerPhoAction(world, actId, seatRef);
@@ -289,9 +290,9 @@ function frame(now) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, cv.width, cv.height);
 
-  // Giữ camera gọn trong nội thất (cho phép lùi nhẹ về z = -1.6 ngay sau khung cửa để ngắm toàn cảnh ngưỡng cửa như Hình 1!)
+  // Khóa chặt Spring-Arm Camera 100% trong 4 bức tường nội thất (chống nhìn xuyên tường tuyệt đối — QĐ 238!)
   updateTpsCamera(cam, world.pig.x, world.pig.seated ? 0.38 : 0, world.pig.z, cv.width, cv.height, {
-    minX: -5.65, maxX: 5.65, minZ: -1.6, maxZ: 14.4
+    minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, maxY: 3.85
   });
   renderPhoTps3D(ctx, cam, world);
   syncHud();

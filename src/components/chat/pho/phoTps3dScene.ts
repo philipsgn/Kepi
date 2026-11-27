@@ -78,11 +78,12 @@ function createPhoTpsWorld() {
 
   return {
     t: 0,
-    doorOpen: 0.95,      // Mở màn 2 cánh cửa gỗ vừa mở ra chào đón chú Heo như Hình 1, tự khép lại sau 1.4s!
-    doorTarget: 0.95,
-    welcomeTimer: 1.4,
+    doorOpen: 0.0,       // Cửa gỗ lá sách kính mờ luôn khép kín đẹp mắt (chuẩn RPG AAA — QĐ 238!)
+    doorTarget: 0.0,
+    exiting: false,
+    exitFade: 0,
     pig: {
-      x: 0, z: 1.05, tx: 0, tz: 1.05,
+      x: 0, z: 1.75, tx: 0, tz: 1.75,
       yaw: 0, walking: false,
       seated: false, seatRef: null,
       eating: false, eatTimer: 0,
@@ -129,16 +130,15 @@ function clampPigWorldPos(w, nx, nz) {
 
 function stepPhoTpsWorld(w, dt) {
   w.t += dt;
-  if (w.welcomeTimer > 0) w.welcomeTimer -= dt;
 
-  // Cửa gỗ 2 cánh chỉ mở 1.4s đầu lúc vào, hoặc khi chú Heo sát cửa (< 1.25m) / khách ra vào -> còn lại tự khép tự nhiên!
-  var nearDoor = (w.welcomeTimer > 0) || (Math.abs(w.pig.x) < 1.35 && w.pig.z < 1.25);
-  for (var ci = 0; ci < w.customers.length; ci++) {
-    var cu = w.customers[ci];
-    if (cu.state !== 'DOOR_WAIT' && Math.abs(cu.x) < 1.5 && cu.z < 1.4) { nearDoor = true; break; }
+  // Hiệu ứng mở hé cửa & chuyển cảnh mượt Fade-Out khi chú Heo bấm Ra lại Đại Lộ Sài Gòn (QĐ 238)
+  if (w.exiting) {
+    w.doorTarget = 0.55;
+    w.exitFade = Math.min(1, w.exitFade + dt * 4.2);
+  } else {
+    w.doorTarget = 0.0;
   }
-  w.doorTarget = nearDoor ? 0.92 : 0.0;
-  w.doorOpen += (w.doorTarget - w.doorOpen) * Math.min(1, dt * 5.2);
+  w.doorOpen += (w.doorTarget - w.doorOpen) * Math.min(1, dt * 6.5);
 
   // Di chuyển Chú Heo Mascot
   var p = w.pig;
@@ -446,9 +446,11 @@ function renderPhoTps3D(ctx, cam, w) {
   drawPoly3D(ctx, cam, [[5.92,1.5,4.0],[5.92,1.5,2.2],[5.92,2.6,2.2],[5.92,2.6,4.0]], '#C9A46B', '#3B2314', 2);
   drawPoly3D(ctx, cam, [[5.92,1.5,8.0],[5.92,1.5,6.2],[5.92,2.6,6.2],[5.92,2.6,8.0]], '#C9A46B', '#3B2314', 2);
 
-  // Tường cửa ra vào phía sau lưng (Z = 0) + Tranh bối cảnh phố Sài Gòn & Sông Bạch Đằng phẳng siêu nhẹ (0% lag — QĐ 237!)
+  // Tường cửa ra vào phía sau lưng (Z = 0) — CHUẨN RPG AAA: CỬA GỖ LÁ SÁCH KÍNH MỜ ĐÓNG KÍN + VỆT NẮNG ĐỔ SÀN (QĐ 238!)
   drawPoly3D(ctx, cam, [[-6.0,0,0],[-1.45,0,0],[-1.45,3.85,0],[-6.0,3.85,0]], '#E0B04C', '#3B2314', 1.2);
+  drawPoly3D(ctx, cam, [[-6.0,0,0.03],[-1.45,0,0.03],[-1.45,0.95,0.03],[-6.0,0.95,0.03]], '#6E452A', '#3B2314', 1);
   drawPoly3D(ctx, cam, [[1.45,0,0],[6.0,0,0],[6.0,3.85,0],[1.45,3.85,0]], '#E0B04C', '#3B2314', 1.2);
+  drawPoly3D(ctx, cam, [[1.45,0,0.03],[6.0,0,0.03],[6.0,0.95,0.03],[1.45,0.95,0.03]], '#6E452A', '#3B2314', 1);
   // Khung biển gỗ đỏ đô phía trên cửa ra vào + chữ KÍNH CHÀO QUÝ KHÁCH
   drawPoly3D(ctx, cam, [[-1.45,2.55,0],[1.45,2.55,0],[1.45,3.85,0],[-1.45,3.85,0]], '#7F1D1D', '#3B2314', 1.4);
   drawPoly3D(ctx, cam, [[-1.25,2.75,0.03],[1.25,2.75,0.03],[1.25,3.45,0.03],[-1.25,3.45,0.03]], '#991B1B', '#F4B93B', 1.2);
@@ -460,16 +462,12 @@ function renderPhoTps3D(ctx, cam, w) {
     ctx.fillText('KÍNH CHÀO QUÝ KHÁCH', byeP.sx, byeP.sy + 3);
     ctx.restore();
   }
-  // TẤM TRANH PHỐ XÁ & SÔNG BẠCH ĐẰNG PHẲNG SIÊU NHẸ SAU KHUNG CỬA (Z = -0.08, 0% mảng vàng khè & 0% lag!)
-  drawPoly3D(ctx, cam, [[-1.45,1.72,-0.08],[1.45,1.72,-0.08],[1.45,2.55,-0.08],[-1.45,2.55,-0.08]], '#8ECDF8', null, 0); // Bầu trời sáng
-  drawPoly3D(ctx, cam, [[-1.45,1.40,-0.08],[1.45,1.40,-0.08],[1.45,1.73,-0.08],[-1.45,1.73,-0.08]], '#4E9A54', null, 0); // Cây xanh Thủ Thiêm
-  drawPoly3D(ctx, cam, [[-1.45,0.98,-0.08],[1.45,0.98,-0.08],[1.45,1.41,-0.08],[-1.45,1.41,-0.08]], '#3B8CB8', null, 0); // Sông Bạch Đằng
-  drawPoly3D(ctx, cam, [[-0.6,1.16,-0.07],[0.45,1.16,-0.07],[0.45,1.22,-0.07],[-0.6,1.22,-0.07]], 'rgba(255,255,255,0.65)', null, 0); // Vệt sóng sông
-  drawPoly3D(ctx, cam, [[-1.45,0.42,-0.08],[1.45,0.42,-0.08],[1.45,0.99,-0.08],[-1.45,0.99,-0.08]], '#475569', null, 0); // Mặt đường nhựa
-  drawPoly3D(ctx, cam, [[-0.5,0.68,-0.07],[0.5,0.68,-0.07],[0.5,0.74,-0.07],[-0.5,0.74,-0.07]], '#FACC15', null, 0); // Vạch vàng giữa đường
-  drawPoly3D(ctx, cam, [[-1.45,0.0,-0.08],[1.45,0.0,-0.08],[1.45,0.43,-0.08],[-1.45,0.43,-0.08]], '#DFCFB2', '#94A3B8', 1); // Vỉa hè gạch
-  // Tán cây xanh rủ góc trên trái khung cửa tạo chiều sâu chân thực
-  drawPoly3D(ctx, cam, [[-1.45,2.05,-0.06],[-0.35,2.05,-0.06],[-0.55,2.55,-0.06],[-1.45,2.55,-0.06]], '#2E7D32', null, 0);
+  // Nền sáng ấm nhẹ phía sau cửa khi cửa hé mở trong lúc Fade-Out chuyển cảnh (không còn tranh phẳng giả!)
+  drawPoly3D(ctx, cam, [[-1.45,0,-0.04],[1.45,0,-0.04],[1.45,2.55,-0.04],[-1.45,2.55,-0.04]], '#FFF7DC', null, 0);
+  // Thảm chùi chân nâu đỏ & 2 Vệt nắng chiều xiên ấm áp đổ qua kính mờ xuống nền gạch bông!
+  drawPoly3D(ctx, cam, [[-1.15,0.015,0.12],[1.15,0.015,0.12],[1.15,0.015,0.88],[-1.15,0.015,0.88]], '#8B3A2B', '#4A2C1A', 1.2);
+  drawPoly3D(ctx, cam, [[-1.1,0.02,0.92],[-0.15,0.02,0.92],[-0.35,0.02,2.25],[-1.3,0.02,2.25]], 'rgba(255,232,168,0.28)', null, 0);
+  drawPoly3D(ctx, cam, [[0.15,0.02,0.92],[1.1,0.02,0.92],[0.9,0.02,2.25],[-0.05,0.02,2.25]], 'rgba(255,232,168,0.28)', null, 0);
 
   // 5. THU THẬP VẬT THỂ 3D ĐỂ Z-SORT (PAINTER'S ALGORITHM)
   var drawList = [];
@@ -478,27 +476,50 @@ function renderPhoTps3D(ctx, cam, w) {
     drawList.push({ cz: cp.cz, fn: fn });
   }
 
-  // 2 Cánh cửa gỗ lim có ô kính & tay nắm đồng vàng (mở chào đón 1.4s đầu rồi tự khép đẹp mắt!)
-  var doorAng = w.doorOpen * 1.45;
-  pushItem(-0.75, 0.2, function() {
-    var lx = -1.45 + Math.cos(doorAng) * 1.42;
-    var lz = Math.sin(doorAng) * 1.42;
-    drawPoly3D(ctx, cam, [[-1.45,0,0],[lx,0,lz],[lx,2.52,lz],[-1.45,2.52,0]], '#5C341D', '#2B180E', 1.4);
-    drawPoly3D(ctx, cam, [[-1.30,0.85,0.02],[lx - Math.cos(doorAng)*0.14,0.85,lz - Math.sin(doorAng)*0.14],[lx - Math.cos(doorAng)*0.14,2.30,lz - Math.sin(doorAng)*0.14],[-1.30,2.30,0.02]], 'rgba(219,234,254,0.34)', '#3B2314', 1);
-    // Tay nắm đồng vàng trên cánh cửa trái
-    var hx1 = -1.45 + Math.cos(doorAng) * 1.24, hz1 = Math.sin(doorAng) * 1.24;
-    var hp1 = projectPoint3D(cam, hx1, 1.15, hz1 + 0.04);
-    if (hp1 && hp1.cz > 0.4) { ctx.fillStyle = '#F4B93B'; ctx.fillRect(Math.round(hp1.sx - 2), Math.round(hp1.sy - 6), 4, 12); }
+  // 2 Chậu cây xanh trầu bà đặt 2 bên khung cửa ra vào
+  pushItem(-1.95, 0.45, function() {
+    drawBox3D(ctx, cam, -1.95, 0, 0.45, 0.48, 0.52, 0.48, { top: '#7C4F2B', front: '#A65432', side: '#8A4223' });
+    drawBox3D(ctx, cam, -1.95, 0.52, 0.45, 0.62, 0.55, 0.62, { top: '#4CAF50', front: '#2E7D32', side: '#1B5E20' });
   });
-  pushItem(0.75, 0.2, function() {
-    var rx = 1.45 - Math.cos(doorAng) * 1.42;
-    var rz = Math.sin(doorAng) * 1.42;
-    drawPoly3D(ctx, cam, [[1.45,0,0],[rx,0,rz],[rx,2.52,rz],[1.45,2.52,0]], '#5C341D', '#2B180E', 1.4);
-    drawPoly3D(ctx, cam, [[1.30,0.85,0.02],[rx + Math.cos(doorAng)*0.14,0.85,rz - Math.sin(doorAng)*0.14],[rx + Math.cos(doorAng)*0.14,2.30,rz - Math.sin(doorAng)*0.14],[1.30,2.30,0.02]], 'rgba(219,234,254,0.34)', '#3B2314', 1);
-    // Tay nắm đồng vàng trên cánh cửa phải
-    var hx2 = 1.45 - Math.cos(doorAng) * 1.24, hz2 = Math.sin(doorAng) * 1.24;
+  pushItem(1.95, 0.45, function() {
+    drawBox3D(ctx, cam, 1.95, 0, 0.45, 0.48, 0.52, 0.48, { top: '#7C4F2B', front: '#A65432', side: '#8A4223' });
+    drawBox3D(ctx, cam, 1.95, 0.52, 0.45, 0.62, 0.55, 0.62, { top: '#4CAF50', front: '#2E7D32', side: '#1B5E20' });
+  });
+
+  // 2 Cánh cửa gỗ lim lá sách có ô kính mờ sương chia ô cổ điển & tay nắm đồng vàng (khép kín chuẩn RPG AAA!)
+  var doorAng = w.doorOpen * 1.1;
+  pushItem(-0.75, 0.08, function() {
+    var lx = -1.45 + Math.cos(doorAng) * 1.43;
+    var lz = Math.sin(doorAng) * 1.43;
+    drawPoly3D(ctx, cam, [[-1.45,0,0],[lx,0,lz],[lx,2.54,lz],[-1.45,2.54,0]], '#5C341D', '#2B180E', 1.4);
+    // Ô kính mờ sương ấm áp có nan gỗ chia ô cổ điển phía trên
+    var gx0 = -1.30, gx1 = lx - Math.cos(doorAng) * 0.14;
+    var gz0 = 0.02, gz1 = lz - Math.sin(doorAng) * 0.14;
+    drawPoly3D(ctx, cam, [[gx0,1.02,gz0],[gx1,1.02,gz1],[gx1,2.34,gz1],[gx0,2.34,gz0]], '#F7E7C4', '#3B2314', 1.2);
+    // Nan chia ô kính ngang & dọc
+    drawPoly3D(ctx, cam, [[gx0,1.65,gz0+0.01],[gx1,1.65,gz1+0.01],[gx1,1.71,gz1+0.01],[gx0,1.71,gz0+0.01]], '#4A2C1A', null, 0);
+    // Các nan lá sách gỗ ngang phần dưới cửa
+    for (var ly = 0.22; ly <= 0.82; ly += 0.2) {
+      drawPoly3D(ctx, cam, [[gx0,ly,gz0+0.01],[gx1,ly,gz1+0.01],[gx1,ly+0.06,gz1+0.01],[gx0,ly+0.06,gz0+0.01]], '#3B2314', null, 0);
+    }
+    var hx1 = -1.45 + Math.cos(doorAng) * 1.26, hz1 = Math.sin(doorAng) * 1.26;
+    var hp1 = projectPoint3D(cam, hx1, 1.15, hz1 + 0.04);
+    if (hp1 && hp1.cz > 0.35) { ctx.fillStyle = '#F4B93B'; ctx.fillRect(Math.round(hp1.sx - 2), Math.round(hp1.sy - 6), 4, 12); }
+  });
+  pushItem(0.75, 0.08, function() {
+    var rx = 1.45 - Math.cos(doorAng) * 1.43;
+    var rz = Math.sin(doorAng) * 1.43;
+    drawPoly3D(ctx, cam, [[1.45,0,0],[rx,0,rz],[rx,2.54,rz],[1.45,2.54,0]], '#5C341D', '#2B180E', 1.4);
+    var gx0 = 1.30, gx1 = rx + Math.cos(doorAng) * 0.14;
+    var gz0 = 0.02, gz1 = rz - Math.sin(doorAng) * 0.14;
+    drawPoly3D(ctx, cam, [[gx0,1.02,gz0],[gx1,1.02,gz1],[gx1,2.34,gz1],[gx0,2.34,gz0]], '#F7E7C4', '#3B2314', 1.2);
+    drawPoly3D(ctx, cam, [[gx0,1.65,gz0+0.01],[gx1,1.65,gz1+0.01],[gx1,1.71,gz1+0.01],[gx0,1.71,gz0+0.01]], '#4A2C1A', null, 0);
+    for (var ly2 = 0.22; ly2 <= 0.82; ly2 += 0.2) {
+      drawPoly3D(ctx, cam, [[gx0,ly2,gz0+0.01],[gx1,ly2,gz1+0.01],[gx1,ly2+0.06,gz1+0.01],[gx0,ly2+0.06,gz0+0.01]], '#3B2314', null, 0);
+    }
+    var hx2 = 1.45 - Math.cos(doorAng) * 1.26, hz2 = Math.sin(doorAng) * 1.26;
     var hp2 = projectPoint3D(cam, hx2, 1.15, hz2 + 0.04);
-    if (hp2 && hp2.cz > 0.4) { ctx.fillStyle = '#F4B93B'; ctx.fillRect(Math.round(hp2.sx - 2), Math.round(hp2.sy - 6), 4, 12); }
+    if (hp2 && hp2.cz > 0.35) { ctx.fillStyle = '#F4B93B'; ctx.fillRect(Math.round(hp2.sx - 2), Math.round(hp2.sy - 6), 4, 12); }
   });
 
   // 2 Quạt trần Vintage 3 cánh quay 60fps & 6 Đèn thả chụp men ánh vàng 90s!
@@ -554,10 +575,14 @@ function renderPhoTps3D(ctx, cam, w) {
     if (drawList[di].cz > -1.2) drawList[di].fn();
   }
 
-  // 6. LỚP PHỦ ÁNH ĐÈN VÀNG VINTAGE 90S ẤM CÚNG TOÀN KHUNG HÌNH
+  // 6. LỚP PHỦ ÁNH ĐÈN VÀNG VINTAGE 90S ẤM CÚNG & CHUYỂN CẢNH FADE-OUT KHI RA CỬA
   ctx.save();
   ctx.fillStyle = 'rgba(255, 198, 92, 0.09)';
   ctx.fillRect(0, 0, vw, vh);
+  if (w.exitFade > 0) {
+    ctx.fillStyle = 'rgba(43, 33, 24, ' + Math.min(1, w.exitFade).toFixed(2) + ')';
+    ctx.fillRect(0, 0, vw, vh);
+  }
   ctx.restore();
 }
 `;

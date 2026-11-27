@@ -12,10 +12,12 @@ export function buildTps3dEngineScript(): string {
   return String.raw`
 /* ==================== 1. HỆ CHIẾU PHỐI CẢNH 3D & CAMERA TPS 360° ==================== */
 function createTpsCamera(opts) {
+  var d = (opts && typeof opts.dist === 'number') ? opts.dist : 3.9;
   return {
     yaw: (opts && typeof opts.yaw === 'number') ? opts.yaw : 0,
     pitch: (opts && typeof opts.pitch === 'number') ? opts.pitch : -0.34,
-    dist: (opts && typeof opts.dist === 'number') ? opts.dist : 3.9,
+    dist: d,
+    curDist: d,
     targetHeight: (opts && typeof opts.targetHeight === 'number') ? opts.targetHeight : 0.95,
     fovFactor: 0.86,
     pos: { x: 0, y: 2.4, z: -4 },
@@ -50,18 +52,34 @@ function updateTpsCamera(cam, targetX, targetY, targetZ, vw, vh, bounds) {
   cam.U.y = cp;
   cam.U.z = -cy * sp;
 
+  // SPRING-ARM RAYCAST 6 MẶT PHẲNG CHỐNG NHÌN XUYÊN TƯỜNG 100% (CHUẨN PUBG / GENSHIN — QĐ 238!)
   var tx = targetX, ty = targetY + cam.targetHeight, tz = targetZ;
-  var d = cam.dist;
-  var px = tx - cam.F.x * d;
-  var py = ty - cam.F.y * d;
-  var pz = tz - cam.F.z * d;
+  var bx = -cam.F.x, by = -cam.F.y, bz = -cam.F.z;
+  var tHit = cam.dist;
+  var wallMargin = 0.38; // Lớn hơn nearPlane (0.22m) -> bất khả thi cắt xuyên qua bất kỳ bức tường nào!
   if (bounds) {
-    if (px < bounds.minX) px = bounds.minX;
-    if (px > bounds.maxX) px = bounds.maxX;
-    if (pz < bounds.minZ) pz = bounds.minZ;
-    if (pz > bounds.maxZ) pz = bounds.maxZ;
-    if (py < 0.7) py = 0.7;
-    if (py > 4.6) py = 4.6;
+    var mnX = bounds.minX + wallMargin, mxX = bounds.maxX - wallMargin;
+    var mnZ = bounds.minZ + wallMargin, mxZ = bounds.maxZ - wallMargin;
+    var mnY = 0.65, mxY = (typeof bounds.maxY === 'number' ? bounds.maxY : 3.85) - 0.35;
+    if (bx < -0.0001) { var t1 = (mnX - tx) / bx; if (t1 >= 0 && t1 < tHit) tHit = t1; }
+    else if (bx > 0.0001) { var t2 = (mxX - tx) / bx; if (t2 >= 0 && t2 < tHit) tHit = t2; }
+    if (bz < -0.0001) { var t3 = (mnZ - tz) / bz; if (t3 >= 0 && t3 < tHit) tHit = t3; }
+    else if (bz > 0.0001) { var t4 = (mxZ - tz) / bz; if (t4 >= 0 && t4 < tHit) tHit = t4; }
+    if (by < -0.0001) { var t5 = (mnY - ty) / by; if (t5 >= 0 && t5 < tHit) tHit = t5; }
+    else if (by > 0.0001) { var t6 = (mxY - ty) / by; if (t6 >= 0 && t6 < tHit) tHit = t6; }
+  }
+  var desiredDist = Math.max(0.75, tHit);
+  // Co vào tức thì khi chạm tường (0ms không xuyên 1 frame), bung ra êm mượt khi rời xa tường!
+  if (desiredDist < cam.curDist) cam.curDist = desiredDist;
+  else cam.curDist += (desiredDist - cam.curDist) * 0.18;
+
+  var px = tx + bx * cam.curDist;
+  var py = ty + by * cam.curDist;
+  var pz = tz + bz * cam.curDist;
+  if (bounds) {
+    px = Math.max(bounds.minX + wallMargin, Math.min(bounds.maxX - wallMargin, px));
+    pz = Math.max(bounds.minZ + wallMargin, Math.min(bounds.maxZ - wallMargin, pz));
+    py = Math.max(0.65, Math.min((typeof bounds.maxY === 'number' ? bounds.maxY : 3.85) - 0.35, py));
   }
   cam.pos.x = px;
   cam.pos.y = py;

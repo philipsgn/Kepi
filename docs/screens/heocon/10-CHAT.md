@@ -575,3 +575,4 @@ Màn hình Tab 3 hiển thị:
   - **3 Nhân viên Bếp sống động:** Bếp trưởng múc 2 nồi nước dùng inox tròn bốc khói, Phụ bếp thái lát thịt bò tươi sống trên thớt gỗ, Phụ bếp trụng bánh phở rắc hành ngò.
   - **2 Nhân viên Phục vụ mặc tạp dề cổ điển đẹp mắt** (dây đeo cổ, nơ eo & túi trước) chạy FSM bưng phở & dọn bàn.
   - **Món Phở chân thực & đũa muỗng đầy đủ:** Tô Phở sứ viền lam đầy lát thịt bò tươi sống, hành ngò, có cả **đũa tre + muỗng sứ trắng**, kèm **ống đũa muỗng đầy đủ** trên từng bàn ăn!
+  - **Camera Spring-Arm chống xuyên tường 100% & Cửa gỗ kính mờ AAA (QĐ 238):** Bắn tia Spring-Arm 6 mặt phẳng (`wallMargin = 0.38m`) ngăn tuyệt đối camera lòi ra ngoài tường; thay tấm tranh phẳng sau cửa bằng **2 cánh cửa gỗ lim lá sách có ô kính mờ chia ô cổ điển đóng kín đẹp mắt**, 2 vệt nắng xiên đổ sàn, thảm chùi chân, 2 chậu cây và hiệu ứng chuyển cảnh Fade-Out mượt khi mở cửa ra Đại Lộ Sài Gòn.
