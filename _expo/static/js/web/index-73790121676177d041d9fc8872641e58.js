@@ -60,7 +60,7 @@ __d(function(g,r,i,a,m,_e,_d){"use strict";function e(e){return e&&e.__esModule?
 __d(function(g,r,i,a,m,_e2,_d){"use strict";function n(n){return n&&n.__esModule?n:{default:n}}Object.defineProperty(_e2,'__esModule',{value:!0}),Object.defineProperty(_e2,"PagodaTempleBannerWebView",{enumerable:!0,get:function(){return l}});var e=r(_d[0]);r(_d[1]);var t=n(r(_d[2])),o=n(r(_d[3]));r(_d[4]);var c=(function(n){if(n&&n.__esModule)return n;var e={};return n&&Object.keys(n).forEach(function(t){if('default'!==t){var o=Object.getOwnPropertyDescriptor(n,t);Object.defineProperty(e,t,o.get?o:{enumerable:!0,get:function(){return n[t]}})}}),e.default=n,e})(r(_d[5])),h=r(_d[6]),d=r(_d[7]),s=r(_d[8]);const l=({active:n=!0,onExitToHub:t})=>{(0,e.useRef)(null);const l=(0,e.useRef)(null),u=(0,e.useRef)(null);(0,e.useEffect)(()=>()=>{u.current&&clearTimeout(u.current)},[]),(0,e.useEffect)(()=>{},[n]);const w=n=>{n&&('HAPTIC_LIGHT'===n.type?c.impactAsync(c.ImpactFeedbackStyle.Light).catch(()=>{}):'ROOM_ACTION'===n.type&&'exit_pagoda'===n.id&&n.userTriggered&&t&&(c.impactAsync(c.ImpactFeedbackStyle.Medium).catch(()=>{}),u.current&&clearTimeout(u.current),u.current=setTimeout(()=>{t()},120)))};(0,e.useEffect)(()=>{if('undefined'==typeof window)return;const n=n=>{try{const e='string'==typeof n.data?JSON.parse(n.data):n.data;w(e)}catch(n){}};return window.addEventListener('message',n),()=>window.removeEventListener('message',n)},[t]);const y=(0,e.useMemo)(()=>(0,h.buildOpenRoomEngineScript)({canvasId:'pgCv',worldWidth:640,worldHeight:560,viewWidth:220,viewHeight:320,walkBounds:{minX:24,maxX:616,minY:208,maxY:536},initialX:320,initialY:368,initialCamX:210,initialCamY:180,speed:46,obstacles:[{x:0,y:310,w:262,h:18},{x:378,y:310,w:262,h:18},{x:296,y:394,w:48,h:42},{x:44,y:452,w:106,h:40},{x:488,y:444,w:104,h:44}],hotspots:[{id:'buddha_altar',x:204,y:48,w:232,h:158,standX:320,standY:224,standFace:1,actionType:'eat_snack',bubbleText:"Nam M\xf4 A Di \u0110\xe0 Ph\u1eadt \xb7 Ch\xfac b\u1ea1n t\xe2m an, gi\u1eef v\xed v\u1eefng v\xe0ng!"},{id:'prajna_drum',x:28,y:144,w:56,h:64,standX:64,standY:226,standFace:-1,actionType:'look_window',bubbleText:"Tr\u1ed1ng B\xe1t Nh\xe3 ng\xe2n vang thanh t\u1ecbnh kh\u1eafp ch\xe1nh \u0111i\u1ec7n"},{id:'great_bell',x:556,y:138,w:56,h:68,standX:578,standY:226,standFace:1,actionType:'look_window',bubbleText:"Th\u1ec9nh \u0110\u1ea1i H\u1ed3ng Chung vang v\u1ecdng \xb7 T\xe2m h\u1ed3n nh\u1eb9 nh\xf5m an y\xean..."},{id:'courtyard_incense',x:294,y:386,w:52,h:50,standX:320,standY:448,standFace:1,actionType:'eat_snack',bubbleText:"Th\u1eafp n\xe9n h\u01b0\u01a1ng tr\u1ea7m c\u1ea7u b\xecnh an & s\u1ee9c kh\u1ecfe cho gia \u0111\xecnh!"},{id:'stupa_tower',x:42,y:332,w:112,h:158,standX:168,standY:456,standFace:-1,actionType:'look_window',bubbleText:"B\u1ea3o Th\xe1p c\u1ed5 k\xednh m\xe1i \u0111ao cong \u0111\u1ecf r\u1ef1c gi\u1eefa s\xe2n ch\xf9a thanh t\u1ecbnh"},{id:'exit_pagoda',x:266,y:504,w:108,h:56,standX:320,standY:514,standFace:1,actionType:'jump_joy',fastDash:!0,bubbleText:"B\u01b0\u1edbc qua C\u1ed5ng Tam Quan ra l\u1ea1i ph\u1ed1 S\xe0i G\xf2n..."}]}),[]),x=(0,e.useMemo)(()=>(0,d.buildPagodaInteriorArtScript)(),[]),f=(0,e.useMemo)(()=>`<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">\n<style>\n*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}\nhtml,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#3A2D25;display:flex;align-items:center;justify-content:center}\n#pgCv{\n  width:100%;\n  height:100%;\n  display:block;\n  image-rendering:pixelated;\n  image-rendering:-webkit-crisp-edges;\n  image-rendering:-moz-crisp-edges;\n  image-rendering:crisp-edges;\n  cursor:grab;\n  touch-action:none;\n}\n</style>\n<script>\nwindow.onerror=function(msg,src,line){\n  if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(JSON.stringify({type:'CONSOLE_ERROR',error:String(msg),line:line}));}\n  return false;\n};\n<\/script>\n</head>\n<body>\n<canvas id="pgCv" width="220" height="320" role="img" aria-label="Ng\xf4i ch\xf9a Vi\u1ec7t Nam c\u1ed5 k\xednh 2 t\u1ea7ng g\u1ed3m Ch\xe1nh \u0110i\u1ec7n t\u01b0\u1ee3ng Ph\u1eadt th\u1ebfp v\xe0ng, kh\xf3i tr\u1ea7m h\u01b0\u01a1ng, Ph\u1eadt t\u1eed c\xfai l\u1ea1y v\xe0 S\xe2n Ch\xf9a B\u1ea3o Th\xe1p"></canvas>\n<script>\n(function(){\n'use strict';\n\nvar INK='#2B2118';\nvar WORLD_W=640;\nvar WORLD_H=560;\nvar VW=220;\nvar VH=320;\n\nfunction R(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}\nfunction E(c,cx,cy,rx,ry,col){\n  c.fillStyle=col;\n  for(var dy=-ry;dy<=ry;dy++)for(var dx=-rx;dx<=rx;dx++)\n    if((dx*dx)/(rx*rx)+(dy*dy)/(ry*ry)<=1)c.fillRect(Math.round(cx+dx),Math.round(cy+dy),1,1);\n}\n\n// Sprite Heo Con 24\xd720 chu\u1ea9n Tab V\u01b0\u1eddn\nvar PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',h:'#FFE3E8',k:'#2B2118',g:'#F4B93B',G:'#B97A14',w:'#FFFFFF'};\nvar hp=document.createElement('canvas');hp.width=24;hp.height=20;\nvar hpx=hp.getContext('2d');hpx.imageSmoothingEnabled=false;\nfunction drawPigSprite(c,o){\n  o=o||{};\n  var pose=o.pose||'stand', f=o.frame||0, by=pose==='walk'?(f%2?0:1):0;\n  var hx=pose==='eat'?1:0, hy=pose==='eat'?3:by;\n  var I=PAL.k,P=PAL.p,S=PAL.s,N=PAL.n,H=PAL.h,G=PAL.g;\n  if(o.tail){R(c,2,10+by,2,1,I);R(c,1,9+by,1,2,I);R(c,2,8+by,1,1,I);}\n  else{R(c,2,11+by,2,1,I);R(c,1,10+by,1,1,I);}\n  R(c,4,7+by,14,9,I);R(c,3,8+by,16,7,I);\n  R(c,5,8+by,12,7,P);R(c,4,9+by,14,5,P);\n  R(c,6,8+by,10,2,H);R(c,5,13+by,12,2,S);\n  R(c,9,8+by,4,1,I);R(c,9,9+by,4,1,G);\n  R(c,14+hx,3+hy,3,3,I);R(c,15+hx,4+hy,1,1,N);\n  R(c,12+hx,4+hy,9,9,I);R(c,11+hx,5+hy,11,7,I);\n  R(c,13+hx,5+hy,7,7,P);R(c,12+hx,6+hy,9,5,P);\n  R(c,13+hx,5+hy,5,2,H);R(c,13+hx,11+hy,6,1,S);\n  R(c,19+hx,7+hy,4,4,I);R(c,20+hx,8+hy,2,2,N);\n  R(c,20+hx,8+hy,1,1,I);R(c,21+hx,9+hy,1,1,I);\n  if(o.blink){R(c,16+hx,8+hy,2,1,I);}\n  else if(o.happy){R(c,16+hx,8+hy,1,1,I);R(c,17+hx,7+hy,1,1,I);R(c,18+hx,8+hy,1,1,I);}\n  else{R(c,16+hx,7+hy,2,2,I);R(c,16+hx,7+hy,1,1,PAL.w);}\n  R(c,14+hx,10+hy,2,1,'#F27D94');\n  var L1=pose==='walk'?(f%2?0:-1):0, L2=pose==='walk'?(f%2?-1:0):0;\n  [[6,L1,P],[9,L2,P],[13,L2,S],[16,L1,S]].forEach(function(lg){\n    R(c,lg[0],15+by+lg[1],2,4,I);R(c,lg[0],15+by+lg[1],1,2,lg[2]);R(c,lg[0],18+by+lg[1],2,1,I);\n  });\n}\n\n${x}\n\nvar PG={bg:null,t:0,last:0,dt:0,run:false,w:VW,h:VH};\n\nfunction buildPagoda(){\n  var bg=document.createElement('canvas');bg.width=WORLD_W;bg.height=WORLD_H;\n  var x=bg.getContext('2d');x.imageSmoothingEnabled=false;\n  drawPagodaBg(x,WORLD_W,WORLD_H);\n  PG.bg=bg;\n}\n\nfunction drawPigAt(x,rm,t){\n  if(!rm)return;\n  var bow=(rm.action==='eat_snack');\n  var px=Math.round(rm.x-12), jumpY=(rm.action==='jump_joy'?-Math.abs(Math.sin(t*10))*4:0), py=Math.round(rm.y-20+jumpY);\n  E(x,Math.round(rm.x),Math.round(rm.y)-1,11,3,'rgba(43,33,24,0.24)');\n  hpx.clearRect(0,0,24,20);\n  drawPigSprite(hpx,{pose:rm.walking?'walk':(bow?'eat':'stand'),frame:rm.walking?(((t*6)|0)%2):0,happy:Boolean(rm.action)&&!bow,blink:(t%4)<0.15,tail:Math.floor(t*3)%2===1});\n  x.save();\n  if(rm.facing<0){x.translate(px+24,py);x.scale(-1,1);x.drawImage(hp,0,0,24,20,0,0,24,20);}\n  else x.drawImage(hp,0,0,24,20,px,py,24,20);\n  x.restore();\n}\n\nfunction pgDraw(t){\n  var x=PG.x;\n  var dt=Math.min(0.05,PG.dt||0.016);\n  var rm=window.__openRoom?window.__openRoom.state:null;\n  if(window.__openRoom) window.__openRoom.step(dt,performance.now());\n  var camX=rm?Math.round(rm.camX):210;\n  var camY=rm?Math.round(rm.camY):180;\n\n  x.save();\n  x.translate(-camX,-camY);\n  x.drawImage(PG.bg,0,0);\n  drawPagodaLiveEffects(x,t);\n  drawPigAt(x,rm,t);\n  x.restore();\n\n  if(window.__openRoom) window.__openRoom.drawOverlays(x,performance.now());\n}\n\nfunction pgFrame(now){\n  if(!PG.run)return;\n  var dt=Math.min(0.05,(now-PG.last)/1000);PG.last=now;PG.dt=dt;PG.t+=dt;\n  pgDraw(PG.t);requestAnimationFrame(pgFrame);\n}\n\nfunction applyResponsiveViewport(){\n  var w=Math.max(240,window.innerWidth||360);\n  var h=Math.max(320,window.innerHeight||640);\n  var sc=Math.max(2,Math.round(w/192));\n  VW=Math.min(260,Math.max(168,Math.ceil(w/sc)));\n  VH=Math.min(356,Math.max(200,Math.ceil(h/sc)));\n  var cv=document.getElementById('pgCv');\n  if(cv){cv.width=VW;cv.height=VH;}\n  PG.w=VW;PG.h=VH;\n  if(PG.x) PG.x.imageSmoothingEnabled=false;\n  if(window.__openRoom&&window.__openRoom.resize) window.__openRoom.resize(VW,VH);\n}\n\nwindow.__pgSetActive=function(v){\n  if(v&&!PG.run){PG.run=true;PG.last=performance.now();requestAnimationFrame(pgFrame);}\n  else if(!v){PG.run=false;}\n};\nwindow.addEventListener('resize',applyResponsiveViewport);\n\nfunction pgStart(){\n  var cv=document.getElementById('pgCv');\n  PG.c=cv;PG.x=cv.getContext('2d');PG.x.imageSmoothingEnabled=false;\n  applyResponsiveViewport();\n  buildPagoda();\n  PG.run=true;PG.last=performance.now();\n  requestAnimationFrame(pgFrame);\n}\n\n${y}\n\nif(document.readyState==='loading') document.addEventListener('DOMContentLoaded',pgStart);\nelse pgStart();\n\n})();\n<\/script>\n</body>\n</html>`,[y,x]);return(0,s.jsx)(o.default,{style:p.wrap,children:(0,s.jsx)("iframe",{ref:l,srcDoc:f,style:{width:'100%',height:'100%',border:'none',display:'block'},title:"Ng\xf4i Ch\xf9a Vi\u1ec7t Nam C\u1ed5 K\xednh To\xe0n M\xe0n H\xecnh"})})},p=t.default.create({wrap:{flex:1,width:'100%',height:'100%',backgroundColor:'#3A2D25'},webView:{flex:1,width:'100%',height:'100%',backgroundColor:'#3A2D25'}})},845,[39,29,80,154,947,775,829,846,60]);
 __d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.buildPagodaInteriorArtScript=function(){return"\nfunction drawBonsaiPot(c, x, y) {\n  R(c, x + 2, y + 12, 16, 8, INK);\n  R(c, x + 3, y + 13, 14, 6, '#B97A14');\n  R(c, x + 4, y + 14, 12, 2, '#F5CA72');\n  R(c, x + 8, y + 6, 4, 7, '#5C381E');\n  E(c, x + 10, y + 4, 8, 4, INK); E(c, x + 10, y + 4, 7, 3, '#2E7D32');\n  E(c, x + 5, y + 7, 5, 3, '#388E3C'); E(c, x + 15, y + 7, 5, 3, '#43A047');\n}\n\nfunction drawWorshipper(c, px, py, bowAmt, shirt, isMonk) {\n  // Ph\u1eadt t\u1eed / s\u01b0 th\u1ea7y qu\u1ef3 l\u1ea1y tr\xean b\u1ed3 \u0111o\xe0n (quay m\u1eb7t l\xean t\u01b0\u1ee3ng Ph\u1eadt)\n  // B\u1ed3 \u0111o\xe0n \u0111\u1ecf vi\u1ec1n v\xe0ng\n  R(c, px - 3, py - 2, 16, 7, INK);\n  R(c, px - 2, py - 1, 14, 5, '#9E2A2B');\n  R(c, px - 1, py, 12, 3, '#DC2626');\n  R(c, px - 2, py + 3, 14, 1, '#F4B93B');\n\n  var bow = Math.round(bowAmt * 4);\n  var bodyCol = isMonk ? '#D97706' : (shirt || '#64748B');\n  var hairCol = isMonk ? '#E5C29F' : '#2B2118';\n  // Th\xe2n \xe1o tr\xe0ng / \xe1o lam c\xfai l\u1ea1y\n  R(c, px, py - 11 + bow, 10, 10 - (bow >> 1), INK);\n  R(c, px + 1, py - 10 + bow, 8, 8 - (bow >> 1), bodyCol);\n  R(c, px + 2, py - 10 + bow, 2, 6 - (bow >> 1), 'rgba(255,255,255,0.2)');\n  // \u0110\u1ea7u c\xfai nh\u1eb9 khi l\u1ea1y Ph\u1eadt\n  R(c, px + 1, py - 16 + bow, 8, 6, INK);\n  R(c, px + 2, py - 15 + bow, 6, 4, hairCol);\n  R(c, px + 2, py - 12 + bow, 6, 1, '#E5C29F');\n}\n\nfunction drawPagodaBg(x, WORLD_W, WORLD_H) {\n  // =========================================================================\n  // T\u1ea6NG 1 (y: 0..314): CH\xc1NH \u0110I\u1ec6N UY NGHI\xcaM (THEO \u1ea2NH 1 \u2014 VI\u1ec6T NAM QU\u1ed0C T\u1ef0)\n  // =========================================================================\n  // 1. TR\u1ea6N G\u1ed6 \xd4 VU\xd4NG CH\u1ea0M HOA SEN M\u1ea0 V\xc0NG L\u1ed8NG L\u1eaaY (y: 0..44)\n  R(x, 0, 0, WORLD_W, 44, '#4A2511');\n  for (var cx = 8; cx < WORLD_W - 8; cx += 48) {\n    R(x, cx, 4, 42, 34, '#7C3F19');\n    R(x, cx + 2, 6, 38, 30, '#D99B38');\n    R(x, cx + 4, 8, 34, 26, '#8C521A');\n    E(x, cx + 21, 21, 13, 10, '#F5CA72');\n    E(x, cx + 21, 21, 9, 7, '#B97A14');\n    E(x, cx + 21, 21, 4, 3, '#FEF08A'); // t\xe2m hoa sen m\u1ea1 v\xe0ng\n  }\n  R(x, 0, 42, WORLD_W, 3, INK);\n\n  // 2. T\u01af\u1edcNG CH\xc1NH \u0110I\u1ec6N, C\u1eecA L\xc1 S\xc1CH & T\u1ee6 T\u01af\u1ee2NG LA H\xc1N (y: 45..204)\n  R(x, 0, 45, WORLD_W, 159, '#F3E5C8');\n  // H\xe0ng c\u1eeda s\u1ed5 k\xednh tr\xean cao l\u1ea5y \xe1nh s\xe1ng thanh t\u1ecbnh\n  for (var wx = 12; wx < 188; wx += 28) {\n    R(x, wx, 52, 22, 24, INK); R(x, wx + 1, 53, 20, 22, '#DCEEFA');\n    R(x, wx + 11, 53, 1, 22, '#5C381E'); R(x, wx + 1, 64, 20, 1, '#5C381E');\n  }\n  for (var wx2 = 452; wx2 < 620; wx2 += 28) {\n    R(x, wx2, 52, 22, 24, INK); R(x, wx2 + 1, 53, 20, 22, '#DCEEFA');\n    R(x, wx2 + 11, 53, 1, 22, '#5C381E'); R(x, wx2 + 1, 64, 20, 1, '#5C381E');\n  }\n  // T\u1ee7 k\xednh tr\u01b0ng b\xe0y t\u01b0\u1ee3ng La H\xe1n hai b\xean t\u01b0\u1eddng (nh\u01b0 \u1ea2nh 1)\n  [18, 106, 466, 550].forEach(function (tx) {\n    R(x, tx, 104, 72, 44, INK); R(x, tx + 1, 105, 70, 42, '#FFF8E7');\n    for (var lx = tx + 8; lx < tx + 64; lx += 16) {\n      R(x, lx, 118, 9, 22, '#D99B38'); R(x, lx + 2, 112, 5, 6, '#F5CA72');\n      R(x, lx + 1, 124, 7, 14, (lx % 32 === 0) ? '#DC2626' : '#EAB308');\n    }\n  });\n\n  // H\xe0ng c\u1ed9t g\u1ed7 lim s\u01a1n n\xe2u \u0111\u1ecf cao v\xfat\n  [92, 188, 448, 538].forEach(function (px) {\n    R(x, px, 44, 14, 162, INK); R(x, px + 1, 44, 12, 160, '#5C2C1D');\n    R(x, px + 3, 44, 3, 160, '#7F3F2B');\n    R(x, px - 2, 184, 18, 22, INK); R(x, px - 1, 185, 16, 20, '#3D1E14'); // ch\xe2n c\u1ed9t g\u1ed7\n  });\n\n  // 3. T\u01af\u1ee2NG \u0110\u1ee8C PH\u1eacT TH\xcdCH CA M\xc2U NI TH\u1ebeP V\xc0NG & H\xc0O QUANG CH\u1ea0M L\u1ed8NG (x: 214..426, y: 46..168)\n  // Khung v\xe1ch ch\u1ea1m tr\u1ed5 m\u1ea1 v\xe0ng r\u1ef1c r\u1ee1 ph\xeda sau t\u01b0\u1ee3ng Ph\u1eadt\n  R(x, 214, 48, 212, 118, INK); R(x, 215, 49, 210, 116, '#8C521A');\n  for (var gx = 222; gx < 420; gx += 16) {\n    for (var gy = 54; gy < 158; gy += 16) {\n      R(x, gx, gy, 12, 12, '#B97A14'); R(x, gx + 2, gy + 2, 8, 8, '#D99B38'); R(x, gx + 4, gy + 4, 4, 4, '#F5CA72');\n    }\n  }\n  // V\xf2ng h\xe0o quang tr\xf2n l\u1edbn m\u1ea1 v\xe0ng ch\u1ea1m hoa v\u0103n quanh \u0110\u1ee9c Ph\u1eadt\n  E(x, 320, 112, 56, 52, INK); E(x, 320, 112, 54, 50, '#D99B38');\n  E(x, 320, 112, 46, 42, '#F5CA72'); E(x, 320, 112, 38, 34, '#FEF08A');\n  // T\u01b0\u1ee3ng \u0110\u1ee9c Ph\u1eadt Th\xedch Ca t\u1ecda thi\u1ec1n tr\xean \u0111\xe0i sen (th\u1ebfp v\xe0ng uy nghi\xeam)\n  // \u0110\xe0i sen v\xe0ng r\u1ef1c\n  E(x, 320, 152, 44, 12, INK); E(x, 320, 152, 42, 10, '#D99B38');\n  for (var sp = -32; sp <= 32; sp += 8) { E(x, 320 + sp, 148, 5, 4, '#F5CA72'); }\n  // Th\xe2n & ch\xe2n x\u1ebfp b\u1eb1ng ki\u1ebft gi\xe0 th\u1ebfp v\xe0ng\n  E(x, 320, 138, 30, 12, INK); E(x, 320, 138, 28, 10, '#EAB308');\n  R(x, 300, 108, 40, 28, INK); R(x, 301, 109, 38, 26, '#FACC15');\n  R(x, 304, 112, 14, 20, '#FEF08A'); // \xe1nh v\xe0ng vai tr\xe1i\n  R(x, 314, 126, 12, 6, '#D99B38'); // hai tay th\u1ee7 \u1ea5n thi\u1ec1n \u0111\u1ecbnh\n  // \u0110\u1ea7u & nh\u1ee5c k\u1ebf \u0110\u1ee9c Ph\u1eadt\n  E(x, 320, 92, 13, 14, INK); E(x, 320, 92, 12, 13, '#FACC15');\n  E(x, 320, 82, 12, 6, '#3B2516'); E(x, 320, 75, 5, 4, '#3B2516'); // t\xf3c xo\u1eafn \u1ed1c & nh\u1ee5c k\u1ebf\n  R(x, 319, 89, 2, 2, '#DC2626'); // b\u1ea1ch h\xe0o gi\u1eefa tr\xe1n\n  R(x, 314, 92, 3, 1, '#5C381E'); R(x, 323, 92, 3, 1, '#5C381E'); // \u0111\xf4i m\u1eaft t\u1eeb bi kh\xe9p nh\u1eb9\n\n  // 4. B\xc0N TH\u1edc G\u1ed6 CH\u1ea0M L\u1ed8NG, HOA LAN TR\u1eaeNG, L\u01af H\u01af\u01a0NG & N\u1ebeN (x: 204..436, y: 162..204)\n  R(x, 204, 166, 232, 38, INK); R(x, 205, 167, 230, 8, '#8C521A'); R(x, 205, 175, 230, 28, '#5C2C1D');\n  R(x, 210, 180, 220, 18, '#7F3F2B');\n  for (var bx = 216; bx < 424; bx += 22) R(x, bx, 184, 14, 10, '#D99B38'); // hoa v\u0103n ch\u1ea1m l\u1ed9ng\n  // 2 B\xecnh hoa lan tr\u1eafng l\u1edbn hai b\xean b\xe0n th\u1edd (nh\u01b0 \u1ea2nh 1)\n  [222, 406].forEach(function (fx) {\n    R(x, fx, 156, 12, 12, INK); R(x, fx + 1, 157, 10, 10, '#1E3A8A');\n    E(x, fx + 6, 150, 14, 8, '#E0F2FE'); E(x, fx + 6, 148, 11, 6, '#FFFFFF');\n  });\n  // L\u01b0 h\u01b0\u01a1ng \u0111\u1ed3ng trung t\xe2m b\xe0n th\u1edd\n  R(x, 306, 154, 28, 14, INK); R(x, 307, 155, 26, 12, '#B97A14'); R(x, 310, 157, 20, 4, '#F5CA72');\n  [314, 319, 324].forEach(function (ix) { R(x, ix, 146, 1, 8, '#DC2626'); R(x, ix, 145, 1, 1, '#F97316'); });\n\n  // 5. TR\u1ed0NG B\xc1T NH\xc3 \u0110\u1ece L\u1edaN (TR\xc1I) & \u0110\u1ea0I H\u1ed2NG CHUNG (PH\u1ea2I)\n  // Tr\u1ed1ng B\xe1t Nh\xe3 (x: 34..78, y: 146..204)\n  R(x, 42, 184, 28, 20, '#3D1E14');\n  E(x, 56, 168, 22, 18, INK); E(x, 56, 168, 20, 16, '#9E2A2B');\n  E(x, 46, 168, 10, 15, '#F5E6C8'); E(x, 46, 168, 7, 11, '#E6D2A8'); // m\u1eb7t tr\u1ed1ng da b\xf2\n  // \u0110\u1ea1i H\u1ed3ng Chung \u0111\u1ed3ng c\u1ed5 (x: 560..606, y: 140..204)\n  R(x, 560, 140, 46, 5, '#5C2C1D'); R(x, 562, 145, 4, 58, '#5C2C1D'); R(x, 600, 145, 4, 58, '#5C2C1D');\n  E(x, 583, 174, 14, 18, INK); E(x, 583, 174, 12, 16, '#9A6B2F');\n  R(x, 571, 182, 24, 10, '#784F1E'); R(x, 575, 168, 5, 14, '#D99B38'); // \xe1nh \u0111\u1ed3ng chu\xf4ng\n\n  // 6. S\xc0N \u0110\xc1 HOA C\u01af\u01a0NG B\xd3NG LO\xc1NG CH\xc1NH \u0110I\u1ec6N (y: 204..314)\n  for (var sx = 0; sx < WORLD_W; sx += 20) {\n    for (var sy = 204; sy < 314; sy += 20) {\n      var alt = ((sx / 20) + (sy / 20)) % 2 === 0;\n      R(x, sx, sy, 20, 20, alt ? '#9E93A6' : '#8E8296');\n      R(x, sx, sy, 20, 1, 'rgba(255,255,255,0.12)');\n      R(x, sx, sy, 1, 20, 'rgba(43,33,24,0.16)');\n    }\n  }\n  // Ph\u1ea3n chi\u1ebfu \xe1nh v\xe0ng \u1ea5m c\u1ee7a T\u01b0\u1ee3ng Ph\u1eadt & \u0111\xe8n tr\xean n\u1ec1n \u0111\xe1 b\xf3ng (nh\u01b0 \u1ea2nh 1)\n  x.save();\n  x.globalAlpha = 0.22;\n  E(x, 320, 236, 92, 28, '#F5CA72');\n  x.globalAlpha = 0.14;\n  E(x, 320, 272, 68, 22, '#FEF08A');\n  x.restore();\n\n  // =========================================================================\n  // T\u1ea6NG 2 (y: 314..560): B\u1eacC TAM C\u1ea4P, S\xc2N CH\xd9A, L\u01af H\u01af\u01a0NG L\u1edaN & B\u1ea2O TH\xc1P (\u1ea2NH 2, 3, 4)\n  // =========================================================================\n  // Lan can \u0111\xe1 ch\u1ea1m tr\u1ed5 ng\u0103n Ch\xe1nh \u0110i\u1ec7n & S\xe2n Ch\xf9a + B\u1eadc tam c\u1ea5p \u1edf gi\u1eefa (x: 264..376)\n  R(x, 0, 312, 264, 16, INK); R(x, 1, 313, 262, 14, '#B85A3F'); R(x, 1, 313, 262, 4, '#F5CA72');\n  R(x, 376, 312, 264, 16, INK); R(x, 377, 313, 262, 14, '#B85A3F'); R(x, 377, 313, 262, 4, '#F5CA72');\n  // B\u1eadc thang \u0111\xe1 c\u1ed5 k\xednh b\u01b0\u1edbc t\u1eeb s\xe2n l\xean Ch\xe1nh \u0110i\u1ec7n\n  [312, 318, 324, 330].forEach(function (by, i) {\n    R(x, 264, by, 112, 6, INK); R(x, 265, by + 1, 110, 4, i % 2 === 0 ? '#D8D2C5' : '#C7C0B2');\n  });\n\n  // N\u1ec1n g\u1ea1ch \u0111\xe1 s\xe2n ch\xf9a r\u1ed9ng tho\xe1ng (y: 328..560)\n  for (var cx2 = 0; cx2 < WORLD_W; cx2 += 16) {\n    for (var cy2 = 328; cy2 < WORLD_H; cy2 += 16) {\n      var a2 = ((cx2 / 16) + (cy2 / 16)) % 2 === 0;\n      R(x, cx2, cy2, 16, 16, a2 ? '#D6CFC2' : '#C9C1B2');\n      R(x, cx2, cy2, 16, 1, 'rgba(65,52,40,0.16)');\n      R(x, cx2, cy2, 1, 16, 'rgba(65,52,40,0.16)');\n    }\n  }\n  // L\u1ed1i \u0111i g\u1ea1ch \u0111\u1ecf d\u1eabn t\u1eeb C\u1ed5ng Tam Quan l\xean B\u1eadc Tam C\u1ea5p (x: 280..360)\n  R(x, 280, 336, 80, 174, '#C88A70');\n  R(x, 280, 336, 2, 174, '#8A4E38'); R(x, 358, 336, 2, 174, '#8A4E38');\n\n  // B\u1ea2O TH\xc1P 7 T\u1ea6NG M\xc1I \u0110AO CONG \u0110\u1ece R\u1ef0C B\xcaN TR\xc1I S\xc2N (\u1ea2nh 2 & 4 \u2014 x: 42..154, y: 334..490)\n  R(x, 48, 466, 98, 22, INK); R(x, 49, 467, 96, 20, '#E8D8BA'); // b\u1ec7 \u0111\xe1 b\u1ea3o th\xe1p\n  for (var tier = 0; tier < 6; tier++) {\n    var tw = 74 - tier * 8;\n    var tx2 = 97 - (tw >> 1);\n    var ty2 = 450 - tier * 18;\n    R(x, tx2 + 6, ty2, tw - 12, 16, INK); R(x, tx2 + 7, ty2 + 1, tw - 14, 14, '#F5B076');\n    R(x, 95, ty2 + 4, 4, 8, '#5C2C1D'); // \xf4 c\u1eeda th\xe1p\n    // M\xe1i \u0111ao cong \u0111\u1ecf r\u1ef1c hai b\xean\n    R(x, tx2 - 4, ty2 - 4, tw + 8, 6, INK); R(x, tx2 - 3, ty2 - 3, tw + 6, 4, '#C94B38');\n    R(x, tx2 - 6, ty2 - 6, 5, 3, '#E0452B'); R(x, tx2 + tw + 1, ty2 - 6, 5, 3, '#E0452B');\n  }\n  R(x, 95, 332, 4, 18, '#D99B38'); // \u0111\u1ec9nh th\xe1p v\xe0ng\n\n  // L\u1ea6U TR\u1ed0NG M\xc1I CONG & CH\u1eacU BONSAI B\xcaN PH\u1ea2I S\xc2N (x: 486..600, y: 356..490)\n  R(x, 492, 456, 96, 30, INK); R(x, 493, 457, 94, 28, '#D8CFC0');\n  R(x, 502, 404, 6, 54, '#7F1D1D'); R(x, 572, 404, 6, 54, '#7F1D1D');\n  E(x, 540, 434, 18, 12, INK); E(x, 540, 434, 16, 10, '#9E2A2B'); // tr\u1ed1ng l\u1edbn trong l\u1ea7u\n  // M\xe1i l\u1ea7u tr\u1ed1ng \u0111\u1ecf r\u1ef1c\n  R(x, 488, 388, 104, 18, INK); R(x, 489, 389, 102, 16, '#C94B38');\n  R(x, 496, 378, 88, 12, '#DC2626'); R(x, 512, 370, 56, 8, '#F5CA72');\n  // 4 Ch\u1eadu Bonsai xanh m\u01b0\u1edbt d\u1ecdc s\xe2n ch\xf9a (\u1ea2nh 4)\n  drawBonsaiPot(x, 178, 344); drawBonsaiPot(x, 224, 344);\n  drawBonsaiPot(x, 402, 344); drawBonsaiPot(x, 448, 344);\n\n  // L\u01af H\u01af\u01a0NG \u0110\u1ed2NG KH\u1ed4NG L\u1ed2 GI\u1eeeA S\xc2N CH\xd9A (\u1ea2nh 4 \u2014 x: 298..342, y: 392..434)\n  R(x, 298, 424, 44, 10, INK); R(x, 299, 425, 42, 8, '#8C521A');\n  R(x, 304, 402, 32, 22, INK); R(x, 305, 403, 30, 20, '#B97A14');\n  R(x, 308, 406, 24, 6, '#F5CA72'); R(x, 308, 415, 24, 4, '#DC2626');\n  R(x, 300, 396, 40, 6, INK); R(x, 301, 397, 38, 4, '#D99B38');\n  [310, 316, 320, 325, 330].forEach(function (ix) { R(x, ix, 388, 1, 9, '#DC2626'); R(x, ix, 387, 1, 1, '#F97316'); });\n\n  // C\u1ed4NG TAM QUAN NG\xd3I \u0110\u1ece \u0110\xc1Y S\xc2N RA PH\u1ed0 KH\xc1M PH\xc1 (\u1ea2nh 3 \u2014 x: 256..384, y: 506..560)\n  R(x, 256, 514, 128, 46, INK); R(x, 257, 515, 126, 44, '#E8D8BA');\n  R(x, 286, 522, 68, 36, '#5C2C1D'); R(x, 294, 526, 52, 28, '#FDE68A'); // l\u1ed1i ra s\xe1ng \u1ea5m\n  R(x, 250, 504, 140, 12, INK); R(x, 251, 505, 138, 10, '#C94B38');\n  R(x, 266, 496, 108, 10, '#DC2626'); R(x, 294, 492, 52, 5, '#F5CA72'); // m\xe1i ng\xf3i \u0111\u1ecf Tam Quan\n}\n\n// HO\u1ea0T C\u1ea2NH S\u1ed0NG 60FPS: PH\u1eacT T\u1eec C\xdaI L\u1ea0Y, KH\xd3I TR\u1ea6M H\u01af\u01a0NG BAY, H\xc0O QUANG PH\u1eacT & H\u1ea0T S\xc1NG THANH T\u1ecaNH\nfunction drawPagodaLiveEffects(x, t) {\n  // 1. H\xe0o quang v\xe0ng t\u1ecfa s\xe1ng d\u1ecbu nh\u1eb9 sau t\u01b0\u1ee3ng \u0110\u1ee9c Ph\u1eadt\n  x.save();\n  x.globalAlpha = 0.16 + Math.sin(t * 1.8) * 0.05;\n  E(x, 320, 112, 68, 60, '#FEF08A');\n  x.globalAlpha = 0.10 + Math.sin(t * 2.5) * 0.03;\n  E(x, 320, 158, 44, 18, '#FFE08A');\n  x.restore();\n\n  // 2. N\u1ebfn v\xe0ng rung rinh tr\xean b\xe0n th\u1edd Ch\xe1nh \u0110i\u1ec7n\n  [254, 270, 368, 384].forEach(function (nx, i) {\n    R(x, nx, 158, 3, 8, '#FFFBF1');\n    var fl = ((t * 7 + i) | 0) % 2 === 0;\n    R(x, nx, fl ? 154 : 155, 3, 3, '#FACC15');\n    R(x, nx + 1, 153, 1, 2, '#FFF8D6');\n  });\n\n  // 3. Ph\u1eadt t\u1eed & S\u01b0 th\u1ea7y qu\u1ef3 l\u1ea1y th\xe0nh k\xednh trong Ch\xe1nh \u0110i\u1ec7n (ho\u1ea1t \u1ea3nh c\xfai l\u1ea1y ch\u1eadm r\xe3i, thanh t\u1ecbnh!)\n  var worshippers = [\n    { x: 256, y: 244, phase: 0.0, shirt: '#64748B', monk: false },\n    { x: 374, y: 244, phase: 1.8, shirt: '#D97706', monk: true },\n    { x: 214, y: 274, phase: 3.1, shirt: '#EC4899', monk: false },\n    { x: 278, y: 278, phase: 0.9, shirt: '#475569', monk: false },\n    { x: 354, y: 278, phase: 2.4, shirt: '#64748B', monk: false },\n    { x: 416, y: 274, phase: 4.0, shirt: '#3B82F6', monk: false }\n  ];\n  worshippers.forEach(function (w) {\n    var cycle = (t * 0.55 + w.phase) % 4;\n    var bow = (cycle < 1.2) ? Math.sin((cycle / 1.2) * Math.PI) : 0;\n    drawWorshipper(x, w.x, w.y, bow, w.shirt, w.monk);\n  });\n\n  // 2 Ph\u1eadt t\u1eed \u0111\u1ee9ng v\xe1i h\u01b0\u01a1ng tr\u01b0\u1edbc L\u01b0 H\u01b0\u01a1ng L\u1edbn ngo\xe0i s\xe2n ch\xf9a\n  drawWorshipper(x, 274, 434, 0.2, '#475569', false);\n  drawWorshipper(x, 356, 434, 0.2, '#D97706', true);\n\n  // 4. Kh\xf3i tr\u1ea7m h\u01b0\u01a1ng u\u1ed1n l\u01b0\u1ee3n bay l\xean t\u1eeb L\u01b0 H\u01b0\u01a1ng Ch\xe1nh \u0110i\u1ec7n & L\u01b0 H\u01b0\u01a1ng S\xe2n Ch\xf9a\n  [[316, 144], [322, 144], [314, 386], [320, 385], [326, 386]].forEach(function (pt, idx) {\n    for (var i = 0; i < 4; i++) {\n      var p = ((t * 0.55 + i * 0.25 + idx * 0.13) % 1);\n      var sy = pt[1] - Math.round(p * 26);\n      var sx = pt[0] + Math.round(Math.sin(t * 2.2 + i * 1.7 + p * 5) * 3);\n      x.save(); x.globalAlpha = 0.55 * (1 - p); R(x, sx, sy, 2, 2, '#E2E8F0'); x.restore();\n    }\n  });\n\n  // 5. H\u1ea1t s\xe1ng v\xe0ng & c\xe1nh hoa sen r\u01a1i nh\u1eb9 thanh t\u1ecbnh 60fps\n  x.save();\n  for (var k = 0; k < 28; k++) {\n    var hx = ((k * 67 + Math.round(Math.sin(t * 0.6 + k) * 12)) % 580) + 30;\n    var hy = ((k * 53 + Math.round(t * (3 + (k % 3)))) % 500) + 20;\n    x.globalAlpha = 0.22 + Math.abs(Math.sin(t * 1.8 + k)) * 0.42;\n    R(x, hx, hy, 2, 2, (k % 4 === 0) ? '#F9B8C4' : '#FEF08A');\n  }\n  x.restore();\n}\n"}},846,[]);
 __d(function(g,r,i,a,m,_e,_d){"use strict";function e(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"PhoRestaurantView",{enumerable:!0,get:function(){return l}}),r(_d[0]),r(_d[1]);var t=e(r(_d[2])),o=e(r(_d[3])),n=e(r(_d[4])),c=r(_d[5]),u=(function(e){if(e&&e.__esModule)return e;var t={};return e&&Object.keys(e).forEach(function(o){if('default'!==o){var n=Object.getOwnPropertyDescriptor(e,o);Object.defineProperty(t,o,n.get?n:{enumerable:!0,get:function(){return e[o]}})}}),t.default=e,t})(r(_d[6])),s=r(_d[7]),d=r(_d[8]);const l=({onBack:e})=>(0,d.jsxs)(n.default,{style:f.fullscreenContainer,children:[(0,d.jsx)(s.PhoRestaurantBannerWebView,{onExitPho:e}),(0,d.jsx)(o.default,{style:f.backButton,onPress:()=>{u.impactAsync(u.ImpactFeedbackStyle.Light).catch(()=>{}),e()},activeOpacity:.85,hitSlop:{top:10,bottom:10,left:10,right:10},children:(0,d.jsx)(c.ArrowLeft,{size:20,color:"#2B2118",strokeWidth:2.8})})]}),f=t.default.create({fullscreenContainer:{flex:1,width:'100%',height:'100%',backgroundColor:'#2B2118'},backButton:{position:'absolute',top:16,left:16,width:42,height:42,borderRadius:14,backgroundColor:'#FFFBF1',borderWidth:3,borderColor:'#2B2118',alignItems:'center',justifyContent:'center',shadowColor:'#2B2118',shadowOffset:{width:0,height:3},shadowOpacity:1,shadowRadius:0,elevation:4,zIndex:20}})},847,[39,29,80,270,154,777,775,848,60]);
-__d(function(g,r,i,a,m,_e2,_d){"use strict";function n(n){return n&&n.__esModule?n:{default:n}}Object.defineProperty(_e2,'__esModule',{value:!0}),Object.defineProperty(_e2,"PhoRestaurantBannerWebView",{enumerable:!0,get:function(){return u}});var t=r(_d[0]);r(_d[1]);var e=n(r(_d[2])),o=n(r(_d[3])),c=r(_d[4]),d=(function(n){if(n&&n.__esModule)return n;var t={};return n&&Object.keys(n).forEach(function(e){if('default'!==e){var o=Object.getOwnPropertyDescriptor(n,e);Object.defineProperty(t,e,o.get?o:{enumerable:!0,get:function(){return n[e]}})}}),t.default=n,t})(r(_d[5])),s=r(_d[6]),l=r(_d[7]),p=r(_d[8]);c.WebView;const u=({onExitPho:n})=>{(0,t.useRef)(null);const e=(0,t.useRef)(null),[c]=(0,t.useState)(!0);(0,t.useEffect)(()=>()=>{e.current&&clearTimeout(e.current)},[]);const u=t=>{t&&('HAPTIC_LIGHT'===t.type?d.impactAsync(d.ImpactFeedbackStyle.Light).catch(()=>{}):'HAPTIC_MEDIUM'===t.type?d.impactAsync(d.ImpactFeedbackStyle.Medium).catch(()=>{}):'EXIT_PHO'===t.type&&n&&(d.impactAsync(d.ImpactFeedbackStyle.Medium).catch(()=>{}),e.current&&clearTimeout(e.current),e.current=setTimeout(()=>n(),120)))};(0,t.useEffect)(()=>{if('undefined'==typeof window)return;const n=n=>{try{const t='string'==typeof n.data?JSON.parse(n.data):n.data;u(t)}catch(n){}};return window.addEventListener('message',n),()=>window.removeEventListener('message',n)},[n]);const h=(0,t.useMemo)(()=>(0,s.buildTps3dEngineScript)(),[]),f=(0,t.useMemo)(()=>(0,l.buildPhoTps3dSceneScript)(),[]),v=(0,t.useMemo)(()=>`<!doctype html>\n<html lang="vi">\n<head>\n<meta charset="utf-8" />\n<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />\n<style>\n  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }\n  html, body { width: 100%; height: 100%; overflow: hidden; background: #2B2118; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }\n  canvas {\n    display: block; width: 100%; height: 100%;\n    image-rendering: pixelated;\n    image-rendering: -webkit-crisp-edges;\n    image-rendering: crisp-edges;\n    touch-action: none;\n    cursor: grab;\n  }\n  canvas:active { cursor: grabbing; }\n  .hud-toast {\n    position: fixed; top: 14px; left: 66px; right: 12px;\n    pointer-events: none; display: flex; justify-content: center; z-index: 10;\n  }\n  .hud-toast-pill {\n    background: rgba(255, 251, 241, 0.94);\n    border: 2.5px solid #2B2118;\n    border-radius: 12px;\n    padding: 5px 10px;\n    font-size: 11px; font-weight: 800; color: #2B2118;\n    box-shadow: 0 2px 0 #2B2118;\n    text-align: center; max-width: 340px;\n  }\n  .room-tabs {\n    position: fixed; top: 56px; left: 10px; right: 10px;\n    display: flex; justify-content: center; gap: 6px; padding: 2px 2px 4px;\n    z-index: 14;\n  }\n  .room-tabs::-webkit-scrollbar { display: none; }\n  .room-tab {\n    flex: 0 0 auto;\n    background: rgba(255, 251, 241, 0.92); color: #2B2118;\n    border: 2.5px solid #2B2118; border-radius: 12px;\n    padding: 5px 10px; font-size: 11px; font-weight: 900;\n    box-shadow: 0 2px 0 #2B2118; cursor: pointer; white-space: nowrap;\n  }\n  .room-tab.active {\n    background: #F4B93B; color: #2B2118;\n    transform: translateY(-1px);\n  }\n  .action-bar {\n    position: fixed; bottom: 26px; left: 16px; right: 16px;\n    display: flex; justify-content: center; gap: 10px;\n    pointer-events: none; z-index: 15;\n  }\n  .action-btn {\n    pointer-events: auto;\n    background: #F4B93B; color: #2B2118;\n    border: 3px solid #2B2118; border-radius: 16px;\n    padding: 10px 18px; font-size: 14px; font-weight: 900;\n    box-shadow: 0 4px 0 #2B2118;\n    cursor: pointer; transition: transform 0.06s;\n  }\n  .action-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2B2118; }\n  .action-btn.sec { background: #FFFBF1; padding: 10px 14px; }\n  [hidden] { display: none !important; }\n</style>\n</head>\n<body>\n<canvas id="phoTpsCv" width="280" height="440"></canvas>\n<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Ch\xe0o m\u1eebng \u0111\u1ebfn Ph\u1edf C\u1ed5 Ph\u1ed1 H\u1ed9i!</div></div>\n<div id="roomTabs" class="room-tabs">\n  <button class="room-tab active" data-room="garden" type="button">\ud83c\udfee V\u1ec9a H\xe8 &amp; S\xf4ng</button>\n  <button class="room-tab" data-room="main_hall" type="button">\ud83c\udfdb\ufe0f S\u1ea3nh Ph\u1edf Ch\xednh</button>\n  <button class="room-tab" data-room="kitchen" type="button">\ud83d\udd25 B\u1ebfp L\u1eeda Ph\u1edf</button>\n</div>\n<div id="actionBar" class="action-bar" hidden>\n  <button id="primaryActBtn" class="action-btn" type="button"></button>\n  <button id="secActBtn" class="action-btn sec" type="button" hidden></button>\n</div>\n<script>\nwindow.onerror = function(msg, src, line) {\n  try {\n    var payload = JSON.stringify({ type: 'WEBVIEW_ERROR', msg: String(msg), line: line });\n    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(payload);\n    else if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*');\n  } catch(e) {}\n};\n(function(){\nfunction postHost(obj) {\n  try {\n    var s = JSON.stringify(obj);\n    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(s);\n    else if (window.parent && window.parent !== window) window.parent.postMessage(s, '*');\n  } catch(e) {}\n}\n\n${h}\n${f}\n\nvar cam = createTpsCamera({ yaw: 0, pitch: -0.34, dist: 3.9, targetHeight: 0.95 });\nvar world = createPhoTpsWorld();\nvar currentAction = null;\nvar lastToast = '';\nvar lastRoomId = '';\nvar lastTime = performance.now();\nvar keys = {};\n\nvar cv = document.getElementById('phoTpsCv');\nvar toastEl = document.getElementById('toastPill');\nvar roomTabsEl = document.getElementById('roomTabs');\nvar actionBar = document.getElementById('actionBar');\nvar primaryBtn = document.getElementById('primaryActBtn');\nvar secBtn = document.getElementById('secActBtn');\n\nif (roomTabsEl) {\n  roomTabsEl.addEventListener('click', function(e) {\n    var btn = e.target && e.target.closest ? e.target.closest('.room-tab') : null;\n    if (!btn) return;\n    e.stopPropagation();\n    var rid = btn.getAttribute('data-room');\n    if (rid) {\n      postHost({ type: 'HAPTIC_LIGHT' });\n      navigatePigToRoom(world, cam, rid);\n    }\n  });\n}\n\nfunction syncViewport() {\n  if (!cv) return;\n  var rect = cv.getBoundingClientRect();\n  if (!rect || !rect.width || !rect.height) return;\n  var aspect = rect.width / rect.height;\n  var baseW = 280;\n  var vh = Math.max(240, Math.min(540, Math.round(baseW / Math.max(0.42, Math.min(2.2, aspect)))));\n  var vw = Math.max(220, Math.min(540, Math.round(vh * aspect)));\n  if (cv.width !== vw || cv.height !== vh) {\n    cv.width = vw;\n    cv.height = vh;\n  }\n}\n\n// C\u1ea3m \u1ee9ng & Chu\u1ed9t chu\u1ea9n Zero-Joystick: Ch\u1ea1m (< 8px) = Raycast Tap-to-Walk; Vu\u1ed1t (>= 8px) = Xoay Camera 360\xb0!\nvar ptr = { down: false, id: null, sx: 0, sy: 0, lx: 0, ly: 0, moved: 0 };\n\nfunction onDown(x, y, id) {\n  ptr.down = true; ptr.id = id; ptr.sx = x; ptr.sy = y; ptr.lx = x; ptr.ly = y; ptr.moved = 0;\n}\nfunction onMove(x, y) {\n  if (!ptr.down) return;\n  var dx = x - ptr.lx, dy = y - ptr.ly;\n  ptr.lx = x; ptr.ly = y;\n  ptr.moved += Math.hypot(dx, dy);\n  if (ptr.moved >= 6) {\n    cam.yaw = normalizeAngle(cam.yaw + dx * 0.0085);\n    cam.pitch = Math.max(-0.68, Math.min(-0.14, cam.pitch - dy * 0.0045));\n  }\n}\nfunction onUp(x, y) {\n  if (!ptr.down) return;\n  ptr.down = false;\n  if (ptr.moved < 9 && cv) {\n    var rect = cv.getBoundingClientRect();\n    var cx = ((x - rect.left) / rect.width) * cv.width;\n    var cy = ((y - rect.top) / rect.height) * cv.height;\n    var hit = unprojectFloorTap(cam, cx, cy);\n    if (hit) {\n      if (world.pig.seated) {\n        world.toastText = 'Heo \u0111ang ng\u1ed3i gh\u1ebf! B\u1ea5m G\u1ecdi Ph\u1edf ho\u1eb7c \u0110\u1ee9ng d\u1eady nh\xe9!';\n      } else {\n        var clamped = clampPigWorldPos(world, hit.x, hit.z);\n        world.pig.waypoints = [];\n        world.desiredCamYaw = null;\n        world.pig.tx = clamped.x;\n        world.pig.tz = clamped.z;\n        world.pig.walking = true;\n        world.targetMarker = { x: clamped.x, z: clamped.z, ttl: 0.9 };\n        postHost({ type: 'HAPTIC_LIGHT' });\n      }\n    }\n  }\n}\n\ncv.addEventListener('pointerdown', function(e) {\n  e.preventDefault();\n  onDown(e.clientX, e.clientY, e.pointerId);\n});\nwindow.addEventListener('pointermove', function(e) {\n  if (ptr.down) { e.preventDefault(); onMove(e.clientX, e.clientY); }\n}, { passive: false });\nwindow.addEventListener('pointerup', function(e) {\n  if (ptr.down) onUp(e.clientX, e.clientY);\n});\nwindow.addEventListener('pointercancel', function() { ptr.down = false; });\n\n// H\u1ed7 tr\u1ee3 th\xeam ph\xedm WASD / M\u0169i t\xean cho ng\u01b0\u1eddi d\xf9ng Web desktop\nwindow.addEventListener('keydown', function(e) { keys[e.key.toLowerCase()] = true; });\nwindow.addEventListener('keyup', function(e) { keys[e.key.toLowerCase()] = false; });\n\nfunction handleActionClick(actId, seatRef) {\n  postHost({ type: 'HAPTIC_MEDIUM' });\n  if (actId === 'exit_pho') {\n    postHost({ type: 'EXIT_PHO' });\n    return;\n  }\n  triggerPhoAction(world, actId, seatRef);\n}\n\nprimaryBtn.addEventListener('click', function(e) {\n  e.stopPropagation();\n  if (currentAction) handleActionClick(currentAction.id, currentAction.seatRef);\n});\nsecBtn.addEventListener('click', function(e) {\n  e.stopPropagation();\n  if (currentAction && currentAction.secondary) handleActionClick(currentAction.secondary.id, null);\n});\n\nfunction syncHud() {\n  if (world.toastText !== lastToast) {\n    lastToast = world.toastText;\n    toastEl.textContent = lastToast;\n  }\n  var curRoom = detectCurrentPhoRoom(world.pig.x, world.pig.z);\n  if (curRoom !== lastRoomId && roomTabsEl) {\n    lastRoomId = curRoom;\n    var btns = roomTabsEl.querySelectorAll('.room-tab');\n    for (var bi = 0; bi < btns.length; bi++) {\n      var rid = btns[bi].getAttribute('data-room');\n      if (rid === curRoom) btns[bi].classList.add('active');\n      else btns[bi].classList.remove('active');\n    }\n  }\n  var act = getPhoContextAction(world);\n  currentAction = act;\n  if (!act) {\n    actionBar.hidden = true;\n  } else {\n    actionBar.hidden = false;\n    primaryBtn.textContent = act.label;\n    if (act.secondary) {\n      secBtn.hidden = false;\n      secBtn.textContent = act.secondary.label;\n    } else {\n      secBtn.hidden = true;\n    }\n  }\n}\n\nfunction frame(now) {\n  var dt = Math.min(0.05, (now - lastTime) / 1000);\n  lastTime = now;\n\n  // H\u1ed7 tr\u1ee3 di chuy\u1ec3n b\u1eb1ng ph\xedm WASD theo h\u01b0\u1edbng Camera TPS\n  if (!world.pig.seated) {\n    var fwd = (keys['w'] || keys['arrowup'] ? 1 : 0) - (keys['s'] || keys['arrowdown'] ? 1 : 0);\n    var strafe = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);\n    if (fwd !== 0 || strafe !== 0) {\n      var mx = Math.sin(cam.yaw) * fwd + Math.cos(cam.yaw) * strafe;\n      var mz = Math.cos(cam.yaw) * fwd - Math.sin(cam.yaw) * strafe;\n      var ml = Math.hypot(mx, mz) || 1;\n      var nx = world.pig.x + (mx / ml) * 3.5 * dt;\n      var nz = world.pig.z + (mz / ml) * 3.5 * dt;\n      var cl = clampPigWorldPos(world, nx, nz);\n      world.pig.x = cl.x; world.pig.z = cl.z;\n      world.pig.tx = cl.x; world.pig.tz = cl.z;\n      world.pig.yaw = Math.atan2(mx, mz);\n      world.pig.walking = true;\n    }\n  }\n\n  stepPhoTpsWorld(world, dt, cam);\n  syncViewport();\n\n  var ctx = cv.getContext('2d');\n  ctx.imageSmoothingEnabled = false;\n  ctx.setTransform(1, 0, 0, 1, 0, 0);\n  ctx.clearRect(0, 0, cv.width, cv.height);\n\n  updateTpsCamera(cam, world.pig.x, world.pig.seated ? 0.38 : 0, world.pig.z, cv.width, cv.height, {\n    minX: -5.65, maxX: 5.65, minZ: -6.8, maxZ: 14.8\n  });\n  renderPhoTps3D(ctx, cam, world);\n  syncHud();\n\n  requestAnimationFrame(frame);\n}\n\nwindow.addEventListener('resize', syncViewport);\nsyncViewport();\nrequestAnimationFrame(frame);\n})();\n<\/script>\n</body>\n</html>`,[h,f]);return c?(0,p.jsx)(o.default,{style:w.container,children:(0,p.jsx)("iframe",{srcDoc:v,title:"Qu\xe1n Ph\u1edf C\u1ed5 Truy\u1ec1n \u2014 G\xf3c Nh\xecn Th\u1ee9 3 TPS 3D",style:{width:'100%',height:'100%',border:'none',display:'block',backgroundColor:'#2B2118'}})}):null},w=e.default.create({container:{flex:1,width:'100%',backgroundColor:'#2B2118'},webview:{flex:1,width:'100%',backgroundColor:'#2B2118'}})},848,[39,29,80,154,947,775,849,850,60]);
+__d(function(g,r,i,a,m,_e2,_d){"use strict";function n(n){return n&&n.__esModule?n:{default:n}}Object.defineProperty(_e2,'__esModule',{value:!0}),Object.defineProperty(_e2,"PhoRestaurantBannerWebView",{enumerable:!0,get:function(){return w}});var t=r(_d[0]);r(_d[1]);var e=n(r(_d[2])),o=n(r(_d[3])),c=r(_d[4]),d=(function(n){if(n&&n.__esModule)return n;var t={};return n&&Object.keys(n).forEach(function(e){if('default'!==e){var o=Object.getOwnPropertyDescriptor(n,e);Object.defineProperty(t,e,o.get?o:{enumerable:!0,get:function(){return n[e]}})}}),t.default=n,t})(r(_d[5])),s=r(_d[6]),l=r(_d[7]),p=r(_d[8]);c.WebView;const w=({onExitPho:n})=>{(0,t.useRef)(null);const e=(0,t.useRef)(null),[c]=(0,t.useState)(!0);(0,t.useEffect)(()=>()=>{e.current&&clearTimeout(e.current)},[]);const w=t=>{t&&('HAPTIC_LIGHT'===t.type?d.impactAsync(d.ImpactFeedbackStyle.Light).catch(()=>{}):'HAPTIC_MEDIUM'===t.type?d.impactAsync(d.ImpactFeedbackStyle.Medium).catch(()=>{}):'EXIT_PHO'===t.type&&n&&(d.impactAsync(d.ImpactFeedbackStyle.Medium).catch(()=>{}),e.current&&clearTimeout(e.current),e.current=setTimeout(()=>n(),120)))};(0,t.useEffect)(()=>{if('undefined'==typeof window)return;const n=n=>{try{const t='string'==typeof n.data?JSON.parse(n.data):n.data;w(t)}catch(n){}};return window.addEventListener('message',n),()=>window.removeEventListener('message',n)},[n]);const u=(0,t.useMemo)(()=>(0,s.buildTps3dEngineScript)(),[]),f=(0,t.useMemo)(()=>(0,l.buildPhoTps3dSceneScript)(),[]),v=(0,t.useMemo)(()=>`<!doctype html>\n<html lang="vi">\n<head>\n<meta charset="utf-8" />\n<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />\n<style>\n  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }\n  html, body { width: 100%; height: 100%; overflow: hidden; background: #2B2118; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }\n  canvas {\n    display: block; width: 100%; height: 100%;\n    image-rendering: pixelated;\n    image-rendering: -webkit-crisp-edges;\n    image-rendering: crisp-edges;\n    touch-action: none;\n    cursor: grab;\n  }\n  canvas:active { cursor: grabbing; }\n  .hud-toast {\n    position: fixed; top: 16px; left: 68px; right: 14px;\n    pointer-events: none; display: flex; justify-content: center; z-index: 10;\n  }\n  .hud-toast-pill {\n    background: rgba(255, 251, 241, 0.94);\n    border: 2.5px solid #2B2118;\n    border-radius: 12px;\n    padding: 6px 12px;\n    font-size: 11.5px; font-weight: 800; color: #2B2118;\n    box-shadow: 0 3px 0 #2B2118;\n    text-align: center; max-width: 340px;\n  }\n  .action-bar {\n    position: fixed; bottom: 26px; left: 16px; right: 16px;\n    display: flex; justify-content: center; gap: 10px;\n    pointer-events: none; z-index: 15;\n  }\n  .action-btn {\n    pointer-events: auto;\n    background: #F4B93B; color: #2B2118;\n    border: 3px solid #2B2118; border-radius: 16px;\n    padding: 10px 18px; font-size: 14px; font-weight: 900;\n    box-shadow: 0 4px 0 #2B2118;\n    cursor: pointer; transition: transform 0.06s;\n  }\n  .action-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2B2118; }\n  .action-btn.sec { background: #FFFBF1; padding: 10px 14px; }\n  [hidden] { display: none !important; }\n</style>\n</head>\n<body>\n<canvas id="phoTpsCv" width="280" height="440"></canvas>\n<div class="hud-toast"><div id="toastPill" class="hud-toast-pill">Ch\xe0o m\u1eebng \u0111\u1ebfn Ph\u1edf Vintage 90s!</div></div>\n<div id="actionBar" class="action-bar" hidden>\n  <button id="primaryActBtn" class="action-btn" type="button"></button>\n  <button id="secActBtn" class="action-btn sec" type="button" hidden></button>\n</div>\n<script>\nwindow.onerror = function(msg, src, line) {\n  try {\n    var payload = JSON.stringify({ type: 'WEBVIEW_ERROR', msg: String(msg), line: line });\n    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(payload);\n    else if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*');\n  } catch(e) {}\n};\n(function(){\nfunction postHost(obj) {\n  try {\n    var s = JSON.stringify(obj);\n    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(s);\n    else if (window.parent && window.parent !== window) window.parent.postMessage(s, '*');\n  } catch(e) {}\n}\n\n${u}\n${f}\n\nvar cam = createTpsCamera({ yaw: 0, pitch: -0.28, dist: 3.4, targetHeight: 0.98 });\nvar world = createPhoTpsWorld();\nvar currentAction = null;\nvar lastToast = '';\nvar lastTime = performance.now();\nvar keys = {};\n\nvar cv = document.getElementById('phoTpsCv');\nvar toastEl = document.getElementById('toastPill');\nvar actionBar = document.getElementById('actionBar');\nvar primaryBtn = document.getElementById('primaryActBtn');\nvar secBtn = document.getElementById('secActBtn');\n\nfunction syncViewport() {\n  if (!cv) return;\n  var rect = cv.getBoundingClientRect();\n  if (!rect || !rect.width || !rect.height) return;\n  var aspect = rect.width / rect.height;\n  var baseW = 280;\n  var vh = Math.max(240, Math.min(540, Math.round(baseW / Math.max(0.42, Math.min(2.2, aspect)))));\n  var vw = Math.max(220, Math.min(540, Math.round(vh * aspect)));\n  if (cv.width !== vw || cv.height !== vh) {\n    cv.width = vw;\n    cv.height = vh;\n  }\n}\n\nvar ptr = { down: false, id: null, sx: 0, sy: 0, lx: 0, ly: 0, moved: 0 };\nfunction onDown(x, y, id) {\n  ptr.down = true; ptr.id = id; ptr.sx = x; ptr.sy = y; ptr.lx = x; ptr.ly = y; ptr.moved = 0;\n}\nfunction onMove(x, y) {\n  if (!ptr.down) return;\n  var dx = x - ptr.lx, dy = y - ptr.ly;\n  ptr.lx = x; ptr.ly = y;\n  ptr.moved += Math.hypot(dx, dy);\n  if (ptr.moved >= 6) {\n    cam.yaw = normalizeAngle(cam.yaw + dx * 0.0085);\n    cam.pitch = Math.max(-0.65, Math.min(-0.12, cam.pitch - dy * 0.0045));\n  }\n}\nfunction onUp(x, y) {\n  if (!ptr.down) return;\n  ptr.down = false;\n  if (ptr.moved < 9 && cv) {\n    var rect = cv.getBoundingClientRect();\n    var cx = ((x - rect.left) / rect.width) * cv.width;\n    var cy = ((y - rect.top) / rect.height) * cv.height;\n    var hit = unprojectFloorTap(cam, cx, cy);\n    if (hit) {\n      if (world.pig.seated) {\n        world.toastText = 'Heo \u0111ang ng\u1ed3i gh\u1ebf! B\u1ea5m G\u1ecdi Ph\u1edf ho\u1eb7c \u0110\u1ee9ng d\u1eady nh\xe9!';\n      } else {\n        var clamped = clampPigWorldPos(world, hit.x, hit.z);\n        world.pig.tx = clamped.x;\n        world.pig.tz = clamped.z;\n        world.pig.walking = true;\n        world.targetMarker = { x: clamped.x, z: clamped.z, ttl: 0.9 };\n        postHost({ type: 'HAPTIC_LIGHT' });\n      }\n    }\n  }\n}\n\ncv.addEventListener('pointerdown', function(e) {\n  e.preventDefault();\n  onDown(e.clientX, e.clientY, e.pointerId);\n});\nwindow.addEventListener('pointermove', function(e) {\n  if (ptr.down) { e.preventDefault(); onMove(e.clientX, e.clientY); }\n}, { passive: false });\nwindow.addEventListener('pointerup', function(e) {\n  if (ptr.down) onUp(e.clientX, e.clientY);\n});\nwindow.addEventListener('pointercancel', function() { ptr.down = false; });\n\nwindow.addEventListener('keydown', function(e) { keys[e.key.toLowerCase()] = true; });\nwindow.addEventListener('keyup', function(e) { keys[e.key.toLowerCase()] = false; });\n\nfunction handleActionClick(actId, seatRef) {\n  postHost({ type: 'HAPTIC_MEDIUM' });\n  if (actId === 'exit_pho') {\n    postHost({ type: 'EXIT_PHO' });\n    return;\n  }\n  triggerPhoAction(world, actId, seatRef);\n}\n\nprimaryBtn.addEventListener('click', function(e) {\n  e.stopPropagation();\n  if (currentAction) handleActionClick(currentAction.id, currentAction.seatRef);\n});\nsecBtn.addEventListener('click', function(e) {\n  e.stopPropagation();\n  if (currentAction && currentAction.secondary) handleActionClick(currentAction.secondary.id, null);\n});\n\nfunction syncHud() {\n  if (world.toastText !== lastToast) {\n    lastToast = world.toastText;\n    toastEl.textContent = lastToast;\n  }\n  var act = getPhoContextAction(world);\n  currentAction = act;\n  if (!act) {\n    actionBar.hidden = true;\n  } else {\n    actionBar.hidden = false;\n    primaryBtn.textContent = act.label;\n    if (act.secondary) {\n      secBtn.hidden = false;\n      secBtn.textContent = act.secondary.label;\n    } else {\n      secBtn.hidden = true;\n    }\n  }\n}\n\nfunction frame(now) {\n  var dt = Math.min(0.05, (now - lastTime) / 1000);\n  lastTime = now;\n\n  if (!world.pig.seated) {\n    var fwd = (keys['w'] || keys['arrowup'] ? 1 : 0) - (keys['s'] || keys['arrowdown'] ? 1 : 0);\n    var strafe = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);\n    if (fwd !== 0 || strafe !== 0) {\n      var mx = Math.sin(cam.yaw) * fwd + Math.cos(cam.yaw) * strafe;\n      var mz = Math.cos(cam.yaw) * fwd - Math.sin(cam.yaw) * strafe;\n      var ml = Math.hypot(mx, mz) || 1;\n      var nx = world.pig.x + (mx / ml) * 3.5 * dt;\n      var nz = world.pig.z + (mz / ml) * 3.5 * dt;\n      var cl = clampPigWorldPos(world, nx, nz);\n      world.pig.x = cl.x; world.pig.z = cl.z;\n      world.pig.tx = cl.x; world.pig.tz = cl.z;\n      world.pig.yaw = Math.atan2(mx, mz);\n      world.pig.walking = true;\n    }\n  }\n\n  stepPhoTpsWorld(world, dt);\n  syncViewport();\n\n  var ctx = cv.getContext('2d');\n  ctx.imageSmoothingEnabled = false;\n  ctx.setTransform(1, 0, 0, 1, 0, 0);\n  ctx.clearRect(0, 0, cv.width, cv.height);\n\n  // Gi\u1eef camera g\u1ecdn trong n\u1ed9i th\u1ea5t (cho ph\xe9p l\xf9i nh\u1eb9 v\u1ec1 z = -1.6 ngay sau khung c\u1eeda \u0111\u1ec3 ng\u1eafm to\xe0n c\u1ea3nh ng\u01b0\u1ee1ng c\u1eeda nh\u01b0 H\xecnh 1!)\n  updateTpsCamera(cam, world.pig.x, world.pig.seated ? 0.38 : 0, world.pig.z, cv.width, cv.height, {\n    minX: -5.65, maxX: 5.65, minZ: -1.6, maxZ: 14.4\n  });\n  renderPhoTps3D(ctx, cam, world);\n  syncHud();\n\n  requestAnimationFrame(frame);\n}\n\nwindow.addEventListener('resize', syncViewport);\nsyncViewport();\nrequestAnimationFrame(frame);\n})();\n<\/script>\n</body>\n</html>`,[u,f]);return c?(0,p.jsx)(o.default,{style:h.container,children:(0,p.jsx)("iframe",{srcDoc:v,title:"Qu\xe1n Ph\u1edf Vintage 90s \u2014 G\xf3c Nh\xecn Th\u1ee9 3 TPS 3D",style:{width:'100%',height:'100%',border:'none',display:'block',backgroundColor:'#2B2118'}})}):null},h=e.default.create({container:{flex:1,width:'100%',backgroundColor:'#2B2118'},webview:{flex:1,width:'100%',backgroundColor:'#2B2118'}})},848,[39,29,80,154,947,775,849,850,60]);
 __d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.buildTps3dEngineScript=function(){return String.raw`
 /* ==================== 1. HỆ CHIẾU PHỐI CẢNH 3D & CAMERA TPS 360° ==================== */
 function createTpsCamera(opts) {
@@ -395,9 +395,15 @@ function drawPhoBowlSprite3D(ctx, cam, wx, wy, wz, bState, t, phase) {
     ctx.beginPath(); ctx.ellipse(px - 2 * u, py - 4.2 * u, 2.4 * u, 1.2 * u, 0.2, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#16A34A'; // Hành lá & ngò gai xanh
     ctx.beginPath(); ctx.arc(px + 2 * u, py - 4.2 * u, 1.8 * u, 0, Math.PI * 2); ctx.fill();
-    // Đôi đũa tre gác ngang miệng tô
+    // Đôi đũa tre + Muỗng sứ trắng đầy đủ gác trên miệng tô Phở (QĐ 236!)
     ctx.strokeStyle = '#B45309'; ctx.lineWidth = Math.max(1, 1.1 * u);
     ctx.beginPath(); ctx.moveTo(px - 8 * u, py - 6.5 * u); ctx.lineTo(px + 9 * u, py - 3.5 * u); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px - 8 * u, py - 5.2 * u); ctx.lineTo(px + 9 * u, py - 2.3 * u); ctx.stroke();
+    // Chiếc muỗng sứ trắng tinh gác bên trái tô
+    ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#64748B'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.ellipse(px - 5 * u, py - 4.4 * u, 2.2 * u, 1.3 * u, -0.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = Math.max(1.2, 1.4 * u);
+    ctx.beginPath(); ctx.moveTo(px - 6.5 * u, py - 5 * u); ctx.lineTo(px - 10 * u, py - 8 * u); ctx.stroke();
     // Làn khói nóng bay lên từ tô Phở
     var st = (t * 0.9 + (phase || 0)) % 1;
     ctx.globalAlpha = (1 - st) * 0.55;
@@ -449,6 +455,15 @@ function drawCondimentCaddySprite3D(ctx, cam, wx, wy, wz) {
   // Rổ nhựa đỏ đựng gia vị phía trước
   ctx.fillStyle = '#DC2626'; ctx.strokeStyle = '#7F1D1D'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.ellipse(px + 0.5 * u, py - 2.5 * u, 7.5 * u, 3 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  // Ống đựng đũa tre & muỗng inox đầy đủ ngay bên cạnh rổ gia vị (QĐ 236)
+  ctx.fillStyle = '#B45309'; ctx.strokeStyle = '#451A03';
+  ctx.fillRect(Math.round(px + 9 * u), Math.round(py - 8 * u), Math.max(3, Math.round(5.5 * u)), Math.max(4, Math.round(7.5 * u)));
+  ctx.strokeRect(Math.round(px + 9 * u), Math.round(py - 8 * u), Math.max(3, Math.round(5.5 * u)), Math.max(4, Math.round(7.5 * u)));
+  ctx.strokeStyle = '#F59E0B'; ctx.lineWidth = Math.max(1, 1.1 * u);
+  ctx.beginPath(); ctx.moveTo(px + 10.5 * u, py - 8 * u); ctx.lineTo(px + 10 * u, py - 12.5 * u); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px + 12.2 * u, py - 8 * u); ctx.lineTo(px + 12.5 * u, py - 12.5 * u); ctx.stroke();
+  ctx.fillStyle = '#E2E8F0';
+  ctx.beginPath(); ctx.arc(px + 13.8 * u, py - 11.5 * u, 1.3 * u, 0, Math.PI * 2); ctx.fill(); // Đầu muỗng inox
   ctx.restore();
 }
 
@@ -470,6 +485,64 @@ function drawQuayAndHerbsSprite3D(ctx, cam, wx, wy, wz) {
   ctx.fillRect(Math.round(px + 2.5 * u), Math.round(py - 3.2 * u), Math.max(3, Math.round(7 * u)), Math.max(1.5, Math.round(2 * u)));
   ctx.fillStyle = '#E6A14A';
   ctx.fillRect(Math.round(px + 3 * u), Math.round(py - 4.4 * u), Math.max(3, Math.round(6 * u)), Math.max(1.5, Math.round(1.6 * u)));
+  ctx.restore();
+}
+
+function drawCeilingFan3D(ctx, cam, wx, wy, wz, t, phase) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 24 || pr.cz < 0.6) return;
+  var u = Math.max(0.45, Math.min(3.2, pr.scale / 36));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  var topPr = projectPoint3D(cam, wx, wy + 0.42, wz);
+  ctx.save();
+  // Ty treo quạt trần gắn lên xà gỗ
+  if (topPr) {
+    ctx.strokeStyle = '#4A2C1A'; ctx.lineWidth = Math.max(1.5, 2.2 * u);
+    ctx.beginPath(); ctx.moveTo(topPr.sx, topPr.sy); ctx.lineTo(px, py); ctx.stroke();
+  }
+  // 3 Cánh quạt trần vintage quay 60fps theo góc nhìn phối cảnh bầu dục
+  var baseAng = t * 5.2 + (phase || 0);
+  for (var i = 0; i < 3; i++) {
+    var a = baseAng + (i * Math.PI * 2) / 3;
+    var bx = Math.cos(a) * 24 * u;
+    var by = Math.sin(a) * 6.5 * u;
+    ctx.strokeStyle = '#5C341D'; ctx.lineWidth = Math.max(2.5, 4.5 * u);
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + bx, py + by); ctx.stroke();
+    ctx.strokeStyle = '#D99B26'; ctx.lineWidth = Math.max(1, 1.5 * u);
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + bx * 0.9, py + by * 0.9); ctx.stroke();
+  }
+  // Bầu động cơ quạt đồng cổ giữa
+  ctx.fillStyle = '#8C5418'; ctx.strokeStyle = '#2B180E'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(px, py, 5.5 * u, 2.6 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+function drawVintageLamp3D(ctx, cam, wx, wy, wz, topY) {
+  var pr = projectPoint3D(cam, wx, wy, wz);
+  if (!pr || pr.cz > 24 || pr.cz < 0.5) return;
+  var u = Math.max(0.42, Math.min(3.0, pr.scale / 36));
+  var px = Math.round(pr.sx), py = Math.round(pr.sy);
+  var topPr = projectPoint3D(cam, wx, topY || 3.85, wz);
+  ctx.save();
+  if (topPr) {
+    ctx.strokeStyle = '#2B180E'; ctx.lineWidth = Math.max(1, 1.4 * u);
+    ctx.beginPath(); ctx.moveTo(topPr.sx, topPr.sy); ctx.lineTo(px, py - 4 * u); ctx.stroke();
+  }
+  // Quầng sáng vàng ấm vintage thập niên 90 lan tỏa
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = '#FFD97D';
+  ctx.beginPath(); ctx.arc(px, py + 2 * u, 20 * u, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 0.98;
+  // Bóng đèn sợi đốt vàng ấm bên dưới chao đèn
+  ctx.fillStyle = '#FFF9C4';
+  ctx.beginPath(); ctx.arc(px, py + 2 * u, 3.5 * u, 0, Math.PI * 2); ctx.fill();
+  // Chao đèn chụp men xanh lá cổ điển Sài Gòn 90s viền đồng
+  ctx.fillStyle = '#1E5B3A'; ctx.strokeStyle = '#2B180E'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(px - 9 * u, py + 1 * u);
+  ctx.quadraticCurveTo(px, py - 8 * u, px + 9 * u, py + 1 * u);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
   ctx.restore();
 }
 
@@ -679,21 +752,35 @@ function drawHumanTps3D(ctx, cam, h, t) {
     hr(-4, -5, 8, 5, '#1E293B');
   }
 
-  // Thân áo + Tạp dề (Đầu bếp / Phục vụ)
+  // Thân áo + Tạp dề cổ điển đẹp mắt (Đầu bếp / Phục vụ — QĐ 236)
+  var isAnyChef = h.role === 'chef' || h.role === 'chef_butcher' || h.role === 'chef_noodle';
   hr(-6, -21, 12, 13, '#2B2118');
   hr(-5, -20, 10, 11, h.shirt || '#3B82F6');
-  if (h.role === 'chef') {
+  if (isAnyChef) {
     hr(-4, -19, 8, 10, '#FFFDF7');
     hr(-5, -16, 10, 1, '#94A3B8');
+    hr(-3, -18, 2, 1, '#DC2626'); // Nút áo bếp truyền thống
   } else if (h.role === 'waiter') {
-    hr(-4, -17, 8, 8, '#B91C1C'); // Tạp dề đỏ nhân viên quán Phở
+    // Tạp dề vintage nâu-đỏ đẹp mắt có dây đeo cổ, nơ thắt eo & túi trước!
+    hr(-3, -20, 1, 3, '#7F1D1D'); hr(2, -20, 1, 3, '#7F1D1D'); // 2 Dây đeo cổ tạp dề
+    hr(-4, -17, 8, 9, '#991B1B'); // Thân tạp dề đỏ đô cổ điển
+    hr(-5, -14, 10, 1, '#FACC15'); // Dây thắt eo chỉ vàng
+    hr(-3, -12, 6, 3, '#7F1D1D');  // Túi tạp dề trước bụng
   }
 
-  // Tay cầm muôi nấu / bưng tô phở
+  // Tay cầm muôi nấu / dao thái thịt / vợt trụng phở / bưng tô phở
   if (h.role === 'chef') {
     var lad = Math.round(Math.sin(t * 6) * 2);
     hr(5, -17 + lad, 4, 2, '#FCD5B5');
     hr(8, -19 + lad, 2, 7, '#CBD5E1'); // Muôi inox múc nước dùng
+  } else if (h.role === 'chef_butcher') {
+    var chop = Math.round(Math.abs(Math.sin(t * 8)) * 3);
+    hr(5, -18 - chop, 4, 2, '#FCD5B5');
+    hr(8, -21 - chop, 4, 4, '#E2E8F0'); // Dao phay thái thịt bò tươi sống!
+  } else if (h.role === 'chef_noodle') {
+    var dip = Math.round(Math.sin(t * 5 + 1) * 2.5);
+    hr(5, -17 + dip, 4, 2, '#FCD5B5');
+    hr(8, -19 + dip, 3, 6, '#D98A36'); // Vợt tre trụng bánh phở!
   } else if (h.carryBowl) {
     hr(4, -16, 4, 2, '#FCD5B5');
     hr(5, -19, 7, 4, '#FFFDF7'); // Tô phở bưng trên tay
@@ -704,7 +791,7 @@ function drawHumanTps3D(ctx, cam, h, t) {
   hr(-5, -31, 10, 10, '#2B2118');
   hr(-4, -30, 8, 8, '#FFD8B8');
   hr(-4, -31, 8, 3, h.hair || '#2B2118');
-  if (h.role === 'chef') {
+  if (isAnyChef) {
     // Mũ đầu bếp cao trắng nổi bật
     hr(-5, -37, 10, 6, '#2B2118');
     hr(-4, -36, 8, 5, '#FFFFFF');
@@ -717,59 +804,19 @@ function drawHumanTps3D(ctx, cam, h, t) {
 }
 `}},849,[]);
 __d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.buildPhoTps3dSceneScript=function(){return String.raw`
-/* ==================== 1. CẤU HÌNH 3 KHU GỌN MƯỢT & DẪN ĐƯỜNG WAYPOINT ĐỒNG BỘ TAB ==================== */
-var PHO_ROOM_DESTS = {
-  garden:    { x: 0.0, z: -2.4, yaw: 0.0,  camYaw: 0.0,   label: '🏮 Vỉa Hè Quán Phở & Sông Bạch Đằng' },
-  main_hall: { x: 0.0, z: 2.8,  yaw: 0.0,  camYaw: 0.0,   label: '🏛️ Sảnh Phở Chính Ấm Cúng' },
-  kitchen:   { x: 0.6, z: 12.6, yaw: -1.1, camYaw: -0.65, label: '🔥 Bếp Lửa Phở & Quầy Nguyên Liệu' }
-};
-
-function detectCurrentPhoRoom(x, z) {
-  if (z < 0) return 'garden';
-  if (z >= 10.2) return 'kitchen';
-  return 'main_hall';
-}
-
-function navigatePigToRoom(w, cam, roomId) {
-  var dest = PHO_ROOM_DESTS[roomId];
-  if (!dest) return;
-  var p = w.pig;
-  if (p.seated) triggerPhoAction(w, 'stand_up', null);
-  var curRoom = detectCurrentPhoRoom(p.x, p.z);
-  var q = [];
-  if (curRoom === 'garden' && roomId !== 'garden') {
-    w.doorManualOpen = true;
-    q.push({ x: 0, z: -0.6 }, { x: 0, z: 1.5 });
-  } else if (curRoom === 'kitchen' && roomId !== 'kitchen') {
-    q.push({ x: 3.6, z: 11.4 }, { x: 3.6, z: 9.2 });
-  }
-  if (roomId === 'garden') {
-    w.doorManualOpen = true;
-    q.push({ x: 0, z: 1.2 }, { x: 0, z: -0.8 }, { x: dest.x, z: dest.z });
-  } else if (roomId === 'kitchen') {
-    q.push({ x: 3.6, z: 9.2 }, { x: 3.6, z: 11.8 }, { x: dest.x, z: dest.z });
-  } else {
-    q.push({ x: dest.x, z: dest.z });
-  }
-  p.waypoints = q;
-  p.walking = true;
-  w.desiredCamYaw = dest.camYaw;
-  w.toastText = 'Đang dẫn chú Heo tới ' + dest.label + '...';
-}
-
-/* ==================== 2. KHỞI TẠO THẾ GIỚI 3 KHU GỌN ẤM & FSM THỰC TẾ ==================== */
+/* ==================== 1. KHỞI TẠO NỘI THẤT QUÁN PHỞ VINTAGE 90S (INTERIOR-ONLY 12m × 15m) ==================== */
 function createPhoTpsWorld() {
   var tables = [];
   var tid = 0;
-  // 6 Bàn gỗ lim ở Sảnh Phở Chính (3 bên trái X=-3.4, 3 bên phải X=+3.4), lối đi giữa rộng thoáng!
-  var mainZs = [2.2, 5.2, 8.2];
+  // 6 Bàn gỗ lim cổ truyền (3 dãy trái X=-3.4, 3 dãy phải X=+3.4), lối giữa mở thông thoáng nhìn thẳng vào Bếp!
+  var mainZs = [2.4, 5.4, 8.4];
   for (var ri = 0; ri < mainZs.length; ri++) {
     var zt = mainZs[ri];
     var xs = [-3.4, 3.4];
     for (var ci = 0; ci < 2; ci++) {
       var xt = xs[ci];
       tables.push({
-        id: tid++, room: 'main_hall', x: xt, z: zt,
+        id: tid++, x: xt, z: zt,
         seats: [
           { x: xt, z: zt - 0.96, yaw: 0, occupant: null, bowl: 'none' },
           { x: xt, z: zt + 0.96, yaw: Math.PI, occupant: null, bowl: 'none' }
@@ -777,29 +824,21 @@ function createPhoTpsWorld() {
       });
     }
   }
-  // 2 Bàn gỗ ngoài Sân Phố Cổ dưới giàn đèn lồng
-  tables.push({
-    id: tid++, room: 'garden', x: -3.5, z: -2.4,
-    seats: [
-      { x: -3.5, z: -3.3, yaw: 0, occupant: null, bowl: 'none' },
-      { x: -3.5, z: -1.5, yaw: Math.PI, occupant: null, bowl: 'none' }
-    ]
-  });
-  tables.push({
-    id: tid++, room: 'garden', x: 3.5, z: -2.4,
-    seats: [
-      { x: 3.5, z: -3.3, yaw: 0, occupant: null, bowl: 'none' },
-      { x: 3.5, z: -1.5, yaw: Math.PI, occupant: null, bowl: 'none' }
-    ]
-  });
 
+  // 2 Nhân viên phục vụ mặc áo kem 90s + tạp dề đỏ đô dây đeo cổ đẹp mắt
   var waiters = [
-    { id: 0, x: -1.2, z: 9.2, yaw: Math.PI, role: 'waiter', shirt: '#6B7A4A', hair: '#2B2118', moving: false, carryBowl: null, task: null, phase: 0.2 },
-    { id: 1, x: 1.4,  z: 9.2, yaw: Math.PI, role: 'waiter', shirt: '#6B7A4A', hair: '#3B2314', moving: false, carryBowl: null, task: null, phase: 1.7 }
+    { id: 0, x: -1.2, z: 9.2, yaw: Math.PI, role: 'waiter', shirt: '#FFF8E6', hair: '#2B2118', moving: false, carryBowl: null, task: null, phase: 0.2 },
+    { id: 1, x: 1.4,  z: 9.2, yaw: Math.PI, role: 'waiter', shirt: '#FFF8E6', hair: '#3B2314', moving: false, carryBowl: null, task: null, phase: 1.7 }
   ];
 
-  var chef = { x: -1.8, z: 12.6, yaw: Math.PI, role: 'chef', shirt: '#FFFFFF', hair: '#1E293B', moving: false, phase: 0 };
+  // Đội ngũ Bếp 3 người sống động: Bếp trưởng múc nước dùng, Phụ bếp thái thịt bò tươi, Phụ bếp trụng phở!
+  var chefs = [
+    { id: 'chef_head',    x: -1.6, baseX: -1.6, z: 12.2, yaw: Math.PI, role: 'chef',         shirt: '#FFFFFF', hair: '#1E293B', moving: false, phase: 0.0 },
+    { id: 'chef_butcher', x: -4.1, baseX: -4.1, z: 12.1, yaw: Math.PI, role: 'chef_butcher', shirt: '#FFFDF7', hair: '#2B2118', moving: false, phase: 1.3 },
+    { id: 'chef_noodle',  x: 0.4,  baseX: 0.4,  z: 12.1, yaw: Math.PI, role: 'chef_noodle',  shirt: '#FFFDF7', hair: '#3B2314', moving: false, phase: 2.4 }
+  ];
 
+  // 6 Khách hàng NPC ra vào cửa & ăn Phở thực tế 100%
   var shirtCols = ['#3B82F6', '#10B981', '#F59E0B', '#EC4899', '#6366F1', '#0EA5E9'];
   var hairCols = ['#2B2118', '#3B2314', '#1E293B', '#4A3222'];
   var customers = [];
@@ -822,22 +861,20 @@ function createPhoTpsWorld() {
       customers.push({
         id: 'npc_' + k, role: 'customer',
         shirt: shirtCols[k % shirtCols.length], hair: hairCols[k % hairCols.length],
-        x: (k % 2 === 0 ? -2.2 : 2.2), z: -4.4, yaw: 0,
+        x: 0, z: 0.4, yaw: 0,
         seated: false, moving: false, phase: k * 1.1,
-        state: 'OUTSIDE_WAIT', timer: 3 + k * 1.6, tableId: -1, seatIdx: -1
+        state: 'DOOR_WAIT', timer: 3 + k * 1.8, tableId: -1, seatIdx: -1
       });
     }
   }
 
   return {
     t: 0,
-    doorOpen: 0,
-    doorTarget: 0,
-    doorManualOpen: false,
-    desiredCamYaw: null,
+    doorOpen: 0.95,      // Mở màn 2 cánh cửa gỗ vừa mở ra chào đón chú Heo như Hình 1!
+    doorTarget: 0.95,
+    welcomeTimer: 2.2,
     pig: {
-      x: 0, z: -2.6, tx: 0, tz: -2.6,
-      waypoints: [],
+      x: 0, z: 1.05, tx: 0, tz: 1.05,
       yaw: 0, walking: false,
       seated: false, seatRef: null,
       eating: false, eatTimer: 0,
@@ -846,23 +883,9 @@ function createPhoTpsWorld() {
     targetMarker: null,
     tables: tables,
     waiters: waiters,
-    chef: chef,
+    chefs: chefs,
     customers: customers,
-    // 5 Xe cộ chạy 2 chiều 60fps trên Đại Lộ Sài Gòn trước mặt tiền quán Phở (QĐ 235)
-    vehicles: [
-      { kind: 'moto', x: -16, z: -5.9, sp: 6.2, dir: 1,  col: '#DC2626' },
-      { kind: 'taxi', x: 6,   z: -5.9, sp: 5.4, dir: 1,  col: '#16A34A' },
-      { kind: 'bus',  x: 18,  z: -8.7, sp: 4.5, dir: -1, col: '#1D4ED8' },
-      { kind: 'moto', x: -4,  z: -8.7, sp: 6.6, dir: -1, col: '#2563EB' },
-      { kind: 'taxi', x: -24, z: -8.7, sp: 5.2, dir: -1, col: '#F8FAFC' }
-    ],
-    // 3 Tàu Waterbus & thuyền chạy 2 chiều 60fps trên Sông Bạch Đằng bên kia đường (QĐ 235)
-    boats: [
-      { kind: 'waterbus', x: -22, z: -18.5, sp: 2.8, dir: 1,  phase: 0.2 },
-      { kind: 'boat',     x: 16,  z: -24.5, sp: 2.1, dir: -1, phase: 1.5 },
-      { kind: 'waterbus', x: 34,  z: -29.5, sp: 2.5, dir: -1, phase: 2.8 }
-    ],
-    toastText: 'Mặt tiền Quán Phở nhìn ra Đại Lộ Sài Gòn & Sông Bạch Đằng · Chạm sàn để đi!'
+    toastText: 'Chào mừng đến Phở Vintage 90s! Chạm sàn để đi · Vuốt xoay 360°'
   };
 }
 
@@ -883,20 +906,11 @@ function moveTowards2D(ent, tx, tz, speed, dt) {
 }
 
 function clampPigWorldPos(w, nx, nz) {
-  // Đệm va chạm an toàn 0.65m cách mọi tường ngoài -> chú Heo KHÔNG BAO GIỜ bị lún/kẹt góc tường!
+  // Đệm va chạm an toàn 0.65m trong lòng quán (Interior-Only: Z ∈ [0.7, 14.1], X ∈ [-5.25, +5.25])
   nx = Math.max(-5.25, Math.min(5.25, nx));
-  nz = Math.max(-4.5, Math.min(14.3, nz));
+  nz = Math.max(0.7, Math.min(14.1, nz));
   var oldZ = w.pig.z;
-
-  // Tường mặt tiền tại Z = 0 (mở cửa 2 cánh rộng X ∈ [-1.35, +1.35])
-  if ((oldZ < 0 && nz >= -0.45) || (oldZ >= 0 && nz <= 0.45)) {
-    if (Math.abs(nx) > 1.25) {
-      nz = oldZ < 0 ? -0.5 : 0.5;
-    } else if (w.doorOpen < 0.35) {
-      w.doorManualOpen = true;
-    }
-  }
-  // Quầy kính & nồi phở (X: -5.8 .. +1.65, Z: 9.95 .. 11.45): lối mở rộng vào bếp tại X > +1.75!
+  // Quầy kính & 2 nồi phở (X: -5.8 .. +1.65, Z: 9.85 .. 11.55): lối mở rộng bên phải X > +1.8 để vào Bếp!
   if (nx < 1.8 && nz > 9.85 && nz < 11.6) {
     if (oldZ <= 10.0) nz = 9.85;
     else if (oldZ >= 11.45) nz = 11.6;
@@ -905,27 +919,20 @@ function clampPigWorldPos(w, nx, nz) {
   return { x: nx, z: nz };
 }
 
-function stepPhoTpsWorld(w, dt, cam) {
+function stepPhoTpsWorld(w, dt) {
   w.t += dt;
+  if (w.welcomeTimer > 0) w.welcomeTimer -= dt;
 
-  if (w.desiredCamYaw !== null && cam) {
-    var diff = normalizeAngle(w.desiredCamYaw - cam.yaw);
-    if (Math.abs(diff) < 0.03) {
-      cam.yaw = w.desiredCamYaw;
-      w.desiredCamYaw = null;
-    } else {
-      cam.yaw = normalizeAngle(cam.yaw + diff * Math.min(1, dt * 4.5));
-    }
-  }
-
-  var someoneNearDoor = (Math.abs(w.pig.x) < 1.8 && Math.abs(w.pig.z) < 1.45);
+  // Cửa gỗ 2 cánh mở rộng khi mới vào, hoặc khi chú Heo / khách lại gần cửa
+  var nearDoor = (w.welcomeTimer > 0) || (Math.abs(w.pig.x) < 1.8 && w.pig.z < 1.9);
   for (var ci = 0; ci < w.customers.length; ci++) {
     var cu = w.customers[ci];
-    if (Math.abs(cu.x) < 1.6 && Math.abs(cu.z) < 1.35) { someoneNearDoor = true; break; }
+    if (cu.state !== 'DOOR_WAIT' && Math.abs(cu.x) < 1.6 && cu.z < 1.6) { nearDoor = true; break; }
   }
-  w.doorTarget = (w.doorManualOpen || someoneNearDoor) ? 1 : 0;
-  w.doorOpen += (w.doorTarget - w.doorOpen) * Math.min(1, dt * 6.5);
+  w.doorTarget = nearDoor ? 0.95 : 0.0;
+  w.doorOpen += (w.doorTarget - w.doorOpen) * Math.min(1, dt * 5.0);
 
+  // Di chuyển Chú Heo Mascot
   var p = w.pig;
   if (p.eating) {
     p.eatTimer -= dt;
@@ -933,38 +940,18 @@ function stepPhoTpsWorld(w, dt, cam) {
       p.eating = false;
       p.orderState = 'done';
       if (p.seatRef) p.seatRef.seat.bowl = 'empty';
-      w.toastText = 'Heo ăn sạch tô Phở Cổ Phố Hội thơm lừng! Bấm Đứng dậy để vào Bếp xem Đầu bếp nấu nhé!';
+      w.toastText = 'Heo ăn sạch tô Phở thịt bò tươi thơm lừng! Bấm Đứng dậy để vào Bếp xem 3 Đầu bếp nấu!';
     }
   } else if (!p.seated && p.walking) {
-    if (p.waypoints && p.waypoints.length > 0) {
-      var wp = p.waypoints[0];
-      var wdx = wp.x - p.x, wdz = wp.z - p.z;
-      var wdist = Math.hypot(wdx, wdz);
-      if (wdist < 0.16) {
-        p.x = wp.x; p.z = wp.z;
-        p.waypoints.shift();
-        if (p.waypoints.length === 0) {
-          p.walking = false;
-          var rm = detectCurrentPhoRoom(p.x, p.z);
-          if (PHO_ROOM_DESTS[rm]) w.toastText = 'Chú Heo đã tới ' + PHO_ROOM_DESTS[rm].label + '!';
-        }
-      } else {
-        var wstep = Math.min(wdist, 4.8 * dt);
-        p.x += (wdx / wdist) * wstep;
-        p.z += (wdz / wdist) * wstep;
-        p.yaw = Math.atan2(wdx, wdz);
-      }
+    var dx = p.tx - p.x, dz = p.tz - p.z;
+    var dist = Math.hypot(dx, dz);
+    if (dist < 0.12) {
+      p.walking = false;
     } else {
-      var dx = p.tx - p.x, dz = p.tz - p.z;
-      var dist = Math.hypot(dx, dz);
-      if (dist < 0.12) {
-        p.walking = false;
-      } else {
-        var step = Math.min(dist, 3.8 * dt);
-        var next = clampPigWorldPos(w, p.x + (dx / dist) * step, p.z + (dz / dist) * step);
-        p.x = next.x; p.z = next.z;
-        p.yaw = Math.atan2(dx, dz);
-      }
+      var step = Math.min(dist, 3.8 * dt);
+      var next = clampPigWorldPos(w, p.x + (dx / dist) * step, p.z + (dz / dist) * step);
+      p.x = next.x; p.z = next.z;
+      p.yaw = Math.atan2(dx, dz);
     }
   }
   if (w.targetMarker) {
@@ -972,27 +959,17 @@ function stepPhoTpsWorld(w, dt, cam) {
     if (w.targetMarker.ttl <= 0) w.targetMarker = null;
   }
 
-  w.chef.x = -1.8 + Math.sin(w.t * 0.9) * 1.3;
-  w.chef.moving = Math.abs(Math.cos(w.t * 0.9)) > 0.3;
-
-  // Cập nhật xe cộ chạy 60fps trên Đại Lộ Sài Gòn & tàu bè chạy trên Sông Bạch Đằng (QĐ 235)
-  for (var vi = 0; vi < w.vehicles.length; vi++) {
-    var v = w.vehicles[vi];
-    v.x += v.dir * v.sp * dt;
-    if (v.dir > 0 && v.x > 38) v.x = -38;
-    else if (v.dir < 0 && v.x < -38) v.x = 38;
-  }
-  for (var bi = 0; bi < w.boats.length; bi++) {
-    var b = w.boats[bi];
-    b.x += b.dir * b.sp * dt;
-    if (b.dir > 0 && b.x > 52) b.x = -52;
-    else if (b.dir < 0 && b.x < -52) b.x = 52;
+  // 3 Nhân viên Bếp chuyển động sống động theo từng vị trí (múc nước dùng / thái thịt / trụng phở)
+  for (var chi = 0; chi < w.chefs.length; chi++) {
+    var ch = w.chefs[chi];
+    ch.x = ch.baseX + Math.sin(w.t * (0.8 + chi * 0.25) + ch.phase) * 0.45;
+    ch.moving = Math.abs(Math.cos(w.t * (0.8 + chi * 0.25) + ch.phase)) > 0.4;
   }
 
   // FSM Khách hàng NPC ra vào cửa & ăn Phở thực tế 100%
   for (var i = 0; i < w.customers.length; i++) {
     var c = w.customers[i];
-    if (c.state === 'OUTSIDE_WAIT') {
+    if (c.state === 'DOOR_WAIT') {
       c.timer -= dt;
       if (c.timer <= 0) {
         var freeSeat = null;
@@ -1007,11 +984,10 @@ function stepPhoTpsWorld(w, dt, cam) {
         if (freeSeat) {
           freeSeat.seat.occupant = c.id;
           c.tableId = freeSeat.tId; c.seatIdx = freeSeat.sId;
-          c.state = 'WALK_TO_DOOR';
+          c.x = 0; c.z = 0.5;
+          c.state = 'WALK_TO_SEAT';
         } else c.timer = 3;
       }
-    } else if (c.state === 'WALK_TO_DOOR') {
-      if (moveTowards2D(c, 0, 1.0, 2.3, dt)) c.state = 'WALK_TO_SEAT';
     } else if (c.state === 'WALK_TO_SEAT') {
       var st = w.tables[c.tableId].seats[c.seatIdx];
       if (moveTowards2D(c, st.x, st.z, 2.3, dt)) {
@@ -1025,15 +1001,14 @@ function stepPhoTpsWorld(w, dt, cam) {
         c.seated = false; c.state = 'LEAVE_TO_DOOR';
       }
     } else if (c.state === 'LEAVE_TO_DOOR') {
-      if (moveTowards2D(c, 0, 0.4, 2.3, dt)) c.state = 'LEAVE_OUTSIDE';
-    } else if (c.state === 'LEAVE_OUTSIDE') {
-      if (moveTowards2D(c, (i % 2 === 0 ? -2.4 : 2.4), -4.4, 2.3, dt)) {
-        c.state = 'OUTSIDE_WAIT'; c.timer = 4 + Math.random() * 5;
+      if (moveTowards2D(c, 0, 0.45, 2.3, dt)) {
+        c.state = 'DOOR_WAIT';
+        c.timer = 4.5 + Math.random() * 5;
       }
     }
   }
 
-  // FSM 2 Nhân viên phục vụ (Ưu tiên bưng Phở cho Chú Heo -> Khách chờ -> Dọn tô rỗng)
+  // FSM 2 Nhân viên phục vụ tạp dề (Ưu tiên bưng Phở cho Chú Heo -> Khách chờ -> Dọn tô rỗng)
   for (var wi = 0; wi < w.waiters.length; wi++) {
     var wt = w.waiters[wi];
     if (!wt.task) {
@@ -1085,7 +1060,7 @@ function stepPhoTpsWorld(w, dt, cam) {
       if (tk.type === 'PIG_ORDER') {
         if (tk.phase === 'TO_PIG') {
           if (moveTowards2D(wt, appX, tk.seat.z, 3.0, dt)) {
-            w.toastText = 'Nhân viên: "Dạ 1 Phở Tái Nạm + quẩy nóng cho chú Heo ngay ạ!"';
+            w.toastText = 'Nhân viên: "Dạ 1 Phở Tái Nạm bò tươi + quẩy nóng cho chú Heo ngay ạ!"';
             tk.phase = 'TO_KITCHEN';
           }
         } else if (tk.phase === 'TO_KITCHEN') {
@@ -1093,7 +1068,7 @@ function stepPhoTpsWorld(w, dt, cam) {
         } else if (tk.phase === 'DELIVER_PIG') {
           if (moveTowards2D(wt, appX, tk.seat.z, 3.0, dt)) {
             wt.carryBowl = null; tk.seat.bowl = 'full'; p.orderState = 'served';
-            w.toastText = 'Tô Phở nóng hổi bốc khói đã ra tận bàn! Bấm Ăn Phở thôi!';
+            w.toastText = 'Tô Phở bò tươi đầy đủ đũa muỗng đã ra tận bàn! Bấm Ăn Phở thôi!';
             wt.task = null;
           }
         }
@@ -1118,7 +1093,7 @@ function stepPhoTpsWorld(w, dt, cam) {
   }
 }
 
-/* ==================== 3. TƯƠNG TÁC NGỮ CẢNH THÔNG MINH ==================== */
+/* ==================== 2. TƯƠNG TÁC NGỮ CẢNH THÔNG MINH ==================== */
 function getPhoContextAction(w) {
   var p = w.pig;
   if (p.seated) {
@@ -1128,13 +1103,10 @@ function getPhoContextAction(w) {
     if (p.orderState === 'eating') return { id: 'eating_now', label: '😋 Heo đang xì xụp Phở...', secondary: null };
     return { id: 'stand_up', label: '🐷 Đứng dậy đi khám phá', secondary: null };
   }
-  if (Math.abs(p.x) < 1.8 && Math.abs(p.z) < 1.8 && w.doorOpen < 0.5) {
-    return { id: 'open_door', label: p.z < 0 ? '🚪 Mở cửa vào Phở Cổ Phố Hội' : '🚪 Mở cửa ra Sân Phố Cổ', secondary: null };
+  if (p.z > 10.2) {
+    return { id: 'watch_chef', label: '👨‍🍳 Xem 3 Đầu bếp nấu Phở & thái thịt', secondary: null };
   }
-  if (p.z > 10.4 && Math.hypot(p.x - w.chef.x, p.z - w.chef.z) < 3.8) {
-    return { id: 'watch_chef', label: '👨‍🍳 Xem Đầu bếp chần Phở & múc nước dùng', secondary: null };
-  }
-  var bestSeat = null, bestD = 1.7;
+  var bestSeat = null, bestD = 1.75;
   for (var ti = 0; ti < w.tables.length; ti++) {
     var tb = w.tables[ti];
     for (var si = 0; si < 2; si++) {
@@ -1146,58 +1118,50 @@ function getPhoContextAction(w) {
     }
   }
   if (bestSeat) return { id: 'sit_seat', label: '🪑 Ngồi xuống bàn gỗ lim', seatRef: bestSeat, secondary: null };
-  if (p.z < -3.8) return { id: 'exit_pho', label: '🏙️ Quay lại Đại Lộ Sài Gòn', secondary: null };
+  if (Math.abs(p.x) < 1.8 && p.z < 1.45) {
+    return { id: 'exit_pho', label: '🚪 Ra lại Đại Lộ Sài Gòn', secondary: null };
+  }
   return null;
 }
 
 function triggerPhoAction(w, actionId, seatRef) {
   var p = w.pig;
-  if (actionId === 'open_door') {
-    w.doorManualOpen = true; p.waypoints = []; p.walking = true;
-    p.tx = 0; p.tz = p.z < 0 ? 1.8 : -2.2;
-    w.toastText = p.z < 0 ? 'Bước vào Sảnh Phở Chính ấm cúng! Hương quế hồi thơm nức mũi!' : 'Ra lại Sân Phố Cổ hóng mát!';
-  } else if (actionId === 'sit_seat' && seatRef) {
-    p.seated = true; p.walking = false; p.waypoints = [];
+  if (actionId === 'sit_seat' && seatRef) {
+    p.seated = true; p.walking = false;
     p.seatRef = seatRef; seatRef.seat.occupant = 'PIG';
     p.x = seatRef.seat.x; p.z = seatRef.seat.z; p.yaw = seatRef.seat.yaw;
     p.orderState = seatRef.seat.bowl === 'full' ? 'served' : 'none';
-    w.toastText = 'Heo đã ngồi yên vị! Bấm Gọi Phở để thưởng thức tô Phở nóng hổi nhé!';
+    w.toastText = 'Heo đã ngồi yên vị! Bấm Gọi Phở để nhân viên tạp dề phục vụ ngay nhé!';
   } else if (actionId === 'order_pho') {
     p.orderState = 'ordered';
-    w.toastText = 'Heo gọi 1 tô Phở Tái Nạm đặc biệt! Nhân viên đang chạy tới bàn...';
+    w.toastText = 'Heo gọi 1 Phở Tái Nạm bò tươi! Nhân viên phục vụ đang chạy tới bàn...';
   } else if (actionId === 'eat_pho') {
     p.orderState = 'eating'; p.eating = true; p.eatTimer = 4.5;
-    w.toastText = 'Xì xụp! Nước dùng ngọt xương, thịt bò mềm, quẩy giòn rụm ngon tuyệt!';
+    w.toastText = 'Xì xụp! Nước dùng ninh xương, thịt bò tươi mềm & quẩy giòn rụm!';
   } else if (actionId === 'stand_up') {
     if (p.seatRef) {
       p.seatRef.seat.occupant = null;
       p.x = p.seatRef.table.x > 0 ? p.seatRef.table.x - 1.45 : p.seatRef.table.x + 1.45;
     }
     p.seated = false; p.eating = false; p.seatRef = null; p.orderState = 'none';
-    w.toastText = 'Heo đứng dậy! Chạm sàn đi dạo hoặc bấm Tab trên để vào Bếp Lửa!';
+    w.toastText = 'Heo đứng dậy! Chạm lối bên phải quầy để vào thẳng Bếp xem 3 Đầu bếp nấu nhé!';
   } else if (actionId === 'watch_chef') {
-    w.toastText = 'Đầu bếp: "Nồi nước dùng ninh xương ống 14 tiếng cùng hoa hồi, thảo quả, quế thanh!"';
+    w.toastText = 'Bếp trưởng: "3 anh em nhà bếp thái bò tươi, trụng phở, ninh xương 14 tiếng chuẩn vị 90s!"';
   }
 }
 
-/* ==================== 4. VẼ BÀN GỖ LIM + SPRITE NGUYÊN LIỆU TẢ THỰC & BỐI CẢNH PHỐ CỔ ==================== */
+/* ==================== 3. VẼ NỘI THẤT QUÁN PHỞ VINTAGE 90S (100% INTERIOR-ONLY, 0% TRỜI XANH!) ==================== */
 function drawPhoTableIngredients3D(ctx, cam, tb, t) {
   var tx = tb.x, tz = tb.z;
-  // Mặt bàn gỗ lim cổ truyền + 4 chân bàn chắc chắn
   drawBox3D(ctx, cam, tx, 0.70, tz, 1.68, 0.11, 1.08, { top: '#5C341D', front: '#3F2212', side: '#31190C' });
   drawBox3D(ctx, cam, tx - 0.70, 0, tz - 0.42, 0.10, 0.70, 0.10, { top: '#4A2816', front: '#3B1E10', side: '#2B150A' });
   drawBox3D(ctx, cam, tx + 0.70, 0, tz - 0.42, 0.10, 0.70, 0.10, { top: '#4A2816', front: '#3B1E10', side: '#2B150A' });
   drawBox3D(ctx, cam, tx - 0.70, 0, tz + 0.42, 0.10, 0.70, 0.10, { top: '#4A2816', front: '#3B1E10', side: '#2B150A' });
   drawBox3D(ctx, cam, tx + 0.70, 0, tz + 0.42, 0.10, 0.70, 0.10, { top: '#4A2816', front: '#3B1E10', side: '#2B150A' });
 
-  // Sprite Pixel Art tả thực trên mặt bàn (KHÔNG dùng cục hộp vuông!):
-  // 1. Ấm trà Bát Tràng men xanh dáng tròn có vòi & quai xách
   drawBatTrangTeapotSprite3D(ctx, cam, tx + 0.46, 0.82, tz - 0.08);
-  // 2. Rổ gia vị đỏ đựng nước tương, tương ớt & giấm tỏi ớt ngâm
   drawCondimentCaddySprite3D(ctx, cam, tx - 0.54, 0.82, tz);
-  // 3. Đĩa rau giá chanh tươi & đĩa quẩy nóng vàng giòn
   drawQuayAndHerbsSprite3D(ctx, cam, tx + 0.16, 0.82, tz + 0.24);
-  // 4. Tô Phở sứ tròn đầy thịt bò tái, hành ngò, đũa tre & khói nóng 3D!
   for (var bi = 0; bi < 2; bi++) {
     var bState = tb.seats[bi].bowl;
     if (bState !== 'none') {
@@ -1213,107 +1177,28 @@ function drawHeritageChair3D(ctx, cam, se) {
   drawBox3D(ctx, cam, se.x, 0.46, backZ, 0.54, 0.50, 0.08, { top: '#5C341D', front: '#4A2C1A', side: '#3B2314' });
 }
 
-function drawSaigonAvenueAndBachDang3D(ctx, cam, w) {
-  // 1. Vỉa hè Sài Gòn trải dài vô tận 2 bên (X: -65..+65, Z: 0..-4.3) -> 0% mảng trời xanh mất liên kết!
-  drawPoly3D(ctx, cam, [[-65,0,0],[65,0,0],[65,0,-4.3],[-65,0,-4.3]], '#DFCFB2', null, 0);
-  // Bó vỉa vạch trắng-đen chuẩn Banner Tab Khám phá (Z: -4.3..-4.65)
-  drawPoly3D(ctx, cam, [[-65,0.01,-4.3],[65,0.01,-4.3],[65,0.01,-4.65],[-65,0.01,-4.65]], '#2B2118', null, 0);
-  for (var kx = -28; kx <= 28; kx += 2.4) {
-    drawPoly3D(ctx, cam, [[kx,0.02,-4.3],[kx+1.2,0.02,-4.3],[kx+1.2,0.02,-4.65],[kx,0.02,-4.65]], '#F8FAFC', null, 0);
-  }
-  // 2. Đại lộ Sài Gòn 2 làn xe (Z: -4.65..-10.6, X: -70..+70)
-  drawPoly3D(ctx, cam, [[-70,0,-4.65],[70,0,-4.65],[70,0,-10.6],[-70,0,-10.6]], '#3B424C', '#2B2118', 1);
-  for (var rx = -34; rx <= 34; rx += 3.6) {
-    drawPoly3D(ctx, cam, [[rx,0.01,-7.45],[rx+1.8,0.01,-7.45],[rx+1.8,0.01,-7.75],[rx,0.01,-7.75]], '#FACC15', null, 0);
-  }
-  // 3. Bờ kè Bến Bạch Đằng lát đá + cây xanh ven sông (Z: -10.6..-12.8, X: -75..+75)
-  drawPoly3D(ctx, cam, [[-75,0,-10.6],[75,0,-10.6],[75,0,-12.8],[-75,0,-12.8]], '#CBD5E1', '#64748B', 1);
-  drawPoly3D(ctx, cam, [[-75,0,-12.8],[75,0,-12.8],[75,0.75,-12.8],[-75,0.75,-12.8]], '#94A3B8', '#475569', 1); // Lan can bờ kè
-  // 4. SÔNG BẠCH ĐẰNG rộng lớn lấp lánh sóng (Z: -12.8..-35.0, X: -85..+85)
-  drawPoly3D(ctx, cam, [[-85,0,-12.8],[85,0,-12.8],[85,0,-35.0],[-85,0,-35.0]], '#3B8CB8', null, 0);
-  // Vệt sóng lấp lánh chạy nhẹ trên mặt sông Bạch Đằng
-  for (var wi = 0; wi < 12; wi++) {
-    var wx = -32 + ((wi * 9.5 + w.t * (wi % 2 === 0 ? 1.4 : -1.2)) % 64 + 64) % 64;
-    var wz = -15.5 - (wi % 5) * 3.8;
-    drawPoly3D(ctx, cam, [[wx,0.02,wz],[wx+2.4,0.02,wz],[wx+2.4,0.02,wz-0.25],[wx,0.02,wz-0.25]], 'rgba(224,242,254,0.55)', null, 0);
-  }
-  // 5. BỜ CÔNG VIÊN THỦ THIÊM xanh mướt & dãy skyline xa khép kín 100% đường chân trời (Z: -35.0..-42.0)
-  drawPoly3D(ctx, cam, [[-95,0,-35.0],[95,0,-35.0],[95,2.2,-35.5],[-95,2.2,-35.5]], '#3B8249', null, 0);
-  drawPoly3D(ctx, cam, [[-95,2.2,-35.5],[95,2.2,-35.5],[95,4.8,-36.0],[-95,4.8,-36.0]], '#7AA7CE', null, 0);
-  // 6. Vẽ 3 Tàu Waterbus & thuyền chạy 60fps trên Sông Bạch Đằng (từ xa tới gần)
-  var sortedBoats = w.boats.slice().sort(function(a, b) { return a.z - b.z; });
-  for (var bi = 0; bi < sortedBoats.length; bi++) {
-    drawRiverBoatSprite3D(ctx, cam, sortedBoats[bi], w.t);
-  }
-  // 7. Vẽ 5 Xe máy / Taxi / Xe buýt chạy 60fps trên Đại Lộ Sài Gòn
-  var sortedVehs = w.vehicles.slice().sort(function(a, b) { return a.z - b.z; });
-  for (var vi = 0; vi < sortedVehs.length; vi++) {
-    drawRoadVehicleSprite3D(ctx, cam, sortedVehs[vi]);
-  }
-  // 8. Dãy công trình kế bên Quán Phở (Z = 0, kéo dài 2 phía -> 0% hở trời xanh khi xoay trái/phải!)
-  // BÊN PHẢI (X: +6..+22): TIỆM CAFE MÁI HIÊN SỌC ĐỎ-TRẮNG 1:1 BANNER TAB KHÁM PHÁ!
-  drawPoly3D(ctx, cam, [[6.0,0,0],[22.0,0,0],[22.0,5.2,0],[6.0,5.2,0]], '#F2DBAE', '#2B2118', 1.2);
-  drawPoly3D(ctx, cam, [[6.0,5.2,0],[22.0,5.2,0],[22.0,5.8,-0.4],[6.0,5.8,-0.4]], '#5C3A21', '#2B2118', 1);
-  // 3 Cửa sổ xanh tầng 2 của Tiệm CAFE
-  var cafeWinXs = [8.5, 13.0, 17.5];
-  for (var cwi = 0; cwi < 3; cwi++) {
-    var cwx = cafeWinXs[cwi];
-    drawPoly3D(ctx, cam, [[cwx,3.2,-0.04],[cwx+2.4,3.2,-0.04],[cwx+2.4,4.4,-0.04],[cwx,4.4,-0.04]], '#5B8FB9', '#2B2118', 1.2);
-  }
-  // Biển nâu CAFE + Mái hiên sọc đỏ-trắng đặc trưng!
-  drawPoly3D(ctx, cam, [[9.0,2.2,-0.05],[19.0,2.2,-0.05],[19.0,2.9,-0.05],[9.0,2.9,-0.05]], '#4A2C1A', '#2B2118', 1.2);
-  for (var ax = 6.4; ax < 21.6; ax += 1.2) {
-    var isRed = Math.floor(ax * 2) % 2 === 0;
-    drawPoly3D(ctx, cam, [[ax,1.65,-0.35],[ax+1.2,1.65,-0.35],[ax+1.2,2.2,0],[ax,2.2,0]], isRed ? '#D93829' : '#FFFDF7', '#2B2118', 0.8);
-  }
-  drawPoly3D(ctx, cam, [[7.0,0.05,-0.04],[12.0,0.05,-0.04],[12.0,1.65,-0.04],[7.0,1.65,-0.04]], '#A9C8D9', '#2B2118', 1);
-  drawPoly3D(ctx, cam, [[15.0,0.05,-0.04],[20.8,0.05,-0.04],[20.8,1.65,-0.04],[15.0,1.65,-0.04]], '#A9C8D9', '#2B2118', 1);
-  drawPoly3D(ctx, cam, [[12.5,0.05,-0.04],[14.5,0.05,-0.04],[14.5,1.65,-0.04],[12.5,1.65,-0.04]], '#6E452A', '#2B2118', 1);
-  // Dãy nhà phố kéo dài xa bên phải (X: +22..+60) & bên trái (X: -60..-6) khép kín 100% chân trời!
-  drawPoly3D(ctx, cam, [[22.0,0,0],[60.0,0,0],[60.0,5.4,0],[22.0,5.4,0]], '#E6A825', '#2B2118', 1);
-  drawPoly3D(ctx, cam, [[-60.0,0,0],[-6.0,0,0],[-6.0,5.2,0],[-60.0,5.2,0]], '#E8CF9E', '#2B2118', 1);
-  drawPoly3D(ctx, cam, [[-60.0,5.2,0],[-6.0,5.2,0],[-6.0,6.0,-0.4],[-60.0,6.0,-0.4]], '#B83224', '#2B2118', 1);
-}
-
 function renderPhoTps3D(ctx, cam, w) {
   var vw = cam.vw, vh = cam.vh;
-  var isIndoors = w.pig.z >= -0.15;
 
-  // 1. NỀN TRẦN KÍN 100% KHI Ở TRONG NHÀ — BẦU TRỜI ẤM KHI Ở SÂN PHỐ CỔ
-  if (isIndoors) {
-    ctx.fillStyle = '#EFE2C8';
-    ctx.fillRect(0, 0, vw, Math.round(vh * 0.55));
-    ctx.fillStyle = '#8C7A65';
-    ctx.fillRect(0, Math.round(vh * 0.55), vw, vh);
-  } else {
-    var skyGrad = ctx.createLinearGradient(0, 0, 0, Math.round(vh * 0.52));
-    skyGrad.addColorStop(0, '#6AB5F5');
-    skyGrad.addColorStop(1, '#CFE8FF');
-    ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, vw, Math.round(vh * 0.52));
-    // Nền mặt nước/vỉa hè dưới đường chân trời (không bao giờ hở trời xanh bên dưới chân trời!)
-    ctx.fillStyle = '#3B8CB8';
-    ctx.fillRect(0, Math.round(vh * 0.52), vw, vh);
-    drawSaigonAvenueAndBachDang3D(ctx, cam, w);
-  }
+  // 1. NỀN NỘI THẤT VINTAGE 90S KÍN 100% — TUYỆT ĐỐI 0% TRỜI XANH Ở MỌI GÓC XOAY 360°!
+  ctx.fillStyle = '#E8D3A8';
+  ctx.fillRect(0, 0, vw, Math.round(vh * 0.55));
+  ctx.fillStyle = '#8C7456';
+  ctx.fillRect(0, Math.round(vh * 0.55), vw, vh);
 
-  // 2. SÀN GẠCH BÔNG INDOCHINE 3 KHU (giảm 60% đa giác, siêu mượt 60fps!)
-  for (var gz = -5.4; gz < 15.0; gz += 1.7) {
-    for (var gx = -6.0; gx < 6.0; gx += 1.7) {
-      var isGarden = gz < 0;
-      var isKitchen = gz >= 10.2;
+  // 2. SÀN GẠCH BÔNG INDOCHINE 90S PHỐI CẢNH 3D (Z: 0..14.8, X: -6..+6)
+  for (var gz = 0.0; gz < 14.8; gz += 1.65) {
+    for (var gx = -6.0; gx < 6.0; gx += 1.65) {
+      var isKitchen = gz >= 10.0;
       var chk = ((Math.floor(gx + 20) + Math.floor(gz + 20)) % 2 === 0);
-      var col = isGarden ? (chk ? '#D4C7B0' : '#C7B89E')
-        : isKitchen ? (chk ? '#CBD5E1' : '#DDE5EE')
-        : (chk ? '#F4EBDA' : '#DDD0B6');
-      drawPoly3D(ctx, cam, [[gx,0,gz],[gx+1.7,0,gz],[gx+1.7,0,gz+1.7],[gx,0,gz+1.7]], col, 'rgba(74,44,26,0.12)', 1);
-      if (!isGarden && !isKitchen && chk) {
-        drawPoly3D(ctx, cam, [[gx+0.7,0.01,gz+0.7],[gx+1.0,0.01,gz+0.7],[gx+1.0,0.01,gz+1.0],[gx+0.7,0.01,gz+1.0]], '#2F6F5B', null, 0);
+      var col = isKitchen ? (chk ? '#CBD5E1' : '#DCE4EE') : (chk ? '#F4E6C8' : '#E0CCA6');
+      drawPoly3D(ctx, cam, [[gx,0,gz],[gx+1.65,0,gz],[gx+1.65,0,gz+1.65],[gx,0,gz+1.65]], col, 'rgba(74,44,26,0.12)', 1);
+      if (!isKitchen && chk) {
+        drawPoly3D(ctx, cam, [[gx+0.68,0.01,gz+0.68],[gx+0.98,0.01,gz+0.68],[gx+0.98,0.01,gz+0.98],[gx+0.68,0.01,gz+0.98]], '#2F6F5B', null, 0);
       }
     }
   }
-  // Nẹp gỗ chuyển tiếp gọn gàng giữa sàn Sảnh Chính & Bếp Lửa (Z = 10.2)
-  drawPoly3D(ctx, cam, [[-6.0,0.015,10.1],[6.0,0.015,10.1],[6.0,0.015,10.3],[-6.0,0.015,10.3]], '#5C341D', null, 0);
+  drawPoly3D(ctx, cam, [[-6.0,0.015,9.9],[6.0,0.015,9.9],[6.0,0.015,10.1],[-6.0,0.015,10.1]], '#5C341D', null, 0);
 
   if (w.targetMarker) {
     var tm = w.targetMarker;
@@ -1324,40 +1209,40 @@ function renderPhoTps3D(ctx, cam, w) {
     ], 'rgba(244,185,59,0.52)', '#F4B93B', 1.5);
   }
 
-  // 3. TRẦN NHÀ GỖ LIM KÍN 100% + XÀ GỒ PHỐI CẢNH 3D (chỉ trong nhà Z: 0..15.2)
-  if (isIndoors) {
-    drawPoly3D(ctx, cam, [[-6.0,3.85,0],[6.0,3.85,0],[6.0,3.85,15.2],[-6.0,3.85,15.2]], '#F5EAD3', '#4A2C1A', 1);
-    for (var bz = 0.2; bz <= 15.0; bz += 3.0) {
-      drawPoly3D(ctx, cam, [[-6.0,3.62,bz],[6.0,3.62,bz],[6.0,3.85,bz],[-6.0,3.85,bz]], '#4A2C1A', '#2B180E', 1);
-    }
+  // 3. TRẦN GỖ LIM VINTAGE 90S KÍN 100% + XÀ GỒ NÂU SẪM (Y = 3.85)
+  drawPoly3D(ctx, cam, [[-6.0,3.85,0],[6.0,3.85,0],[6.0,3.85,14.8],[-6.0,3.85,14.8]], '#F0DFBC', '#4A2C1A', 1);
+  for (var bz = 0.4; bz <= 14.6; bz += 2.8) {
+    drawPoly3D(ctx, cam, [[-6.0,3.62,bz],[6.0,3.62,bz],[6.0,3.85,bz],[-6.0,3.85,bz]], '#4A2C1A', '#2B180E', 1);
   }
 
-  // 4. TƯỜNG BAO 3 PHÍA TRONG QUÁN (Không có vách ngăn thừa -> 0% lỗi xuyên tường!)
-  drawPoly3D(ctx, cam, [[-6.0,0,0],[-6.0,0,15.2],[-6.0,3.85,15.2],[-6.0,3.85,0]], '#DFAA3E', '#3B2314', 1.2);
-  drawPoly3D(ctx, cam, [[6.0,0,15.2],[6.0,0,0],[6.0,3.85,0],[6.0,3.85,15.2]], '#D99B26', '#3B2314', 1.2);
-  drawPoly3D(ctx, cam, [[-6.0,0,15.2],[6.0,0,15.2],[6.0,3.85,15.2],[-6.0,3.85,15.2]], '#E6B34B', '#3B2314', 1.2);
-  // Tranh phố cổ đóng khung gỗ dọc tường trái & phải (có nội dung bên trong, không trống trắng!)
-  drawPoly3D(ctx, cam, [[-5.94,1.5,2.4],[-5.94,1.5,4.2],[-5.94,2.6,4.2],[-5.94,2.6,2.4]], '#C4A47C', '#3B2314', 2);
-  drawPoly3D(ctx, cam, [[5.94,1.5,4.2],[5.94,1.5,2.4],[5.94,2.6,2.4],[5.94,2.6,4.2]], '#C4A47C', '#3B2314', 2);
-  // Bảng thực đơn gỗ sơn son thếp vàng sau bếp & 3 Quạt treo tường quay 60fps
-  drawPoly3D(ctx, cam, [[-3.6,2.1,15.1],[1.4,2.1,15.1],[1.4,3.1,15.1],[-3.6,3.1,15.1]], '#991B1B', '#F4B93B', 1.8);
-  var fanXs = [-4.0, 0.0, 4.0];
-  for (var fi = 0; fi < fanXs.length; fi++) {
-    var fp = projectPoint3D(cam, fanXs[fi], 3.15, 15.0);
-    if (fp && fp.cz > 0.5) {
-      var fr = Math.max(4, Math.round(fp.scale * 0.28));
-      ctx.save();
-      ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(fp.sx, fp.sy, fr, 0, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = '#38BDF8'; ctx.lineWidth = 2;
-      var ang = w.t * 14 + fi;
-      ctx.beginPath();
-      ctx.moveTo(fp.sx - Math.cos(ang) * fr * 0.8, fp.sy - Math.sin(ang) * fr * 0.8);
-      ctx.lineTo(fp.sx + Math.cos(ang) * fr * 0.8, fp.sy + Math.sin(ang) * fr * 0.8);
-      ctx.stroke();
-      ctx.restore();
-    }
+  // 4. 4 BỨC TƯỜNG NỘI THẤT VINTAGE 90S KHÉP KÍN 360° + ỐP GỖ CHÂN TƯỜNG + TRANH SÀI GÒN XƯA
+  // Tường trái (X = -6.0) & Tường phải (X = +6.0)
+  drawPoly3D(ctx, cam, [[-6.0,0,0],[-6.0,0,14.8],[-6.0,3.85,14.8],[-6.0,3.85,0]], '#DFAA3E', '#3B2314', 1.2);
+  drawPoly3D(ctx, cam, [[-5.96,0,0],[-5.96,0,14.8],[-5.96,0.95,14.8],[-5.96,0.95,0]], '#6E452A', '#3B2314', 1);
+  drawPoly3D(ctx, cam, [[6.0,0,14.8],[6.0,0,0],[6.0,3.85,0],[6.0,3.85,14.8]], '#D99B26', '#3B2314', 1.2);
+  drawPoly3D(ctx, cam, [[5.96,0,14.8],[5.96,0,0],[5.96,0.95,0],[5.96,0.95,14.8]], '#6E452A', '#3B2314', 1);
+  // Tường hậu bếp (Z = 14.8) + Bảng thực đơn sơn son thếp vàng PHỞ BÒ GIA TRUYỀN 1990
+  drawPoly3D(ctx, cam, [[-6.0,0,14.8],[6.0,0,14.8],[6.0,3.85,14.8],[-6.0,3.85,14.8]], '#E2AE42', '#3B2314', 1.2);
+  drawPoly3D(ctx, cam, [[-3.6,2.15,14.72],[1.6,2.15,14.72],[1.6,3.15,14.72],[-3.6,3.15,14.72]], '#991B1B', '#F4B93B', 1.8);
+  var menuP = projectPoint3D(cam, -1.0, 2.65, 14.68);
+  if (menuP && menuP.cz > 0.6 && menuP.cz < 20) {
+    ctx.save();
+    ctx.font = 'bold ' + Math.max(7, Math.min(16, Math.round(menuP.scale * 0.24))) + 'px monospace';
+    ctx.fillStyle = '#FACC15'; ctx.textAlign = 'center';
+    ctx.fillText('PHỞ BÒ GIA TRUYỀN 1990', menuP.sx, menuP.sy + 3);
+    ctx.restore();
   }
+  // Tranh Sài Gòn thập niên 90 đóng khung gỗ 2 bên tường
+  drawPoly3D(ctx, cam, [[-5.92,1.5,2.2],[-5.92,1.5,4.0],[-5.92,2.6,4.0],[-5.92,2.6,2.2]], '#C9A46B', '#3B2314', 2);
+  drawPoly3D(ctx, cam, [[-5.92,1.5,6.2],[-5.92,1.5,8.0],[-5.92,2.6,8.0],[-5.92,2.6,6.2]], '#C9A46B', '#3B2314', 2);
+  drawPoly3D(ctx, cam, [[5.92,1.5,4.0],[5.92,1.5,2.2],[5.92,2.6,2.2],[5.92,2.6,4.0]], '#C9A46B', '#3B2314', 2);
+  drawPoly3D(ctx, cam, [[5.92,1.5,8.0],[5.92,1.5,6.2],[5.92,2.6,6.2],[5.92,2.6,8.0]], '#C9A46B', '#3B2314', 2);
+
+  // Tường cửa ra vào phía sau lưng (Z = 0) với phông kính mờ ánh vàng ấm phía sau cửa (KHÔNG hở trời xanh!)
+  drawPoly3D(ctx, cam, [[-6.0,0,0],[-1.45,0,0],[-1.45,3.85,0],[-6.0,3.85,0]], '#E0B04C', '#3B2314', 1.2);
+  drawPoly3D(ctx, cam, [[1.45,0,0],[6.0,0,0],[6.0,3.85,0],[1.45,3.85,0]], '#E0B04C', '#3B2314', 1.2);
+  drawPoly3D(ctx, cam, [[-1.45,2.55,0],[1.45,2.55,0],[1.45,3.85,0],[-1.45,3.85,0]], '#B8291E', '#3B2314', 1.2);
+  drawPoly3D(ctx, cam, [[-1.45,0,-0.08],[1.45,0,-0.08],[1.45,2.55,-0.08],[-1.45,2.55,-0.08]], '#F4D498', '#4A2C1A', 1);
 
   // 5. THU THẬP VẬT THỂ 3D ĐỂ Z-SORT (PAINTER'S ALGORITHM)
   var drawList = [];
@@ -1366,119 +1251,66 @@ function renderPhoTps3D(ctx, cam, w) {
     drawList.push({ cz: cp.cz, fn: fn });
   }
 
-  // 2 Cột đèn đường Sài Gòn trên vỉa hè (bỏ hàng rào gạch chắn tầm nhìn -> nhìn thẳng ra Đại lộ & Sông Bạch Đằng!)
-  pushItem(-5.2, -4.0, function() {
-    drawBox3D(ctx, cam, -5.2, 0, -4.0, 0.16, 3.3, 0.16, { top: '#475569', front: '#334155', side: '#1E293B' });
-    drawBox3D(ctx, cam, -5.2, 3.25, -4.0, 0.75, 0.14, 0.16, { top: '#475569', front: '#334155', side: '#1E293B' });
-  });
-  pushItem(5.2, -4.0, function() {
-    drawBox3D(ctx, cam, 5.2, 0, -4.0, 0.16, 3.3, 0.16, { top: '#475569', front: '#334155', side: '#1E293B' });
-    drawBox3D(ctx, cam, 5.2, 3.25, -4.0, 0.75, 0.14, 0.16, { top: '#475569', front: '#334155', side: '#1E293B' });
-  });
-
-  // Giàn xà gỗ hiên quán Phở (Z = -1.5, Y = 3.25) treo đèn lồng nối thẳng vào mặt tiền
-  pushItem(0, -1.5, function() {
-    drawBox3D(ctx, cam, 0, 3.22, -1.5, 11.8, 0.14, 0.16, { top: '#4A2C1A', front: '#3B2314', side: '#2B180E' });
-  });
-
-  // MẶT TIỀN QUÁN PHỞ 2 TẦNG 1:1 BANNER TAB KHÁM PHÁ (MÁI NGÓI ĐỎ LIỀN SUỐT X:-6..+6 — 0% HỞ TRỜI XANH!)
-  pushItem(-3.7, 0, function() {
-    drawPoly3D(ctx, cam, [[-6.0,0,0],[-1.45,0,0],[-1.45,2.6,0],[-6.0,2.6,0]], '#F2DBAE', '#2B2118', 1.2);
-    drawPoly3D(ctx, cam, [[-5.1,0.7,-0.04],[-2.1,0.7,-0.04],[-2.1,2.2,-0.04],[-5.1,2.2,-0.04]], '#C9E1EE', '#4A2C1A', 1.5);
-  });
-  pushItem(3.7, 0, function() {
-    drawPoly3D(ctx, cam, [[1.45,0,0],[6.0,0,0],[6.0,2.6,0],[1.45,2.6,0]], '#F2DBAE', '#2B2118', 1.2);
-    drawPoly3D(ctx, cam, [[2.1,0.7,-0.04],[5.1,0.7,-0.04],[5.1,2.2,-0.04],[2.1,2.2,-0.04]], '#C9E1EE', '#4A2C1A', 1.5);
-  });
-  // Tầng 2 liền mạch (Y: 2.55..5.2) + 2 Cửa sổ lá sách xanh rêu + Mái ngói đỏ liền suốt + Biển đỏ-vàng PHỞ!
-  pushItem(0, -0.05, function() {
-    // Tường tầng 2 liền mạch không có khe hở trên cửa!
-    drawPoly3D(ctx, cam, [[-6.0,2.55,0],[6.0,2.55,0],[6.0,5.2,0],[-6.0,5.2,0]], '#F2DBAE', '#2B2118', 1.2);
-    // 2 Cửa sổ lá sách xanh rêu đặc trưng tầng 2 (1:1 Banner Tab Khám phá!)
-    drawPoly3D(ctx, cam, [[-4.4,3.6,-0.04],[-1.6,3.6,-0.04],[-1.6,4.7,-0.04],[-4.4,4.7,-0.04]], '#3F6A44', '#2B2118', 1.4);
-    drawPoly3D(ctx, cam, [[1.6,3.6,-0.04],[4.4,3.6,-0.04],[4.4,4.7,-0.04],[1.6,4.7,-0.04]], '#3F6A44', '#2B2118', 1.4);
-    // Mái ngói đỏ liền suốt từ X = -6.2 đến +6.2 (tuyệt đối KHÔNG hở bầu trời ở giữa!)
-    drawPoly3D(ctx, cam, [[-6.2,5.2,0],[6.2,5.2,0],[6.2,6.1,-0.5],[-6.2,6.1,-0.5]], '#C93424', '#2B2118', 1.2);
-    // Biển hiệu đỏ-vàng PHỞ nổi bật ngay trên cửa ra vào
-    drawPoly3D(ctx, cam, [[-3.4,2.55,-0.06],[3.4,2.55,-0.06],[3.4,3.35,-0.06],[-3.4,3.35,-0.06]], '#C93424', '#2B2118', 1.5);
-    drawPoly3D(ctx, cam, [[-3.2,2.68,-0.07],[3.2,2.68,-0.07],[3.2,3.22,-0.07],[-3.2,3.22,-0.07]], '#B8291E', '#F4B93B', 1);
-    var signP = projectPoint3D(cam, 0, 2.95, -0.09);
-    if (signP && signP.cz > 0.5 && signP.cz < 18) {
-      ctx.save();
-      ctx.font = 'bold ' + Math.max(8, Math.min(20, Math.round(signP.scale * 0.30))) + 'px monospace';
-      ctx.fillStyle = '#FACC15'; ctx.textAlign = 'center';
-      ctx.fillText('PHỞ GIA TRUYỀN', signP.sx, signP.sy + 3);
-      ctx.restore();
-    }
-  });
-
-  // Cửa gỗ-kính 2 cánh xoay bản lề 90° (Z = 0)
-  var doorAng = w.doorOpen * 1.52;
-  pushItem(-0.75, 0.1, function() {
+  // 2 Cánh cửa gỗ-kính mở vào trong chào đón như Hình 1!
+  var doorAng = w.doorOpen * 1.48;
+  pushItem(-0.75, 0.2, function() {
     var lx = -1.45 + Math.cos(doorAng) * 1.42;
     var lz = Math.sin(doorAng) * 1.42;
     drawPoly3D(ctx, cam, [[-1.45,0,0],[lx,0,lz],[lx,2.52,lz],[-1.45,2.52,0]], '#5C341D', '#2B180E', 1.4);
-    drawPoly3D(ctx, cam, [[-1.30,0.85,0.02],[lx - Math.cos(doorAng)*0.12,0.85,lz - Math.sin(doorAng)*0.12],[lx - Math.cos(doorAng)*0.12,2.30,lz - Math.sin(doorAng)*0.12],[-1.30,2.30,0.02]], 'rgba(255,243,196,0.52)', '#3B2314', 1);
+    drawPoly3D(ctx, cam, [[-1.30,0.85,0.02],[lx - Math.cos(doorAng)*0.12,0.85,lz - Math.sin(doorAng)*0.12],[lx - Math.cos(doorAng)*0.12,2.30,lz - Math.sin(doorAng)*0.12],[-1.30,2.30,0.02]], 'rgba(255,240,196,0.58)', '#3B2314', 1);
   });
-  pushItem(0.75, 0.1, function() {
+  pushItem(0.75, 0.2, function() {
     var rx = 1.45 - Math.cos(doorAng) * 1.42;
     var rz = Math.sin(doorAng) * 1.42;
     drawPoly3D(ctx, cam, [[1.45,0,0],[rx,0,rz],[rx,2.52,rz],[1.45,2.52,0]], '#5C341D', '#2B180E', 1.4);
-    drawPoly3D(ctx, cam, [[1.30,0.85,0.02],[rx + Math.cos(doorAng)*0.12,0.85,rz - Math.sin(doorAng)*0.12],[rx + Math.cos(doorAng)*0.12,2.30,rz - Math.sin(doorAng)*0.12],[1.30,2.30,0.02]], 'rgba(255,243,196,0.52)', '#3B2314', 1);
+    drawPoly3D(ctx, cam, [[1.30,0.85,0.02],[rx + Math.cos(doorAng)*0.12,0.85,rz - Math.sin(doorAng)*0.12],[rx + Math.cos(doorAng)*0.12,2.30,rz - Math.sin(doorAng)*0.12],[1.30,2.30,0.02]], 'rgba(255,240,196,0.58)', '#3B2314', 1);
   });
 
-  // Bình phong song gỗ chạm giữa Sảnh Phở Chính (X: 0, Z: 5.2)
-  pushItem(0, 5.2, function() {
-    drawBox3D(ctx, cam, 0, 0, 5.2, 1.7, 2.55, 0.16, { top: '#4A2C1A', front: '#5C341D', side: '#3B2314' });
-  });
-
-  // Đèn lồng có dây treo nối thẳng lên xà gỗ (ngoài hiên topY=3.45, trong quán topY=3.85)
-  var lanternList = [
-    [-2.8, 2.75, -1.6, '#E0452B', 3.45], [-1.1, 2.85, -1.6, '#FACC15', 3.45],
-    [1.1, 2.85, -1.6, '#38BDF8', 3.45],  [2.8, 2.75, -1.6, '#EC4899', 3.45],
-    [-3.4, 2.95, 2.2, '#FFF3C4', 3.85],  [3.4, 2.95, 2.2, '#FFF3C4', 3.85],
-    [-3.4, 2.95, 8.2, '#FFF3C4', 3.85],  [3.4, 2.95, 8.2, '#FFF3C4', 3.85]
-  ];
-  for (var li = 0; li < lanternList.length; li++) {
-    (function(lt) {
-      pushItem(lt[0], lt[2], function() { drawLanternGlow3D(ctx, cam, lt[0], lt[1], lt[2], lt[3], '#FFE49E', 0.20, lt[4]); });
-    })(lanternList[li]);
+  // 2 Quạt trần Vintage 3 cánh quay 60fps & 6 Đèn thả chụp men ánh vàng 90s!
+  pushItem(0, 3.8, function() { drawCeilingFan3D(ctx, cam, 0, 3.42, 3.8, w.t, 0.0); });
+  pushItem(0, 7.6, function() { drawCeilingFan3D(ctx, cam, 0, 3.42, 7.6, w.t, 1.8); });
+  var lampPts = [[-3.4, 2.4], [3.4, 2.4], [-3.4, 5.4], [3.4, 5.4], [-3.4, 8.4], [3.4, 8.4], [-1.6, 11.4]];
+  for (var li = 0; li < lampPts.length; li++) {
+    (function(lp) {
+      pushItem(lp[0], lp[1], function() { drawVintageLamp3D(ctx, cam, lp[0], 2.95, lp[1], 3.85); });
+    })(lampPts[li]);
   }
 
-  // QUẦY BẾP LỬA PHỞ + 2 NỒI NƯỚC DÙNG TRÒN TẢ THỰC + TỦ KÍNH TREO THỊT BÒ & RAU THƠM (Z = 10.6)
+  // QUẦY BẾP LỬA 3 ĐẦU BẾP + 2 NỒI NƯỚC DÙNG TRÒN BỐC KHÓI + TỦ THỊT BÒ TƯƠI SỐNG (Z = 10.6)
   pushItem(-2.0, 10.6, function() {
     drawBox3D(ctx, cam, -2.0, 0, 10.6, 7.2, 0.94, 1.05, { top: '#E2E8F0', front: '#5C341D', side: '#4A2C1A' });
-    // Khung tủ kính trong suốt đựng nguyên liệu Phở tả thực (KHÔNG còn cục hộp đỏ/trắng/xanh!)
-    drawBox3D(ctx, cam, -4.1, 0.94, 10.6, 2.2, 1.05, 0.78, { top: 'rgba(186,230,253,0.45)', front: 'rgba(186,230,253,0.22)', side: 'rgba(147,197,253,0.28)' });
+    drawBox3D(ctx, cam, -4.1, 0.94, 10.6, 2.2, 1.05, 0.78, { top: 'rgba(255,243,196,0.45)', front: 'rgba(255,243,196,0.22)', side: 'rgba(255,235,175,0.28)' });
     drawKitchenIngredientsSprite3D(ctx, cam, -4.1, 1.02, 10.6);
-    // 2 Nồi nước dùng inox TRÒN có 2 quai, vá múc & nước dùng vàng sủi tăm bốc khói!
     drawPhoPotSprite3D(ctx, cam, -1.6, 0.96, 10.6, w.t, 0.0);
     drawPhoPotSprite3D(ctx, cam, 0.1,  0.96, 10.6, w.t, 0.5);
   });
-  // Bồn rửa chén inox gọn sát tường sau bếp (X: 4.3, Z: 14.5 — KHÔNG chặn lối đi!)
-  pushItem(4.3, 14.5, function() {
-    drawBox3D(ctx, cam, 4.3, 0, 14.5, 2.4, 0.88, 0.9, { top: '#93C5FD', front: '#CBD5E1', side: '#94A3B8' });
+  pushItem(4.3, 14.1, function() {
+    drawBox3D(ctx, cam, 4.3, 0, 14.1, 2.4, 0.88, 0.9, { top: '#93C5FD', front: '#CBD5E1', side: '#94A3B8' });
   });
 
-  // 8 BÀN GỖ LIM + 16 GHẾ ĐỆM XANH RÊU + SPRITE ĐỒ ĂN PHỞ TẢ THỰC
+  // 6 BÀN GỖ LIM + 12 GHẾ ĐỆM XANH RÊU + SPRITE ĐỒ ĂN PHỞ TẢ THỰC ĐẦY ĐỦ ĐŨA MUỖNG
   for (var ti = 0; ti < w.tables.length; ti++) {
     (function(tb) {
       for (var si = 0; si < 2; si++) {
-        (function(se) {
-          pushItem(se.x, se.z, function() { drawHeritageChair3D(ctx, cam, se); });
-        })(tb.seats[si]);
+        (function(se) { pushItem(se.x, se.z, function() { drawHeritageChair3D(ctx, cam, se); }); })(tb.seats[si]);
       }
       pushItem(tb.x, tb.z, function() { drawPhoTableIngredients3D(ctx, cam, tb, w.t); });
     })(w.tables[ti]);
   }
 
-  // ĐẦU BẾP, 2 NHÂN VIÊN PHỤC VỤ, 6 KHÁCH HÀNG NPC & CHÚ HEO MASCOT BO TRÒN
-  pushItem(w.chef.x, w.chef.z, function() { drawHumanTps3D(ctx, cam, w.chef, w.t); });
+  // 3 NHÂN VIÊN BẾP, 2 PHỤC VỤ TẠP DỀ ĐẸP MẮT, 6 KHÁCH HÀNG NPC & CHÚ HEO MASCOT BO TRÒN
+  for (var chi = 0; chi < w.chefs.length; chi++) {
+    (function(ch) { pushItem(ch.x, ch.z, function() { drawHumanTps3D(ctx, cam, ch, w.t); }); })(w.chefs[chi]);
+  }
   for (var wi = 0; wi < w.waiters.length; wi++) {
     (function(wt) { pushItem(wt.x, wt.z, function() { drawHumanTps3D(ctx, cam, wt, w.t); }); })(w.waiters[wi]);
   }
   for (var ki = 0; ki < w.customers.length; ki++) {
-    (function(cu) { pushItem(cu.x, cu.z, function() { drawHumanTps3D(ctx, cam, cu, w.t); }); })(w.customers[ki]);
+    (function(cu) {
+      if (cu.state !== 'DOOR_WAIT') {
+        pushItem(cu.x, cu.z, function() { drawHumanTps3D(ctx, cam, cu, w.t); });
+      }
+    })(w.customers[ki]);
   }
   pushItem(w.pig.x, w.pig.z, function() { drawPigTps3D(ctx, cam, w.pig, w.t); });
 
@@ -1486,6 +1318,12 @@ function renderPhoTps3D(ctx, cam, w) {
   for (var di = 0; di < drawList.length; di++) {
     if (drawList[di].cz > -1.2) drawList[di].fn();
   }
+
+  // 6. LỚP PHỦ ÁNH ĐÈN VÀNG VINTAGE 90S ẤM CÚNG TOÀN KHUNG HÌNH
+  ctx.save();
+  ctx.fillStyle = 'rgba(255, 198, 92, 0.09)';
+  ctx.fillRect(0, 0, vw, vh);
+  ctx.restore();
 }
 `}},850,[]);
 __d(function(g,r,i,a,m,_e,_d){"use strict";function e(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"AdidasStoreView",{enumerable:!0,get:function(){return l}}),r(_d[0]),r(_d[1]);var t=e(r(_d[2])),o=e(r(_d[3])),n=e(r(_d[4])),d=r(_d[5]),c=(function(e){if(e&&e.__esModule)return e;var t={};return e&&Object.keys(e).forEach(function(o){if('default'!==o){var n=Object.getOwnPropertyDescriptor(e,o);Object.defineProperty(t,o,n.get?n:{enumerable:!0,get:function(){return e[o]}})}}),t.default=e,t})(r(_d[6])),s=r(_d[7]),u=r(_d[8]);const l=({onBack:e})=>(0,u.jsxs)(n.default,{style:f.fullscreenContainer,children:[(0,u.jsx)(s.AdidasStoreBannerWebView,{onExitAdidas:e}),(0,u.jsx)(o.default,{style:f.backButton,onPress:()=>{c.impactAsync(c.ImpactFeedbackStyle.Light).catch(()=>{}),e()},activeOpacity:.85,hitSlop:{top:10,bottom:10,left:10,right:10},children:(0,u.jsx)(d.ArrowLeft,{size:20,color:"#2B2118",strokeWidth:2.8})})]}),f=t.default.create({fullscreenContainer:{flex:1,width:'100%',height:'100%',backgroundColor:'#181B22'},backButton:{position:'absolute',top:16,left:16,width:42,height:42,borderRadius:14,backgroundColor:'#FFFBF1',borderWidth:3,borderColor:'#2B2118',alignItems:'center',justifyContent:'center',shadowColor:'#2B2118',shadowOffset:{width:0,height:3},shadowOpacity:1,shadowRadius:0,elevation:4,zIndex:20}})},851,[39,29,80,270,154,777,775,852,60]);
