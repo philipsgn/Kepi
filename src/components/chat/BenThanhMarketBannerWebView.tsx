@@ -89,7 +89,7 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
     postRN({ type: 'SELECT_ZONE', zone: zoneId });
   };
   var cam = createTpsCamera({ yaw: 0.06, pitch: -0.32, dist: 4.75, targetHeight: 0.76 });
-  var marketBounds = { minX: -18.0, maxX: 18.0, minZ: 0.0, maxZ: 36.0, maxY: 7.2 };
+  var marketBounds = { minX: -24.0, maxX: 24.0, minZ: 0.0, maxZ: 108.0, maxY: 7.6 };
   var currentAction = null;
   var exitSent = false;
 
@@ -102,46 +102,45 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
 
   function resolveContextAction() {
     var p = st.pig;
-    // 1. Thoát ở bất kỳ cửa nào trong 4 Cửa Đông – Tây – Nam – Bắc
-    if ((p.z <= 2.35 && Math.abs(p.x) <= 2.8) || (p.z >= 33.6 && Math.abs(p.x) <= 2.8) ||
-        (p.x >= 15.8 && Math.abs(p.z - 17.0) <= 2.8) || (p.x <= -15.8 && Math.abs(p.z - 17.0) <= 2.8)) {
+    // 1. CHỈ có 2 lối thoát: Cửa Nam (trước Z = 0) & Cửa Bắc (sau Z = 108)
+    if ((p.z <= 2.6 && Math.abs(p.x) <= 3.6) || (p.z >= 105.4 && Math.abs(p.x) <= 3.6)) {
       return { id: 'exit_market', label: '🚪 Ra khỏi Chợ Bến Thành' };
     }
-    // 2. Sạp Adidas 208 & Nike 212 & Giày Dép 306 & Vải Áo Dài Hương Trinh 415
-    if (p.x <= -3.5 && p.x >= -10.5 && p.z >= 2.5 && p.z <= 10.2) {
+    // 2. Sạp Adidas & Nike & Giày Dép/Vali & Vải Áo Dài Hương Trinh (Khu trước Z = 2..36)
+    if (p.x <= -3.5 && p.x >= -11.5 && p.z >= 2.5 && p.z <= 10.5) {
       return { id: 'try_adidas', label: '🧥 Thử áo Adidas 3 Sọc (Sạp 208)' };
     }
-    if (p.x >= 3.5 && p.x <= 10.5 && p.z >= 2.5 && p.z <= 10.2) {
+    if (p.x >= 3.5 && p.x <= 11.5 && p.z >= 2.5 && p.z <= 10.5) {
       return { id: 'try_nike', label: '👕 Thử áo Nike Swoosh (Sạp 212)' };
     }
-    if (Math.abs(p.x) >= 3.5 && Math.abs(p.x) <= 10.5 && p.z >= 10.2 && p.z <= 14.6) {
+    if (Math.abs(p.x) >= 3.5 && Math.abs(p.x) <= 11.5 && p.z >= 10.5 && p.z <= 15.0) {
       return { id: 'buy_shoes_bags', label: '👟 Xem Giày, Vali & Đồng Hồ 306' };
     }
-    if (p.x <= -11.5 && p.z >= 2.0 && p.z <= 15.0) {
+    if (p.x <= -13.5 && p.z >= 2.0 && p.z <= 33.0) {
       return { id: 'try_aodai', label: p.wearingAoDai ? '👘 Cất Áo Dài Lụa' : '👘 Ướm Áo Dài Hương Trinh 415' };
     }
-    // 3. Khu Ẩm Thực (Sạp 1044 + Phở, Bún Bò, Cơm Tấm, Bánh Xèo, Bánh Cuốn, Chè)
+    // 3. Khu Ẩm Thực (Sạp 1044 + Đại Sảnh Ẩm Thực Z = 58..78.5)
     if (p.seated) {
       return { id: 'eat_banhcuon', label: '🍜 Thưởng thức Món Việt & Dừa Xiêm' };
     }
-    if (Math.abs(p.x) <= 2.8 && p.z >= 17.6 && p.z <= 20.5) {
+    if (Math.abs(p.x) <= 2.8 && p.z >= 17.6 && p.z <= 23.5) {
       return { id: 'sit_food', label: '🪑 Ngồi ghế inox Sạp 1044' };
     }
-    if (Math.abs(p.x) <= 10.5 && p.z >= 20.0 && p.z <= 29.2) {
+    if (Math.abs(p.x) <= 13.0 && p.z >= 58.0 && p.z <= 78.5) {
       return { id: 'eat_banhcuon', label: '🥞 Ăn Phở, Cơm Tấm, Bánh Xèo & Chè' };
     }
-    // 4. Trái Cây 1029 Ngọc Hảo & Cửa Bắc Hoa/Hải Sản
-    if ((p.x >= 8.2 && p.x <= 14.5 && p.z >= 17.0 && p.z <= 23.6) || (p.x <= -2.0 && p.x >= -9.0 && p.z >= 29.0)) {
+    // 4. Trái Cây 1029 Ngọc Hảo & Vườn Trái Cây/Hoa/Hải Sản Cửa Bắc (Z = 81..103.5)
+    if ((p.x >= 8.2 && p.x <= 15.0 && p.z >= 17.0 && p.z <= 23.8) || (Math.abs(p.x) <= 12.5 && p.z >= 81.0 && p.z <= 95.0)) {
       return { id: 'buy_mango', label: '🥭 Chọn Sầu Riêng, Măng Cụt & Xoài Cát' };
     }
-    if (p.x >= 2.0 && p.x <= 13.5 && p.z >= 29.0) {
+    if (p.z >= 82.0 && p.z <= 103.5 && Math.abs(p.x) >= 13.5) {
       return { id: 'buy_seafood_flower', label: '🦞 Mua Hoa Tươi & Hải Sản Cửa Bắc' };
     }
-    // 5. Đồ Khô, Cà Phê Cửa Đông & Mỹ Nghệ Cửa Tây
-    if (p.x >= 11.5 && p.z <= 31.5) {
+    // 5. Đồ Khô, Cà Phê Cánh Đông & Mỹ Nghệ Cánh Tây (Z = 0..58)
+    if (p.x >= 13.5 && p.z <= 58.0) {
       return { id: 'buy_coffee_dry', label: '☕ Mua Cà Phê, Trà Sen & Mứt Cửa Đông' };
     }
-    if (p.x <= -11.5 && p.z >= 19.0) {
+    if (p.x <= -13.5 && p.z >= 36.0 && p.z <= 58.0) {
       return { id: 'buy_craft', label: '🏺 Xem Gốm Bát Tràng & Nón Lá Cửa Tây' };
     }
     return null;
@@ -151,7 +150,7 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
     if (!act) return;
     postRN({ type: 'HAPTIC_MEDIUM' });
     if (act.id === 'try_aodai') {
-      planMarketRealtimePath(st, -12.6, 0, 7.0, { pendingAction: 'try_aodai' });
+      planMarketRealtimePath(st, -14.8, 0, 7.8, { pendingAction: 'try_aodai' });
     } else if (act.id === 'try_adidas') {
       planMarketRealtimePath(st, -4.8, 0, 6.5, { pendingAction: 'try_adidas' });
     } else if (act.id === 'try_nike') {
@@ -164,17 +163,23 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
       if (st.pig.seated) {
         st.pig.eating = true;
         st.pig.ateFood = true;
+      } else if (st.pig.z >= 48.0) {
+        planMarketRealtimePath(st, -2.5, 0, 62.5, { seatChairId: 4, pendingAction: 'eat_banhcuon' });
       } else {
         planMarketRealtimePath(st, 0.38, 0, 19.15, { seatChairId: 2, pendingAction: 'eat_banhcuon' });
       }
     } else if (act.id === 'buy_mango') {
-      planMarketRealtimePath(st, 11.6, 0, 18.0, { pendingAction: 'buy_mango' });
+      if (st.pig.z >= 60.0) {
+        planMarketRealtimePath(st, st.pig.x < 0 ? -8.5 : 8.5, 0, 82.5, { pendingAction: 'buy_mango' });
+      } else {
+        planMarketRealtimePath(st, 11.6, 0, 18.0, { pendingAction: 'buy_mango' });
+      }
     } else if (act.id === 'buy_seafood_flower') {
-      planMarketRealtimePath(st, 5.3, 0, 29.8, { pendingAction: 'buy_seafood_flower' });
+      planMarketRealtimePath(st, st.pig.x < 0 ? -14.8 : 14.8, 0, 88.0, { pendingAction: 'buy_seafood_flower' });
     } else if (act.id === 'buy_coffee_dry') {
-      planMarketRealtimePath(st, 12.6, 0, 6.2, { pendingAction: 'buy_coffee_dry' });
+      planMarketRealtimePath(st, 14.8, 0, 7.8, { pendingAction: 'buy_coffee_dry' });
     } else if (act.id === 'buy_craft') {
-      planMarketRealtimePath(st, -12.6, 0, 24.0, { pendingAction: 'buy_craft' });
+      planMarketRealtimePath(st, -14.8, 0, 42.5, { pendingAction: 'buy_craft' });
     } else if (act.id === 'exit_market') {
       if (!st.exiting) {
         st.exiting = true;

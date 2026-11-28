@@ -9651,7 +9651,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
 }
 
 // =========================================================================
-// TEST 194: CHỢ BẾN THÀNH 1914 CHUẨN THỰC TẾ 100% — Ô BÀN CỜ 36m × 36m, 4 CỬA ĐÔNG-TÂY-NAM-BẮC, ADIDAS/NIKE, TOÀN BỘ MÓN VIỆT & TRÁI CÂY (QĐ 259)
+// TEST 194: CHỢ BẾN THÀNH 1914 MỞ RỘNG GẤP 4× (48m × 108m, 56 NPC, CHỈ 2 LỐI RA TRƯỚC/SAU + SÔNG BẠCH ĐẰNG MỜ MỜ — QĐ 260)
 // =========================================================================
 {
   const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
@@ -9660,19 +9660,24 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const wglEng = fs.readFileSync('src/components/pixel/pixelWebgl3dEngine.ts', 'utf8');
   const bbEng = fs.readFileSync('src/components/pixel/pixelTpsBillboards.ts', 'utf8');
   const navEng = fs.readFileSync('src/components/pixel/pixelNavGraph3d.ts', 'utf8');
+  const bdEng = fs.readFileSync('src/components/pixel/saigonStreetBackdrop3d.ts', 'utf8');
   const mktWall = fs.readFileSync('src/components/chat/market/marketWallArt.ts', 'utf8');
   const mktScene = fs.readFileSync('src/components/chat/market/marketTps3dScene.ts', 'utf8');
   const mktBanner = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
 
   assert.ok(
     decDoc.includes('Quyết định 259') &&
+      decDoc.includes('Quyết định 260') &&
       tpsDoc.includes('QĐ 259') &&
+      tpsDoc.includes('48m × 108m') &&
       bbEng.includes("ofName === 'nike_tee'") &&
       bbEng.includes("ofName === 'nike_hoodie'") &&
       mktBanner.includes('try_nike') &&
       mktBanner.includes('try_adidas') &&
-      mktBanner.includes('buy_coffee_dry'),
-    'QĐ 259 docs, Nike outfits, and 4-gate market banner wiring must be synced cleanly'
+      mktBanner.includes('maxZ: 108.0') &&
+      mktBanner.includes('p.z >= 105.4') &&
+      !mktBanner.includes('p.x >= 15.8'),
+    'QĐ 260 docs, 48x108 bounds, Nike outfits, and 2-exit-only market banner wiring must be synced cleanly'
   );
 
   const extractRaw = (src) => src.match(/return String\.raw`([\s\S]*?)`;/)[1];
@@ -9712,13 +9717,16 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'cv',
     'regTex',
     extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + '\n' + extractRaw(bbEng) + '\n' + extractRaw(navEng) + '\n' +
-      extractRaw(mktWall) + '\n' + extractRaw(mktScene) + `
+      extractRaw(bdEng) + '\n' + extractRaw(mktWall) + '\n' + extractRaw(mktScene) + `
     var wgl = createPixelWebglRenderer(cv);
     var origReg = wgl.registerTextureCanvas;
     wgl.registerTextureCanvas = function(k, c, r, n) { regTex.push(k); return origReg(k, c, r, n); };
     buildMarketProceduralTextures(wgl);
     var st = createMarketTpsState();
     var cam = createTpsCamera({ yaw: 0.06, pitch: -0.32, dist: 4.75, targetHeight: 0.76 });
+    var t0 = (st.traffic && st.traffic.vehicles && st.traffic.vehicles.length > 0) ? st.traffic.vehicles[0].x : 0;
+    var b0 = (st.traffic && st.traffic.boats && st.traffic.boats.length > 0) ? st.traffic.boats[0].x : 0;
+    var bt0 = (st.backVehicles && st.backVehicles.length > 0) ? st.backVehicles[0].x : 0;
     renderMarketWebglScene(wgl, cam, st, 390, 844);
 
     // 1. Thử đồ Adidas tại Sạp 208
@@ -9731,23 +9739,30 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     for (var j = 0; j < 180; j++) { stepMarketTps(st, 0.05); if (!st.pig.walking) break; }
     var woreNike = st.pig.outfit === 'nike_tee';
 
-    // 3. Ngồi ghế Sạp 1044 ăn món Việt rồi đi thẳng sang Cửa Đông
+    // 3. Ngồi ghế Sạp 1044 ăn Bún Bò rồi đi xuyên đại sảnh 108m tới Cửa Bắc (Lối sau)
     planMarketRealtimePath(st, 0.38, 0, 19.15, { seatChairId: 2, dish: 'bunbo', pendingAction: 'eat_banhcuon' });
-    for (var k = 0; k < 220; k++) { stepMarketTps(st, 0.05); if (!st.pig.walking) break; }
+    for (var k = 0; k < 240; k++) { stepMarketTps(st, 0.05); if (!st.pig.walking) break; }
     var ateBunBo = st.pig.seated && st.pig.eating && st.pig.activeDish === 'bunbo';
-    planMarketRealtimePath(st, 16.5, 0, 17.0, {});
-    for (var m = 0; m < 220; m++) { stepMarketTps(st, 0.05); if (!st.pig.walking) break; }
+    planMarketRealtimePath(st, 0.0, 0, 102.5, {});
+    for (var m = 0; m < 1200; m++) { stepMarketTps(st, 0.05); if (!st.pig.walking) break; }
     renderMarketWebglScene(wgl, cam, st, 390, 844);
+    var t1 = (st.traffic && st.traffic.vehicles && st.traffic.vehicles.length > 0) ? st.traffic.vehicles[0].x : 0;
+    var b1 = (st.traffic && st.traffic.boats && st.traffic.boats.length > 0) ? st.traffic.boats[0].x : 0;
+    var bt1 = (st.backVehicles && st.backVehicles.length > 0) ? st.backVehicles[0].x : 0;
 
     return {
       width: MARKET_NAV_GRAPH.outerBounds.maxX - MARKET_NAV_GRAPH.outerBounds.minX,
       depth: MARKET_NAV_GRAPH.outerBounds.maxZ - MARKET_NAV_GRAPH.outerBounds.minZ,
       stalls: MARKET_STALL_AABBS.length,
       npcs: st.npcs.length,
+      trafficCount: (st.traffic && st.traffic.vehicles) ? st.traffic.vehicles.length : 0,
+      boatCount: (st.traffic && st.traffic.boats) ? st.traffic.boats.length : 0,
+      backTrafficCount: st.backVehicles ? st.backVehicles.length : 0,
+      trafficMoved: t0 !== t1 && b0 !== b1 && bt0 !== bt1,
       woreAdidas: woreAdidas,
       woreNike: woreNike,
       ateBunBo: ateBunBo,
-      reachedEastGate: st.pig.x > 15.0
+      reachedBackGate: st.pig.z >= 98.0
     };
   `
   )(mockDoc, mockCv, regTex);
@@ -9756,18 +9771,20 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'signCuaSo1', 'signCuaBac', 'signCuaDong', 'signCuaTay', 'marketLouvers',
     'artAdidasMarket', 'artNikeMarket', 'artShoesBags', 'artAoDaiFabric', 'artSaigonTees',
     'artPhoHuTieu', 'artBunBoComTam', 'artBanhXeoBanhMi', 'artCheSinhTo', 'artBanhCuonWall', 'artBanhBeoWall',
-    'artTropicalFruits', 'artFreshFlowers', 'artWetSeafood', 'artCoffeeSpices', 'artHandicraftRattan'
+    'artTropicalFruits', 'artFreshFlowers', 'artWetSeafood', 'artCoffeeSpices', 'artHandicraftRattan',
+    'sgRoadAsphalt', 'sgRiverWater', 'sgSkylineDay'
   ];
   for (const tk of reqTex) {
-    assert.ok(regTex.includes(tk), 'Ben Thanh Market must register real-market texture: ' + tk);
+    assert.ok(regTex.includes(tk), 'Ben Thanh Market must register real-market & Saigon river backdrop texture: ' + tk);
   }
-  assert.strictEqual(nans, 0, 'Ben Thanh Market 36x36 WebGL scene must emit 0 NaN values');
-  assert.ok(res194.width === 36 && res194.depth === 36, 'Ben Thanh Market must expand to 36m x 36m cross-grid hall');
-  assert.ok(res194.stalls >= 24, 'Ben Thanh Market must have >= 24 realistic stall blocks (got ' + res194.stalls + ')');
-  assert.strictEqual(res194.npcs, 12, 'Ben Thanh Market must keep 12 lively NPCs');
-  assert.ok(res194.woreAdidas && res194.woreNike && res194.ateBunBo && res194.reachedEastGate, 'Pig must try Adidas, Nike, eat VN dish & walk freely to East Gate');
+  assert.strictEqual(nans, 0, 'Ben Thanh Market 48x108 WebGL scene must emit 0 NaN values');
+  assert.ok(res194.width === 48 && res194.depth === 108, 'Ben Thanh Market must expand to 48m x 108m (4x floor area)');
+  assert.ok(res194.stalls >= 38, 'Ben Thanh Market must have >= 38 realistic stall blocks (got ' + res194.stalls + ')');
+  assert.ok(res194.npcs >= 56, 'Ben Thanh Market must have dense crowd >= 56 NPCs (got ' + res194.npcs + ')');
+  assert.ok(res194.trafficCount >= 6 && res194.boatCount >= 3 && res194.backTrafficCount >= 4 && res194.trafficMoved, 'Front & Rear courtyards must animate 2-lane traffic vehicles & river boats');
+  assert.ok(res194.woreAdidas && res194.woreNike && res194.ateBunBo && res194.reachedBackGate, 'Pig must try Adidas, Nike, eat VN dish & traverse full 108m hall to Back Gate');
 
-  console.log(`✅ Test 194 Passed: Chợ Bến Thành 1914 Chuẩn Thực Tế [${res194.width}x${res194.depth}m, 4 Cửa Đ-T-N-B, stalls=${res194.stalls}, draws=${draws}, Adidas/Nike/Món Việt/Trái Cây 3D, 0 NaN — Quyết định 259] verified cleanly`);
+  console.log(`✅ Test 194 Passed: Chợ Bến Thành 1914 Mở Rộng 4× [${res194.width}x${res194.depth}m, CHỈ 2 Lối Ra Trước/Sau + Sông Bạch Đằng Mờ Mờ, stalls=${res194.stalls}, npcs=${res194.npcs}, draws=${draws}, 0 NaN — Quyết định 260] verified cleanly`);
 }
 
 console.log('\n🎉 ALL 194 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (194/194)!');
