@@ -166,9 +166,16 @@ function unprojectFloorTap(cam, sx, sy) {
   return { x: cam.pos.x + dx * t, z: cam.pos.z + dz * t };
 }
 
+function tpsLerpAngle(a, b, t) {
+  var d = normalizeAngle(b - a);
+  return normalizeAngle(a + d * Math.max(0, Math.min(1, t)));
+}
+
 function bindTpsCanvasGestures(cv, cam, opts) {
   var dragging = false, moved = false, activeId = null;
   var lastX = 0, lastY = 0, startX = 0, startY = 0;
+  var activePts = {};
+  var pinchStartD = 0, pinchStartDist = 4.85;
   var minPitch = (opts && typeof opts.minPitch === 'number') ? opts.minPitch : -0.68;
   var maxPitch = (opts && typeof opts.maxPitch === 'number') ? opts.maxPitch : -0.08;
   var dragSlop = (opts && typeof opts.dragSlop === 'number') ? opts.dragSlop : 13;
@@ -178,10 +185,24 @@ function bindTpsCanvasGestures(cv, cam, opts) {
     if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
     return { x: e.clientX, y: e.clientY };
   }
+  function activeKeys() {
+    var k = [];
+    for (var p in activePts) if (Object.prototype.hasOwnProperty.call(activePts, p)) k.push(p);
+    return k;
+  }
   function onDown(e) {
     if (typeof e.button === 'number' && e.button !== 0 && e.pointerType === 'mouse') return;
-    if (dragging && typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
+    var pid = (typeof e.pointerId === 'number') ? String(e.pointerId) : '0';
     var pt = getPt(e);
+    activePts[pid] = { x: pt.x, y: pt.y };
+    var ks = activeKeys();
+    if (ks.length >= 2) {
+      var p1 = activePts[ks[0]], p2 = activePts[ks[1]];
+      pinchStartD = Math.max(20, Math.hypot(p2.x - p1.x, p2.y - p1.y));
+      pinchStartDist = Math.max(2.2, Math.min(6.8, cam.dist || 4.85));
+      dragging = true; moved = true; activeId = null;
+      return;
+    }
     dragging = true; moved = false;
     activeId = (typeof e.pointerId === 'number') ? e.pointerId : null;
     lastX = startX = pt.x; lastY = startY = pt.y;
@@ -191,16 +212,39 @@ function bindTpsCanvasGestures(cv, cam, opts) {
   }
   function onMove(e) {
     if (!dragging) return;
-    if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
+    var pid = (typeof e.pointerId === 'number') ? String(e.pointerId) : '0';
     var pt = getPt(e);
+    if (activePts[pid]) activePts[pid] = { x: pt.x, y: pt.y };
+    var ks = activeKeys();
+    if (ks.length >= 2) {
+      var p1 = activePts[ks[0]], p2 = activePts[ks[1]];
+      var d = Math.max(20, Math.hypot(p2.x - p1.x, p2.y - p1.y));
+      cam.dist = Math.max(2.2, Math.min(6.8, pinchStartDist * (pinchStartD / d)));
+      cam.lastManualOrbitAt = Date.now();
+      moved = true;
+      if (e.cancelable) e.preventDefault();
+      return;
+    }
+    if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
     var dx = pt.x - lastX, dy = pt.y - lastY;
     if (Math.hypot(pt.x - startX, pt.y - startY) > dragSlop) moved = true;
+    if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) cam.lastManualOrbitAt = Date.now();
     cam.yaw -= dx * 0.0085;
     cam.pitch = Math.max(minPitch, Math.min(maxPitch, cam.pitch - dy * 0.0055));
     lastX = pt.x; lastY = pt.y;
     if (e.cancelable) e.preventDefault();
   }
   function onUp(e) {
+    var pid = (typeof e.pointerId === 'number') ? String(e.pointerId) : '0';
+    delete activePts[pid];
+    var ks = activeKeys();
+    if (ks.length === 1) {
+      var rem = activePts[ks[0]];
+      activeId = ks[0] === '0' ? null : Number(ks[0]);
+      lastX = rem.x; lastY = rem.y;
+      moved = true;
+      return;
+    }
     if (!dragging) return;
     if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
     if (typeof e.pointerId === 'number' && cv.releasePointerCapture) {
@@ -219,8 +263,17 @@ function bindTpsCanvasGestures(cv, cam, opts) {
     }
   }
   function onCancel(e) {
-    if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
-    dragging = false; moved = false; activeId = null;
+    var pid = (typeof e.pointerId === 'number') ? String(e.pointerId) : '0';
+    delete activePts[pid];
+    if (activeKeys().length === 0) {
+      dragging = false; moved = false; activeId = null;
+    }
+  }
+  function onWheel(e) {
+    if (typeof e.deltaY !== 'number') return;
+    cam.dist = Math.max(2.2, Math.min(6.8, (cam.dist || 4.85) + e.deltaY * 0.0035));
+    cam.lastManualOrbitAt = Date.now();
+    if (e.cancelable) e.preventDefault();
   }
 
   var hasPointer = typeof window !== 'undefined' && typeof window.PointerEvent !== 'undefined';
@@ -235,8 +288,9 @@ function bindTpsCanvasGestures(cv, cam, opts) {
     window.addEventListener('touchend', onUp);
     window.addEventListener('touchcancel', onCancel);
   }
+  cv.addEventListener('wheel', onWheel, { passive: false });
   if (typeof window !== 'undefined') {
-    window.addEventListener('blur', function() { dragging = false; moved = false; activeId = null; });
+    window.addEventListener('blur', function() { activePts = {}; dragging = false; moved = false; activeId = null; });
   }
 }
 
@@ -1530,8 +1584,35 @@ function raySplitDividerWall(ox, oy, oz, bx, by, bz, dw) {
   return Math.max(0.55, t - 0.36);
 }
 
-function computeWebglTpsCamera(cam, pig, navConfig) {
-  var dist = cam.dist || 4.85;
+function wglLerpAngle(a, b, t) {
+  var d = (b - a) % (Math.PI * 2);
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return a + d * Math.max(0, Math.min(1, t));
+}
+
+function wglExpRate(speed, dt) {
+  var s = (typeof dt === 'number' && isFinite(dt) && dt > 0) ? Math.min(0.06, dt) : 0.016;
+  return 1 - Math.exp(-speed * s);
+}
+
+function computeWebglTpsCamera(cam, pig, navConfig, dt) {
+  var stepDt = (typeof dt === 'number' && isFinite(dt) && dt > 0) ? Math.min(0.06, dt) : 0.016;
+  var nowMs = (typeof Date !== 'undefined' && Date.now) ? Date.now() : 0;
+  var manualCooldown = cam.lastManualOrbitAt ? (nowMs - cam.lastManualOrbitAt) : 99999;
+
+  // Soft-Chase Yaw: tự bám nhẹ theo lưng chú Heo khi đi bộ (tạm nhường 1.6s khi user vừa xoay tay)
+  if (pig && pig.walking && !pig.seated && typeof pig.yaw === 'number' && manualCooldown > 1600) {
+    cam.yaw = wglLerpAngle(cam.yaw || 0, pig.yaw, wglExpRate(1.35, stepDt));
+  }
+
+  // Dynamic Action Zoom: tự lùi nhẹ +0.38m khi chạy, thu gần -0.35m khi ngồi/nghỉ
+  var targetDynZoom = (pig && pig.walking) ? 0.38 : ((pig && pig.seated) ? -0.35 : 0);
+  if (typeof cam.dynZoom !== 'number' || !isFinite(cam.dynZoom)) cam.dynZoom = targetDynZoom;
+  else cam.dynZoom += (targetDynZoom - cam.dynZoom) * wglExpRate(4.5, stepDt);
+
+  var baseDist = Math.max(2.2, Math.min(6.8, cam.dist || 4.85));
+  var dist = Math.max(2.0, Math.min(7.2, baseDist + cam.dynZoom));
   var sy = Math.sin(cam.yaw), cy = Math.cos(cam.yaw);
   var sp = Math.sin(cam.pitch), cp = Math.cos(cam.pitch);
   var tx = pig.x, ty = (pig.y || 0) + (cam.targetHeight || 0.72), tz = pig.z;
@@ -1541,7 +1622,7 @@ function computeWebglTpsCamera(cam, pig, navConfig) {
 
   // Tìm zone AABB chứa (pig.x, pig.y, pig.z) hoặc bao ngoại vi
   var outer = navConfig && navConfig.outerBounds ? navConfig.outerBounds : { minX: -5.8, maxX: 5.8, minZ: 0.1, maxZ: 14.6, minY: 0.45, maxY: 6.5 };
-  if (navConfig && navConfig.zones && navConfig.zones.length) {
+  if (navConfig && (navConfig.outerBounds || (navConfig.zones && navConfig.zones.length))) {
     // Raycast trên vùng biên ngoài trước, rồi raycast các vách ngăn đặc ngoài openings[]
     var mnX = outer.minX + wm, mxX = outer.maxX - wm;
     var mnZ = outer.minZ + wm, mxZ = outer.maxZ - wm;
@@ -1562,9 +1643,9 @@ function computeWebglTpsCamera(cam, pig, navConfig) {
   }
 
   var desiredDist = Math.max(0.85, tHit);
-  if (typeof cam.curDist !== 'number') cam.curDist = desiredDist;
-  if (desiredDist < cam.curDist) cam.curDist = desiredDist;
-  else cam.curDist += (desiredDist - cam.curDist) * 0.18;
+  if (typeof cam.curDist !== 'number' || !isFinite(cam.curDist)) cam.curDist = desiredDist;
+  if (desiredDist < cam.curDist) cam.curDist += (desiredDist - cam.curDist) * wglExpRate(18, stepDt);
+  else cam.curDist += (desiredDist - cam.curDist) * wglExpRate(4.4, stepDt);
 
   var ex = tx + bx * cam.curDist;
   var ey = ty + by * cam.curDist;
@@ -1581,12 +1662,14 @@ function computeWebglTpsCamera(cam, pig, navConfig) {
     cam.pos = { x: ex, y: ey, z: ez };
     cam.lookX = targetLookX; cam.lookY = targetLookY; cam.lookZ = targetLookZ;
   } else {
-    cam.pos.x += (ex - cam.pos.x) * 0.24;
-    cam.pos.y += (ey - cam.pos.y) * 0.24;
-    cam.pos.z += (ez - cam.pos.z) * 0.24;
-    cam.lookX += (targetLookX - cam.lookX) * 0.26;
-    cam.lookY += (targetLookY - cam.lookY) * 0.26;
-    cam.lookZ += (targetLookZ - cam.lookZ) * 0.26;
+    var posRate = wglExpRate(12, stepDt);
+    var lookRate = wglExpRate(14, stepDt);
+    cam.pos.x += (ex - cam.pos.x) * posRate;
+    cam.pos.y += (ey - cam.pos.y) * posRate;
+    cam.pos.z += (ez - cam.pos.z) * posRate;
+    cam.lookX += (targetLookX - cam.lookX) * lookRate;
+    cam.lookY += (targetLookY - cam.lookY) * lookRate;
+    cam.lookZ += (targetLookZ - cam.lookZ) * lookRate;
   }
 
   var fx = cam.lookX - cam.pos.x, fy = cam.lookY - cam.pos.y, fz = cam.lookZ - cam.pos.z;
@@ -2860,6 +2943,7 @@ function stepMarketNpcs(st, dt) {
 
 function stepMarketTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   stepMarketNpcs(st, dt);
@@ -2910,10 +2994,11 @@ function stepMarketTps(st, dt) {
         p.pendingAction = null;
       }
     } else {
-      var spd = Math.min(dist, 3.15 * dt);
+      var spd = Math.min(dist, 3.6 * dt);
       var next = clampMarketWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd);
       p.x = next.x; p.z = next.z;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
 
     // Cập nhật thụ động zone khi Heo đi bộ vượt cổng (0% teleport)
@@ -3069,7 +3154,7 @@ function drawMarketPropBanhBeoTrayWebgl(wgl, x, y, z) {
 }
 
 function renderMarketWebglScene(wgl, cam, st, W, H) {
-  computeWebglTpsCamera(cam, st.pig, MARKET_NAV_GRAPH);
+  computeWebglTpsCamera(cam, st.pig, MARKET_NAV_GRAPH, st._lastDt || 0.016);
   var p = st.pig;
   var atmo = {
     clearColor: MARKET_ATMO.clearColor,
@@ -4341,6 +4426,7 @@ function stepCathedralNpcs(st, dt) {
 
 function stepCathedralTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   stepCathedralNpcs(st, dt);
@@ -4386,10 +4472,11 @@ function stepCathedralTps(st, dt) {
       var onAnyRamp = (p.x >= -6.0 && p.x <= -3.0 && p.z >= 11.0 && p.z <= 12.6) ||
                       (p.x >= -7.45 && p.x <= -6.0 && p.z >= 7.8 && p.z <= 11.0) ||
                       (p.x >= -2.2 && p.x <= 2.2 && p.z >= 14.5 && p.z <= 16.1);
-      var spd = Math.min(dist, (onAnyRamp ? 2.15 : 2.95) * dt);
+      var spd = Math.min(dist, (onAnyRamp ? 2.6 : 3.6) * dt);
       var next = clampCathedralWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd, p.y);
       p.x = next.x; p.z = next.z;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
   }
 
@@ -4627,7 +4714,7 @@ function drawBronzeBellWebgl(wgl, st) {
 
 function renderCathedralWebglScene(wgl, cam, st, W, H) {
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, st.pig, CATHEDRAL_NAV_GRAPH);
+    computeWebglTpsCamera(cam, st.pig, CATHEDRAL_NAV_GRAPH, st._lastDt || 0.016);
   }
   CATHEDRAL_ATMOSPHERE.lights[1].col[0] = 1.22 + st.candleGlow * 0.45 + st.maryHalo * 0.35;
   CATHEDRAL_ATMOSPHERE.lights[1].col[1] = 0.88 + st.candleGlow * 0.28 + st.maryHalo * 0.24;
@@ -5766,6 +5853,7 @@ function stepPagodaNpcs(st, dt) {
 
 function stepPagodaTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   stepPagodaNpcs(st, dt);
@@ -5795,11 +5883,12 @@ function stepPagodaTps(st, dt) {
       }
     } else {
       var onRamp = (p.y > 0.02 && p.y < 0.46);
-      var spd = Math.min(dist, (onRamp ? 2.15 : 2.95) * dt);
+      var spd = Math.min(dist, (onRamp ? 2.6 : 3.6) * dt);
       var next = clampPagodaWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd, p.y);
       var moved = Math.hypot(next.x - p.x, next.z - p.z);
       p.x = next.x; p.z = next.z;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
       if (moved < 0.002 && p.waypoints && p.waypoints.length <= 1) {
         p.walking = false;
       }
@@ -5906,7 +5995,7 @@ function renderPagodaWebglScene(wgl, cam, st, W, H) {
   var maxYMap = { garden: 6.2, main_hall: 4.48, bell_tea: 4.16, east_corridor: 3.76 };
   PAGODA_NAV_CONFIG.outerBounds.maxY = maxYMap[st.zone] || 4.45;
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, st.pig, PAGODA_NAV_CONFIG);
+    computeWebglTpsCamera(cam, st.pig, PAGODA_NAV_CONFIG, st._lastDt || 0.016);
   }
   wgl.beginFrame(W, H, cam, PAGODA_ATMOSPHERE);
   var dm = wgl.drawMesh;
@@ -6501,6 +6590,7 @@ function planPhoRealtimePath(st, tx, tz, seatTarget, actionTag) {
 
 function stepPhoTpsWorld(w, dt) {
   w.t += dt;
+  w._lastDt = dt;
 
   // Chỉ hé mở duy nhất 1 cánh cửa phải (~35°) khi có khách NPC ra/vào sát cửa hoặc khi Heo ra cửa -> không xuyên gỗ! (QĐ 239)
   var npcNearDoor = false;
@@ -6558,7 +6648,8 @@ function stepPhoTpsWorld(w, dt) {
       var step = Math.min(dist, 3.6 * dt);
       var next = clampPigWorldPos(w, p.x + (dx / dist) * step, p.z + (dz / dist) * step);
       p.x = next.x; p.z = next.z;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
   }
   if (w.targetMarker) {
@@ -6960,7 +7051,7 @@ function drawPhoTablePropsWebgl(wgl, tb, t) {
 
 function renderPhoWebglScene(wgl, cam, st, W, H) {
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, st.pig, PHO_NAV_CONFIG);
+    computeWebglTpsCamera(cam, st.pig, PHO_NAV_CONFIG, st._lastDt || 0.016);
   }
   wgl.beginFrame(W, H, cam, PHO_ATMOS);
   var dm = wgl.drawMesh;
@@ -8914,37 +9005,48 @@ function segIntersectsBox(ax, az, bx, bz, box, pad) {
 
 function routeAroundCafeObstacles(st, startPt, endPt, floorY) {
   var obs = getCafeObstacles(floorY, st.f1Tables, st.f2Tables);
-  var hitBox = null, pad = 0.24;
-  for (var i = 0; i < obs.length; i++) {
-    if (segIntersectsBox(startPt.x, startPt.z, endPt.x, endPt.z, obs[i], pad)) {
-      hitBox = obs[i];
-      break;
-    }
-  }
-  if (!hitBox) return [endPt];
-  var cands = [
-    { x: hitBox.minX - 0.36, z: hitBox.minZ - 0.36, y: floorY },
-    { x: hitBox.maxX + 0.36, z: hitBox.minZ - 0.36, y: floorY },
-    { x: hitBox.minX - 0.36, z: hitBox.maxZ + 0.36, y: floorY },
-    { x: hitBox.maxX + 0.36, z: hitBox.maxZ + 0.36, y: floorY }
-  ];
-  var best = null, bestLen = 9999;
-  for (var ci = 0; ci < cands.length; ci++) {
-    var cp = cands[ci];
-    if (cp.x < -6.45 || cp.x > 6.45 || cp.z < 0.55 || cp.z > 15.65) continue;
-    var blocked = false;
-    for (var j = 0; j < obs.length; j++) {
-      if (segIntersectsBox(startPt.x, startPt.z, cp.x, cp.z, obs[j], 0.16) ||
-          segIntersectsBox(cp.x, cp.z, endPt.x, endPt.z, obs[j], 0.16)) {
-        blocked = true;
+  var out = [];
+  var cur = startPt;
+  for (var iter = 0; iter < 4; iter++) {
+    var hitBox = null, pad = 0.24;
+    for (var i = 0; i < obs.length; i++) {
+      if (segIntersectsBox(cur.x, cur.z, endPt.x, endPt.z, obs[i], pad)) {
+        hitBox = obs[i];
         break;
       }
     }
-    var len = Math.hypot(cp.x - startPt.x, cp.z - startPt.z) + Math.hypot(endPt.x - cp.x, endPt.z - cp.z);
-    if (!blocked && len < bestLen) { bestLen = len; best = cp; }
+    if (!hitBox) break;
+    var cands = [
+      { x: hitBox.minX - 0.38, z: hitBox.minZ - 0.38, y: floorY },
+      { x: hitBox.maxX + 0.38, z: hitBox.minZ - 0.38, y: floorY },
+      { x: hitBox.minX - 0.38, z: hitBox.maxZ + 0.38, y: floorY },
+      { x: hitBox.maxX + 0.38, z: hitBox.maxZ + 0.38, y: floorY }
+    ];
+    var best = null, bestScore = 99999;
+    for (var ci = 0; ci < cands.length; ci++) {
+      var cp = cands[ci];
+      if (cp.x < -6.45 || cp.x > 6.45 || cp.z < 0.55 || cp.z > 15.65) continue;
+      // Không chọn lại đúng góc đang đứng (tránh kẹt vòng lặp waypoint trùng lặp)
+      if (Math.hypot(cp.x - cur.x, cp.z - cur.z) < 0.25) continue;
+      var blockedFirst = false;
+      for (var j = 0; j < obs.length; j++) {
+        if (segIntersectsBox(cur.x, cur.z, cp.x, cp.z, obs[j], 0.16)) {
+          blockedFirst = true;
+          break;
+        }
+      }
+      if (blockedFirst) continue;
+      // Ưu tiên góc vượt thoát hoàn toàn khỏi hitBox (không cắt xuyên lại qua lỗ cầu thang/bàn)
+      var stillHits = segIntersectsBox(cp.x, cp.z, endPt.x, endPt.z, hitBox, pad) ? 40 : 0;
+      var len = stillHits + Math.hypot(cp.x - cur.x, cp.z - cur.z) + Math.hypot(endPt.x - cp.x, endPt.z - cp.z);
+      if (len < bestScore) { bestScore = len; best = cp; }
+    }
+    if (!best) break;
+    out.push(best);
+    cur = best;
   }
-  if (!best) return [endPt];
-  return [best, endPt];
+  out.push(endPt);
+  return out;
 }
 
 function planCafeRealtimePath(st, tx, targetFloorY, tz, seatChairId, pendingAction) {
@@ -9031,6 +9133,7 @@ function stepCafeNpcs(st, dt) {
 
 function stepCafeTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   for (var pi = 0; pi < st.particles.length; pi++) {
@@ -9119,55 +9222,23 @@ function stepCafeTps(st, dt) {
 /* ==================== 3. CAMERA TPS NỘI SUY CẦU THANG MƯỢT & RAYCAST 3D 24 GHẾ ==================== */
 function computeCafeWebglCamera(cam, st) {
   var p = st.pig;
-  var dist = cam.dist || 4.85;
-  var sy = Math.sin(cam.yaw), cy = Math.cos(cam.yaw);
-  var sp = Math.sin(cam.pitch), cp = Math.cos(cam.pitch);
-  var ex = p.x - sy * cp * dist;
-  var ey = (p.y + (cam.targetHeight || 0.72)) - sp * dist;
-  var ez = p.z - cy * cp * dist;
-
-  ex = Math.max(-6.60, Math.min(6.60, ex));
-  ez = Math.max(0.45, Math.min(15.75, ez));
-
-  // Chống kẹt góc sát tường mặt tiền: nếu bị kẹp sát lưng heo (< 2.1m), đẩy nhẹ camera sang ngang/lên
-  var hDist = Math.hypot(ex - p.x, ez - p.z);
-  if (hDist < 2.1) {
-    var pushX = ex >= 0 ? -1.4 : 1.4;
-    ex = Math.max(-6.40, Math.min(6.40, ex + pushX));
-    ez = Math.max(0.55, Math.min(15.65, ez + (p.z < 2.4 ? 1.8 : 0)));
-  }
-
-  // Nội suy tuyến tính chiều cao camera theo p.y -> triệt tiêu hoàn toàn bước nhảy +1.3m ở cầu thang!
   var stairT = Math.max(0, Math.min(1, p.y / 3.4));
-  var eyMin = 1.15 + stairT * 3.10;
-  var eyMax = 3.20 + stairT * 3.35;
-  ey = Math.max(eyMin, Math.min(eyMax, ey));
-
-  var targetLookX = p.x + sy * 1.1;
-  var targetLookY = p.y + 1.05;
-  var targetLookZ = p.z + cy * 1.1;
-  if (!cam.cafeInited || !cam.pos || !isFinite(cam.pos.x)) {
-    cam.cafeInited = true;
-    cam.pos = { x: ex, y: ey, z: ez };
-    cam.lookX = targetLookX; cam.lookY = targetLookY; cam.lookZ = targetLookZ;
-  } else {
-    cam.pos.x += (ex - cam.pos.x) * 0.24;
-    cam.pos.y += (ey - cam.pos.y) * 0.24;
-    cam.pos.z += (ez - cam.pos.z) * 0.24;
-    cam.lookX += (targetLookX - cam.lookX) * 0.26;
-    cam.lookY += (targetLookY - cam.lookY) * 0.26;
-    cam.lookZ += (targetLookZ - cam.lookZ) * 0.26;
+  var cafeNavCfg = {
+    wallMargin: 0.40,
+    outerBounds: {
+      minX: -7.0, maxX: 7.0, minZ: 0.25, maxZ: 16.2,
+      minY: 0.55,
+      maxY: 3.32 + stairT * 3.53
+    },
+    zones: [
+      { id: 'f1', minX: -7.0, maxX: 7.0, minZ: 0.25, maxZ: 16.2, floorY: 0 },
+      { id: 'f2', minX: -7.0, maxX: 7.0, minZ: 0.25, maxZ: 16.2, floorY: 3.4 }
+    ],
+    dividerWalls: []
+  };
+  if (typeof computeWebglTpsCamera === 'function') {
+    computeWebglTpsCamera(cam, p, cafeNavCfg, st._lastDt || 0.016);
   }
-
-  var fx = cam.lookX - cam.pos.x, fy = cam.lookY - cam.pos.y, fz = cam.lookZ - cam.pos.z;
-  var fl = Math.hypot(fx, fy, fz) || 1;
-  fx /= fl; fy /= fl; fz /= fl;
-  var rx = -fz, rz = fx;
-  var rl = Math.hypot(rx, rz) || 1;
-  rx /= rl; rz /= rl;
-  cam.F = { x: fx, y: fy, z: fz };
-  cam.R = { x: rx, y: 0, z: rz };
-  cam.U = { x: -fy * rz, y: fx * rz - fz * rx, z: fy * rx };
 }
 
 function raySphereDist(ox, oy, oz, dx, dy, dz, cx, cy, cz, rad) {
@@ -10758,6 +10829,7 @@ function stepAdidasNpcs(st, dt) {
 
 function stepAdidasTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   for (var pi = 0; pi < (st.particles ? st.particles.length : 0); pi++) {
@@ -10806,7 +10878,7 @@ function stepAdidasTps(st, dt) {
       }
     } else {
       var onStairs = (p.x >= -5.05 && p.x <= -2.95 && p.z > 8.55 && p.z < 13.45);
-      var spd = Math.min(dist, (onStairs ? 2.15 : 2.95) * dt);
+      var spd = Math.min(dist, (onStairs ? 2.6 : 3.6) * dt);
       var nx = p.x + (dx / dist) * spd;
       var nz = p.z + (dz / dist) * spd;
       if (onStairs) {
@@ -10816,7 +10888,8 @@ function stepAdidasTps(st, dt) {
         var next = clampAdidasWalkPos(st, nx, nz, p.y);
         p.x = next.x; p.z = next.z;
       }
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
     p.y = getAdidasSurfaceY(p.x, p.z, p.y);
     st.floor = p.y >= 1.9 ? 2 : 1;
@@ -10851,7 +10924,7 @@ function computeAdidasWebglCamera(cam, st) {
         : { minX: -6.0, maxX: 15.6, minZ: 0.0, maxZ: 14.8, minY: 0.45, maxY: 3.32 })
   };
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, p, navCfg);
+    computeWebglTpsCamera(cam, p, navCfg, st._lastDt || 0.016);
   }
 }
 
@@ -12277,6 +12350,7 @@ function executeStadiumAction(st, actionId) {
 
 function stepStadiumTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   // 1. Chuyển động chú Heo liên hoàn qua Waypoints (từng bước, từng bậc cầu thang/dốc)
@@ -12300,7 +12374,7 @@ function stepStadiumTps(st, dt) {
     } else {
       var onStairOrRamp = (p.x >= 3.4 && p.x <= 5.2 && p.z >= 6.5 && p.z <= 12.1) ||
                           (p.x >= -1.8 && p.x <= 1.8 && p.z >= 14.0 && p.z <= 21.2);
-      var spd = Math.min(dist, (onStairOrRamp ? 2.25 : 3.45) * dt);
+      var spd = Math.min(dist, (onStairOrRamp ? 2.6 : 3.6) * dt);
       var nx = p.x + (dx / dist) * spd;
       var nz = p.z + (dz / dist) * spd;
       if (!p.waypoints || p.waypoints.length <= 1) {
@@ -12308,7 +12382,8 @@ function stepStadiumTps(st, dt) {
         nx = cl.x; nz = cl.z;
       }
       p.x = nx; p.z = nz;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
   }
 
@@ -12509,7 +12584,7 @@ function drawFloodlightTowerWebgl(wgl, x, z, lookYaw) {
 
 function renderStadiumWebglScene(wgl, cam, st, W, H) {
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, st.pig, STADIUM_NAV_GRAPH);
+    computeWebglTpsCamera(cam, st.pig, STADIUM_NAV_GRAPH, st._lastDt || 0.016);
   }
   var dm = wgl.drawMesh;
   var p = st.pig;
