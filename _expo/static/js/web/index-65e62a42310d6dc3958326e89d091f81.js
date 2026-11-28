@@ -13524,7 +13524,7 @@ function renderAdidasTpsScene(ctx, cam, st, W, H) {
 }
 `}},865,[]);
 __d(function(g,r,i,a,m,_e,_d){"use strict";function e(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"StadiumView",{enumerable:!0,get:function(){return s}}),r(_d[0]),r(_d[1]);var t=e(r(_d[2])),o=e(r(_d[3])),n=e(r(_d[4])),c=r(_d[5]),u=(function(e){if(e&&e.__esModule)return e;var t={};return e&&Object.keys(e).forEach(function(o){if('default'!==o){var n=Object.getOwnPropertyDescriptor(e,o);Object.defineProperty(t,o,n.get?n:{enumerable:!0,get:function(){return e[o]}})}}),t.default=e,t})(r(_d[6])),d=r(_d[7]),l=r(_d[8]);const s=({onBack:e})=>(0,l.jsxs)(n.default,{style:f.fullscreenContainer,children:[(0,l.jsx)(d.StadiumBannerWebView,{onExitStadium:e}),(0,l.jsx)(o.default,{style:f.backButton,onPress:()=>{u.impactAsync(u.ImpactFeedbackStyle.Light).catch(()=>{}),e()},activeOpacity:.85,hitSlop:{top:10,bottom:10,left:10,right:10},children:(0,l.jsx)(c.ArrowLeft,{size:20,color:"#2B2118",strokeWidth:2.8})})]}),f=t.default.create({fullscreenContainer:{flex:1,width:'100%',height:'100%',backgroundColor:'#1E293B'},backButton:{position:'absolute',top:16,left:16,width:42,height:42,borderRadius:14,backgroundColor:'#FFFBF1',borderWidth:3,borderColor:'#2B2118',alignItems:'center',justifyContent:'center',shadowColor:'#2B2118',shadowOffset:{width:0,height:3},shadowOpacity:1,shadowRadius:0,elevation:4,zIndex:20}})},866,[39,29,80,270,154,777,775,867,60]);
-__d(function(g,r,i,a,m,_e,_d){"use strict";Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"StadiumBannerWebView",{enumerable:!0,get:function(){return d}});var t=r(_d[0]),n=(function(t){if(t&&t.__esModule)return t;var n={};return t&&Object.keys(t).forEach(function(e){if('default'!==e){var s=Object.getOwnPropertyDescriptor(t,e);Object.defineProperty(n,e,s.get?s:{enumerable:!0,get:function(){return t[e]}})}}),n.default=t,n})(r(_d[1])),e=r(_d[2]),s=r(_d[3]),c=r(_d[4]),l=r(_d[5]);const d=({onExitStadium:d})=>{const o=(0,t.useRef)(null);(0,t.useEffect)(()=>()=>{o.current&&clearTimeout(o.current)},[]);const u=(0,t.useMemo)(()=>(0,s.buildStadiumWallArtScript)(),[]),p=(0,t.useMemo)(()=>(0,c.buildStadiumTps3dSceneScript)(),[]),x=(0,t.useMemo)(()=>"\n(function() {\n  var cv = document.getElementById('tpsCv');\n  var ctxBtn = document.getElementById('ctxPillBtn');\n  var wgl = createPixelWebglRenderer(cv);\n  var ctx = wgl ? null : cv.getContext('2d');\n  if (wgl) buildStadiumProceduralTextures(wgl);\n\n  var W = 400, H = 720;\n  function resizeCanvas() {\n    var dw = Math.max(320, window.innerWidth || 390);\n    var dh = Math.max(480, window.innerHeight || 760);\n    var dpr = wgl ? Math.min(2, window.devicePixelRatio || 1) : (dw > 460 ? 0.72 : 0.84);\n    W = Math.round(dw * dpr);\n    H = Math.round(dh * dpr);\n    cv.width = W; cv.height = H;\n    if (ctx) ctx.imageSmoothingEnabled = false;\n  }\n  resizeCanvas();\n  window.addEventListener('resize', resizeCanvas);\n\n  var st = createStadiumTpsState();\n  var cam = createTpsCamera({ yaw: 0.06, pitch: -0.26, dist: 4.85, targetHeight: 0.72 });\n  var stadiumBounds = { minX: -24.5, maxX: 24.5, minZ: -10.5, maxZ: 64.0, maxY: 16.0 };\n  var exitSent = false;\n  var currentCtxAction = null;\n  var wasSeated = false;\n\n  function updateContextPill() {\n    if (!ctxBtn) return;\n    var p = st.pig;\n    var z = st.zone || 'gate_plaza';\n    var nextAct = null;\n\n    if (p.seated) {\n      nextAct = { id: 'cheer_wave', label: '\ud83d\udce3 H\xf4 Vang \"Vi\u1ec7t Nam V\xf4 \u0110\u1ecbch!\" (S\xf3ng Ng\u01b0\u1eddi)' };\n    } else if (z === 'gate_plaza') {\n      if (p.z <= -6.2) {\n        nextAct = { id: 'exit_stadium', label: '\ud83d\udeaa Ra l\u1ea1i \u0110\u1ea1i L\u1ed9 S\xe0i G\xf2n' };\n      } else {\n        nextAct = { id: 'enter_gate', label: '\ud83c\udfab Qua C\u1ed5ng So\xe1t V\xe9 \u2192 \u0110\u01b0\u1eddng H\u1ea7m & Kh\xe1n \u0110\xe0i' };\n      }\n    } else if (z === 'home_locker') {\n      nextAct = {\n        id: 'wear_kit',\n        label: p.wearingVietnamKit ? '\ud83d\udc55 C\u1ea5t \xc1o \u0110\u1ea5u \u0110T Vi\u1ec7t Nam' : '\u26bd M\u1eb7c \xc1o \u0110\u1ea5u \u0110T Vi\u1ec7t Nam #10'\n      };\n    } else if (z === 'away_locker') {\n      nextAct = { id: 'inspect_away_tactics', label: '\ud83d\udccb Xem Sa B\xe0n Chi\u1ebfn Thu\u1eadt \u0110\u1ed9i Kh\xe1ch' };\n    } else if (z === 'main_tunnel' || z === 'player_tunnel' || z === 'pitchside') {\n      nextAct = { id: 'go_stands_seat', label: '\ud83e\ude9c L\xean Kh\xe1n \u0110\xe0i Ng\u1ed3i Xem Tr\u1eadn 11v11' };\n    } else if (z === 'stands_south') {\n      nextAct = { id: 'sit_nearest_seat', label: '\ud83e\ude91 Ng\u1ed3i Gh\u1ebf Kh\xe1n \u0110\xe0i Xem Tr\u1eadn 11v11' };\n    } else if (z === 'trophy_vip') {\n      nextAct = { id: 'lift_trophy', label: '\ud83c\udfc6 N\xe2ng C\xfap V\xe0ng V\xf4 \u0110\u1ecbch Vi\u1ec7t Nam!' };\n    }\n\n    currentCtxAction = nextAct;\n    if (nextAct) {\n      if (ctxBtn.textContent !== nextAct.label) ctxBtn.textContent = nextAct.label;\n      ctxBtn.hidden = false;\n    } else {\n      ctxBtn.hidden = true;\n    }\n  }\n\n  function findNearestSeat(px) {\n    if (!st.stools || !st.stools.length) return { id: 4, x: -2.0, z: 23.6 };\n    var best = st.stools[0], bestD = 999;\n    for (var i = 0; i < st.stools.length; i++) {\n      var d = Math.abs(st.stools[i].x - px);\n      if (d < bestD) { bestD = d; best = st.stools[i]; }\n    }\n    return best;\n  }\n\n  function triggerContextAction(act) {\n    if (!act) return;\n    postRN({ type: 'HAPTIC_MEDIUM' });\n    if (act.id === 'enter_gate') {\n      planStadiumRealtimePath(st, 0.0, 0.0, 6.2, {});\n    } else if (act.id === 'wear_kit' || act.id === 'inspect_away_tactics' || act.id === 'cheer_wave' || act.id === 'lift_trophy' || act.id === 'exit_stadium') {\n      executeStadiumAction(st, act.id);\n    } else if (act.id === 'go_stands_seat' || act.id === 'sit_nearest_seat') {\n      var seat = findNearestSeat(st.pig.x || 0);\n      planStadiumRealtimePath(st, seat.x, 3.4, seat.z, { targetKind: 'seat', seatChairId: seat.id });\n    }\n  }\n\n  if (ctxBtn) {\n    ctxBtn.addEventListener('click', function(e) {\n      e.stopPropagation();\n      triggerContextAction(currentCtxAction);\n    });\n  }\n\n  bindTpsCanvasGestures(cv, cam, {\n    minPitch: -0.74,\n    getSize: function() { return { w: W, h: H }; },\n    onTap: function(sx, sy) {\n      var target = wgl ? pickStadiumTarget3D(cam, st, sx, sy) : null;\n      if (!wgl && !target) {\n        var hit = unprojectFloorTap(cam, sx, sy);\n        if (hit) target = { kind: 'floor', x: hit.x, y: 0, z: hit.z };\n      }\n      if (target) {\n        planStadiumRealtimePath(st, target.x, target.y, target.z, {\n          targetKind: target.kind,\n          seatChairId: target.seatChairId,\n          pendingAction: target.pendingAction || null\n        });\n        st.ripples.push({ x: target.x, y: target.y, z: target.z, t: 0 });\n        postRN({ type: (target.pendingAction || target.kind === 'seat') ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });\n      }\n    }\n  });\n\n  var lastNow = performance.now();\n  function loop(now) {\n    var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));\n    lastNow = now;\n    if (window.__isActive !== false) {\n      stepStadiumTps(st, dt);\n      if (st.pig.seated && !wasSeated) {\n        wasSeated = true;\n        cam.yaw = 0.0; cam.pitch = -0.22; cam.dist = 4.35;\n      } else if (!st.pig.seated) {\n        wasSeated = false;\n      }\n      if (st.exiting && !exitSent && st.exitFade >= 0.85) {\n        exitSent = true;\n        postRN({ type: 'EXIT_STADIUM' });\n      }\n      if (wgl) {\n        cam.vw = W; cam.vh = H;\n        var asp = W / Math.max(1, H);\n        var fovy = asp < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, asp))) : 0.82;\n        cam.activeFovy = fovy;\n        cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);\n        renderStadiumWebglScene(wgl, cam, st, W, H);\n      } else {\n        updateTpsCamera(cam, st.pig.x, st.pig.y || 0, st.pig.z, W, H, stadiumBounds);\n        renderStadiumTpsScene(ctx, cam, st, W, H);\n      }\n      updateContextPill();\n    }\n    requestAnimationFrame(loop);\n  }\n  requestAnimationFrame(loop);\n})();\n",[]);return(0,l.jsx)(e.WebglTpsBannerShell,{title:"S\xe2n V\u1eadn \u0110\u1ed9ng Tr\u1ed1ng \u0110\u1ed3ng FIFA WebGL 3D",backgroundHex:"#2B120C",wallArtScript:u,sceneScript:p,initScript:x,onPayload:t=>{t&&'EXIT_STADIUM'===t.type&&d&&(n.impactAsync(n.ImpactFeedbackStyle.Medium).catch(()=>{}),o.current&&clearTimeout(o.current),o.current=setTimeout(()=>d(),120))}})}},867,[39,775,837,868,869,60]);
+__d(function(g,r,i,a,m,_e,_d){"use strict";Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"StadiumBannerWebView",{enumerable:!0,get:function(){return d}});var t=r(_d[0]),n=(function(t){if(t&&t.__esModule)return t;var n={};return t&&Object.keys(t).forEach(function(e){if('default'!==e){var s=Object.getOwnPropertyDescriptor(t,e);Object.defineProperty(n,e,s.get?s:{enumerable:!0,get:function(){return t[e]}})}}),n.default=t,n})(r(_d[1])),e=r(_d[2]),s=r(_d[3]),c=r(_d[4]),o=r(_d[5]);const d=({onExitStadium:d})=>{const l=(0,t.useRef)(null);(0,t.useEffect)(()=>()=>{l.current&&clearTimeout(l.current)},[]);const u=(0,t.useMemo)(()=>(0,s.buildStadiumWallArtScript)(),[]),p=(0,t.useMemo)(()=>(0,c.buildStadiumTps3dSceneScript)(),[]),x=(0,t.useMemo)(()=>"\n(function() {\n  var cv = document.getElementById('tpsCv');\n  var ctxBtn = document.getElementById('ctxPillBtn');\n  var wgl = createPixelWebglRenderer(cv);\n  var ctx = wgl ? null : cv.getContext('2d');\n  if (wgl) buildStadiumProceduralTextures(wgl);\n\n  var W = 400, H = 720;\n  function resizeCanvas() {\n    var dw = Math.max(320, window.innerWidth || 390);\n    var dh = Math.max(480, window.innerHeight || 760);\n    var dpr = wgl ? Math.min(2, window.devicePixelRatio || 1) : (dw > 460 ? 0.72 : 0.84);\n    W = Math.round(dw * dpr);\n    H = Math.round(dh * dpr);\n    cv.width = W; cv.height = H;\n    if (ctx) ctx.imageSmoothingEnabled = false;\n  }\n  resizeCanvas();\n  window.addEventListener('resize', resizeCanvas);\n\n  var st = createStadiumTpsState();\n  var cam = createTpsCamera({ yaw: 0.04, pitch: -0.22, dist: 4.85, targetHeight: 0.72 });\n  var stadiumBounds = { minX: -26.0, maxX: 26.0, minZ: -0.5, maxZ: 88.0, maxY: 18.0 };\n  var exitSent = false;\n  var currentCtxAction = null;\n  var wasSeated = false;\n\n  function updateContextPill() {\n    if (!ctxBtn) return;\n    var p = st.pig;\n    var z = st.zone || 'fan_concourse';\n    var nextAct = null;\n\n    if (p.seated) {\n      nextAct = { id: 'cheer_wave', label: '\ud83d\udce3 H\xf4 Vang \"Vi\u1ec7t Nam V\xf4 \u0110\u1ecbch!\" (S\xf3ng Ng\u01b0\u1eddi)' };\n    } else if (z === 'fan_concourse' && p.z <= 1.8 && Math.abs(p.x) <= 2.6) {\n      nextAct = { id: 'exit_stadium', label: '\ud83d\udeaa Ra kh\u1ecfi SV\u0110 Tr\u1ed1ng \u0110\u1ed3ng' };\n    } else if (z === 'fan_concourse' && p.x >= 1.2 && p.z >= 5.2 && p.z <= 10.2) {\n      nextAct = {\n        id: 'wear_kit',\n        label: p.wearingVietnamKit ? '\ud83d\udc55 C\u1ea5t \xc1o \u0110\u1ea5u \u0110T Vi\u1ec7t Nam' : '\ud83e\udde3 M\u1eb7c \xc1o & Kh\u0103n C\u1ed5 V\u0169 Vi\u1ec7t Nam'\n      };\n    } else if (z === 'home_locker') {\n      nextAct = {\n        id: 'wear_kit',\n        label: p.wearingVietnamKit ? '\ud83d\udc55 C\u1ea5t \xc1o \u0110\u1ea5u \u0110T Vi\u1ec7t Nam' : '\u26bd M\u1eb7c \xc1o \u0110\u1ea5u \u0110T Vi\u1ec7t Nam #10'\n      };\n    } else if (z === 'away_locker') {\n      nextAct = { id: 'inspect_away_tactics', label: '\ud83d\udccb Xem Sa B\xe0n Chi\u1ebfn Thu\u1eadt \u0110\u1ed9i Kh\xe1ch' };\n    } else if (z === 'fan_concourse' || z === 'player_tunnel' || z === 'pitchside') {\n      nextAct = { id: 'go_stands_seat', label: '\ud83e\ude9c L\xean Kh\xe1n \u0110\xe0i Ng\u1ed3i Xem Tr\u1eadn 11v11' };\n    } else if (z === 'stands_south') {\n      nextAct = { id: 'sit_nearest_seat', label: '\ud83e\ude91 Ng\u1ed3i Gh\u1ebf VIP Kh\xe1n \u0110\xe0i Xem 11v11' };\n    } else if (z === 'trophy_vip') {\n      nextAct = { id: 'lift_trophy', label: '\ud83c\udfc6 N\xe2ng C\xfap V\xe0ng V\xf4 \u0110\u1ecbch Vi\u1ec7t Nam!' };\n    }\n\n    currentCtxAction = nextAct;\n    if (nextAct) {\n      if (ctxBtn.textContent !== nextAct.label) ctxBtn.textContent = nextAct.label;\n      ctxBtn.hidden = false;\n    } else {\n      ctxBtn.hidden = true;\n    }\n  }\n\n  function findNearestSeat(px) {\n    if (!st.stools || !st.stools.length) return { id: 2, x: -0.36, z: 37.2 };\n    var best = st.stools[0], bestD = 999;\n    for (var i = 0; i < st.stools.length; i++) {\n      var d = Math.abs(st.stools[i].x - px);\n      if (d < bestD) { bestD = d; best = st.stools[i]; }\n    }\n    return best;\n  }\n\n  function triggerContextAction(act) {\n    if (!act) return;\n    postRN({ type: 'HAPTIC_MEDIUM' });\n    if (act.id === 'wear_kit' || act.id === 'inspect_away_tactics' || act.id === 'cheer_wave' || act.id === 'lift_trophy' || act.id === 'exit_stadium') {\n      executeStadiumAction(st, act.id);\n    } else if (act.id === 'go_stands_seat' || act.id === 'sit_nearest_seat') {\n      var seat = findNearestSeat(st.pig.x || 0);\n      planStadiumRealtimePath(st, seat.x, 3.4, seat.z, { targetKind: 'seat', seatChairId: seat.id });\n    }\n  }\n\n  if (ctxBtn) {\n    ctxBtn.addEventListener('click', function(e) {\n      e.stopPropagation();\n      triggerContextAction(currentCtxAction);\n    });\n  }\n\n  bindTpsCanvasGestures(cv, cam, {\n    minPitch: -0.74,\n    getSize: function() { return { w: W, h: H }; },\n    onTap: function(sx, sy) {\n      var target = wgl ? pickStadiumTarget3D(cam, st, sx, sy) : null;\n      if (!wgl && !target) {\n        var hit = unprojectFloorTap(cam, sx, sy);\n        if (hit) target = { kind: 'floor', x: hit.x, y: 0, z: hit.z };\n      }\n      if (target) {\n        planStadiumRealtimePath(st, target.x, target.y, target.z, {\n          targetKind: target.kind,\n          seatChairId: target.seatChairId,\n          pendingAction: target.pendingAction || null\n        });\n        st.ripples.push({ x: target.x, y: target.y, z: target.z, t: 0 });\n        postRN({ type: (target.pendingAction || target.kind === 'seat') ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });\n      }\n    }\n  });\n\n  var lastNow = performance.now();\n  function loop(now) {\n    var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));\n    lastNow = now;\n    if (window.__isActive !== false) {\n      stepStadiumTps(st, dt);\n      if (st.pig.seated && !wasSeated) {\n        wasSeated = true;\n        cam.yaw = 0.0; cam.pitch = -0.22; cam.dist = 4.35;\n      } else if (!st.pig.seated) {\n        wasSeated = false;\n      }\n      if (st.exiting && !exitSent && st.exitFade >= 0.85) {\n        exitSent = true;\n        postRN({ type: 'EXIT_STADIUM' });\n      }\n      if (wgl) {\n        cam.vw = W; cam.vh = H;\n        var asp = W / Math.max(1, H);\n        var fovy = asp < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, asp))) : 0.82;\n        cam.activeFovy = fovy;\n        cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);\n        renderStadiumWebglScene(wgl, cam, st, W, H);\n      } else {\n        updateTpsCamera(cam, st.pig.x, st.pig.y || 0, st.pig.z, W, H, stadiumBounds);\n        renderStadiumTpsScene(ctx, cam, st, W, H);\n      }\n      updateContextPill();\n    }\n    requestAnimationFrame(loop);\n  }\n  requestAnimationFrame(loop);\n})();\n",[]);return(0,o.jsx)(e.WebglTpsBannerShell,{title:"S\xe2n V\u1eadn \u0110\u1ed9ng Tr\u1ed1ng \u0110\u1ed3ng FIFA WebGL 3D",backgroundHex:"#2B120C",wallArtScript:u,sceneScript:p,initScript:x,onPayload:t=>{t&&'EXIT_STADIUM'===t.type&&d&&(n.impactAsync(n.ImpactFeedbackStyle.Medium).catch(()=>{}),l.current&&clearTimeout(l.current),l.current=setTimeout(()=>d(),120))}})}},867,[39,775,837,868,869,60]);
 __d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.buildStadiumWallArtScript=function(){return String.raw`
 /* ==================== 1. BỘ SINH TEXTURE THỦ TỤC WEBGL 3D CHO SVĐ TRỐNG ĐỒNG FIFA ==================== */
 function makeStadiumSeedRng(seed) {
@@ -13915,7 +13915,75 @@ function buildStadiumProceduralTextures(wgl) {
     wgl.registerTextureCanvas('standConcrete', c, true);
   })();
 
-  // 23. Sprite chú Heo Mascot 24×20 (bao gồm bộ trang phục Áo Đấu ĐT Việt Nam 'vn_kit')
+  // 23. Biển Quầy Bar Nước & Bắp Rang + Quầy Fan Shop Cổ Vũ Đường Hầm CĐV
+  (function() {
+    var c1 = mkCanvas(512, 128), g1 = c1.getContext('2d');
+    g1.fillStyle = '#0F172A'; g1.fillRect(0, 0, 512, 128);
+    g1.strokeStyle = '#38BDF8'; g1.lineWidth = 5; g1.strokeRect(5, 5, 502, 118);
+    g1.fillStyle = '#FACC15'; g1.font = 'bold 26px monospace'; g1.textAlign = 'center'; g1.textBaseline = 'middle';
+    g1.fillText('🥤 STADIUM BAR · BẮP RANG & NƯỚC MÁT', 256, 46);
+    g1.fillStyle = '#38BDF8'; g1.font = 'bold 18px monospace';
+    g1.fillText('PEPSI · TRÀ ĐÀO · CÀ PHÊ · POPCORN 25K', 256, 90);
+    wgl.registerTextureCanvas('stadiumBarSign', c1, false);
+
+    var c2 = mkCanvas(512, 128), g2 = c2.getContext('2d');
+    g2.fillStyle = '#7F1D1D'; g2.fillRect(0, 0, 512, 128);
+    g2.strokeStyle = '#FDE047'; g2.lineWidth = 5; g2.strokeRect(5, 5, 502, 118);
+    g2.fillStyle = '#FDE047'; g2.font = 'bold 26px monospace'; g2.textAlign = 'center'; g2.textBaseline = 'middle';
+    g2.fillText('🧣 FAN SHOP · ÁO ĐỎ & CỜ SAO VÀNG 🇻🇳', 256, 46);
+    g2.fillStyle = '#FFFBEB'; g2.font = 'bold 18px monospace';
+    g2.fillText('KHĂN CỔ VŨ · NÓN LÁ · KÈN VUVUZELA', 256, 90);
+    wgl.registerTextureCanvas('fanShopSign', c2, false);
+  })();
+
+  // 24. Tranh Hộp Đèn LED Hào Khí Bóng Đá Việt Nam & Biển Chỉ Dẫn Vomitory
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#1E1B4B'; g.fillRect(0, 0, 512, 256);
+    var grd = g.createLinearGradient(0, 0, 512, 256);
+    grd.addColorStop(0, '#7F1D1D'); grd.addColorStop(0.5, '#B91C1C'); grd.addColorStop(1, '#450A0A');
+    g.fillStyle = grd; g.fillRect(10, 10, 492, 236);
+    drawDongSonStarAndRays2D(g, 256, 128, 90, '#FDE047', '#FEF08A');
+    g.strokeStyle = '#FACC15'; g.lineWidth = 6; g.strokeRect(8, 8, 496, 240);
+    g.fillStyle = '#FEF08A'; g.font = 'bold 24px monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('★ HÀO KHÍ ĐÔNG SƠN · ĐT VIỆT NAM ★', 256, 38);
+    g.fillStyle = '#FFFFFF'; g.font = 'bold 18px monospace';
+    g.fillText('TRỐNG ĐỒNG FIFA WORLD CUP ARENA', 256, 222);
+    wgl.registerTextureCanvas('tunnelMuralVN', c, false);
+
+    var cv = mkCanvas(512, 128), gv = cv.getContext('2d');
+    gv.fillStyle = '#064E3B'; gv.fillRect(0, 0, 512, 128);
+    gv.strokeStyle = '#4ADE80'; gv.lineWidth = 5; gv.strokeRect(5, 5, 502, 118);
+    gv.fillStyle = '#FEF08A'; gv.font = 'bold 25px monospace'; gv.textAlign = 'center'; gv.textBaseline = 'middle';
+    gv.fillText('↗ LỐI LÊN KHÁN ĐÀI A-B · SEATING ↗', 256, 46);
+    gv.fillStyle = '#A7F3D0'; gv.font = 'bold 17px monospace';
+    gv.fillText('HÀNG GHẾ CỔ ĐỘNG VIÊN & SẢNH CÚP VÀNG', 256, 90);
+    wgl.registerTextureCanvas('vomitorySign', cv, false);
+  })();
+
+  // 25. Dải LED Ribbon Board tầng 2 khán đài & Sàn Đường hầm Terrazzo LED
+  (function() {
+    var cr = mkCanvas(512, 64), gr = cr.getContext('2d');
+    gr.fillStyle = '#090D16'; gr.fillRect(0, 0, 512, 64);
+    gr.fillStyle = '#B91C1C'; gr.fillRect(4, 8, 504, 48);
+    gr.strokeStyle = '#FDE047'; gr.lineWidth = 3; gr.strokeRect(4, 8, 504, 48);
+    gr.fillStyle = '#FEF08A'; gr.font = 'bold 21px monospace'; gr.textAlign = 'center'; gr.textBaseline = 'middle';
+    gr.fillText('★ TRỐNG ĐỒNG FIFA 135,000 · VIỆT NAM VÔ ĐỊCH ★', 256, 32);
+    wgl.registerTextureCanvas('ribbonLedTex', cr, true);
+
+    var cf = mkCanvas(256, 256), gf = cf.getContext('2d');
+    gf.fillStyle = '#1E293B'; gf.fillRect(0, 0, 256, 256);
+    for (var y = 0; y < 256; y += 64) {
+      for (var x = 0; x < 256; x += 64) {
+        gf.fillStyle = ((x / 64 + y / 64) % 2 === 0) ? '#283548' : '#1E293B';
+        gf.fillRect(x + 2, y + 2, 60, 60);
+      }
+    }
+    gf.fillStyle = '#FACC15'; gf.fillRect(6, 0, 6, 256); gf.fillRect(244, 0, 6, 256);
+    wgl.registerTextureCanvas('tunnelFloorTex', cf, true);
+  })();
+
+  // 26. Sprite chú Heo Mascot 24×20 (bao gồm bộ trang phục Áo Đấu ĐT Việt Nam 'vn_kit')
   if (typeof buildPigBillboardTextures === 'function') {
     buildPigBillboardTextures(wgl, ['vn_kit']);
   }
@@ -14123,139 +14191,129 @@ function drawStadiumRoomWalls3D(ctx, cam, room, st) {
 }
 `}},868,[]);
 __d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.buildStadiumTps3dSceneScript=function(){return String.raw`
-/* ==================== 1. ĐỒ THỊ KHÔNG GIAN SVĐ TRỐNG ĐỒNG FIFA (STADIUM_NAV_GRAPH) ==================== */
+/* ==================== 1. ĐỒ THỊ KHÔNG GIAN SVĐ TRỐNG ĐỒNG 44M TUNNEL & GRANDSTAND (STADIUM_NAV_GRAPH) ==================== */
 var STADIUM_NAV_GRAPH = {
   zones: [
-    { id: 'gate_plaza',    minX: -10.0, maxX: 10.0, minZ: -10.0, maxZ: 0.0,  floorY: 0.0 },
-    { id: 'main_tunnel',   minX: -2.4,  maxX: 2.4,  minZ: 0.0,   maxZ: 15.0, floorY: 0.0 },
-    { id: 'home_locker',   minX: -14.0, maxX: -2.4, minZ: 4.0,   maxZ: 12.6, floorY: 0.0 },
-    { id: 'away_locker',   minX: 2.4,   maxX: 14.0, minZ: 4.0,   maxZ: 12.6, floorY: 0.0 },
-    { id: 'vom_left_f',    minX: -5.8,  maxX: -2.4, minZ: 12.8,  maxZ: 15.0, floorY: 0.0 },
-    { id: 'vom_right_f',   minX: 2.4,   maxX: 5.8,  minZ: 12.8,  maxZ: 15.0, floorY: 0.0 },
-    { id: 'player_tunnel', minX: -2.4,  maxX: 2.4,  minZ: 15.0,  maxZ: 22.0, floorY: 0.4 },
-    { id: 'pitchside',     minX: -18.0, maxX: 18.0, minZ: 22.0,  maxZ: 27.2, floorY: 0.8 },
-    { id: 'stands_south',  minX: -22.0, maxX: 22.0, minZ: 18.5,  maxZ: 25.2, floorY: 3.4 },
-    { id: 'trophy_vip',    minX: 6.2,   maxX: 16.0, minZ: 6.0,   maxZ: 18.5, floorY: 3.4 }
+    { id: 'fan_concourse',  minX: -3.4,  maxX: 3.4,  minZ: 0.0,  maxZ: 20.5, floorY: 0.0 },
+    { id: 'vom_left_f',     minX: -6.4,  maxX: -3.4, minZ: 17.0, maxZ: 19.8, floorY: 0.0 },
+    { id: 'vom_right_f',    minX: 3.4,   maxX: 6.4,  minZ: 17.0, maxZ: 19.8, floorY: 0.0 },
+    { id: 'player_tunnel',  minX: -2.4,  maxX: 2.4,  minZ: 20.5, maxZ: 44.0, floorY: 0.0 },
+    { id: 'home_locker',    minX: -14.5, maxX: -2.4, minZ: 24.0, maxZ: 35.5, floorY: 0.0 },
+    { id: 'away_locker',    minX: 2.4,   maxX: 14.5, minZ: 24.0, maxZ: 35.5, floorY: 0.0 },
+    { id: 'pitchside',      minX: -20.0, maxX: 20.0, minZ: 44.0, maxZ: 49.5, floorY: 0.8 },
+    { id: 'stands_south',   minX: -22.0, maxX: 22.0, minZ: 25.6, maxZ: 39.0, floorY: 3.4 },
+    { id: 'trophy_vip',     minX: 7.0,   maxX: 16.5, minZ: 13.5, maxZ: 25.6, floorY: 3.4 }
   ],
   ramps: [
-    { id: 'tunnel_ramp', axis: 'z', minX: -2.4, maxX: 2.4,  zStart: 15.0, zEnd: 22.0, yStart: 0.0, yEnd: 0.8, maxCurY: 2.1 },
-    { id: 'left_stair',  axis: 'z', minX: -5.6, maxX: -3.4, zStart: 14.8, zEnd: 20.2, yStart: 0.0, yEnd: 3.4 },
-    { id: 'right_stair', axis: 'z', minX: 3.4,  maxX: 5.6,  zStart: 14.8, zEnd: 20.2, yStart: 0.0, yEnd: 3.4 }
+    { id: 'tunnel_ramp', axis: 'z', minX: -2.4, maxX: 2.4,  zStart: 37.0, zEnd: 44.0, yStart: 0.0, yEnd: 0.8, maxCurY: 2.1 },
+    { id: 'left_stair',  axis: 'z', minX: -6.2, maxX: -3.8, zStart: 19.8, zEnd: 25.6, yStart: 0.0, yEnd: 3.4 },
+    { id: 'right_stair', axis: 'z', minX: 3.8,  maxX: 6.2,  zStart: 19.8, zEnd: 25.6, yStart: 0.0, yEnd: 3.4 }
   ],
   edges: [
     {
-      from: 'gate_plaza', to: 'main_tunnel',
-      waypointsForward: [{ x: 0.0, y: 0.0, z: 0.8 }],
-      waypointsBackward: [{ x: 0.0, y: 0.0, z: -0.9 }]
+      from: 'fan_concourse', to: 'vom_left_f',
+      waypointsForward: [{ x: -4.2, y: 0.0, z: 18.4 }],
+      waypointsBackward: [{ x: -2.2, y: 0.0, z: 18.4 }]
     },
     {
-      from: 'main_tunnel', to: 'home_locker',
-      waypointsForward: [{ x: -3.0, y: 0.0, z: 8.6 }],
-      waypointsBackward: [{ x: -1.6, y: 0.0, z: 8.6 }]
-    },
-    {
-      from: 'main_tunnel', to: 'away_locker',
-      waypointsForward: [{ x: 3.0, y: 0.0, z: 8.6 }],
-      waypointsBackward: [{ x: 1.6, y: 0.0, z: 8.6 }]
-    },
-    {
-      from: 'main_tunnel', to: 'vom_left_f',
-      waypointsForward: [{ x: -3.2, y: 0.0, z: 13.9 }],
-      waypointsBackward: [{ x: -1.5, y: 0.0, z: 13.9 }]
-    },
-    {
-      from: 'main_tunnel', to: 'vom_right_f',
-      waypointsForward: [{ x: 3.2, y: 0.0, z: 13.9 }],
-      waypointsBackward: [{ x: 1.5, y: 0.0, z: 13.9 }]
+      from: 'fan_concourse', to: 'vom_right_f',
+      waypointsForward: [{ x: 4.2, y: 0.0, z: 18.4 }],
+      waypointsBackward: [{ x: 2.2, y: 0.0, z: 18.4 }]
     },
     {
       from: 'vom_left_f', to: 'stands_south',
       waypointsForward: [
-        { x: -4.5, y: 0.0, z: 14.6 },
-        { x: -4.5, y: 3.4, z: 20.4 },
-        { x: -4.5, y: 3.4, z: 22.0 }
+        { x: -5.0, y: 0.0, z: 19.6 },
+        { x: -5.0, y: 3.4, z: 25.8 },
+        { x: -5.0, y: 3.4, z: 37.8 }
       ],
       waypointsBackward: [
-        { x: -4.5, y: 3.4, z: 22.0 },
-        { x: -4.5, y: 3.4, z: 20.4 },
-        { x: -4.5, y: 0.0, z: 14.6 }
+        { x: -5.0, y: 3.4, z: 37.8 },
+        { x: -5.0, y: 3.4, z: 25.8 },
+        { x: -5.0, y: 0.0, z: 19.6 }
       ]
     },
     {
       from: 'vom_right_f', to: 'stands_south',
       waypointsForward: [
-        { x: 4.5, y: 0.0, z: 14.6 },
-        { x: 4.5, y: 3.4, z: 20.4 },
-        { x: 4.5, y: 3.4, z: 22.0 }
+        { x: 5.0, y: 0.0, z: 19.6 },
+        { x: 5.0, y: 3.4, z: 25.8 },
+        { x: 5.0, y: 3.4, z: 37.8 }
       ],
       waypointsBackward: [
-        { x: 4.5, y: 3.4, z: 22.0 },
-        { x: 4.5, y: 3.4, z: 20.4 },
-        { x: 4.5, y: 0.0, z: 14.6 }
+        { x: 5.0, y: 3.4, z: 37.8 },
+        { x: 5.0, y: 3.4, z: 25.8 },
+        { x: 5.0, y: 0.0, z: 19.6 }
       ]
     },
     {
       from: 'stands_south', to: 'trophy_vip',
-      waypointsForward: [{ x: 10.0, y: 3.4, z: 17.8 }],
-      waypointsBackward: [{ x: 10.0, y: 3.4, z: 19.2 }]
+      waypointsForward: [{ x: 11.2, y: 3.4, z: 24.8 }],
+      waypointsBackward: [{ x: 11.2, y: 3.4, z: 26.8 }]
     },
     {
-      from: 'main_tunnel', to: 'player_tunnel',
-      waypointsForward: [{ x: 0.0, y: 0.0, z: 14.8 }],
-      waypointsBackward: [{ x: 0.0, y: 0.0, z: 15.2 }]
+      from: 'fan_concourse', to: 'player_tunnel',
+      waypointsForward: [{ x: 0.0, y: 0.0, z: 21.0 }],
+      waypointsBackward: [{ x: 0.0, y: 0.0, z: 19.8 }]
+    },
+    {
+      from: 'player_tunnel', to: 'home_locker',
+      waypointsForward: [{ x: -3.2, y: 0.0, z: 30.0 }],
+      waypointsBackward: [{ x: -1.6, y: 0.0, z: 30.0 }]
+    },
+    {
+      from: 'player_tunnel', to: 'away_locker',
+      waypointsForward: [{ x: 3.2, y: 0.0, z: 30.0 }],
+      waypointsBackward: [{ x: 1.6, y: 0.0, z: 30.0 }]
     },
     {
       from: 'player_tunnel', to: 'pitchside',
-      waypointsForward: [{ x: 0.0, y: 0.8, z: 22.3 }],
-      waypointsBackward: [{ x: 0.0, y: 0.8, z: 21.8 }]
+      waypointsForward: [{ x: 0.0, y: 0.8, z: 44.3 }],
+      waypointsBackward: [{ x: 0.0, y: 0.8, z: 43.6 }]
     }
   ],
-  outerBounds: { minX: -24.5, maxX: 24.5, minZ: -10.5, maxZ: 64.0, minY: 0.65, maxY: 16.0 },
+  outerBounds: { minX: -26.0, maxX: 26.0, minZ: -0.5, maxZ: 88.0, minY: 0.65, maxY: 18.0 },
   wallMargin: 0.36,
   dividerWalls: [
-    // Mặt tiền Cổng A tại Z = 0: chừa cổng vào đường hầm X ∈ [-2.2, 2.2]
-    { axis: 'z', pos: 0.0, minSpan: -10.0, maxSpan: 10.0, minY: 0.0, maxY: 4.2, openings: [{ a1: -2.2, a2: 2.2, y1: 0.0, y2: 3.5 }] },
-    // Hai vách trục Đường Hầm (X = ±2.4, maxY = 3.25 nằm dưới sàn Khán Đài Nam Y=3.4): mở cửa 2 Phòng Thay Đồ & 2 Cầu thang Vomitory
-    {
-      axis: 'x', pos: -2.4, minSpan: 0.0, maxSpan: 22.0, minY: 0.0, maxY: 3.25,
-      openings: [{ a1: 6.6, a2: 10.6, y1: 0.0, y2: 3.2 }, { a1: 12.8, a2: 15.0, y1: 0.0, y2: 3.2 }]
-    },
-    {
-      axis: 'x', pos: 2.4, minSpan: 0.0, maxSpan: 22.0, minY: 0.0, maxY: 3.25,
-      openings: [{ a1: 6.6, a2: 10.6, y1: 0.0, y2: 3.2 }, { a1: 12.8, a2: 15.0, y1: 0.0, y2: 3.2 }]
-    },
-    // Bao ngoài Phòng Thay Đồ ĐT Việt Nam (Trái: X = -14.0, Z = 4.0, Z = 12.6)
-    { axis: 'x', pos: -14.0, minSpan: 4.0, maxSpan: 12.6, minY: 0.0, maxY: 3.8, openings: [] },
-    { axis: 'z', pos: 4.0, minSpan: -14.0, maxSpan: -2.4, minY: 0.0, maxY: 3.8, openings: [] },
-    { axis: 'z', pos: 12.6, minSpan: -14.0, maxSpan: -2.4, minY: 0.0, maxY: 3.8, openings: [] },
-    // Bao ngoài Phòng Thay Đồ Đội Khách (Phải: X = 14.0, Z = 4.0, Z = 12.6)
-    { axis: 'x', pos: 14.0, minSpan: 4.0, maxSpan: 12.6, minY: 0.0, maxY: 3.8, openings: [] },
-    { axis: 'z', pos: 4.0, minSpan: 2.4, maxSpan: 14.0, minY: 0.0, maxY: 3.8, openings: [] },
-    { axis: 'z', pos: 12.6, minSpan: 2.4, maxSpan: 14.0, minY: 0.0, maxY: 3.8, openings: [] },
-    // Rào An Ninh sát đường biên Pitchside (Z = 27.2) + 2 biên piste (X = ±18.0)
-    { axis: 'z', pos: 27.2, minSpan: -18.0, maxSpan: 18.0, minY: 0.8, maxY: 3.0, openings: [] },
-    { axis: 'x', pos: -18.0, minSpan: 22.0, maxSpan: 27.2, minY: 0.8, maxY: 3.0, openings: [] },
-    { axis: 'x', pos: 18.0, minSpan: 22.0, maxSpan: 27.2, minY: 0.8, maxY: 3.0, openings: [] },
-    // Lan can Khán Đài Nam (Z = 25.2) & Sảnh VIP (Z = 6.0, X = 6.2, X = 16.0)
-    { axis: 'z', pos: 25.2, minSpan: -22.0, maxSpan: 22.0, minY: 3.4, maxY: 6.5, openings: [] },
-    { axis: 'z', pos: 18.5, minSpan: -22.0, maxSpan: 22.0, minY: 3.4, maxY: 6.5, openings: [{ a1: 6.4, a2: 15.8, y1: 3.4, y2: 6.5 }] },
-    { axis: 'x', pos: -22.0, minSpan: 18.5, maxSpan: 25.2, minY: 3.4, maxY: 6.5, openings: [] },
-    { axis: 'x', pos: 22.0, minSpan: 18.5, maxSpan: 25.2, minY: 3.4, maxY: 6.5, openings: [] }
+    // Cửa kính Turnstile hậu đường hầm Z = 0
+    { axis: 'z', pos: 0.0, minSpan: -3.4, maxSpan: 3.4, minY: 0.0, maxY: 4.0, openings: [] },
+    // Vách Đoạn 1 Đường Hầm CĐV (X = ±3.4, Z = 0..20.5): mở lối rẽ 2 Cầu thang Vomitory Z ∈ [17.0, 19.8]
+    { axis: 'x', pos: -3.4, minSpan: 0.0, maxSpan: 20.5, minY: 0.0, maxY: 3.8, openings: [{ a1: 17.0, a2: 19.8, y1: 0.0, y2: 3.3 }] },
+    { axis: 'x', pos: 3.4,  minSpan: 0.0, maxSpan: 20.5, minY: 0.0, maxY: 3.8, openings: [{ a1: 17.0, a2: 19.8, y1: 0.0, y2: 3.3 }] },
+    // Cổng An Ninh ngăn Đoạn 1 ↔ Đoạn 2 tại Z = 20.5 (mở lối giữa X ∈ [-2.2, 2.2])
+    { axis: 'z', pos: 20.5, minSpan: -3.4, maxSpan: 3.4, minY: 0.0, maxY: 3.8, openings: [{ a1: -2.2, a2: 2.2, y1: 0.0, y2: 3.3 }] },
+    // Vách Đoạn 2 Đường Hầm Cầu Thủ (X = ±2.4, maxY = 3.25 nằm dưới sàn Khán Đài Nam): mở 2 cửa Phòng Thay Đồ Z ∈ [27.5, 32.5]
+    { axis: 'x', pos: -2.4, minSpan: 20.5, maxSpan: 44.0, minY: 0.0, maxY: 3.25, openings: [{ a1: 27.5, a2: 32.5, y1: 0.0, y2: 3.1 }] },
+    { axis: 'x', pos: 2.4,  minSpan: 20.5, maxSpan: 44.0, minY: 0.0, maxY: 3.25, openings: [{ a1: 27.5, a2: 32.5, y1: 0.0, y2: 3.1 }] },
+    // Bao ngoài 2 Phòng Thay Đồ (Z = 24.0..35.5, X = ±14.5)
+    { axis: 'x', pos: -14.5, minSpan: 24.0, maxSpan: 35.5, minY: 0.0, maxY: 3.25, openings: [] },
+    { axis: 'z', pos: 24.0,  minSpan: -14.5, maxSpan: -2.4, minY: 0.0, maxY: 3.25, openings: [] },
+    { axis: 'z', pos: 35.5,  minSpan: -14.5, maxSpan: -2.4, minY: 0.0, maxY: 3.25, openings: [] },
+    { axis: 'x', pos: 14.5,  minSpan: 24.0, maxSpan: 35.5, minY: 0.0, maxY: 3.25, openings: [] },
+    { axis: 'z', pos: 24.0,  minSpan: 2.4,  maxSpan: 14.5, minY: 0.0, maxY: 3.25, openings: [] },
+    { axis: 'z', pos: 35.5,  minSpan: 2.4,  maxSpan: 14.5, minY: 0.0, maxY: 3.25, openings: [] },
+    // Rào An Ninh sát đường biên Pitchside (Z = 49.5) + 2 biên piste (X = ±20.0)
+    { axis: 'z', pos: 49.5,  minSpan: -20.0, maxSpan: 20.0, minY: 0.8, maxY: 3.0, openings: [] },
+    { axis: 'x', pos: -20.0, minSpan: 44.0, maxSpan: 49.5, minY: 0.8, maxY: 3.0, openings: [] },
+    { axis: 'x', pos: 20.0,  minSpan: 44.0, maxSpan: 49.5, minY: 0.8, maxY: 3.0, openings: [] },
+    // Lan can kính trước Khán Đài Nam (Z = 39.2) & Tường sau hành lang Nam (Z = 25.6 mở cửa VIP)
+    { axis: 'z', pos: 39.2, minSpan: -22.0, maxSpan: 22.0, minY: 3.4, maxY: 6.5, openings: [] },
+    { axis: 'z', pos: 25.6, minSpan: -22.0, maxSpan: 22.0, minY: 3.4, maxY: 6.5, openings: [{ a1: 7.2, a2: 16.2, y1: 3.4, y2: 6.5 }] },
+    { axis: 'x', pos: -22.0, minSpan: 25.6, maxSpan: 39.2, minY: 3.4, maxY: 6.5, openings: [] },
+    { axis: 'x', pos: 22.0,  minSpan: 25.6, maxSpan: 39.2, minY: 3.4, maxY: 6.5, openings: [] }
   ],
   slabs: [
-    // Trần Hậu Trường & Đường Hầm Y = 3.8 (mở lỗ 2 cầu thang Vomitory & mở thông ngoài trời Z < 0 / Z > 22)
-    { minX: -14.0, maxX: 14.0, minZ: 0.0, maxZ: 15.0, yLow: 3.65, yHigh: 3.92 },
-    // Sàn Khán Đài Nam Y = 3.4 (chừa 2 lỗ thang Vomitory X ∈ [-5.7, -3.3] & [3.3, 5.7], Z ∈ [14.8, 20.2])
-    { minX: -22.0, maxX: -5.7, minZ: 18.5, maxZ: 25.2, yLow: 3.28, yHigh: 3.48 },
-    { minX: -3.3,  maxX: 3.3,  minZ: 18.5, maxZ: 25.2, yLow: 3.28, yHigh: 3.48 },
-    { minX: 5.7,   maxX: 22.0, minZ: 18.5, maxZ: 25.2, yLow: 3.28, yHigh: 3.48 },
-    { minX: -5.7,  maxX: -3.3, minZ: 20.2, maxZ: 25.2, yLow: 3.28, yHigh: 3.48 },
-    { minX: 3.3,   maxX: 5.7,  minZ: 20.2, maxZ: 25.2, yLow: 3.28, yHigh: 3.48 },
-    // Sàn Sảnh Cúp Vàng VIP Y = 3.4
-    { minX: 6.2,   maxX: 16.0, minZ: 6.0,  maxZ: 18.5, yLow: 3.28, yHigh: 3.48 }
+    // Trần Đoạn 1 Đường Hầm CĐV Y = 3.9
+    { minX: -3.5, maxX: 3.5, minZ: 0.0, maxZ: 20.5, yLow: 3.75, yHigh: 4.02 },
+    // Trần Hầm Cầu Thủ & 2 Phòng Thay Đồ Y = 3.8 (mở 2 lỗ thang Vomitory & mở ra sân sau Z = 44)
+    { minX: -14.5, maxX: 14.5, minZ: 24.0, maxZ: 36.5, yLow: 3.28, yHigh: 3.48 },
+    // Sàn Khán Đài Nam Y = 3.4
+    { minX: -22.0, maxX: 22.0, minZ: 25.6, maxZ: 39.2, yLow: 3.28, yHigh: 3.48 },
+    // Sảnh Cúp Vàng VIP Y = 3.4
+    { minX: 7.0,   maxX: 16.5, minZ: 13.5, maxZ: 25.6, yLow: 3.28, yHigh: 3.48 }
   ],
   camBoxes: [
-    { x1: 9.95, y1: 3.4, z1: 10.2, x2: 12.45, y2: 5.4, z2: 12.2 }
+    { x1: 9.95, y1: 3.4, z1: 17.6, x2: 12.45, y2: 5.4, z2: 19.6 }
   ]
 };
 
@@ -14263,57 +14321,59 @@ function getStadiumSurfaceY(x, z, curY) {
   if (typeof getNavGraphSurfaceY === 'function') {
     return getNavGraphSurfaceY(STADIUM_NAV_GRAPH, x, z, curY);
   }
-  if (x >= -5.6 && x <= -3.4 && z >= 14.8 && z <= 20.2) {
-    return Math.max(0, Math.min(1, (z - 14.8) / 5.4)) * 3.4;
+  if (x >= -6.2 && x <= -3.8 && z >= 19.8 && z <= 25.6) {
+    return Math.max(0, Math.min(1, (z - 19.8) / 5.8)) * 3.4;
   }
-  if (x >= 3.4 && x <= 5.6 && z >= 14.8 && z <= 20.2) {
-    return Math.max(0, Math.min(1, (z - 14.8) / 5.4)) * 3.4;
+  if (x >= 3.8 && x <= 6.2 && z >= 19.8 && z <= 25.6) {
+    return Math.max(0, Math.min(1, (z - 19.8) / 5.8)) * 3.4;
   }
-  if (x >= -2.4 && x <= 2.4 && z >= 15.0 && z <= 22.0 && (curY || 0) <= 2.1) {
-    return Math.max(0, Math.min(1, (z - 15.0) / 7.0)) * 0.8;
+  if (x >= -2.4 && x <= 2.4 && z >= 37.0 && z <= 44.0 && (curY || 0) <= 2.1) {
+    return Math.max(0, Math.min(1, (z - 37.0) / 7.0)) * 0.8;
   }
   if ((curY || 0) >= 2.2) return 3.4;
-  if (z >= 22.0) return 0.8;
+  if (z >= 44.0) return 0.8;
   return 0.0;
 }
 
 function getStadiumZoneAt(x, y, z) {
   if ((y || 0) >= 2.2) {
-    return (z < 18.5 && x >= 6.0) ? 'trophy_vip' : 'stands_south';
+    return (z < 25.6 && x >= 7.0) ? 'trophy_vip' : 'stands_south';
   }
-  if (z < 0.0) return 'gate_plaza';
-  if (z >= 22.0) return 'pitchside';
-  if (z > 15.0 && Math.abs(x) <= 2.4) return 'player_tunnel';
-  if (x < -2.4 && z >= 4.0 && z <= 12.6) return 'home_locker';
-  if (x > 2.4 && z >= 4.0 && z <= 12.6) return 'away_locker';
-  return 'main_tunnel';
+  if (z >= 44.0) return 'pitchside';
+  if (z >= 20.5) {
+    if (x < -2.4 && z >= 24.0 && z <= 35.5) return 'home_locker';
+    if (x > 2.4 && z >= 24.0 && z <= 35.5) return 'away_locker';
+    return 'player_tunnel';
+  }
+  return 'fan_concourse';
 }
 
 function createStadiumStools() {
+  // 6 ghế VIP trống ngay Hàng 1 Khán Đài Nam (Z = 37.2, Y = 3.4) nhìn thẳng xuống sân cỏ 11v11
   var stools = [];
-  var xs = [-15.0, -11.5, -8.5, -5.5, -2.0, 2.0, 5.5, 8.5, 11.5, 15.0];
+  var xs = [-1.8, -1.08, -0.36, 0.36, 1.08, 1.8];
   for (var i = 0; i < xs.length; i++) {
-    stools.push({ id: i, x: xs[i], y: 3.4, z: 23.6, lookX: 0.0, lookZ: 44.0 });
+    stools.push({ id: i, x: xs[i], y: 3.4, z: 37.2, lookX: 0.0, lookZ: 67.0 });
   }
   return stools;
 }
 
 function createStadiumNpcs() {
   var npcs = [];
-  // 1. 11 Cầu Thủ ĐT Việt Nam (1 GK + 10 Cầu thủ sân cỏ X ∈ [-20.5, 20.5], Z ∈ [30.5, 57.5], Y = 0.8)
-  npcs.push({ x: -19.8, y: 0.8, z: 44.0, vx: 0.0, vz: 1.4, minX: -20.1, maxX: -19.5, minZ: 41.2, maxZ: 46.8, yaw: Math.PI * 0.5, role: 'gk', shirt: '#16A34A', hair: '#1C1917', moving: true, seated: false, phase: 0.2, carryProp: 'none' });
+  // 1. 11 Cầu Thủ ĐT Việt Nam (1 GK + 10 Cầu thủ Đỏ Sao Vàng trên sân cỏ X ∈ [-21, 21], Z ∈ [52.5, 81.5], Y = 0.8)
+  npcs.push({ x: -20.6, y: 0.8, z: 67.0, vx: 0.0, vz: 1.5, minX: -20.9, maxX: -20.3, minZ: 64.0, maxZ: 70.0, yaw: Math.PI * 0.5, role: 'gk', shirt: '#16A34A', hair: '#1C1917', moving: true, seated: false, phase: 0.2, carryProp: 'none' });
   var vnForm = [
-    [-14.5, 34.5], [-14.0, 41.0], [-14.0, 47.0], [-14.5, 53.5],
-    [-6.5, 36.5],  [-4.5, 44.0],  [-6.5, 51.5],
-    [4.0, 35.0],   [6.5, 44.0],   [4.0, 53.0]
+    [-15.0, 56.5], [-14.2, 63.5], [-14.2, 70.5], [-15.0, 77.5],
+    [-6.5,  58.5], [-4.5,  67.0], [-6.5,  75.5],
+    [4.0,   57.5], [6.8,   67.0], [4.0,   76.5]
   ];
   for (var vi = 0; vi < vnForm.length; vi++) {
     var vp = vnForm[vi];
     npcs.push({
       x: vp[0], y: 0.8, z: vp[1],
       vx: (vi % 2 === 0 ? 1.7 : -1.5), vz: (vi % 3 === 0 ? 1.3 : -1.2),
-      minX: Math.max(-18.5, vp[0] - 5.2), maxX: Math.min(18.0, vp[0] + 5.8),
-      minZ: Math.max(31.2, vp[1] - 4.0),  maxZ: Math.min(56.8, vp[1] + 4.0),
+      minX: Math.max(-19.0, vp[0] - 5.2), maxX: Math.min(18.5, vp[0] + 5.8),
+      minZ: Math.max(53.2, vp[1] - 4.0),  maxZ: Math.min(80.8, vp[1] + 4.0),
       yaw: Math.PI * 0.5,
       role: vi === 8 ? 'vn_captain' : 'vn_player',
       shirt: '#DC2626', hair: vi % 2 === 0 ? '#1C1917' : '#292524',
@@ -14321,20 +14381,20 @@ function createStadiumNpcs() {
     });
   }
 
-  // 2. 11 Cầu Thủ Đội Khách (1 GK + 10 Cầu thủ áo Xanh Dương)
-  npcs.push({ x: 19.8, y: 0.8, z: 44.0, vx: 0.0, vz: -1.4, minX: 19.5, maxX: 20.1, minZ: 41.2, maxZ: 46.8, yaw: -Math.PI * 0.5, role: 'gk', shirt: '#EAB308', hair: '#451A03', moving: true, seated: false, phase: 0.7, carryProp: 'none' });
+  // 2. 11 Cầu Thủ Đội Khách (1 GK + 10 Cầu thủ Xanh Dương)
+  npcs.push({ x: 20.6, y: 0.8, z: 67.0, vx: 0.0, vz: -1.5, minX: 20.3, maxX: 20.9, minZ: 64.0, maxZ: 70.0, yaw: -Math.PI * 0.5, role: 'gk', shirt: '#EAB308', hair: '#451A03', moving: true, seated: false, phase: 0.7, carryProp: 'none' });
   var awForm = [
-    [14.5, 34.5], [14.0, 41.0], [14.0, 47.0], [14.5, 53.5],
-    [6.5, 36.5],  [4.5, 44.0],  [6.5, 51.5],
-    [-4.0, 35.0], [-6.5, 44.0], [-4.0, 53.0]
+    [15.0, 56.5], [14.2, 63.5], [14.2, 70.5], [15.0, 77.5],
+    [6.5,  58.5], [4.5,  67.0], [6.5,  75.5],
+    [-4.0, 57.5], [-6.8, 67.0], [-4.0, 76.5]
   ];
   for (var ai = 0; ai < awForm.length; ai++) {
     var ap = awForm[ai];
     npcs.push({
       x: ap[0], y: 0.8, z: ap[1],
       vx: (ai % 2 === 0 ? -1.6 : 1.5), vz: (ai % 3 === 0 ? -1.3 : 1.2),
-      minX: Math.max(-18.0, ap[0] - 5.8), maxX: Math.min(18.5, ap[0] + 5.2),
-      minZ: Math.max(31.2, ap[1] - 4.0),  maxZ: Math.min(56.8, ap[1] + 4.0),
+      minX: Math.max(-18.5, ap[0] - 5.8), maxX: Math.min(19.0, ap[0] + 5.2),
+      minZ: Math.max(53.2, ap[1] - 4.0),  maxZ: Math.min(80.8, ap[1] + 4.0),
       yaw: -Math.PI * 0.5,
       role: 'away_player',
       shirt: '#2563EB', hair: ai % 2 === 0 ? '#451A03' : '#1E293B',
@@ -14342,25 +14402,26 @@ function createStadiumNpcs() {
     });
   }
 
-  // 3. Đủ 3 Trọng Tài (1 Trọng tài chính giữa sân + 2 Trọng tài biên cầm cờ dọc biên Bắc/Nam)
-  npcs.push({ x: 0.0, y: 0.8, z: 44.0, vx: 1.1, vz: 0.8, minX: -11.0, maxX: 11.0, minZ: 34.0, maxZ: 54.0, yaw: 0.4, role: 'referee', shirt: '#0F172A', hair: '#111827', moving: true, seated: false, phase: 0.3, carryProp: 'none' });
-  npcs.push({ x: -5.0, y: 0.8, z: 29.4, vx: 1.4, vz: 0.0, minX: -19.5, maxX: 0.5, minZ: 29.3, maxZ: 29.5, yaw: 0.0, role: 'linesman', shirt: '#0F172A', hair: '#1C1917', moving: true, seated: false, phase: 1.1, carryProp: 'flag' });
-  npcs.push({ x: 5.0,  y: 0.8, z: 58.6, vx: -1.4, vz: 0.0, minX: -0.5, maxX: 19.5, minZ: 58.5, maxZ: 58.7, yaw: Math.PI, role: 'linesman', shirt: '#0F172A', hair: '#292524', moving: true, seated: false, phase: 1.9, carryProp: 'flag' });
+  // 3. Đủ 3 Trọng Tài (1 Trọng tài chính + 2 Trọng tài biên cầm cờ)
+  npcs.push({ x: 0.0, y: 0.8, z: 67.0, vx: 1.1, vz: 0.8, minX: -11.0, maxX: 11.0, minZ: 56.0, maxZ: 78.0, yaw: 0.4, role: 'referee', shirt: '#0F172A', hair: '#111827', moving: true, seated: false, phase: 0.3, carryProp: 'none' });
+  npcs.push({ x: -5.0, y: 0.8, z: 51.4, vx: 1.4, vz: 0.0, minX: -20.5, maxX: 0.5, minZ: 51.3, maxZ: 51.5, yaw: 0.0, role: 'linesman', shirt: '#0F172A', hair: '#1C1917', moving: true, seated: false, phase: 1.1, carryProp: 'flag' });
+  npcs.push({ x: 5.0,  y: 0.8, z: 82.6, vx: -1.4, vz: 0.0, minX: -0.5, maxX: 20.5, minZ: 82.5, maxZ: 82.7, yaw: Math.PI, role: 'linesman', shirt: '#0F172A', hair: '#292524', moving: true, seated: false, phase: 1.9, carryProp: 'flag' });
 
-  // 4. Hai Cabin Kỹ Thuật Đầy Đủ (2 HLV trưởng chỉ đạo + 8 Cầu thủ dự bị ngồi ghế băng ngoài đường pitch)
-  npcs.push({ x: -4.2, y: 0.8, z: 25.4, yaw: 0.1, role: 'vn_coach', shirt: '#1E3A8A', hair: '#1C1917', moving: false, seated: false, phase: 0.4, carryProp: 'board' });
-  npcs.push({ x:  4.2, y: 0.8, z: 25.4, yaw: -0.1, role: 'away_coach', shirt: '#0F172A', hair: '#451A03', moving: false, seated: false, phase: 0.9, carryProp: 'board' });
+  // 4. Hai Cabin Kỹ Thuật Đầy Đủ (2 HLV trưởng chỉ đạo + 8 Cầu thủ dự bị ngồi ghế Recaro ngoài đường pitch)
+  npcs.push({ x: -4.2, y: 0.8, z: 47.8, yaw: 0.1,  role: 'vn_coach',   shirt: '#1E3A8A', hair: '#1C1917', moving: false, seated: false, phase: 0.4, carryProp: 'board' });
+  npcs.push({ x:  4.2, y: 0.8, z: 47.8, yaw: -0.1, role: 'away_coach', shirt: '#0F172A', hair: '#451A03', moving: false, seated: false, phase: 0.9, carryProp: 'board' });
   for (var sh = 0; sh < 4; sh++) {
-    npcs.push({ x: -9.6 + sh * 1.25, y: 0.8, z: 24.4, yaw: 0.0, role: 'sub_home', shirt: '#F97316', hair: '#1C1917', moving: false, seated: true, phase: sh * 0.6, carryProp: 'none' });
-    npcs.push({ x:  5.8 + sh * 1.25, y: 0.8, z: 24.4, yaw: 0.0, role: 'sub_away', shirt: '#84CC16', hair: '#292524', moving: false, seated: true, phase: sh * 0.7, carryProp: 'none' });
+    npcs.push({ x: -10.8 + sh * 1.45, y: 0.8, z: 46.8, yaw: 0.0, role: 'sub_home', shirt: '#F97316', hair: '#1C1917', moving: false, seated: true, phase: sh * 0.6, carryProp: 'none' });
+    npcs.push({ x:   6.4 + sh * 1.45, y: 0.8, z: 46.8, yaw: 0.0, role: 'sub_away', shirt: '#84CC16', hair: '#292524', moving: false, seated: true, phase: sh * 0.7, carryProp: 'none' });
   }
 
-  // 5. Lực Lượng An Ninh Áo Phản Quang (Cổng Soát Vé, 2 Phòng Thay Đồ & Dàn An Ninh Biên Sân)
+  // 5. Lực Lượng An Ninh Áo Phản Quang (Cổng Soát Vé, Cổng Hầm Cầu Thủ, 2 Phòng Thay Đồ & Dàn An Ninh Biên Sân)
   var stewards = [
-    [-2.6, 0.0, -0.5, Math.PI], [2.6, 0.0, -0.5, Math.PI],
-    [-2.8, 0.0, 6.6, Math.PI * 0.5], [2.8, 0.0, 6.6, -Math.PI * 0.5],
-    [-15.0, 0.8, 27.0, Math.PI], [-9.2, 0.8, 27.0, Math.PI], [-3.0, 0.8, 27.0, Math.PI],
-    [3.0, 0.8, 27.0, Math.PI], [9.2, 0.8, 27.0, Math.PI], [15.0, 0.8, 27.0, Math.PI]
+    [-2.5, 0.0, 1.2, 0.0], [2.5, 0.0, 1.2, 0.0],
+    [-2.5, 0.0, 20.2, Math.PI], [2.5, 0.0, 20.2, Math.PI],
+    [-2.8, 0.0, 28.0, Math.PI * 0.5], [2.8, 0.0, 28.0, -Math.PI * 0.5],
+    [-16.0, 0.8, 49.2, Math.PI], [-9.6, 0.8, 49.2, Math.PI], [-3.2, 0.8, 49.2, Math.PI],
+    [3.2, 0.8, 49.2, Math.PI], [9.6, 0.8, 49.2, Math.PI], [16.0, 0.8, 49.2, Math.PI]
   ];
   for (var si = 0; si < stewards.length; si++) {
     var stw = stewards[si];
@@ -14371,35 +14432,55 @@ function createStadiumNpcs() {
     });
   }
 
-  // 6. Hậu Trường 2 Nhánh Phòng Thay Đồ + Sảnh Cúp Vàng + Báo Chí Biên Sân
-  npcs.push({ x: -8.2, y: 0.0, z: 6.2, yaw: 0.4, role: 'vn_player', shirt: '#DC2626', hair: '#1C1917', moving: false, seated: false, phase: 0.3, carryProp: 'ball' });
-  npcs.push({ x: 8.2,  y: 0.0, z: 6.2, yaw: -0.4, role: 'away_player', shirt: '#2563EB', hair: '#451A03', moving: false, seated: false, phase: 1.1, carryProp: 'none' });
-  npcs.push({ x: 11.2, y: 3.4, z: 13.6, yaw: 0.0, role: 'press', shirt: '#475569', hair: '#1C1917', moving: false, seated: false, phase: 0.8, carryProp: 'camera' });
-  npcs.push({ x: -13.5, y: 0.8, z: 26.8, yaw: 0.2, role: 'press', shirt: '#0F766E', hair: '#292524', moving: false, seated: false, phase: 1.5, carryProp: 'camera' });
+  // 6. Nhân Viên Quầy Nước & Fan Shop + Hậu Trường 2 Phòng Thay Đồ + Báo Chí
+  npcs.push({ x: -2.6, y: 0.0, z: 7.8,  yaw: Math.PI * 0.5,  role: 'barista', shirt: '#0EA5E9', hair: '#1C1917', moving: false, seated: false, phase: 0.2, carryProp: 'coffee' });
+  npcs.push({ x:  2.6, y: 0.0, z: 7.8,  yaw: -Math.PI * 0.5, role: 'adidas_staff', shirt: '#DC2626', hair: '#292524', moving: false, seated: false, phase: 0.8, carryProp: 'none' });
+  npcs.push({ x: -8.5, y: 0.0, z: 29.8, yaw: 0.4,  role: 'vn_player',   shirt: '#DC2626', hair: '#1C1917', moving: false, seated: false, phase: 0.3, carryProp: 'ball' });
+  npcs.push({ x:  8.5, y: 0.0, z: 29.8, yaw: -0.4, role: 'away_player', shirt: '#2563EB', hair: '#451A03', moving: false, seated: false, phase: 1.1, carryProp: 'none' });
+  npcs.push({ x: 11.2, y: 3.4, z: 21.8, yaw: 0.0,  role: 'press', shirt: '#475569', hair: '#1C1917', moving: false, seated: false, phase: 0.8, carryProp: 'camera' });
+  npcs.push({ x: -14.5,y: 0.8, z: 48.8, yaw: 0.2,  role: 'press', shirt: '#0F766E', hair: '#292524', moving: false, seated: false, phase: 1.5, carryProp: 'camera' });
 
-  // 7. Cổ Động Viên Ngồi & Vẫy Cờ Khắp Khán Đài (Hàng ghế Nam + Tây + Đông + Bắc)
+  // 7. Biển Cổ Động Viên Ngồi Đúng Trong Các Dãy Ghế Ergonomic (Hàng 1, 2, 3 Khán Đài Nam + Bắc + Tây + Đông)
   var fanCols = ['#DC2626', '#FACC15', '#E11D48', '#FFFFFF'];
-  for (var fsi = 0; fsi < 8; fsi++) {
-    var fx = -16.8 + fsi * 4.8;
-    if (Math.abs(fx - 2.0) < 0.8 || Math.abs(fx + 2.0) < 0.8) fx += 1.2;
+  // Hàng 1 cánh Trái/Phải ngồi kín cạnh cụm 6 ghế VIP trống của chú Heo
+  var r1FanXs = [-16.2, -14.8, -13.4, -12.0, -10.6, -9.2, -7.8, 7.8, 9.2, 10.6, 12.0, 13.4, 14.8, 16.2];
+  for (var f1 = 0; f1 < r1FanXs.length; f1++) {
     npcs.push({
-      x: fx, y: 3.4, z: 23.6, yaw: 0.0,
-      role: 'vn_fan', shirt: fanCols[fsi % fanCols.length], hair: '#1C1917',
-      moving: false, seated: true, phase: fsi * 0.4,
-      carryProp: (fsi % 2 === 0) ? 'vn_flag' : 'none'
+      x: r1FanXs[f1], y: 3.4, z: 37.2, yaw: 0.0,
+      role: 'vn_fan', shirt: fanCols[f1 % fanCols.length], hair: '#1C1917',
+      moving: false, seated: true, phase: f1 * 0.35,
+      carryProp: (f1 % 3 === 0) ? 'vn_flag' : 'none'
     });
   }
+  // Hàng 2 (Y = 3.85, Z = 34.8) & Hàng 3 (Y = 4.30, Z = 32.8) ngồi kín sau lưng
+  for (var f2 = 0; f2 < 10; f2++) {
+    var x2 = -15.6 + f2 * 3.45;
+    if (Math.abs(Math.abs(x2) - 5.0) < 1.1) x2 += (x2 < 0 ? -1.1 : 1.1);
+    npcs.push({
+      x: x2, y: 3.85, z: 34.8, yaw: 0.0,
+      role: 'vn_fan', shirt: fanCols[(f2 + 1) % fanCols.length], hair: '#292524',
+      moving: false, seated: true, phase: f2 * 0.45,
+      carryProp: (f2 % 2 === 0) ? 'vn_flag' : 'none'
+    });
+    npcs.push({
+      x: x2, y: 4.30, z: 32.8, yaw: 0.0,
+      role: 'vn_fan', shirt: fanCols[(f2 + 2) % fanCols.length], hair: '#1C1917',
+      moving: false, seated: true, phase: f2 * 0.55,
+      carryProp: (f2 % 3 === 1) ? 'vn_flag' : 'none'
+    });
+  }
+  // Khán đài Bắc, Tây, Đông
   for (var fni = 0; fni < 8; fni++) {
     npcs.push({
-      x: -17.5 + fni * 5.0, y: 3.8, z: 62.0, yaw: Math.PI,
+      x: -18.0 + fni * 5.0, y: 3.8, z: 86.0, yaw: Math.PI,
       role: 'vn_fan', shirt: fanCols[(fni + 1) % fanCols.length], hair: '#292524',
       moving: false, seated: true, phase: fni * 0.55,
       carryProp: (fni % 2 === 1) ? 'vn_flag' : 'none'
     });
   }
   for (var fwi = 0; fwi < 4; fwi++) {
-    npcs.push({ x: -24.2, y: 3.8, z: 33.0 + fwi * 7.2, yaw: Math.PI * 0.5, role: 'vn_fan', shirt: '#DC2626', hair: '#1C1917', moving: false, seated: true, phase: fwi * 0.7, carryProp: 'vn_flag' });
-    npcs.push({ x:  24.2, y: 3.8, z: 33.0 + fwi * 7.2, yaw: -Math.PI * 0.5, role: 'vn_fan', shirt: '#DC2626', hair: '#292524', moving: false, seated: true, phase: fwi * 0.8, carryProp: 'vn_flag' });
+    npcs.push({ x: -25.4, y: 3.8, z: 56.0 + fwi * 7.2, yaw: Math.PI * 0.5,  role: 'vn_fan', shirt: '#DC2626', hair: '#1C1917', moving: false, seated: true, phase: fwi * 0.7, carryProp: 'vn_flag' });
+    npcs.push({ x:  25.4, y: 3.8, z: 56.0 + fwi * 7.2, yaw: -Math.PI * 0.5, role: 'vn_fan', shirt: '#DC2626', hair: '#292524', moving: false, seated: true, phase: fwi * 0.8, carryProp: 'vn_flag' });
   }
   return npcs;
 }
@@ -14407,17 +14488,12 @@ function createStadiumNpcs() {
 function createStadiumTpsState() {
   var npcs = createStadiumNpcs();
   var stools = createStadiumStools();
-  var traffic = (typeof createSaigonBackdropTraffic === 'function')
-    ? createSaigonBackdropTraffic()
-    : { vehicles: [], boats: [] };
-
   return {
-    room: 'gate_plaza',
-    zone: 'gate_plaza',
-    skyModeOverride: 'night',
+    room: 'fan_concourse',
+    zone: 'fan_concourse',
     pig: {
-      x: 0.0, y: 0.0, z: -4.5, yaw: 0.0,
-      targetX: 0.0, targetZ: -4.5,
+      x: 0.0, y: 0.0, z: 2.2, yaw: 0.0,
+      targetX: 0.0, targetZ: 2.2,
       waypoints: [],
       walking: false, seated: false, eating: false,
       seatChairId: -1, pendingSeatId: -1, pendingAction: null,
@@ -14427,8 +14503,7 @@ function createStadiumTpsState() {
     },
     stools: stools,
     npcs: npcs,
-    traffic: traffic,
-    ball: { x: 0.0, y: 0.94, z: 44.0, shooting: false, shootT: 0 },
+    ball: { x: 0.0, y: 0.94, z: 67.0, shooting: false, shootT: 0 },
     vnScore: 2,
     goalFlashUntil: 0,
     confettiUntil: 0,
@@ -14437,7 +14512,7 @@ function createStadiumTpsState() {
     exitFade: 0,
     exiting: false,
     ripples: [],
-    toast: 'Chào mừng tới SVĐ Trống Đồng FIFA! Hãy qua Cổng Soát Vé → Đường Hầm (2 Phòng Thay Đồ) → Lên Khán Đài ngồi xem trận 11v11! ⚽🏟️',
+    toast: 'Chào mừng vào Đường Hầm 44m SVĐ Trống Đồng! Ghé Quầy Fan Shop, rẽ Vomitory lên Ghế Khán Đài hoặc đi tiếp qua Hầm Cầu Thủ (2 Phòng Thay Đồ) ⚽🏟️',
     toastUntil: 5.5,
     t: 0
   };
@@ -14449,40 +14524,33 @@ function clampStadiumWalkPos(st, x, z, yArg) {
 
   // 1. Khán Đài Nam & Sảnh Cúp Vàng VIP (Y >= 2.2)
   if (y >= 2.2) {
-    if (nz < 18.5 && nx >= 6.0) {
-      nx = Math.max(6.45, Math.min(15.65, nx));
-      nz = Math.max(6.35, Math.min(18.5, nz));
-      if (nx > 9.6 && nx < 12.8 && nz > 9.9 && nz < 12.5) {
-        if (Math.abs(nx - 11.2) > Math.abs(nz - 11.2)) nx = nx < 11.2 ? 9.6 : 12.8;
-        else nz = nz < 11.2 ? 9.9 : 12.5;
+    if (nz < 25.6 && nx >= 7.0) {
+      nx = Math.max(7.35, Math.min(16.1, nx));
+      nz = Math.max(13.9, Math.min(25.6, nz));
+      if (nx > 9.6 && nx < 12.8 && nz > 17.3 && nz < 19.9) {
+        if (Math.abs(nx - 11.2) > Math.abs(nz - 18.6)) nx = nx < 11.2 ? 9.6 : 12.8;
+        else nz = nz < 18.6 ? 17.3 : 19.9;
       }
       return { x: nx, z: nz };
     }
-    if (nz < 20.2 && ((nx >= -5.7 && nx <= -3.3) || (nx >= 3.3 && nx <= 5.7))) {
-      var sxMid = nx < 0 ? -4.5 : 4.5;
+    if (nz < 25.6 && ((nx >= -6.4 && nx <= -3.6) || (nx >= 3.6 && nx <= 6.4))) {
+      var sxMid = nx < 0 ? -5.0 : 5.0;
       nx = Math.max(sxMid - 0.95, Math.min(sxMid + 0.95, nx));
-      nz = Math.max(14.8, Math.min(20.4, nz));
+      nz = Math.max(19.8, Math.min(25.8, nz));
       return { x: nx, z: nz };
     }
     nx = Math.max(-21.5, Math.min(21.5, nx));
-    nz = Math.max(18.85, Math.min(24.75, nz));
+    nz = Math.max(25.85, Math.min(38.75, nz));
     return { x: nx, z: nz };
   }
 
-  // 2. Đường Dốc Hầm Cầu Thủ (Z ∈ [15.0, 22.0] trong hành lang trung tâm)
-  if (nz > 14.95 && nz < 22.05 && Math.abs(nx) <= 2.45) {
-    nx = Math.max(-2.05, Math.min(2.05, nx));
-    nz = Math.max(14.95, Math.min(22.05, nz));
-    return { x: nx, z: nz };
-  }
-
-  // 3. Đường Piste Biên Sân & 2 Cabin Kỹ Thuật (Z >= 22.0) — Rào An Ninh Z = 27.2 chặn xâm nhập sân cỏ 11v11!
-  if (nz >= 22.0) {
-    nx = Math.max(-17.5, Math.min(17.5, nx));
-    nz = Math.max(22.05, Math.min(26.85, nz));
+  // 2. Đường Piste Biên Sân & 2 Cabin Kỹ Thuật Kính Cong (Z >= 44.0) — Rào An Ninh Z = 49.5
+  if (nz >= 44.0) {
+    nx = Math.max(-19.4, Math.min(19.4, nx));
+    nz = Math.max(44.05, Math.min(49.05, nz));
     var dugouts = [
-      { x1: -10.5, z1: 23.8, x2: -3.5, z2: 25.8 },
-      { x1:   3.5, z1: 23.8, x2: 10.5, z2: 25.8 }
+      { x1: -11.8, z1: 46.0, x2: -3.4, z2: 48.2 },
+      { x1:   3.4, z1: 46.0, x2: 11.8, z2: 48.2 }
     ];
     for (var di = 0; di < dugouts.length; di++) {
       var db = dugouts[di];
@@ -14499,69 +14567,52 @@ function clampStadiumWalkPos(st, x, z, yArg) {
     return { x: nx, z: nz };
   }
 
-  // 4. Quảng Trường Cổng A Ngoài Trời (Z < 0)
-  if (nz < 0.0) {
-    nx = Math.max(-9.4, Math.min(9.4, nx));
-    nz = Math.max(-9.2, Math.min(-0.15, nz));
+  // 3. Đoạn 2 — Đường Hầm Cầu Thủ & 2 Nhánh Phòng Thay Đồ (Z ∈ [20.5, 44.0], Y = 0..0.8)
+  if (nz >= 20.5) {
+    if (nx < -2.4 && nz >= 24.0 && nz <= 35.5) {
+      nx = Math.max(-12.8, Math.min(-2.5, nx));
+      nz = Math.max(24.4, Math.min(34.0, nz));
+      if (nx > -9.6 && nx < -7.2 && nz > 28.9 && nz < 30.7) {
+        if (Math.abs(nx + 8.4) > Math.abs(nz - 29.8)) nx = nx < -8.4 ? -9.6 : -7.2;
+        else nz = nz < 29.8 ? 28.9 : 30.7;
+      }
+      return { x: nx, z: nz };
+    }
+    if (nx > 2.4 && nz >= 24.0 && nz <= 35.5) {
+      nx = Math.max(2.5, Math.min(12.8, nx));
+      nz = Math.max(24.4, Math.min(34.0, nz));
+      if (nx > 7.2 && nx < 9.6 && nz > 28.9 && nz < 30.7) {
+        if (Math.abs(nx - 8.4) > Math.abs(nz - 29.8)) nx = nx < 8.4 ? 7.2 : 9.6;
+        else nz = nz < 29.8 ? 28.9 : 30.7;
+      }
+      return { x: nx, z: nz };
+    }
+    nx = Math.max(-2.05, Math.min(2.05, nx));
+    nz = Math.max(20.5, Math.min(44.0, nz));
     return { x: nx, z: nz };
   }
 
-  // 5. Trục Đường Hầm + 2 Nhánh Phòng Thay Đồ + 2 Chân Thang Vomitory (Y = 0, Z ∈ [0, 15.0])
-  if (nx < -2.4 && nz >= 4.0 && nz <= 12.6) {
-    nx = Math.max(-13.6, Math.min(-2.5, nx));
-    nz = Math.max(4.35, Math.min(12.25, nz));
-    var homeBoxes = [
-      { x1: -13.95, z1: 4.5, x2: -12.4, z2: 12.1 },
-      { x1: -9.3,   z1: 7.6, x2: -7.1,  z2: 9.2 },
-      { x1: -12.2,  z1: 4.2, x2: -10.5, z2: 5.7 }
-    ];
-    for (var hi = 0; hi < homeBoxes.length; hi++) {
-      var hb = homeBoxes[hi];
-      if (nx > hb.x1 - 0.34 && nx < hb.x2 + 0.34 && nz > hb.z1 - 0.34 && nz < hb.z2 + 0.34) {
-        if (Math.abs(nx - (hb.x1 + hb.x2) * 0.5) > Math.abs(nz - (hb.z1 + hb.z2) * 0.5)) {
-          nx = nx < (hb.x1 + hb.x2) * 0.5 ? hb.x1 - 0.34 : hb.x2 + 0.34;
-        } else {
-          nz = nz < (hb.z1 + hb.z2) * 0.5 ? hb.z1 - 0.34 : hb.z2 + 0.34;
-        }
-      }
-    }
+  // 4. Đoạn 1 — Đường Hầm Cổ Động Viên & Ngã Tư Vomitory (Z ∈ [0.0, 20.5])
+  if (nz >= 17.0 && (nx < -3.4 || nx > 3.4)) {
+    nx = nx < 0 ? Math.max(-6.1, Math.min(-3.4, nx)) : Math.max(3.4, Math.min(6.1, nx));
+    nz = Math.max(17.2, Math.min(25.2, nz));
     return { x: nx, z: nz };
   }
-  if (nx > 2.4 && nz >= 4.0 && nz <= 12.6) {
-    nx = Math.max(2.5, Math.min(13.6, nx));
-    nz = Math.max(4.35, Math.min(12.25, nz));
-    var awayBoxes = [
-      { x1: 12.4, z1: 4.5, x2: 13.95, z2: 12.1 },
-      { x1: 7.1,  z1: 7.6, x2: 9.3,   z2: 9.2 },
-      { x1: 10.5, z1: 4.2, x2: 12.2,  z2: 5.7 }
-    ];
-    for (var ai2 = 0; ai2 < awayBoxes.length; ai2++) {
-      var ab = awayBoxes[ai2];
-      if (nx > ab.x1 - 0.34 && nx < ab.x2 + 0.34 && nz > ab.z1 - 0.34 && nz < ab.z2 + 0.34) {
-        if (Math.abs(nx - (ab.x1 + ab.x2) * 0.5) > Math.abs(nz - (ab.z1 + ab.z2) * 0.5)) {
-          nx = nx < (ab.x1 + ab.x2) * 0.5 ? ab.x1 - 0.34 : ab.x2 + 0.34;
-        } else {
-          nz = nz < (ab.z1 + ab.z2) * 0.5 ? ab.z1 - 0.34 : ab.z2 + 0.34;
-        }
-      }
-    }
-    return { x: nx, z: nz };
+  nx = Math.max(-2.95, Math.min(2.95, nx));
+  nz = Math.max(0.55, Math.min(20.5, nz));
+  if (nz >= 5.3 && nz <= 10.2) {
+    if (nx < -1.85) nx = -1.85;
+    if (nx > 1.85) nx = 1.85;
   }
-  if (nz >= 12.8 && (nx < -2.4 || nx > 2.4)) {
-    nx = nx < 0 ? Math.max(-5.5, Math.min(-2.4, nx)) : Math.max(2.4, Math.min(5.5, nx));
-    nz = Math.max(13.0, Math.min(19.8, nz));
-    return { x: nx, z: nz };
-  }
-  nx = Math.max(-2.05, Math.min(2.05, nx));
-  nz = Math.max(0.25, Math.min(15.0, nz));
   return { x: nx, z: nz };
 }
 
-/* ==================== 2. ĐIỀU HƯỚNG LIÊN HOÀN CHUẨN CỔ ĐỘNG VIÊN FIFA ==================== */
+/* ==================== 2. ĐIỀU HƯỚNG LIÊN HOÀN QUA ĐƯỜNG HẦM 44M → KHÁN ĐÀI ==================== */
 function planStadiumRealtimePath(st, tx, targetFloorY, tz, extraOpts) {
   var p = st.pig;
   var eo = extraOpts || {};
   var targetKind = eo.targetKind || 'floor';
+  if (targetKind !== 'tunnel_ramp' && targetFloorY >= 0.7 && targetFloorY <= 0.9 && tz < 44.0) tz = 45.2;
   p.seated = false; p.seatChairId = -1; p.eating = false; p.cheering = false;
   p.pendingSeatId = typeof eo.seatChairId === 'number' ? eo.seatChairId : -1;
   p.pendingAction = eo.pendingAction || null;
@@ -14570,31 +14621,30 @@ function planStadiumRealtimePath(st, tx, targetFloorY, tz, extraOpts) {
     var curY = p.y || 0;
     var wps = [];
     if (targetKind === 'left_stair' || targetKind === 'right_stair') {
-      var sx = targetKind === 'left_stair' ? -4.5 : 4.5;
+      var sx = targetKind === 'left_stair' ? -5.0 : 5.0;
       if (curY >= 2.2) {
-        if (p.z < 18.5 && p.x >= 6.0) wps.push({ x: 10.0, y: 3.4, z: 19.2 });
-        wps.push({ x: sx, y: 3.4, z: 22.0 });
-        wps.push({ x: sx, y: 3.4, z: 20.4 });
+        if (p.z < 25.6 && p.x >= 7.0) wps.push({ x: 11.2, y: 3.4, z: 26.8 });
+        wps.push({ x: sx, y: 3.4, z: 25.8 });
       } else {
-        if (p.z < 0.0) wps.push({ x: 0.0, y: 0.0, z: 0.8 });
-        if (p.x < -2.4 && p.z < 12.8) wps.push({ x: -1.6, y: 0.0, z: 8.6 });
-        if (p.x > 2.4 && p.z < 12.8) wps.push({ x: 1.6, y: 0.0, z: 8.6 });
-        if (p.z >= 22.0) wps.push({ x: 0.0, y: 0.8, z: 22.3 });
-        if (p.z > 15.0 && Math.abs(p.x) <= 2.4) wps.push({ x: 0.0, y: 0.0, z: 14.8 });
-        var onVomStairNow = (Math.abs(Math.abs(p.x) - 4.5) <= 1.15 && p.z >= 14.8 && p.z <= 20.2 && curY > 0.15 && curY < 3.25);
-        if (!onVomStairNow) {
-          wps.push({ x: sx * 0.72, y: 0.0, z: 13.9 });
-          wps.push({ x: sx, y: 0.0, z: 14.6 });
+        if (p.z >= 44.0) wps.push({ x: 0.0, y: 0.8, z: 43.6 });
+        if (p.x < -2.4 && p.z >= 24.0 && p.z <= 35.5) wps.push({ x: -1.6, y: 0.0, z: 30.0 });
+        if (p.x > 2.4 && p.z >= 24.0 && p.z <= 35.5) wps.push({ x: 1.6, y: 0.0, z: 30.0 });
+        if (p.z > 20.5) wps.push({ x: 0.0, y: 0.0, z: 19.8 });
+        var onVomNow = (Math.abs(Math.abs(p.x) - 5.0) <= 1.2 && p.z >= 19.8 && p.z <= 25.6 && curY > 0.15 && curY < 3.25);
+        if (!onVomNow) {
+          wps.push({ x: sx * 0.84, y: 0.0, z: 18.4 });
+          wps.push({ x: sx, y: 0.0, z: 19.6 });
         }
       }
     } else {
       if (curY >= 2.2) {
-        wps.push({ x: p.x < 0 ? -4.5 : 4.5, y: 3.4, z: 22.0 });
-        wps.push({ x: p.x < 0 ? -4.5 : 4.5, y: 3.4, z: 20.4 });
-        wps.push({ x: p.x < 0 ? -4.5 : 4.5, y: 0.0, z: 14.6 });
-        wps.push({ x: 0.0, y: 0.0, z: 14.8 });
-      } else if (p.z < 0.0) {
-        wps.push({ x: 0.0, y: 0.0, z: 0.8 });
+        var dxExit = p.x < 0 ? -5.0 : 5.0;
+        wps.push({ x: dxExit, y: 3.4, z: 25.8 });
+        wps.push({ x: dxExit, y: 0.0, z: 19.6 });
+        wps.push({ x: dxExit * 0.44, y: 0.0, z: 18.4 });
+        wps.push({ x: 0.0, y: 0.0, z: 21.0 });
+      } else if (p.z < 20.5) {
+        wps.push({ x: 0.0, y: 0.0, z: 21.0 });
       }
     }
     wps.push({ x: tx, y: targetFloorY, z: tz });
@@ -14605,11 +14655,11 @@ function planStadiumRealtimePath(st, tx, targetFloorY, tz, extraOpts) {
   }
 
   if (typeof planNavGraphRealtimePath === 'function') {
-    var onAnyStair = (Math.abs(Math.abs(p.x) - 4.5) <= 1.2 && p.z > 14.9 && p.z < 20.1 && (p.y || 0) > 0.15 && (p.y || 0) < 3.25);
+    var onAnyStair = (Math.abs(Math.abs(p.x) - 5.0) <= 1.25 && p.z > 19.9 && p.z < 25.5 && (p.y || 0) > 0.15 && (p.y || 0) < 3.25);
     planNavGraphRealtimePath(STADIUM_NAV_GRAPH, st, tx, targetFloorY, tz, eo);
     if (onAnyStair && p.waypoints && p.waypoints.length > 1) {
-      if (targetFloorY >= 2.2 && p.waypoints[0].z < 15.2) p.waypoints.shift();
-      else if (targetFloorY < 1.5 && p.waypoints[0].z > 20.0) {
+      if (targetFloorY >= 2.2 && p.waypoints[0].z < 20.2) p.waypoints.shift();
+      else if (targetFloorY < 1.5 && p.waypoints[0].z > 25.2) {
         while (p.waypoints.length > 1 && p.waypoints[0].y >= 3.0) p.waypoints.shift();
       }
       if (p.waypoints.length > 0) {
@@ -14637,22 +14687,22 @@ function executeStadiumAction(st, actionId) {
     st.pig.wearingVietnamKit = !st.pig.wearingVietnamKit;
     st.pig.wearingKit = st.pig.wearingVietnamKit;
     st.pig.outfit = st.pig.wearingVietnamKit ? 'vn_kit' : 'none';
-    st.toast = st.pig.wearingVietnamKit ? 'Đã khoác Áo Đấu ĐT Việt Nam #10! Cùng lên Khán Đài cổ vũ thôi! 🇻🇳👕' : 'Đã cất áo đấu ĐT Việt Nam!';
+    st.toast = st.pig.wearingVietnamKit ? 'Đã khoác Áo Đấu ĐT Việt Nam #10! Lên Ghế Khán Đài cổ vũ thôi! 🇻🇳👕' : 'Đã cất áo đấu ĐT Việt Nam!';
     st.toastUntil = st.t + 3.8;
   } else if (actionId === 'inspect_away_tactics') {
-    st.toast = 'Phòng Thay Đồ Đội Khách (đối xứng chuẩn FIFA): Đội hình 4-2-3-1 sẵn sàng đối đầu! 📋';
+    st.toast = 'Phòng Thay Đồ Đội Khách (6 khoang tủ chuẩn FIFA): Đội hình 4-2-3-1 sẵn sàng! 📋';
     st.toastUntil = st.t + 3.8;
   } else if (actionId === 'cheer_wave' || actionId === 'shoot_goal') {
     st.pig.cheering = true;
     st.waveUntil = st.t + 5.0;
     st.confettiUntil = st.t + 4.8;
     if (actionId === 'shoot_goal') {
-      st.ball.x = 12.0; st.ball.y = 0.96; st.ball.z = 44.0;
+      st.ball.x = 12.0; st.ball.y = 0.96; st.ball.z = 67.0;
       st.ball.shooting = true; st.ball.shootT = 0;
       st.vnScore = (st.vnScore || 2) + 1;
       st.goalFlashUntil = st.t + 3.8;
     }
-    st.toast = '🇻🇳 VIỆT NAM VÔ ĐỊCH! Cả 4 mặt khán đài 135.000 chỗ đang làm sóng người Mexican Wave! 🎉🔥';
+    st.toast = '🇻🇳 VIỆT NAM VÔ ĐỊCH! Hàng chục nghìn CĐV trên 4 mặt khán đài đang làm sóng người Mexican Wave! 🎉🔥';
     st.toastUntil = st.t + 4.2;
   } else if (actionId === 'lift_trophy') {
     st.pig.liftedTrophy = true;
@@ -14671,16 +14721,12 @@ function stepStadiumTps(st, dt) {
   st._lastDt = dt;
   var p = st.pig;
 
-  if (typeof stepSaigonBackdropTraffic === 'function' && st.traffic) {
-    stepSaigonBackdropTraffic(st.traffic, dt);
-  }
-
-  // 1. Chuyển động chú Heo Cổ Động Viên qua Cổng → Đường Hầm → 2 Phòng Thay Đồ / Thang Vomitory → Ghế Khán Đài
+  // 1. Chuyển động chú Heo dọc Đường Hầm 44m, Phòng Thay Đồ, Cầu Thang Vomitory & Ghế Khán Đài
   if (!p.seated && p.walking) {
     var curWp = (p.waypoints && p.waypoints.length > 0) ? p.waypoints[0] : { x: p.targetX, z: p.targetZ };
     var dx = curWp.x - p.x, dz = curWp.z - p.z;
     var dist = Math.hypot(dx, dz);
-    if (dist < 0.12) {
+    if (dist < 0.14) {
       p.x = curWp.x; p.z = curWp.z;
       if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
       if (p.waypoints && p.waypoints.length > 0) {
@@ -14694,7 +14740,7 @@ function stepStadiumTps(st, dt) {
           p.yaw = Math.atan2(sl.lookX - sl.x, sl.lookZ - sl.z);
           p.seated = true; p.seatChairId = sl.id;
           p.pendingSeatId = -1;
-          st.toast = 'Đã lên Khán Đài ngồi xem trận 11v11! Bấm "Hô Vang Cổ Vũ" hoặc chạm sàn đứng dậy 📣⚽';
+          st.toast = 'Đã ngồi đúng hàng ghế VIP Khán Đài! Bấm "Hô Vang Cổ Vũ" hoặc chạm sàn đứng dậy 📣⚽';
           st.toastUntil = st.t + 4.2;
         }
         if (p.pendingAction) {
@@ -14703,9 +14749,9 @@ function stepStadiumTps(st, dt) {
         }
       }
     } else {
-      var onStairOrRamp = (Math.abs(Math.abs(p.x) - 4.5) <= 1.25 && p.z >= 14.8 && p.z <= 20.2) ||
-                          (Math.abs(p.x) <= 2.4 && p.z >= 15.0 && p.z <= 22.0);
-      var speedSt = onStairOrRamp ? 2.8 : 3.8;
+      var onStairOrRamp = (Math.abs(Math.abs(p.x) - 5.0) <= 1.25 && p.z >= 19.8 && p.z <= 25.6) ||
+                          (Math.abs(p.x) <= 2.4 && p.z >= 37.0 && p.z <= 44.0);
+      var speedSt = onStairOrRamp ? 3.2 : 4.2;
       if (onStairOrRamp || typeof slidePigStep !== 'function') {
         var spd = Math.min(dist, speedSt * dt);
         var nx = p.x + (dx / dist) * spd;
@@ -14756,12 +14802,12 @@ function stepStadiumTps(st, dt) {
   var b = st.ball;
   if (b.shooting) {
     b.shootT += dt * 1.5;
-    b.x += (20.2 - b.x) * Math.min(1, dt * 5.2);
-    b.z += (44.0 - b.z) * Math.min(1, dt * 5.2);
+    b.x += (20.8 - b.x) * Math.min(1, dt * 5.2);
+    b.z += (67.0 - b.z) * Math.min(1, dt * 5.2);
     b.y = 0.94 + Math.sin(Math.min(1, b.shootT) * Math.PI) * 1.65;
     if (b.shootT >= 1.0) {
       b.shooting = false; b.shootT = 0;
-      b.x = 0.0; b.y = 0.94; b.z = 44.0;
+      b.x = 0.0; b.y = 0.94; b.z = 67.0;
     }
   } else {
     var passPool = [5, 7, 9, 10, 16, 19, 21];
@@ -14774,9 +14820,6 @@ function stepStadiumTps(st, dt) {
     }
   }
 
-  // 3. Cửa cổng mở & Hiệu ứng thoát
-  var targetDoor = st.exiting ? 0.95 : 0.45;
-  st.rightDoorOpen += (targetDoor - st.rightDoorOpen) * Math.min(1, dt * 6.0);
   if (st.exiting) st.exitFade = Math.min(1, st.exitFade + dt * 4.2);
 
   for (var ri = st.ripples.length - 1; ri >= 0; ri--) {
@@ -14785,11 +14828,11 @@ function stepStadiumTps(st, dt) {
   }
 }
 
-/* ==================== 3. RAYCAST CHỌN ĐIỂM 3D CHUẨN CỔ ĐỘNG VIÊN ==================== */
+/* ==================== 3. RAYCAST CHỌN ĐIỂM 3D CHUẨN SENIOR DESIGN ==================== */
 function raySphereStadium(ox, oy, oz, dx, dy, dz, cx, cy, cz, rad) {
   var ocx = cx - ox, ocy = cy - oy, ocz = cz - oz;
   var proj = ocx * dx + ocy * dy + ocz * dz;
-  if (proj < 0.2 || proj > 56) return -1;
+  if (proj < 0.2 || proj > 60) return -1;
   var d2 = (ocx * ocx + ocy * ocy + ocz * ocz) - proj * proj;
   return d2 <= rad * rad ? proj : -1;
 }
@@ -14804,83 +14847,80 @@ function pickStadiumTarget3D(cam, st, sx, sy) {
   dx /= dl; dy /= dl; dz /= dl;
   var ox = cam.pos.x, oy = cam.pos.y, oz = cam.pos.z;
 
-  // 1. Chạm Ghế Ngồi Khán Đài Nam (Y = 3.4, Z = 23.6) -> Leo Vomitory lên ngồi xem 11v11
+  // 1. Chạm Ghế VIP Hàng 1 Khán Đài Nam (Z = 37.2, Y = 3.4) -> Tới ngồi xem trận 11v11
   if (st.stools) {
     for (var si = 0; si < st.stools.length; si++) {
       var sl = st.stools[si];
-      var hitS = raySphereStadium(ox, oy, oz, dx, dy, dz, sl.x, sl.y + 0.52, sl.z, 0.95);
-      if (hitS > 0) {
+      if (raySphereStadium(ox, oy, oz, dx, dy, dz, sl.x, sl.y + 0.52, sl.z, 0.85) > 0) {
         return { kind: 'seat', seatChairId: sl.id, x: sl.x, y: 3.4, z: sl.z };
       }
     }
   }
 
   // 2. Chạm Bục Cúp Vàng trên Sảnh VIP -> Tới nâng Cúp
-  var cupHit = raySphereStadium(ox, oy, oz, dx, dy, dz, 11.2, 4.45, 11.2, 1.35);
-  if (cupHit > 0) {
-    return { kind: 'vip', x: 11.2, y: 3.4, z: 9.2, pendingAction: 'lift_trophy' };
+  if (raySphereStadium(ox, oy, oz, dx, dy, dz, 11.2, 4.45, 18.6, 1.35) > 0) {
+    return { kind: 'vip', x: 11.2, y: 3.4, z: 16.5, pendingAction: 'lift_trophy' };
   }
 
   // 3. Chạm Tủ Áo Phòng Thay Đồ ĐT Việt Nam (-X) -> Mặc/cất áo ĐT Việt Nam
   if (dx < -0.02) {
-    var tLk = (-12.5 - ox) / dx;
-    if (tLk > 0.3 && tLk < 20) {
+    var tLk = (-13.0 - ox) / dx;
+    if (tLk > 0.3 && tLk < 18) {
       var ly = oy + dy * tLk, lz = oz + dz * tLk;
-      if (ly >= 0 && ly <= 3.0 && lz >= 4.2 && lz <= 12.2) {
-        return { kind: 'locker', x: -11.4, y: 0.0, z: Math.max(5.5, Math.min(11.4, lz)), pendingAction: 'wear_kit' };
+      if (ly >= 0 && ly <= 3.0 && lz >= 24.4 && lz <= 35.0) {
+        return { kind: 'locker', x: -11.5, y: 0.0, z: Math.max(25.2, Math.min(33.5, lz)), pendingAction: 'wear_kit' };
       }
     }
   }
 
-  // 4. Raycast trực tiếp lên 2 Cầu Thang Vomitory & Dốc Đường Hầm FIFA (rayRampQuad)
+  // 4. Raycast trực tiếp lên 2 Cầu Thang Vomitory & Dốc Đường Hầm (rayRampQuad)
   if (typeof rayRampQuad === 'function') {
     var leftStHit = rayRampQuad(ox, oy, oz, dx, dy, dz, {
-      axis: 'z', minX: -5.6, maxX: -3.4, zStart: 14.8, zEnd: 20.2, yStart: 0.0, yEnd: 3.4
+      axis: 'z', minX: -6.2, maxX: -3.8, zStart: 19.8, zEnd: 25.6, yStart: 0.0, yEnd: 3.4
     });
     if (leftStHit) return { kind: 'left_stair', x: leftStHit.x, y: leftStHit.y, z: leftStHit.z };
 
     var rightStHit = rayRampQuad(ox, oy, oz, dx, dy, dz, {
-      axis: 'z', minX: 3.4, maxX: 5.6, zStart: 14.8, zEnd: 20.2, yStart: 0.0, yEnd: 3.4
+      axis: 'z', minX: 3.8, maxX: 6.2, zStart: 19.8, zEnd: 25.6, yStart: 0.0, yEnd: 3.4
     });
     if (rightStHit) return { kind: 'right_stair', x: rightStHit.x, y: rightStHit.y, z: rightStHit.z };
 
     var tunnelHit = rayRampQuad(ox, oy, oz, dx, dy, dz, {
-      axis: 'z', minX: -2.4, maxX: 2.4, zStart: 15.0, zEnd: 22.0, yStart: 0.0, yEnd: 0.8
+      axis: 'z', minX: -2.4, maxX: 2.4, zStart: 37.0, zEnd: 44.0, yStart: 0.0, yEnd: 0.8
     });
     if (tunnelHit) return { kind: 'tunnel_ramp', x: tunnelHit.x, y: tunnelHit.y, z: tunnelHit.z };
   }
 
-  // 5. Chạm các cao độ sàn hợp lệ: Khán Đài/VIP (Y=3.4) -> Piste Đường Biên (Y=0.8) -> Đường Hầm/Phòng Thay Đồ/Cổng A (Y=0.0)
+  // 5. Chạm các cao độ sàn hợp lệ: Khán Đài/VIP (Y=3.4) -> Đường Piste (Y=0.8) -> Đường Hầm 44m/Phòng Thay Đồ (Y=0.0)
   if (dy < -0.02) {
     var tStand = (3.4 - oy) / dy;
-    if (tStand > 0.2 && tStand < 48) {
+    if (tStand > 0.2 && tStand < 52) {
       var sx2 = ox + dx * tStand, sz2 = oz + dz * tStand;
-      var inSouthStand = (sx2 >= -22.0 && sx2 <= 22.0 && sz2 >= 18.5 && sz2 <= 25.2);
-      var inVipHall    = (sx2 >= 6.2 && sx2 <= 16.0 && sz2 >= 6.0 && sz2 < 18.5);
+      var inSouthStand = (sx2 >= -22.0 && sx2 <= 22.0 && sz2 >= 25.6 && sz2 <= 39.0);
+      var inVipHall    = (sx2 >= 7.0 && sx2 <= 16.5 && sz2 >= 13.5 && sz2 < 25.6);
       if (inSouthStand || inVipHall) {
         return { kind: 'floor', x: sx2, y: 3.4, z: sz2 };
       }
     }
     var tPitchside = (0.8 - oy) / dy;
-    if (tPitchside > 0.2 && tPitchside < 54) {
+    if (tPitchside > 0.2 && tPitchside < 58) {
       var px2 = ox + dx * tPitchside, pz2 = oz + dz * tPitchside;
-      if (px2 >= -18.0 && px2 <= 18.0 && pz2 >= 22.0 && pz2 <= 27.2) {
+      if (px2 >= -20.0 && px2 <= 20.0 && pz2 >= 44.0 && pz2 <= 49.5) {
         return { kind: 'floor', x: px2, y: 0.8, z: pz2 };
       }
-      // Chạm vào sân cỏ 11v11 -> cổ động viên tiến tới sát hàng rào an ninh gần nhất (hoặc nếu đang trên khán đài thì giữ nguyên)
-      if ((st.pig.y || 0) < 2.2 && px2 >= -22.0 && px2 <= 22.0 && pz2 > 27.2 && pz2 <= 58.0) {
-        return { kind: 'floor', x: Math.max(-17.2, Math.min(17.2, px2)), y: 0.8, z: 26.8 };
+      if ((st.pig.y || 0) < 2.2 && px2 >= -22.0 && px2 <= 22.0 && pz2 > 49.5 && pz2 <= 82.0) {
+        return { kind: 'floor', x: Math.max(-18.5, Math.min(18.5, px2)), y: 0.8, z: 48.9 };
       }
     }
     var tFloor0 = (0.0 - oy) / dy;
-    if (tFloor0 > 0.2 && tFloor0 < 38) {
+    if (tFloor0 > 0.2 && tFloor0 < 48) {
       var fx0 = ox + dx * tFloor0, fz0 = oz + dz * tFloor0;
-      var inPlaza = (fx0 >= -10.0 && fx0 <= 10.0 && fz0 >= -10.0 && fz0 <= 0.0);
-      var inMainT = (fx0 >= -2.4 && fx0 <= 2.4 && fz0 >= 0.0 && fz0 <= 15.0);
-      var inHomeL = (fx0 >= -14.0 && fx0 < -2.4 && fz0 >= 4.0 && fz0 <= 12.6);
-      var inAwayL = (fx0 > 2.4 && fx0 <= 14.0 && fz0 >= 4.0 && fz0 <= 12.6);
-      var inVomF  = (fz0 >= 12.8 && fz0 <= 15.0 && (Math.abs(fx0) >= 2.4 && Math.abs(fx0) <= 5.8));
-      if (inPlaza || inMainT || inHomeL || inAwayL || inVomF) {
+      var inConc  = (fx0 >= -3.4 && fx0 <= 3.4 && fz0 >= 0.0 && fz0 <= 20.5);
+      var inVomF  = (fz0 >= 17.0 && fz0 <= 19.8 && Math.abs(fx0) >= 3.4 && Math.abs(fx0) <= 6.4);
+      var inPTun  = (fx0 >= -2.4 && fx0 <= 2.4 && fz0 >= 20.5 && fz0 <= 37.0);
+      var inHomeL = (fx0 >= -14.5 && fx0 < -2.4 && fz0 >= 24.0 && fz0 <= 35.5);
+      var inAwayL = (fx0 > 2.4 && fx0 <= 14.5 && fz0 >= 24.0 && fz0 <= 35.5);
+      if (inConc || inVomF || inPTun || inHomeL || inAwayL) {
         return { kind: 'floor', x: fx0, y: 0.0, z: fz0 };
       }
     }
@@ -14888,7 +14928,79 @@ function pickStadiumTarget3D(cam, st, sx, sy) {
   return null;
 }
 
-/* ==================== 4. RENDER WEBGL 3D SVĐ TRỐNG ĐỒNG FIFA 11v11 (60FPS) ==================== */
+/* ==================== 4. HELPERS KIẾN TRÚC SENIOR DESIGN ART (GHẾ FIFA, KHOANG TỦ, CABIN KÍNH, MÁI VÒM) ==================== */
+// 4A. Ghế Gập FIFA Ergonomic Đúc Khít (thanh dầm, chân trụ, mặt đệm cong, tựa lưng nghiêng 10°, tay vịn đen giữ cốc)
+function drawFifaSeatUnitWebgl(wgl, x, y, z, seatCol, isVip) {
+  var dm = wgl.drawMesh;
+  // Chân khung thép
+  dm('box', 'white', x, y + 0.14, z, 0, 0, 0, 0.10, 0.28, 0.26, { tint: [0.16, 0.20, 0.26, 1] });
+  // Mặt đệm ngồi bo dốc nhẹ
+  dm('box', 'white', x, y + 0.30, z + 0.06, 0.06, 0, 0, 0.48, 0.09, 0.44, { tint: seatCol, specPow: 64 });
+  // Đệm tựa lưng vát vai nghiêng -0.18 rad
+  dm('box', 'white', x, y + 0.56, z - 0.16, -0.18, 0, 0, 0.46, 0.46, 0.08, { tint: seatCol, specPow: 64 });
+  // Đệm đầu nhỏ trên đỉnh lưng ghế VIP
+  if (isVip) {
+    dm('box', 'white', x, y + 0.80, z - 0.20, -0.18, 0, 0, 0.34, 0.09, 0.08, { tint: [0.98, 0.82, 0.18, 1] });
+  }
+  // Tay vịn đen phải có hốc đựng nước
+  dm('box', 'white', x + 0.25, y + 0.42, z + 0.02, 0, 0, 0, 0.05, 0.06, 0.36, { tint: [0.09, 0.11, 0.15, 1] });
+}
+
+// 4B. Khoang Tủ Cầu Thủ 3D Nổi Khối (2 vách đứng, hộp đèn tên, áo đấu + quần 3D treo móc, ghế da & đôi giày đinh)
+function drawLockerCubbyBay3D(wgl, cx, cz, rotY, kitCol, trimCol, numIdx) {
+  var dm = wgl.drawMesh;
+  var cosR = Math.cos(rotY), sinR = Math.sin(rotY);
+  function at(lx, ly, lz, sx, sy, sz, col, tex, em) {
+    var wx = cx + lx * cosR + lz * sinR;
+    var wz = cz - lx * sinR + lz * cosR;
+    dm('box', tex || 'white', wx, ly, wz, 0, rotY, 0, sx, sy, sz, { tint: col, emissive: em || 0 });
+  }
+  var woodCol = trimCol[0] > 0.5 ? [0.46, 0.18, 0.14, 1] : [0.16, 0.22, 0.34, 1];
+  // Vách hậu & 2 vách ngăn hốc tủ + nóc hộp đèn số áo phát sáng
+  at(0.0,  1.45, -0.34, 1.38, 2.9, 0.08, woodCol, 'lockerWall');
+  at(-0.68,1.45,  0.0,  0.08, 2.9, 0.72, woodCol);
+  at( 0.68,1.45,  0.0,  0.08, 2.9, 0.72, woodCol);
+  at(0.0,  2.72,  0.04, 1.32, 0.30, 0.66, trimCol, 'white', 0.35);
+  // Thanh treo đồ thép + Áo đấu 3D nổi khối (thân áo + 2 tay áo + quần short)
+  at(0.0,  2.26,  0.0,  1.26, 0.04, 0.04, [0.78, 0.82, 0.88, 1]);
+  at(0.0,  1.92, -0.02, 0.48, 0.60, 0.12, kitCol);
+  at(-0.31,2.08, -0.02, 0.16, 0.26, 0.12, kitCol);
+  at( 0.31,2.08, -0.02, 0.16, 0.26, 0.12, kitCol);
+  at(0.0,  1.42, -0.02, 0.42, 0.34, 0.12, trimCol);
+  // Ghế ngồi nệm da + Đôi giày đinh vàng/trắng dưới gầm
+  at(0.0,  0.48,  0.10, 1.32, 0.10, 0.68, kitCol);
+  at(-0.22,0.12,  0.08, 0.18, 0.12, 0.32, numIdx % 2 === 0 ? [0.98, 0.80, 0.18, 1] : [0.95, 0.96, 0.98, 1]);
+  at( 0.22,0.12,  0.08, 0.18, 0.12, 0.32, numIdx % 2 === 0 ? [0.98, 0.80, 0.18, 1] : [0.95, 0.96, 0.98, 1]);
+}
+
+// 4C. Khung Vòm Thép Đường Hầm Lặp Nhịp Tạo Chiều Sâu 44m
+function drawTunnelArchRib3D(wgl, z, halfW, h) {
+  var dm = wgl.drawMesh;
+  dm('box', 'white', -halfW + 0.14, h * 0.5, z, 0, 0, 0, 0.24, h, 0.28, { tint: [0.22, 0.26, 0.34, 1] });
+  dm('box', 'white',  halfW - 0.14, h * 0.5, z, 0, 0, 0, 0.24, h, 0.28, { tint: [0.22, 0.26, 0.34, 1] });
+  dm('box', 'white',  0.0, h - 0.14, z, 0, 0, 0, halfW * 2, 0.22, 0.32, { tint: [0.76, 0.58, 0.22, 1] });
+  dm('box', 'white',  0.0, h - 0.28, z, 0, 0, 0, halfW * 1.4, 0.06, 0.14, { tint: [1.0, 0.95, 0.78, 1], emissive: 1.4 });
+}
+
+// 4D. Cabin Kỹ Thuật Mái Kính Cong + 6 Ghế Recaro Cho HLV & Dự Bị
+function drawTechnicalDugoutWebgl(wgl, cx, z, accentCol) {
+  var dm = wgl.drawMesh;
+  dm('box', 'standConcrete', cx, 0.90, z, 0, 0, 0, 8.2, 0.20, 2.1, { tint: [0.26, 0.30, 0.38, 1] });
+  // Khung thép cột sau + vách bên
+  dm('box', 'white', cx - 4.0, 1.75, z - 0.9, 0, 0, 0, 0.12, 1.7, 0.12, { tint: [0.16, 0.20, 0.26, 1] });
+  dm('box', 'white', cx + 4.0, 1.75, z - 0.9, 0, 0, 0, 0.12, 1.7, 0.12, { tint: [0.16, 0.20, 0.26, 1] });
+  dm('box', 'white', cx, 2.55, z - 0.2, 0, 0, 0, 8.2, 0.10, 0.10, { tint: accentCol });
+  // 6 Ghế Recaro bọc da ngồi khít nhau
+  for (var ri = 0; ri < 6; ri++) {
+    drawFifaSeatUnitWebgl(wgl, cx - 3.0 + ri * 1.2, 1.0, z - 0.35, accentCol, true);
+  }
+  // Mái vòm kính Acrylic trong suốt
+  wgl.setBlend('alpha');
+  dm('box', 'white', cx, 2.58, z, -0.22, 0, 0, 8.2, 0.06, 2.1, { tint: [0.70, 0.88, 1.0, 0.30], specPow: 120 });
+  dm('quad','white', cx, 1.75, z - 0.95, 0, 0, 0, 8.0, 1.6, 1, { tint: [0.72, 0.90, 1.0, 0.22] });
+  wgl.setBlend(null);
+}
+
 function drawStadiumTrophyAndDrumWebgl(wgl, x, y, z, t) {
   var dm = wgl.drawMesh;
   dm('box', 'lockerWall', x, y + 0.46, z, 0, 0, 0, 2.35, 0.92, 1.85, { tint: [1.0, 0.92, 0.85, 1] });
@@ -14904,26 +15016,27 @@ function drawStadiumTrophyAndDrumWebgl(wgl, x, y, z, t) {
 
 function drawStadiumGoalWebgl(wgl, xPos, dirSign) {
   var dm = wgl.drawMesh;
-  var y0 = 0.8, zMid = 44.0;
-  dm('cyl', 'white', xPos, y0 + 1.1, zMid - 2.6, 0, 0, 0, 0.12, 2.2, 0.12, { tint: [0.98, 0.99, 1.0, 1] });
-  dm('cyl', 'white', xPos, y0 + 1.1, zMid + 2.6, 0, 0, 0, 0.12, 2.2, 0.12, { tint: [0.98, 0.99, 1.0, 1] });
-  dm('box', 'white', xPos, y0 + 2.18, zMid,       0, 0, 0, 0.12, 0.12, 5.32, { tint: [0.98, 0.99, 1.0, 1] });
+  var y0 = 0.8, zMid = 67.0;
+  dm('cyl', 'white', xPos, y0 + 1.15, zMid - 2.8, 0, 0, 0, 0.12, 2.3, 0.12, { tint: [0.98, 0.99, 1.0, 1] });
+  dm('cyl', 'white', xPos, y0 + 1.15, zMid + 2.8, 0, 0, 0, 0.12, 2.3, 0.12, { tint: [0.98, 0.99, 1.0, 1] });
+  dm('box', 'white', xPos, y0 + 2.28, zMid,       0, 0, 0, 0.12, 0.12, 5.72, { tint: [0.98, 0.99, 1.0, 1] });
+  // Cột chống lưới sau chữ L
+  dm('box', 'white', xPos + dirSign * 0.8, y0 + 2.24, zMid - 2.8, 0, 0, 0, 1.6, 0.08, 0.08, { tint: [0.82, 0.86, 0.92, 1] });
+  dm('box', 'white', xPos + dirSign * 0.8, y0 + 2.24, zMid + 2.8, 0, 0, 0, 1.6, 0.08, 0.08, { tint: [0.82, 0.86, 0.92, 1] });
+  dm('cyl', 'white', xPos + dirSign * 1.55, y0 + 1.12, zMid - 2.8, 0, 0, 0, 0.06, 2.24, 0.06, { tint: [0.76, 0.80, 0.86, 1] });
+  dm('cyl', 'white', xPos + dirSign * 1.55, y0 + 1.12, zMid + 2.8, 0, 0, 0, 0.06, 2.24, 0.06, { tint: [0.76, 0.80, 0.86, 1] });
   wgl.setBlend('alpha');
-  dm('box', 'white', xPos + dirSign * 0.65, y0 + 1.06, zMid, 0, 0, 0, 1.25, 2.1, 5.15, { tint: [0.92, 0.96, 1.0, 0.24] });
+  dm('box', 'white', xPos + dirSign * 0.78, y0 + 1.12, zMid, 0, 0, 0, 1.50, 2.2, 5.55, { tint: [0.92, 0.96, 1.0, 0.24] });
   wgl.setBlend(null);
 }
 
 function drawFloodlightTowerWebgl(wgl, x, z, lookYaw) {
   var dm = wgl.drawMesh;
-  dm('box', 'white', x, 9.6, z, 0, 0, 0, 0.75, 17.6, 0.75, { tint: [0.42, 0.48, 0.56, 1] });
-  dm('box', 'white', x, 18.6, z, 0.35, lookYaw, 0, 3.8, 1.6, 0.4, { tint: [0.20, 0.24, 0.30, 1] });
-  dm('quad', 'white', x, 18.55, z, 0.35, lookYaw, 0, 3.4, 1.3, 1, { tint: [1.0, 0.96, 0.78, 1], emissive: 1.6 });
-}
-
-function drawSpectatorSeatWebgl(wgl, x, y, z, col) {
-  var dm = wgl.drawMesh;
-  dm('box', 'white', x, y + 0.18, z, 0, 0, 0, 0.52, 0.36, 0.46, { tint: col });
-  dm('box', 'white', x, y + 0.52, z - 0.18, 0, 0, 0, 0.52, 0.48, 0.10, { tint: col });
+  dm('box', 'white', x, 10.6, z, 0, 0, 0, 0.82, 19.6, 0.82, { tint: [0.42, 0.48, 0.56, 1] });
+  dm('box', 'white', x, 20.6, z, 0.38, lookYaw, 0, 4.4, 2.0, 0.45, { tint: [0.16, 0.20, 0.26, 1] });
+  for (var li = -1; li <= 1; li++) {
+    dm('quad', 'white', x + li * 0.95 * Math.cos(lookYaw), 20.55, z - li * 0.95 * Math.sin(lookYaw), 0.38, lookYaw, 0, 0.9, 1.4, 1, { tint: [1.0, 0.97, 0.80, 1], emissive: 1.7 });
+  }
 }
 
 function renderStadiumWebglScene(wgl, cam, st, W, H) {
@@ -14932,7 +15045,7 @@ function renderStadiumWebglScene(wgl, cam, st, W, H) {
   }
   var dm = wgl.drawMesh;
   var p = st.pig;
-  var isOutdoor = (p.z < 0.0) || (p.y < 2.2 && p.z >= 19.5) || (p.y >= 2.2 && p.z >= 17.5);
+  var isOutdoor = (p.y < 2.2 && p.z >= 41.5) || (p.y >= 2.2 && p.z >= 25.4);
   var isGoalFlash = !!(st.goalFlashUntil && st.t < st.goalFlashUntil);
   var isWave = !!(st.waveUntil && st.t < st.waveUntil);
 
@@ -14944,203 +15057,253 @@ function renderStadiumWebglScene(wgl, cam, st, W, H) {
     sunCol: [1.06, 0.98, 0.86],
     wrapBias: 0.48,
     lights: [
-      { pos: [-22.0, 16.5, 24.0], col: [1.18, 1.10, 0.92] },
-      { pos: [ 22.0, 16.5, 24.0], col: [1.18, 1.10, 0.92] },
-      { pos: [-22.0, 16.5, 62.0], col: [1.18, 1.10, 0.92] },
-      { pos: [ 22.0, 16.5, 62.0], col: [1.18, 1.10, 0.92] }
+      { pos: [-24.0, 18.5, 45.0], col: [1.18, 1.10, 0.92] },
+      { pos: [ 24.0, 18.5, 45.0], col: [1.18, 1.10, 0.92] },
+      { pos: [-24.0, 18.5, 86.0], col: [1.18, 1.10, 0.92] },
+      { pos: [ 24.0, 18.5, 86.0], col: [1.18, 1.10, 0.92] }
     ],
     outdoorRect: [-1.0, 0.0, 0.0, 0.88],
     fogCol: [0.06, 0.12, 0.26],
-    fogParams: [36.0, 74.0, 0.34]
+    fogParams: [42.0, 92.0, 0.30]
   } : {
-    clearColor: [0.14, 0.06, 0.05, 1.0],
-    hemiLow: [0.26, 0.18, 0.14],
-    hemiHigh: [0.64, 0.56, 0.46],
-    sunDir: [0.35, 0.72, 0.58],
-    sunCol: [0.98, 0.84, 0.62],
-    wrapBias: 0.44,
+    clearColor: [0.10, 0.08, 0.09, 1.0],
+    hemiLow: [0.24, 0.20, 0.18],
+    hemiHigh: [0.64, 0.60, 0.54],
+    sunDir: [0.32, 0.76, 0.56],
+    sunCol: [0.98, 0.88, 0.72],
+    wrapBias: 0.46,
     lights: [
-      { pos: [0.0, 3.3, 6.0],  col: [1.15, 0.84, 0.46] },
-      { pos: [-8.0, 3.2, 8.5], col: [1.12, 0.80, 0.42] },
-      { pos: [ 8.0, 3.2, 8.5], col: [0.76, 0.90, 1.16] },
-      { pos: [0.0, 3.3, 14.5], col: [1.08, 0.78, 0.38] }
+      { pos: [0.0, 3.4, 8.0],   col: [1.18, 0.96, 0.64] },
+      { pos: [0.0, 3.4, 18.0],  col: [1.15, 0.92, 0.58] },
+      { pos: [-8.5, 3.3, 30.0], col: [1.15, 0.84, 0.48] },
+      { pos: [ 8.5, 3.3, 30.0], col: [0.82, 0.94, 1.18] }
     ],
     outdoorRect: [0.0, 0.0, 0.0, 0.0],
-    fogCol: [0.16, 0.08, 0.06],
-    fogParams: [16.0, 42.0, 0.38]
+    fogCol: [0.12, 0.10, 0.11],
+    fogParams: [22.0, 54.0, 0.34]
   };
 
   wgl.beginFrame(W, H, cam, atmo);
 
-  // A. CHÂN TRỜI SKYLINE ĐÊM SÀI GÒN & ĐẠI LỘ NGOÀI CỔNG SVĐ
+  // A. CHÂN TRỜI SKYLINE ĐÊM QUANH SVĐ (CHỈ PHẦN TRỜI CAO — KHÔNG CÓ ĐƯỜNG PHỐ NGOÀI CỔNG)
   if (typeof drawSaigonHorizonRing3D === 'function') {
-    drawSaigonHorizonRing3D(wgl, st, { forceNight: true, cx: 0, cz: 32.0, y: 15.0, rx: 36, rz: 44, widthX: 88, widthZ: 96, height: 32 });
+    drawSaigonHorizonRing3D(wgl, st, { forceNight: true, cx: 0, cz: 62.0, y: 18.0, rx: 42, rz: 46, widthX: 98, widthZ: 98, height: 34 });
   } else {
-    dm('quad', 'skyNightDome', 0, 18.0, 72.0, 0, Math.PI, 0, 92, 36, 1, { tint: [1, 1, 1, 1], emissive: 0.92 });
+    dm('quad', 'skyNightDome', 0, 20.0, 98.0, 0, Math.PI, 0, 98, 38, 1, { tint: [1, 1, 1, 1], emissive: 0.92 });
   }
 
-  // B. QUẢNG TRƯỜNG CỔNG A SOÁT VÉ (gate_plaza: X ∈ [-10, 10], Z ∈ [-10, 0], Y = 0)
-  dm('box', 'standConcrete', 0.0, -0.06, -5.0, 0, 0, 0, 20.0, 0.12, 10.0, { tint: [0.82, 0.80, 0.76, 1], us: 5, vs: 3 });
-  dm('box', 'redCarpet',     0.0, 0.006, -5.0, 0, 0, 0, 4.4,  0.012, 10.0, { tint: [1, 1, 1, 1], us: 1, vs: 3 });
-  // Ngoại cảnh đường phố & xe cộ phía trước Cổng A (Z < -10)
-  if (typeof drawSaigonStreetBackdrop3D === 'function') {
-    drawSaigonStreetBackdrop3D(wgl, st, { frontZ: -10.2, mirrorZ: true, widthX: 54.0, forceNight: true });
+  // B. ĐOẠN 1 — ĐƯỜNG HẦM CỔ ĐỘNG VIÊN (fan_concourse: X ∈ [-3.4, 3.4], Z ∈ [0, 20.5], Y = 0)
+  dm('box', 'tunnelFloorTex', 0.0, -0.05, 10.25, 0, 0, 0, 6.8, 0.10, 20.5, { tint: [1, 1, 1, 1], us: 2, vs: 6 });
+  dm('box', 'redCarpet',      0.0,  0.006, 10.25, 0, 0, 0, 2.8, 0.012, 20.4, { tint: [1, 1, 1, 1], us: 1, vs: 6 });
+  // Tường hậu Cổng Kính Turnstile QR Z = 0
+  dm('box', 'lockerWall', 0.0, 2.0, -0.08, 0, 0, 0, 7.0, 4.0, 0.16, { tint: [0.22, 0.26, 0.34, 1] });
+  dm('quad', 'gateSign',  0.0, 2.65, 0.04, 0, Math.PI, 0, 5.4, 1.3, 1, { tint: [1, 1, 1, 1], emissive: 0.55 });
+  for (var tsi = -2; tsi <= 2; tsi++) {
+    dm('box', 'white', tsi * 1.15, 0.52, 0.55, 0, 0, 0, 0.28, 1.04, 0.95, { tint: [0.72, 0.78, 0.86, 1] });
+    dm('box', 'white', tsi * 1.15, 1.06, 0.55, 0, 0, 0, 0.24, 0.06, 0.40, { tint: [0.14, 0.86, 0.45, 1], emissive: 0.9 });
   }
-  // Cổng Vòm Trống Đồng A & Trạm Soát Vé QR (X = ±2.4, Z = 0)
-  dm('box', 'lockerWall', -6.2, 2.1, 0.0, 0, 0, 0, 7.6, 4.2, 0.32, { tint: [0.85, 0.76, 0.68, 1], us: 2.5, vs: 1.4 });
-  dm('box', 'lockerWall',  6.2, 2.1, 0.0, 0, 0, 0, 7.6, 4.2, 0.32, { tint: [0.85, 0.76, 0.68, 1], us: 2.5, vs: 1.4 });
-  dm('box', 'lockerWall',  0.0, 3.85, 0.0, 0, 0, 0, 5.2, 1.1, 0.36, { tint: [0.90, 0.78, 0.62, 1] });
-  dm('quad', 'gateSign',   0.0, 3.85, -0.20, 0, 0, 0, 5.4, 1.25, 1, { tint: [1, 1, 1, 1], emissive: 0.55 });
-  dm('box', 'white', -2.35, 0.55, -0.6, 0, 0, 0, 0.42, 1.1, 1.2, { tint: [0.16, 0.22, 0.32, 1] });
-  dm('box', 'white',  2.35, 0.55, -0.6, 0, 0, 0, 0.42, 1.1, 1.2, { tint: [0.16, 0.22, 0.32, 1] });
+  // Vách tường Đoạn 1 (chừa lối rẽ 2 Cầu Thang Vomitory tại Z ∈ [17.0, 19.8]) & Trần + Hệ Vòm Thép 4m/nhịp
+  dm('box', 'lockerWall', -3.48, 2.0, 8.5,  0, 0, 0, 0.16, 4.0, 17.0, { tint: [0.58, 0.44, 0.38, 1], us: 5, vs: 1.5 });
+  dm('box', 'lockerWall',  3.48, 2.0, 8.5,  0, 0, 0, 0.16, 4.0, 17.0, { tint: [0.58, 0.44, 0.38, 1], us: 5, vs: 1.5 });
+  dm('box', 'lockerWall', -3.48, 2.0, 20.15,0, 0, 0, 0.16, 4.0, 0.7,  { tint: [0.58, 0.44, 0.38, 1] });
+  dm('box', 'lockerWall',  3.48, 2.0, 20.15,0, 0, 0, 0.16, 4.0, 0.7,  { tint: [0.58, 0.44, 0.38, 1] });
+  dm('box', 'lockerWall',  0.0,  3.95, 10.25, 0, 0, 0, 7.0, 0.16, 20.5, { tint: [0.22, 0.24, 0.30, 1], us: 2, vs: 6 });
+  for (var ar1 = 2.0; ar1 <= 18.0; ar1 += 4.0) drawTunnelArchRib3D(wgl, ar1, 3.4, 3.9);
 
-  // C. TRỤC ĐƯỜNG HẦM TRUNG TÂM & 2 NHÁNH PHÒNG THAY ĐỒ ĐỐI XỨNG FIFA
-  // Sàn Đường Hầm (Z = 0..15) + Dốc Hầm (Z = 15..22, Y: 0 → 0.8)
-  dm('box',   'lockerFloor', 0.0, -0.05, 7.5, 0, 0, 0, 4.8, 0.1, 15.0, { tint: [1, 1, 1, 1], us: 2, vs: 5 });
-  dm('box',   'redCarpet',   0.0, 0.006, 7.5, 0, 0, 0, 3.2, 0.012, 15.0, { tint: [1, 1, 1, 1], us: 1, vs: 5 });
-  dm('wedge', 'redCarpet',   0.0, 0.40, 18.5, 0, 0, 0, 4.8, 0.80, 7.0, { tint: [1, 1, 1, 1], us: 1.2, vs: 3 });
-  // Tường dọc Đường Hầm (chừa cổng 2 Phòng Thay Đồ Z ∈ [6.6, 10.6] & lối rẽ 2 Cầu thang Vomitory Z ∈ [12.8, 15.0])
-  dm('box', 'lockerWall', -2.48, 1.8, 3.3,  0, 0, 0, 0.16, 3.6, 6.6, { tint: [1, 1, 1, 1], us: 2, vs: 1 });
-  dm('box', 'lockerWall',  2.48, 1.8, 3.3,  0, 0, 0, 0.16, 3.6, 6.6, { tint: [1, 1, 1, 1], us: 2, vs: 1 });
-  dm('box', 'lockerWall', -2.48, 1.8, 11.7, 0, 0, 0, 0.16, 3.6, 2.2, { tint: [1, 1, 1, 1] });
-  dm('box', 'lockerWall',  2.48, 1.8, 11.7, 0, 0, 0, 0.16, 3.6, 2.2, { tint: [1, 1, 1, 1] });
-  dm('box', 'lockerWall', -2.48, 1.8, 18.5, 0, 0, 0, 0.16, 3.6, 7.0, { tint: [1, 1, 1, 1], us: 2, vs: 1 });
-  dm('box', 'lockerWall',  2.48, 1.8, 18.5, 0, 0, 0, 0.16, 3.6, 7.0, { tint: [1, 1, 1, 1], us: 2, vs: 1 });
-  dm('quad', 'tunnelSign', 0.0,  3.15, 14.9, 0, Math.PI, 0, 4.6, 1.1, 1, { tint: [1, 1, 1, 1], emissive: 0.45 });
+  // Quầy Nước Stadium Bar (Trái X = -2.6, Z = 5.5..10.0) & Quầy Fan Shop (Phải X = 2.6, Z = 5.5..10.0) + Tranh LED
+  dm('box', 'white', -2.75, 0.52, 7.75, 0, 0, 0, 1.2, 1.04, 4.4, { tint: [0.16, 0.24, 0.36, 1] });
+  dm('box', 'white', -2.75, 1.06, 7.75, 0, 0, 0, 1.3, 0.08, 4.5, { tint: [0.22, 0.74, 0.96, 1] });
+  dm('quad', 'stadiumBarSign', -3.36, 2.45, 7.75, 0, Math.PI * 0.5, 0, 4.0, 1.0, 1, { tint: [1, 1, 1, 1], emissive: 0.75 });
+  dm('box', 'white',  2.75, 0.52, 7.75, 0, 0, 0, 1.2, 1.04, 4.4, { tint: [0.68, 0.12, 0.12, 1] });
+  dm('box', 'white',  2.75, 1.06, 7.75, 0, 0, 0, 1.3, 0.08, 4.5, { tint: [0.98, 0.80, 0.18, 1] });
+  dm('quad', 'fanShopSign',     3.36, 2.45, 7.75, 0, -Math.PI * 0.5, 0, 4.0, 1.0, 1, { tint: [1, 1, 1, 1], emissive: 0.75 });
+  dm('quad', 'tunnelMuralVN',  -3.36, 2.1, 13.5, 0, Math.PI * 0.5, 0, 3.8, 1.9, 1, { tint: [1, 1, 1, 1], emissive: 0.45 });
+  dm('quad', 'tunnelMuralVN',   3.36, 2.1, 13.5, 0, -Math.PI * 0.5,0, 3.8, 1.9, 1, { tint: [1, 1, 1, 1], emissive: 0.45 });
+  dm('quad', 'vomitorySign',   -3.36, 3.3, 18.4, 0, Math.PI * 0.5, 0, 2.8, 0.7, 1, { tint: [1, 1, 1, 1], emissive: 0.75 });
+  dm('quad', 'vomitorySign',    3.36, 3.3, 18.4, 0, -Math.PI * 0.5,0, 2.8, 0.7, 1, { tint: [1, 1, 1, 1], emissive: 0.75 });
 
-  // Nhánh Trái: Phòng Thay Đồ ĐT Việt Nam (home_locker: X ∈ [-14.0, -2.4], Z ∈ [4.0, 12.6])
-  dm('box', 'lockerFloor', -8.2, -0.05, 8.3, 0, 0, 0, 11.6, 0.1, 8.6, { tint: [1, 1, 1, 1], us: 4, vs: 3 });
-  dm('box', 'redCarpet',   -8.2, 0.006, 8.3, 0, 0, 0, 5.4, 0.012, 3.2, { tint: [1, 1, 1, 1], us: 2, vs: 1 });
-  dm('box', 'lockerWall', -14.08, 1.9, 8.3, 0, 0, 0, 0.16, 3.8, 8.6, { tint: [1, 1, 1, 1], us: 3, vs: 1 });
-  dm('box', 'lockerWall',  -8.2, 1.9, 3.92, 0, 0, 0, 11.6, 3.8, 0.16, { tint: [1, 1, 1, 1], us: 4, vs: 1 });
-  dm('box', 'lockerWall',  -8.2, 1.9, 12.68,0, 0, 0, 11.6, 3.8, 0.16, { tint: [1, 1, 1, 1], us: 4, vs: 1 });
-  dm('box', 'lockerWall',  -8.2, 3.8, 8.3,  0, 0, 0, 11.6, 0.16, 8.6, { tint: [0.8, 0.7, 0.65, 1], us: 4, vs: 3 });
-  dm('quad', 'lockerCabinet', -13.94, 1.85, 8.3, 0, Math.PI * 0.5, 0, 7.6, 2.25, 1, { tint: [1, 1, 1, 1] });
-  dm('quad', 'tacticsBoard',   -8.2, 2.05, 4.05, 0, 0, 0, 4.2, 2.05, 1, { tint: [1, 1, 1, 1] });
-  dm('box', 'lockerWall', -8.2, 0.38, 8.4, 0, 0, 0, 2.1, 0.76, 1.4, { tint: [0.85, 0.55, 0.30, 1] });
-  dm('box', 'fifaGrass',  -8.2, 0.78, 8.4, 0, 0, 0, 1.95, 0.04, 1.25, { tint: [1, 1, 1, 1] });
-  dm('box', 'white', -11.35, 0.34, 4.95, 0, 0, 0, 1.5, 0.68, 1.3, { tint: [0.86, 0.92, 0.98, 1] });
-  dm('box', 'white', -11.35, 0.69, 4.95, 0, 0, 0, 1.3, 0.05, 1.1, { tint: [0.22, 0.74, 0.96, 1], emissive: 0.4 });
+  // C. NGÃ TƯ VOMITORY & ĐOẠN 2 — ĐƯỜNG HẦM CẦU THỦ FIFA (Z ∈ [20.5, 44.0])
+  dm('box', 'lockerWall', -2.9, 1.9, 20.5, 0, 0, 0, 1.1, 3.8, 0.20, { tint: [0.22, 0.26, 0.34, 1] });
+  dm('box', 'lockerWall',  2.9, 1.9, 20.5, 0, 0, 0, 1.1, 3.8, 0.20, { tint: [0.22, 0.26, 0.34, 1] });
+  dm('quad', 'tunnelSign', 0.0, 3.3, 20.38, 0, Math.PI, 0, 4.4, 0.95, 1, { tint: [1, 1, 1, 1], emissive: 0.55 });
+  dm('box',   'tunnelFloorTex', 0.0, -0.05, 28.75, 0, 0, 0, 4.8, 0.10, 16.5, { tint: [1, 1, 1, 1], us: 1.5, vs: 5 });
+  dm('box',   'redCarpet',      0.0,  0.006, 28.75, 0, 0, 0, 3.0, 0.012, 16.5, { tint: [1, 1, 1, 1], us: 1, vs: 5 });
+  dm('wedge', 'redCarpet',      0.0,  0.40, 40.5,  0, 0, 0, 4.8, 0.80, 7.0,  { tint: [1, 1, 1, 1], us: 1.2, vs: 3 });
+  // Tường dọc Đường Hầm Cầu Thủ (chừa cửa 2 Phòng Thay Đồ Z ∈ [27.5, 32.5])
+  dm('box', 'lockerWall', -2.48, 1.7, 24.0, 0, 0, 0, 0.16, 3.4, 7.0,  { tint: [1, 1, 1, 1], us: 2, vs: 1 });
+  dm('box', 'lockerWall',  2.48, 1.7, 24.0, 0, 0, 0, 0.16, 3.4, 7.0,  { tint: [1, 1, 1, 1], us: 2, vs: 1 });
+  dm('box', 'lockerWall', -2.48, 1.7, 38.25,0, 0, 0, 0.16, 3.4, 11.5, { tint: [1, 1, 1, 1], us: 3, vs: 1 });
+  dm('box', 'lockerWall',  2.48, 1.7, 38.25,0, 0, 0, 0.16, 3.4, 11.5, { tint: [1, 1, 1, 1], us: 3, vs: 1 });
+  dm('box', 'lockerWall',  0.0,  3.45, 28.75,0, 0, 0, 5.0, 0.16, 16.5, { tint: [0.24, 0.26, 0.32, 1], us: 1.5, vs: 5 });
+  for (var ar2 = 22.5; ar2 <= 42.5; ar2 += 4.0) drawTunnelArchRib3D(wgl, ar2, 2.4, 3.4);
 
-  // Nhánh Phải: Phòng Thay Đồ Đội Khách (away_locker: X ∈ [2.4, 14.0], Z ∈ [4.0, 12.6])
-  dm('box', 'lockerFloor', 8.2, -0.05, 8.3, 0, 0, 0, 11.6, 0.1, 8.6, { tint: [0.86, 0.92, 1.0, 1], us: 4, vs: 3 });
-  dm('box', 'lockerWall',  14.08, 1.9, 8.3, 0, 0, 0, 0.16, 3.8, 8.6, { tint: [0.42, 0.54, 0.74, 1], us: 3, vs: 1 });
-  dm('box', 'lockerWall',   8.2, 1.9, 3.92, 0, 0, 0, 11.6, 3.8, 0.16, { tint: [0.42, 0.54, 0.74, 1], us: 4, vs: 1 });
-  dm('box', 'lockerWall',   8.2, 1.9, 12.68,0, 0, 0, 11.6, 3.8, 0.16, { tint: [0.42, 0.54, 0.74, 1], us: 4, vs: 1 });
-  dm('box', 'lockerWall',   8.2, 3.8, 8.3,  0, 0, 0, 11.6, 0.16, 8.6, { tint: [0.35, 0.45, 0.62, 1], us: 4, vs: 3 });
-  dm('quad', 'awayLockerCabinet', 13.94, 1.85, 8.3, 0, -Math.PI * 0.5, 0, 7.6, 2.25, 1, { tint: [1, 1, 1, 1] });
-  dm('quad', 'awayTacticsBoard',   8.2, 2.05, 4.05, 0, 0, 0, 4.2, 2.05, 1, { tint: [1, 1, 1, 1] });
-  dm('box', 'lockerWall', 8.2, 0.38, 8.4, 0, 0, 0, 2.1, 0.76, 1.4, { tint: [0.32, 0.44, 0.68, 1] });
-  dm('box', 'fifaGrass',  8.2, 0.78, 8.4, 0, 0, 0, 1.95, 0.04, 1.25, { tint: [1, 1, 1, 1] });
-  dm('box', 'white', 11.35, 0.34, 4.95, 0, 0, 0, 1.5, 0.68, 1.3, { tint: [0.86, 0.92, 0.98, 1] });
-  dm('box', 'white', 11.35, 0.69, 4.95, 0, 0, 0, 1.3, 0.05, 1.1, { tint: [0.22, 0.74, 0.96, 1], emissive: 0.4 });
-
-  // Trần Đường Hầm Trung Tâm & Hành Lang Vomitory (Z = 0..15)
-  dm('box', 'lockerWall', 0.0, 3.72, 7.5, 0, 0, 0, 5.0, 0.16, 15.0, { tint: [0.78, 0.68, 0.62, 1], us: 1.5, vs: 5 });
-  for (var tr = 2.5; tr <= 20.5; tr += 3.0) {
-    dm('sphere', 'white', 0.0, 3.48, tr, 0, 0, 0, 0.28, 0.14, 0.28, { tint: [1.0, 0.92, 0.65, 1], emissive: 1.5 });
+  // D. 2 NHÁNH PHÒNG THAY ĐỒ VIP WORLD CUP TẢ THỰC (0% MẢNG TƯỜNG TRƠN!)
+  // D1. Nhánh Trái — Phòng Thay Đồ ĐT Việt Nam (home_locker: X ∈ [-14.5, -2.4], Z ∈ [24.0, 35.5])
+  dm('box', 'lockerFloor', -8.45, -0.05, 29.75, 0, 0, 0, 12.1, 0.10, 11.5, { tint: [1, 1, 1, 1], us: 4, vs: 4 });
+  dm('box', 'redCarpet',   -8.45,  0.006, 29.75, 0, 0, 0, 6.2,  0.012, 4.4, { tint: [1, 1, 1, 1], us: 2, vs: 1.5 });
+  dm('box', 'lockerWall', -14.58, 1.7, 29.75, 0, 0, 0, 0.16, 3.4, 11.5, { tint: [1, 1, 1, 1], us: 4, vs: 1 });
+  dm('box', 'lockerWall',  -8.45, 1.7, 23.92, 0, 0, 0, 12.1, 3.4, 0.16, { tint: [1, 1, 1, 1], us: 4, vs: 1 });
+  dm('box', 'lockerWall',  -8.45, 1.7, 35.58, 0, 0, 0, 12.1, 3.4, 0.16, { tint: [1, 1, 1, 1], us: 4, vs: 1 });
+  dm('box', 'lockerWall',  -8.45, 3.38, 29.75, 0, 0, 0, 12.1, 0.16, 11.5, { tint: [0.36, 0.22, 0.18, 1], us: 4, vs: 4 });
+  // 6 Khoang tủ 3D dọc tường Tây + 4 Khoang tủ dọc tường Bắc
+  for (var hc = 0; hc < 6; hc++) {
+    drawLockerCubbyBay3D(wgl, -13.9, 25.4 + hc * 1.55, Math.PI * 0.5, [0.85, 0.14, 0.14, 1], [0.96, 0.78, 0.18, 1], hc);
   }
+  for (var hcb = 0; hcb < 4; hcb++) {
+    drawLockerCubbyBay3D(wgl, -11.4 + hcb * 1.65, 34.9, Math.PI, [0.85, 0.14, 0.14, 1], [0.96, 0.78, 0.18, 1], hcb + 6);
+  }
+  // Đèn vòng Trống Đồng trần, TV Bảng chiến thuật 4-3-3, Bàn sa bàn kính, Giường y tế & Bồn Cryo thép
+  dm('cyl', 'dongSonCenter', -8.45, 3.28, 29.8, 0, 0, 0, 1.6, 0.08, 1.6, { tint: [1.0, 0.90, 0.45, 1], emissive: 0.7 });
+  dm('quad', 'tacticsBoard', -7.2,  1.85, 24.06, 0, 0, 0, 4.8, 2.2, 1, { tint: [1, 1, 1, 1], emissive: 0.25 });
+  dm('box', 'lockerWall', -8.4, 0.42, 29.8, 0, 0, 0, 2.2, 0.76, 1.5, { tint: [0.76, 0.46, 0.22, 1] });
+  dm('box', 'fifaGrass',  -8.4, 0.82, 29.8, 0, 0, 0, 2.0, 0.04, 1.3, { tint: [1, 1, 1, 1] });
+  dm('box', 'white',     -11.8, 0.36, 25.0, 0, 0, 0, 1.7, 0.72, 1.4, { tint: [0.86, 0.92, 0.98, 1] });
+  dm('box', 'white',     -11.8, 0.74, 25.0, 0, 0, 0, 1.45, 0.05, 1.15,{ tint: [0.22, 0.74, 0.96, 1], emissive: 0.5 });
 
-  // D. 2 CẦU THANG VOMITORY 12 BẬC LÊN KHÁN ĐÀI NAM (left_stair X=-4.5 & right_stair X=+4.5, Z: 14.8 → 20.2, Y: 0 → 3.4)
-  dm('box', 'standConcrete', -4.1, -0.04, 13.9, 0, 0, 0, 3.4, 0.08, 2.2, { tint: [0.75, 0.78, 0.82, 1] });
-  dm('box', 'standConcrete',  4.1, -0.04, 13.9, 0, 0, 0, 3.4, 0.08, 2.2, { tint: [0.75, 0.78, 0.82, 1] });
+  // D2. Nhánh Phải — Phòng Thay Đồ Đội Khách (away_locker: X ∈ [2.4, 14.5], Z ∈ [24.0, 35.5])
+  dm('box', 'lockerFloor', 8.45, -0.05, 29.75, 0, 0, 0, 12.1, 0.10, 11.5, { tint: [0.86, 0.92, 1.0, 1], us: 4, vs: 4 });
+  dm('box', 'lockerWall',  14.58, 1.7, 29.75, 0, 0, 0, 0.16, 3.4, 11.5, { tint: [0.28, 0.38, 0.56, 1], us: 4, vs: 1 });
+  dm('box', 'lockerWall',   8.45, 1.7, 23.92, 0, 0, 0, 12.1, 3.4, 0.16, { tint: [0.28, 0.38, 0.56, 1], us: 4, vs: 1 });
+  dm('box', 'lockerWall',   8.45, 1.7, 35.58, 0, 0, 0, 12.1, 3.4, 0.16, { tint: [0.28, 0.38, 0.56, 1], us: 4, vs: 1 });
+  dm('box', 'lockerWall',   8.45, 3.38, 29.75, 0, 0, 0, 12.1, 0.16, 11.5, { tint: [0.18, 0.24, 0.38, 1], us: 4, vs: 4 });
+  for (var ac = 0; ac < 6; ac++) {
+    drawLockerCubbyBay3D(wgl, 13.9, 25.4 + ac * 1.55, -Math.PI * 0.5, [0.16, 0.42, 0.88, 1], [0.88, 0.94, 1.0, 1], ac);
+  }
+  for (var acb = 0; acb < 4; acb++) {
+    drawLockerCubbyBay3D(wgl, 6.4 + acb * 1.65, 34.9, Math.PI, [0.16, 0.42, 0.88, 1], [0.88, 0.94, 1.0, 1], acb + 6);
+  }
+  dm('cyl', 'white',          8.45, 3.28, 29.8, 0, 0, 0, 1.6, 0.08, 1.6, { tint: [0.42, 0.78, 1.0, 1], emissive: 0.7 });
+  dm('quad', 'awayTacticsBoard', 7.2, 1.85, 24.06, 0, 0, 0, 4.8, 2.2, 1, { tint: [1, 1, 1, 1], emissive: 0.25 });
+  dm('box', 'lockerWall', 8.4, 0.42, 29.8, 0, 0, 0, 2.2, 0.76, 1.5, { tint: [0.26, 0.36, 0.58, 1] });
+  dm('box', 'fifaGrass',  8.4, 0.82, 29.8, 0, 0, 0, 2.0, 0.04, 1.3, { tint: [1, 1, 1, 1] });
+  dm('box', 'white',     11.8, 0.36, 25.0, 0, 0, 0, 1.7, 0.72, 1.4, { tint: [0.86, 0.92, 0.98, 1] });
+  dm('box', 'white',     11.8, 0.74, 25.0, 0, 0, 0, 1.45, 0.05, 1.15,{ tint: [0.22, 0.74, 0.96, 1], emissive: 0.5 });
+
+  // E. 2 CẦU THANG VOMITORY 12 BẬC LÊN KHÁN ĐÀI NAM (Z: 19.8 → 25.6, Y: 0 → 3.4)
+  dm('box', 'standConcrete', -4.8, -0.04, 18.4, 0, 0, 0, 3.2, 0.08, 2.8, { tint: [0.76, 0.78, 0.82, 1] });
+  dm('box', 'standConcrete',  4.8, -0.04, 18.4, 0, 0, 0, 3.2, 0.08, 2.8, { tint: [0.76, 0.78, 0.82, 1] });
   for (var vs = 0; vs < 12; vs++) {
-    var vStepZ = 14.8 + (vs + 0.5) * (5.4 / 12);
+    var vStepZ = 19.8 + (vs + 0.5) * (5.8 / 12);
     var vStepY = (vs + 1) * (3.4 / 12);
-    dm('box', 'standConcrete', -4.5, vStepY * 0.5, vStepZ, 0, 0, 0, 2.2, vStepY, 0.46, { tint: [0.85, 0.86, 0.88, 1] });
-    dm('box', 'standConcrete',  4.5, vStepY * 0.5, vStepZ, 0, 0, 0, 2.2, vStepY, 0.46, { tint: [0.85, 0.86, 0.88, 1] });
-    dm('box', 'white', -4.5, vStepY, vStepZ - 0.19, 0, 0, 0, 2.22, 0.04, 0.06, { tint: [0.96, 0.74, 0.24, 1] });
-    dm('box', 'white',  4.5, vStepY, vStepZ - 0.19, 0, 0, 0, 2.22, 0.04, 0.06, { tint: [0.96, 0.74, 0.24, 1] });
+    dm('box', 'standConcrete', -5.0, vStepY * 0.5, vStepZ, 0, 0, 0, 2.4, vStepY, 0.48, { tint: [0.86, 0.88, 0.90, 1] });
+    dm('box', 'standConcrete',  5.0, vStepY * 0.5, vStepZ, 0, 0, 0, 2.4, vStepY, 0.48, { tint: [0.86, 0.88, 0.90, 1] });
+    dm('box', 'white', -5.0, vStepY, vStepZ - 0.21, 0, 0, 0, 2.42, 0.04, 0.06, { tint: [0.96, 0.78, 0.22, 1] });
+    dm('box', 'white',  5.0, vStepY, vStepZ - 0.21, 0, 0, 0, 2.42, 0.04, 0.06, { tint: [0.96, 0.78, 0.22, 1] });
   }
+  dm('box', 'white', -3.85, 2.25, 22.7, -0.52, 0, 0, 0.08, 0.08, 6.8, { tint: [0.86, 0.90, 0.94, 1] });
+  dm('box', 'white',  3.85, 2.25, 22.7, -0.52, 0, 0, 0.08, 0.08, 6.8, { tint: [0.86, 0.90, 0.94, 1] });
 
-  // E. KHÁN ĐÀI NAM (stands_south: Y = 3.4, 10 Ghế Cổ Động Viên) & SẢNH CÚP VÀNG VIP (trophy_vip)
-  dm('box', 'standConcrete', -14.0, 3.34, 21.85, 0, 0, 0, 16.0, 0.12, 6.7, { tint: [0.86, 0.86, 0.88, 1], us: 5, vs: 2 });
-  dm('box', 'standConcrete',   0.0, 3.34, 21.85, 0, 0, 0, 6.6,  0.12, 6.7, { tint: [0.86, 0.86, 0.88, 1], us: 2, vs: 2 });
-  dm('box', 'standConcrete',  14.0, 3.34, 21.85, 0, 0, 0, 16.0, 0.12, 6.7, { tint: [0.86, 0.86, 0.88, 1], us: 5, vs: 2 });
-  dm('box', 'standConcrete',  -4.5, 3.34, 22.7,  0, 0, 0, 2.4,  0.12, 5.0, { tint: [0.86, 0.86, 0.88, 1] });
-  dm('box', 'standConcrete',   4.5, 3.34, 22.7,  0, 0, 0, 2.4,  0.12, 5.0, { tint: [0.86, 0.86, 0.88, 1] });
-  // 10 Ghế Ngồi Cổ Động Viên trên Khán Đài Nam + Lan Can Kính Z = 25.1
-  if (st.stools) {
-    for (var sIdx = 0; sIdx < st.stools.length; sIdx++) {
-      var seat = st.stools[sIdx];
-      drawSpectatorSeatWebgl(wgl, seat.x, 3.4, seat.z, (sIdx % 3 === 1) ? [0.96, 0.78, 0.14, 1] : [0.84, 0.16, 0.14, 1]);
+  // F. KHÁN ĐÀI NAM GIẬT CẤP 4 TẦNG + 60 GHẾ GẬP FIFA ERGONOMIC ĐÚC KHÍT + SẢNH CÚP VÀNG VIP
+  dm('box', 'standConcrete', 0.0, 3.34, 32.4, 0, 0, 0, 44.0, 0.12, 13.6, { tint: [0.82, 0.84, 0.88, 1], us: 10, vs: 4 });
+  // 2 Bậc Giật Cấp phía sau hàng VIP (Y = 3.85 tại Z = 34.8, Y = 4.30 tại Z = 32.8) để CĐV ngồi nhìn qua đầu hàng trước
+  dm('box', 'standConcrete', -14.0, 3.60, 34.8, 0, 0, 0, 14.0, 0.50, 1.8, { tint: [0.76, 0.78, 0.82, 1] });
+  dm('box', 'standConcrete',   0.0, 3.60, 34.8, 0, 0, 0,  6.8, 0.50, 1.8, { tint: [0.76, 0.78, 0.82, 1] });
+  dm('box', 'standConcrete',  14.0, 3.60, 34.8, 0, 0, 0, 14.0, 0.50, 1.8, { tint: [0.76, 0.78, 0.82, 1] });
+  dm('box', 'standConcrete', -14.0, 3.82, 32.8, 0, 0, 0, 14.0, 0.95, 1.8, { tint: [0.70, 0.72, 0.78, 1] });
+  dm('box', 'standConcrete',   0.0, 3.82, 32.8, 0, 0, 0,  6.8, 0.95, 1.8, { tint: [0.70, 0.72, 0.78, 1] });
+  dm('box', 'standConcrete',  14.0, 3.82, 32.8, 0, 0, 0, 14.0, 0.95, 1.8, { tint: [0.70, 0.72, 0.78, 1] });
+
+  // Thanh dầm thép + Lắp hàng chục Ghế Gập FIFA Ergonomic khít nhau (0.72m bước ghế) trên cả 3 hàng!
+  var rowDefs = [
+    { z: 37.2, y: 3.40, vip: true },
+    { z: 34.8, y: 3.85, vip: false },
+    { z: 32.8, y: 4.30, vip: false }
+  ];
+  for (var ri2 = 0; ri2 < rowDefs.length; ri2++) {
+    var rd = rowDefs[ri2];
+    dm('box', 'white', 0.0, rd.y + 0.10, rd.z, 0, 0, 0, 36.0, 0.08, 0.12, { tint: [0.22, 0.26, 0.32, 1] });
+    for (var sx = -16.8; sx <= 16.81; sx += 0.72) {
+      if (Math.abs(Math.abs(sx) - 5.0) < 1.1) continue; // Chừa 2 cầu thang lối đi X = ±5.0
+      var distS = Math.abs(sx - p.x) + Math.abs(rd.z - p.z);
+      if (p.y >= 2.2 && distS > 28.0) continue;
+      var sCol = (Math.abs(sx) < 2.2 && rd.vip) ? [0.96, 0.78, 0.14, 1] : ((Math.round((sx + 17) / 0.72 + ri2) % 5 === 0) ? [0.96, 0.76, 0.16, 1] : [0.84, 0.16, 0.14, 1]);
+      drawFifaSeatUnitWebgl(wgl, sx, rd.y, rd.z, sCol, Math.abs(sx) < 2.2 && rd.vip);
     }
   }
-  dm('box', 'white', 0.0, 4.42, 25.15, 0, 0, 0, 44.0, 0.08, 0.08, { tint: [0.96, 0.78, 0.28, 1] });
+  // Lan can kính bảo vệ Z = 39.15 nhìn thẳng xuống sân 11v11
+  dm('box', 'white', 0.0, 4.42, 39.15, 0, 0, 0, 44.0, 0.08, 0.08, { tint: [0.96, 0.78, 0.28, 1] });
   wgl.setBlend('alpha');
-  dm('quad', 'white', 0.0, 3.92, 25.15, 0, 0, 0, 44.0, 1.0, 1, { tint: [0.74, 0.92, 1.0, 0.24] });
+  dm('quad', 'white', 0.0, 3.92, 39.15, 0, 0, 0, 44.0, 1.0, 1, { tint: [0.74, 0.92, 1.0, 0.24] });
   wgl.setBlend(null);
 
-  // Sảnh Cúp Vàng VIP bên cạnh Khán Đài Nam (X ∈ [6.2, 16.0], Z ∈ [6.0, 18.5], Y = 3.4)
-  dm('box', 'vipMarble', 11.1, 3.34, 12.25, 0, 0, 0, 9.8, 0.12, 12.5, { tint: [1, 1, 1, 1], us: 4, vs: 4 });
-  dm('box', 'redCarpet', 11.1, 3.406, 12.5, 0, 0, 0, 3.4, 0.012, 11.0, { tint: [1, 1, 1, 1], us: 1, vs: 4 });
-  dm('box', 'lockerWall', 11.1, 5.1, 6.0,   0, 0, 0, 9.8, 3.4, 0.16, { tint: [1, 1, 1, 1], us: 3, vs: 1 });
-  dm('box', 'lockerWall', 16.0, 5.1, 12.25, 0, 0, 0, 0.16, 3.4, 12.5, { tint: [1, 1, 1, 1], us: 4, vs: 1 });
-  dm('box', 'lockerWall', 6.2,  5.1, 12.25, 0, 0, 0, 0.16, 3.4, 12.5, { tint: [1, 1, 1, 1], us: 4, vs: 1 });
-  dm('quad', 'hallOfChampions',  11.1, 5.15, 6.12, 0, 0, 0, 6.2, 2.4, 1, { tint: [1, 1, 1, 1] });
-  dm('quad', 'vipPressBackdrop', 15.88, 5.15, 12.8, 0, -Math.PI * 0.5, 0, 6.4, 2.5, 1, { tint: [1, 1, 1, 1] });
-  drawStadiumTrophyAndDrumWebgl(wgl, 11.2, 3.4, 11.2, st.t);
+  // Sảnh Cúp Vàng VIP nối sau Khán Đài Nam (X ∈ [7.0, 16.5], Z ∈ [13.5, 25.6], Y = 3.4)
+  dm('box', 'vipMarble', 11.75, 3.34, 19.55, 0, 0, 0, 9.5, 0.12, 12.1, { tint: [1, 1, 1, 1], us: 4, vs: 4 });
+  dm('box', 'redCarpet', 11.2,  3.406, 20.0, 0, 0, 0, 3.4, 0.012, 10.6, { tint: [1, 1, 1, 1], us: 1, vs: 4 });
+  dm('box', 'lockerWall', 11.75, 5.1, 13.5, 0, 0, 0, 9.5, 3.4, 0.16, { tint: [1, 1, 1, 1], us: 3, vs: 1 });
+  dm('box', 'lockerWall', 16.5,  5.1, 19.55,0, 0, 0, 0.16, 3.4, 12.1, { tint: [1, 1, 1, 1], us: 4, vs: 1 });
+  dm('box', 'lockerWall', 7.0,   5.1, 19.55,0, 0, 0, 0.16, 3.4, 12.1, { tint: [1, 1, 1, 1], us: 4, vs: 1 });
+  dm('quad', 'hallOfChampions',  11.75, 5.15, 13.62, 0, 0, 0, 6.2, 2.4, 1, { tint: [1, 1, 1, 1] });
+  dm('quad', 'vipPressBackdrop', 16.38, 5.15, 20.2,  0, -Math.PI * 0.5, 0, 6.4, 2.5, 1, { tint: [1, 1, 1, 1] });
+  drawStadiumTrophyAndDrumWebgl(wgl, 11.2, 3.4, 18.6, st.t);
 
-  // F. SÂN CỎ 11v11 TRỐNG ĐỒNG (X ∈ [-21, 21], Z ∈ [30, 58], Y = 0.8) + ĐƯỜNG PISTE + 2 CABIN KỸ THUẬT + RÀO AN NINH
-  dm('box', 'pisteTrack', 0.0, 0.72, 43.0, 0, 0, 0, 52.0, 0.14, 42.0, { tint: [1, 1, 1, 1], us: 10, vs: 8 });
-  dm('box', 'fifaGrass',  0.0, 0.804, 44.0, 0, 0, 0, 42.0, 0.016, 28.0, { tint: [1, 1, 1, 1], us: 10, vs: 7 });
-  // Vạch kẻ sân FIFA chuẩn + Vòng cấm địa Tây & Đông + Mặt Trời Trống Đồng giữa sân (0, 44.0)
-  dm('box', 'white',  0.0,   0.818, 30.0, 0, 0, 0, 42.0, 0.01, 0.14, { tint: [1, 1, 1, 1], emissive: 0.25 });
-  dm('box', 'white',  0.0,   0.818, 58.0, 0, 0, 0, 42.0, 0.01, 0.14, { tint: [1, 1, 1, 1], emissive: 0.25 });
-  dm('box', 'white', -21.0,  0.818, 44.0, 0, 0, 0, 0.14, 0.01, 28.0, { tint: [1, 1, 1, 1], emissive: 0.25 });
-  dm('box', 'white',  21.0,  0.818, 44.0, 0, 0, 0, 0.14, 0.01, 28.0, { tint: [1, 1, 1, 1], emissive: 0.25 });
-  dm('box', 'white',  0.0,   0.818, 44.0, 0, 0, 0, 0.12, 0.01, 28.0, { tint: [1, 1, 1, 1], emissive: 0.25 });
-  dm('box', 'white', -18.0,  0.818, 38.0, 0, 0, 0, 6.0, 0.01, 0.12, { tint: [1, 1, 1, 1] });
-  dm('box', 'white', -18.0,  0.818, 50.0, 0, 0, 0, 6.0, 0.01, 0.12, { tint: [1, 1, 1, 1] });
-  dm('box', 'white', -15.0,  0.818, 44.0, 0, 0, 0, 0.12, 0.01, 12.1, { tint: [1, 1, 1, 1] });
-  dm('box', 'white',  18.0,  0.818, 38.0, 0, 0, 0, 6.0, 0.01, 0.12, { tint: [1, 1, 1, 1] });
-  dm('box', 'white',  18.0,  0.818, 50.0, 0, 0, 0, 6.0, 0.01, 0.12, { tint: [1, 1, 1, 1] });
-  dm('box', 'white',  15.0,  0.818, 44.0, 0, 0, 0, 0.12, 0.01, 12.1, { tint: [1, 1, 1, 1] });
+  // G. SÂN CỎ 11v11 TRỐNG ĐỒNG (X ∈ [-22, 22], Z ∈ [52, 82], Y = 0.8) + CABIN KÍNH RECARO + RÀO LED + 4 CỜ GÓC
+  dm('box', 'pisteTrack', 0.0, 0.72, 66.0, 0, 0, 0, 56.0, 0.14, 44.0, { tint: [1, 1, 1, 1], us: 10, vs: 8 });
+  dm('box', 'fifaGrass',  0.0, 0.804, 67.0, 0, 0, 0, 44.0, 0.016, 30.0, { tint: [1, 1, 1, 1], us: 11, vs: 7 });
+  dm('box', 'white',  0.0,   0.818, 52.0, 0, 0, 0, 44.0, 0.01, 0.14, { tint: [1, 1, 1, 1], emissive: 0.25 });
+  dm('box', 'white',  0.0,   0.818, 82.0, 0, 0, 0, 44.0, 0.01, 0.14, { tint: [1, 1, 1, 1], emissive: 0.25 });
+  dm('box', 'white', -22.0,  0.818, 67.0, 0, 0, 0, 0.14, 0.01, 30.0, { tint: [1, 1, 1, 1], emissive: 0.25 });
+  dm('box', 'white',  22.0,  0.818, 67.0, 0, 0, 0, 0.14, 0.01, 30.0, { tint: [1, 1, 1, 1], emissive: 0.25 });
+  dm('box', 'white',  0.0,   0.818, 67.0, 0, 0, 0, 0.12, 0.01, 30.0, { tint: [1, 1, 1, 1], emissive: 0.25 });
+  dm('box', 'white', -18.5,  0.818, 60.0, 0, 0, 0, 7.0, 0.01, 0.12, { tint: [1, 1, 1, 1] });
+  dm('box', 'white', -18.5,  0.818, 74.0, 0, 0, 0, 7.0, 0.01, 0.12, { tint: [1, 1, 1, 1] });
+  dm('box', 'white', -15.0,  0.818, 67.0, 0, 0, 0, 0.12, 0.01, 14.1, { tint: [1, 1, 1, 1] });
+  dm('box', 'white',  18.5,  0.818, 60.0, 0, 0, 0, 7.0, 0.01, 0.12, { tint: [1, 1, 1, 1] });
+  dm('box', 'white',  18.5,  0.818, 74.0, 0, 0, 0, 7.0, 0.01, 0.12, { tint: [1, 1, 1, 1] });
+  dm('box', 'white',  15.0,  0.818, 67.0, 0, 0, 0, 0.12, 0.01, 14.1, { tint: [1, 1, 1, 1] });
   wgl.setBlend('alpha');
-  dm('quad', 'dongSonCenter', 0.0, 0.824, 44.0, -Math.PI * 0.5, 0, 0, 6.8, 6.8, 1, { tint: [1, 0.96, 0.65, 0.84], emissive: 0.40 });
+  dm('quad', 'dongSonCenter', 0.0, 0.824, 67.0, -Math.PI * 0.5, 0, 0, 7.2, 7.2, 1, { tint: [1, 0.96, 0.65, 0.84], emissive: 0.42 });
   wgl.setBlend(null);
 
-  drawStadiumGoalWebgl(wgl, -21.0, -1);
-  drawStadiumGoalWebgl(wgl,  21.0,  1);
+  // 4 Cột cờ phạt góc
+  var cCorners = [[-22.0, 52.0], [22.0, 52.0], [-22.0, 82.0], [22.0, 82.0]];
+  for (var cci = 0; cci < cCorners.length; cci++) {
+    dm('cyl', 'white', cCorners[cci][0], 1.4, cCorners[cci][1], 0, 0, 0, 0.05, 1.2, 0.05, { tint: [0.98, 0.98, 0.98, 1] });
+    dm('box', 'white', cCorners[cci][0] + 0.18, 1.9, cCorners[cci][1], 0, 0, 0, 0.36, 0.22, 0.04, { tint: [0.92, 0.14, 0.14, 1] });
+  }
+  drawStadiumGoalWebgl(wgl, -22.0, -1);
+  drawStadiumGoalWebgl(wgl,  22.0,  1);
+  drawTechnicalDugoutWebgl(wgl, -7.6, 47.0, [0.86, 0.16, 0.16, 1]);
+  drawTechnicalDugoutWebgl(wgl,  7.6, 47.0, [0.16, 0.42, 0.86, 1]);
 
-  // 2 Cabin Kỹ Thuật có mái kính + Ghế băng HLV & Dự bị dọc Z = 24.4..25.6
-  dm('box', 'redCarpet', -7.0, 1.05, 24.4, 0, 0, 0, 6.8, 0.5, 1.4, { tint: [1, 1, 1, 1] });
-  dm('box', 'white',     -7.0, 2.35, 24.5, -0.18, 0, 0, 7.0, 0.08, 1.8, { tint: [0.85, 0.16, 0.16, 1] });
-  dm('box', 'white',      7.0, 1.05, 24.4, 0, 0, 0, 6.8, 0.5, 1.4, { tint: [0.14, 0.34, 0.72, 1] });
-  dm('box', 'white',      7.0, 2.35, 24.5, -0.18, 0, 0, 7.0, 0.08, 1.8, { tint: [0.16, 0.42, 0.86, 1] });
+  // Rào LED An Ninh dọc Z = 49.8 & 84.2
+  dm('box', 'ledPitchBoard', 0.0, 1.25, 49.8, 0, 0, 0, 42.0, 0.9, 0.24, { tint: [1, 1, 1, 1], us: 5, vs: 1, emissive: 0.55 });
+  dm('box', 'ledPitchBoard', 0.0, 1.25, 84.2, 0, 0, 0, 46.0, 0.9, 0.24, { tint: [1, 1, 1, 1], us: 6, vs: 1, emissive: 0.55 });
 
-  // Rào Chắn LED An Ninh dọc Z = 27.5 bảo vệ sân cỏ 11v11
-  dm('box', 'ledPitchBoard', 0.0, 1.25, 27.5, 0, 0, 0, 38.0, 0.9, 0.24, { tint: [1, 1, 1, 1], us: 5, vs: 1, emissive: 0.55 });
-  dm('box', 'ledPitchBoard', 0.0, 1.25, 60.5, 0, 0, 0, 44.0, 0.9, 0.24, { tint: [1, 1, 1, 1], us: 6, vs: 1, emissive: 0.55 });
-
-  // G. KHÁN ĐÀI 3 TẦNG TRÀN NGẬP CỔ ĐỘNG VIÊN 4 PHÍA + MÁI VÒM TRỐNG ĐỒNG + JUMBOTRON LED + 4 TRỤ ĐÈN PHA
+  // H. 4 MẶT KHÁN ĐÀI PHÂN TẦNG 3 LỚP + DẢI LED RIBBON BOARD + GIÀN THÉP MÁI VÒM TRỐNG ĐỒNG + 4 THÁP ĐÈN PHA
   var waveBoost = isWave ? Math.sin(st.t * 8.0) * 0.16 : 0.0;
-  // Khán đài Bắc (3 tầng giật cấp)
-  dm('box', 'grandstandRedGold', 0.0, 3.6 + waveBoost, 63.8, -0.34, 0, 0, 52.0, 4.8, 4.6, { tint: [1, 1, 1, 1], us: 7, vs: 1.5 });
-  dm('box', 'grandstandRedGold', 0.0, 7.2 - waveBoost, 68.2, -0.38, 0, 0, 56.0, 5.2, 5.2, { tint: [1, 1, 1, 1], us: 8, vs: 1.5 });
-  // Khán đài Tây & Đông (3 tầng giật cấp)
-  dm('box', 'grandstandRedGold', -25.4, 3.6 - waveBoost, 44.0, 0, 0, -0.34, 4.6, 4.8, 42.0, { tint: [1, 1, 1, 1], us: 6, vs: 1.5 });
-  dm('box', 'grandstandRedGold', -29.8, 7.2 + waveBoost, 44.0, 0, 0, -0.38, 5.2, 5.2, 46.0, { tint: [1, 1, 1, 1], us: 7, vs: 1.5 });
-  dm('box', 'grandstandRedGold',  25.4, 3.6 + waveBoost, 44.0, 0, 0,  0.34, 4.6, 4.8, 42.0, { tint: [1, 1, 1, 1], us: 6, vs: 1.5 });
-  dm('box', 'grandstandRedGold',  29.8, 7.2 - waveBoost, 44.0, 0, 0,  0.38, 5.2, 5.2, 46.0, { tint: [1, 1, 1, 1], us: 7, vs: 1.5 });
-  // Khán đài Nam tầng trên (phía sau lưng khán giả Nam Y = 6.2..9.6)
-  dm('box', 'grandstandRedGold', 0.0, 6.8 + waveBoost, 17.5, 0.36, 0, 0, 48.0, 4.8, 4.4, { tint: [1, 1, 1, 1], us: 7, vs: 1.5 });
+  dm('box', 'grandstandRedGold', 0.0, 3.6 + waveBoost, 88.0, -0.34, 0, 0, 56.0, 4.8, 4.8, { tint: [1, 1, 1, 1], us: 7, vs: 1.5 });
+  dm('box', 'ribbonLedTex',      0.0, 6.2,             86.0,  0,    0, 0, 56.0, 0.85, 0.3, { tint: [1, 1, 1, 1], us: 6, vs: 1, emissive: 0.75 });
+  dm('box', 'grandstandRedGold', 0.0, 8.8 - waveBoost, 92.8, -0.38, 0, 0, 60.0, 5.2, 5.4, { tint: [1, 1, 1, 1], us: 8, vs: 1.5 });
 
-  // Mái vòm Trống Đồng Đông Sơn 4 cánh
-  dm('box', 'roofTrongDong', 0.0,   11.2, 67.0, 0.14, 0, 0, 58.0, 0.4, 8.0, { tint: [1, 1, 1, 1], us: 10, vs: 1, emissive: 0.16 });
-  dm('box', 'roofTrongDong', -29.0, 11.2, 44.0, 0, 0,  0.14, 8.0, 0.4, 48.0, { tint: [1, 1, 1, 1], us: 8, vs: 1, emissive: 0.16 });
-  dm('box', 'roofTrongDong',  29.0, 11.2, 44.0, 0, 0, -0.14, 8.0, 0.4, 48.0, { tint: [1, 1, 1, 1], us: 8, vs: 1, emissive: 0.16 });
-  dm('box', 'roofTrongDong', 0.0,   10.6, 17.2,-0.14, 0, 0, 52.0, 0.4, 7.0, { tint: [1, 1, 1, 1], us: 9, vs: 1, emissive: 0.16 });
+  dm('box', 'grandstandRedGold', -26.8, 3.6 - waveBoost, 67.0, 0, 0, -0.34, 4.8, 4.8, 46.0, { tint: [1, 1, 1, 1], us: 6, vs: 1.5 });
+  dm('box', 'ribbonLedTex',      -25.2, 6.2,             67.0, 0, 0,  0,    0.3, 0.85, 46.0, { tint: [1, 1, 1, 1], us: 5, vs: 1, emissive: 0.75 });
+  dm('box', 'grandstandRedGold', -31.4, 8.8 + waveBoost, 67.0, 0, 0, -0.38, 5.4, 5.2, 50.0, { tint: [1, 1, 1, 1], us: 7, vs: 1.5 });
+
+  dm('box', 'grandstandRedGold',  26.8, 3.6 + waveBoost, 67.0, 0, 0,  0.34, 4.8, 4.8, 46.0, { tint: [1, 1, 1, 1], us: 6, vs: 1.5 });
+  dm('box', 'ribbonLedTex',       25.2, 6.2,             67.0, 0, 0,  0,    0.3, 0.85, 46.0, { tint: [1, 1, 1, 1], us: 5, vs: 1, emissive: 0.75 });
+  dm('box', 'grandstandRedGold',  31.4, 8.8 - waveBoost, 67.0, 0, 0,  0.38, 5.4, 5.2, 50.0, { tint: [1, 1, 1, 1], us: 7, vs: 1.5 });
+
+  dm('box', 'grandstandRedGold', 0.0, 7.6 + waveBoost, 28.5, 0.36, 0, 0, 50.0, 4.6, 4.4, { tint: [1, 1, 1, 1], us: 7, vs: 1.5 });
+
+  // Mái vòm Trống Đồng Đông Sơn + Giàn kèo thép không gian 4 cánh
+  dm('box', 'roofTrongDong', 0.0,   13.2, 91.0,  0.14, 0, 0, 62.0, 0.42, 8.6, { tint: [1, 1, 1, 1], us: 10, vs: 1, emissive: 0.18 });
+  dm('box', 'roofTrongDong', -30.5, 13.2, 67.0,  0, 0,  0.14, 8.6, 0.42, 52.0,{ tint: [1, 1, 1, 1], us: 8, vs: 1, emissive: 0.18 });
+  dm('box', 'roofTrongDong',  30.5, 13.2, 67.0,  0, 0, -0.14, 8.6, 0.42, 52.0,{ tint: [1, 1, 1, 1], us: 8, vs: 1, emissive: 0.18 });
+  dm('box', 'roofTrongDong', 0.0,   12.6, 28.0, -0.14, 0, 0, 54.0, 0.42, 7.2, { tint: [1, 1, 1, 1], us: 9, vs: 1, emissive: 0.18 });
+  // Các thanh giàn thép trắng bạc đỡ vành mái vòm
+  for (var trk = -22; trk <= 22; trk += 11) {
+    dm('box', 'white', trk, 12.7, 87.2, 0.14, 0, 0, 0.28, 0.32, 7.8, { tint: [0.78, 0.84, 0.90, 1] });
+  }
 
   var sbTex = ensureStadiumScoreboardTex(wgl, st.vnScore, isGoalFlash);
-  dm('quad', sbTex,           0.0,   9.6, 62.0, 0, Math.PI, 0, 16.5, 4.1, 1, { tint: [1, 1, 1, 1], emissive: 1.0 });
-  dm('quad', 'bannerVnChamp', -23.0, 8.4, 44.0, 0, Math.PI * 0.5, 0, 20.0, 2.2, 1, { tint: [1, 1, 1, 1], emissive: 0.65 });
-  dm('quad', 'bannerVnChamp',  23.0, 8.4, 44.0, 0, -Math.PI * 0.5, 0, 20.0, 2.2, 1, { tint: [1, 1, 1, 1], emissive: 0.65 });
+  dm('quad', sbTex,           0.0,   11.2, 85.8, 0, Math.PI, 0, 17.5, 4.4, 1, { tint: [1, 1, 1, 1], emissive: 1.0 });
+  dm('quad', 'bannerVnChamp', -24.5, 10.2, 67.0, 0, Math.PI * 0.5, 0, 22.0, 2.4, 1, { tint: [1, 1, 1, 1], emissive: 0.65 });
+  dm('quad', 'bannerVnChamp',  24.5, 10.2, 67.0, 0, -Math.PI * 0.5, 0, 22.0, 2.4, 1, { tint: [1, 1, 1, 1], emissive: 0.65 });
 
-  drawFloodlightTowerWebgl(wgl, -24.0, 22.0,  Math.PI * 0.25);
-  drawFloodlightTowerWebgl(wgl,  24.0, 22.0, -Math.PI * 0.25);
-  drawFloodlightTowerWebgl(wgl, -24.0, 62.0,  Math.PI * 0.75);
-  drawFloodlightTowerWebgl(wgl,  24.0, 62.0, -Math.PI * 0.75);
+  drawFloodlightTowerWebgl(wgl, -26.0, 44.0,  Math.PI * 0.25);
+  drawFloodlightTowerWebgl(wgl,  26.0, 44.0, -Math.PI * 0.25);
+  drawFloodlightTowerWebgl(wgl, -26.0, 86.0,  Math.PI * 0.75);
+  drawFloodlightTowerWebgl(wgl,  26.0, 86.0, -Math.PI * 0.75);
 
   // Quả bóng FIFA 3D trên sân cỏ
   wgl.setBlend('alpha');
@@ -15148,11 +15311,11 @@ function renderStadiumWebglScene(wgl, cam, st, W, H) {
   wgl.setBlend(null);
   dm('sphere', 'white', st.ball.x, st.ball.y + 0.14, st.ball.z, 0, st.t * 3, 0, 0.34, 0.34, 0.34, { tint: [0.99, 0.99, 0.99, 1], specPow: 96 });
 
-  // H. TOÀN BỘ 22 CẦU THỦ + 3 TRỌNG TÀI + 2 HLV + 8 DỰ BỊ + 10 AN NINH + CỔ ĐỘNG VIÊN & CHÚ HEO
+  // I. TOÀN BỘ 22 CẦU THỦ + 3 TRỌNG TÀI + 2 HLV + 8 DỰ BỊ + AN NINH + CĐV NGỒI GHẾ & CHÚ HEO
   if (typeof drawHumanBillboardWebgl === 'function') {
     for (var hi = 0; hi < st.npcs.length; hi++) {
       var h = st.npcs[hi];
-      if (Math.hypot(h.x - cam.pos.x, h.z - cam.pos.z) > 68.0) continue;
+      if (Math.hypot(h.x - cam.pos.x, h.z - cam.pos.z) > 74.0) continue;
       drawHumanBillboardWebgl(wgl, cam, h, st.t);
     }
   }
@@ -15160,7 +15323,7 @@ function renderStadiumWebglScene(wgl, cam, st, W, H) {
     drawPigBillboardWebgl(wgl, cam, st.pig, st.t, false);
   }
 
-  // I. VÒNG SÓNG CHẠM SÀN & PHÁO GIẤY CỔ VŨ
+  // J. VÒNG SÓNG CHẠM SÀN & PHÁO GIẤY CỔ VŨ
   wgl.setBlend('add');
   for (var ri = 0; ri < st.ripples.length; ri++) {
     var rp = st.ripples[ri];
@@ -15215,7 +15378,7 @@ function drawGoldenTrophySprite3D(ctx, cam, wx, wy, wz, t) {
 }
 
 function renderStadiumTpsScene(ctx, cam, st, W, H) {
-  var room = st.room || st.zone || 'gate_plaza';
+  var room = st.room || st.zone || 'fan_concourse';
   var isPitch = room === 'pitch_arena' || room === 'pitchside' || room === 'stands_south';
   var isTrophy = room === 'trophy_vip';
 
