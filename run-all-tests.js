@@ -9487,4 +9487,167 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log(`✅ Test 192 Passed: Quán Cà Phê 2 Banner Văn Hóa Con Người VN Độc Bản [saigonCoffeeArtTex=${regSizes.saigonCoffeeArtTex}, ruralMekongArtTex=${regSizes.ruralMekongArtTex}, 0 mặt ẩn danh] (Quyết định 257) verified cleanly`);
 }
 
-console.log('\n🎉 ALL 192 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (192/192)!');
+// =========================================================================
+// TEST 193: ĐỒNG BỘ NGOẠI CẢNH ĐẠI LỘ + SÔNG BẠCH ĐẰNG 3 QUÁN MẶT PHỐ, XÓA MẢNG TRỜI THÔ, CAMERA CHỐNG CẮT SÀN/GÓC KHUẤT & SLIDE QUÁN PHỞ 7/7 (QĐ 258)
+// =========================================================================
+{
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const shellCode = fs.readFileSync('src/components/chat/WebglTpsBannerShell.tsx', 'utf8');
+  const tpsEng = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const wglEng = fs.readFileSync('src/components/pixel/pixelWebgl3dEngine.ts', 'utf8');
+  const bbEng = fs.readFileSync('src/components/pixel/pixelTpsBillboards.ts', 'utf8');
+  const navEng = fs.readFileSync('src/components/pixel/pixelNavGraph3d.ts', 'utf8');
+  const bdEng = fs.readFileSync('src/components/pixel/saigonStreetBackdrop3d.ts', 'utf8');
+  const adWall = fs.readFileSync('src/components/chat/adidas/adidasWallArt.ts', 'utf8');
+  const adScene = fs.readFileSync('src/components/chat/adidas/adidasTps3dScene.ts', 'utf8');
+  const phoWall = fs.readFileSync('src/components/chat/pho/phoVnWallArt.ts', 'utf8');
+  const phoScene = fs.readFileSync('src/components/chat/pho/phoTps3dScene.ts', 'utf8');
+  const cafeScene = fs.readFileSync('src/components/chat/cafe/cafeTps3dScene.ts', 'utf8');
+  const cathScene = fs.readFileSync('src/components/chat/cathedral/cathedralTps3dScene.ts', 'utf8');
+  const pagodaScene = fs.readFileSync('src/components/chat/pagoda/pagodaTps3dScene.ts', 'utf8');
+  const marketScene = fs.readFileSync('src/components/chat/market/marketTps3dScene.ts', 'utf8');
+  const stadiumScene = fs.readFileSync('src/components/chat/stadium/stadiumTps3dScene.ts', 'utf8');
+
+  assert.ok(
+    decDoc.includes('Quyết định 258') &&
+      tpsDoc.includes('QĐ 258') &&
+      shellCode.includes('buildSaigonStreetBackdrop3dScript') &&
+      wglEng.includes('clampCamPosSafe') &&
+      wglEng.includes('rayCameraOcclusionDist') &&
+      navEng.includes('function slidePigStep') &&
+      navEng.includes('function pushPointOutOfBoxes'),
+    'QĐ 258 docs, WebglTpsBannerShell street backdrop, slab/box camera clamp & slidePigStep must be wired cleanly'
+  );
+
+  // 1. Cả 7/7 công trình đồng bộ slidable movement / camBoxes hoặc slabs
+  assert.ok(
+    adScene.includes('drawSaigonStreetBackdrop3D') &&
+      adScene.includes('slabs:') &&
+      phoScene.includes('drawSaigonStreetBackdrop3D') &&
+      phoScene.includes('camBoxes:') &&
+      cafeScene.includes('slidePigStep') &&
+      cafeScene.includes('slabs:') &&
+      cathScene.includes('slidePigStep') &&
+      cathScene.includes('slabs:') &&
+      pagodaScene.includes('drawSaigonHorizonRing3D') &&
+      pagodaScene.includes('slidePigStep') &&
+      !pagodaScene.includes("dm('quad', 'white', 0, 13.5, 6") &&
+      marketScene.includes('slidePigStep') &&
+      marketScene.includes('camBoxes:') &&
+      stadiumScene.includes('drawSaigonHorizonRing3D') &&
+      stadiumScene.includes('slabs:') &&
+      stadiumScene.includes('slidePigStep'),
+    'All 7/7 scenes must wire QĐ 258 camera occlusion, horizon/street backdrop & slidePigStep movement'
+  );
+
+  // 2. Chạy thật Camera 360° chống cắt sàn tầng 2 (Hình 1) & góc khuất tường/cột (Hình 2) trên Adidas + Ngoại cảnh mặt phố & Trượt cạnh
+  const extractRaw = (src) => src.match(/return String\.raw`([\s\S]*?)`;/)[1];
+  const regTex = {};
+  const mockGl = {
+    VERTEX_SHADER: 1, FRAGMENT_SHADER: 2, ARRAY_BUFFER: 3, ELEMENT_ARRAY_BUFFER: 4, STATIC_DRAW: 5,
+    TEXTURE_2D: 6, RGBA: 7, UNSIGNED_BYTE: 8, TEXTURE_WRAP_S: 9, TEXTURE_WRAP_T: 10, REPEAT: 11, CLAMP_TO_EDGE: 12,
+    TEXTURE_MIN_FILTER: 13, TEXTURE_MAG_FILTER: 14, LINEAR_MIPMAP_LINEAR: 15, LINEAR: 16, NEAREST: 99,
+    DEPTH_TEST: 17, BLEND: 18, SRC_ALPHA: 19, ONE: 20, ONE_MINUS_SRC_ALPHA: 21, COLOR_BUFFER_BIT: 22, DEPTH_BUFFER_BIT: 24,
+    FLOAT: 25, UNSIGNED_SHORT: 26, TRIANGLES: 27, TEXTURE0: 28,
+    createShader() { return {}; }, shaderSource() {}, compileShader() {},
+    createProgram() { return {}; }, attachShader() {}, linkProgram() {}, useProgram() {},
+    getAttribLocation() { return 0; }, getUniformLocation() { return {}; },
+    createBuffer() { return {}; }, bindBuffer() {}, bufferData() {},
+    createTexture() { return {}; }, bindTexture() {}, texImage2D() {}, texParameteri() {}, generateMipmap() {},
+    activeTexture() {}, viewport() {}, clearColor() {}, clear() {}, enable() {}, disable() {}, depthMask() {}, blendFunc() {},
+    enableVertexAttribArray() {}, vertexAttribPointer() {},
+    uniformMatrix4fv() {}, uniform1i() {}, uniform1f() {}, uniform2f() {}, uniform3f() {}, uniform4f() {}, drawElements() {},
+  };
+  const mock2d = {
+    fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left', textBaseline: 'alphabetic',
+    save() {}, restore() {}, beginPath() {}, closePath() {}, clip() {}, translate() {}, rotate() {}, scale() {},
+    moveTo() {}, lineTo() {}, quadraticCurveTo() {}, bezierCurveTo() {}, arcTo() {}, rect() {}, arc() {}, ellipse() {},
+    fill() {}, stroke() {}, fillRect() {}, clearRect() {}, strokeRect() {}, fillText() {},
+    createLinearGradient() { return { addColorStop() {} }; },
+    createRadialGradient() { return { addColorStop() {} }; },
+  };
+  const mockDoc = { createElement() { return { width: 256, height: 256, getContext() { return mock2d; } }; } };
+  const mockCv = { getContext(kind) { return kind === 'webgl' ? mockGl : mock2d; } };
+
+  const run193 = new Function(
+    'document',
+    'cv',
+    'regTex',
+    extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + '\n' + extractRaw(bbEng) + '\n' + extractRaw(navEng) + '\n' +
+      extractRaw(bdEng) + '\n' + extractRaw(adWall) + '\n' + extractRaw(adScene) + `
+    var wgl = createPixelWebglRenderer(cv);
+    var origReg = wgl.registerTextureCanvas;
+    wgl.registerTextureCanvas = function(k, c, r, n) { regTex[k] = c.width + 'x' + c.height; return origReg(k, c, r, n); };
+    buildAdidasProceduralTextures(wgl);
+    var st = createAdidasTpsState();
+    var cam = createTpsCamera({ yaw: 0.04, pitch: -0.30, dist: 4.85, targetHeight: 0.72 });
+
+    // Kiểm 1: Chú heo đứng dưới mép giếng trời (5.4, 0, 11.8) & góc cột ( -2.8, 0, 1.4 ), xoay 16 góc 360° -> 0 bao giờ lọt ngang sàn T2 (3.2..3.6) dưới slab!
+    var f1SlabClip = 0, f2FloorClip = 0, totalSweeps = 0;
+    var testPts = [{ x: 5.4, y: 0, z: 11.8 }, { x: -2.8, y: 0, z: 1.4 }, { x: -5.8, y: 0, z: 10.2 }];
+    for (var pi = 0; pi < testPts.length; pi++) {
+      st.pig.x = testPts[pi].x; st.pig.y = testPts[pi].y; st.pig.z = testPts[pi].z;
+      for (var ai = 0; ai < 16; ai++) {
+        cam.yaw = (ai * Math.PI * 2) / 16;
+        cam.pitch = (ai % 2 === 0) ? -0.14 : -0.45;
+        for (var step = 0; step < 10; step++) computeAdidasWebglCamera(cam, st);
+        totalSweeps++;
+        if (cam.pos.x < 6.0 && cam.pos.z < 14.0 && !(cam.pos.x >= -9.65 && cam.pos.x <= -7.35 && cam.pos.z >= 7.95 && cam.pos.z <= 12.85)) {
+          if (cam.pos.y > 3.12 && cam.pos.y < 3.88) f1SlabClip++;
+        }
+      }
+    }
+    // Kiểm 2: Chú heo ở Tầng 2 (0, 3.4, 6.0) xoay 360° -> không tụt xuống xuyên qua sàn T2!
+    st.pig.x = 0; st.pig.y = 3.4; st.pig.z = 6.0;
+    for (var bi = 0; bi < 12; bi++) {
+      cam.yaw = (bi * Math.PI * 2) / 12;
+      cam.pitch = -0.35;
+      for (var s2 = 0; s2 < 10; s2++) computeAdidasWebglCamera(cam, st);
+      if (cam.pos.y < 3.85) f2FloorClip++;
+    }
+
+    // Kiểm 3: Render Adidas với SaigonStreetBackdrop3D + di chuyển trượt cạnh + pushPointOutOfBoxes
+    renderAdidasWebglScene(wgl, cam, st, 390, 844);
+    var pushedOut = pushPointOutOfBoxes(0, 6.3, getAdidasObstacles(0), 0.14);
+    var v0 = st.traffic.vehicles[0].x, b0 = st.traffic.boats[0].x;
+    for (var k = 0; k < 20; k++) stepAdidasTps(st, 0.05);
+    return {
+      f1SlabClip: f1SlabClip,
+      f2FloorClip: f2FloorClip,
+      totalSweeps: totalSweeps,
+      pushedClear: Math.abs(pushedOut.z - 6.3) > 0.3,
+      trafficMoved: Math.abs(st.traffic.vehicles[0].x - v0) > 1.0 && Math.abs(st.traffic.boats[0].x - b0) > 0.5,
+      hasBackdropTex: !!(regTex.sgRoadAsphalt && regTex.sgRiverWater && regTex.sgSkylineDay && regTex.sgSkylineSunset && regTex.sgSkylineNight)
+    };
+  `
+  );
+  const res193 = run193(mockDoc, mockCv, regTex);
+  assert.strictEqual(res193.f1SlabClip, 0, 'Camera at F1 near mezzanine/pillars must NEVER clip Floor 2 slab (got ' + res193.f1SlabClip + ')');
+  assert.strictEqual(res193.f2FloorClip, 0, 'Camera at F2 must NEVER drop below Floor 2 slab (got ' + res193.f2FloorClip + ')');
+  assert.strictEqual(res193.pushedClear, true, 'pushPointOutOfBoxes must push tap inside obstacle out onto clean walkway');
+  assert.strictEqual(res193.trafficMoved, true, 'Saigon street vehicles & Bach Dang River boats must animate smoothly');
+  assert.strictEqual(res193.hasBackdropTex, true, 'Shared Saigon street backdrop textures must register cleanly');
+
+  // 4. Kiểm chứng Quán Phở render 2 ô cửa sổ + ngoại cảnh Đại lộ & Sông Bạch Đằng
+  const phoCheck = new Function(
+    'document',
+    'cv',
+    extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + '\n' + extractRaw(bbEng) + '\n' + extractRaw(navEng) + '\n' +
+      extractRaw(bdEng) + '\n' + extractRaw(phoWall) + '\n' + extractRaw(phoScene) + `
+    var wgl = createPixelWebglRenderer(cv);
+    buildPhoProceduralTextures(wgl);
+    var w = createPhoTpsWorld();
+    var cam = createTpsCamera({ yaw: Math.PI, pitch: -0.25, dist: 4.5, targetHeight: 0.72 });
+    renderPhoWebglScene(wgl, cam, w, 390, 844);
+    var bStart = w.traffic ? w.traffic.boats[0].x : 0;
+    for (var s = 0; s < 10; s++) stepPhoTpsWorld(w, 0.05);
+    return { hasTraffic: !!w.traffic, boatMoved: !!w.traffic && Math.abs(w.traffic.boats[0].x - bStart) > 0.2 };
+  `
+  )(mockDoc, mockCv);
+  assert.strictEqual(phoCheck.hasTraffic && phoCheck.boatMoved, true, 'Pho restaurant street + river backdrop must run smoothly');
+
+  console.log(`✅ Test 193 Passed: Ngoại Cảnh Đại Lộ + Sông Bạch Đằng 3 Quán Mặt Phố, Xóa Mảng Trời Thô, Camera Chống Cắt Sàn/Góc Khuất (${res193.totalSweeps} sweeps, 0 clips) & Di Chuyển Chuẩn Quán Phở 7/7 (Quyết định 258) verified cleanly`);
+}
+
+console.log('\n🎉 ALL 193 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (193/193)!');

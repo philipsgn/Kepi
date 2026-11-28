@@ -160,6 +160,59 @@ function planNavGraphRealtimePath(graph, st, tx, targetFloorY, tz, extraOpts) {
   if ('tx' in p) p.tx = wps[0].x;
   if ('tz' in p) p.tz = wps[0].z;
   p.walking = true;
+  p._stuckTimer = 0;
+}
+
+/* ==================== 4. CHUẨN HÓA DI CHUYỂN TRƯỢT CẠNH & CHỐNG KẸT NHƯ QUÁN PHỞ (QĐ 258) ==================== */
+function pushPointOutOfBoxes(x, z, boxes, pad) {
+  var px = x, pz = z, m = (typeof pad === 'number') ? pad : 0.06;
+  if (!boxes || !boxes.length) return { x: px, z: pz };
+  for (var i = 0; i < boxes.length; i++) {
+    var b = boxes[i];
+    if (px >= b.x1 && px <= b.x2 && pz >= b.z1 && pz <= b.z2) {
+      var dl = px - b.x1, dr = b.x2 - px, df = pz - b.z1, db = b.z2 - pz;
+      var mn = Math.min(dl, dr, df, db);
+      if (mn === dl) px = b.x1 - m;
+      else if (mn === dr) px = b.x2 + m;
+      else if (mn === df) pz = b.z1 - m;
+      else pz = b.z2 + m;
+    }
+  }
+  return { x: px, z: pz };
+}
+
+function slidePigStep(p, wx, wz, speed, dt, clampFn) {
+  var dx = wx - p.x, dz = wz - p.z;
+  var dist = Math.hypot(dx, dz);
+  if (dist < 0.001) return { x: p.x, z: p.z, dist: dist, moved: 0 };
+  var step = Math.min(dist, speed * dt);
+  var ux = dx / dist, uz = dz / dist;
+  var best = clampFn(p.x + ux * step, p.z + uz * step);
+  var bestMoved = Math.hypot(best.x - p.x, best.z - p.z);
+
+  // Sliding collision khi va mép AABB: thử trượt dọc X hoặc Z để đi mượt như Quán Phở
+  if (bestMoved < step * 0.35) {
+    var tryX = clampFn(p.x + (ux >= 0 ? 1 : -1) * step, p.z);
+    var tryZ = clampFn(p.x, p.z + (uz >= 0 ? 1 : -1) * step);
+    var dX = Math.hypot(wx - tryX.x, wz - tryX.z);
+    var dZ = Math.hypot(wx - tryZ.x, wz - tryZ.z);
+    var mX = Math.hypot(tryX.x - p.x, tryX.z - p.z);
+    var mZ = Math.hypot(tryZ.x - p.x, tryZ.z - p.z);
+    if (mX > bestMoved * 1.15 && dX < dist) { best = tryX; bestMoved = mX; }
+    if (mZ > bestMoved * 1.15 && dZ < dist && dZ <= dX) { best = tryZ; bestMoved = mZ; }
+  }
+
+  var stepYaw = (bestMoved > 0.004) ? Math.atan2(best.x - p.x, best.z - p.z) : Math.atan2(dx, dz);
+  p.yaw = (typeof tpsLerpAngle === 'function')
+    ? tpsLerpAngle(p.yaw || 0, stepYaw, Math.min(1, dt * 12))
+    : stepYaw;
+
+  if (bestMoved < 0.015 * step) {
+    p._stuckTimer = (p._stuckTimer || 0) + dt;
+  } else {
+    p._stuckTimer = 0;
+  }
+  return { x: best.x, z: best.z, dist: dist, moved: bestMoved, stuck: (p._stuckTimer || 0) > 0.42 };
 }
 `;
 }

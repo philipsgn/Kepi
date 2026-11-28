@@ -67,6 +67,18 @@ var CATHEDRAL_NAV_GRAPH = {
     { axis: 'z', pos: 14.8, minSpan: -15.2, maxSpan: -6.0, minY: 0.0, maxY: 7.8, openings: [] },
     { axis: 'x', pos: -5.5, minSpan:  14.8, maxSpan: 24.4, minY: 0.0, maxY: 7.8, openings: [] },
     { axis: 'x', pos:  5.5, minSpan:  14.8, maxSpan: 24.4, minY: 0.0, maxY: 7.8, openings: [] }
+  ],
+  slabs: [
+    // Sàn Gác Chuông & Đàn Ống Cánh Tây Y = 4.0 (trừ lỗ cầu thang X ∈ [-7.55, -6.0], Z ∈ [7.9, 12.9])
+    {
+      minX: -15.2, maxX: -6.0, minZ: 4.0, maxZ: 14.8, yLow: 3.86, yHigh: 4.04,
+      hole: { minX: -7.55, maxX: -6.0, minZ: 7.9, maxZ: 12.9 }
+    }
+  ],
+  camBoxes: [
+    // Bàn thờ đá hoa cương, Tượng Đức Mẹ & Đàn Ống Pipe Organ
+    { x1: -1.85, y1: 0.45, z1: 20.0, x2: 1.85, y2: 1.85, z2: 21.3 },
+    { x1: -14.0, y1: 4.0,  z1: 13.2, x2: -8.6, y2: 7.4,  z2: 14.4 }
   ]
 };
 
@@ -530,11 +542,24 @@ function stepCathedralTps(st, dt) {
       var onAnyRamp = (p.x >= -6.0 && p.x <= -3.0 && p.z >= 11.0 && p.z <= 12.6) ||
                       (p.x >= -7.45 && p.x <= -6.0 && p.z >= 7.8 && p.z <= 11.0) ||
                       (p.x >= -2.2 && p.x <= 2.2 && p.z >= 14.5 && p.z <= 16.1);
-      var spd = Math.min(dist, (onAnyRamp ? 2.6 : 3.6) * dt);
-      var next = clampCathedralWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd, p.y);
-      p.x = next.x; p.z = next.z;
-      var tyaw = Math.atan2(dx, dz);
-      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
+      var speedCt = onAnyRamp ? 2.6 : 3.6;
+      if (onAnyRamp || typeof slidePigStep !== 'function') {
+        var spd = Math.min(dist, speedCt * dt);
+        var next = clampCathedralWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd, p.y);
+        p.x = next.x; p.z = next.z;
+        var tyaw = Math.atan2(dx, dz);
+        p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
+      } else {
+        var stpCt = slidePigStep(p, curWp.x, curWp.z, speedCt, dt, function(cx, cz) {
+          return clampCathedralWalkPos(st, cx, cz, p.y);
+        });
+        p.x = stpCt.x; p.z = stpCt.z;
+        if (stpCt.stuck) {
+          if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
+          if (!p.waypoints || p.waypoints.length === 0) { p.walking = false; p.pendingAction = null; }
+          p._stuckTimer = 0;
+        }
+      }
     }
   }
 
@@ -885,8 +910,8 @@ function renderCathedralWebglScene(wgl, cam, st, W, H) {
   dm('box', 'marseilleBrick', -3.725, 3.9, 0, 0, 0, 0, 4.55, 7.8, 0.16, { tint: [1, 1, 1, 1], us: 2, vs: 3 });
   dm('box', 'marseilleBrick',  3.725, 3.9, 0, 0, 0, 0, 4.55, 7.8, 0.16, { tint: [1, 1, 1, 1], us: 2, vs: 3 });
   dm('box', 'marseilleBrick',  0.0,   5.5, 0, 0, 0, 0, 2.90, 4.6, 0.16, { tint: [1, 1, 1, 1], us: 1.5, vs: 2 });
-  // Ánh nắng hắt sau cửa chính
-  dm('quad', 'white', 0, 1.6, -0.04, 0, 0, 0, 2.9, 3.2, 1, { tint: [1.0, 0.94, 0.78, 1], emissive: 1.25 });
+  // Ánh nắng vàng ấm tự nhiên sau cửa chính (không mảng trắng chói)
+  dm('quad', 'white', 0, 1.6, -0.04, 0, 0, 0, 2.9, 3.2, 1, { tint: [0.96, 0.86, 0.66, 1], emissive: 0.72 });
   var dAng = st.doorOpen * 0.92;
   dm('box', 'cathedralDoor', -1.45 + Math.cos(0.18) * 0.72, 1.6, 0.04 + Math.sin(0.18) * 0.72, 0, -0.18, 0, 1.44, 3.2, 0.08, { tint: [1, 1, 1, 1] });
   dm('box', 'cathedralDoor',  1.45 - Math.cos(dAng) * 0.72, 1.6, 0.04 + Math.sin(dAng) * 0.72, 0,  dAng, 0, 1.44, 3.2, 0.08, { tint: [1, 1, 1, 1] });

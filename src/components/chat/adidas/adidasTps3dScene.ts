@@ -40,7 +40,13 @@ var ADIDAS_NAV_GRAPH = {
         { a1: 16.5, a2: 20.5, y1: 0.0, y2: 3.5 }
       ]
     },
-    { axis: 'x', pos: 6.0, minSpan: 0.0, maxSpan: 14.0, minY: 3.4, maxY: 7.80, openings: [] },
+    {
+      axis: 'x', pos: 6.0, minSpan: 0.0, maxSpan: 14.0, minY: 3.4, maxY: 7.80, openings: []
+    },
+    // Vách lửng giếng trời mặt Bắc Tầng 2 (Z = 14.0, X ∈ [-10, 6], Y = 4.45..7.80) - chừa khe thoáng lan can Y=3.4..4.45
+    {
+      axis: 'z', pos: 14.0, minSpan: -10.0, maxSpan: 6.0, minY: 4.35, maxY: 7.80, openings: []
+    },
     // Vách ngăn Z = 14.0 cánh Đông Tầng 1 (Thay Đồ ↔ Sân Bóng)
     {
       axis: 'z', pos: 14.0, minSpan: 6.0, maxSpan: 14.0, minY: 0.0, maxY: 4.65,
@@ -48,6 +54,25 @@ var ADIDAS_NAV_GRAPH = {
         { a1: 8.2, a2: 11.8, y1: 0.0, y2: 3.4 }
       ]
     }
+  ],
+  slabs: [
+    // Sàn Tầng 2 (Y = 3.30..3.42), trừ lỗ cầu thang X ∈ [-9.65, -7.35], Z ∈ [7.95, 12.85]
+    {
+      minX: -10.0, maxX: 6.0, minZ: 0.0, maxZ: 14.0, yLow: 3.29, yHigh: 3.42,
+      hole: { minX: -9.65, maxX: -7.35, minZ: 7.95, maxZ: 12.85 }
+    }
+  ],
+  camBoxes: [
+    // Vách mặt sau/hông lỗ cầu thang Tầng 1 & vách ngăn kín bên cạnh lỗ thang
+    { x1: -10.0, y1: 0.0, z1: 12.75, x2: -7.25, y2: 3.35, z2: 14.05 },
+    { x1: -7.55, y1: 0.0, z1: 8.00,  x2: -7.22, y2: 4.25, z2: 12.85 },
+    // Trụ cột dày mặt tiền Z = 0 giữa 2 cửa sổ & 3 vòm Tầng 2
+    { x1: -9.95, y1: 0.0, z1: -0.20, x2: -7.60, y2: 7.80, z2: 0.15 },
+    { x1: -3.20, y1: 0.0, z1: -0.20, x2: -1.45, y2: 7.80, z2: 0.15 },
+    { x1:  1.45, y1: 0.0, z1: -0.20, x2:  2.40, y2: 7.80, z2: 0.15 },
+    { x1:  5.25, y1: 0.0, z1: -0.20, x2:  6.05, y2: 7.80, z2: 0.15 },
+    // Tường cánh phải X = 14 & vách POS Tầng 2
+    { x1:  3.20, y1: 3.4, z1:  4.20, x2:  5.95, y2: 6.00, z2: 9.60 }
   ],
   edges: [
     {
@@ -322,13 +347,18 @@ function createAdidasTpsState() {
     });
   }
 
-  // 4 xe chạy 2 làn trên đại lộ phía trước cửa sổ mặt tiền (Z < 0)
-  var streetVehicles = [
-    { kind: 'taxi', x: -12.0, z: -4.1, dir:  1, speed: 3.8, col: [0.98, 0.78, 0.14, 1] },
-    { kind: 'moto', x:  6.0,  z: -3.4, dir:  1, speed: 4.6, col: [0.85, 0.16, 0.16, 1] },
-    { kind: 'car',  x:  13.0, z: -6.2, dir: -1, speed: 3.4, col: [0.15, 0.38, 0.85, 1] },
-    { kind: 'moto', x: -4.0,  z: -6.8, dir: -1, speed: 4.9, col: [0.06, 0.58, 0.45, 1] }
-  ];
+  // Ngoại cảnh dùng chung Đồng bộ Tab Banner Khám phá (Đại lộ 2 làn 6 xe + Sông Bạch Đằng 3 tàu chạy)
+  var traffic = (typeof createSaigonBackdropTraffic === 'function')
+    ? createSaigonBackdropTraffic()
+    : {
+        vehicles: [
+          { kind: 'taxi', x: -12.0, z: -4.1, lane: 0, dir:  1, speed: 3.8, col: [0.98, 0.78, 0.14, 1] },
+          { kind: 'moto', x:  6.0,  z: -3.4, lane: 0, dir:  1, speed: 4.6, col: [0.85, 0.16, 0.16, 1] },
+          { kind: 'car',  x:  13.0, z: -6.2, lane: 1, dir: -1, speed: 3.4, col: [0.15, 0.38, 0.85, 1] },
+          { kind: 'moto', x: -4.0,  z: -6.8, lane: 1, dir: -1, speed: 4.9, col: [0.06, 0.58, 0.45, 1] }
+        ],
+        boats: []
+      };
 
   return {
     room: 'hall',
@@ -344,13 +374,15 @@ function createAdidasTpsState() {
       boughtSamba: false,
       outfit: 'none',
       pendingAction: null,
-      customBadge: ''
+      customBadge: '',
+      _stuckTimer: 0
     },
     npcs: npcs,
     hallStaff: hallStaff,
     upperCashier: upperCashier,
     particles: particles,
-    streetVehicles: streetVehicles,
+    traffic: traffic,
+    streetVehicles: traffic.vehicles,
     leftDoorOpen: 0.0,
     rightDoorOpen: 0.0,
     exitFade: 0,
@@ -500,10 +532,14 @@ function planAdidasRealtimePath(st, tx, targetFloorY, tz, pendingAction) {
 
   var fyTarget = (typeof targetFloorY === 'number' && targetFloorY >= 1.9) ? 3.4 : 0;
   var isStairTarget = (tx >= -9.6 && tx <= -7.4 && tz >= 8.0 && tz <= 12.8 && targetFloorY > 0.05 && targetFloorY < 3.35);
+  var pushed = isStairTarget || typeof pushPointOutOfBoxes !== 'function'
+    ? { x: tx, z: tz }
+    : pushPointOutOfBoxes(tx, tz, getAdidasObstacles(fyTarget), 0.14);
   var cl = isStairTarget
-    ? { x: Math.max(-9.3, Math.min(-7.7, tx)), z: Math.max(8.05, Math.min(12.75, tz)) }
-    : clampAdidasWalkPos(st, tx, tz, fyTarget);
+    ? { x: Math.max(-9.3, Math.min(-7.7, pushed.x)), z: Math.max(8.05, Math.min(12.75, pushed.z)) }
+    : clampAdidasWalkPos(st, pushed.x, pushed.z, fyTarget);
   tx = cl.x; tz = cl.z;
+  p._stuckTimer = 0;
 
   var onStairsNow = (p.x >= -9.65 && p.x <= -7.35 && p.z > 8.05 && p.z < 12.75 && p.y > 0.15 && p.y < 3.25);
   if (onStairsNow || isStairTarget) {
@@ -661,7 +697,10 @@ function stepAdidasTps(st, dt) {
   }
 
   // Xe chạy 2 làn ngoài cửa sổ mặt tiền Z < 0
-  if (st.streetVehicles) {
+  // Xe chạy đại lộ & tàu sông Bạch Đằng ngoài cửa sổ (Z < 0)
+  if (typeof stepSaigonBackdropTraffic === 'function' && st.traffic) {
+    stepSaigonBackdropTraffic(st.traffic, dt);
+  } else if (st.streetVehicles) {
     for (var svi = 0; svi < st.streetVehicles.length; svi++) {
       var vh = st.streetVehicles[svi];
       vh.x += vh.dir * vh.speed * dt;
@@ -740,18 +779,32 @@ function stepAdidasTps(st, dt) {
       }
     } else {
       var onStairs = (p.x >= -9.65 && p.x <= -7.35 && p.z > 7.95 && p.z < 12.85);
-      var spd = Math.min(dist, (onStairs ? 2.6 : 3.6) * dt);
-      var nx = p.x + (dx / dist) * spd;
-      var nz = p.z + (dz / dist) * spd;
+      var speedNow = onStairs ? 2.6 : 3.6;
       if (onStairs) {
-        p.x = Math.max(-9.45, Math.min(-7.55, nx));
-        p.z = nz;
+        var spd = Math.min(dist, speedNow * dt);
+        p.x = Math.max(-9.45, Math.min(-7.55, p.x + (dx / dist) * spd));
+        p.z = p.z + (dz / dist) * spd;
+        var tyaw = Math.atan2(dx, dz);
+        p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
+      } else if (typeof slidePigStep === 'function') {
+        var stp = slidePigStep(p, curWp.x, curWp.z, speedNow, dt, function(cx, cz) {
+          return clampAdidasWalkPos(st, cx, cz, p.y);
+        });
+        p.x = stp.x; p.z = stp.z;
+        if (stp.stuck) {
+          if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
+          if (!p.waypoints || p.waypoints.length === 0) {
+            p.walking = false; p.pendingAction = null;
+          }
+          p._stuckTimer = 0;
+        }
       } else {
-        var next = clampAdidasWalkPos(st, nx, nz, p.y);
+        var spd2 = Math.min(dist, speedNow * dt);
+        var next = clampAdidasWalkPos(st, p.x + (dx / dist) * spd2, p.z + (dz / dist) * spd2, p.y);
         p.x = next.x; p.z = next.z;
+        var tyaw2 = Math.atan2(dx, dz);
+        p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw2, Math.min(1, dt * 12)) : tyaw2;
       }
-      var tyaw = Math.atan2(dx, dz);
-      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
     p.y = getAdidasSurfaceY(p.x, p.z, p.y);
     st.floor = p.y >= 1.9 ? 2 : 1;
@@ -822,11 +875,13 @@ function computeAdidasWebglCamera(cam, st) {
   var p = st.pig;
   var stairT = Math.max(0, Math.min(1, (p.y || 0) / 3.4));
   var underUpperSlab = (p.x < 6.0 && p.z < 14.0);
-  var maxCamY = underUpperSlab ? (3.34 + stairT * 4.46) : 4.65;
+  var maxCamY = underUpperSlab ? (3.24 + stairT * 4.56) : 4.65;
   var navCfg = {
     wallMargin: 0.38,
     zones: ADIDAS_NAV_GRAPH.zones,
     dividerWalls: ADIDAS_NAV_GRAPH.dividerWalls,
+    slabs: ADIDAS_NAV_GRAPH.slabs,
+    camBoxes: ADIDAS_NAV_GRAPH.camBoxes,
     outerBounds: { minX: -10.0, maxX: 14.0, minZ: 0.0, maxZ: 24.0, minY: 0.45, maxY: maxCamY }
   };
   if (typeof computeWebglTpsCamera === 'function') {
@@ -1167,25 +1222,27 @@ function renderAdidasWebglScene(wgl, cam, st, W, H) {
   wgl.beginFrame(W, H, cam, adidasAtmo);
   var dm = wgl.drawMesh;
 
-  // ==================== A. NGOẠI CẢNH ĐẠI LỘ SÀI GÒN & BẦU TRỜI NGOÀI CỬA SỔ (Z < 0) ====================
-  var skyKey = getAdidasSkyKey();
-  dm('quad', skyKey, -2.0, 5.2, -20.5, 0, 0, 0, 48.0, 14.0, 1, { tint: [1, 1, 1, 1], emissive: 0.95 });
-  // Vỉa hè đá & Bậc tam cấp trước cửa chính + Đường nhựa 2 làn + dải cây xa
-  dm('box', 'mallTerrazzoFloor', 2.0, -0.06, -1.45, 0, 0, 0, 42.0, 0.12, 2.9, { tint: [0.95, 0.90, 0.82, 1], us: 16, vs: 2 });
+  // ==================== A. NGOẠI CẢNH ĐẠI LỘ 2 CHIỀU, SÔNG BẠCH ĐẰNG & SKYLINE 3 SẮC (QĐ 258 — ĐỒNG BỘ TAB BANNER) ====================
+  if (typeof drawSaigonStreetBackdrop3D === 'function') {
+    drawSaigonStreetBackdrop3D(wgl, st, st.traffic, {
+      centerX: -2.0,
+      frontZ: 0.0,
+      width: 60,
+      leftNeighborX: -14.2,
+      rightNeighborX: 18.2,
+      neighborHeight: 7.8
+    });
+  } else {
+    var skyKey = getAdidasSkyKey();
+    dm('quad', skyKey, -2.0, 5.2, -20.5, 0, 0, 0, 48.0, 14.0, 1, { tint: [1, 1, 1, 1], emissive: 0.95 });
+    dm('box', 'mallTerrazzoFloor', 2.0, -0.06, -1.45, 0, 0, 0, 42.0, 0.12, 2.9, { tint: [0.95, 0.90, 0.82, 1], us: 16, vs: 2 });
+    dm('box', 'roadAsphaltTex', 2.0, -0.08, -5.5, 0, 0, 0, 46.0, 0.10, 5.4, { tint: [1, 1, 1, 1], us: 10, vs: 1 });
+    if (st.streetVehicles) {
+      for (var vi = 0; vi < st.streetVehicles.length; vi++) drawAdidasStreetVehicle3D(wgl, st.streetVehicles[vi]);
+    }
+  }
+  // Bậc tam cấp trước cửa chính & 2 giàn hoa giấy hồng rực 2 bên mặt tiền (bám sát Hub Banner)
   dm('box', 'white', 0.0, 0.02, -0.45, 0, 0, 0, 3.4, 0.08, 0.8, { tint: [0.85, 0.87, 0.90, 1] });
-  dm('box', 'roadAsphaltTex', 2.0, -0.08, -5.5, 0, 0, 0, 46.0, 0.10, 5.4, { tint: [1, 1, 1, 1], us: 10, vs: 1 });
-  dm('box', 'turfPitchTex',   2.0, -0.08, -14.2, 0, 0, 0, 48.0, 0.10, 12.0, { tint: [0.85, 0.90, 0.82, 1], us: 8, vs: 3 });
-  // 2 dãy nhà phố cánh hông & hàng cây bờ kè che kín góc nhìn xiên qua cửa sổ
-  dm('box', 'mallWarmWall', -14.5, 3.6, -7.5, 0, 0, 0, 8.5, 7.6, 15.0, { tint: [0.92, 0.88, 0.80, 1], us: 3, vs: 3 });
-  dm('box', 'mallWarmWall',  17.5, 3.6, -7.5, 0, 0, 0, 8.5, 7.6, 15.0, { tint: [0.88, 0.84, 0.78, 1], us: 3, vs: 3 });
-  for (var tx = -12; tx <= 14; tx += 5.5) {
-    dm('cyl', 'limWood', tx, 1.3, -9.2, 0, 0, 0, 0.25, 2.6, 0.25, { tint: [0.45, 0.28, 0.16, 1] });
-    dm('sphere', 'turfPitchTex', tx, 3.0, -9.2, 0, 0, 0, 2.2, 1.9, 2.2, { tint: [0.32, 0.74, 0.36, 1] });
-  }
-  if (st.streetVehicles) {
-    for (var vi = 0; vi < st.streetVehicles.length; vi++) drawAdidasStreetVehicle3D(wgl, st.streetVehicles[vi]);
-  }
-  // 2 Giàn hoa giấy hồng rực 2 bên mặt tiền (bám sát Hub Banner)
   dm('box', 'bougainvilleaTex', -9.45, 1.6, -0.35, 0, 0, 0, 1.1, 3.2, 0.55, { tint: [1, 1, 1, 1] });
   dm('box', 'bougainvilleaTex',  5.65, 1.6, -0.35, 0, 0, 0, 0.8, 3.2, 0.55, { tint: [1, 1, 1, 1] });
 

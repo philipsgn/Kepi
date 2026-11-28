@@ -135,8 +135,8 @@ function bindTpsCanvasGestures(cv, cam, opts) {
   var lastX = 0, lastY = 0, startX = 0, startY = 0;
   var activePts = {};
   var pinchStartD = 0, pinchStartDist = 4.85;
-  var minPitch = (opts && typeof opts.minPitch === 'number') ? opts.minPitch : -0.68;
-  var maxPitch = (opts && typeof opts.maxPitch === 'number') ? opts.maxPitch : -0.08;
+  var minPitch = (opts && typeof opts.minPitch === 'number') ? opts.minPitch : -0.56;
+  var maxPitch = (opts && typeof opts.maxPitch === 'number') ? opts.maxPitch : -0.10;
   var dragSlop = (opts && typeof opts.dragSlop === 'number') ? opts.dragSlop : 13;
 
   function getPt(e) {

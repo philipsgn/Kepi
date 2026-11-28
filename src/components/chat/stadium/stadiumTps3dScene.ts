@@ -88,6 +88,17 @@ var STADIUM_NAV_GRAPH = {
     { axis: 'z', pos: 6.0,  minSpan: 6.2,  maxSpan: 16.2, minY: 3.4, maxY: 6.8, openings: [] },
     { axis: 'x', pos: 16.2, minSpan: 6.0,  maxSpan: 18.0, minY: 3.4, maxY: 6.8, openings: [] },
     { axis: 'z', pos: 18.0, minSpan: 12.4, maxSpan: 16.2, minY: 3.4, maxY: 6.8, openings: [] }
+  ],
+  slabs: [
+    // Trần phòng thay đồ Y = 4.4 (trừ lỗ thang VIP X ∈ [3.3, 6.0], Z ∈ [6.6, 14.0])
+    { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.0, yLow: 4.30, yHigh: 4.48, hole: { minX: 3.3, maxX: 6.0, minZ: 6.6, maxZ: 14.0 } },
+    // Sàn VIP & Hành lang Kính Skybox Y = 3.4
+    { minX: 6.2, maxX: 16.2, minZ: 6.0, maxZ: 18.0, yLow: 3.30, yHigh: 3.46 },
+    { minX: 6.2, maxX: 12.4, minZ: 18.0, maxZ: 23.6, yLow: 3.30, yHigh: 3.46 }
+  ],
+  camBoxes: [
+    { x1: 3.22, y1: 4.4, z1: 6.55, x2: 3.38, y2: 6.8, z2: 14.05 },
+    { x1: 9.95, y1: 3.4, z1: 10.2, x2: 12.45, y2: 5.4, z2: 12.2 }
   ]
 };
 
@@ -389,16 +400,29 @@ function stepStadiumTps(st, dt) {
     } else {
       var onStairOrRamp = (p.x >= 3.4 && p.x <= 5.2 && p.z >= 6.5 && p.z <= 12.1) ||
                           (p.x >= -1.8 && p.x <= 1.8 && p.z >= 14.0 && p.z <= 21.2);
-      var spd = Math.min(dist, (onStairOrRamp ? 2.6 : 3.6) * dt);
-      var nx = p.x + (dx / dist) * spd;
-      var nz = p.z + (dz / dist) * spd;
-      if (!p.waypoints || p.waypoints.length <= 1) {
-        var cl = clampStadiumWalkPos(st, nx, nz, p.y);
-        nx = cl.x; nz = cl.z;
+      var speedSt = onStairOrRamp ? 2.6 : 3.6;
+      if (onStairOrRamp || typeof slidePigStep !== 'function') {
+        var spd = Math.min(dist, speedSt * dt);
+        var nx = p.x + (dx / dist) * spd;
+        var nz = p.z + (dz / dist) * spd;
+        if (!p.waypoints || p.waypoints.length <= 1) {
+          var cl = clampStadiumWalkPos(st, nx, nz, p.y);
+          nx = cl.x; nz = cl.z;
+        }
+        p.x = nx; p.z = nz;
+        var tyaw = Math.atan2(dx, dz);
+        p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
+      } else {
+        var stpSt = slidePigStep(p, curWp.x, curWp.z, speedSt, dt, function(cx, cz) {
+          return (p.waypoints && p.waypoints.length > 1) ? { x: cx, z: cz } : clampStadiumWalkPos(st, cx, cz, p.y);
+        });
+        p.x = stpSt.x; p.z = stpSt.z;
+        if (stpSt.stuck) {
+          if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
+          if (!p.waypoints || p.waypoints.length === 0) { p.walking = false; p.pendingAction = null; }
+          p._stuckTimer = 0;
+        }
       }
-      p.x = nx; p.z = nz;
-      var tyaw = Math.atan2(dx, dz);
-      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
   }
 
@@ -642,11 +666,12 @@ function renderStadiumWebglScene(wgl, cam, st, W, H) {
 
   wgl.beginFrame(W, H, cam, atmo);
 
-  // A. BẦU TRỜI ĐÊM SVĐ (CHẾ ĐỘ B — 0% VOID Ở PITCH ARENA & SKYBOX)
-  dm('quad', 'skyNightDome', 0, 16.0, 60.0, 0, Math.PI, 0, 74, 34, 1, { tint: [1, 1, 1, 1], emissive: 1.0 });
-  dm('quad', 'skyNightDome', -28.0, 16.0, 35.0, 0, Math.PI * 0.5, 0, 58, 34, 1, { tint: [1, 1, 1, 1], emissive: 1.0 });
-  dm('quad', 'skyNightDome',  28.0, 16.0, 35.0, 0, -Math.PI * 0.5, 0, 58, 34, 1, { tint: [1, 1, 1, 1], emissive: 1.0 });
-  dm('quad', 'skyNightDome', 0, 16.0, 10.0, 0, 0, 0, 74, 34, 1, { tint: [1, 1, 1, 1], emissive: 1.0 });
+  // A. CHÂN TRỜI SKYLINE ĐÊM SÀI GÒN XUNG QUANH SVĐ (XÓA VÒM SKY NIGHT DOME THÔ CŨ — QĐ 258)
+  if (typeof drawSaigonHorizonRing3D === 'function') {
+    drawSaigonHorizonRing3D(wgl, st, { forceNight: true, cx: 0, cz: 32.0, y: 12.5, rx: 28, rz: 28, widthX: 72, widthZ: 68, height: 28 });
+  } else {
+    dm('quad', 'skyNightDome', 0, 16.0, 60.0, 0, Math.PI, 0, 74, 34, 1, { tint: [1, 1, 1, 1], emissive: 0.92 });
+  }
 
   // B. PHÒNG THAY ĐỒ ĐT VIỆT NAM (locker_tunnel: X ∈ [-6, 6], Z ∈ [0, 14], Y = 0)
   dm('box', 'lockerFloor', 0, -0.05, 7.0, 0, 0, 0, 12.0, 0.1, 14.0, { tint: [1, 1, 1, 1], us: 4, vs: 5 });

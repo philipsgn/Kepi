@@ -6,6 +6,7 @@ import { buildTps3dEngineScript } from '../pixel/pixelTps3dEngine';
 import { buildPixelWebgl3dEngineScript } from '../pixel/pixelWebgl3dEngine';
 import { buildPixelTpsBillboardsScript } from '../pixel/pixelTpsBillboards';
 import { buildPixelNavGraph3dScript } from '../pixel/pixelNavGraph3d';
+import { buildSaigonStreetBackdrop3dScript } from '../pixel/saigonStreetBackdrop3d';
 
 const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
@@ -99,6 +100,7 @@ export const WebglTpsBannerShell: React.FC<WebglTpsBannerShellProps> = ({
   const webglEngineScript = useMemo(() => buildPixelWebgl3dEngineScript(), []);
   const billboardsScript = useMemo(() => buildPixelTpsBillboardsScript(), []);
   const navGraphScript = useMemo(() => buildPixelNavGraph3dScript(), []);
+  const streetBackdropScript = useMemo(() => buildSaigonStreetBackdrop3dScript(), []);
 
   const htmlContent = useMemo(
     () => `<!doctype html>
@@ -165,13 +167,14 @@ ${tpsEngineScript}
 ${webglEngineScript}
 ${billboardsScript}
 ${navGraphScript}
+${streetBackdropScript}
 ${wallArtScript}
 ${sceneScript}
 ${initScript}
 </script>
 </body>
 </html>`,
-    [title, backgroundHex, active, tpsEngineScript, webglEngineScript, billboardsScript, navGraphScript, wallArtScript, sceneScript, initScript]
+    [title, backgroundHex, active, tpsEngineScript, webglEngineScript, billboardsScript, navGraphScript, streetBackdropScript, wallArtScript, sceneScript, initScript]
   );
 
   const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);

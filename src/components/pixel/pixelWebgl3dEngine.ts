@@ -508,7 +508,7 @@ function createCafeWebglRenderer(canvas) {
   return createPixelWebglRenderer(canvas);
 }
 
-/* ==================== 3. CAMERA SPRING-ARM PORTAL-AWARE ĐA PHÒNG / ĐA TẦNG ==================== */
+/* ==================== 3. CAMERA SPRING-ARM PORTAL-AWARE + CHỐNG CẮT SÀN & GÓC KHUẤT (QĐ 250–258) ==================== */
 function raySplitDividerWall(ox, oy, oz, bx, by, bz, dw) {
   var t = -1, hitX = 0, hitY = 0, hitZ = 0, spanCoord = 0;
   if (dw.axis === 'x') {
@@ -537,6 +537,97 @@ function raySplitDividerWall(ox, oy, oz, bx, by, bz, dw) {
   return Math.max(0.55, t - 0.36);
 }
 
+// Ray-vs-AABB 3D Slab Method: trả về khoảng cách cắt vào hộp đặc (cột, tường dày, trần/sàn lửng, tủ cao)
+function raySolidBoxDist(ox, oy, oz, bx, by, bz, x1, y1, z1, x2, y2, z2) {
+  var tmin = -1e9, tmax = 1e9;
+  var axes = [
+    [ox, bx, x1, x2],
+    [oy, by, y1, y2],
+    [oz, bz, z1, z2]
+  ];
+  for (var ai = 0; ai < 3; ai++) {
+    var o = axes[ai][0], d = axes[ai][1], lo = axes[ai][2], hi = axes[ai][3];
+    if (Math.abs(d) < 1e-6) {
+      if (o < lo || o > hi) return -1;
+    } else {
+      var inv = 1 / d;
+      var t0 = (lo - o) * inv, t1 = (hi - o) * inv;
+      if (t0 > t1) { var tmp = t0; t0 = t1; t1 = tmp; }
+      if (t0 > tmin) tmin = t0;
+      if (t1 < tmax) tmax = t1;
+      if (tmin > tmax) return -1;
+    }
+  }
+  if (tmax < 0.05) return -1;
+  return tmin > 0.05 ? tmin : tmax;
+}
+
+function pointInSlabHole(x, z, slab) {
+  if (!slab || !slab.hole) return false;
+  var h = slab.hole;
+  return x >= h.minX && x <= h.maxX && z >= h.minZ && z <= h.maxZ;
+}
+
+function rayCameraOcclusionDist(ox, oy, oz, bx, by, bz, maxT, navConfig) {
+  var tHit = maxT;
+  if (!navConfig) return tHit;
+  if (navConfig.dividerWalls) {
+    for (var di = 0; di < navConfig.dividerWalls.length; di++) {
+      var td = raySplitDividerWall(ox, oy, oz, bx, by, bz, navConfig.dividerWalls[di]);
+      if (td > 0 && td < tHit) tHit = td;
+    }
+  }
+  var mBox = 0.28;
+  if (navConfig.camBoxes) {
+    for (var bi = 0; bi < navConfig.camBoxes.length; bi++) {
+      var b = navConfig.camBoxes[bi];
+      var tb = raySolidBoxDist(ox, oy, oz, bx, by, bz, b.x1 - mBox, b.y1 - mBox, b.z1 - mBox, b.x2 + mBox, b.y2 + mBox, b.z2 + mBox);
+      if (tb > 0.45 && tb < tHit) tHit = Math.max(0.55, tb - 0.08);
+    }
+  }
+  return tHit;
+}
+
+function clampCamPosSafe(tx, ty, tz, px, py, pz, floorBase, outer, navConfig) {
+  var wm = (navConfig && typeof navConfig.wallMargin === 'number') ? navConfig.wallMargin : 0.38;
+  var mnX = outer.minX + wm, mxX = outer.maxX - wm;
+  var mnZ = outer.minZ + wm, mxZ = outer.maxZ - wm;
+  if (px < mnX) px = mnX;
+  if (px > mxX) px = mxX;
+  if (pz < mnZ) pz = mnZ;
+  if (pz > mxZ) pz = mxZ;
+
+  // Chặn tuyệt đối không để camera lọt ngang sàn tầng 2 / gác lửng (Hình 1), và giữ nguyên nội suy cầu thang mượt!
+  if (navConfig && navConfig.slabs) {
+    for (var si = 0; si < navConfig.slabs.length; si++) {
+      var sl = navConfig.slabs[si];
+      if (px >= sl.minX - 0.32 && px <= sl.maxX + 0.32 && pz >= sl.minZ - 0.32 && pz <= sl.maxZ + 0.32 && !pointInSlabHole(px, pz, sl)) {
+        if (floorBase <= 0.35 && ty < sl.yLow) {
+          py = Math.min(py, sl.yLow - 0.28);
+        } else if (floorBase >= sl.yHigh - 0.12 && ty >= sl.yHigh) {
+          py = Math.max(py, sl.yHigh + 0.45);
+        }
+      }
+    }
+  }
+  py = Math.max(floorBase + 0.85, Math.min(outer.maxY - 0.30, py));
+
+  // Final Line-of-Sight Sweep sau lerp: không bao giờ để cam.pos trôi vào sau cột/vách/sàn (Hình 2)
+  var rx = px - tx, ry = py - ty, rz = pz - tz;
+  var rLen = Math.hypot(rx, ry, rz);
+  if (rLen > 0.25) {
+    var ux = rx / rLen, uy = ry / rLen, uz = rz / rLen;
+    var safeDist = rayCameraOcclusionDist(tx, ty, tz, ux, uy, uz, rLen, navConfig);
+    if (safeDist < rLen - 0.02) {
+      safeDist = Math.max(0.62, safeDist);
+      px = tx + ux * safeDist;
+      pz = tz + uz * safeDist;
+      py = Math.max(floorBase + 0.85, Math.min(outer.maxY - 0.30, ty + uy * safeDist));
+    }
+  }
+  return { x: px, y: py, z: pz };
+}
+
 function wglLerpAngle(a, b, t) {
   var d = (b - a) % (Math.PI * 2);
   while (d > Math.PI) d -= Math.PI * 2;
@@ -553,6 +644,11 @@ function computeWebglTpsCamera(cam, pig, navConfig, dt) {
   var stepDt = (typeof dt === 'number' && isFinite(dt) && dt > 0) ? Math.min(0.06, dt) : 0.016;
   var nowMs = (typeof Date !== 'undefined' && Date.now) ? Date.now() : 0;
   var manualCooldown = cam.lastManualOrbitAt ? (nowMs - cam.lastManualOrbitAt) : 99999;
+
+  // Khống chế dải xoay dọc an toàn chống cắm sàn/ngước trần
+  if (typeof cam.pitch === 'number') {
+    cam.pitch = Math.max(-0.62, Math.min(-0.10, cam.pitch));
+  }
 
   // Soft-Chase Yaw: tự bám nhẹ theo lưng chú Heo khi đi bộ (tạm nhường 1.6s khi user vừa xoay tay)
   if (pig && pig.walking && !pig.seated && typeof pig.yaw === 'number' && manualCooldown > 1600) {
@@ -576,7 +672,7 @@ function computeWebglTpsCamera(cam, pig, navConfig, dt) {
   // Tìm zone AABB chứa (pig.x, pig.y, pig.z) hoặc bao ngoại vi
   var outer = navConfig && navConfig.outerBounds ? navConfig.outerBounds : { minX: -5.8, maxX: 5.8, minZ: 0.1, maxZ: 14.6, minY: 0.45, maxY: 6.5 };
   if (navConfig && (navConfig.outerBounds || (navConfig.zones && navConfig.zones.length))) {
-    // Raycast trên vùng biên ngoài trước, rồi raycast các vách ngăn đặc ngoài openings[]
+    // Raycast trên vùng biên ngoài trước, rồi raycast vách ngăn, sàn lửng slabs & cột tủ camBoxes
     var mnX = outer.minX + wm, mxX = outer.maxX - wm;
     var mnZ = outer.minZ + wm, mxZ = outer.maxZ - wm;
     var mnY = (typeof outer.minY === 'number' ? outer.minY : 0.65) + (pig.y || 0) * 0.85;
@@ -588,23 +684,19 @@ function computeWebglTpsCamera(cam, pig, navConfig, dt) {
     if (by < -0.0001) { var t5 = (mnY - ty) / by; if (t5 >= 0 && t5 < tHit) tHit = t5; }
     else if (by > 0.0001) { var t6 = (mxY - ty) / by; if (t6 >= 0 && t6 < tHit) tHit = t6; }
   }
-  if (navConfig && navConfig.dividerWalls) {
-    for (var di = 0; di < navConfig.dividerWalls.length; di++) {
-      var td = raySplitDividerWall(tx, ty, tz, bx, by, bz, navConfig.dividerWalls[di]);
-      if (td > 0 && td < tHit) tHit = td;
-    }
-  }
+  tHit = rayCameraOcclusionDist(tx, ty, tz, bx, by, bz, tHit, navConfig);
 
-  var desiredDist = Math.max(0.85, tHit);
+  var desiredDist = Math.max(0.75, tHit);
   if (typeof cam.curDist !== 'number' || !isFinite(cam.curDist)) cam.curDist = desiredDist;
   if (desiredDist < cam.curDist) cam.curDist += (desiredDist - cam.curDist) * wglExpRate(18, stepDt);
   else cam.curDist += (desiredDist - cam.curDist) * wglExpRate(4.4, stepDt);
 
+  var floorBase = pig.y || 0;
   var ex = tx + bx * cam.curDist;
   var ey = ty + by * cam.curDist;
   var ez = tz + bz * cam.curDist;
-  var floorBase = pig.y || 0;
-  ey = Math.max(floorBase + 0.85, Math.min(outer.maxY - 0.30, ey));
+  var clampedTarget = clampCamPosSafe(tx, ty, tz, ex, ey, ez, floorBase, outer, navConfig);
+  ex = clampedTarget.x; ey = clampedTarget.y; ez = clampedTarget.z;
 
   var targetLookX = pig.x + sy * 1.1;
   var targetLookY = floorBase + 1.05;
@@ -617,9 +709,13 @@ function computeWebglTpsCamera(cam, pig, navConfig, dt) {
   } else {
     var posRate = wglExpRate(12, stepDt);
     var lookRate = wglExpRate(14, stepDt);
-    cam.pos.x += (ex - cam.pos.x) * posRate;
-    cam.pos.y += (ey - cam.pos.y) * posRate;
-    cam.pos.z += (ez - cam.pos.z) * posRate;
+    var npx = cam.pos.x + (ex - cam.pos.x) * posRate;
+    var npy = cam.pos.y + (ey - cam.pos.y) * posRate;
+    var npz = cam.pos.z + (ez - cam.pos.z) * posRate;
+    var safePost = clampCamPosSafe(tx, ty, tz, npx, npy, npz, floorBase, outer, navConfig);
+    cam.pos.x = safePost.x;
+    cam.pos.y = safePost.y;
+    cam.pos.z = safePost.z;
     cam.lookX += (targetLookX - cam.lookX) * lookRate;
     cam.lookY += (targetLookY - cam.lookY) * lookRate;
     cam.lookZ += (targetLookZ - cam.lookZ) * lookRate;

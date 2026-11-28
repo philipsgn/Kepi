@@ -20,7 +20,11 @@ var PHO_NAV_CONFIG = {
     { id: 'corridor', floorY: 0, minX:  1.85, maxX: 5.25, minZ: 9.75, maxZ: 11.7 },
     { id: 'kitchen',  floorY: 0, minX: -5.25, maxX: 5.25, minZ: 11.6, maxZ: 14.1 }
   ],
-  dividerWalls: []
+  dividerWalls: [],
+  camBoxes: [
+    // Quầy kính & 2 nồi nước dùng chặn camera không lọt góc khuất phía sau quầy
+    { x1: -5.85, y1: 0.0, z1: 9.95, x2: 1.65, y2: 1.65, z2: 11.25 }
+  ]
 };
 
 /* ==================== 1. KHỞI TẠO NỘI THẤT QUÁN PHỞ VINTAGE 90S (INTERIOR-ONLY 12m × 15m) ==================== */
@@ -109,6 +113,7 @@ function createPhoTpsWorld() {
     waiters: waiters,
     chefs: chefs,
     customers: customers,
+    traffic: (typeof createSaigonBackdropTraffic === 'function') ? createSaigonBackdropTraffic() : null,
     toastText: 'Chào mừng đến Phở Vintage 90s! Chạm sàn để đi · Vuốt xoay 360°'
   };
 }
@@ -199,6 +204,9 @@ function planPhoRealtimePath(st, tx, tz, seatTarget, actionTag) {
 function stepPhoTpsWorld(w, dt) {
   w.t += dt;
   w._lastDt = dt;
+  if (typeof stepSaigonBackdropTraffic === 'function' && w.traffic) {
+    stepSaigonBackdropTraffic(w.traffic, dt);
+  }
 
   // Chỉ hé mở duy nhất 1 cánh cửa phải (~35°) khi có khách NPC ra/vào sát cửa hoặc khi Heo ra cửa -> không xuyên gỗ! (QĐ 239)
   var npcNearDoor = false;
@@ -664,19 +672,47 @@ function renderPhoWebglScene(wgl, cam, st, W, H) {
   wgl.beginFrame(W, H, cam, PHO_ATMOS);
   var dm = wgl.drawMesh;
 
+  // A0. Ngoại cảnh mặt phố đồng bộ Tab Banner Khám phá (Đại lộ 2 làn xe chạy + Sông Bạch Đằng + Skyline 3 sắc)
+  if (typeof drawSaigonStreetBackdrop3D === 'function') {
+    drawSaigonStreetBackdrop3D(wgl, w, w.traffic, {
+      centerX: 0.0,
+      frontZ: 0.0,
+      width: 58,
+      leftNeighborX: -12.6,
+      rightNeighborX: 12.6,
+      neighborHeight: 6.8
+    });
+  }
+
   // A. Sàn Gạch Bông Indochine Sảnh Ăn + Sàn Gạch Bếp + Thảm Chùi Chân
   dm('box', 'phoTile', 0, -0.05, 5.0, 0, 0, 0, 12.2, 0.10, 10.0, { tint: [1, 1, 1, 1], us: 5.5, vs: 4.5 });
   dm('box', 'phoKitchenTile', 0, -0.05, 12.4, 0, 0, 0, 12.2, 0.10, 4.8, { tint: [1, 1, 1, 1], us: 6.0, vs: 2.4 });
   dm('box', 'phoTimber', 0, 0.008, 10.0, 0, 0, 0, 12.0, 0.02, 0.20, { tint: [0.9, 0.82, 0.72, 1] });
   dm('box', 'white', 0, 0.01, 0.50, 0, 0, 0, 2.30, 0.02, 0.76, { tint: [0.55, 0.23, 0.17, 1] });
 
-  // B. 4 Bức Tường Vàng 90s Kín 100% + Ốp Gỗ Chân Tường + Diềm Đỏ Vàng + Trần Xà Gồ Gỗ Lim
+  // B. 4 Bức Tường Vàng 90s + 2 Ô Cửa Sổ Gỗ Nan Dọc Nhìn Ra Phố + Ốp Gỗ Chân Tường + Trần Xà Gồ Gỗ Lim
   dm('box', 'phoWall', -6.05, 1.925, 7.4, 0, 0, 0, 0.14, 3.85, 14.9, { tint: [1, 1, 1, 1], us: 6.0, vs: 1.5 });
   dm('box', 'phoWall',  6.05, 1.925, 7.4, 0, 0, 0, 0.14, 3.85, 14.9, { tint: [1, 1, 1, 1], us: 6.0, vs: 1.5 });
   dm('box', 'phoWall',  0,    1.925, 14.85, 0, 0, 0, 12.2, 3.85, 0.14, { tint: [1, 1, 1, 1], us: 5.0, vs: 1.5 });
-  // Tường trước (Z = 0) kẹp khung cửa chính
-  dm('box', 'phoWall', -3.725, 1.925, -0.04, 0, 0, 0, 4.55, 3.85, 0.14, { tint: [1, 1, 1, 1], us: 2.0, vs: 1.5 });
-  dm('box', 'phoWall',  3.725, 1.925, -0.04, 0, 0, 0, 4.55, 3.85, 0.14, { tint: [1, 1, 1, 1], us: 2.0, vs: 1.5 });
+  // Tường trước (Z = 0) kẹp khung cửa chính & 2 ô cửa sổ X ∈ [-4.85, -2.55] và [2.55, 4.85], Y ∈ [0.95, 2.75]
+  dm('box', 'phoWall', -5.425, 1.925, -0.04, 0, 0, 0, 1.15, 3.85, 0.14, { tint: [1, 1, 1, 1], us: 0.6, vs: 1.5 });
+  dm('box', 'phoWall', -2.00,  1.925, -0.04, 0, 0, 0, 1.10, 3.85, 0.14, { tint: [1, 1, 1, 1], us: 0.6, vs: 1.5 });
+  dm('box', 'phoWall',  2.00,  1.925, -0.04, 0, 0, 0, 1.10, 3.85, 0.14, { tint: [1, 1, 1, 1], us: 0.6, vs: 1.5 });
+  dm('box', 'phoWall',  5.425, 1.925, -0.04, 0, 0, 0, 1.15, 3.85, 0.14, { tint: [1, 1, 1, 1], us: 0.6, vs: 1.5 });
+  dm('box', 'phoWall', -3.70,  0.475, -0.04, 0, 0, 0, 2.30, 0.95, 0.14, { tint: [1, 1, 1, 1], us: 1.0, vs: 0.4 });
+  dm('box', 'phoWall', -3.70,  3.30,  -0.04, 0, 0, 0, 2.30, 1.10, 0.14, { tint: [1, 1, 1, 1], us: 1.0, vs: 0.5 });
+  dm('box', 'phoWall',  3.70,  0.475, -0.04, 0, 0, 0, 2.30, 0.95, 0.14, { tint: [1, 1, 1, 1], us: 1.0, vs: 0.4 });
+  dm('box', 'phoWall',  3.70,  3.30,  -0.04, 0, 0, 0, 2.30, 1.10, 0.14, { tint: [1, 1, 1, 1], us: 1.0, vs: 0.5 });
+  // Khung nan gỗ & bệ cửa cho 2 cửa sổ Phở Cổ Truyền
+  var phoWinXs = [-3.70, 3.70];
+  for (var pwi = 0; pwi < phoWinXs.length; pwi++) {
+    var pwx = phoWinXs[pwi];
+    dm('box', 'phoTimber', pwx, 0.96, -0.02, 0, 0, 0, 2.36, 0.08, 0.22, { tint: [0.85, 0.72, 0.58, 1] });
+    dm('box', 'phoTimber', pwx, 2.74, -0.02, 0, 0, 0, 2.36, 0.08, 0.22, { tint: [0.85, 0.72, 0.58, 1] });
+    dm('box', 'phoTimber', pwx - 0.55, 1.85, -0.04, 0, 0, 0, 0.06, 1.76, 0.12, { tint: [0.65, 0.44, 0.28, 1] });
+    dm('box', 'phoTimber', pwx + 0.55, 1.85, -0.04, 0, 0, 0, 0.06, 1.76, 0.12, { tint: [0.65, 0.44, 0.28, 1] });
+    dm('box', 'phoTimber', pwx, 1.85, -0.04, 0, 0, 0, 2.26, 0.06, 0.12, { tint: [0.65, 0.44, 0.28, 1] });
+  }
   dm('box', 'phoTimber', 0, 3.20, -0.04, 0, 0, 0, 2.95, 1.30, 0.14, { tint: [0.75, 0.22, 0.18, 1] });
   // Ốp gỗ chân tường & diềm chỉ
   dm('box', 'phoTimber', -5.96, 0.475, 7.4, 0, 0, 0, 0.05, 0.95, 14.8, { tint: [1, 1, 1, 1], us: 6.0, vs: 1.0 });
@@ -686,9 +722,8 @@ function renderPhoWebglScene(wgl, cam, st, W, H) {
   dm('box', 'white', -5.93, 3.53, 7.4, 0, 0, 0, 0.04, 0.10, 14.8, { tint: [0.65, 0.14, 0.12, 1] });
   dm('box', 'white',  5.93, 3.53, 7.4, 0, 0, 0, 0.04, 0.10, 14.8, { tint: [0.65, 0.14, 0.12, 1] });
   dm('box', 'white',  0,    3.53, 14.74, 0, 0, 0, 11.9, 0.10, 0.04, { tint: [0.65, 0.14, 0.12, 1] });
-  // Biển KÍNH CHÀO QUÝ KHÁCH & nền ngược sáng sau khe cửa
+  // Biển KÍNH CHÀO QUÝ KHÁCH phía trên cửa chính (không dùng bảng trắng phát sáng phẳng sau cửa!)
   dm('quad', 'phoWelcomeSign', 0, 3.10, 0.06, 0, 0, 0, 2.50, 0.68, 1, { tint: [1, 1, 1, 1] });
-  dm('quad', 'white', 0, 1.28, -0.06, 0, 0, 0, 2.95, 2.58, 1, { tint: [1.0, 0.97, 0.86, 1], emissive: 1.35 });
 
   // Trần kín 100% + 6 xà gồ gỗ lim
   dm('box', 'white', 0, 3.91, 7.4, 0, 0, 0, 12.2, 0.12, 14.9, { tint: [0.94, 0.87, 0.74, 1] });

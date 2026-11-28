@@ -36,6 +36,11 @@ var MARKET_NAV_GRAPH = {
     { axis: 'x', pos: 6.0, minSpan: 0.0, maxSpan: 13.6, minY: 0, maxY: 5.8, openings: [] },
     { axis: 'z', pos: 13.6, minSpan: 6.0, maxSpan: 17.2, minY: 0, maxY: 5.8, openings: [] }
   ],
+  camBoxes: [
+    // Sạp trung tâm 1044 & Đảo Trái Cây 1029 tránh camera góc khuất sát sạp
+    { x1: -1.75, y1: 0, z1: 19.7, x2: 1.75, y2: 1.4, z2: 22.9 },
+    { x1:  9.95, y1: 0, z1: 18.8, x2: 13.25, y2: 1.4, z2: 22.0 }
+  ],
   edges: [
     {
       from: 'south_hall', to: 'food_court',
@@ -316,11 +321,23 @@ function stepMarketTps(st, dt) {
         p.pendingAction = null;
       }
     } else {
-      var spd = Math.min(dist, 3.6 * dt);
-      var next = clampMarketWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd);
-      p.x = next.x; p.z = next.z;
-      var tyaw = Math.atan2(dx, dz);
-      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
+      if (typeof slidePigStep === 'function') {
+        var stpMk = slidePigStep(p, curWp.x, curWp.z, 3.6, dt, function(cx, cz) {
+          return clampMarketWalkPos(st, cx, cz);
+        });
+        p.x = stpMk.x; p.z = stpMk.z;
+        if (stpMk.stuck) {
+          if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
+          if (!p.waypoints || p.waypoints.length === 0) { p.walking = false; p.pendingAction = null; }
+          p._stuckTimer = 0;
+        }
+      } else {
+        var spd = Math.min(dist, 3.6 * dt);
+        var next = clampMarketWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd);
+        p.x = next.x; p.z = next.z;
+        var tyaw = Math.atan2(dx, dz);
+        p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
+      }
     }
 
     // Cập nhật thụ động zone khi Heo đi bộ vượt cổng (0% teleport)
@@ -525,8 +542,8 @@ function renderMarketWebglScene(wgl, cam, st, W, H) {
     dm('box', 'marketWallGold', -3.78, 2.9, -0.06, 0, 0, 0, 4.45, 5.8, 0.14, { tint: [1,1,1,1], us: 1.6, vs: 2 });
     dm('box', 'marketWallGold',  3.78, 2.9, -0.06, 0, 0, 0, 4.45, 5.8, 0.14, { tint: [1,1,1,1], us: 1.6, vs: 2 });
     dm('box', 'marketWallGold',  0.0,  4.45, -0.06, 0, 0, 0, 3.12, 2.7, 0.14, { tint: [1,1,1,1], us: 1.2, vs: 1 });
-    // Ánh sáng ngoài quảng trường Quách Thị Trang & 2 cánh cổng sắt xếp Cửa Số 1
-    dm('quad', 'white', 0, 1.55, -0.18, 0, 0, 0, 3.2, 3.1, 1, { tint: [1.0, 0.96, 0.80, 1], emissive: 1.1 });
+    // Ánh sáng ấm ngoài quảng trường Quách Thị Trang & 2 cánh cổng sắt xếp Cửa Số 1
+    dm('quad', 'white', 0, 1.55, -0.18, 0, 0, 0, 3.2, 3.1, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
     dm('quad', 'marketIronGate', -1.16, 1.48, 0.04, 0, 0, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });
     var sgAng = st.southGateOpen * 1.15;
     dm('quad', 'marketIronGate', 1.55 - Math.cos(sgAng) * 0.39, 1.48, 0.04 + Math.sin(sgAng) * 0.39, 0, -sgAng, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });

@@ -520,11 +520,30 @@ function stepCafeTps(st, dt) {
       }
     } else {
       var onStairs = (p.x >= -5.45 && p.x <= -2.95 && p.z > 9.5 && p.z < 14.5);
-      // Tốc độ 3.6 m/s đồng bộ Quán Phở, xoay hướng mượt bằng cafeLerpAngle
-      var spd = Math.min(dist, (onStairs ? 2.6 : 3.6) * dt);
-      p.x += (dx / dist) * spd;
-      p.z += (dz / dist) * spd;
-      p.yaw = cafeLerpAngle(p.yaw || 0, Math.atan2(dx, dz), Math.min(1, dt * 12));
+      var speedCf = onStairs ? 2.6 : 3.6;
+      // Tốc độ 3.6 m/s đồng bộ Quán Phở, trượt cạnh mượt & xoay hướng lerpAngle
+      if (onStairs) {
+        var spd = Math.min(dist, speedCf * dt);
+        p.x += (dx / dist) * spd;
+        p.z += (dz / dist) * spd;
+        p.yaw = cafeLerpAngle(p.yaw || 0, Math.atan2(dx, dz), Math.min(1, dt * 12));
+      } else if (typeof slidePigStep === 'function') {
+        var fyCur = p.y >= 1.9 ? 3.4 : 0;
+        var stp = slidePigStep(p, curWp.x, curWp.z, speedCf, dt, function(cx, cz) {
+          return clampCafeWalkPos(st, cx, cz, fyCur);
+        });
+        p.x = stp.x; p.z = stp.z;
+        if (stp.stuck) {
+          if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
+          if (!p.waypoints || p.waypoints.length === 0) { p.walking = false; p.pendingAction = null; }
+          p._stuckTimer = 0;
+        }
+      } else {
+        var spd2 = Math.min(dist, speedCf * dt);
+        var clC = clampCafeWalkPos(st, p.x + (dx / dist) * spd2, p.z + (dz / dist) * spd2, p.y >= 1.9 ? 3.4 : 0);
+        p.x = clC.x; p.z = clC.z;
+        p.yaw = cafeLerpAngle(p.yaw || 0, Math.atan2(dx, dz), Math.min(1, dt * 12));
+      }
     }
   }
 
@@ -553,7 +572,18 @@ function computeCafeWebglCamera(cam, st) {
       { id: 'f1', minX: -7.0, maxX: 7.0, minZ: 0.25, maxZ: 16.2, floorY: 0 },
       { id: 'f2', minX: -7.0, maxX: 7.0, minZ: 0.25, maxZ: 16.2, floorY: 3.4 }
     ],
-    dividerWalls: []
+    dividerWalls: [],
+    slabs: [
+      {
+        minX: -7.0, maxX: 7.0, minZ: 0.25, maxZ: 16.2, yLow: 3.30, yHigh: 3.44,
+        hole: { minX: -5.45, maxX: -2.95, minZ: 9.50, maxZ: 14.50 }
+      }
+    ],
+    camBoxes: [
+      // Vách gỗ hông cầu thang & Quầy bar Tầng 1 tránh camera góc khuất
+      { x1: -3.20, y1: 0.0, z1: 9.50, x2: -2.85, y2: 3.35, z2: 14.50 },
+      { x1:  3.00, y1: 0.0, z1: 10.2, x2:  6.95, y2: 1.50, z2: 15.95 }
+    ]
   };
   if (typeof computeWebglTpsCamera === 'function') {
     computeWebglTpsCamera(cam, p, cafeNavCfg, st._lastDt || 0.016);

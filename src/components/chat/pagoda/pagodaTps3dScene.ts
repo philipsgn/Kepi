@@ -71,6 +71,11 @@ var PAGODA_NAV_CONFIG = {
     { axis: 'x', pos: -5.8, minSpan: 14.8, maxSpan: 27.6, minY: 0, maxY: 4.6, openings: [] },
     { axis: 'x', pos: 16.8, minSpan: 5.6,  maxSpan: 14.8, minY: 0, maxY: 4.3, openings: [] },
     { axis: 'z', pos: 27.6, minSpan: -5.8, maxSpan: 5.8,  minY: 0, maxY: 4.6, openings: [] }
+  ],
+  camBoxes: [
+    // Phật đài Chánh Điện & Đại Hồng Chung tránh camera xoay dính sau tượng/chuông
+    { x1: -2.9, y1: 0.48, z1: 25.4, x2: 2.9, y2: 4.2, z2: 27.5 },
+    { x1:  8.2, y1: 0.36, z1: 10.4, x2: 10.2, y2: 3.8, z2: 12.4 }
   ]
 };
 
@@ -452,14 +457,25 @@ function stepPagodaTps(st, dt) {
       }
     } else {
       var onRamp = (p.y > 0.02 && p.y < 0.46);
-      var spd = Math.min(dist, (onRamp ? 2.6 : 3.6) * dt);
-      var next = clampPagodaWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd, p.y);
-      var moved = Math.hypot(next.x - p.x, next.z - p.z);
-      p.x = next.x; p.z = next.z;
-      var tyaw = Math.atan2(dx, dz);
-      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
-      if (moved < 0.002 && p.waypoints && p.waypoints.length <= 1) {
-        p.walking = false;
+      var speedPg = onRamp ? 2.6 : 3.6;
+      if (onRamp || typeof slidePigStep !== 'function') {
+        var spd = Math.min(dist, speedPg * dt);
+        var next = clampPagodaWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd, p.y);
+        var moved = Math.hypot(next.x - p.x, next.z - p.z);
+        p.x = next.x; p.z = next.z;
+        var tyaw = Math.atan2(dx, dz);
+        p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
+        if (moved < 0.002 && p.waypoints && p.waypoints.length <= 1) p.walking = false;
+      } else {
+        var stpPg = slidePigStep(p, curWp.x, curWp.z, speedPg, dt, function(cx, cz) {
+          return clampPagodaWalkPos(st, cx, cz, p.y);
+        });
+        p.x = stpPg.x; p.z = stpPg.z;
+        if (stpPg.stuck) {
+          if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
+          if (!p.waypoints || p.waypoints.length === 0) { p.walking = false; p.pendingAction = null; }
+          p._stuckTimer = 0;
+        }
       }
     }
   }
@@ -570,11 +586,12 @@ function renderPagodaWebglScene(wgl, cam, st, W, H) {
   var dm = wgl.drawMesh;
   var t = st.t;
 
-  // A. CHẾ ĐỘ B — BẦU TRỜI BÌNH MINH / HOÀNG HÔN & RỪNG CÂY BAO QUANH VƯỜN CHÙA (0% VOID)
-  dm('quad', 'skyBackdrop', 0, 7.5, -18, 0, 0, 0, 42, 22, 1, { tint: [1,1,1,1], emissive: 1.0 });
-  dm('quad', 'skyBackdrop', -18, 7.5, 6, 0, Math.PI * 0.5, 0, 36, 22, 1, { tint: [1,1,1,1], emissive: 1.0 });
-  dm('quad', 'skyBackdrop', 18, 7.5, 2, 0, -Math.PI * 0.5, 0, 32, 22, 1, { tint: [1,1,1,1], emissive: 1.0 });
-  dm('quad', 'white', 0, 13.5, 6, Math.PI * 0.5, 0, 0, 46, 46, 1, { tint: [0.99, 0.90, 0.62, 1], emissive: 1.0 });
+  // A. VÒNG CHÂN TRỜI SKYLINE SÀI GÒN THANH TỊNH & CÂY XANH BAO QUANH VƯỜN CHÙA (XÓA MẢNG TRỜI/TRẦN THÔ CŨ — QĐ 258)
+  if (typeof drawSaigonHorizonRing3D === 'function') {
+    drawSaigonHorizonRing3D(wgl, st, { cx: 2.0, cz: 10.0, y: 8.6, rx: 22, rz: 22, widthX: 54, widthZ: 54, height: 22 });
+  } else {
+    dm('quad', 'skyBackdrop', 0, 7.5, -18, 0, 0, 0, 42, 22, 1, { tint: [1,1,1,1], emissive: 0.92 });
+  }
   var bgTreePts = [[-8.5, 2.5], [-8.2, 8.5], [-8.4, 13.5], [-4.5, -4.5], [4.5, -4.5], [8.5, 2.2]];
   for (var bti = 0; bti < bgTreePts.length; bti++) {
     dm('cyl', 'darkTimber', bgTreePts[bti][0], 1.8, bgTreePts[bti][1], 0, 0, 0, 0.42, 3.6, 0.42, { tint: [0.46, 0.34, 0.22, 1] });
