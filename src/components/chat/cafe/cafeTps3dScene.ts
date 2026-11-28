@@ -1120,7 +1120,7 @@ function renderCafeWebglScene(wgl, cam, st, W, H) {
   drawAoDaiRack3D(wgl, -6.30, 0, 12.2, Math.PI * 0.5);
 
   // Tường Sau Tầng 1
-  dm('quad', 'photos1980s',  0.65, 1.95, 16.12, 0, Math.PI, 0, 3.8, 1.75, 1, { tint: [1,1,1,1] });
+  dm('quad', 'saigonCoffeeArtTex',  0.65, 1.95, 16.12, 0, Math.PI, 0, 3.8, 1.75, 1, { tint: [1,1,1,1] });
   dm('quad', 'vnFlagMaiArt', 4.10, 2.00, 16.12, 0, Math.PI, 0, 1.65, 1.55, 1, { tint: [1,1,1,1] });
 
   // Quầy Bartender Tầng 1 + Enamel Menu CÀ PHÊ SÀI GÒN
@@ -1161,7 +1161,7 @@ function renderCafeWebglScene(wgl, cam, st, W, H) {
   }
   dm('box', 'timber', -3.05, 2.15, 12.0, -0.62, 0, 0, 0.10, 0.12, 5.8, { tint: [1.1, 0.9, 0.7, 1] });
   dm('box', 'oliveWall', -5.45, 2.4, 12.0, 0, 0, 0, 0.12, 4.8, 5.8, { tint: [1,1,1,1] });
-  dm('quad', 'photos1980s', -5.36, 2.65, 12.0, 0, Math.PI * 0.5, 0, 3.8, 1.8, 1, { tint: [1,1,1,1] });
+  dm('quad', 'ruralMekongArtTex', -5.36, 2.65, 12.0, 0, Math.PI * 0.5, 0, 3.8, 1.8, 1, { tint: [1,1,1,1] });
   dm('sphere', 'white', -5.18, 2.85, 13.8, 0, 0, 0, 0.22, 0.22, 0.22, { tint: [1.0, 0.75, 0.30, 1], emissive: 1.4 });
 
   // E. TẦNG 2 (Y = 3.4): 15 BÀN ĐA DẠNG (TRÒN, SOFA BOOTH, BÀN DÀI, ĐÔN GỖ, HEO AI) + KỆ SÁCH & TRANG TRÍ

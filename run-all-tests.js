@@ -9428,4 +9428,63 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log(`✅ Test 191 Passed: Adidas 2 Tầng Bám Sát Banner [camStepMax=${f2Res.maxCamStepY}m, 2F SALE=true, 0 fellThroughHole, streetVehicles=4] (Quyết định 256) verified cleanly`);
 }
 
-console.log('\n🎉 ALL 191 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (191/191)!');
+// =========================================================================
+// TEST 192: QUÁN CÀ PHÊ — THAY 2 BẢNG ẢNH MẶT ẨN DANH `photos1980s` BẰNG 2 BANNER 1024×512 VĂN HÓA CON NGƯỜI VN ĐỘC BẢN (QĐ 257)
+// =========================================================================
+{
+  const cafeWall = fs.readFileSync('src/components/chat/cafe/cafeVnWallArt.ts', 'utf8');
+  const cafeScene = fs.readFileSync('src/components/chat/cafe/cafeTps3dScene.ts', 'utf8');
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+
+  assert.ok(
+    !cafeWall.includes('photos1980s') && !cafeScene.includes('photos1980s'),
+    'Cafe wall art & scene must completely remove faceless photos1980s silhouette poster'
+  );
+  assert.ok(
+    cafeScene.includes("'saigonCoffeeArtTex'") && cafeScene.includes("'ruralMekongArtTex'"),
+    'Cafe 3D scene must hang 2 distinct banners: saigonCoffeeArtTex & ruralMekongArtTex'
+  );
+  assert.ok(
+    cafeWall.includes('drawCafeDetailedFace') &&
+      cafeWall.includes('NHẠC TRỊNH · SÀI GÒN') &&
+      cafeWall.includes('CÀ PHÊ BỆT · HẸN HÒ') &&
+      cafeWall.includes('GÁNH HÀNG RONG XƯA') &&
+      cafeWall.includes('CHỢ NỔI MIỀN TÂY') &&
+      cafeWall.includes('MÙA VÀNG ĐỒNG QUÊ') &&
+      cafeWall.includes('CÁNH DIỀU TUỔI THƠ') &&
+      cafeWall.includes('MIỀN TÂY SÔNG NƯỚC · HỒN QUÊ VIỆT'),
+    'Both 1024x512 Cafe cultural banners must include all 6 distinct scenes + clear facial features'
+  );
+
+  // Chạy thật buildCafeProceduralTextures để kiểm chứng cả 2 texture 1024×512 được đăng ký sạch không lỗi
+  const regSizes = {};
+  const mock2d = {
+    fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left', textBaseline: 'alphabetic',
+    save() {}, restore() {}, beginPath() {}, closePath() {}, clip() {}, translate() {}, rotate() {}, scale() {},
+    moveTo() {}, lineTo() {}, quadraticCurveTo() {}, bezierCurveTo() {}, arcTo() {}, rect() {}, arc() {}, ellipse() {},
+    fill() {}, stroke() {}, fillRect() {}, clearRect() {}, strokeRect() {}, fillText() {},
+    createLinearGradient() { return { addColorStop() {} }; },
+    createRadialGradient() { return { addColorStop() {} }; },
+  };
+  const mockDoc = {
+    createElement() {
+      return { width: 256, height: 256, getContext() { return mock2d; } };
+    }
+  };
+  const mockWgl = {
+    registerTextureCanvas(name, canvas) {
+      regSizes[name] = `${canvas.width}x${canvas.height}`;
+    }
+  };
+  const extractRaw = (src) => src.match(/return String\.raw`([\s\S]*?)`;/)[1];
+  const fn = new Function('document', 'webgl', extractRaw(cafeWall) + '\nbuildCafeProceduralTextures(webgl);');
+  fn(mockDoc, mockWgl);
+
+  assert.strictEqual(regSizes.saigonCoffeeArtTex, '1024x512', 'saigonCoffeeArtTex must render at crisp 1024x512');
+  assert.strictEqual(regSizes.ruralMekongArtTex, '1024x512', 'ruralMekongArtTex must render at crisp 1024x512');
+  assert.ok(decDoc.includes('Quyết định 257') && tpsDoc.includes('QĐ 257'), 'DECISIONS.md and TPS_3D_OPEN_WORLD_SPEC.md must record QD 257');
+  console.log(`✅ Test 192 Passed: Quán Cà Phê 2 Banner Văn Hóa Con Người VN Độc Bản [saigonCoffeeArtTex=${regSizes.saigonCoffeeArtTex}, ruralMekongArtTex=${regSizes.ruralMekongArtTex}, 0 mặt ẩn danh] (Quyết định 257) verified cleanly`);
+}
+
+console.log('\n🎉 ALL 192 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (192/192)!');
