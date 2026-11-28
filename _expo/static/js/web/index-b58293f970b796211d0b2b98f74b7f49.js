@@ -8303,25 +8303,188 @@ function buildCafeProceduralTextures(webgl) {
     webgl.registerTextureCanvas('enamelMenu', c, false);
   })();
 
-  // 9. Tường Ảnh Đen Trắng 1980s & Poster Cổ Động (photos1980s)
-  (function() {
-    var c = mkCanvas(512, 256), g = c.getContext('2d');
-    g.fillStyle = '#4B5B35'; g.fillRect(0, 0, 512, 256);
-    // 3 Khung ảnh B&W thập niên 80
-    var xs = [18, 180, 342];
-    for (var i = 0; i < 3; i++) {
-      g.fillStyle = '#3E2414'; g.fillRect(xs[i], 22, 148, 126);
-      g.fillStyle = '#D6D3D1'; g.fillRect(xs[i]+10, 32, 128, 106);
-      g.fillStyle = '#44403C';
-      g.beginPath(); g.arc(xs[i]+74, 68, 16, 0, Math.PI*2); g.fill();
-      g.fillRect(xs[i]+52, 86, 44, 42);
+  // 9. Hai Banner 1024×512 Văn Hóa & Con Người Việt Nam Độc Bản (Không mặt ẩn danh, không trùng Sen/Xích lô/Áo dài/Hoa mai — QĐ 257)
+  function drawCafeCultureFrame(g, x, y, w, h) {
+    g.fillStyle = '#3B2212'; g.fillRect(x, y, w, h);
+    g.strokeStyle = '#D99B26'; g.lineWidth = 4; g.strokeRect(x + 4, y + 4, w - 8, h - 8);
+    // 4 Khớp đồng góc khung gỗ
+    g.fillStyle = '#FACC15';
+    g.fillRect(x + 2, y + 2, 14, 5); g.fillRect(x + 2, y + 2, 5, 14);
+    g.fillRect(x + w - 16, y + 2, 14, 5); g.fillRect(x + w - 7, y + 2, 5, 14);
+    g.fillRect(x + 2, y + h - 7, 14, 5); g.fillRect(x + 2, y + h - 16, 5, 14);
+    g.fillRect(x + w - 16, y + h - 7, 14, 5); g.fillRect(x + w - 7, y + h - 16, 5, 14);
+    g.fillStyle = '#FFF7E6'; g.fillRect(x + 12, y + 12, w - 24, h - 24);
+  }
+
+  function drawCafeDetailedFace(g, cx, cy, r, hairCol, hatKind) {
+    // Tóc & Đầu + khuôn mặt sáng ấm có mắt, chân mày, mũi, má hồng & nụ cười
+    g.fillStyle = hairCol || '#1E1B18';
+    g.beginPath(); g.arc(cx, cy - r * 0.14, r * 1.08, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#FFE0C2'; g.strokeStyle = '#5C341D'; g.lineWidth = 1.6;
+    g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill(); g.stroke();
+    // Mái tóc ôm trán
+    g.fillStyle = hairCol || '#1E1B18';
+    g.beginPath(); g.arc(cx, cy - r * 0.25, r * 0.98, Math.PI, Math.PI * 2); g.fill();
+    // Đôi mắt đen có ánh sáng trắng
+    g.fillStyle = '#1E1B18';
+    g.beginPath(); g.arc(cx - r * 0.34, cy - r * 0.05, r * 0.14, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(cx + r * 0.34, cy - r * 0.05, r * 0.14, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#FFFFFF';
+    g.fillRect(cx - r * 0.38, cy - r * 0.12, 2, 2); g.fillRect(cx + r * 0.30, cy - r * 0.12, 2, 2);
+    // Má hồng & Nụ cười tươi
+    g.fillStyle = '#F472B6';
+    g.beginPath(); g.arc(cx - r * 0.52, cy + r * 0.24, r * 0.16, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(cx + r * 0.52, cy + r * 0.24, r * 0.16, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#991B1B'; g.lineWidth = 2;
+    g.beginPath(); g.arc(cx, cy + r * 0.22, r * 0.36, 0.18, Math.PI - 0.18); g.stroke();
+    if (hatKind === 'nonla') {
+      g.fillStyle = '#E8C574'; g.strokeStyle = '#78350F'; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(cx, cy - r * 1.95); g.lineTo(cx - r * 1.9, cy - r * 0.52); g.lineTo(cx + r * 1.9, cy - r * 0.52); g.closePath(); g.fill(); g.stroke();
+      g.strokeStyle = '#DC2626'; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(cx - r * 0.72, cy - r * 0.52); g.quadraticCurveTo(cx, cy + r * 0.95, cx + r * 0.72, cy - r * 0.52); g.stroke();
+    } else if (hatKind === 'cap') {
+      g.fillStyle = '#334155'; g.fillRect(cx - r * 0.95, cy - r * 1.1, r * 1.9, r * 0.55);
+      g.fillStyle = '#1E293B'; g.fillRect(cx - r * 0.2, cy - r * 0.65, r * 1.4, r * 0.24);
     }
+  }
+
+  // 9a. Banner 1 (Tường hậu gần Quầy Bar Z = 16.12): "SÀI GÒN CÀ PHÊ BỆT & NHẠC TRỊNH" (1024×512)
+  (function() {
+    var c = mkCanvas(1024, 512), g = c.getContext('2d');
+    g.fillStyle = '#4B5B35'; g.fillRect(0, 0, 1024, 512);
+    var xs = [28, 360, 692];
+
+    // Khung 1: Nghệ sĩ đánh đàn Guitar dưới tán me chiều Sài Gòn
+    drawCafeCultureFrame(g, xs[0], 24, 304, 304);
+    var ix = xs[0] + 18, iy = 42, iw = 268, ih = 244;
+    var grd1 = g.createLinearGradient(0, iy, 0, iy + ih);
+    grd1.addColorStop(0, '#FDBA74'); grd1.addColorStop(1, '#FEF3C7');
+    g.fillStyle = grd1; g.fillRect(ix, iy, iw, ih);
+    g.fillStyle = '#9A3412'; // Tháp Nhà Thờ Đức Bà xa mờ
+    g.fillRect(ix + 178, iy + 52, 22, 130); g.fillRect(ix + 210, iy + 52, 22, 130);
+    g.beginPath(); g.moveTo(ix + 178, iy + 52); g.lineTo(ix + 189, iy + 22); g.lineTo(ix + 200, iy + 52); g.fill();
+    g.beginPath(); g.moveTo(ix + 210, iy + 52); g.lineTo(ix + 221, iy + 22); g.lineTo(ix + 232, iy + 52); g.fill();
+    g.fillStyle = '#15803D'; g.beginPath(); g.arc(ix + 48, iy + 48, 56, 0, Math.PI * 2); g.arc(ix + 110, iy + 32, 46, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#78350F'; g.fillRect(ix, iy + 182, iw, 62); // Ghế công viên & nền gạch
+    g.fillStyle = '#E2E8F0'; g.fillRect(ix + 68, iy + 126, 62, 68); // Áo sơ mi trắng
+    drawCafeDetailedFace(g, ix + 98, iy + 104, 21, '#1E1B18', 'none');
+    // Đàn Guitar thùng gỗ nâu rõ dây & lỗ thoát âm
+    g.fillStyle = '#B45309'; g.strokeStyle = '#451A03'; g.lineWidth = 2;
+    g.beginPath(); g.ellipse(ix + 108, iy + 168, 28, 20, -0.25, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.fillStyle = '#29150A'; g.beginPath(); g.arc(ix + 104, iy + 166, 7, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#78350F'; g.fillRect(ix + 128, iy + 148, 44, 7);
+    g.fillStyle = '#7C2D12'; g.font = 'bold 16px serif'; g.textAlign = 'center';
+    g.fillText('NHẠC TRỊNH · SÀI GÒN', xs[0] + 152, 310);
+
+    // Khung 2: Đôi bạn trẻ ngồi Cà Phê Bệt đọc báo & uống phin đá
+    drawCafeCultureFrame(g, xs[1], 24, 304, 304);
+    ix = xs[1] + 18;
+    var grd2 = g.createLinearGradient(0, iy, 0, iy + ih);
+    grd2.addColorStop(0, '#BAE6FD'); grd2.addColorStop(1, '#ECFCCB');
+    g.fillStyle = grd2; g.fillRect(ix, iy, iw, ih);
+    g.fillStyle = '#65A30D'; g.fillRect(ix, iy + 168, iw, 76); // Thảm cỏ công viên 30/4
+    g.fillStyle = '#CBD5E1'; g.fillRect(ix + 40, iy + 190, 188, 54); // Tờ báo bệt
+    // Bạn nam áo xanh & bạn nữ áo vàng rõ mặt vui vẻ
+    g.fillStyle = '#1D4ED8'; g.fillRect(ix + 64, iy + 122, 52, 62);
+    g.fillStyle = '#F59E0B'; g.fillRect(ix + 148, iy + 126, 48, 58);
+    drawCafeDetailedFace(g, ix + 90, iy + 100, 20, '#111827', 'cap');
+    drawCafeDetailedFace(g, ix + 172, iy + 104, 19, '#292524', 'none');
+    // Hai ly cà phê sữa đá + phin nhôm
+    g.fillStyle = '#FFFBF1'; g.fillRect(ix + 114, iy + 196, 18, 28); g.fillRect(ix + 138, iy + 198, 18, 26);
+    g.fillStyle = '#78350F'; g.fillRect(ix + 116, iy + 206, 14, 16); g.fillRect(ix + 140, iy + 208, 14, 14);
+    g.fillStyle = '#7C2D12'; g.font = 'bold 16px serif'; g.textAlign = 'center';
+    g.fillText('CÀ PHÊ BỆT · HẸN HÒ', xs[1] + 152, 310);
+
+    // Khung 3: Cô bán hàng rong Sài Gòn đội Nón Lá gánh bánh mì
+    drawCafeCultureFrame(g, xs[2], 24, 304, 304);
+    ix = xs[2] + 18;
+    var grd3 = g.createLinearGradient(0, iy, 0, iy + ih);
+    grd3.addColorStop(0, '#FEF08A'); grd3.addColorStop(1, '#FED7AA');
+    g.fillStyle = grd3; g.fillRect(ix, iy, iw, ih);
+    g.fillStyle = '#D97706'; g.fillRect(ix, iy + 188, iw, 56);
+    g.fillStyle = '#7C2D12'; g.fillRect(ix + 108, iy + 124, 52, 72); // Áo bà ba nâu
+    drawCafeDetailedFace(g, ix + 134, iy + 102, 20, '#1C1917', 'nonla');
+    g.fillStyle = '#92400E'; g.fillRect(ix + 46, iy + 132, 176, 8); // Đòn gánh tre
+    g.strokeStyle = '#78350F'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(ix + 62, iy + 140); g.lineTo(ix + 44, iy + 186); g.moveTo(ix + 62, iy + 140); g.lineTo(ix + 80, iy + 186); g.stroke();
+    g.beginPath(); g.moveTo(ix + 206, iy + 140); g.lineTo(ix + 188, iy + 186); g.moveTo(ix + 206, iy + 140); g.lineTo(ix + 224, iy + 186); g.stroke();
+    g.fillStyle = '#B45309'; g.fillRect(ix + 38, iy + 184, 48, 28); g.fillRect(ix + 182, iy + 184, 48, 28);
+    g.fillStyle = '#7C2D12'; g.font = 'bold 16px serif'; g.textAlign = 'center';
+    g.fillText('GÁNH HÀNG RONG XƯA', xs[2] + 152, 310);
+
     // Băng rôn gỗ ĐỘC LẬP · TỰ DO · HẠNH PHÚC bên dưới
-    g.fillStyle = '#5C341D'; g.fillRect(26, 164, 460, 72);
-    g.strokeStyle = '#FACC15'; g.lineWidth = 3; g.strokeRect(30, 168, 452, 64);
-    g.fillStyle = '#FFFBEB'; g.font = 'bold 26px serif'; g.textAlign = 'center';
-    g.fillText('★ ĐỘC LẬP · TỰ DO · HẠNH PHÚC ★', 256, 209);
-    webgl.registerTextureCanvas('photos1980s', c, false);
+    g.fillStyle = '#5C341D'; g.fillRect(36, 352, 952, 132);
+    g.strokeStyle = '#FACC15'; g.lineWidth = 6; g.strokeRect(46, 362, 932, 112);
+    g.fillStyle = '#FFFBEB'; g.font = 'bold 46px serif'; g.textAlign = 'center';
+    g.fillText('★ ĐỘC LẬP · TỰ DO · HẠNH PHÚC ★', 512, 434);
+    webgl.registerTextureCanvas('saigonCoffeeArtTex', c, false);
+  })();
+
+  // 9b. Banner 2 (Vách Cầu Thang X = -5.36): "MIỀN TÂY SÔNG NƯỚC & HỒN QUÊ VIỆT" (1024×512)
+  (function() {
+    var c = mkCanvas(1024, 512), g = c.getContext('2d');
+    g.fillStyle = '#4B5B35'; g.fillRect(0, 0, 1024, 512);
+    var xs = [28, 360, 692], iy = 42, iw = 268, ih = 244;
+
+    // Khung 1: Cô gái khăn rằn chèo xuồng Chợ Nổi Miền Tây chở đầy hoa trái
+    drawCafeCultureFrame(g, xs[0], 24, 304, 304);
+    var ix = xs[0] + 18;
+    var gr1 = g.createLinearGradient(0, iy, 0, iy + ih);
+    gr1.addColorStop(0, '#FDE68A'); gr1.addColorStop(0.55, '#FEF3C7'); gr1.addColorStop(0.56, '#0E7490'); gr1.addColorStop(1, '#155E75');
+    g.fillStyle = gr1; g.fillRect(ix, iy, iw, ih);
+    g.fillStyle = '#F59E0B'; g.beginPath(); g.arc(ix + 216, iy + 54, 24, 0, Math.PI * 2); g.fill();
+    // Xuồng ba lá chở dưa hấu & khóm
+    g.fillStyle = '#5C341D';
+    g.beginPath(); g.moveTo(ix + 18, iy + 178); g.lineTo(ix + 244, iy + 182); g.lineTo(ix + 206, iy + 216); g.lineTo(ix + 54, iy + 216); g.closePath(); g.fill();
+    g.fillStyle = '#15803D'; g.beginPath(); g.arc(ix + 82, iy + 172, 16, 0, Math.PI * 2); g.arc(ix + 114, iy + 172, 15, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#EAB308'; g.beginPath(); g.arc(ix + 146, iy + 174, 14, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#7E22CE'; g.fillRect(ix + 168, iy + 122, 46, 58); // Áo bà ba tím
+    g.fillStyle = '#1E293B'; g.fillRect(ix + 172, iy + 120, 38, 12); // Khăn rằn quấn cổ
+    drawCafeDetailedFace(g, ix + 191, iy + 100, 19, '#1C1917', 'nonla');
+    g.strokeStyle = '#92400E'; g.lineWidth = 5; g.beginPath(); g.moveTo(ix + 188, iy + 146); g.lineTo(ix + 242, iy + 228); g.stroke();
+    g.fillStyle = '#7C2D12'; g.font = 'bold 16px serif'; g.textAlign = 'center';
+    g.fillText('CHỢ NỔI MIỀN TÂY', xs[0] + 152, 310);
+
+    // Khung 2: Gia đình nông dân gặt Lúa Chín Vàng đồng quê
+    drawCafeCultureFrame(g, xs[1], 24, 304, 304);
+    ix = xs[1] + 18;
+    var gr2 = g.createLinearGradient(0, iy, 0, iy + ih);
+    gr2.addColorStop(0, '#7DD3FC'); gr2.addColorStop(0.55, '#E0F2FE'); gr2.addColorStop(0.56, '#EAB308'); gr2.addColorStop(1, '#CA8A04');
+    g.fillStyle = gr2; g.fillRect(ix, iy, iw, ih);
+    g.fillStyle = '#166534'; g.beginPath(); g.arc(ix + 46, iy + 124, 36, 0, Math.PI * 2); g.arc(ix + 220, iy + 128, 34, 0, Math.PI * 2); g.fill();
+    // 2 bác nông dân áo nâu + bó lúa vàng
+    g.fillStyle = '#78350F'; g.fillRect(ix + 64, iy + 126, 48, 66); g.fillRect(ix + 156, iy + 130, 48, 64);
+    drawCafeDetailedFace(g, ix + 88, iy + 104, 19, '#1E1B18', 'nonla');
+    drawCafeDetailedFace(g, ix + 180, iy + 108, 19, '#1E1B18', 'nonla');
+    g.fillStyle = '#FDE047'; g.fillRect(ix + 114, iy + 162, 38, 42);
+    g.fillStyle = '#7C2D12'; g.font = 'bold 16px serif'; g.textAlign = 'center';
+    g.fillText('MÙA VÀNG ĐỒNG QUÊ', xs[1] + 152, 310);
+
+    // Khung 3: Lũy tre xanh & Đàn trẻ em thả Diều Sáo chiều hoàng hôn
+    drawCafeCultureFrame(g, xs[2], 24, 304, 304);
+    ix = xs[2] + 18;
+    var gr3 = g.createLinearGradient(0, iy, 0, iy + ih);
+    gr3.addColorStop(0, '#FB7185'); gr3.addColorStop(0.65, '#FDE047'); gr3.addColorStop(0.66, '#4D7C0F'); gr3.addColorStop(1, '#365314');
+    g.fillStyle = gr3; g.fillRect(ix, iy, iw, ih);
+    // Cánh diều ngũ sắc trên bầu trời
+    g.fillStyle = '#EF4444'; g.beginPath(); g.moveTo(ix + 186, iy + 28); g.lineTo(ix + 236, iy + 54); g.lineTo(ix + 186, iy + 88); g.lineTo(ix + 144, iy + 54); g.closePath(); g.fill();
+    g.fillStyle = '#FACC15'; g.fillRect(ix + 178, iy + 48, 18, 14);
+    g.strokeStyle = '#FFFBF1'; g.lineWidth = 2; g.beginPath(); g.moveTo(ix + 186, iy + 84); g.quadraticCurveTo(ix + 132, iy + 126, ix + 98, iy + 158); g.stroke();
+    // 2 em bé rõ mặt vui đùa thả diều bên lũy tre xanh
+    g.fillStyle = '#15803D'; g.fillRect(ix + 12, iy + 62, 16, 120); g.fillRect(ix + 34, iy + 48, 14, 134);
+    g.fillStyle = '#EF4444'; g.fillRect(ix + 78, iy + 148, 40, 48);
+    g.fillStyle = '#2563EB'; g.fillRect(ix + 146, iy + 154, 38, 44);
+    drawCafeDetailedFace(g, ix + 98, iy + 128, 17, '#111827', 'none');
+    drawCafeDetailedFace(g, ix + 165, iy + 134, 16, '#292524', 'none');
+    g.fillStyle = '#7C2D12'; g.font = 'bold 16px serif'; g.textAlign = 'center';
+    g.fillText('CÁNH DIỀU TUỔI THƠ', xs[2] + 152, 310);
+
+    // Băng rôn gỗ riêng cho Vách Cầu Thang
+    g.fillStyle = '#5C341D'; g.fillRect(36, 352, 952, 132);
+    g.strokeStyle = '#4ADE80'; g.lineWidth = 6; g.strokeRect(46, 362, 932, 112);
+    g.fillStyle = '#FEF08A'; g.font = 'bold 42px serif'; g.textAlign = 'center';
+    g.fillText('★ MIỀN TÂY SÔNG NƯỚC · HỒN QUÊ VIỆT ★', 512, 434);
+    webgl.registerTextureCanvas('ruralMekongArtTex', c, false);
   })();
 
   // 10. Mặt tiền Pháp cổ vàng nắng chiều dưới phố (colonialStreet)
@@ -9848,7 +10011,7 @@ function renderCafeWebglScene(wgl, cam, st, W, H) {
   drawAoDaiRack3D(wgl, -6.30, 0, 12.2, Math.PI * 0.5);
 
   // Tường Sau Tầng 1
-  dm('quad', 'photos1980s',  0.65, 1.95, 16.12, 0, Math.PI, 0, 3.8, 1.75, 1, { tint: [1,1,1,1] });
+  dm('quad', 'saigonCoffeeArtTex',  0.65, 1.95, 16.12, 0, Math.PI, 0, 3.8, 1.75, 1, { tint: [1,1,1,1] });
   dm('quad', 'vnFlagMaiArt', 4.10, 2.00, 16.12, 0, Math.PI, 0, 1.65, 1.55, 1, { tint: [1,1,1,1] });
 
   // Quầy Bartender Tầng 1 + Enamel Menu CÀ PHÊ SÀI GÒN
@@ -9889,7 +10052,7 @@ function renderCafeWebglScene(wgl, cam, st, W, H) {
   }
   dm('box', 'timber', -3.05, 2.15, 12.0, -0.62, 0, 0, 0.10, 0.12, 5.8, { tint: [1.1, 0.9, 0.7, 1] });
   dm('box', 'oliveWall', -5.45, 2.4, 12.0, 0, 0, 0, 0.12, 4.8, 5.8, { tint: [1,1,1,1] });
-  dm('quad', 'photos1980s', -5.36, 2.65, 12.0, 0, Math.PI * 0.5, 0, 3.8, 1.8, 1, { tint: [1,1,1,1] });
+  dm('quad', 'ruralMekongArtTex', -5.36, 2.65, 12.0, 0, Math.PI * 0.5, 0, 3.8, 1.8, 1, { tint: [1,1,1,1] });
   dm('sphere', 'white', -5.18, 2.85, 13.8, 0, 0, 0, 0.22, 0.22, 0.22, { tint: [1.0, 0.75, 0.30, 1], emissive: 1.4 });
 
   // E. TẦNG 2 (Y = 3.4): 15 BÀN ĐA DẠNG (TRÒN, SOFA BOOTH, BÀN DÀI, ĐÔN GỖ, HEO AI) + KỆ SÁCH & TRANG TRÍ
