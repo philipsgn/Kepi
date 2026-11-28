@@ -537,8 +537,35 @@ function raySplitDividerWall(ox, oy, oz, bx, by, bz, dw) {
   return Math.max(0.55, t - 0.36);
 }
 
-function computeWebglTpsCamera(cam, pig, navConfig) {
-  var dist = cam.dist || 4.85;
+function wglLerpAngle(a, b, t) {
+  var d = (b - a) % (Math.PI * 2);
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return a + d * Math.max(0, Math.min(1, t));
+}
+
+function wglExpRate(speed, dt) {
+  var s = (typeof dt === 'number' && isFinite(dt) && dt > 0) ? Math.min(0.06, dt) : 0.016;
+  return 1 - Math.exp(-speed * s);
+}
+
+function computeWebglTpsCamera(cam, pig, navConfig, dt) {
+  var stepDt = (typeof dt === 'number' && isFinite(dt) && dt > 0) ? Math.min(0.06, dt) : 0.016;
+  var nowMs = (typeof Date !== 'undefined' && Date.now) ? Date.now() : 0;
+  var manualCooldown = cam.lastManualOrbitAt ? (nowMs - cam.lastManualOrbitAt) : 99999;
+
+  // Soft-Chase Yaw: tự bám nhẹ theo lưng chú Heo khi đi bộ (tạm nhường 1.6s khi user vừa xoay tay)
+  if (pig && pig.walking && !pig.seated && typeof pig.yaw === 'number' && manualCooldown > 1600) {
+    cam.yaw = wglLerpAngle(cam.yaw || 0, pig.yaw, wglExpRate(1.35, stepDt));
+  }
+
+  // Dynamic Action Zoom: tự lùi nhẹ +0.38m khi chạy, thu gần -0.35m khi ngồi/nghỉ
+  var targetDynZoom = (pig && pig.walking) ? 0.38 : ((pig && pig.seated) ? -0.35 : 0);
+  if (typeof cam.dynZoom !== 'number' || !isFinite(cam.dynZoom)) cam.dynZoom = targetDynZoom;
+  else cam.dynZoom += (targetDynZoom - cam.dynZoom) * wglExpRate(4.5, stepDt);
+
+  var baseDist = Math.max(2.2, Math.min(6.8, cam.dist || 4.85));
+  var dist = Math.max(2.0, Math.min(7.2, baseDist + cam.dynZoom));
   var sy = Math.sin(cam.yaw), cy = Math.cos(cam.yaw);
   var sp = Math.sin(cam.pitch), cp = Math.cos(cam.pitch);
   var tx = pig.x, ty = (pig.y || 0) + (cam.targetHeight || 0.72), tz = pig.z;
@@ -548,7 +575,7 @@ function computeWebglTpsCamera(cam, pig, navConfig) {
 
   // Tìm zone AABB chứa (pig.x, pig.y, pig.z) hoặc bao ngoại vi
   var outer = navConfig && navConfig.outerBounds ? navConfig.outerBounds : { minX: -5.8, maxX: 5.8, minZ: 0.1, maxZ: 14.6, minY: 0.45, maxY: 6.5 };
-  if (navConfig && navConfig.zones && navConfig.zones.length) {
+  if (navConfig && (navConfig.outerBounds || (navConfig.zones && navConfig.zones.length))) {
     // Raycast trên vùng biên ngoài trước, rồi raycast các vách ngăn đặc ngoài openings[]
     var mnX = outer.minX + wm, mxX = outer.maxX - wm;
     var mnZ = outer.minZ + wm, mxZ = outer.maxZ - wm;
@@ -569,9 +596,9 @@ function computeWebglTpsCamera(cam, pig, navConfig) {
   }
 
   var desiredDist = Math.max(0.85, tHit);
-  if (typeof cam.curDist !== 'number') cam.curDist = desiredDist;
-  if (desiredDist < cam.curDist) cam.curDist = desiredDist;
-  else cam.curDist += (desiredDist - cam.curDist) * 0.18;
+  if (typeof cam.curDist !== 'number' || !isFinite(cam.curDist)) cam.curDist = desiredDist;
+  if (desiredDist < cam.curDist) cam.curDist += (desiredDist - cam.curDist) * wglExpRate(18, stepDt);
+  else cam.curDist += (desiredDist - cam.curDist) * wglExpRate(4.4, stepDt);
 
   var ex = tx + bx * cam.curDist;
   var ey = ty + by * cam.curDist;
@@ -588,12 +615,14 @@ function computeWebglTpsCamera(cam, pig, navConfig) {
     cam.pos = { x: ex, y: ey, z: ez };
     cam.lookX = targetLookX; cam.lookY = targetLookY; cam.lookZ = targetLookZ;
   } else {
-    cam.pos.x += (ex - cam.pos.x) * 0.24;
-    cam.pos.y += (ey - cam.pos.y) * 0.24;
-    cam.pos.z += (ez - cam.pos.z) * 0.24;
-    cam.lookX += (targetLookX - cam.lookX) * 0.26;
-    cam.lookY += (targetLookY - cam.lookY) * 0.26;
-    cam.lookZ += (targetLookZ - cam.lookZ) * 0.26;
+    var posRate = wglExpRate(12, stepDt);
+    var lookRate = wglExpRate(14, stepDt);
+    cam.pos.x += (ex - cam.pos.x) * posRate;
+    cam.pos.y += (ey - cam.pos.y) * posRate;
+    cam.pos.z += (ez - cam.pos.z) * posRate;
+    cam.lookX += (targetLookX - cam.lookX) * lookRate;
+    cam.lookY += (targetLookY - cam.lookY) * lookRate;
+    cam.lookZ += (targetLookZ - cam.lookZ) * lookRate;
   }
 
   var fx = cam.lookX - cam.pos.x, fy = cam.lookY - cam.pos.y, fz = cam.lookZ - cam.pos.z;

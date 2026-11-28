@@ -125,9 +125,16 @@ function unprojectFloorTap(cam, sx, sy) {
   return { x: cam.pos.x + dx * t, z: cam.pos.z + dz * t };
 }
 
+function tpsLerpAngle(a, b, t) {
+  var d = normalizeAngle(b - a);
+  return normalizeAngle(a + d * Math.max(0, Math.min(1, t)));
+}
+
 function bindTpsCanvasGestures(cv, cam, opts) {
   var dragging = false, moved = false, activeId = null;
   var lastX = 0, lastY = 0, startX = 0, startY = 0;
+  var activePts = {};
+  var pinchStartD = 0, pinchStartDist = 4.85;
   var minPitch = (opts && typeof opts.minPitch === 'number') ? opts.minPitch : -0.68;
   var maxPitch = (opts && typeof opts.maxPitch === 'number') ? opts.maxPitch : -0.08;
   var dragSlop = (opts && typeof opts.dragSlop === 'number') ? opts.dragSlop : 13;
@@ -137,10 +144,24 @@ function bindTpsCanvasGestures(cv, cam, opts) {
     if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
     return { x: e.clientX, y: e.clientY };
   }
+  function activeKeys() {
+    var k = [];
+    for (var p in activePts) if (Object.prototype.hasOwnProperty.call(activePts, p)) k.push(p);
+    return k;
+  }
   function onDown(e) {
     if (typeof e.button === 'number' && e.button !== 0 && e.pointerType === 'mouse') return;
-    if (dragging && typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
+    var pid = (typeof e.pointerId === 'number') ? String(e.pointerId) : '0';
     var pt = getPt(e);
+    activePts[pid] = { x: pt.x, y: pt.y };
+    var ks = activeKeys();
+    if (ks.length >= 2) {
+      var p1 = activePts[ks[0]], p2 = activePts[ks[1]];
+      pinchStartD = Math.max(20, Math.hypot(p2.x - p1.x, p2.y - p1.y));
+      pinchStartDist = Math.max(2.2, Math.min(6.8, cam.dist || 4.85));
+      dragging = true; moved = true; activeId = null;
+      return;
+    }
     dragging = true; moved = false;
     activeId = (typeof e.pointerId === 'number') ? e.pointerId : null;
     lastX = startX = pt.x; lastY = startY = pt.y;
@@ -150,16 +171,39 @@ function bindTpsCanvasGestures(cv, cam, opts) {
   }
   function onMove(e) {
     if (!dragging) return;
-    if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
+    var pid = (typeof e.pointerId === 'number') ? String(e.pointerId) : '0';
     var pt = getPt(e);
+    if (activePts[pid]) activePts[pid] = { x: pt.x, y: pt.y };
+    var ks = activeKeys();
+    if (ks.length >= 2) {
+      var p1 = activePts[ks[0]], p2 = activePts[ks[1]];
+      var d = Math.max(20, Math.hypot(p2.x - p1.x, p2.y - p1.y));
+      cam.dist = Math.max(2.2, Math.min(6.8, pinchStartDist * (pinchStartD / d)));
+      cam.lastManualOrbitAt = Date.now();
+      moved = true;
+      if (e.cancelable) e.preventDefault();
+      return;
+    }
+    if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
     var dx = pt.x - lastX, dy = pt.y - lastY;
     if (Math.hypot(pt.x - startX, pt.y - startY) > dragSlop) moved = true;
+    if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) cam.lastManualOrbitAt = Date.now();
     cam.yaw -= dx * 0.0085;
     cam.pitch = Math.max(minPitch, Math.min(maxPitch, cam.pitch - dy * 0.0055));
     lastX = pt.x; lastY = pt.y;
     if (e.cancelable) e.preventDefault();
   }
   function onUp(e) {
+    var pid = (typeof e.pointerId === 'number') ? String(e.pointerId) : '0';
+    delete activePts[pid];
+    var ks = activeKeys();
+    if (ks.length === 1) {
+      var rem = activePts[ks[0]];
+      activeId = ks[0] === '0' ? null : Number(ks[0]);
+      lastX = rem.x; lastY = rem.y;
+      moved = true;
+      return;
+    }
     if (!dragging) return;
     if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
     if (typeof e.pointerId === 'number' && cv.releasePointerCapture) {
@@ -178,8 +222,17 @@ function bindTpsCanvasGestures(cv, cam, opts) {
     }
   }
   function onCancel(e) {
-    if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
-    dragging = false; moved = false; activeId = null;
+    var pid = (typeof e.pointerId === 'number') ? String(e.pointerId) : '0';
+    delete activePts[pid];
+    if (activeKeys().length === 0) {
+      dragging = false; moved = false; activeId = null;
+    }
+  }
+  function onWheel(e) {
+    if (typeof e.deltaY !== 'number') return;
+    cam.dist = Math.max(2.2, Math.min(6.8, (cam.dist || 4.85) + e.deltaY * 0.0035));
+    cam.lastManualOrbitAt = Date.now();
+    if (e.cancelable) e.preventDefault();
   }
 
   var hasPointer = typeof window !== 'undefined' && typeof window.PointerEvent !== 'undefined';
@@ -194,8 +247,9 @@ function bindTpsCanvasGestures(cv, cam, opts) {
     window.addEventListener('touchend', onUp);
     window.addEventListener('touchcancel', onCancel);
   }
+  cv.addEventListener('wheel', onWheel, { passive: false });
   if (typeof window !== 'undefined') {
-    window.addEventListener('blur', function() { dragging = false; moved = false; activeId = null; });
+    window.addEventListener('blur', function() { activePts = {}; dragging = false; moved = false; activeId = null; });
   }
 }
 

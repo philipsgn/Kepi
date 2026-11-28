@@ -198,6 +198,7 @@ function planPhoRealtimePath(st, tx, tz, seatTarget, actionTag) {
 
 function stepPhoTpsWorld(w, dt) {
   w.t += dt;
+  w._lastDt = dt;
 
   // Chỉ hé mở duy nhất 1 cánh cửa phải (~35°) khi có khách NPC ra/vào sát cửa hoặc khi Heo ra cửa -> không xuyên gỗ! (QĐ 239)
   var npcNearDoor = false;
@@ -255,7 +256,8 @@ function stepPhoTpsWorld(w, dt) {
       var step = Math.min(dist, 3.6 * dt);
       var next = clampPigWorldPos(w, p.x + (dx / dist) * step, p.z + (dz / dist) * step);
       p.x = next.x; p.z = next.z;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
   }
   if (w.targetMarker) {
@@ -657,7 +659,7 @@ function drawPhoTablePropsWebgl(wgl, tb, t) {
 
 function renderPhoWebglScene(wgl, cam, st, W, H) {
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, st.pig, PHO_NAV_CONFIG);
+    computeWebglTpsCamera(cam, st.pig, PHO_NAV_CONFIG, st._lastDt || 0.016);
   }
   wgl.beginFrame(W, H, cam, PHO_ATMOS);
   var dm = wgl.drawMesh;

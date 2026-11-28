@@ -422,6 +422,7 @@ function stepPagodaNpcs(st, dt) {
 
 function stepPagodaTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   stepPagodaNpcs(st, dt);
@@ -451,11 +452,12 @@ function stepPagodaTps(st, dt) {
       }
     } else {
       var onRamp = (p.y > 0.02 && p.y < 0.46);
-      var spd = Math.min(dist, (onRamp ? 2.15 : 2.95) * dt);
+      var spd = Math.min(dist, (onRamp ? 2.6 : 3.6) * dt);
       var next = clampPagodaWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd, p.y);
       var moved = Math.hypot(next.x - p.x, next.z - p.z);
       p.x = next.x; p.z = next.z;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
       if (moved < 0.002 && p.waypoints && p.waypoints.length <= 1) {
         p.walking = false;
       }
@@ -562,7 +564,7 @@ function renderPagodaWebglScene(wgl, cam, st, W, H) {
   var maxYMap = { garden: 6.2, main_hall: 4.48, bell_tea: 4.16, east_corridor: 3.76 };
   PAGODA_NAV_CONFIG.outerBounds.maxY = maxYMap[st.zone] || 4.45;
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, st.pig, PAGODA_NAV_CONFIG);
+    computeWebglTpsCamera(cam, st.pig, PAGODA_NAV_CONFIG, st._lastDt || 0.016);
   }
   wgl.beginFrame(W, H, cam, PAGODA_ATMOSPHERE);
   var dm = wgl.drawMesh;

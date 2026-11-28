@@ -9085,4 +9085,133 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log(`✅ Test 188 Passed: Che Giấu Cửa Sổ 6 Lớp Tầng 1-2, Đường Nhựa 2 Làn (${out.vehiclesCount} xe), Nhà Phố 56m, Skyline Bitexco/Landmark81 & 3 Sắc Trời [${out.modes.join('/')}] (${draws} draws, 0 NaN — Quyết định 253) Audit verified cleanly`);
 }
 
-console.log('\n🎉 ALL 188 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (188/188)!');
+// =========================================================================
+// TEST 189: CAMERA SPRING-ARM ZOOM OUT/IN ĐỘNG, SOFT-CHASE YAW, PINCH/WHEEL ZOOM & TỐC ĐỘ 3.6 M/S TOÀN BỘ 7 CÔNG TRÌNH (QĐ 254)
+// =========================================================================
+{
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const tpsEng = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const wglEng = fs.readFileSync('src/components/pixel/pixelWebgl3dEngine.ts', 'utf8');
+
+  assert.ok(
+    tpsDoc.includes('QĐ 254') &&
+      decDoc.includes('Quyết định 254') &&
+      wglEng.includes('function wglExpRate') &&
+      wglEng.includes('function wglLerpAngle') &&
+      wglEng.includes('dynZoom') &&
+      wglEng.includes('lastManualOrbitAt') &&
+      tpsEng.includes('function tpsLerpAngle') &&
+      tpsEng.includes("'wheel'"),
+    'QD 254 docs, exp damping, dynZoom, Soft-Chase & Pinch/Wheel helpers must be synced'
+  );
+
+  const sceneFiles = [
+    'src/components/chat/pho/phoTps3dScene.ts',
+    'src/components/chat/cafe/cafeTps3dScene.ts',
+    'src/components/chat/adidas/adidasTps3dScene.ts',
+    'src/components/chat/cathedral/cathedralTps3dScene.ts',
+    'src/components/chat/pagoda/pagodaTps3dScene.ts',
+    'src/components/chat/market/marketTps3dScene.ts',
+    'src/components/chat/stadium/stadiumTps3dScene.ts',
+  ];
+  for (const sf of sceneFiles) {
+    const code = fs.readFileSync(sf, 'utf8');
+    assert.ok(
+      code.includes('computeWebglTpsCamera(') &&
+        code.includes('3.6') &&
+        code.includes('_lastDt'),
+      sf + ' must unify onto computeWebglTpsCamera with 3.6 m/s speed and _lastDt'
+    );
+  }
+
+  const extractRaw = (src) => {
+    const m = src.match(/return String\.raw`([\s\S]*?)`;/);
+    assert.ok(m && m[1], 'Must export String.raw script');
+    return m[1];
+  };
+
+  const listeners = { cv: {}, win: {} };
+  const fakeWin = {
+    PointerEvent: function() {},
+    addEventListener(ev, fn) { listeners.win[ev] = fn; },
+  };
+  const fakeCv = {
+    width: 390, height: 844,
+    getBoundingClientRect() { return { left: 0, top: 0, width: 390, height: 844 }; },
+    addEventListener(ev, fn) { listeners.cv[ev] = fn; },
+    setPointerCapture() {},
+    releasePointerCapture() {},
+  };
+
+  const simFn = new Function(
+    'window',
+    'cv',
+    extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + `\n
+    var nav = {
+      wallMargin: 0.4,
+      outerBounds: { minX: -7, maxX: 7, minZ: 0.25, maxZ: 16.2, minY: 0.55, maxY: 6.8 },
+      zones: [{ id: 'hall', minX: -7, maxX: 7, minZ: 0.25, maxZ: 16.2, floorY: 0 }],
+      dividerWalls: []
+    };
+    var cam = createTpsCamera({ yaw: 0, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
+    cam.vw = 390; cam.vh = 844; cam.focal = 280;
+
+    // 1. Dynamic Action Zoom: walking zooms OUT, seated zooms IN
+    var pigWalk = { x: 0, y: 0, z: 9.5, yaw: 0, walking: true, seated: false };
+    for (var i = 0; i < 45; i++) computeWebglTpsCamera(cam, pigWalk, nav, 0.03);
+    var walkDist = cam.curDist;
+
+    var pigSeat = { x: 0, y: 0, z: 9.5, yaw: 0, walking: false, seated: true };
+    for (var j = 0; j < 45; j++) computeWebglTpsCamera(cam, pigSeat, nav, 0.03);
+    var seatDist = cam.curDist;
+
+    // 2. Soft-Chase Yaw: active after cooldown, paused immediately after manual orbit
+    cam.yaw = 0;
+    cam.lastManualOrbitAt = Date.now() - 3000;
+    var pigTurn = { x: 0, y: 0, z: 9.5, yaw: 0.85, walking: true, seated: false };
+    for (var k = 0; k < 35; k++) computeWebglTpsCamera(cam, pigTurn, nav, 0.03);
+    var chasedYaw = cam.yaw;
+
+    cam.yaw = 0;
+    cam.lastManualOrbitAt = Date.now();
+    computeWebglTpsCamera(cam, pigTurn, nav, 0.03);
+    var pausedYaw = cam.yaw;
+
+    // 3. Pinch-to-Zoom 2 ngón + Mouse Wheel zoom
+    var tapCount = 0;
+    bindTpsCanvasGestures(cv, cam, {
+      getSize: function() { return { w: 390, h: 844 }; },
+      onTap: function() { tapCount++; }
+    });
+    return {
+      cam: cam,
+      walkDist: walkDist,
+      seatDist: seatDist,
+      chasedYaw: chasedYaw,
+      pausedYaw: pausedYaw,
+      getTapCount: function() { return tapCount; }
+    };
+  `
+  );
+  const res = simFn(fakeWin, fakeCv);
+  assert.ok(res.walkDist > res.seatDist + 0.45, 'Camera must zoom OUT when walking (' + res.walkDist.toFixed(2) + 'm) and zoom IN when seated (' + res.seatDist.toFixed(2) + 'm)');
+  assert.ok(res.chasedYaw > 0.25, 'Soft-Chase Yaw must follow Pig heading after cooldown (got ' + res.chasedYaw.toFixed(2) + ')');
+  assert.strictEqual(res.pausedYaw, 0, 'Soft-Chase Yaw must yield immediately during manual orbit cooldown');
+
+  // Test 2-finger pinch spread zooms IN (< 4.85 -> < 3.8) with 0 walk taps
+  listeners.cv.pointerdown({ pointerId: 10, button: 0, pointerType: 'touch', clientX: 160, clientY: 400 });
+  listeners.cv.pointerdown({ pointerId: 11, button: 0, pointerType: 'touch', clientX: 230, clientY: 400 });
+  listeners.win.pointermove({ pointerId: 11, clientX: 300, clientY: 400, cancelable: true, preventDefault() {} });
+  listeners.win.pointerup({ pointerId: 11, clientX: 300, clientY: 400 });
+  listeners.win.pointerup({ pointerId: 10, clientX: 160, clientY: 400 });
+  assert.ok(res.cam.dist < 3.8, 'Pinch spread must zoom camera IN smoothly (dist=' + res.cam.dist.toFixed(2) + ')');
+  const distAfterPinch = res.cam.dist;
+  listeners.cv.wheel({ deltaY: 200, cancelable: true, preventDefault() {} });
+  assert.ok(res.cam.dist > distAfterPinch, 'Mouse wheel scroll down must zoom OUT cleanly');
+  assert.strictEqual(res.getTapCount(), 0, 'Pinch & Wheel zoom must emit 0 accidental walk taps');
+
+  console.log(`✅ Test 189 Passed: 7/7 Venues Unified Spring-Arm, Dynamic Zoom [walk=${res.walkDist.toFixed(2)}m > seat=${res.seatDist.toFixed(2)}m], Soft-Chase=${res.chasedYaw.toFixed(2)}, Pinch & Wheel Zoom (Quyết định 254) Audit verified cleanly`);
+}
+
+console.log('\n🎉 ALL 189 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (189/189)!');

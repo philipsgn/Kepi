@@ -484,6 +484,7 @@ function stepCathedralNpcs(st, dt) {
 
 function stepCathedralTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   stepCathedralNpcs(st, dt);
@@ -529,10 +530,11 @@ function stepCathedralTps(st, dt) {
       var onAnyRamp = (p.x >= -6.0 && p.x <= -3.0 && p.z >= 11.0 && p.z <= 12.6) ||
                       (p.x >= -7.45 && p.x <= -6.0 && p.z >= 7.8 && p.z <= 11.0) ||
                       (p.x >= -2.2 && p.x <= 2.2 && p.z >= 14.5 && p.z <= 16.1);
-      var spd = Math.min(dist, (onAnyRamp ? 2.15 : 2.95) * dt);
+      var spd = Math.min(dist, (onAnyRamp ? 2.6 : 3.6) * dt);
       var next = clampCathedralWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd, p.y);
       p.x = next.x; p.z = next.z;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
   }
 
@@ -770,7 +772,7 @@ function drawBronzeBellWebgl(wgl, st) {
 
 function renderCathedralWebglScene(wgl, cam, st, W, H) {
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, st.pig, CATHEDRAL_NAV_GRAPH);
+    computeWebglTpsCamera(cam, st.pig, CATHEDRAL_NAV_GRAPH, st._lastDt || 0.016);
   }
   CATHEDRAL_ATMOSPHERE.lights[1].col[0] = 1.22 + st.candleGlow * 0.45 + st.maryHalo * 0.35;
   CATHEDRAL_ATMOSPHERE.lights[1].col[1] = 0.88 + st.candleGlow * 0.28 + st.maryHalo * 0.24;

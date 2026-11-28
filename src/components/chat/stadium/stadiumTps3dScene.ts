@@ -365,6 +365,7 @@ function executeStadiumAction(st, actionId) {
 
 function stepStadiumTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   // 1. Chuyển động chú Heo liên hoàn qua Waypoints (từng bước, từng bậc cầu thang/dốc)
@@ -388,7 +389,7 @@ function stepStadiumTps(st, dt) {
     } else {
       var onStairOrRamp = (p.x >= 3.4 && p.x <= 5.2 && p.z >= 6.5 && p.z <= 12.1) ||
                           (p.x >= -1.8 && p.x <= 1.8 && p.z >= 14.0 && p.z <= 21.2);
-      var spd = Math.min(dist, (onStairOrRamp ? 2.25 : 3.45) * dt);
+      var spd = Math.min(dist, (onStairOrRamp ? 2.6 : 3.6) * dt);
       var nx = p.x + (dx / dist) * spd;
       var nz = p.z + (dz / dist) * spd;
       if (!p.waypoints || p.waypoints.length <= 1) {
@@ -396,7 +397,8 @@ function stepStadiumTps(st, dt) {
         nx = cl.x; nz = cl.z;
       }
       p.x = nx; p.z = nz;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
   }
 
@@ -597,7 +599,7 @@ function drawFloodlightTowerWebgl(wgl, x, z, lookYaw) {
 
 function renderStadiumWebglScene(wgl, cam, st, W, H) {
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, st.pig, STADIUM_NAV_GRAPH);
+    computeWebglTpsCamera(cam, st.pig, STADIUM_NAV_GRAPH, st._lastDt || 0.016);
   }
   var dm = wgl.drawMesh;
   var p = st.pig;

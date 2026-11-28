@@ -412,6 +412,7 @@ function stepAdidasNpcs(st, dt) {
 
 function stepAdidasTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   for (var pi = 0; pi < (st.particles ? st.particles.length : 0); pi++) {
@@ -460,7 +461,7 @@ function stepAdidasTps(st, dt) {
       }
     } else {
       var onStairs = (p.x >= -5.05 && p.x <= -2.95 && p.z > 8.55 && p.z < 13.45);
-      var spd = Math.min(dist, (onStairs ? 2.15 : 2.95) * dt);
+      var spd = Math.min(dist, (onStairs ? 2.6 : 3.6) * dt);
       var nx = p.x + (dx / dist) * spd;
       var nz = p.z + (dz / dist) * spd;
       if (onStairs) {
@@ -470,7 +471,8 @@ function stepAdidasTps(st, dt) {
         var next = clampAdidasWalkPos(st, nx, nz, p.y);
         p.x = next.x; p.z = next.z;
       }
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
     p.y = getAdidasSurfaceY(p.x, p.z, p.y);
     st.floor = p.y >= 1.9 ? 2 : 1;
@@ -505,7 +507,7 @@ function computeAdidasWebglCamera(cam, st) {
         : { minX: -6.0, maxX: 15.6, minZ: 0.0, maxZ: 14.8, minY: 0.45, maxY: 3.32 })
   };
   if (typeof computeWebglTpsCamera === 'function') {
-    computeWebglTpsCamera(cam, p, navCfg);
+    computeWebglTpsCamera(cam, p, navCfg, st._lastDt || 0.016);
   }
 }
 

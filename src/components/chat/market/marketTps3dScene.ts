@@ -265,6 +265,7 @@ function stepMarketNpcs(st, dt) {
 
 function stepMarketTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   stepMarketNpcs(st, dt);
@@ -315,10 +316,11 @@ function stepMarketTps(st, dt) {
         p.pendingAction = null;
       }
     } else {
-      var spd = Math.min(dist, 3.15 * dt);
+      var spd = Math.min(dist, 3.6 * dt);
       var next = clampMarketWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd);
       p.x = next.x; p.z = next.z;
-      p.yaw = Math.atan2(dx, dz);
+      var tyaw = Math.atan2(dx, dz);
+      p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
 
     // Cập nhật thụ động zone khi Heo đi bộ vượt cổng (0% teleport)
@@ -474,7 +476,7 @@ function drawMarketPropBanhBeoTrayWebgl(wgl, x, y, z) {
 }
 
 function renderMarketWebglScene(wgl, cam, st, W, H) {
-  computeWebglTpsCamera(cam, st.pig, MARKET_NAV_GRAPH);
+  computeWebglTpsCamera(cam, st.pig, MARKET_NAV_GRAPH, st._lastDt || 0.016);
   var p = st.pig;
   var atmo = {
     clearColor: MARKET_ATMO.clearColor,

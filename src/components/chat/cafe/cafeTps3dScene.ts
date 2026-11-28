@@ -324,37 +324,48 @@ function segIntersectsBox(ax, az, bx, bz, box, pad) {
 
 function routeAroundCafeObstacles(st, startPt, endPt, floorY) {
   var obs = getCafeObstacles(floorY, st.f1Tables, st.f2Tables);
-  var hitBox = null, pad = 0.24;
-  for (var i = 0; i < obs.length; i++) {
-    if (segIntersectsBox(startPt.x, startPt.z, endPt.x, endPt.z, obs[i], pad)) {
-      hitBox = obs[i];
-      break;
-    }
-  }
-  if (!hitBox) return [endPt];
-  var cands = [
-    { x: hitBox.minX - 0.36, z: hitBox.minZ - 0.36, y: floorY },
-    { x: hitBox.maxX + 0.36, z: hitBox.minZ - 0.36, y: floorY },
-    { x: hitBox.minX - 0.36, z: hitBox.maxZ + 0.36, y: floorY },
-    { x: hitBox.maxX + 0.36, z: hitBox.maxZ + 0.36, y: floorY }
-  ];
-  var best = null, bestLen = 9999;
-  for (var ci = 0; ci < cands.length; ci++) {
-    var cp = cands[ci];
-    if (cp.x < -6.45 || cp.x > 6.45 || cp.z < 0.55 || cp.z > 15.65) continue;
-    var blocked = false;
-    for (var j = 0; j < obs.length; j++) {
-      if (segIntersectsBox(startPt.x, startPt.z, cp.x, cp.z, obs[j], 0.16) ||
-          segIntersectsBox(cp.x, cp.z, endPt.x, endPt.z, obs[j], 0.16)) {
-        blocked = true;
+  var out = [];
+  var cur = startPt;
+  for (var iter = 0; iter < 4; iter++) {
+    var hitBox = null, pad = 0.24;
+    for (var i = 0; i < obs.length; i++) {
+      if (segIntersectsBox(cur.x, cur.z, endPt.x, endPt.z, obs[i], pad)) {
+        hitBox = obs[i];
         break;
       }
     }
-    var len = Math.hypot(cp.x - startPt.x, cp.z - startPt.z) + Math.hypot(endPt.x - cp.x, endPt.z - cp.z);
-    if (!blocked && len < bestLen) { bestLen = len; best = cp; }
+    if (!hitBox) break;
+    var cands = [
+      { x: hitBox.minX - 0.38, z: hitBox.minZ - 0.38, y: floorY },
+      { x: hitBox.maxX + 0.38, z: hitBox.minZ - 0.38, y: floorY },
+      { x: hitBox.minX - 0.38, z: hitBox.maxZ + 0.38, y: floorY },
+      { x: hitBox.maxX + 0.38, z: hitBox.maxZ + 0.38, y: floorY }
+    ];
+    var best = null, bestScore = 99999;
+    for (var ci = 0; ci < cands.length; ci++) {
+      var cp = cands[ci];
+      if (cp.x < -6.45 || cp.x > 6.45 || cp.z < 0.55 || cp.z > 15.65) continue;
+      // Không chọn lại đúng góc đang đứng (tránh kẹt vòng lặp waypoint trùng lặp)
+      if (Math.hypot(cp.x - cur.x, cp.z - cur.z) < 0.25) continue;
+      var blockedFirst = false;
+      for (var j = 0; j < obs.length; j++) {
+        if (segIntersectsBox(cur.x, cur.z, cp.x, cp.z, obs[j], 0.16)) {
+          blockedFirst = true;
+          break;
+        }
+      }
+      if (blockedFirst) continue;
+      // Ưu tiên góc vượt thoát hoàn toàn khỏi hitBox (không cắt xuyên lại qua lỗ cầu thang/bàn)
+      var stillHits = segIntersectsBox(cp.x, cp.z, endPt.x, endPt.z, hitBox, pad) ? 40 : 0;
+      var len = stillHits + Math.hypot(cp.x - cur.x, cp.z - cur.z) + Math.hypot(endPt.x - cp.x, endPt.z - cp.z);
+      if (len < bestScore) { bestScore = len; best = cp; }
+    }
+    if (!best) break;
+    out.push(best);
+    cur = best;
   }
-  if (!best) return [endPt];
-  return [best, endPt];
+  out.push(endPt);
+  return out;
 }
 
 function planCafeRealtimePath(st, tx, targetFloorY, tz, seatChairId, pendingAction) {
@@ -441,6 +452,7 @@ function stepCafeNpcs(st, dt) {
 
 function stepCafeTps(st, dt) {
   st.t += dt;
+  st._lastDt = dt;
   var p = st.pig;
 
   for (var pi = 0; pi < st.particles.length; pi++) {
@@ -529,55 +541,23 @@ function stepCafeTps(st, dt) {
 /* ==================== 3. CAMERA TPS NỘI SUY CẦU THANG MƯỢT & RAYCAST 3D 24 GHẾ ==================== */
 function computeCafeWebglCamera(cam, st) {
   var p = st.pig;
-  var dist = cam.dist || 4.85;
-  var sy = Math.sin(cam.yaw), cy = Math.cos(cam.yaw);
-  var sp = Math.sin(cam.pitch), cp = Math.cos(cam.pitch);
-  var ex = p.x - sy * cp * dist;
-  var ey = (p.y + (cam.targetHeight || 0.72)) - sp * dist;
-  var ez = p.z - cy * cp * dist;
-
-  ex = Math.max(-6.60, Math.min(6.60, ex));
-  ez = Math.max(0.45, Math.min(15.75, ez));
-
-  // Chống kẹt góc sát tường mặt tiền: nếu bị kẹp sát lưng heo (< 2.1m), đẩy nhẹ camera sang ngang/lên
-  var hDist = Math.hypot(ex - p.x, ez - p.z);
-  if (hDist < 2.1) {
-    var pushX = ex >= 0 ? -1.4 : 1.4;
-    ex = Math.max(-6.40, Math.min(6.40, ex + pushX));
-    ez = Math.max(0.55, Math.min(15.65, ez + (p.z < 2.4 ? 1.8 : 0)));
-  }
-
-  // Nội suy tuyến tính chiều cao camera theo p.y -> triệt tiêu hoàn toàn bước nhảy +1.3m ở cầu thang!
   var stairT = Math.max(0, Math.min(1, p.y / 3.4));
-  var eyMin = 1.15 + stairT * 3.10;
-  var eyMax = 3.20 + stairT * 3.35;
-  ey = Math.max(eyMin, Math.min(eyMax, ey));
-
-  var targetLookX = p.x + sy * 1.1;
-  var targetLookY = p.y + 1.05;
-  var targetLookZ = p.z + cy * 1.1;
-  if (!cam.cafeInited || !cam.pos || !isFinite(cam.pos.x)) {
-    cam.cafeInited = true;
-    cam.pos = { x: ex, y: ey, z: ez };
-    cam.lookX = targetLookX; cam.lookY = targetLookY; cam.lookZ = targetLookZ;
-  } else {
-    cam.pos.x += (ex - cam.pos.x) * 0.24;
-    cam.pos.y += (ey - cam.pos.y) * 0.24;
-    cam.pos.z += (ez - cam.pos.z) * 0.24;
-    cam.lookX += (targetLookX - cam.lookX) * 0.26;
-    cam.lookY += (targetLookY - cam.lookY) * 0.26;
-    cam.lookZ += (targetLookZ - cam.lookZ) * 0.26;
+  var cafeNavCfg = {
+    wallMargin: 0.40,
+    outerBounds: {
+      minX: -7.0, maxX: 7.0, minZ: 0.25, maxZ: 16.2,
+      minY: 0.55,
+      maxY: 3.32 + stairT * 3.53
+    },
+    zones: [
+      { id: 'f1', minX: -7.0, maxX: 7.0, minZ: 0.25, maxZ: 16.2, floorY: 0 },
+      { id: 'f2', minX: -7.0, maxX: 7.0, minZ: 0.25, maxZ: 16.2, floorY: 3.4 }
+    ],
+    dividerWalls: []
+  };
+  if (typeof computeWebglTpsCamera === 'function') {
+    computeWebglTpsCamera(cam, p, cafeNavCfg, st._lastDt || 0.016);
   }
-
-  var fx = cam.lookX - cam.pos.x, fy = cam.lookY - cam.pos.y, fz = cam.lookZ - cam.pos.z;
-  var fl = Math.hypot(fx, fy, fz) || 1;
-  fx /= fl; fy /= fl; fz /= fl;
-  var rx = -fz, rz = fx;
-  var rl = Math.hypot(rx, rz) || 1;
-  rx /= rl; rz /= rl;
-  cam.F = { x: fx, y: fy, z: fz };
-  cam.R = { x: rx, y: 0, z: rz };
-  cam.U = { x: -fy * rz, y: fx * rz - fz * rx, z: fy * rx };
 }
 
 function raySphereDist(ox, oy, oz, dx, dy, dz, cx, cy, cz, rad) {
