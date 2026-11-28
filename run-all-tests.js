@@ -8737,22 +8737,16 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
         var st = createAdidasTpsState(); var cam = createTpsCamera({ yaw: 0.06, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
         renderAdidasWebglScene(wgl, cam, st, 390, 844);
         var fovy = Number((cam.activeFovy || 0).toFixed(2));
-        // Bước 1: Đi xuyên sảnh vòng qua Đảo Predator qua Vòm Phòng Thay Đồ & thử Áo Khoác 3 Sọc
-        planAdidasRealtimePath(st, 11.8, 0, 9.8, 'try_jacket');
-        for (var i = 0; i < 360; i++) {
+        // Leo cầu thang 14 bậc liên hoàn lên Tầng 2 (tới quầy POS Tầng 2)
+        planAdidasRealtimePath(st, 2.5, 3.4, 6.9, 'buy_bag');
+        var mid = false;
+        for (var i = 0; i < 420; i++) {
           stepAdidasTps(st, 0.05);
+          if (st.pig.y > 0.3 && st.pig.y < 3.1) mid = true;
           if (!st.pig.walking) break;
         }
-        var woreJacket = st.pig.outfit === 'adidas_jacket' && st.pig.x > 10.5;
-        // Bước 2: Đi tiếp qua cửa thông sang Sân Turf Football Kick Zone & sút bóng
-        planAdidasRealtimePath(st, 10.0, 0, 17.8, 'kick_spot');
-        for (var j = 0; j < 260; j++) {
-          stepAdidasTps(st, 0.05);
-          if (!st.pig.walking) break;
-        }
-        var inKick = !!(st.kickGame && st.kickGame.active && st.pig.z >= 16.5);
         renderAdidasWebglScene(wgl, cam, st, 390, 844);
-        return { fovy: fovy, woreJacket: woreJacket, inKick: inKick, ok: woreJacket && inKick && Math.abs(st.pig.y) < 0.05 };
+        return { fovy: fovy, mid: mid, y: st.pig.y, bag: st.pig.boughtSamba, ok: mid && Math.abs(st.pig.y - 3.4) < 0.08 && st.pig.boughtSamba };
       `,
     }),
     runWebglVenueAudit({
@@ -9302,7 +9296,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     };
     buildAdidasProceduralTextures(wgl);
 
-    var obsCount = getAdidasObstacles().length;
+    var obsCount = getAdidasObstacles(0).length + getAdidasObstacles(3.4).length;
     var st = createAdidasTpsState();
     var cam = createTpsCamera({ yaw: 0.04, pitch: -0.30, dist: 4.85, targetHeight: 0.72 });
     renderAdidasWebglScene(wgl, cam, st, 390, 844);
@@ -9337,10 +9331,10 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   `
   );
   const adRes = adRun(mockDoc, mockCv, regTexNames);
-  assert.ok(adRes.obsCount >= 16, 'Adidas Mega Mall must have >= 16 obstacle/stall zones (got ' + adRes.obsCount + ')');
-  assert.strictEqual(adRes.npcCount, 12, 'Adidas Mega Mall must have 12 NPCs (got ' + adRes.npcCount + ')');
-  assert.strictEqual(adRes.zoneCount, 4, 'Adidas Mega Mall must unite 4 seamless 1-floor zones');
-  assert.strictEqual(adRes.rampCount, 0, 'Adidas Mega Mall must be 100% 1-floor with 0 stairs');
+  assert.ok(adRes.obsCount >= 22, 'Adidas Mega Mall 2-floor must have >= 22 obstacle/stall zones (got ' + adRes.obsCount + ')');
+  assert.strictEqual(adRes.npcCount, 14, 'Adidas Mega Mall 2-floor must have 14 NPCs (got ' + adRes.npcCount + ')');
+  assert.strictEqual(adRes.zoneCount, 5, 'Adidas Mega Mall 2-floor must unite 5 seamless zones');
+  assert.strictEqual(adRes.rampCount, 1, 'Adidas Mega Mall 2-floor must have 14-step staircase ramp');
   assert.ok(adRes.detourCount >= 2, 'routeAroundAdidasObstacles must detour around center Predator island (wps=' + adRes.detourCount + ')');
   assert.strictEqual(adRes.leakedAcrossWall, false, 'pickAdidasTarget3D must NOT shoot through solid divider wall X=6.0');
   assert.ok(adRes.goalsScored >= 1, '3D Football Kick Zone must score goals cleanly (goals=' + adRes.goalsScored + ')');
@@ -9370,7 +9364,68 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   assert.ok(mktRes.hasDetour, 'Market fixed AABB check must detour around Sạp 1044 when exiting from stall perimeter');
 
   assert.ok(decDoc.includes('Quyết định 255') && tpsDoc.includes('QĐ 255'), 'DECISIONS.md and TPS_3D_OPEN_WORLD_SPEC.md must record QD 255');
-  console.log(`✅ Test 190 Passed: Adidas Mega Mall 1 Tầng [stalls=${adRes.obsCount}, npcs=${adRes.npcCount}, goal=${adRes.goalsScored}, 0 Hội An] + Vá lỗi đường đi Adidas & Market (Quyết định 255) verified cleanly`);
+  console.log(`✅ Test 190 Passed: Adidas Mega Mall 2 Tầng [stalls=${adRes.obsCount}, npcs=${adRes.npcCount}, goal=${adRes.goalsScored}, 0 Hội An] + Vá lỗi đường đi Adidas & Market (Quyết định 255–256) verified cleanly`);
+
+  // =========================================================================
+  // TEST 191: ADIDAS 2 TẦNG BÁM SÁT BANNER — CỬA SỔ TẦNG 1-2, XE CHẠY PHỐ, GIÁ TREO ĐA HƯỚNG, KHU SALE -50% & CẦU THANG MƯỢT <= 0.35M (QĐ 256)
+  // =========================================================================
+  assert.ok(
+    regTexNames.includes('saleBannerTex') &&
+      regTexNames.includes('glassWindowFrameTex') &&
+      regTexNames.includes('archBalustradeTex') &&
+      regTexNames.includes('roofTileTex') &&
+      regTexNames.includes('roadAsphaltTex') &&
+      regTexNames.includes('bougainvilleaTex') &&
+      regTexNames.includes('vnCollectionSign'),
+    'QĐ 256 textures (SALE -50%, Window Glass, Arch Balustrade, Roof Tile, Road Asphalt, Bougainvillea, VN Collection) must be registered'
+  );
+  const f2CheckFn = new Function(
+    'document',
+    'cv',
+    extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + '\n' + extractRaw(bbEng) + '\n' + extractRaw(navEng) + '\n' +
+      extractRaw(adWall) + '\n' + extractRaw(adScene) + `
+    var wgl = createPixelWebglRenderer(cv); buildAdidasProceduralTextures(wgl);
+    var st = createAdidasTpsState();
+    var cam = createTpsCamera({ yaw: 0.04, pitch: -0.30, dist: 4.85, targetHeight: 0.72 });
+    var v0x = st.streetVehicles[0].x;
+    // Leo từ (0,0,2.2) lên Khu SALE Tầng 2 (2.0, 3.4, 10.2) rồi chạy sang góc Phải Tầng 2 (-7.6, 3.4, 4.2) qua lỗ thang không rớt!
+    planAdidasRealtimePath(st, 2.0, 3.4, 10.2, 'sale_deal');
+    var prevCamY = null, maxCamStepY = 0;
+    for (var i = 0; i < 420; i++) {
+      stepAdidasTps(st, 0.05);
+      computeAdidasWebglCamera(cam, st);
+      if (st.pig.y > 0.15 && st.pig.y < 3.25 && prevCamY !== null) {
+        maxCamStepY = Math.max(maxCamStepY, Math.abs(cam.pos.y - prevCamY));
+      }
+      prevCamY = cam.pos.y;
+      if (!st.pig.walking) break;
+    }
+    var gotSale = st.pig.boughtSamba && Math.abs(st.pig.y - 3.4) < 0.05;
+    // Đi tiếp qua phía Đông lỗ thang tới BST VN (-7.6, 3.4, 4.2) -> tuyệt đối không rớt xuống Y=0!
+    planAdidasRealtimePath(st, -7.6, 3.4, 4.2, null);
+    var fellThroughHole = false;
+    for (var j = 0; j < 260; j++) {
+      stepAdidasTps(st, 0.05);
+      if (st.pig.y < 3.2) fellThroughHole = true;
+      if (!st.pig.walking) break;
+    }
+    renderAdidasWebglScene(wgl, cam, st, 390, 844);
+    return {
+      maxCamStepY: Number(maxCamStepY.toFixed(3)),
+      gotSale: gotSale,
+      fellThroughHole: fellThroughHole,
+      vehicleMoved: Math.abs(st.streetVehicles[0].x - v0x) > 0.5,
+      endY: st.pig.y
+    };
+  `
+  );
+  const f2Res = f2CheckFn(mockDoc, mockCv);
+  assert.ok(f2Res.gotSale, 'Pig must climb 14-step stairs smoothly and claim SALE -50% on Floor 2');
+  assert.ok(f2Res.maxCamStepY <= 0.35, 'Adidas stair camera Y step must stay smooth <= 0.35m (got ' + f2Res.maxCamStepY + 'm)');
+  assert.strictEqual(f2Res.fellThroughHole, false, 'Pig walking around Floor 2 stairwell must NEVER drop through stairwell hole');
+  assert.strictEqual(f2Res.vehicleMoved, true, 'Street vehicles outside Adidas facade windows must animate smoothly');
+  assert.ok(decDoc.includes('Quyết định 256') && tpsDoc.includes('QĐ 256'), 'DECISIONS.md and TPS_3D_OPEN_WORLD_SPEC.md must record QD 256');
+  console.log(`✅ Test 191 Passed: Adidas 2 Tầng Bám Sát Banner [camStepMax=${f2Res.maxCamStepY}m, 2F SALE=true, 0 fellThroughHole, streetVehicles=4] (Quyết định 256) verified cleanly`);
 }
 
-console.log('\n🎉 ALL 190 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (190/190)!');
+console.log('\n🎉 ALL 191 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (191/191)!');

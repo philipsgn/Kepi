@@ -61,7 +61,7 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
 
   var st = createAdidasTpsState();
   var cam = createTpsCamera({ yaw: 0.04, pitch: -0.30, dist: 4.85, targetHeight: 0.72 });
-  var adidasBounds = { minX: -10.0, maxX: 14.0, minZ: 0.0, maxZ: 24.0, maxY: 4.65 };
+  var adidasBounds = { minX: -10.0, maxX: 14.0, minZ: 0.0, maxZ: 24.0, maxY: 7.80 };
   var currentAction = null;
   var exitSent = false;
 
@@ -101,11 +101,17 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
       st.actionFlashText = '🎨 MAKER LAB · ÉP NHIỆT SỐ 10!';
       st.actionFlashUntil = st.t + 2.8;
       st.ripples.push({ x: 1.0, y: 0, z: 19.7, t: 0 });
+    } else if (act.id === 'sale_deal') {
+      st.pig.boughtSamba = true;
+      st.pig.outfit = (st.pig.y || 0) >= 1.9 ? 'adidas_polo' : 'adidas_jacket';
+      st.actionFlashText = '🏷️ SĂN DEAL SALE -50% · NHẬN TÚI 3 SỌC!';
+      st.actionFlashUntil = st.t + 3.2;
+      st.ripples.push({ x: st.pig.x, y: st.pig.y || 0, z: st.pig.z, t: 0 });
     } else if (act.id === 'buy_bag') {
       st.pig.boughtSamba = true;
       st.actionFlashText = '🛍️ CHECKOUT POS · NHẬN TÚI 3 SỌC!';
       st.actionFlashUntil = st.t + 3.0;
-      st.ripples.push({ x: 9.4, y: 0, z: 3.4, t: 0 });
+      st.ripples.push({ x: st.pig.x, y: st.pig.y || 0, z: st.pig.z, t: 0 });
     } else if (act.id === 'inspect_shoes') {
       st.actionFlashText = '👟 SAMBA OG · ADILETTE · ULTRABOOST';
       st.actionFlashUntil = st.t + 2.6;
@@ -154,7 +160,7 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
       var target = wgl ? pickAdidasTarget3D(cam, st, sx, sy) : null;
       if (!wgl && !target) {
         var hit = unprojectFloorTap(cam, sx, sy);
-        if (hit) target = { kind: 'floor', x: hit.x, y: 0, z: hit.z };
+        if (hit) target = { kind: 'floor', x: hit.x, y: (st.pig.y || 0) >= 1.9 ? 3.4 : 0, z: hit.z };
       }
       if (!target) return;
       if (target.kind === 'goal_shoot') {
@@ -164,8 +170,8 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
         }
         return;
       }
-      planAdidasRealtimePath(st, target.x, 0, target.z, target.action || null);
-      st.ripples.push({ x: target.x, y: 0, z: target.z, t: 0 });
+      planAdidasRealtimePath(st, target.x, target.y || 0, target.z, target.action || null);
+      st.ripples.push({ x: target.x, y: target.y || 0, z: target.z, t: 0 });
       postRN({ type: target.action ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });
     }
   });
@@ -187,7 +193,7 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
         cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);
         renderAdidasWebglScene(wgl, cam, st, W, H);
       } else {
-        updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, adidasBounds);
+        updateTpsCamera(cam, st.pig.x, st.pig.y || 0, st.pig.z, W, H, adidasBounds);
         renderAdidasTpsScene(ctx, cam, st, W, H);
       }
       syncContextPill();

@@ -512,6 +512,127 @@ function buildAdidasProceduralTextures(wgl) {
     wgl.registerTextureCanvas('vnDoorWood', d, false);
   })();
 
+  // 17b. Khu SALE -50%, Kính Cửa Sổ Tầng 1-2, Lan Can Vòm, Mái Ngói, Hoa Giấy, Phố & Bầu Trời 3 Thời Điểm (QĐ 256)
+  (function() {
+    // Biển SALE -50% Đỏ-Vàng nổi bật
+    var sb = mkCanvas(512, 256), sbg = sb.getContext('2d');
+    sbg.fillStyle = '#991B1B'; sbg.fillRect(0, 0, 512, 256);
+    sbg.strokeStyle = '#FACC15'; sbg.lineWidth = 10; sbg.strokeRect(8, 8, 496, 240);
+    sbg.fillStyle = '#111827'; sbg.fillRect(22, 22, 468, 72);
+    sbg.fillStyle = '#FDE047'; sbg.font = 'bold 40px monospace'; sbg.textAlign = 'center';
+    sbg.fillText('MEGA SALE -50%', 256, 72);
+    var tags = [
+      { x: 96,  p: '-30%', item: 'POLO' },
+      { x: 256, p: '-50%', item: 'JOGGER' },
+      { x: 416, p: '-40%', item: 'SHOES' }
+    ];
+    for (var ti = 0; ti < tags.length; ti++) {
+      var tg = tags[ti];
+      sbg.fillStyle = '#FFFBF1'; sbg.fillRect(tg.x - 56, 112, 112, 118);
+      sbg.strokeStyle = '#1E1B18'; sbg.lineWidth = 4; sbg.strokeRect(tg.x - 56, 112, 112, 118);
+      sbg.fillStyle = '#DC2626'; sbg.fillRect(tg.x - 46, 122, 92, 46);
+      sbg.fillStyle = '#FFFBF1'; sbg.font = 'bold 28px monospace'; sbg.fillText(tg.p, tg.x, 155);
+      sbg.fillStyle = '#111827'; sbg.font = 'bold 20px monospace'; sbg.fillText(tg.item, tg.x, 205);
+    }
+    wgl.registerTextureCanvas('saleBannerTex', sb, false);
+
+    // Kính cửa sổ trong suốt bán phản chiếu (giữ nhìn xuyên ra phố 100%)
+    var gw = mkCanvas(256, 256), gwg = gw.getContext('2d');
+    gwg.clearRect(0, 0, 256, 256);
+    gwg.fillStyle = 'rgba(206, 234, 248, 0.22)'; gwg.fillRect(10, 10, 236, 236);
+    gwg.fillStyle = 'rgba(255, 255, 255, 0.28)';
+    gwg.beginPath(); gwg.moveTo(26, 20); gwg.lineTo(74, 10); gwg.lineTo(148, 240); gwg.lineTo(100, 246); gwg.closePath(); gwg.fill();
+    gwg.strokeStyle = '#3B2314'; gwg.lineWidth = 14; gwg.strokeRect(7, 7, 242, 242);
+    gwg.strokeStyle = '#F4B93B'; gwg.lineWidth = 2; gwg.strokeRect(15, 15, 226, 226);
+    wgl.registerTextureCanvas('glassWindowFrameTex', gw, false, true);
+
+    // Lan can con tiện trắng đáy vòm Tầng 2 bám sát Banner
+    var ab = mkCanvas(256, 128), abg = ab.getContext('2d');
+    abg.clearRect(0, 0, 256, 128);
+    abg.fillStyle = '#FFFBF1';
+    abg.fillRect(0, 0, 256, 18);
+    abg.fillRect(0, 108, 256, 20);
+    for (var bx = 12; bx < 252; bx += 28) {
+      abg.fillStyle = '#FFFBF1'; abg.fillRect(bx, 18, 12, 90);
+      abg.fillStyle = '#CBD5E1'; abg.fillRect(bx + 12, 18, 4, 90);
+    }
+    wgl.registerTextureCanvas('archBalustradeTex', ab, false, true);
+
+    // Mái ngói ống xám ấm giữa Tầng 1 và Tầng 2 (giống Banner)
+    var rt = mkCanvas(256, 128), rtg = rt.getContext('2d');
+    rtg.fillStyle = '#57463B'; rtg.fillRect(0, 0, 256, 128);
+    for (var rx = 0; rx < 256; rx += 24) {
+      rtg.fillStyle = '#A89B91'; rtg.fillRect(rx + 2, 4, 12, 120);
+      rtg.fillStyle = '#2B2118'; rtg.fillRect(rx + 18, 0, 4, 128);
+    }
+    wgl.registerTextureCanvas('roofTileTex', rt, true);
+
+    // Giàn hoa giấy hồng rực hai bên mặt tiền (bám sát Banner)
+    var bg = mkCanvas(256, 256), bgg = bg.getContext('2d'), rngB = makeAdidasSeedRng(2562);
+    bgg.fillStyle = '#2E7D32'; bgg.fillRect(0, 0, 256, 256);
+    for (var li = 0; li < 90; li++) {
+      bgg.fillStyle = rngB() > 0.45 ? '#4CAF50' : '#1B5E20';
+      bgg.fillRect(rngB() * 236, rngB() * 236, 16, 16);
+    }
+    var pinkCols = ['#EC4899', '#F472B6', '#FBCFE8', '#DB2777'];
+    for (var fi = 0; fi < 54; fi++) {
+      bgg.fillStyle = pinkCols[fi % pinkCols.length];
+      bgg.fillRect(10 + rngB() * 220, 10 + rngB() * 220, 14, 14);
+    }
+    wgl.registerTextureCanvas('bougainvilleaTex', bg, false);
+
+    // Đường nhựa 2 làn xe chạy (roadAsphaltTex) & Nền Trời Skyline Sài Gòn 3 Thời Điểm
+    var rd = mkCanvas(256, 256), rdg = rd.getContext('2d');
+    rdg.fillStyle = '#3B4252'; rdg.fillRect(0, 0, 256, 256);
+    rdg.fillStyle = '#E2E8F0'; rdg.fillRect(0, 8, 256, 8); rdg.fillRect(0, 240, 256, 8);
+    rdg.fillStyle = '#FACC15';
+    for (var dash = 12; dash < 256; dash += 48) rdg.fillRect(dash, 124, 26, 8);
+    wgl.registerTextureCanvas('roadAsphaltTex', rd, true);
+
+    var skies = [
+      { key: 'skyDayTex',    top: '#38BDF8', bot: '#BAE6FD', bld: '#64748B', win: '#E0F2FE' },
+      { key: 'skySunsetTex', top: '#7C2D12', bot: '#FB923C', bld: '#475569', win: '#FDE047' },
+      { key: 'skyNightTex',  top: '#0F172A', bot: '#1E293B', bld: '#0B1220', win: '#FACC15' }
+    ];
+    for (var si = 0; si < skies.length; si++) {
+      var sk = skies[si], sc = mkCanvas(512, 256), sg = sc.getContext('2d');
+      var grd = sg.createLinearGradient(0, 0, 0, 256);
+      grd.addColorStop(0, sk.top); grd.addColorStop(1, sk.bot);
+      sg.fillStyle = grd; sg.fillRect(0, 0, 512, 256);
+      // Tòa nhà & Bitexco/Landmark 81 đường chân trời
+      var blds = [[24, 105, 58], [94, 78, 52], [156, 130, 42], [220, 46, 32], [274, 88, 60], [350, 62, 48], [412, 98, 72]];
+      for (var bi = 0; bi < blds.length; bi++) {
+        var b = blds[bi];
+        sg.fillStyle = sk.bld; sg.fillRect(b[0], b[1], b[2], 256 - b[1]);
+        sg.fillStyle = sk.win;
+        for (var wy = b[1] + 12; wy < 236; wy += 18) {
+          for (var wx = b[0] + 8; wx < b[0] + b[2] - 10; wx += 14) sg.fillRect(wx, wy, 7, 10);
+        }
+      }
+      wgl.registerTextureCanvas(sk.key, sc, false);
+    }
+
+    // Bảng Bộ Sưu Tập Việt Nam × 3 Sọc (Tầng 2)
+    var vc2 = mkCanvas(512, 256), vcg = vc2.getContext('2d');
+    vcg.fillStyle = '#5C341D'; vcg.fillRect(0, 0, 512, 256);
+    vcg.fillStyle = '#FFF5D6'; vcg.fillRect(14, 52, 484, 190);
+    vcg.fillStyle = '#991B1B'; vcg.fillRect(10, 10, 492, 44);
+    vcg.strokeStyle = '#FDE047'; vcg.lineWidth = 4; vcg.strokeRect(10, 10, 492, 236);
+    vcg.fillStyle = '#FDE047'; vcg.font = 'bold 22px monospace'; vcg.textAlign = 'center';
+    vcg.fillText('★ BỘ SƯU TẬP VIỆT NAM · 3 SỌC ★', 256, 39);
+    var jCols = [['#DA251D', '#FDE047'], ['#FFFBF1', '#DA251D'], ['#0F766E', '#FDE047']];
+    for (var ji = 0; ji < 3; ji++) {
+      var jx = 112 + ji * 144, jy = 94;
+      vcg.fillStyle = jCols[ji][0]; vcg.fillRect(jx - 38, jy, 76, 22); vcg.fillRect(jx - 24, jy, 48, 88);
+      vcg.strokeStyle = '#2B180E'; vcg.lineWidth = 2; vcg.strokeRect(jx - 24, jy, 48, 88);
+      vcg.fillStyle = jCols[ji][1];
+      for (var k = 0; k < 3; k++) {
+        vcg.fillRect(jx - 34 + k * 5, jy + 2, 3, 18); vcg.fillRect(jx + 22 + k * 5, jy + 2, 3, 18);
+      }
+    }
+    wgl.registerTextureCanvas('vnCollectionSign', vc2, false);
+  })();
+
   // 18. Đăng ký 4 bộ trang phục Chú Heo 24×20 (gl.NEAREST)
   if (typeof buildPigBillboardTextures === 'function') {
     buildPigBillboardTextures(wgl, ['adidas_jacket', 'adidas_polo', 'adidas_jogger', 'adidas_kit']);
