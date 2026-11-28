@@ -8191,7 +8191,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       cafeBannerCode.includes('unprojectFloorTap(cam, sx, sy)') &&
       cafeBannerCode.includes('updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, cafeBounds)') &&
       (cafeBannerCode.includes('createTpsCamera({ yaw: 0, pitch: -0.28') ||
-        cafeBannerCode.includes('createTpsCamera({ yaw: 0, pitch: -0.26')) &&
+        cafeBannerCode.includes('createTpsCamera({ yaw: 0, pitch: -0.26') ||
+        cafeBannerCode.includes('createTpsCamera({ yaw: 0.08, pitch: -0.32')) &&
       tpsDocCode.includes('QUYẾT ĐỊNH 243') &&
       decisionsCode.includes('Quyết định 243'),
     'CafeTpsBannerWebView signatures and QD 243 3-layer safeguard docs must be synced'
@@ -8212,8 +8213,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
 
   assert.ok(
-    (tpsDocCode.includes('QĐ 242–244') || tpsDocCode.includes('QĐ 242–248')) &&
-      (chatDocCode.includes('Quyết định 242–244') || chatDocCode.includes('Quyết định 242–248')) &&
+    (tpsDocCode.includes('QĐ 242–244') || tpsDocCode.includes('QĐ 242–248') || tpsDocCode.includes('QĐ 242–249')) &&
+      (chatDocCode.includes('Quyết định 242–244') || chatDocCode.includes('Quyết định 242–248') || chatDocCode.includes('Quyết định 242–249')) &&
       decisionsCode.includes('Quyết định 244') &&
       wallCode.includes('function drawCafeFloor1Walls3D') &&
       wallCode.includes('function drawCafeFloor2Walls3D') &&
@@ -8451,7 +8452,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   };
   const mockCanvas = { getContext(kind) { return kind === 'webgl' ? mockGl : mock2d; } };
 
-  // Chạy mô phỏng Real-Time 100% không cắt đoạn: từ Cửa Tầng 1 (0,0,1.85) đi lên cầu thang 12 bậc ra Ghế Ban Công #6 (-0.35, 3.4, -0.52) và tự ngồi!
+  // Chạy mô phỏng Real-Time 100% không cắt đoạn: từ giữa sảnh Tầng 1 (-0.15,0,3.20) với góc nhìn rộng chuẩn Quán Phở trên màn hình dọc (390x844), rồi đi lên cầu thang 12 bậc ra Ghế Ban Công #10 (-0.35, 3.4, -0.58) và tự ngồi!
   const runner = new Function(
     'document',
     'cv',
@@ -8459,26 +8460,37 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     var wgl = createCafeWebglRenderer(cv);
     buildCafeProceduralTextures(wgl);
     var st = createCafeTpsState();
-    var cam = createTpsCamera({ yaw: 0, pitch: -0.26, dist: 3.3, targetHeight: 0.92 });
-    cam.vw = 800; cam.vh = 1440; cam.focal = 720;
+    var cam = createTpsCamera({ yaw: 0.08, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
 
-    // Chạm Ghế Ban Công #6 -> đi real-time qua chân cầu thang -> leo từng bậc (0 < y < 3.4) -> tầng 2 -> ban công -> tự ngồi!
-    var balconyChair = st.chairs[6];
+    // Kiểm chứng frame đầu ở độ phân giải dọc iPhone (390x844): góc nhìn ngang rộng ~60-64°, camera KHÔNG kẹt sát đít Heo!
+    renderCafeWebglScene(wgl, cam, st, 390, 844);
+    var initCamDist = Math.hypot(st.pig.x - cam.pos.x, st.pig.z - cam.pos.z);
+    var initFovy = cam.activeFovy || 0;
+    var npc0Start = { x: st.npcs[1].x, z: st.npcs[1].z };
+
+    // Chạm Ghế Ban Công #10 -> đi real-time qua chân cầu thang -> leo từng bậc (0 < y < 3.4) -> tầng 2 -> ban công -> tự ngồi!
+    var balconyChair = st.chairs[10];
     planCafeRealtimePath(st, balconyChair.x, balconyChair.floorY, balconyChair.z, balconyChair.id, null);
     var sawMidStair = false;
     var arrivedSeated = false;
-    for (var frame = 0; frame < 400; frame++) {
+    for (var frame = 0; frame < 440; frame++) {
       stepCafeTps(st, 0.05);
       if (st.pig.y > 0.3 && st.pig.y < 3.1) sawMidStair = true;
-      if (frame % 40 === 0) renderCafeWebglScene(wgl, cam, st, 800, 1440);
-      if (st.pig.seated && st.pig.seatChairId === 6) {
+      if (frame % 40 === 0) renderCafeWebglScene(wgl, cam, st, 390, 844);
+      if (st.pig.seated && st.pig.seatChairId === 10) {
         arrivedSeated = true;
-        renderCafeWebglScene(wgl, cam, st, 800, 1440);
+        renderCafeWebglScene(wgl, cam, st, 390, 844);
         break;
       }
     }
-    var tapChair = pickCafeTarget3D(cam, st, 400, 720);
+    var tapChair = pickCafeTarget3D(cam, st, 195, 422);
+    var npcMoved = Math.hypot(st.npcs[1].x - npc0Start.x, st.npcs[1].z - npc0Start.z) > 0.25;
     return {
+      initCamDist: Number(initCamDist.toFixed(2)),
+      initFovy: Number(initFovy.toFixed(2)),
+      chairsCount: st.chairs.length,
+      npcsCount: st.npcs ? st.npcs.length : 0,
+      npcMoved: npcMoved,
       sawMidStair: sawMidStair,
       arrivedSeated: arrivedSeated,
       finalY: Number(st.pig.y.toFixed(2)),
@@ -8491,31 +8503,44 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   );
   const res = runner(mockDoc, mockCanvas);
   assert.strictEqual(glNanHits, 0, 'WebGL 3D real-time walk must emit 0 NaN matrix/uniform values');
-  assert.ok(glTexCount >= 20, 'Must generate procedural 1980s textures + 9 NEAREST pixel pig sprites (got ' + glTexCount + ')');
+  assert.ok(glTexCount >= 28, 'Must generate 1980s + VN cultural wall textures (Ao Dai, Non La, Hoa Sen, Xich Lo, Thu Vien) + 9 NEAREST pixel pig sprites (got ' + glTexCount + ')');
   assert.ok(glNearestCount >= 18, 'Pig 24x20 textures must use gl.NEAREST crisp pixel filtering (got ' + glNearestCount + ')');
-  assert.ok(glDraws > 200, 'WebGL 3D must submit > 200 drawElements mesh calls (got ' + glDraws + ')');
+  assert.ok(glDraws > 260, 'WebGL 3D must submit > 260 drawElements mesh calls (got ' + glDraws + ')');
+  assert.ok(res.initFovy >= 1.15, 'Portrait 390x844 WebGL perspective must widen fovy >= 1.15 rad (~60 deg HFOV like Pho) (got ' + res.initFovy + ')');
+  assert.ok(res.initCamDist >= 2.5, 'Opening TPS camera must stay >= 2.5m behind Pig (got ' + res.initCamDist + 'm)');
+  assert.strictEqual(res.chairsCount, 11, 'Must provide 11 interactive clickable chairs across Floor 1, Library, Floor 2 & Balcony');
+  assert.ok(res.npcsCount >= 7 && res.npcMoved, 'Must simulate >= 7 lively moving NPCs across 2 floors');
   assert.strictEqual(res.sawMidStair, true, 'Pig must walk continuously through intermediate stair heights (0 < y < 3.4) with ZERO teleportation');
-  assert.strictEqual(res.arrivedSeated, true, 'Pig must arrive at Balcony chair #6 and sit down automatically in real time');
+  assert.strictEqual(res.arrivedSeated, true, 'Pig must arrive at Balcony chair #10 and sit down automatically in real time');
   assert.ok(Math.abs(res.finalY - 3.4) < 0.05 && res.finalZ < 0, 'Final position must be on Floor 2 Balcony');
 
-  // Xác thực 0% Card Viền / Banner trên trần trong CafeTpsBannerWebView.tsx
+  // Xác thực 0% Card Viền / Banner trên trần + Mỹ Thuật Văn Hóa Việt & QĐ 249
   assert.ok(
     !bannerCode.includes('hud-toast-pill') &&
       !bannerCode.includes('floor-pill') &&
       !bannerCode.includes('seq-bar') &&
       !bannerCode.includes('action-bar') &&
-      tpsDoc.includes('QĐ 242–248') &&
-      chatDoc.includes('Quyết định 242–248') &&
-      decDoc.includes('Quyết định 248') &&
+      tpsDoc.includes('QĐ 242–249') &&
+      chatDoc.includes('Quyết định 242–249') &&
+      decDoc.includes('Quyết định 249') &&
       wglCode.includes('gl.NEAREST') &&
+      wglCode.includes('activeFovy') &&
+      wallCode.includes('vnAoDaiArt') &&
+      wallCode.includes('vnLotusArt') &&
+      wallCode.includes('vnCycloArt') &&
+      wallCode.includes('vnBookShelfTex') &&
+      wallCode.includes('vnQuietSign') &&
       wallCode.includes('function buildPigPixelBillboardTextures') &&
       sceneCode.includes('function drawPigBillboardWebgl') &&
+      sceneCode.includes('function stepCafeNpcs') &&
+      sceneCode.includes('function drawAoDaiRack3D') &&
+      sceneCode.includes('function drawHangingNonLa3D') &&
       sceneCode.includes('function planCafeRealtimePath') &&
       sceneCode.includes('function pickCafeTarget3D'),
-    'Cong Ca Phe QĐ 248 (1:1 24x20 Pig Billboard NEAREST, 0 bordered cards, real-time multi-floor pathfinding + click-to-sit, and docs) must be synced'
+    'Cong Ca Phe QĐ 249 (Wide ~64deg HFOV, 11 chairs, VN cultural art Ao Dai/Non La/Lotus/Cyclo/Library/Plants, 7 lively NPCs, 0 bordered cards & docs) must be synced'
   );
 
-  console.log(`✅ Test 184 & 185 Passed: Cộng Cà Phê WebGL 3D (${glTexCount} textures, ${glDraws} draws, midStair=${res.sawMidStair}, autoSit=#${res.seatChairId}, 0% cards, 0 NaN — Quyết định 247–248) Audit verified cleanly`);
+  console.log(`✅ Test 184 & 185 Passed: Cộng Cà Phê WebGL 3D (${glTexCount} textures, ${glDraws} draws, fovy=${res.initFovy}, camDist=${res.initCamDist}m, chairs=${res.chairsCount}, npcs=${res.npcsCount}, midStair=${res.sawMidStair}, autoSit=#${res.seatChairId}, 0% cards, 0 NaN — Quyết định 247–249) Audit verified cleanly`);
 }
 
 console.log('\n🎉 ALL 185 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (185/185)!');

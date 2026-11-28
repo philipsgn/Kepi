@@ -217,7 +217,158 @@ function buildCafeProceduralTextures(webgl) {
     webgl.registerTextureCanvas('colonialStreet', c, true);
   })();
 
-  // 11. Bộ Sprite Chú Heo Mascot Pixel Art 24×20 Đồng Bộ 100% Toàn App (QĐ 248, NEAREST 1:1!)
+  // 11. Bộ Tranh & Mỹ Thuật Văn Hóa Việt Nam Trên Tường Cộng Cà Phê (QĐ 249)
+  // 11a. Tranh Hoa Sen Hồng nhiều tầng cánh khung gỗ gụ (vnLotusArt)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#FFF7DF'; g.fillRect(14, 14, 228, 228);
+    g.strokeStyle = '#B45309'; g.lineWidth = 3; g.strokeRect(20, 20, 216, 216);
+    g.fillStyle = '#15803D';
+    g.beginPath(); g.ellipse(86, 178, 42, 18, -0.25, 0, Math.PI*2); g.fill();
+    g.beginPath(); g.ellipse(170, 178, 42, 18, 0.25, 0, Math.PI*2); g.fill();
+    var petals = [
+      [-42, 8, -0.55, '#EC4899'], [42, 8, 0.55, '#EC4899'],
+      [-24, -12, -0.32, '#F472B6'], [24, -12, 0.32, '#F472B6'],
+      [0, -24, 0, '#FBCFE8']
+    ];
+    for (var i = 0; i < petals.length; i++) {
+      g.save(); g.translate(128 + petals[i][0], 132 + petals[i][1]); g.rotate(petals[i][2]);
+      g.fillStyle = petals[i][3]; g.strokeStyle = '#9D174D'; g.lineWidth = 2;
+      g.beginPath(); g.ellipse(0, 0, 22, 48, 0, 0, Math.PI*2); g.fill(); g.stroke();
+      g.restore();
+    }
+    g.fillStyle = '#FACC15'; g.beginPath(); g.arc(128, 134, 16, 0, Math.PI*2); g.fill();
+    g.fillStyle = '#7C2D12'; g.font = 'bold 20px serif'; g.textAlign = 'center';
+    g.fillText('QUỐC HOA SEN VIỆT', 128, 222);
+    webgl.registerTextureCanvas('vnLotusArt', c, false);
+  })();
+
+  // 11b. Tranh Xe Xích Lô Đỏ-Vàng Phố Cổ Sài Gòn (vnCycloArt)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#FDE68A'; g.fillRect(14, 14, 228, 228);
+    g.strokeStyle = '#991B1B'; g.lineWidth = 3; g.strokeRect(20, 20, 216, 216);
+    // Hai bánh xích lô
+    g.strokeStyle = '#1E293B'; g.lineWidth = 6;
+    g.beginPath(); g.arc(82, 168, 28, 0, Math.PI*2); g.stroke();
+    g.beginPath(); g.arc(174, 168, 28, 0, Math.PI*2); g.stroke();
+    // Mui xích lô & khoang ghế đỏ vàng
+    g.fillStyle = '#5C341D';
+    g.beginPath(); g.moveTo(54, 108); g.quadraticCurveTo(86, 56, 132, 92); g.lineTo(118, 120); g.closePath(); g.fill();
+    g.fillStyle = '#DC2626'; g.fillRect(62, 114, 68, 42);
+    g.fillStyle = '#FACC15'; g.fillRect(70, 122, 48, 26);
+    g.strokeStyle = '#92400E'; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(130, 146); g.lineTo(174, 168); g.lineTo(158, 112); g.lineTo(132, 106); g.stroke();
+    g.fillStyle = '#7C2D12'; g.font = 'bold 20px serif'; g.textAlign = 'center';
+    g.fillText('SÀI GÒN XÍCH LÔ', 128, 222);
+    webgl.registerTextureCanvas('vnCycloArt', c, false);
+  })();
+
+  // 11c. Tranh Áo Dài Trắng Thêu Hoa Sen & Tem Bưu Chính (vnAoDaiArt)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#EFE6D2'; g.fillRect(14, 14, 228, 228);
+    g.strokeStyle = '#15803D'; g.lineWidth = 3; g.strokeRect(20, 20, 216, 216);
+    // Quần lụa & Tà Áo Dài
+    g.fillStyle = '#94A3B8'; g.fillRect(98, 148, 60, 54);
+    g.fillStyle = '#FFFFFF'; g.strokeStyle = '#8F6E42'; g.lineWidth = 3;
+    g.beginPath();
+    g.moveTo(110, 44); g.lineTo(146, 44); g.lineTo(182, 88); g.lineTo(164, 104);
+    g.lineTo(150, 82); g.lineTo(166, 194); g.lineTo(90, 194); g.lineTo(106, 82);
+    g.lineTo(92, 104); g.lineTo(74, 88); g.closePath(); g.fill(); g.stroke();
+    // Hoa sen thêu dọc tà áo
+    g.strokeStyle = '#15803D'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(124, 84); g.quadraticCurveTo(140, 128, 122, 178); g.stroke();
+    g.fillStyle = '#F472B6';
+    g.beginPath(); g.arc(130, 104, 10, 0, Math.PI*2); g.arc(136, 144, 12, 0, Math.PI*2); g.fill();
+    g.fillStyle = '#5C341D'; g.font = 'bold 19px serif'; g.textAlign = 'center';
+    g.fillText('ÁO DÀI VIỆT NAM', 128, 224);
+    webgl.registerTextureCanvas('vnAoDaiArt', c, false);
+  })();
+
+  // 11d. Tranh Cờ Đỏ Sao Vàng & Hoa Mai Vàng + Câu Đối (vnFlagMaiArt)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#3B2314'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#FEF3C7'; g.fillRect(14, 14, 228, 228);
+    // Cờ Đỏ Sao Vàng
+    g.fillStyle = '#DA251D'; g.fillRect(36, 36, 152, 98);
+    g.fillStyle = '#FFFF00'; g.beginPath();
+    for (var si = 0; si < 10; si++) {
+      var r = (si % 2 === 0) ? 30 : 12;
+      var ang = -Math.PI/2 + si * Math.PI/5;
+      var px = 112 + Math.cos(ang)*r, py = 85 + Math.sin(ang)*r;
+      if (si === 0) g.moveTo(px, py); else g.lineTo(px, py);
+    }
+    g.closePath(); g.fill();
+    // Nón lá nhỏ + Nhành Hoa Mai vàng 5 cánh
+    g.fillStyle = '#E8CF9E'; g.strokeStyle = '#7C4F2B'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(74, 152); g.lineTo(34, 206); g.lineTo(114, 206); g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = '#5C341D'; g.lineWidth = 4;
+    g.beginPath(); g.moveTo(138, 218); g.quadraticCurveTo(180, 168, 222, 118); g.stroke();
+    var mais = [[164,184],[190,154],[214,126],[174,142],[204,174]];
+    g.fillStyle = '#FACC15';
+    for (var mi = 0; mi < mais.length; mi++) {
+      g.beginPath(); g.arc(mais[mi][0], mais[mi][1], 11, 0, Math.PI*2); g.fill();
+    }
+    webgl.registerTextureCanvas('vnFlagMaiArt', c, false);
+  })();
+
+  // 11e. Kệ Sách Thư Viện Cổ 3 Tầng Đầy Sách Đủ Màu Gáy (vnBookShelfTex)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d'), rng = makeSeedRng(1990);
+    g.fillStyle = '#3B2314'; g.fillRect(0, 0, 512, 256);
+    var bookCols = ['#B91C1C','#1D4ED8','#D97706','#15803D','#7C2D12','#475569','#EAB308','#A16207','#0F766E'];
+    for (var row = 0; row < 3; row++) {
+      var yBase = 80 + row * 82;
+      g.fillStyle = '#5C341D'; g.fillRect(8, yBase - 6, 496, 12);
+      var x = 16;
+      while (x < 484) {
+        var bw = 12 + Math.floor(rng() * 14);
+        var bh = 44 + Math.floor(rng() * 24);
+        g.fillStyle = bookCols[Math.floor(rng() * bookCols.length)];
+        g.fillRect(x, yBase - 6 - bh, bw, bh);
+        g.fillStyle = 'rgba(255,255,255,0.22)'; g.fillRect(x + 2, yBase - bh + 2, bw - 4, 3);
+        g.strokeStyle = '#1E140E'; g.lineWidth = 1; g.strokeRect(x, yBase - 6 - bh, bw, bh);
+        x += bw + 1;
+      }
+    }
+    g.strokeStyle = '#2B180E'; g.lineWidth = 8; g.strokeRect(4, 4, 504, 248);
+    webgl.registerTextureCanvas('vnBookShelfTex', c, false);
+  })();
+
+  // 11f. Biển Treo Đỏ Quầy Bar "PICK UP HERE" & Biển Gỗ Tròn "ĐI NHẸ NÓI KHẼ" & Tường Vàng Bao Cấp
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#991B1B';
+    g.beginPath(); g.moveTo(20, 12); g.lineTo(236, 12); g.lineTo(236, 186); g.lineTo(128, 244); g.lineTo(20, 186); g.closePath(); g.fill();
+    g.strokeStyle = '#FEF3C7'; g.lineWidth = 5; g.stroke();
+    g.fillStyle = '#FFFDF5'; g.font = 'bold 42px sans-serif'; g.textAlign = 'center';
+    g.fillText('PICK', 128, 76); g.fillText('UP', 128, 128); g.fillText('HERE', 128, 180);
+    webgl.registerTextureCanvas('vnPickUpSign', c, false);
+
+    var q = mkCanvas(256, 256), qg = q.getContext('2d');
+    qg.clearRect(0, 0, 256, 256);
+    qg.fillStyle = '#A67C52'; qg.beginPath(); qg.arc(128, 128, 114, 0, Math.PI*2); qg.fill();
+    qg.strokeStyle = '#5C341D'; qg.lineWidth = 10; qg.stroke();
+    qg.fillStyle = '#FFFBEB'; qg.font = 'bold 34px serif'; qg.textAlign = 'center';
+    qg.fillText('ĐI NHẸ', 128, 114); qg.fillText('NÓI KHẼ', 128, 158);
+    webgl.registerTextureCanvas('vnQuietSign', q, false);
+
+    var d = mkCanvas(256, 256), dg = d.getContext('2d');
+    dg.fillStyle = '#5C3A21'; dg.fillRect(0, 0, 256, 256);
+    dg.fillStyle = '#D9ECF2'; dg.fillRect(26, 22, 92, 110); dg.fillRect(138, 22, 92, 110);
+    dg.strokeStyle = '#3B2314'; dg.lineWidth = 6;
+    dg.strokeRect(26, 22, 92, 110); dg.strokeRect(138, 22, 92, 110);
+    dg.fillStyle = '#4A2C1A'; dg.fillRect(26, 150, 92, 86); dg.fillRect(138, 150, 92, 86);
+    dg.fillStyle = '#F4B93B'; dg.beginPath(); dg.arc(118, 146, 7, 0, Math.PI*2); dg.arc(138, 146, 7, 0, Math.PI*2); dg.fill();
+    webgl.registerTextureCanvas('vnDoorWood', d, false);
+  })();
+
+  // 12. Bộ Sprite Chú Heo Mascot Pixel Art 24×20 Đồng Bộ 100% Toàn App (QĐ 248, NEAREST 1:1!)
   buildPigPixelBillboardTextures(webgl);
 }
 

@@ -135,7 +135,8 @@ ${cafeSceneScript}
     postRN({ type: 'HAPTIC_MEDIUM' });
     postRN({ type: 'OPEN_AI_CHAT' });
   };
-  var cam = createTpsCamera({ yaw: 0, pitch: -0.26, dist: 3.3, targetHeight: 0.92 });
+  // Góc nhìn thứ 3 rộng chuẩn Quán Phở (dist = 4.85m, pitch = -0.32, yaw = 0.08)
+  var cam = createTpsCamera({ yaw: 0.08, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
   var cafeBounds = { minX: -5.5, maxX: 5.5, minZ: -2.2, maxZ: 14.0, maxY: 6.8 };
   var exitSent = false;
 
@@ -212,7 +213,9 @@ ${cafeSceneScript}
     }
     if (wgl) {
       cam.vw = W; cam.vh = H;
-      cam.focal = (H * 0.5) / Math.tan(0.76 * 0.5);
+      var asp = W / Math.max(1, H);
+      var fovy = asp < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, asp))) : 0.82;
+      cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);
       renderCafeWebglScene(wgl, cam, st, W, H);
     } else {
       updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, cafeBounds);

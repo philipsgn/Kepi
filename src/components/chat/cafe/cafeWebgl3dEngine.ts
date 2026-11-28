@@ -367,7 +367,15 @@ function createCafeWebglRenderer(canvas) {
     gl.disable(gl.BLEND);
     gl.useProgram(prog);
 
-    currentProj = M4.perspective(0.76, W / Math.max(1, H), 0.14, 65.0);
+    var aspect = W / Math.max(1, H);
+    // Responsive Horizontal-Safe FOV (QĐ 249): giữ góc nhìn ngang rộng ~58–64° như Quán Phở trên màn hình dọc!
+    var fovy = aspect < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, aspect))) : 0.82;
+    if (cam) {
+      cam.activeFovy = fovy;
+      cam.vw = W; cam.vh = H;
+      cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);
+    }
+    currentProj = M4.perspective(fovy, aspect, 0.14, 65.0);
     currentView = M4.lookAt(
       cam.pos.x, cam.pos.y, cam.pos.z,
       cam.lookX, cam.lookY, cam.lookZ
