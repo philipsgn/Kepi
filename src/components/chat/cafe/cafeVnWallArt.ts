@@ -425,6 +425,118 @@ function buildCafeProceduralTextures(webgl) {
     webgl.registerTextureCanvas('treePine', tp, true);
   })();
 
+  // 11g. Texture Mặt Đường Nhựa 2 Làn Xe Chạy, Rèm Cửa Sổ & Skyline Sài Gòn 3 Thời Điểm (QĐ 253)
+  (function() {
+    // Mặt đường nhựa 2 làn + vạch trắng phân làn + mép vỉa hè
+    var rd = mkCanvas(256, 256), rdg = rd.getContext('2d'), rdrng = makeSeedRng(2530);
+    rdg.fillStyle = '#383B42'; rdg.fillRect(0, 0, 256, 256);
+    for (var ri = 0; ri < 420; ri++) {
+      rdg.fillStyle = rdrng() > 0.5 ? 'rgba(255,255,255,0.06)' : 'rgba(15,18,24,0.14)';
+      rdg.fillRect(rdrng()*254, rdrng()*254, 2, 2);
+    }
+    rdg.fillStyle = '#EAB308'; rdg.fillRect(0, 8, 256, 4); rdg.fillRect(0, 244, 256, 4);
+    rdg.fillStyle = '#F8FAFC';
+    for (var rx = 12; rx < 256; rx += 64) {
+      rdg.fillRect(rx, 124, 38, 8);
+    }
+    webgl.registerTextureCanvas('roadAsphalt', rd, true);
+
+    // Rèm vải lanh xếp nếp kem nhạt che cửa sổ Tầng 1 & vén hai bên vòm Tầng 2
+    var ct = mkCanvas(256, 256), ctg = ct.getContext('2d');
+    ctg.fillStyle = '#F7EFE0'; ctg.fillRect(0, 0, 256, 256);
+    for (var fx = 0; fx < 256; fx += 32) {
+      ctg.fillStyle = 'rgba(180,155,120,0.22)'; ctg.fillRect(fx, 0, 10, 256);
+      ctg.fillStyle = 'rgba(255,252,245,0.35)'; ctg.fillRect(fx + 14, 0, 8, 256);
+    }
+    ctg.fillStyle = '#E2D0B5'; ctg.fillRect(0, 232, 256, 24);
+    for (var lx = 6; lx < 256; lx += 16) {
+      ctg.fillStyle = '#C7AF8D'; ctg.fillRect(lx, 240, 8, 8);
+    }
+    webgl.registerTextureCanvas('cafeCurtain', ct, false);
+
+    // Skyline Sài Gòn (Bitexco + Landmark 81 + Cao ốc + Bờ Thủ Thiêm) cho Sáng / Chiều / Tối
+    function buildSkylineTex(mode, texName) {
+      var c = mkCanvas(512, 256), g = c.getContext('2d'), rng = makeSeedRng(mode === 'night' ? 2533 : (mode === 'sunset' ? 2532 : 2531));
+      var grad = g.createLinearGradient(0, 0, 0, 224);
+      if (mode === 'day') {
+        grad.addColorStop(0, '#5FA8F2'); grad.addColorStop(0.55, '#9BD0FC'); grad.addColorStop(1, '#DCEFFF');
+      } else if (mode === 'sunset') {
+        grad.addColorStop(0, '#5C4B99'); grad.addColorStop(0.45, '#C7778E'); grad.addColorStop(1, '#FCE0A4');
+      } else {
+        grad.addColorStop(0, '#0F142C'); grad.addColorStop(0.55, '#1E2752'); grad.addColorStop(1, '#394378');
+      }
+      g.fillStyle = grad; g.fillRect(0, 0, 512, 256);
+
+      if (mode === 'night') {
+        for (var si = 0; si < 52; si++) {
+          g.fillStyle = rng() > 0.3 ? 'rgba(255,248,214,0.82)' : 'rgba(186,230,253,0.70)';
+          g.fillRect(rng()*508, rng()*118, 2, 2);
+        }
+      } else {
+        g.fillStyle = mode === 'sunset' ? 'rgba(255,228,196,0.58)' : 'rgba(255,253,248,0.82)';
+        var cloudXs = [48, 175, 310, 430];
+        for (var ci = 0; ci < cloudXs.length; ci++) {
+          g.beginPath();
+          g.ellipse(cloudXs[ci], 56 + (ci % 2) * 18, 36, 12, 0, 0, Math.PI * 2);
+          g.ellipse(cloudXs[ci] + 22, 52 + (ci % 2) * 18, 24, 10, 0, 0, Math.PI * 2);
+          g.fill();
+        }
+      }
+
+      var bCol = mode === 'night' ? '#1B254A' : (mode === 'sunset' ? '#584878' : '#7BA4CE');
+      var bHi  = mode === 'night' ? '#2F4378' : (mode === 'sunset' ? '#7E6BA0' : '#9DC2E6');
+      var winC = mode === 'night' ? '#FFE18A' : (mode === 'sunset' ? '#FFD699' : '#E0F2FE');
+      var blds = [
+        [18,128,26],[52,108,24],[86,134,30],[124,96,26],[184,116,28],[220,132,26],
+        [278,104,30],[316,126,26],[372,112,28],[442,102,26],[474,124,28]
+      ];
+      for (var bi = 0; bi < blds.length; bi++) {
+        var b = blds[bi];
+        g.fillStyle = bCol; g.fillRect(b[0], b[1], b[2], 226 - b[1]);
+        g.fillStyle = bHi;  g.fillRect(b[0], b[1], 5, 226 - b[1]);
+        if (mode !== 'day') {
+          g.fillStyle = winC;
+          for (var wy = b[1] + 8; wy < 214; wy += 9) {
+            for (var wx = b[0] + 6; wx < b[0] + b[2] - 4; wx += 6) {
+              if (rng() > 0.36) g.fillRect(wx, wy, 3, 4);
+            }
+          }
+        }
+      }
+
+      // Bitexco Financial Tower (x = 154)
+      g.fillStyle = bCol;
+      g.beginPath(); g.moveTo(154, 226); g.lineTo(159, 64); g.lineTo(171, 60); g.lineTo(178, 226); g.closePath(); g.fill();
+      g.fillStyle = bHi; g.fillRect(160, 68, 5, 154);
+      g.fillStyle = '#D7E5F5'; g.fillRect(171, 96, 16, 4);
+      g.fillStyle = '#E0452B'; g.fillRect(164, 54, 3, 6);
+
+      // Landmark 81 (x = 398)
+      var lmTiers = [[0,118,6],[5,92,6],[10,64,7],[16,36,8],[23,66,7],[29,96,6],[34,124,5]];
+      for (var li = 0; li < lmTiers.length; li++) {
+        var lt = lmTiers[li];
+        g.fillStyle = bCol; g.fillRect(398 + lt[0], lt[1], lt[2], 226 - lt[1]);
+        g.fillStyle = bHi;  g.fillRect(398 + lt[0], lt[1], 2, 226 - lt[1]);
+      }
+      g.fillStyle = '#FFF6DA'; g.fillRect(417, 18, 2, 18);
+      if (mode !== 'day') {
+        g.fillStyle = winC;
+        for (var lwy = 46; lwy < 210; lwy += 8) g.fillRect(410, lwy, 16, 2);
+      }
+
+      // Rặng cây bờ Thủ Thiêm sát đường chân trời che mép mặt sông
+      g.fillStyle = mode === 'night' ? '#142921' : (mode === 'sunset' ? '#2A452A' : '#2E6A34');
+      g.fillRect(0, 218, 512, 38);
+      for (var tx = 6; tx < 512; tx += 22) {
+        g.beginPath(); g.arc(tx, 218, 12 + (tx % 5), 0, Math.PI * 2); g.fill();
+      }
+      webgl.registerTextureCanvas(texName, c, false);
+    }
+    buildSkylineTex('day', 'skylineDay');
+    buildSkylineTex('sunset', 'skylineSunset');
+    buildSkylineTex('night', 'skylineNight');
+  })();
+
   // 12. Bộ Sprite Chú Heo Mascot Pixel Art 24×20 Đồng Bộ 100% Toàn App (QĐ 248, NEAREST 1:1!)
   buildPigPixelBillboardTextures(webgl);
 }

@@ -209,10 +209,19 @@ function createCafeTpsState() {
     tagReceived: false,
     stoolPull: 0,
     hasBalcony: false,
+    hourOverride: null,
     riverBoats: [
-      { x: -12.0, z: -11.5, dir: 1, speed: 1.65, color: [0.72, 0.18, 0.16, 1], len: 3.4 },
-      { x:   4.0, z: -15.8, dir: -1, speed: 1.25, color: [0.10, 0.42, 0.62, 1], len: 4.2 },
-      { x:  14.5, z: -9.4,  dir: -1, speed: 2.05, color: [0.85, 0.58, 0.14, 1], len: 2.6 }
+      { x: -16.0, z: -13.2, dir: 1,  speed: 1.75, color: [0.72, 0.18, 0.16, 1], len: 3.6 },
+      { x:   4.0, z: -17.5, dir: -1, speed: 1.35, color: [0.10, 0.42, 0.62, 1], len: 4.4 },
+      { x:  18.5, z: -10.8, dir: -1, speed: 2.15, color: [0.85, 0.58, 0.14, 1], len: 2.8 }
+    ],
+    streetVehicles: [
+      { kind: 'motorbike', x: -16.0, z: -2.9, dir:  1, speed: 5.2, col: [0.82, 0.18, 0.16, 1] },
+      { kind: 'car',       x:  -3.5, z: -3.2, dir:  1, speed: 6.4, col: [0.95, 0.78, 0.18, 1] },
+      { kind: 'motorbike', x:  12.0, z: -2.9, dir:  1, speed: 4.8, col: [0.16, 0.45, 0.78, 1] },
+      { kind: 'bus',       x:  18.0, z: -5.3, dir: -1, speed: 5.4, col: [0.14, 0.56, 0.36, 1] },
+      { kind: 'car',       x:   2.0, z: -5.4, dir: -1, speed: 6.8, col: [0.92, 0.94, 0.96, 1] },
+      { kind: 'motorbike', x: -12.0, z: -5.2, dir: -1, speed: 5.5, col: [0.22, 0.24, 0.28, 1] }
     ],
     pig: {
       // Xuất phát giữa sảnh Tầng 1 z=5.20 -> camera đứng ~z=0.55 nhìn rộng toàn bộ quán & không bị sát tường!
@@ -445,13 +454,21 @@ function stepCafeTps(st, dt) {
     }
   }
 
-  // Di chuyển tàu thuyền ngoài Sông Bạch Đằng mượt 60fps
+  // Di chuyển tàu thuyền ngoài Sông Bạch Đằng & 6 xe chạy 2 làn trên đại lộ mượt 60fps
   if (st.riverBoats) {
     for (var bi = 0; bi < st.riverBoats.length; bi++) {
       var b = st.riverBoats[bi];
       b.x += b.dir * b.speed * dt;
-      if (b.dir > 0 && b.x > 20) b.x = -20;
-      if (b.dir < 0 && b.x < -20) b.x = 20;
+      if (b.dir > 0 && b.x > 24) b.x = -24;
+      if (b.dir < 0 && b.x < -24) b.x = 24;
+    }
+  }
+  if (st.streetVehicles) {
+    for (var svi = 0; svi < st.streetVehicles.length; svi++) {
+      var vh = st.streetVehicles[svi];
+      vh.x += vh.dir * vh.speed * dt;
+      if (vh.dir > 0 && vh.x > 27) vh.x = -27;
+      if (vh.dir < 0 && vh.x < -27) vh.x = 27;
     }
   }
 
@@ -843,40 +860,207 @@ function drawDetailedChair3D(wgl, x, y, z, yaw, kind) {
   dm('box', 'timber', x - cy*0.26, y + 0.52, z + sy*0.26, 0, yaw, 0, 0.06, 0.24, 0.48, { tint: [0.52, 0.34, 0.20, 1] });
 }
 
-function drawRiverBoat3D(wgl, x, y, z, dir, len, col, t) {
+function getCafeTimePalette(st) {
+  var h = (st && typeof st.hourOverride === 'number') ? st.hourOverride : (new Date()).getHours();
+  if (h >= 6 && h < 16) {
+    return {
+      mode: 'day',
+      hour: h,
+      skylineTex: 'skylineDay',
+      waterTint: [0.95, 1.04, 1.10, 1],
+      bankTint: [0.36, 0.62, 0.28, 1],
+      roadTint: [1.0, 1.0, 1.0, 1],
+      nightGlow: 0,
+      glassTint: [0.80, 0.94, 1.0, 0.20],
+      atmo: {
+        clearColor: [0.46, 0.72, 0.94, 1.0],
+        hemiLow: [0.40, 0.34, 0.26],
+        hemiHigh: [0.86, 0.84, 0.76],
+        sunDir: [0.30, 0.86, -0.42],
+        sunCol: [1.08, 0.98, 0.82],
+        wrapBias: 0.45,
+        outdoorRect: [1.0, 0.2, 0.0, 0.45],
+        fogCol: [0.76, 0.88, 0.98],
+        fogParams: [16.0, 44.0, 0.50]
+      }
+    };
+  }
+  if (h >= 16 && h < 19) {
+    return {
+      mode: 'sunset',
+      hour: h,
+      skylineTex: 'skylineSunset',
+      waterTint: [0.88, 0.72, 0.94, 1],
+      bankTint: [0.34, 0.46, 0.26, 1],
+      roadTint: [0.96, 0.84, 0.76, 1],
+      nightGlow: 0.6,
+      glassTint: [1.0, 0.82, 0.58, 0.22],
+      atmo: {
+        clearColor: [0.56, 0.40, 0.52, 1.0],
+        hemiLow: [0.36, 0.26, 0.22],
+        hemiHigh: [0.88, 0.66, 0.52],
+        sunDir: [-0.35, 0.48, -0.80],
+        sunCol: [1.10, 0.72, 0.44],
+        wrapBias: 0.48,
+        outdoorRect: [1.0, 0.2, 0.0, 0.40],
+        fogCol: [0.86, 0.66, 0.56],
+        fogParams: [15.0, 42.0, 0.56]
+      }
+    };
+  }
+  return {
+    mode: 'night',
+    hour: h,
+    skylineTex: 'skylineNight',
+    waterTint: [0.44, 0.54, 0.82, 1],
+    bankTint: [0.16, 0.28, 0.18, 1],
+    roadTint: [0.58, 0.62, 0.74, 1],
+    nightGlow: 1.0,
+    glassTint: [0.38, 0.48, 0.72, 0.26],
+    atmo: {
+      clearColor: [0.09, 0.12, 0.24, 1.0],
+      hemiLow: [0.24, 0.20, 0.18],
+      hemiHigh: [0.54, 0.48, 0.44],
+      sunDir: [0.22, 0.78, -0.52],
+      sunCol: [0.46, 0.52, 0.72],
+      wrapBias: 0.52,
+      outdoorRect: [1.0, 0.2, 0.0, 0.12],
+      fogCol: [0.14, 0.18, 0.34],
+      fogParams: [14.0, 40.0, 0.62]
+    }
+  };
+}
+
+function drawRiverBoat3D(wgl, x, y, z, dir, len, col, pal, t) {
   var dm = wgl.drawMesh;
   var bob = Math.sin(t * 2.2 + x * 0.4) * 0.04;
+  var darkGlow = pal && pal.nightGlow > 0.3 ? 1.25 : 0.40;
+  var winCol = pal && pal.nightGlow > 0.3 ? [1.0, 0.86, 0.38, 1] : [0.20, 0.54, 0.80, 1];
   dm('box', 'timber', x, y + 0.18 + bob, z, 0, 0, 0, len, 0.34, 0.92, { tint: col });
   dm('box', 'white', x + dir * len * 0.48, y + 0.22 + bob, z, 0, Math.PI * 0.25, 0, 0.68, 0.26, 0.68, { tint: col });
   dm('box', 'white', x - dir * 0.25, y + 0.52 + bob, z, 0, 0, 0, len * 0.44, 0.42, 0.68, { tint: [0.98, 0.96, 0.90, 1] });
-  dm('box', 'white', x - dir * 0.25, y + 0.56 + bob, z + 0.35, 0, 0, 0, len * 0.30, 0.16, 0.03, { tint: [0.16, 0.48, 0.72, 1], emissive: 0.4 });
+  dm('box', 'white', x - dir * 0.25, y + 0.56 + bob, z + 0.35, 0, 0, 0, len * 0.32, 0.16, 0.03, { tint: winCol, emissive: darkGlow });
+  if (pal && pal.nightGlow > 0.3) {
+    dm('sphere', 'white', x + dir * len * 0.54, y + 0.38 + bob, z, 0, 0, 0, 0.12, 0.12, 0.12, { tint: [1.0, 0.92, 0.55, 1], emissive: 1.5 });
+  }
+}
+
+function drawStreetVehicle3D(wgl, v, pal, t) {
+  var dm = wgl.drawMesh;
+  var x = v.x, z = v.z, d = v.dir;
+  var lit = pal && pal.nightGlow > 0.3;
+  if (v.kind === 'motorbike') {
+    var wob = Math.sin(t * 9 + x) * 0.015;
+    dm('cyl', 'white', x - d * 0.34, 0.20, z, Math.PI * 0.5, 0, 0, 0.36, 0.09, 0.36, { tint: [0.14, 0.14, 0.16, 1] });
+    dm('cyl', 'white', x + d * 0.34, 0.20, z, Math.PI * 0.5, 0, 0, 0.36, 0.09, 0.36, { tint: [0.14, 0.14, 0.16, 1] });
+    dm('box', 'white', x, 0.42 + wob, z, 0, 0, 0, 0.78, 0.28, 0.26, { tint: v.col });
+    dm('box', 'white', x - d * 0.06, 0.74 + wob, z, 0, 0, 0, 0.26, 0.42, 0.24, { tint: [0.18, 0.32, 0.52, 1] });
+    dm('sphere', 'white', x - d * 0.04, 1.04 + wob, z, 0, 0, 0, 0.20, 0.20, 0.20, { tint: [0.96, 0.86, 0.25, 1] });
+    dm('sphere', 'white', x + d * 0.40, 0.62 + wob, z, 0, 0, 0, 0.12, 0.12, 0.12, { tint: [1.0, 0.94, 0.58, 1], emissive: lit ? 1.65 : 0.4 });
+    dm('box', 'white', x - d * 0.40, 0.50 + wob, z, 0, 0, 0, 0.05, 0.10, 0.12, { tint: [0.95, 0.16, 0.16, 1], emissive: lit ? 1.4 : 0.2 });
+    return;
+  }
+  var isBus = v.kind === 'bus';
+  var L = isBus ? 3.8 : 2.15, H = isBus ? 1.45 : 0.76, Wv = isBus ? 1.05 : 0.90;
+  dm('box', 'white', x, H * 0.5 + 0.18, z, 0, 0, 0, L, H, Wv, { tint: v.col, specPow: 64 });
+  if (!isBus) {
+    dm('box', 'white', x - d * 0.10, H + 0.34, z, 0, 0, 0, 1.18, 0.42, Wv * 0.86, { tint: [0.85, 0.93, 0.98, 1], specPow: 90 });
+  } else {
+    dm('box', 'white', x, H * 0.72 + 0.18, z + Wv * 0.51, 0, 0, 0, L * 0.82, 0.44, 0.03, { tint: lit ? [1.0, 0.88, 0.46, 1] : [0.72, 0.88, 0.98, 1], emissive: lit ? 1.15 : 0.2 });
+  }
+  var wxOff = L * 0.32;
+  dm('cyl', 'white', x - wxOff, 0.22, z + Wv * 0.46, Math.PI * 0.5, 0, 0, 0.40, 0.12, 0.40, { tint: [0.12, 0.12, 0.14, 1] });
+  dm('cyl', 'white', x + wxOff, 0.22, z + Wv * 0.46, Math.PI * 0.5, 0, 0, 0.40, 0.12, 0.40, { tint: [0.12, 0.12, 0.14, 1] });
+  dm('box', 'white', x + d * (L * 0.51), 0.46, z - Wv * 0.28, 0, 0, 0, 0.06, 0.14, 0.18, { tint: [1.0, 0.94, 0.58, 1], emissive: lit ? 1.65 : 0.35 });
+  dm('box', 'white', x + d * (L * 0.51), 0.46, z + Wv * 0.28, 0, 0, 0, 0.06, 0.14, 0.18, { tint: [1.0, 0.94, 0.58, 1], emissive: lit ? 1.65 : 0.35 });
+  dm('box', 'white', x - d * (L * 0.51), 0.48, z, 0, 0, 0, 0.05, 0.14, Wv * 0.72, { tint: [0.95, 0.18, 0.18, 1], emissive: lit ? 1.35 : 0.2 });
+}
+
+function drawStreetLamp3D(wgl, x, z, pal) {
+  var dm = wgl.drawMesh;
+  var lit = pal && pal.nightGlow > 0.3;
+  dm('cyl', 'white', x, 1.85, z, 0, 0, 0, 0.10, 3.7, 0.10, { tint: [0.18, 0.20, 0.22, 1] });
+  dm('box', 'white', x, 3.65, z, 0, 0, 0, 0.85, 0.08, 0.08, { tint: [0.18, 0.20, 0.22, 1] });
+  dm('sphere', 'white', x - 0.38, 3.55, z, 0, 0, 0, 0.22, 0.24, 0.22, { tint: [1.0, 0.90, 0.54, 1], emissive: lit ? 1.6 : 0.35 });
+  dm('sphere', 'white', x + 0.38, 3.55, z, 0, 0, 0, 0.22, 0.24, 0.22, { tint: [1.0, 0.90, 0.54, 1], emissive: lit ? 1.6 : 0.35 });
+}
+
+function drawNeighborShopfront3D(wgl, x, z, w, h, pal) {
+  var dm = wgl.drawMesh;
+  var lit = pal && pal.nightGlow > 0.3;
+  dm('box', 'colonialStreet', x, h * 0.5, z, 0, 0, 0, w, h, 3.4, { tint: [1.0, 0.95, 0.86, 1], us: 2.2, vs: 1.5 });
+  dm('box', 'awningStripe', x, 3.05, z - 2.05, 0.28, 0, 0, w * 0.92, 0.10, 1.2, { tint: [1, 1, 1, 1], us: 3, vs: 1 });
+  if (lit) {
+    dm('quad', 'white', x - w * 0.22, 4.7, z - 1.72, 0, Math.PI, 0, 1.3, 1.5, 1, { tint: [1.0, 0.84, 0.44, 1], emissive: 1.1 });
+    dm('quad', 'white', x + w * 0.22, 4.7, z - 1.72, 0, Math.PI, 0, 1.3, 1.5, 1, { tint: [1.0, 0.84, 0.44, 1], emissive: 1.1 });
+  }
+}
+
+function drawWindowFlowerBox3D(wgl, x, y, z) {
+  var dm = wgl.drawMesh;
+  dm('box', 'timber', x, y, z, 0, 0, 0, 1.85, 0.18, 0.28, { tint: [0.58, 0.38, 0.24, 1] });
+  dm('box', 'fernLeaf', x, y + 0.14, z, 0, 0, 0, 1.72, 0.20, 0.24, { tint: [0.46, 0.78, 0.34, 1], us: 2, vs: 1 });
+  for (var fi = -2; fi <= 2; fi++) {
+    dm('sphere', 'white', x + fi * 0.34, y + 0.26, z, 0, 0, 0, 0.12, 0.12, 0.12, { tint: fi % 2 === 0 ? [0.96, 0.42, 0.62, 1] : [0.98, 0.82, 0.22, 1] });
+  }
 }
 
 /* ==================== 5. RENDER WEBGL 3D TOÀN CẢNH QUÁN CÀ PHÊ SÀI GÒN 2 TẦNG (14M × 16M) ==================== */
 function renderCafeWebglScene(wgl, cam, st, W, H) {
+  var pal = getCafeTimePalette(st);
+  st.currentSkyMode = pal.mode;
   computeCafeWebglCamera(cam, st);
-  wgl.beginFrame(W, H, cam);
+  wgl.beginFrame(W, H, cam, pal.atmo);
   var dm = wgl.drawMesh;
 
-  // A. CẢNH QUAN BÊN NGOÀI CỬA SỔ: VỈA HÈ ĐẠI LỘ -> BỜ KÈ CÂY XANH -> SÔNG BẠCH ĐẰNG + THUYỀN CHẠY -> BỜ THỦ THIÊM
-  dm('box', 'cementFloor', 0, -0.08, -2.1, 0, 0, 0, 32, 0.1, 4.6, { tint: [0.78, 0.74, 0.66, 1], us: 8, vs: 2 });
-  dm('box', 'white',       0,  0.42, -4.4, 0, 0, 0, 32, 0.10, 0.12, { tint: [0.32, 0.28, 0.24, 1] });
-  dm('box', 'riverWater',  0, -0.28, -14.5, 0, 0, 0, 48, 0.08, 20.0, { tint: [1, 1, 1, 1], us: 8, vs: 4 });
-  dm('box', 'fernLeaf',    0,  0.40, -25.8, 0, 0, 0, 48, 1.4, 3.2, { tint: [0.36, 0.58, 0.26, 1], us: 8, vs: 1 });
-  dm('quad', 'white',      0,  9.50, -27.5, 0, 0, 0, 52, 22, 1, { tint: [0.96, 0.85, 0.62, 1], emissive: 1.0 });
+  // A. CẢNH QUAN BÊN NGOÀI CỬA SỔ 6 LỚP (56M RỘNG + 2 DÃY NHÀ PHỐ + ĐẠI LỘ XE CHẠY + BỜ KÈ CÂY XANH + SÔNG + SKYLINE)
+  // Lớp 2: Vỉa hè đại lộ 56m + 2 dãy nhà phố cổ kề bên quán (bịt kín góc nhìn xiên qua cửa sổ trái/phải!)
+  dm('box', 'cementFloor', 0, -0.06, -0.95, 0, 0, 0, 56, 0.1, 2.3, { tint: [0.80, 0.76, 0.68, 1], us: 16, vs: 1 });
+  drawNeighborShopfront3D(wgl, -12.6, 1.9, 10.6, 7.1, pal);
+  drawNeighborShopfront3D(wgl, -22.8, 1.9, 9.6,  6.8, pal);
+  drawNeighborShopfront3D(wgl,  12.6, 1.9, 10.6, 7.2, pal);
+  drawNeighborShopfront3D(wgl,  22.8, 1.9, 9.6,  6.9, pal);
+
+  // Tiền cảnh vỉa hè Tầng 1: 2 xe máy dựng trước cửa + hàng cây tán rậm che ranh giới thấp qua mắt người dùng
+  drawVintageMotorbike3D(wgl, -4.85, 0, -1.05, Math.PI * 0.46);
+  drawVintageMotorbike3D(wgl,  4.95, 0, -1.05, -Math.PI * 0.46);
+  var sidePlantXs = [-6.2, -3.4, -2.05, 2.05, 3.4, 6.2];
+  for (var spi = 0; spi < sidePlantXs.length; spi++) {
+    drawLushPlanter3D(wgl, sidePlantXs[spi], 0, -0.65, 1.15, st.t + spi * 0.7);
+  }
+
+  // Lớp 3: Mặt đường nhựa Đại Lộ 2 làn (Z ∈ [-6.6, -2.0]) + 6 xe 3D chạy 2 chiều 60fps
+  dm('box', 'roadAsphalt', 0, -0.09, -4.30, 0, 0, 0, 56, 0.08, 4.6, { tint: pal.roadTint, us: 14, vs: 1 });
+  if (st.streetVehicles) {
+    for (var svi = 0; svi < st.streetVehicles.length; svi++) {
+      drawStreetVehicle3D(wgl, st.streetVehicles[svi], pal, st.t);
+    }
+  }
+
+  // Lớp 4: Bờ kè đá Bạch Đằng + lan can + 4 đèn đường + 6 cây me tán cao che mối nối mặt đường ↔ mặt sông
+  dm('box', 'cementFloor', 0, -0.02, -7.05, 0, 0, 0, 56, 0.18, 0.95, { tint: [0.74, 0.70, 0.64, 1], us: 14, vs: 1 });
+  dm('box', 'white',       0,  0.52, -7.42, 0, 0, 0, 56, 0.10, 0.10, { tint: [0.30, 0.26, 0.22, 1] });
+  var lampXs = [-11.5, -3.8, 3.8, 11.5];
+  for (var lxi = 0; lxi < lampXs.length; lxi++) {
+    drawStreetLamp3D(wgl, lampXs[lxi], -6.85, pal);
+  }
+  var bankXs = [-14.0, -9.2, -4.6, 0.0, 4.6, 9.2, 14.0];
+  for (var bxi = 0; bxi < bankXs.length; bxi++) {
+    drawLushPlanter3D(wgl, bankXs[bxi], 0, -7.00, 1.85, st.t + bxi);
+  }
+
+  // Lớp 5: Sông Bạch Đằng 56m (Z ∈ [-26.0, -7.4]) + 3 Tàu Thủy Chạy 60fps
+  dm('box', 'riverWater', 0, -0.28, -16.8, 0, 0, 0, 58, 0.08, 19.2, { tint: pal.waterTint, us: 12, vs: 5 });
   if (st.riverBoats) {
     for (var rbi = 0; rbi < st.riverBoats.length; rbi++) {
       var rb = st.riverBoats[rbi];
-      drawRiverBoat3D(wgl, rb.x, -0.24, rb.z, rb.dir, rb.len, rb.color, st.t);
+      drawRiverBoat3D(wgl, rb.x, -0.24, rb.z, rb.dir, rb.len, rb.color, pal, st.t);
     }
   }
-  // Hàng cây bờ sông + 2 chậu cây ngoài cửa khớp Tab Banner
-  var bankXs = [-5.8, -2.4, 2.4, 5.8];
-  for (var bxi = 0; bxi < bankXs.length; bxi++) {
-    drawLushPlanter3D(wgl, bankXs[bxi], 0, -3.5, 1.65, st.t + bxi);
-  }
-  drawLushPlanter3D(wgl, -2.05, 0, -0.55, 1.05, st.t);
-  drawLushPlanter3D(wgl,  2.05, 0, -0.55, 1.05, st.t + 1.0);
+
+  // Lớp 6: Bờ Thủ Thiêm & Skyline Bitexco / Landmark 81 đồng bộ 3 sắc trời (Z = -27.5)
+  dm('box', 'fernLeaf', 0, 0.42, -26.2, 0, 0, 0, 58, 1.4, 2.8, { tint: pal.bankTint, us: 12, vs: 1 });
+  dm('quad', pal.skylineTex, 0, 9.6, -27.5, 0, 0, 0, 58, 22, 1, { tint: [1, 1, 1, 1], emissive: 1.0 });
 
   // B. KẾT CẤU QUÁN 2 TẦNG 14M × 16M & MẶT TIỀN KHỚP 1:1 TAB BANNER (#F7E7C6, 0 BAN CÔNG)
   dm('box', 'cementFloor', 0, -0.05, 8.2, 0, 0, 0, 14.2, 0.1, 16.0, { tint: [1,1,1,1], us: 5, vs: 6 });
@@ -884,7 +1068,7 @@ function renderCafeWebglScene(wgl, cam, st, W, H) {
   dm('box', 'oliveWall',  7.05, 3.45, 8.2, 0, 0, 0, 0.16, 6.9, 16.0, { tint: [1,1,1,1], us: 5, vs: 2 });
   dm('box', 'oliveWall',  0,    3.45, 16.25, 0, 0, 0, 14.2, 6.9, 0.16, { tint: [1,1,1,1], us: 4.5, vs: 2 });
 
-  // Mặt tiền Tầng 1 (Z = 0.2): 2 cửa sổ kính lớn hai bên + cửa chính + mái hiên sọc đỏ kem + biển CÀ PHÊ SÀI GÒN
+  // Mặt tiền Tầng 1 (Z = 0.2): 2 cửa sổ chia 6 ô gỗ + rèm hé 1/3 + cửa chính + bậu cây xanh che đáy cửa kính
   dm('box', 'cafeCreamWall', -6.30, 1.70, 0.2, 0, 0, 0, 1.40, 3.4, 0.16, { tint: [1,1,1,1] });
   dm('box', 'cafeCreamWall', -1.95, 1.70, 0.2, 0, 0, 0, 1.30, 3.4, 0.16, { tint: [1,1,1,1] });
   dm('box', 'cafeCreamWall',  1.95, 1.70, 0.2, 0, 0, 0, 1.30, 3.4, 0.16, { tint: [1,1,1,1] });
@@ -893,14 +1077,21 @@ function renderCafeWebglScene(wgl, cam, st, W, H) {
   dm('box', 'cafeCreamWall',  4.10, 0.42, 0.2, 0, 0, 0, 3.00, 0.84, 0.16, { tint: [1,1,1,1] });
   dm('box', 'cafeCreamWall',  0,    3.05, 0.2, 0, 0, 0, 14.0, 0.72, 0.16, { tint: [1,1,1,1] });
   dm('quad', 'vnDoorWood',    0,    1.35, 0.26, 0, 0, 0, 2.55, 2.68, 1, { tint: [1,1,1,1] });
-  // 2 Khung cửa sổ kính Tầng 1 nhìn thẳng ra vỉa hè & sông
-  dm('box', 'timber', -4.10, 1.76, 0.20, 0, 0, 0, 0.08, 1.84, 0.18, { tint: [0.55, 0.36, 0.22, 1] });
-  dm('box', 'timber',  4.10, 1.76, 0.20, 0, 0, 0, 0.08, 1.84, 0.18, { tint: [0.55, 0.36, 0.22, 1] });
+  var f1WinXs = [-4.10, 4.10];
+  for (var f1wi = 0; f1wi < f1WinXs.length; f1wi++) {
+    var fwx = f1WinXs[f1wi];
+    // Lưới nan gỗ chia 6 ô cổ điển + bệ cửa hoa lá + rèm sáo hé 1/3 trên che góc chết
+    dm('box', 'timber', fwx - 0.50, 1.76, 0.20, 0, 0, 0, 0.06, 1.84, 0.18, { tint: [0.55, 0.36, 0.22, 1] });
+    dm('box', 'timber', fwx + 0.50, 1.76, 0.20, 0, 0, 0, 0.06, 1.84, 0.18, { tint: [0.55, 0.36, 0.22, 1] });
+    dm('box', 'timber', fwx,        1.76, 0.20, 0, 0, 0, 2.96, 0.06, 0.16, { tint: [0.55, 0.36, 0.22, 1] });
+    dm('quad', 'cafeCurtain', fwx,  2.36, 0.25, 0, 0, 0, 2.90, 0.58, 1, { tint: [1, 1, 1, 1] });
+    drawWindowFlowerBox3D(wgl, fwx, 0.90, 0.42);
+  }
   // Mái hiên sọc đỏ kem + Biển gỗ ★ CÀ PHÊ SÀI GÒN ★ bên ngoài
   dm('box', 'awningStripe', 0, 3.12, -0.58, 0.34, 0, 0, 13.8, 0.10, 1.55, { tint: [1,1,1,1], us: 5, vs: 1 });
   dm('quad', 'cafeWoodSign', 0, 3.75, 0.05, 0, 0, 0, 4.4, 1.05, 1, { tint: [1,1,1,1] });
 
-  // Mặt tiền Tầng 2 (Z = 0.2, Y: 3.4 → 6.8): 3 CỬA SỔ VÒM KÍNH LỚN NHÌN THẲNG RA SÔNG BẠCH ĐẰNG (0 Ban Công!)
+  // Mặt tiền Tầng 2 (Z = 0.2, Y: 3.4 → 6.8): 3 CỬA SỔ VÒM KÍNH + RÈM VÉN + BỒN HOA NHÌN RA PHỐ & SÔNG
   var winCenters = [-4.30, 0.0, 4.30];
   var pillXs = [-6.20, -2.15, 2.15, 6.20];
   var pillWs = [1.60, 2.10, 2.10, 1.60];
@@ -915,13 +1106,17 @@ function renderCafeWebglScene(wgl, cam, st, W, H) {
     dm('box', 'timber', wx + 1.10, 5.12, 0.2, 0, 0, 0, 0.08, 1.96, 0.18, { tint: [0.55, 0.36, 0.22, 1] });
     dm('box', 'timber', wx,        5.12, 0.2, 0, 0, 0, 0.06, 1.96, 0.14, { tint: [0.55, 0.36, 0.22, 1] });
     dm('box', 'timber', wx,        5.12, 0.2, 0, 0, 0, 2.20, 0.06, 0.14, { tint: [0.55, 0.36, 0.22, 1] });
+    // Rèm vải vén hai bên khung vòm + bồn hoa nhỏ bên trong bệ cửa
+    dm('quad', 'cafeCurtain', wx - 0.86, 5.12, 0.25, 0, 0, 0, 0.42, 1.88, 1, { tint: [1, 1, 1, 1] });
+    dm('quad', 'cafeCurtain', wx + 0.86, 5.12, 0.25, 0, 0, 0, 0.42, 1.88, 1, { tint: [1, 1, 1, 1] });
+    drawWindowFlowerBox3D(wgl, wx, 4.22, 0.42);
   }
   wgl.setBlend('alpha');
   for (var gwi = 0; gwi < winCenters.length; gwi++) {
-    dm('quad', 'white', winCenters[gwi], 5.12, 0.21, 0, 0, 0, 2.12, 1.88, 1, { tint: [0.80, 0.94, 1.0, 0.18], emissive: 0.4 });
+    dm('quad', 'white', winCenters[gwi], 5.12, 0.21, 0, 0, 0, 2.12, 1.88, 1, { tint: pal.glassTint, emissive: 0.4 });
   }
-  dm('quad', 'white', -4.10, 1.76, 0.21, 0, 0, 0, 2.90, 1.80, 1, { tint: [0.82, 0.94, 1.0, 0.18], emissive: 0.35 });
-  dm('quad', 'white',  4.10, 1.76, 0.21, 0, 0, 0, 2.90, 1.80, 1, { tint: [0.82, 0.94, 1.0, 0.18], emissive: 0.35 });
+  dm('quad', 'white', -4.10, 1.76, 0.21, 0, 0, 0, 2.90, 1.80, 1, { tint: pal.glassTint, emissive: 0.35 });
+  dm('quad', 'white',  4.10, 1.76, 0.21, 0, 0, 0, 2.90, 1.80, 1, { tint: pal.glassTint, emissive: 0.35 });
   wgl.setBlend(null);
 
   // Sàn Gạch Bông Tầng 2 (chừa lỗ cầu thang X ∈ [-5.4, -3.0], Z ∈ [9.6, 14.4]) & Trần Gỗ Gụ

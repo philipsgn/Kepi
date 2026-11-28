@@ -8215,8 +8215,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
 
   assert.ok(
-    (tpsDocCode.includes('QĐ 242–244') || tpsDocCode.includes('QĐ 242–248') || tpsDocCode.includes('QĐ 242–249') || tpsDocCode.includes('QĐ 242–251')) &&
-      (chatDocCode.includes('Quyết định 242–244') || chatDocCode.includes('Quyết định 242–248') || chatDocCode.includes('Quyết định 242–249') || chatDocCode.includes('Quyết định 242–251')) &&
+    (tpsDocCode.includes('QĐ 242–244') || tpsDocCode.includes('QĐ 242–248') || tpsDocCode.includes('QĐ 242–249') || tpsDocCode.includes('QĐ 242–251') || tpsDocCode.includes('QĐ 242–253')) &&
+      (chatDocCode.includes('Quyết định 242–244') || chatDocCode.includes('Quyết định 242–248') || chatDocCode.includes('Quyết định 242–249') || chatDocCode.includes('Quyết định 242–251') || chatDocCode.includes('Quyết định 242–253')) &&
       decisionsCode.includes('Quyết định 244') &&
       wallCode.includes('function drawCafeFloor1Walls3D') &&
       wallCode.includes('function drawCafeFloor2Walls3D') &&
@@ -8448,6 +8448,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   };
   const mock2d = {
     fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left',
+    createLinearGradient() { return { addColorStop() {} }; },
     save() {}, restore() {}, beginPath() {}, closePath() {}, translate() {}, rotate() {},
     moveTo() {}, lineTo() {}, quadraticCurveTo() {}, rect() {}, arc() {}, ellipse() {},
     fill() {}, stroke() {}, fillRect() {}, clearRect() {}, strokeRect() {}, fillText() {},
@@ -8560,7 +8561,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       !bannerCode.includes('action-bar') &&
       shellCode.includes('WebglTpsBannerShell') &&
       tpsDoc.includes('QĐ 251') &&
-      chatDoc.includes('Quyết định 242–251') &&
+      (chatDoc.includes('Quyết định 242–251') || chatDoc.includes('Quyết định 242–253')) &&
       decDoc.includes('Quyết định 251') &&
       wglCode.includes('gl.NEAREST') &&
       wglCode.includes('activeFovy') &&
@@ -8979,4 +8980,109 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log(`✅ Test 187 Passed: Fixed Inverted cam.U Raycast (sharedUy=${v.sharedUy.toFixed(2)}, cafeUy=${v.cafeUy.toFixed(2)}), Unified bindTpsCanvasGestures (7/7 Venues) & Strict !wgl Floor Fallback + AGENTS.md Sec 6 (Quyết định 252) Audit verified cleanly`);
 }
 
-console.log('\n🎉 ALL 187 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (187/187)!');
+// =========================================================================
+// TEST 188: CHE GIẤU CỬA SỔ 6 LỚP TẦNG 1 & TẦNG 2, ĐẠI LỘ 2 LÀN 6 XE 60FPS, SÔNG BẠCH ĐẰNG & 3 SẮC TRỜI SÁNG/CHIỀU/TỐI (QĐ 253)
+// =========================================================================
+{
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const chatDoc = fs.readFileSync('docs/screens/heocon/10-CHAT.md', 'utf8');
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const tpsEng = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const wglEng = fs.readFileSync('src/components/pixel/pixelWebgl3dEngine.ts', 'utf8');
+  const bbEng = fs.readFileSync('src/components/pixel/pixelTpsBillboards.ts', 'utf8');
+  const navEng = fs.readFileSync('src/components/pixel/pixelNavGraph3d.ts', 'utf8');
+  const wallCode = fs.readFileSync('src/components/chat/cafe/cafeVnWallArt.ts', 'utf8');
+  const sceneCode = fs.readFileSync('src/components/chat/cafe/cafeTps3dScene.ts', 'utf8');
+
+  assert.ok(
+    tpsDoc.includes('QĐ 251–253') &&
+      chatDoc.includes('Quyết định 242–253') &&
+      decDoc.includes('Quyết định 253') &&
+      wallCode.includes('roadAsphalt') &&
+      wallCode.includes('cafeCurtain') &&
+      wallCode.includes('skylineDay') &&
+      wallCode.includes('skylineSunset') &&
+      wallCode.includes('skylineNight') &&
+      sceneCode.includes('function getCafeTimePalette') &&
+      sceneCode.includes('function drawStreetVehicle3D') &&
+      sceneCode.includes('function drawNeighborShopfront3D') &&
+      sceneCode.includes('function drawStreetLamp3D') &&
+      sceneCode.includes('function drawWindowFlowerBox3D'),
+    'QD 253 6-layer window occlusion, street traffic, neighbor shophouses, Bitexco/Landmark81 skyline & 3-mode time sync must be synced'
+  );
+
+  const extractRaw = (src) => {
+    const m = src.match(/return String\.raw`([\s\S]*?)`;/);
+    assert.ok(m && m[1], 'Must export String.raw script');
+    return m[1];
+  };
+
+  let draws = 0, nans = 0;
+  const chk = (a) => { for (let i = 0; i < a.length; i++) if (typeof a[i] === 'number' && !Number.isFinite(a[i])) nans++; };
+  const mockGl = {
+    VERTEX_SHADER: 1, FRAGMENT_SHADER: 2, ARRAY_BUFFER: 3, ELEMENT_ARRAY_BUFFER: 4, STATIC_DRAW: 5,
+    TEXTURE_2D: 6, RGBA: 7, UNSIGNED_BYTE: 8, TEXTURE_WRAP_S: 9, TEXTURE_WRAP_T: 10, REPEAT: 11, CLAMP_TO_EDGE: 12,
+    TEXTURE_MIN_FILTER: 13, TEXTURE_MAG_FILTER: 14, LINEAR_MIPMAP_LINEAR: 15, LINEAR: 16, NEAREST: 99,
+    DEPTH_TEST: 17, BLEND: 18, SRC_ALPHA: 19, ONE: 20, ONE_MINUS_SRC_ALPHA: 21, COLOR_BUFFER_BIT: 22, DEPTH_BUFFER_BIT: 24,
+    FLOAT: 25, UNSIGNED_SHORT: 26, TRIANGLES: 27, TEXTURE0: 28,
+    createShader() { return {}; }, shaderSource() {}, compileShader() {},
+    createProgram() { return {}; }, attachShader() {}, linkProgram() {}, useProgram() {},
+    getAttribLocation() { return 0; }, getUniformLocation() { return {}; },
+    createBuffer() { return {}; }, bindBuffer() {}, bufferData() {},
+    createTexture() { return {}; }, bindTexture() {}, texImage2D() {},
+    texParameteri() {}, generateMipmap() {}, activeTexture() {}, viewport() {}, clearColor() {}, clear() {},
+    enable() {}, disable() {}, depthMask() {}, blendFunc() {}, enableVertexAttribArray() {}, vertexAttribPointer() {},
+    uniformMatrix4fv(_l, _t, m) { chk(m); }, uniform1i() {}, uniform1f(l, a) { chk([a]); },
+    uniform2f(l, a, b) { chk([a, b]); }, uniform3f(l, a, b, c) { chk([a, b, c]); }, uniform4f(l, a, b, c, d) { chk([a, b, c, d]); },
+    drawElements(_m, c) { if (c > 0) draws++; },
+  };
+  const mock2d = {
+    fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left',
+    createLinearGradient() { return { addColorStop() {} }; },
+    save() {}, restore() {}, beginPath() {}, closePath() {}, translate() {}, rotate() {},
+    moveTo() {}, lineTo() {}, quadraticCurveTo() {}, rect() {}, arc() {}, ellipse() {},
+    fill() {}, stroke() {}, fillRect() {}, clearRect() {}, strokeRect() {}, fillText() {},
+  };
+  const doc = { createElement() { return { width: 256, height: 256, getContext() { return mock2d; } }; } };
+  const cv = { getContext(k) { return k === 'webgl' ? mockGl : mock2d; } };
+
+  const runner = new Function(
+    'document',
+    'cv',
+    extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + '\n' + extractRaw(bbEng) + '\n' + extractRaw(navEng) + '\n' + extractRaw(wallCode) + '\n' + extractRaw(sceneCode) + `\n
+    var wgl = createCafeWebglRenderer(cv);
+    buildCafeProceduralTextures(wgl);
+    var st = createCafeTpsState();
+    var cam = createTpsCamera({ yaw: 0.08, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
+
+    var v0x = st.streetVehicles[0].x, v3x = st.streetVehicles[3].x;
+    for (var f = 0; f < 30; f++) stepCafeTps(st, 0.05);
+    var movedBothLanes = (st.streetVehicles[0].x > v0x) && (st.streetVehicles[3].x < v3x);
+
+    var modes = [];
+    var hours = [10, 17, 22];
+    for (var hi = 0; hi < hours.length; hi++) {
+      st.hourOverride = hours[hi];
+      renderCafeWebglScene(wgl, cam, st, 390, 844);
+      modes.push(st.currentSkyMode);
+    }
+
+    return {
+      hasTextures: wgl.hasTexture('roadAsphalt') && wgl.hasTexture('cafeCurtain') && wgl.hasTexture('skylineDay') && wgl.hasTexture('skylineSunset') && wgl.hasTexture('skylineNight'),
+      vehiclesCount: st.streetVehicles.length,
+      movedBothLanes: movedBothLanes,
+      modes: modes
+    };
+  `
+  );
+  const out = runner(doc, cv);
+  assert.strictEqual(nans, 0, '3-mode Day/Sunset/Night outdoor rendering must emit 0 NaN');
+  assert.strictEqual(out.hasTextures, true, 'Must register roadAsphalt, cafeCurtain, skylineDay, skylineSunset, skylineNight textures');
+  assert.ok(out.vehiclesCount >= 6 && out.movedBothLanes, 'Must animate >= 6 two-way street vehicles in 60fps');
+  assert.deepStrictEqual(out.modes, ['day', 'sunset', 'night'], 'Must switch sky & lighting cleanly across day (10h), sunset (17h), night (22h)');
+  assert.ok(draws > 900, '3 frames of Cafe 6-layer indoor/outdoor rendering must submit > 900 draws (got ' + draws + ')');
+
+  console.log(`✅ Test 188 Passed: Che Giấu Cửa Sổ 6 Lớp Tầng 1-2, Đường Nhựa 2 Làn (${out.vehiclesCount} xe), Nhà Phố 56m, Skyline Bitexco/Landmark81 & 3 Sắc Trời [${out.modes.join('/')}] (${draws} draws, 0 NaN — Quyết định 253) Audit verified cleanly`);
+}
+
+console.log('\n🎉 ALL 188 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (188/188)!');
