@@ -1,26 +1,354 @@
 /**
- * Bộ Sưu Tập Mỹ Thuật Tường 3 Phòng Độc Bản — Chợ Bến Thành Sài Gòn TPS 3D (Quyết định 246)
- * - Phòng 1 ('south_hall' — Sảnh Cửa Nam & Sạp Vải Áo Dài):
- *   + Tường Trái (X = -5.93): SẠP VẢI & ÁO DÀI HƯƠNG TRINH (cuộn lụa tơ tằm đủ màu, Áo Dài thêu hoa sen, nón lá bài thơ).
- *   + Tường Phải (X = +5.93): ĐẶC SẢN LIÊN SÀI GÒN & NGỌC HOA 823 (hộp trà sen, hũ mứt nắp đỏ, túi cà phê rang xay) & lối rẽ sang Sảnh Trái Cây.
- *   + Tường Cuối (Z = 14.72): Cổng Vòm KHU ĂN UỐNG · SẠP 1044 dẫn thẳng vào Khu Ẩm Thực Trung Tâm.
- *   + Tường Trước (Z = 0.04): Biển CỬA SỐ 1 · CỬA NAM & hoa văn sắt xếp Bến Thành cổ điển.
- * - Phòng 2 ('food_court' — Khu Ẩm Thực Trung Tâm Sạp 1044):
- *   + Tường Trái (X = -5.93): BÁNH CUỐN NÓNG 50K (nồi tráng vải trắng nghi ngút khói, chả lụa, hành phi, bảng thực đơn).
- *   + Tường Phải (X = +5.93): BÁNH BÈO HUẾ 20K & CHÈ SÀI GÒN (khay chén sứ bánh bèo tôm cháy, ly chè ba màu, nem chua lá chuối) & lối sang Sảnh Trái Cây.
- *   + Tường Cuối (Z = 14.72): Bảng hiệu lớn KHU ĂN UỐNG CHỢ BẾN THÀNH · SẠP 1044 + kệ dừa tươi & thực đơn món ngon Sài Gòn.
- *   + Tường Trước (Z = 0.06): Lối vòm quay về SẢNH CỬA NAM.
- * - Phòng 3 ('fruit_craft' — Sảnh Trái Cây Nhiệt Đới & Đồ Lưu Niệm Nón Lá):
- *   + Tường Trái (X = -5.93): GỐM SỨ & SƠN MÀI BẾN THÀNH (bình gốm Bát Tràng men lam, tranh sơn mài cẩn trứng, giỏ mây tre đan).
- *   + Tường Phải (X = +5.93): NÓN LÁ & QUÀ LƯU NIỆM SÀI GÒN (dàn nón lá treo tầng, túi cói thêu, quạt nan) & lối sang Khu Ẩm Thực.
- *   + Tường Cuối (Z = 14.72): Vòm CỬA BẮC · TRÁI CÂY NHIỆT ĐỚI 1029 NGỌC HẢO.
- *   + Tường Trước (Z = 0.06): Lối vòm về SẢNH CỬA NAM.
- * - 100% bảng chữ áp dụng khóa khung 4 góc ctx.clip() + safeW (maxWidth) chống tràn chữ mọi góc 360°.
- * - Tuyệt đối không dùng ctx.roundRect.
+ * Bộ Sinh Texture Thủ Tục WebGL 3D & Mỹ Thuật Tường Chợ Bến Thành Sài Gòn (Quyết định 250)
+ * - Nâng cấp đồng bộ WebGL 3D (POT 256×256 / 512×256) cho 3 phân khu hợp nhất:
+ *   1. 'south_hall'  — Sảnh Cửa Nam & Sạp Vải Áo Dài (Cửa Số 1, Hương Trinh, Liên Sài Gòn 823)
+ *   2. 'food_court'  — Khu Ẩm Thực Trung Tâm Sạp 1044 (Vòm Khu Ăn Uống, Bánh Cuốn 50K, Bánh Bèo Huế 20K)
+ *   3. 'fruit_craft' — Cánh Đông Trái Cây & Lưu Niệm (1029 Ngọc Hảo, Gốm Sứ Bát Tràng, Nón Lá, Cửa Bắc)
+ * - Gọi buildPigBillboardTextures(wgl, ['aodai']) để hỗ trợ chú Heo 24×20 mặc Áo Dài Lụa gl.NEAREST.
+ * - Giữ nguyên Canvas2D fallback (drawMarketRoomWalls3D) cho Headless Smoke Test 183.
  */
 export function buildMarketWallArtScript(): string {
   return String.raw`
-/* ==================== 1. HELPER KHÓA KHUNG 4 GÓC CHỐNG TRÀN CHỮ 100% ==================== */
+/* ==================== 1. BỘ SINH TEXTURE THỦ TỤC WEBGL 3D CHỢ BẾN THÀNH ==================== */
+function makeMarketRng(seed) {
+  var s = seed | 0;
+  return function() {
+    s = (s + 0x6D2B79F5) | 0;
+    var t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildMarketProceduralTextures(wgl) {
+  function mk(w, h) {
+    var c = document.createElement('canvas'); c.width = w; c.height = h; return c;
+  }
+
+  // 1. Sàn gạch đất nung Terracotta & Kem — Sảnh Cửa Nam (marketTileSouth)
+  (function() {
+    var c = mk(256, 256), g = c.getContext('2d'), rng = makeMarketRng(1914);
+    g.fillStyle = '#E5D3B3'; g.fillRect(0, 0, 256, 256);
+    for (var ty = 0; ty < 256; ty += 64) {
+      for (var tx = 0; tx < 256; tx += 64) {
+        var even = ((tx / 64 + ty / 64) % 2 === 0);
+        g.fillStyle = even ? '#C87D55' : '#E5D3B3';
+        g.fillRect(tx + 2, ty + 2, 60, 60);
+        g.strokeStyle = '#8C6D46'; g.lineWidth = 2;
+        g.strokeRect(tx + 1, ty + 1, 62, 62);
+      }
+    }
+    for (var i = 0; i < 160; i++) {
+      g.fillStyle = 'rgba(72,44,24,0.08)';
+      g.beginPath(); g.arc(rng() * 256, rng() * 256, 4 + rng() * 12, 0, Math.PI * 2); g.fill();
+    }
+    wgl.registerTextureCanvas('marketTileSouth', c, true);
+  })();
+
+  // 2. Sàn gạch Terrazzo & Vàng Đất — Khu Ẩm Thực 1044 (marketTileFood)
+  (function() {
+    var c = mk(256, 256), g = c.getContext('2d'), rng = makeMarketRng(1044);
+    g.fillStyle = '#D8C7A8'; g.fillRect(0, 0, 256, 256);
+    for (var ty = 0; ty < 256; ty += 64) {
+      for (var tx = 0; tx < 256; tx += 64) {
+        var even = ((tx / 64 + ty / 64) % 2 === 0);
+        g.fillStyle = even ? '#B45309' : '#DFCFAF';
+        g.fillRect(tx + 2, ty + 2, 60, 60);
+        g.strokeStyle = '#78350F'; g.lineWidth = 2;
+        g.strokeRect(tx + 1, ty + 1, 62, 62);
+      }
+    }
+    for (var i = 0; i < 180; i++) {
+      g.fillStyle = rng() > 0.5 ? 'rgba(255,245,214,0.16)' : 'rgba(67,20,7,0.10)';
+      g.fillRect(rng() * 256, rng() * 256, 3, 3);
+    }
+    wgl.registerTextureCanvas('marketTileFood', c, true);
+  })();
+
+  // 3. Sàn gạch vàng cát & xanh chợ — Sảnh Trái Cây & Lưu Niệm (marketTileFruit)
+  (function() {
+    var c = mk(256, 256), g = c.getContext('2d'), rng = makeMarketRng(1029);
+    g.fillStyle = '#E2D5B5'; g.fillRect(0, 0, 256, 256);
+    for (var ty = 0; ty < 256; ty += 64) {
+      for (var tx = 0; tx < 256; tx += 64) {
+        var even = ((tx / 64 + ty / 64) % 2 === 0);
+        g.fillStyle = even ? '#C6A468' : '#E8DEC3';
+        g.fillRect(tx + 2, ty + 2, 60, 60);
+        g.strokeStyle = '#7C6E52'; g.lineWidth = 2;
+        g.strokeRect(tx + 1, ty + 1, 62, 62);
+      }
+    }
+    for (var i = 0; i < 140; i++) {
+      g.fillStyle = 'rgba(20,83,45,0.07)';
+      g.beginPath(); g.arc(rng() * 256, rng() * 256, 5 + rng() * 10, 0, Math.PI * 2); g.fill();
+    }
+    wgl.registerTextureCanvas('marketTileFruit', c, true);
+  })();
+
+  // 4. Tường vôi vàng nghệ Chợ Bến Thành (marketWallGold)
+  (function() {
+    var c = mk(256, 256), g = c.getContext('2d'), rng = makeMarketRng(2501);
+    g.fillStyle = '#E5B85B'; g.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 200; i++) {
+      g.fillStyle = rng() > 0.5 ? 'rgba(255,244,210,0.14)' : 'rgba(166,110,32,0.14)';
+      g.beginPath(); g.arc(rng() * 256, rng() * 256, 8 + rng() * 26, 0, Math.PI * 2); g.fill();
+    }
+    // Chỉ chân tường nâu đất ấm
+    g.fillStyle = '#7C4F2B'; g.fillRect(0, 224, 256, 32);
+    g.fillStyle = '#F4B93B'; g.fillRect(0, 220, 256, 5);
+    wgl.registerTextureCanvas('marketWallGold', c, true);
+  })();
+
+  // 5. Kính mờ giếng trời & mái tôn vòm thép vàng (marketSkylight & marketRoofPanel)
+  (function() {
+    var c = mk(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#FEF3C7'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#FFFBEB';
+    for (var y = 0; y < 256; y += 64) g.fillRect(4, y + 4, 248, 52);
+    g.strokeStyle = '#B45309'; g.lineWidth = 6;
+    for (var x = 0; x <= 256; x += 64) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 256); g.stroke(); }
+    for (var y2 = 0; y2 <= 256; y2 += 64) { g.beginPath(); g.moveTo(0, y2); g.lineTo(256, y2); g.stroke(); }
+    wgl.registerTextureCanvas('marketSkylight', c, true);
+
+    var r = mk(256, 256), rg = r.getContext('2d');
+    rg.fillStyle = '#7C4F2B'; rg.fillRect(0, 0, 256, 256);
+    for (var sx = 0; sx < 256; sx += 32) {
+      rg.fillStyle = (sx % 64 === 0) ? '#6B4423' : '#8C5A32';
+      rg.fillRect(sx, 0, 30, 256);
+    }
+    wgl.registerTextureCanvas('marketRoofPanel', r, true);
+  })();
+
+  // 6. Cửa sắt xếp xanh cổ vịt Bến Thành (marketIronGate) & Gạch men trắng Bánh Cuốn (marketCeramicTile)
+  (function() {
+    var c = mk(256, 256), g = c.getContext('2d');
+    g.fillStyle = 'rgba(23, 37, 84, 0.25)'; g.fillRect(0, 0, 256, 256);
+    g.strokeStyle = '#1E3A8A'; g.lineWidth = 8;
+    for (var x = 0; x <= 256; x += 32) {
+      g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 256); g.stroke();
+    }
+    g.strokeStyle = '#38BDF8'; g.lineWidth = 3;
+    for (var d = -256; d < 512; d += 48) {
+      g.beginPath(); g.moveTo(d, 0); g.lineTo(d + 256, 256); g.stroke();
+      g.beginPath(); g.moveTo(d, 256); g.lineTo(d + 256, 0); g.stroke();
+    }
+    g.strokeStyle = '#172554'; g.lineWidth = 10; g.strokeRect(4, 4, 248, 248);
+    wgl.registerTextureCanvas('marketIronGate', c, false);
+
+    var t = mk(256, 256), tg = t.getContext('2d');
+    tg.fillStyle = '#F8FAFC'; tg.fillRect(0, 0, 256, 256);
+    tg.strokeStyle = '#CBD5E1'; tg.lineWidth = 3;
+    for (var ty = 0; ty < 256; ty += 32) {
+      tg.beginPath(); tg.moveTo(0, ty); tg.lineTo(256, ty); tg.stroke();
+    }
+    for (var tx = 0; tx < 256; tx += 64) {
+      tg.beginPath(); tg.moveTo(tx, 0); tg.lineTo(tx, 256); tg.stroke();
+    }
+    wgl.registerTextureCanvas('marketCeramicTile', t, true);
+  })();
+
+  // 7. Gỗ quầy sạp nâu sẫm (marketWood)
+  (function() {
+    var c = mk(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#6D3F21'; g.fillRect(0, 0, 256, 256);
+    for (var y = 0; y < 256; y += 6) {
+      g.fillStyle = (y % 12 === 0) ? 'rgba(38,18,6,0.28)' : 'rgba(140,88,48,0.18)';
+      g.fillRect(0, y, 256, 3);
+    }
+    g.strokeStyle = '#2B180E'; g.lineWidth = 4; g.strokeRect(2, 2, 252, 252);
+    wgl.registerTextureCanvas('marketWood', c, true);
+  })();
+
+  // 8. Helper tạo biển hiệu Chợ Bến Thành sắc nét (512×128 / 512×256)
+  function regSign(key, bgHex, borderHex, title, sub, sub2) {
+    var h = sub2 ? 256 : 128;
+    var c = mk(512, h), g = c.getContext('2d');
+    g.fillStyle = bgHex; g.fillRect(0, 0, 512, h);
+    g.strokeStyle = borderHex; g.lineWidth = 8; g.strokeRect(8, 8, 496, h - 16);
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    if (!sub) {
+      g.fillStyle = '#FDE047'; g.font = 'bold 28px monospace';
+      g.fillText(title, 256, h * 0.5, 472);
+    } else if (!sub2) {
+      g.fillStyle = '#FDE047'; g.font = 'bold 30px monospace';
+      g.fillText(title, 256, h * 0.36, 472);
+      g.fillStyle = '#FFFBF1'; g.font = 'bold 20px monospace';
+      g.fillText(sub, 256, h * 0.72, 472);
+    } else {
+      g.fillStyle = '#FDE047'; g.font = 'bold 32px monospace';
+      g.fillText(title, 256, 62, 472);
+      g.fillStyle = '#FFFBF1'; g.font = 'bold 22px monospace';
+      g.fillText(sub, 256, 130, 472);
+      g.fillStyle = '#FDBA74'; g.font = 'bold 20px monospace';
+      g.fillText(sub2, 256, 196, 472);
+    }
+    wgl.registerTextureCanvas(key, c, false);
+  }
+
+  regSign('signCuaSo1',      '#7F1D1D', '#F4B93B', 'CỬA SỐ 1 · CỬA NAM', 'CHỢ BẾN THÀNH · SÀI GÒN');
+  regSign('signCuaBac',      '#14532D', '#F4B93B', 'CỬA BẮC · TRÁI CÂY 1029 NGỌC HẢO', 'XOÀI CÁT HÒA LỘC · BƯỞI DA XANH · SẦU RIÊNG');
+  regSign('signHuongTrinh',  '#881337', '#F4B93B', 'SẠP VẢI & ÁO DÀI HƯƠNG TRINH', 'LỤA TƠ TẰM HÀ ĐÔNG · ÁO DÀI HOA SEN');
+  regSign('signLienSaiGon',  '#14532D', '#F4B93B', 'ĐẶC SẢN LIÊN SÀI GÒN & NGỌC HOA', 'TRÀ SEN · MỨT TẾT · CÀ PHÊ RANG XAY 823');
+  regSign('signKhuAnUong',   '#991B1B', '#F4B93B', '★ KHU ĂN UỐNG · SẠP 1044 ↑', 'BÁNH CUỐN NÓNG · BÁNH BÈO · CHÈ SÀI GÒN');
+  regSign('signSap1044',     '#7F1D1D', '#F4B93B', '★ SẠP 1044 · ẨM THỰC BẾN THÀNH ★', 'PHỞ BÒ · BÚN BÒ HUẾ · BÁNH CUỐN · DỪA TƯƠI', 'HƯƠNG VỊ SÀI GÒN XƯA TỪ 1914');
+  regSign('signBanhCuon50k', '#991B1B', '#FDE047', 'BÁNH CUỐN NÓNG 50K · TRÁNG TAY', 'CHẢ LỤA HÀ NỘI · ĐẶC BIỆT 65K');
+  regSign('signBanhBeo20k',  '#B45309', '#FDE047', 'BÁNH BÈO HUẾ 20K & CHÈ SÀI GÒN', 'BÁNH BÈO CHÉN · NEM CHUA · CHÈ BA MÀU');
+  regSign('signNgocHao1029', '#14532D', '#FACC15', '1029 NGỌC HẢO · TRÁI CÂY NHIỆT ĐỚI', 'XOÀI CÁT · THANH LONG · BƯỞI DA XANH');
+  regSign('signGomSu',       '#1E3A8A', '#F4B93B', 'GỐM SỨ & SƠN MÀI BẾN THÀNH', 'BÁT TRÀNG MEN LAM · MÂY TRE ĐAN');
+  regSign('signNonLa',       '#991B1B', '#FDE047', 'NÓN LÁ & QUÀ LƯU NIỆM SÀI GÒN', 'NÓN LÁ BÀI THƠ · TÚI CÓI THÊU');
+
+  // 9. Tranh Tường Áo Dài & Vải Lụa Hương Trinh (artAoDaiFabric)
+  (function() {
+    var c = mk(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2511'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#FFF5D6'; g.fillRect(14, 14, 484, 228);
+    g.strokeStyle = '#D97706'; g.lineWidth = 4; g.strokeRect(18, 18, 476, 220);
+    // Hàng nón lá treo trên cao
+    for (var n = 0; n < 5; n++) {
+      var nx = 64 + n * 96, ny = 58;
+      g.fillStyle = '#E8C574'; g.strokeStyle = '#78350F'; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(nx, ny - 22); g.lineTo(nx - 30, ny + 14); g.lineTo(nx + 30, ny + 14); g.closePath();
+      g.fill(); g.stroke();
+      g.fillStyle = n % 2 === 0 ? '#DC2626' : '#16A34A';
+      g.fillRect(nx - 12, ny + 13, 24, 5);
+    }
+    // 3 Bộ Áo Dài Lụa Thêu Hoa Sen rực rỡ
+    var aoCols = [['#DC2626', '#FDE047'], ['#2563EB', '#F472B6'], ['#059669', '#FEF08A']];
+    for (var a = 0; a < 3; a++) {
+      var ax = 112 + a * 144, ay = 152;
+      g.fillStyle = aoCols[a][0];
+      g.fillRect(ax - 38, ay - 52, 76, 26); // tay áo
+      g.fillRect(ax - 22, ay - 52, 44, 44); // thân trên
+      g.fillStyle = '#FFFBEB'; g.fillRect(ax - 18, ay - 4, 36, 72); // quần lụa
+      g.fillStyle = aoCols[a][0]; g.fillRect(ax - 24, ay - 8, 48, 66); // tà áo
+      g.fillStyle = aoCols[a][1];
+      g.beginPath(); g.arc(ax, ay - 28, 9, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = '#2B180E'; g.lineWidth = 2;
+      g.strokeRect(ax - 24, ay - 52, 48, 118);
+    }
+    wgl.registerTextureCanvas('artAoDaiFabric', c, false);
+  })();
+
+  // 10. Kệ Trà Sen, Hũ Mứt Nắp Đỏ & Cà Phê Liên Sài Gòn 823 (artLienTeaShelves)
+  (function() {
+    var c = mk(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#3B2314'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#FEF3C7'; g.fillRect(14, 14, 484, 228);
+    for (var row = 0; row < 3; row++) {
+      var sy = 44 + row * 70;
+      g.fillStyle = '#5C341D'; g.fillRect(20, sy + 36, 472, 10);
+      for (var col = 0; col < 7; col++) {
+        var jx = 42 + col * 64;
+        if (row === 0) {
+          g.fillStyle = '#15803D'; g.fillRect(jx, sy, 42, 36);
+          g.fillStyle = '#FACC15'; g.fillRect(jx, sy - 6, 42, 8);
+        } else if (row === 1) {
+          g.fillStyle = '#FDE68A'; g.fillRect(jx, sy + 4, 42, 32);
+          g.fillStyle = '#D97706'; g.fillRect(jx + 6, sy + 10, 30, 20);
+          g.fillStyle = '#DC2626'; g.fillRect(jx - 2, sy - 4, 46, 10);
+        } else {
+          g.fillStyle = '#78350F'; g.fillRect(jx, sy, 42, 36);
+          g.fillStyle = '#F4B93B'; g.fillRect(jx + 8, sy + 10, 26, 16);
+        }
+      }
+    }
+    wgl.registerTextureCanvas('artLienTeaShelves', c, false);
+  })();
+
+  // 11. Tường Bánh Cuốn Nóng 50K & Bánh Bèo 20K (artBanhCuonWall & artBanhBeoWall)
+  (function() {
+    var c = mk(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#F8FAFC'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#CBD5E1'; g.lineWidth = 2;
+    for (var x = 0; x < 512; x += 48) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 256); g.stroke(); }
+    for (var y = 0; y < 256; y += 32) { g.beginPath(); g.moveTo(0, y); g.lineTo(512, y); g.stroke(); }
+    g.fillStyle = '#7F1D1D'; g.fillRect(36, 26, 440, 74);
+    g.strokeStyle = '#FDE047'; g.lineWidth = 4; g.strokeRect(40, 30, 432, 66);
+    g.fillStyle = '#FDE047'; g.font = 'bold 24px monospace'; g.textAlign = 'center';
+    g.fillText('BÁNH CUỐN CHẢ LỤA 50K · ĐẶC BIỆT 65K', 256, 70, 412);
+    for (var di = -1; di <= 1; di++) {
+      var dx = 256 + di * 130, dy = 176;
+      g.fillStyle = '#E2E8F0'; g.beginPath(); g.ellipse(dx, dy, 46, 30, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#FFFFFF'; g.fillRect(dx - 28, dy - 12, 56, 20);
+      g.fillStyle = '#D97706'; g.fillRect(dx - 10, dy - 6, 20, 8);
+    }
+    wgl.registerTextureCanvas('artBanhCuonWall', c, false);
+
+    var b = mk(512, 256), bg = b.getContext('2d');
+    bg.fillStyle = '#FFFBEB'; bg.fillRect(0, 0, 512, 256);
+    bg.strokeStyle = '#B45309'; bg.lineWidth = 8; bg.strokeRect(8, 8, 496, 240);
+    for (var ci = 0; ci < 5; ci++) {
+      var lx = 76 + ci * 90;
+      bg.fillStyle = '#15803D'; bg.fillRect(lx - 14, 34, 28, 56);
+      bg.fillStyle = '#F43F5E'; bg.fillRect(lx - 14, 58, 28, 8);
+      bg.fillStyle = '#991B1B'; bg.fillRect(lx - 18, 178, 36, 28);
+      bg.fillStyle = '#FACC15'; bg.fillRect(lx - 18, 152, 36, 26);
+      bg.fillStyle = '#22C55E'; bg.fillRect(lx - 18, 126, 36, 26);
+      bg.fillStyle = '#FFFFFF'; bg.fillRect(lx - 20, 110, 40, 16);
+    }
+    wgl.registerTextureCanvas('artBanhBeoWall', b, false);
+  })();
+
+  // 12. Gốm Sứ Sơn Mài, Nón Lá & Mâm Trái Cây 1029 Ngọc Hảo (artGomSonMai, artNonLaRack, artFruitDisplay)
+  (function() {
+    var c = mk(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#FEF3C7'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#3B2314'; g.lineWidth = 8; g.strokeRect(8, 8, 496, 240);
+    for (var li = -1; li <= 1; li++) {
+      var lx = 256 + li * 145;
+      g.fillStyle = '#1C1917'; g.fillRect(lx - 52, 28, 104, 86);
+      g.strokeStyle = '#F4B93B'; g.lineWidth = 3; g.strokeRect(lx - 52, 28, 104, 86);
+      g.fillStyle = '#DC2626'; g.beginPath(); g.arc(lx, 70, 22, 0, Math.PI * 2); g.fill();
+    }
+    for (var vi = 0; vi < 5; vi++) {
+      var vx = 76 + vi * 90;
+      if (vi % 2 === 0) {
+        g.fillStyle = '#FFFFFF'; g.beginPath(); g.ellipse(vx, 182, 24, 42, 0, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#1D4ED8'; g.fillRect(vx - 18, 170, 36, 18);
+      } else {
+        g.fillStyle = '#D97706'; g.fillRect(vx - 24, 152, 48, 60);
+        g.strokeStyle = '#78350F'; g.lineWidth = 2; g.strokeRect(vx - 24, 152, 48, 60);
+      }
+    }
+    wgl.registerTextureCanvas('artGomSonMai', c, false);
+
+    var n = mk(512, 256), ng = n.getContext('2d');
+    ng.fillStyle = '#FFF5D6'; ng.fillRect(0, 0, 512, 256);
+    ng.strokeStyle = '#991B1B'; ng.lineWidth = 8; ng.strokeRect(8, 8, 496, 240);
+    for (var r = 0; r < 2; r++) {
+      for (var k = 0; k < 4; k++) {
+        var nx = 86 + k * 112, ny = 76 + r * 98;
+        ng.fillStyle = '#E8C574'; ng.strokeStyle = '#78350F'; ng.lineWidth = 3;
+        ng.beginPath(); ng.moveTo(nx, ny - 32); ng.lineTo(nx - 42, ny + 24); ng.lineTo(nx + 42, ny + 24); ng.closePath();
+        ng.fill(); ng.stroke();
+        ng.fillStyle = r === 0 ? '#DC2626' : '#16A34A';
+        ng.fillRect(nx - 16, ny + 22, 32, 6);
+      }
+    }
+    wgl.registerTextureCanvas('artNonLaRack', n, false);
+
+    var f = mk(256, 256), fg = f.getContext('2d');
+    fg.fillStyle = '#15803D'; fg.fillRect(0, 0, 256, 256);
+    // Mâm xoài cát vàng, thanh long hồng, bưởi xanh & sầu riêng
+    var fruits = [
+      [56, 64, 24, '#FACC15'], [104, 64, 24, '#FACC15'], [156, 64, 24, '#E11D48'], [204, 64, 24, '#E11D48'],
+      [64, 132, 28, '#22C55E'], [128, 132, 30, '#A16207'], [192, 132, 28, '#22C55E'],
+      [56, 198, 24, '#F59E0B'], [128, 198, 24, '#E11D48'], [200, 198, 24, '#FACC15']
+    ];
+    for (var fi = 0; fi < fruits.length; fi++) {
+      fg.fillStyle = fruits[fi][3]; fg.strokeStyle = '#1E293B'; fg.lineWidth = 3;
+      fg.beginPath(); fg.arc(fruits[fi][0], fruits[fi][1], fruits[fi][2], 0, Math.PI * 2); fg.fill(); fg.stroke();
+    }
+    wgl.registerTextureCanvas('artFruitDisplay', f, false);
+  })();
+
+  // 13. Bộ Sprite Chú Heo 24×20 + Trang Phục Áo Dài ('aodai') gl.NEAREST
+  if (typeof buildPigBillboardTextures === 'function') {
+    buildPigBillboardTextures(wgl, ['aodai']);
+  }
+}
+
+/* ==================== 2. FALLBACK CANVAS2D CHO HEADLESS SMOKE TEST 183 ==================== */
 function drawMarketClippedQuad(ctx, cam, pts, bgCol, borderCol, lineW, drawInner) {
   drawPoly3D(ctx, cam, pts, bgCol, borderCol, lineW || 2);
   var p0 = projectPoint3D(cam, pts[0][0], pts[0][1], pts[0][2]);
@@ -43,20 +371,14 @@ function drawMarketClippedQuad(ctx, cam, pts, bgCol, borderCol, lineW, drawInner
   ctx.restore();
 }
 
-/* Helper vẽ tà Áo Dài lụa Việt Nam treo trong sạp */
 function drawPixelAoDaiIcon(ctx, cx, cy, w, h, dressCol, trimCol, lotusCol) {
-  // Vai & tay áo dài
   ctx.fillStyle = dressCol;
   ctx.fillRect(cx - w * 0.42, cy - h * 0.38, w * 0.84, h * 0.22);
-  // Thân trên ôm eo
   ctx.fillRect(cx - w * 0.24, cy - h * 0.38, w * 0.48, h * 0.34);
-  // Quần lụa trắng/vàng bên trong
   ctx.fillStyle = '#FFFBEB';
   ctx.fillRect(cx - w * 0.20, cy + h * 0.02, w * 0.40, h * 0.38);
-  // Tà áo dài xẻ hai bên
   ctx.fillStyle = dressCol;
   ctx.fillRect(cx - w * 0.27, cy - h * 0.04, w * 0.54, h * 0.38);
-  // Cổ cao truyền thống & hoa sen thêu ngực
   ctx.fillStyle = trimCol || '#FDE047';
   ctx.fillRect(cx - w * 0.11, cy - h * 0.43, w * 0.22, h * 0.07);
   ctx.fillStyle = lotusCol || '#F43F5E';
@@ -68,7 +390,6 @@ function drawPixelAoDaiIcon(ctx, cx, cy, w, h, dressCol, trimCol, lotusCol) {
   ctx.strokeRect(cx - w * 0.27, cy - h * 0.38, w * 0.54, h * 0.72);
 }
 
-/* Helper vẽ Nón Lá truyền thống */
 function drawPixelNonLaIcon(ctx, nx, ny, rw, rh, ribbonCol) {
   ctx.fillStyle = '#E8C574';
   ctx.strokeStyle = '#78350F';
@@ -80,536 +401,125 @@ function drawPixelNonLaIcon(ctx, nx, ny, rw, rh, ribbonCol) {
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-  // Quai lụa dưới nón
   ctx.fillStyle = ribbonCol || '#DC2626';
   ctx.fillRect(nx - rw * 0.18, ny + rh * 0.32, rw * 0.36, Math.max(1.5, rh * 0.12));
 }
 
-/* ==================== 2. PHÒNG 1 ('south_hall'): SẢNH CỬA NAM & SẠP VẢI ÁO DÀI ==================== */
 function drawMarketSouthHallWalls3D(ctx, cam) {
-  // ---- TƯỜNG TRƯỚC (Z = 0.04): BIỂN CỬA SỐ 1 · CỬA NAM ----
   drawMarketClippedQuad(
     ctx, cam,
     [[-2.25, 3.55, 0.04], [2.25, 3.55, 0.04], [2.25, 2.78, 0.04], [-2.25, 2.78, 0.04]],
     '#7F1D1D', '#F4B93B', 2.4,
     function(cx, cy, bw, bh, safeW) {
       var p1 = Math.max(5, Math.min(13, Math.round(bh * 0.36)));
-      var p2 = Math.max(4, Math.min(10, Math.round(bh * 0.24)));
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.font = 'bold ' + p1 + 'px monospace';
       ctx.fillStyle = '#FDE047';
-      ctx.fillText('CỬA SỐ 1 · CỬA NAM', cx, cy - bh * 0.14, safeW);
-      ctx.font = 'bold ' + p2 + 'px monospace';
-      ctx.fillStyle = '#FFFBF1';
-      ctx.fillText('CHỢ BẾN THÀNH · SÀI GÒN', cx, cy + bh * 0.22, safeW);
+      ctx.fillText('CỬA SỐ 1 · CỬA NAM', cx, cy, safeW);
     }
   );
-
-  // ---- TƯỜNG TRÁI (X = -5.93): SẠP VẢI & ÁO DÀI HƯƠNG TRINH ----
   drawMarketClippedQuad(
     ctx, cam,
     [[-5.93, 3.44, 1.6], [-5.93, 3.44, 11.4], [-5.93, 2.84, 11.4], [-5.93, 2.84, 1.6]],
     '#881337', '#F4B93B', 2.2,
     function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(13, Math.round(bh * 0.40)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = 'bold ' + Math.max(5, Math.min(13, Math.round(bh * 0.40))) + 'px monospace';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('SẠP VẢI & ÁO DÀI HƯƠNG TRINH', cx, cy, safeW);
     }
   );
-
-  // 3 Gian trưng bày Lụa Tơ Tằm, Áo Dài Thêu & Nón Lá dọc tường trái
-  var silkBays = [
-    { z1: 1.7, z2: 4.8, title: 'LỤA TƠ TẰM HÀ ĐÔNG', c1: '#E11D48', c2: '#F59E0B', c3: '#10B981' },
-    { z1: 5.0, z2: 8.1, title: 'ÁO DÀI THÊU HOA SEN', c1: '#DC2626', c2: '#2563EB', c3: '#D97706' },
-    { z1: 8.3, z2: 11.4, title: 'GẤM VÓC & NÓN LÁ', c1: '#9333EA', c2: '#059669', c3: '#E11D48' }
-  ];
-  for (var bi = 0; bi < silkBays.length; bi++) {
-    (function(bay, idx) {
-      drawMarketClippedQuad(
-        ctx, cam,
-        [[-5.93, 2.74, bay.z1], [-5.93, 2.74, bay.z2], [-5.93, 0.92, bay.z2], [-5.93, 0.92, bay.z1]],
-        '#4A2511', '#D97706', 2.0,
-        function(cx, cy, bw, bh, safeW) {
-          ctx.fillStyle = '#FFF5D6';
-          ctx.fillRect(cx - bw * 0.45, cy - bh * 0.44, bw * 0.90, bh * 0.72);
-          // Hàng nón lá treo phía trên
-          drawPixelNonLaIcon(ctx, cx - bw * 0.26, cy - bh * 0.28, bw * 0.18, bh * 0.16, bay.c1);
-          drawPixelNonLaIcon(ctx, cx,            cy - bh * 0.28, bw * 0.18, bh * 0.16, bay.c2);
-          drawPixelNonLaIcon(ctx, cx + bw * 0.26, cy - bh * 0.28, bw * 0.18, bh * 0.16, bay.c3);
-          if (idx === 1) {
-            // Gian giữa: 3 Bộ Áo Dài Thêu rực rỡ
-            drawPixelAoDaiIcon(ctx, cx - bw * 0.27, cy + bh * 0.04, bw * 0.22, bh * 0.46, bay.c1, '#FDE047', '#FDE047');
-            drawPixelAoDaiIcon(ctx, cx,            cy + bh * 0.04, bw * 0.22, bh * 0.46, bay.c2, '#FFFBF1', '#FB7185');
-            drawPixelAoDaiIcon(ctx, cx + bw * 0.27, cy + bh * 0.04, bw * 0.22, bh * 0.46, bay.c3, '#7F1D1D', '#FEF08A');
-          } else {
-            // Cuộn vải lụa xếp tầng + Áo dài mẫu ở giữa
-            var silkCols = [bay.c1, '#FACC15', bay.c2, '#EC4899', bay.c3, '#38BDF8'];
-            for (var r = 0; r < 6; r++) {
-              var rx = cx - bw * 0.39 + (r % 3) * bw * 0.28;
-              var ry = cy - bh * 0.08 + Math.floor(r / 3) * bh * 0.18;
-              ctx.fillStyle = silkCols[r];
-              ctx.fillRect(rx, ry, bw * 0.20, bh * 0.13);
-              ctx.fillStyle = '#FFFBF1';
-              ctx.fillRect(rx + bw * 0.03, ry + bh * 0.04, bw * 0.14, bh * 0.04);
-            }
-          }
-          var tPx = Math.max(4, Math.min(10, Math.round(bh * 0.11)));
-          ctx.font = 'bold ' + tPx + 'px monospace';
-          ctx.fillStyle = '#FDE047';
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText(bay.title, cx, cy + bh * 0.37, safeW);
-        }
-      );
-    })(silkBays[bi], bi);
-  }
-
-  // ---- TƯỜNG PHẢI (X = +5.93): ĐẶC SẢN LIÊN SÀI GÒN & NGỌC HOA + LỐI SANG SẢNH TRÁI CÂY ----
   drawMarketClippedQuad(
     ctx, cam,
     [[5.93, 3.44, 8.2], [5.93, 3.44, 1.6], [5.93, 2.84, 1.6], [5.93, 2.84, 8.2]],
     '#14532D', '#F4B93B', 2.2,
     function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(12, Math.round(bh * 0.38)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = 'bold ' + Math.max(5, Math.min(12, Math.round(bh * 0.38))) + 'px monospace';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('ĐẶC SẢN LIÊN SÀI GÒN & NGỌC HOA', cx, cy, safeW);
     }
   );
-
-  // Kệ Trà Sen, Hũ Mứt Nắp Đỏ & Cà Phê Sài Gòn (Z = 1.7..8.1)
   drawMarketClippedQuad(
     ctx, cam,
-    [[5.93, 2.74, 8.1], [5.93, 2.74, 1.7], [5.93, 0.92, 1.7], [5.93, 0.92, 8.1]],
-    '#3B2314', '#C89B3C', 2.0,
+    [[-3.0, 3.55, 13.54], [3.0, 3.55, 13.54], [3.0, 2.75, 13.54], [-3.0, 2.75, 13.54]],
+    '#991B1B', '#F4B93B', 2.4,
     function(cx, cy, bw, bh, safeW) {
-      ctx.fillStyle = '#FEF3C7';
-      ctx.fillRect(cx - bw * 0.46, cy - bh * 0.42, bw * 0.92, bh * 0.72);
-      // 3 Tầng kệ gỗ trưng bày hũ mứt nắp đỏ, hộp trà xanh & gói cà phê vàng
-      for (var row = 0; row < 3; row++) {
-        var sy = cy - bh * 0.24 + row * bh * 0.22;
-        ctx.fillStyle = '#5C341D';
-        ctx.fillRect(cx - bw * 0.45, sy + bh * 0.12, bw * 0.90, Math.max(2, bh * 0.04));
-        for (var col = 0; col < 6; col++) {
-          var jx = cx - bw * 0.41 + col * bw * 0.145;
-          if (row === 0) {
-            // Hộp trà sen xanh ngọc nắp vàng
-            ctx.fillStyle = '#15803D';
-            ctx.fillRect(jx, sy, bw * 0.11, bh * 0.12);
-            ctx.fillStyle = '#FACC15';
-            ctx.fillRect(jx, sy - bh * 0.02, bw * 0.11, bh * 0.03);
-          } else if (row === 1) {
-            // Hũ mứt thủy tinh nắp đỏ đặc trưng Chợ Bến Thành
-            ctx.fillStyle = '#FDE68A';
-            ctx.fillRect(jx, sy + bh * 0.01, bw * 0.11, bh * 0.11);
-            ctx.fillStyle = '#D97706';
-            ctx.fillRect(jx + bw * 0.02, sy + bh * 0.03, bw * 0.07, bh * 0.07);
-            ctx.fillStyle = '#DC2626';
-            ctx.fillRect(jx - bw * 0.005, sy - bh * 0.02, bw * 0.12, bh * 0.035);
-          } else {
-            // Túi cà phê rang xay Sài Gòn
-            ctx.fillStyle = '#78350F';
-            ctx.fillRect(jx, sy, bw * 0.11, bh * 0.12);
-            ctx.fillStyle = '#F4B93B';
-            ctx.fillRect(jx + bw * 0.02, sy + bh * 0.03, bw * 0.07, bh * 0.05);
-          }
-        }
-      }
-      var tPx = Math.max(4, Math.min(10, Math.round(bh * 0.10)));
-      ctx.font = 'bold ' + tPx + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('TRÀ SEN · MỨT TẾT · CÀ PHÊ RANG XAY 823', cx, cy + bh * 0.38, safeW);
-    }
-  );
-
-  // Vòm hành lang rẽ sang SẢNH TRÁI CÂY & LƯU NIỆM (X = +5.93, Z = 8.6..11.4)
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[5.93, 2.68, 11.3], [5.93, 2.68, 8.7], [5.93, 0.02, 8.7], [5.93, 0.02, 11.3]],
-    '#3F2A18', '#F4B93B', 2.8,
-    function(cx, cy, bw, bh) {
-      ctx.fillStyle = '#FEF3C7';
-      ctx.fillRect(cx - bw * 0.38, cy - bh * 0.44, bw * 0.76, bh * 0.88);
-      // Hình bóng nón lá & trái cây phía xa trong hành lang
-      drawPixelNonLaIcon(ctx, cx - bw * 0.16, cy - bh * 0.18, bw * 0.22, bh * 0.18, '#DC2626');
-      drawPixelNonLaIcon(ctx, cx + bw * 0.16, cy - bh * 0.18, bw * 0.22, bh * 0.18, '#16A34A');
-      ctx.fillStyle = '#F59E0B';
-      ctx.beginPath(); ctx.arc(cx, cy + bh * 0.16, Math.max(4, bw * 0.14), 0, Math.PI * 2); ctx.fill();
-    }
-  );
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[5.93, 3.40, 11.4], [5.93, 3.40, 8.6], [5.93, 2.76, 8.6], [5.93, 2.76, 11.4]],
-    '#14532D', '#F4B93B', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(11, Math.round(bh * 0.36)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🥭 TRÁI CÂY & NÓN LÁ →', cx, cy, safeW);
-    }
-  );
-
-  // ---- TƯỜNG CUỐI (Z = 14.72): VÒM LỚN KHU ĂN UỐNG · SẠP 1044 ----
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[-3.2, 3.55, 14.72], [3.2, 3.55, 14.72], [3.2, 2.68, 14.72], [-3.2, 2.68, 14.72]],
-    '#991B1B', '#F4B93B', 2.6,
-    function(cx, cy, bw, bh, safeW) {
-      var p1 = Math.max(6, Math.min(14, Math.round(bh * 0.36)));
-      var p2 = Math.max(5, Math.min(10, Math.round(bh * 0.24)));
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.fillText('🥞 KHU ĂN UỐNG · SẠP 1044 ↑', cx, cy - bh * 0.14, safeW);
-      ctx.font = 'bold ' + p2 + 'px monospace';
-      ctx.fillStyle = '#FFFBF1';
-      ctx.fillText('BÁNH CUỐN NÓNG · BÁNH BÈO · CHÈ SÀI GÒN', cx, cy + bh * 0.22, safeW);
-    }
-  );
-  // Cổng vòm mở nhìn xuyên vào ánh đèn ấm Khu Ẩm Thực
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[-2.2, 2.62, 14.72], [2.2, 2.62, 14.72], [2.2, 0.02, 14.72], [-2.2, 0.02, 14.72]],
-    '#431407', '#D97706', 2.6,
-    function(cx, cy, bw, bh) {
-      ctx.fillStyle = '#7C2D12';
-      ctx.fillRect(cx - bw * 0.42, cy - bh * 0.44, bw * 0.84, bh * 0.88);
-      ctx.fillStyle = 'rgba(254, 240, 138, 0.38)';
-      ctx.beginPath(); ctx.arc(cx, cy - bh * 0.18, bw * 0.28, 0, Math.PI * 2); ctx.fill();
+      ctx.font = 'bold ' + Math.max(6, Math.min(13, Math.round(bh * 0.36))) + 'px monospace';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('KHU ĂN UỐNG · SẠP 1044 ↑', cx, cy, safeW);
     }
   );
 }
 
-/* ==================== 3. PHÒNG 2 ('food_court'): KHU ẨM THỰC TRUNG TÂM SẠP 1044 ==================== */
-function drawMarketFoodCourtWalls3D(ctx, cam, pig, t) {
-  // ---- TƯỜNG TRƯỚC (Z = 0.06): LỐI VỀ SẢNH CỬA NAM ----
+function drawMarketFoodCourtWalls3D(ctx, cam) {
   drawMarketClippedQuad(
     ctx, cam,
-    [[-2.2, 3.45, 0.06], [2.2, 3.45, 0.06], [2.2, 2.74, 0.06], [-2.2, 2.74, 0.06]],
-    '#7F1D1D', '#F4B93B', 2.2,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(12, Math.round(bh * 0.36)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('← SẢNH CỬA NAM & ÁO DÀI', cx, cy, safeW);
-    }
-  );
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[-1.8, 2.68, 0.06], [1.8, 2.68, 0.06], [1.8, 0.02, 0.06], [-1.8, 0.02, 0.06]],
-    '#3B2314', '#C89B3C', 2.4,
-    function(cx, cy, bw, bh) {
-      ctx.fillStyle = '#E8C987';
-      ctx.fillRect(cx - bw * 0.40, cy - bh * 0.44, bw * 0.80, bh * 0.88);
-    }
-  );
-
-  // ---- TƯỜNG TRÁI (X = -5.93): BÁNH CUỐN NÓNG 50K ----
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[-5.93, 3.44, 1.8], [-5.93, 3.44, 11.4], [-5.93, 2.82, 11.4], [-5.93, 2.82, 1.8]],
+    [[-5.93, 3.44, 1.8], [-5.93, 3.44, 11.2], [-5.93, 2.82, 11.2], [-5.93, 2.82, 1.8]],
     '#991B1B', '#FDE047', 2.4,
     function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(13, Math.round(bh * 0.40)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = 'bold ' + Math.max(5, Math.min(13, Math.round(bh * 0.40))) + 'px monospace';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('BÁNH CUỐN NÓNG 50K · TRÁNG TAY', cx, cy, safeW);
     }
   );
-
-  // Gian bếp gạch men trắng BÁNH CUỐN NÓNG + Thực đơn treo tường
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[-5.93, 2.72, 2.0], [-5.93, 2.72, 11.2], [-5.93, 0.96, 11.2], [-5.93, 0.96, 2.0]],
-    '#1E3A8A', '#F4B93B', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      // Tường ốp gạch men trắng xanh sạch bóng của quầy Bánh Cuốn
-      ctx.fillStyle = '#F8FAFC';
-      ctx.fillRect(cx - bw * 0.46, cy - bh * 0.42, bw * 0.92, bh * 0.72);
-      // Các đường chỉ gạch men
-      ctx.strokeStyle = '#CBD5E1';
-      ctx.lineWidth = 0.8;
-      for (var gx = -3; gx <= 3; gx++) {
-        ctx.beginPath();
-        ctx.moveTo(cx + gx * bw * 0.12, cy - bh * 0.42);
-        ctx.lineTo(cx + gx * bw * 0.12, cy + bh * 0.30);
-        ctx.stroke();
-      }
-      // Bảng giá món treo nổi bật
-      ctx.fillStyle = '#7F1D1D';
-      ctx.fillRect(cx - bw * 0.38, cy - bh * 0.32, bw * 0.76, bh * 0.32);
-      var p1 = Math.max(5, Math.min(11, Math.round(bh * 0.13)));
-      ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('BÁNH CUỐN CHẢ LỤA: 50K · ĐẶC BIỆT: 65K', cx, cy - bh * 0.16, safeW * 0.85);
-      // Đĩa bánh cuốn trắng rắc hành phi & rau thơm minh họa
-      for (var di = -1; di <= 1; di++) {
-        var dx = cx + di * bw * 0.26, dy = cy + bh * 0.12;
-        ctx.fillStyle = '#E2E8F0';
-        ctx.beginPath(); ctx.ellipse(dx, dy, bw * 0.09, bh * 0.09, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(dx - bw * 0.05, dy - bh * 0.03, bw * 0.10, bh * 0.05);
-        ctx.fillStyle = '#D97706';
-        ctx.fillRect(dx - bw * 0.02, dy - bh * 0.02, bw * 0.04, bh * 0.03);
-      }
-      ctx.font = 'bold ' + Math.max(4, Math.min(9, Math.round(bh * 0.10))) + 'px monospace';
-      ctx.fillStyle = '#FEF08A';
-      ctx.fillText('NƯỚC MẮM NGUYÊN CHẤT · CHẢ QUẾ HÀ NỘI', cx, cy + bh * 0.38, safeW);
-    }
-  );
-
-  // ---- TƯỜNG PHẢI (X = +5.93): BÁNH BÈO HUẾ 20K & CHÈ SÀI GÒN + LỐI SANG SẢNH TRÁI CÂY ----
   drawMarketClippedQuad(
     ctx, cam,
     [[5.93, 3.44, 8.2], [5.93, 3.44, 1.8], [5.93, 2.82, 1.8], [5.93, 2.82, 8.2]],
     '#B45309', '#FDE047', 2.2,
     function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(12, Math.round(bh * 0.38)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FFFBF1';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = 'bold ' + Math.max(5, Math.min(12, Math.round(bh * 0.38))) + 'px monospace';
+      ctx.fillStyle = '#FFFBF1'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('BÁNH BÈO HUẾ 20K & CHÈ SÀI GÒN', cx, cy, safeW);
     }
   );
-
   drawMarketClippedQuad(
     ctx, cam,
-    [[5.93, 2.72, 8.1], [5.93, 2.72, 1.9], [5.93, 0.96, 1.9], [5.93, 0.96, 8.1]],
-    '#4A2511', '#F4B93B', 2.0,
+    [[-4.4, 3.48, 13.1], [4.4, 3.48, 13.1], [4.4, 2.10, 13.1], [-4.4, 2.10, 13.1]],
+    '#7F1D1D', '#F4B93B', 2.6,
     function(cx, cy, bw, bh, safeW) {
-      ctx.fillStyle = '#FFFBEB';
-      ctx.fillRect(cx - bw * 0.46, cy - bh * 0.42, bw * 0.92, bh * 0.72);
-      // Dàn ly Chè Ba Màu Sài Gòn & Nem Chua Lá Chuối treo hàng trên
-      for (var ci = 0; ci < 5; ci++) {
-        var lx = cx - bw * 0.34 + ci * bw * 0.17;
-        // Nem chua gói lá chuối xanh buộc dây hồng
-        ctx.fillStyle = '#15803D';
-        ctx.fillRect(lx - bw * 0.03, cy - bh * 0.34, bw * 0.06, bh * 0.18);
-        ctx.fillStyle = '#F43F5E';
-        ctx.fillRect(lx - bw * 0.03, cy - bh * 0.26, bw * 0.06, bh * 0.03);
-        // Ly chè 3 màu (đậu đỏ, đậu xanh vàng, lá dứa xanh, cốt dừa trắng)
-        var gy = cy + bh * 0.02;
-        ctx.fillStyle = '#991B1B'; ctx.fillRect(lx - bw * 0.035, gy + bh * 0.10, bw * 0.07, bh * 0.06);
-        ctx.fillStyle = '#FACC15'; ctx.fillRect(lx - bw * 0.035, gy + bh * 0.04, bw * 0.07, bh * 0.06);
-        ctx.fillStyle = '#22C55E'; ctx.fillRect(lx - bw * 0.035, gy - bh * 0.02, bw * 0.07, bh * 0.06);
-        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(lx - bw * 0.038, gy - bh * 0.06, bw * 0.076, bh * 0.04);
-      }
-      var tPx = Math.max(4, Math.min(10, Math.round(bh * 0.10)));
-      ctx.font = 'bold ' + tPx + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('BÁNH BÈO CHÉN · NEM CHUA · CHÈ BA MÀU', cx, cy + bh * 0.38, safeW);
-    }
-  );
-
-  // Vòm thông sang SẢNH TRÁI CÂY & LƯU NIỆM (X = +5.93, Z = 8.6..11.4)
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[5.93, 2.68, 11.3], [5.93, 2.68, 8.7], [5.93, 0.02, 8.7], [5.93, 0.02, 11.3]],
-    '#14532D', '#F4B93B', 2.6,
-    function(cx, cy, bw, bh) {
-      ctx.fillStyle = '#FEF9C3';
-      ctx.fillRect(cx - bw * 0.38, cy - bh * 0.44, bw * 0.76, bh * 0.88);
-    }
-  );
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[5.93, 3.40, 11.4], [5.93, 3.40, 8.6], [5.93, 2.76, 8.6], [5.93, 2.76, 11.4]],
-    '#14532D', '#F4B93B', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(11, Math.round(bh * 0.36)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🥭 SẢNH TRÁI CÂY →', cx, cy, safeW);
-    }
-  );
-
-  // ---- TƯỜNG CUỐI (Z = 14.72): BẢNG HIỆU SẠP 1044 · KHU ẨM THỰC CHỢ BẾN THÀNH ----
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[-4.8, 3.48, 14.72], [4.8, 3.48, 14.72], [4.8, 1.55, 14.72], [-4.8, 1.55, 14.72]],
-    '#7F1D1D', '#F4B93B', 2.8,
-    function(cx, cy, bw, bh, safeW) {
-      ctx.fillStyle = '#991B1B';
-      ctx.fillRect(cx - bw * 0.47, cy - bh * 0.44, bw * 0.94, bh * 0.88);
-      var p1 = Math.max(6, Math.min(15, Math.round(bh * 0.22)));
-      var p2 = Math.max(5, Math.min(11, Math.round(bh * 0.14)));
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.fillText('★ SẠP 1044 · ẨM THỰC BẾN THÀNH ★', cx, cy - bh * 0.22, safeW);
-      ctx.font = 'bold ' + p2 + 'px monospace';
-      ctx.fillStyle = '#FFFBF1';
-      ctx.fillText('PHỞ BÒ · BÚN BÒ HUẾ · BÁNH CUỐN · DỪA TƯƠI', cx, cy + bh * 0.08, safeW);
-      ctx.fillStyle = '#FDBA74';
-      ctx.fillText('HƯƠNG VỊ SÀI GÒN XƯA TỪ 1914', cx, cy + bh * 0.30, safeW);
+      ctx.font = 'bold ' + Math.max(6, Math.min(14, Math.round(bh * 0.28))) + 'px monospace';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('★ SẠP 1044 · ẨM THỰC BẾN THÀNH ★', cx, cy, safeW);
     }
   );
 }
 
-/* ==================== 4. PHÒNG 3 ('fruit_craft'): SẢNH TRÁI CÂY & ĐỒ LƯU NIỆM NÓN LÁ ==================== */
 function drawMarketFruitCraftWalls3D(ctx, cam) {
-  // ---- TƯỜNG TRƯỚC (Z = 0.06): LỐI VỀ SẢNH CỬA NAM ----
   drawMarketClippedQuad(
     ctx, cam,
-    [[-2.2, 3.45, 0.06], [2.2, 3.45, 0.06], [2.2, 2.74, 0.06], [-2.2, 2.74, 0.06]],
-    '#881337', '#F4B93B', 2.2,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(12, Math.round(bh * 0.36)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('← VỀ SẢNH CỬA NAM', cx, cy, safeW);
-    }
-  );
-
-  // ---- TƯỜNG TRÁI (X = -5.93): GỐM SỨ & SƠN MÀI BẾN THÀNH ----
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[-5.93, 3.44, 1.8], [-5.93, 3.44, 11.4], [-5.93, 2.82, 11.4], [-5.93, 2.82, 1.8]],
+    [[-5.93, 3.44, 1.8], [-5.93, 3.44, 11.2], [-5.93, 2.82, 11.2], [-5.93, 2.82, 1.8]],
     '#1E3A8A', '#F4B93B', 2.2,
     function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(13, Math.round(bh * 0.38)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = 'bold ' + Math.max(5, Math.min(13, Math.round(bh * 0.38))) + 'px monospace';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('GỐM SỨ & SƠN MÀI BẾN THÀNH', cx, cy, safeW);
     }
   );
-
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[-5.93, 2.72, 2.0], [-5.93, 2.72, 11.2], [-5.93, 0.94, 11.2], [-5.93, 0.94, 2.0]],
-    '#3B2314', '#C89B3C', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      ctx.fillStyle = '#FEF3C7';
-      ctx.fillRect(cx - bw * 0.46, cy - bh * 0.42, bw * 0.92, bh * 0.72);
-      // Hàng trên: Tranh sơn mài đen-đỏ-vàng
-      for (var li = -1; li <= 1; li++) {
-        var lx = cx + li * bw * 0.28, ly = cy - bh * 0.20;
-        ctx.fillStyle = '#1C1917';
-        ctx.fillRect(lx - bw * 0.11, ly - bh * 0.14, bw * 0.22, bh * 0.26);
-        ctx.strokeStyle = '#F4B93B'; ctx.lineWidth = 1.2;
-        ctx.strokeRect(lx - bw * 0.11, ly - bh * 0.14, bw * 0.22, bh * 0.26);
-        ctx.fillStyle = '#DC2626';
-        ctx.beginPath(); ctx.arc(lx, ly, Math.max(3, bw * 0.05), 0, Math.PI * 2); ctx.fill();
-      }
-      // Hàng dưới: Bình gốm Bát Tràng men lam & giỏ mây tre đan
-      for (var vi = 0; vi < 5; vi++) {
-        var vx = cx - bw * 0.34 + vi * bw * 0.17, vy = cy + bh * 0.16;
-        if (vi % 2 === 0) {
-          // Bình gốm Bát Tràng trắng vẽ lam
-          ctx.fillStyle = '#FFFFFF';
-          ctx.beginPath(); ctx.ellipse(vx, vy, bw * 0.05, bh * 0.11, 0, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = '#1D4ED8';
-          ctx.fillRect(vx - bw * 0.04, vy - bh * 0.03, bw * 0.08, bh * 0.05);
-        } else {
-          // Giỏ mây tre đan vàng nâu
-          ctx.fillStyle = '#D97706';
-          ctx.fillRect(vx - bw * 0.05, vy - bh * 0.08, bw * 0.10, bh * 0.16);
-        }
-      }
-      var tPx = Math.max(4, Math.min(10, Math.round(bh * 0.10)));
-      ctx.font = 'bold ' + tPx + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('BÌNH GỐM BÁT TRÀNG · SƠN MÀI · MÂY TRE ĐAN', cx, cy + bh * 0.38, safeW);
-    }
-  );
-
-  // ---- TƯỜNG PHẢI (X = +5.93): NÓN LÁ & QUÀ LƯU NIỆM SÀI GÒN + LỐI SANG KHU ẨM THỰC ----
   drawMarketClippedQuad(
     ctx, cam,
     [[5.93, 3.44, 8.2], [5.93, 3.44, 1.8], [5.93, 2.82, 1.8], [5.93, 2.82, 8.2]],
     '#991B1B', '#FDE047', 2.2,
     function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(12, Math.round(bh * 0.38)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = 'bold ' + Math.max(5, Math.min(12, Math.round(bh * 0.38))) + 'px monospace';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('NÓN LÁ & QUÀ LƯU NIỆM SÀI GÒN', cx, cy, safeW);
     }
   );
-
   drawMarketClippedQuad(
     ctx, cam,
-    [[5.93, 2.72, 8.1], [5.93, 2.72, 1.9], [5.93, 0.94, 1.9], [5.93, 0.94, 8.1]],
-    '#4A2511', '#F4B93B', 2.0,
+    [[-4.2, 3.50, 13.1], [4.2, 3.50, 13.1], [4.2, 2.10, 13.1], [-4.2, 2.10, 13.1]],
+    '#14532D', '#F4B93B', 2.6,
     function(cx, cy, bw, bh, safeW) {
-      ctx.fillStyle = '#FFF5D6';
-      ctx.fillRect(cx - bw * 0.46, cy - bh * 0.42, bw * 0.92, bh * 0.72);
-      // 2 Hàng Nón Lá & Túi Cói Thêu Hoa Sen
-      for (var ni = -1; ni <= 1; ni++) {
-        drawPixelNonLaIcon(ctx, cx + ni * bw * 0.27, cy - bh * 0.20, bw * 0.22, bh * 0.20, '#DC2626');
-        drawPixelNonLaIcon(ctx, cx + ni * bw * 0.27, cy + bh * 0.08, bw * 0.22, bh * 0.20, '#16A34A');
-      }
-      var tPx = Math.max(4, Math.min(10, Math.round(bh * 0.10)));
-      ctx.font = 'bold ' + tPx + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('NÓN LÁ BÀI THƠ · TÚI CÓI THÊU · QUẠT LỤA', cx, cy + bh * 0.38, safeW);
-    }
-  );
-
-  // Vòm thông sang KHU ẨM THỰC SẠP 1044 (X = +5.93, Z = 8.6..11.4)
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[5.93, 2.68, 11.3], [5.93, 2.68, 8.7], [5.93, 0.02, 8.7], [5.93, 0.02, 11.3]],
-    '#7F1D1D', '#F4B93B', 2.6,
-    function(cx, cy, bw, bh) {
-      ctx.fillStyle = '#FED7AA';
-      ctx.fillRect(cx - bw * 0.38, cy - bh * 0.44, bw * 0.76, bh * 0.88);
-    }
-  );
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[5.93, 3.40, 11.4], [5.93, 3.40, 8.6], [5.93, 2.76, 8.6], [5.93, 2.76, 11.4]],
-    '#7F1D1D', '#F4B93B', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(11, Math.round(bh * 0.36)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🥞 KHU ẨM THỰC 1044 →', cx, cy, safeW);
-    }
-  );
-
-  // ---- TƯỜNG CUỐI (Z = 14.72): VÒM CỬA BẮC · TRÁI CÂY NHIỆT ĐỚI 1029 NGỌC HẢO ----
-  drawMarketClippedQuad(
-    ctx, cam,
-    [[-4.4, 3.50, 14.72], [4.4, 3.50, 14.72], [4.4, 2.00, 14.72], [-4.4, 2.00, 14.72]],
-    '#14532D', '#F4B93B', 2.8,
-    function(cx, cy, bw, bh, safeW) {
-      var p1 = Math.max(6, Math.min(14, Math.round(bh * 0.28)));
-      var p2 = Math.max(5, Math.min(11, Math.round(bh * 0.18)));
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.fillText('CỬA BẮC · TRÁI CÂY 1029 NGỌC HẢO', cx, cy - bh * 0.16, safeW);
-      ctx.font = 'bold ' + p2 + 'px monospace';
-      ctx.fillStyle = '#FFFBF1';
-      ctx.fillText('XOÀI CÁT HÒA LỘC · BƯỞI DA XANH · THANH LONG · SẦU RIÊNG', cx, cy + bh * 0.20, safeW);
+      ctx.font = 'bold ' + Math.max(6, Math.min(14, Math.round(bh * 0.28))) + 'px monospace';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('CỬA BẮC · TRÁI CÂY 1029 NGỌC HẢO', cx, cy, safeW);
     }
   );
 }
 
-/* ==================== 5. HÀM ĐIỀU PHỐI MỸ THUẬT TƯỜNG 3 PHÒNG CHỢ BẾN THÀNH ==================== */
-function drawMarketRoomWalls3D(ctx, cam, room, pig, t) {
-  if (room === 'food_court') {
-    drawMarketFoodCourtWalls3D(ctx, cam, pig, t);
-  } else if (room === 'fruit_craft') {
-    drawMarketFruitCraftWalls3D(ctx, cam);
-  } else {
-    drawMarketSouthHallWalls3D(ctx, cam);
-  }
+function drawMarketRoomWalls3D(ctx, cam, room) {
+  if (room === 'food_court') drawMarketFoodCourtWalls3D(ctx, cam);
+  else if (room === 'fruit_craft') drawMarketFruitCraftWalls3D(ctx, cam);
+  else drawMarketSouthHallWalls3D(ctx, cam);
 }
 `;
 }

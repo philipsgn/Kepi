@@ -1,177 +1,476 @@
 /**
- * Ngôi Chùa Cổ Kính & Vườn Chùa 3 Phòng TPS 3D Độc Bản (Quyết định 245)
- * 3 Phòng tách biệt hoàn toàn (1 Phòng = 1 Cảnh, chuyển phòng mượt 200ms fade, ZERO merging):
- * - 'garden' (Vườn Chùa Thanh Tịnh): Sân gạch tàu đỏ ấm, tường vàng đất mái ngói đỏ cong, bầu trời nắng vàng thanh tịnh,
- *   Hồ Sen & Chùa Một Cột giữa hồ bên trái, Cây Đa Cổ Thụ bên phải, Cổng Tam Quan (Z = 0), bậc tam cấp vào Chánh Điện
- *   & cổng vòm tre trúc sang Tháp Chuông - Thiền Trà.
- * - 'main_hall' (Chánh Điện Trang Nghiêm): Không gian gỗ gụ thếp vàng, 6 cột son đỏ, trần ô hoa sen vàng,
- *   Tượng Phật Vàng trên tòa sen hồng-vàng tỏa hào quang, Lư Hương Đồng nghi ngút khói trầm, đèn lồng lụa đỏ,
- *   chiếu lạy & sư thầy/Phật tử, tương tác "🙏 Dâng hương cầu bình an".
- * - 'bell_tea' (Tháp Chuông & Góc Thiền Trà): Nhà gỗ thanh tịnh có cửa sổ trúc xanh, Đại Hồng Chung đồng cổ treo trên
- *   giá gỗ son cùng chày gỗ (tương tác "🔔 Thỉnh Đại Hồng Chung" ngân vang & đung đưa), bàn trà gỗ thấp với bộ ấm trà
- *   Bát Tràng (drawBatTrangTeapotSprite3D) & bức thư pháp "TÂM AN".
+ * Ngôi Chùa Cổ Kính & Vườn Chùa WebGL 3D Hợp Nhất Không Cắt Cảnh (Quyết định 250)
+ * - Hợp nhất 4 khu vực chữ L liên hoàn trên 1 hệ tọa độ thế giới 3D duy nhất:
+ *   1. 'garden' (Vườn Chùa Tiền Đường — Chế độ B: tường bao + Cổng Tam Quan + Sky Dome): X ∈ [-6.2, 6.2], Z ∈ [0, 14.8], Y = 0
+ *   2. 'main_hall' (Chánh Điện phía Bắc — Chế độ A kín): X ∈ [-5.8, 5.8], Z ∈ [14.8, 27.6], Y = 0.48
+ *      nối thẳng từ 'garden' qua 3 Bậc Đá Tam Cấp & cửa đồng trục X ∈ [-2.0, 2.0], Z ∈ [14.0, 15.4] (Y: 0 -> 0.48, 18.9°)
+ *   3. 'bell_tea' (Nhà Chuông & Thiền Trà Cánh Đông — Chế độ A kín): X ∈ [6.2, 16.8], Z ∈ [5.6, 14.8], Y = 0.36
+ *      nối từ 'garden' qua Cổng Vòm Tre + 2 Bậc Đá X ∈ [5.6, 7.0], Z ∈ [10.4, 13.0] (Y: 0 -> 0.36, 14.4°)
+ *   4. 'east_corridor' (Hành Lang Mái Che nối thẳng main_hall <-> bell_tea — Chế độ A kín): X ∈ [5.8, 8.6], Z ∈ [14.8, 17.6]
+ *      nối cửa Đông Chánh Điện (X = 5.8, Z ∈ [15.2, 17.2], Y = 0.48) <-> 1 bậc đá (X ∈ [6.2, 8.4], Z ∈ [14.6, 15.2], Y: 0.48 -> 0.36, 11.3°) <-> cửa Bắc Nhà Chuông (Z = 14.8, X ∈ [6.4, 8.4], Y = 0.36)
+ * - Đi bộ liên hoàn 100% không cắt cảnh giữa 4 khu vực; bật Seated Auto-Stand tại chiếu trà TÂM AN.
+ * - Bảo toàn Canvas2D fallback (renderPagodaTpsScene > 80 primitives, 0 NaN) cho Headless Smoke Test 182.
  */
 export function buildPagodaTps3dSceneScript(): string {
   return String.raw`
-function createPagodaTpsState() {
-  var gardenMonk = {
-    x: 1.65, z: 4.8, yaw: 0, role: 'monk', shirt: '#D97706', hair: '#C29B70',
-    seated: false, moving: true, phase: 0.4, patrolDir: 1
-  };
-  var hallWorshippers = [
-    { x: -2.25, z: 7.2, yaw: 0, role: 'monk', shirt: '#D97706', hair: '#C29B70', seated: true, moving: false, phase: 0.2 },
-    { x:  2.25, z: 7.2, yaw: 0, role: 'worshipper', shirt: '#78350F', hair: '#1C1917', seated: true, moving: false, phase: 1.4 }
+/* ==================== 1. ĐỒ THỊ KHÔNG GIAN LIÊN HOÀN PAGODA_NAV_GRAPH (QĐ 250) ==================== */
+var PAGODA_NAV_GRAPH = {
+  zones: [
+    { id: 'garden',        minX: -6.2, maxX:  6.2, minZ:  0.0, maxZ: 14.8, floorY: 0.00 },
+    { id: 'main_hall',     minX: -5.8, maxX:  5.8, minZ: 14.8, maxZ: 27.6, floorY: 0.48 },
+    { id: 'east_corridor', minX:  5.8, maxX:  8.6, minZ: 14.8, maxZ: 17.6, floorY: 0.48 },
+    { id: 'bell_tea',      minX:  6.2, maxX: 16.8, minZ:  5.6, maxZ: 14.8, floorY: 0.36 }
+  ],
+  ramps: [
+    { id: 'tam_cap',       axis: 'z', minX: -2.0, maxX: 2.0, minZ: 14.0, maxZ: 15.4, zStart: 14.0, zEnd: 15.4, yStart: 0.00, yEnd: 0.48 },
+    { id: 'bamboo_steps',  axis: 'x', minX:  5.6, maxX: 7.0, minZ: 10.4, maxZ: 13.0, xStart:  5.6, xEnd:  7.0, yStart: 0.00, yEnd: 0.36 },
+    { id: 'corridor_step', axis: 'z', minX:  6.2, maxX: 8.4, minZ: 14.6, maxZ: 15.2, zStart: 14.6, zEnd: 15.2, yStart: 0.36, yEnd: 0.48 }
+  ],
+  edges: [
+    {
+      from: 'garden', to: 'main_hall',
+      waypointsForward:  [{ x: 0.0, y: 0.00, z: 13.5 }, { x: 0.0, y: 0.48, z: 15.8 }],
+      waypointsBackward: [{ x: 0.0, y: 0.48, z: 15.8 }, { x: 0.0, y: 0.00, z: 13.5 }]
+    },
+    {
+      from: 'garden', to: 'bell_tea',
+      waypointsForward:  [{ x: 5.2, y: 0.00, z: 11.7 }, { x: 7.4, y: 0.36, z: 11.7 }],
+      waypointsBackward: [{ x: 7.4, y: 0.36, z: 11.7 }, { x: 5.2, y: 0.00, z: 11.7 }]
+    },
+    {
+      from: 'main_hall', to: 'east_corridor',
+      waypointsForward:  [{ x: 5.1, y: 0.48, z: 16.2 }, { x: 7.3, y: 0.48, z: 16.2 }],
+      waypointsBackward: [{ x: 7.3, y: 0.48, z: 16.2 }, { x: 5.1, y: 0.48, z: 16.2 }]
+    },
+    {
+      from: 'east_corridor', to: 'bell_tea',
+      waypointsForward:  [{ x: 7.4, y: 0.48, z: 15.7 }, { x: 7.4, y: 0.36, z: 14.0 }],
+      waypointsBackward: [{ x: 7.4, y: 0.36, z: 14.0 }, { x: 7.4, y: 0.48, z: 15.7 }]
+    }
+  ]
+};
+
+var PAGODA_NAV_CONFIG = {
+  wallMargin: 0.38,
+  outerBounds: { minX: -6.2, maxX: 16.8, minZ: -1.8, maxZ: 27.6, minY: 0.45, maxY: 6.2 },
+  zones: PAGODA_NAV_GRAPH.zones,
+  dividerWalls: [
+    // Tường ngăn Garden <-> Main Hall (cửa Chánh Điện X ∈ [-2.0, 2.0])
+    { axis: 'z', pos: 14.8, minSpan: -6.2, maxSpan: 6.2, minY: 0, maxY: 4.6, openings: [{ a1: -2.0, a2: 2.0, y1: 0, y2: 3.05 }] },
+    // Tường ngăn Garden <-> Bell & Tea (Cổng Vòm Tre Z ∈ [10.4, 13.0])
+    { axis: 'x', pos: 6.2, minSpan: 0.0, maxSpan: 14.8, minY: 0, maxY: 4.3, openings: [{ a1: 10.4, a2: 13.0, y1: 0, y2: 2.55 }] },
+    // Tường ngăn Main Hall <-> East Corridor (cửa Đông Z ∈ [15.2, 17.2])
+    { axis: 'x', pos: 5.8, minSpan: 14.8, maxSpan: 27.6, minY: 0.48, maxY: 4.6, openings: [{ a1: 15.2, a2: 17.2, y1: 0.48, y2: 2.95 }] },
+    // Tường ngăn Bell & Tea <-> East Corridor (cửa Bắc Nhà Chuông X ∈ [6.4, 8.4])
+    { axis: 'z', pos: 14.8, minSpan: 6.2, maxSpan: 16.8, minY: 0.36, maxY: 4.3, openings: [{ a1: 6.4, a2: 8.4, y1: 0.36, y2: 2.75 }] },
+    // Các tường bao chữ L bên ngoài chống camera lọt ra khoảng không
+    { axis: 'z', pos: 0.0,  minSpan: -6.2, maxSpan: 6.2,  minY: 0, maxY: 3.6, openings: [{ a1: -1.75, a2: 1.75, y1: 0, y2: 2.9 }] },
+    { axis: 'z', pos: 5.6,  minSpan: 6.2,  maxSpan: 16.8, minY: 0, maxY: 4.3, openings: [] },
+    { axis: 'x', pos: 8.6,  minSpan: 14.8, maxSpan: 17.6, minY: 0, maxY: 4.0, openings: [] },
+    { axis: 'z', pos: 17.6, minSpan: 5.8,  maxSpan: 8.6,  minY: 0, maxY: 4.0, openings: [] },
+    { axis: 'x', pos: -5.8, minSpan: 14.8, maxSpan: 27.6, minY: 0, maxY: 4.6, openings: [] },
+    { axis: 'x', pos: 16.8, minSpan: 5.6,  maxSpan: 14.8, minY: 0, maxY: 4.3, openings: [] },
+    { axis: 'z', pos: 27.6, minSpan: -5.8, maxSpan: 5.8,  minY: 0, maxY: 4.6, openings: [] }
+  ]
+};
+
+var PAGODA_ATMOSPHERE = {
+  clearColor: [0.96, 0.87, 0.66, 1.0],
+  hemiLow:    [0.32, 0.24, 0.16],
+  hemiHigh:   [0.78, 0.68, 0.50],
+  sunDir:     [0.34, 0.78, -0.52],
+  sunCol:     [1.06, 0.90, 0.64],
+  wrapBias:   0.48,
+  lights: [
+    { pos: [0.0,  3.2, 25.8], col: [1.28, 0.94, 0.38] }, // Hào quang Phật Đài Chánh Điện
+    { pos: [0.0,  3.0, 19.6], col: [0.96, 0.62, 0.28] }, // Đèn lồng Chánh Điện & Hành lang
+    { pos: [11.8, 3.1, 10.6], col: [1.05, 0.78, 0.42] }, // Đèn giấy Thiền Trà & Đại Hồng Chung
+    { pos: [0.0,  3.6,  6.8], col: [0.68, 0.58, 0.42] }  // Ánh nắng Vườn Chùa
+  ],
+  outdoorRect: [1.0, 14.8, 0.0, 1.0],
+  fogCol:     [0.88, 0.78, 0.58],
+  fogParams:  [19.0, 36.0, 0.35]
+};
+
+var PAGODA_OBSTACLES = [
+  // Garden
+  { x1: -5.25, z1:  3.55, x2: -1.05, z2:  9.75 }, // Hồ Sen & Chùa Một Cột
+  { x1:  3.25, z1:  5.75, x2:  5.05, z2:  7.95 }, // Cây Đa Cổ Thụ
+  // Main Hall (6 cột + Lư hương + Phật Đài)
+  { x1: -4.48, z1: 17.52, x2: -3.92, z2: 18.08 },
+  { x1:  3.92, z1: 17.52, x2:  4.48, z2: 18.08 },
+  { x1: -4.48, z1: 21.32, x2: -3.92, z2: 21.88 },
+  { x1:  3.92, z1: 21.32, x2:  4.48, z2: 21.88 },
+  { x1: -4.48, z1: 25.12, x2: -3.92, z2: 25.68 },
+  { x1:  3.92, z1: 25.12, x2:  4.48, z2: 25.68 },
+  { x1: -0.85, z1: 23.20, x2:  0.85, z2: 24.50 }, // Lư hương
+  { x1: -3.20, z1: 25.40, x2:  3.20, z2: 27.30 }, // Phật Đài
+  // Bell & Tea Hall
+  { x1:  7.95, z1: 10.25, x2: 10.45, z2: 12.55 }, // Đại Hồng Chung
+  { x1: 13.05, z1:  8.75, x2: 14.55, z2: 10.45 }  // Bàn trà TÂM AN
+];
+
+function getPagodaSurfaceY(x, z, curY) {
+  // 1. 3 Bậc Đá Tam Cấp (garden <-> main_hall)
+  if (x >= -2.0 && x <= 2.0 && z >= 14.0 && z <= 15.4) {
+    return Math.max(0, Math.min(0.48, ((z - 14.0) / 1.4) * 0.48));
+  }
+  // 2. 2 Bậc Đá Cổng Vòm Tre (garden <-> bell_tea)
+  if (x >= 5.6 && x <= 7.0 && z >= 10.4 && z <= 13.0) {
+    return Math.max(0, Math.min(0.36, ((x - 5.6) / 1.4) * 0.36));
+  }
+  // 3. 1 Bậc Đá Hành Lang Đông (bell_tea <-> east_corridor)
+  if (x >= 6.2 && x <= 8.4 && z >= 14.6 && z <= 15.2) {
+    return 0.36 + Math.max(0, Math.min(1, (z - 14.6) / 0.6)) * 0.12;
+  }
+  if (x >= 6.2 && z <= 14.8) return 0.36;
+  if (z >= 14.8) return 0.48;
+  return 0.0;
+}
+
+function getPagodaZoneAt(x, z) {
+  if (x >= 6.2 && z <= 14.8) return 'bell_tea';
+  if (z >= 14.8 && x >= 5.8) return 'east_corridor';
+  if (z >= 14.8) return 'main_hall';
+  return 'garden';
+}
+
+function createPagodaNpcs() {
+  return [
+    {
+      id: 'garden_monk', role: 'monk', shirt: '#D97706', hair: '#C29B70',
+      x: 1.75, y: 0.0, z: 4.8, yaw: 0, state: 'WALK', timer: 0, stepIdx: 0, phase: 0.4,
+      pts: [
+        { x: 1.75, y: 0.0, z: 3.4 },
+        { x: 1.75, y: 0.0, z: 11.4 },
+        { x: 1.75, y: 0.0, z: 11.4, wait: 2.2, yaw: -Math.PI * 0.5 },
+        { x: 1.75, y: 0.0, z: 3.4 }
+      ]
+    },
+    {
+      id: 'corridor_monk', role: 'monk', shirt: '#B45309', hair: '#C29B70',
+      x: 7.4, y: 0.48, z: 16.2, yaw: -Math.PI * 0.5, state: 'WALK', timer: 0, stepIdx: 1, phase: 1.2,
+      pts: [
+        { x: 3.4, y: 0.48, z: 16.2 },
+        { x: 7.4, y: 0.48, z: 16.2 },
+        { x: 7.4, y: 0.36, z: 12.2 },
+        { x: 9.2, y: 0.36, z: 9.4, wait: 3.0, yaw: 0 },
+        { x: 7.4, y: 0.36, z: 12.2 },
+        { x: 7.4, y: 0.48, z: 16.2 }
+      ]
+    },
+    {
+      id: 'hall_monk', role: 'monk', shirt: '#D97706', hair: '#C29B70',
+      x: -2.0, y: 0.48, z: 21.8, yaw: 0, state: 'SIT', seated: true, moving: false, timer: 99, stepIdx: 0, phase: 0.2, pts: null
+    },
+    {
+      id: 'hall_worshipper', role: 'worshipper', shirt: '#64748B', hair: '#1C1917',
+      x: 2.0, y: 0.48, z: 21.8, yaw: 0, state: 'SIT', seated: true, moving: false, timer: 99, stepIdx: 0, phase: 1.5, pts: null
+    },
+    {
+      id: 'garden_worshipper', role: 'worshipper', shirt: '#475569', hair: '#2B2118',
+      x: -0.9, y: 0.0, z: 10.6, yaw: 0, state: 'WALK', timer: 0, stepIdx: 0, phase: 2.1,
+      pts: [
+        { x: -0.8, y: 0.0, z: 8.6 },
+        { x:  0.0, y: 0.0, z: 13.5 },
+        { x:  0.0, y: 0.48, z: 16.2 },
+        { x:  0.0, y: 0.48, z: 21.8, wait: 3.8, yaw: 0 },
+        { x:  0.0, y: 0.48, z: 16.2 },
+        { x:  0.0, y: 0.0, z: 13.5 }
+      ]
+    },
+    {
+      id: 'tea_master', role: 'monk', shirt: '#B45309', hair: '#C29B70',
+      x: 15.05, y: 0.36, z: 9.6, yaw: -Math.PI * 0.5, state: 'SIT', seated: true, moving: false, timer: 99, stepIdx: 0, phase: 0.8, pts: null
+    }
   ];
-  var teaMaster = {
-    x: 3.55, z: 8.4, yaw: -Math.PI / 2, role: 'monk', shirt: '#B45309', hair: '#C29B70',
-    seated: true, moving: false, phase: 0.8
-  };
+}
+
+function createPagodaTpsState() {
+  var npcs = createPagodaNpcs();
+  var smokeParticles = [];
+  for (var i = 0; i < 12; i++) {
+    smokeParticles.push({
+      x: ((i % 3) - 1) * 0.12,
+      y: 1.48 + (i / 12) * 1.4,
+      z: 23.85 + ((i % 2) - 0.5) * 0.08,
+      phase: i * 0.55
+    });
+  }
 
   return {
-    room: 'garden',
-    pendingRoom: '',
-    roomFade: 0,
+    zone: 'garden',
     pig: {
-      x: 0, z: 1.35, yaw: 0, targetX: 0, targetZ: 2.3,
-      walking: true, seated: false, eating: false
+      x: 0.25, y: 0.0, z: 4.5, yaw: 0.0,
+      targetX: 0.25, targetZ: 4.5,
+      waypoints: [],
+      walking: false,
+      seated: false,
+      seatChairId: -1,
+      pendingSeatId: -1,
+      pendingAction: null,
+      eating: false
     },
-    gardenMonk: gardenMonk,
-    hallWorshippers: hallWorshippers,
-    teaMaster: teaMaster,
+    npcs: npcs,
+    smokeParticles: smokeParticles,
     incenseGlow: 0,
     bellRingTimer: 0,
     bellSwingPhase: 0,
     exitFade: 0,
     exiting: false,
     ripples: [],
-    toast: 'Vườn Chùa Thanh Tịnh · Ngắm Chùa Một Cột, vào Chánh Điện hay sang Thiền Trà 🪷',
-    toastUntil: 5.2,
     t: 0
   };
 }
 
-function clampPagodaWalkPos(st, x, z) {
-  var nx = Math.max(-5.15, Math.min(5.15, x));
-  var nz = Math.max(0.75, Math.min(13.6, z));
-  var boxes = [];
-  if (st.room === 'garden') {
-    boxes = [
-      { x1: -5.25, z1: 3.55, x2: -1.05, z2: 9.75 }, // Hồ Sen & Chùa Một Cột
-      { x1: 3.25, z1: 5.75, x2: 5.05, z2: 7.95 }    // Gốc Cây Đa Cổ Thụ
-    ];
-  } else if (st.room === 'main_hall') {
-    boxes = [
-      { x1: -3.25, z1: 11.2, x2: 3.25, z2: 14.5 },  // Bàn thờ & Tượng Phật Vàng
-      { x1: -0.95, z1: 8.85, x2: 0.95, z2: 10.15 }, // Lư Hương Đồng
-      { x1: -4.65, z1: 3.05, x2: -3.75, z2: 3.85 }, // Cột son trái 1
-      { x1:  3.75, z1: 3.05, x2:  4.65, z2: 3.85 }, // Cột son phải 1
-      { x1: -4.65, z1: 7.25, x2: -3.75, z2: 8.05 }, // Cột son trái 2
-      { x1:  3.75, z1: 7.25, x2:  4.65, z2: 8.05 }  // Cột son phải 2
-    ];
-  } else if (st.room === 'bell_tea') {
-    boxes = [
-      { x1: -4.15, z1: 9.25, x2: -1.05, z2: 11.85 }, // Giá gỗ Đại Hồng Chung
-      { x1: 1.65, z1: 7.55, x2: 3.15, z2: 9.25 }     // Bàn gỗ Thiền Trà
-    ];
+function clampPagodaWalkPos(st, x, z, curY) {
+  var nx = x, nz = z;
+  var pad = 0.34;
+  var curZone = getPagodaZoneAt(st.pig ? st.pig.x : x, st.pig ? st.pig.z : z);
+
+  // Giữ trong biên tường khu chữ L, chỉ thông qua đúng các cửa & bậc đá
+  if (nx < -6.2 + pad) nx = -6.2 + pad;
+  if (nz < 0.65) nz = 0.65;
+  if (nz > 27.6 - pad) nz = 27.6 - pad;
+  if (nx > 16.8 - pad) nx = 16.8 - pad;
+
+  if (nz < 5.6 + pad && nx > 6.2 - pad) {
+    if (curZone === 'bell_tea') nz = 5.6 + pad;
+    else nx = 6.2 - pad;
   }
-  for (var i = 0; i < boxes.length; i++) {
-    var b = boxes[i];
-    if (nx > b.x1 - 0.34 && nx < b.x2 + 0.34 && nz > b.z1 - 0.34 && nz < b.z2 + 0.34) {
-      var dl = Math.abs(nx - (b.x1 - 0.34)), dr = Math.abs(nx - (b.x2 + 0.34));
-      var dt = Math.abs(nz - (b.z1 - 0.34)), db = Math.abs(nz - (b.z2 + 0.34));
+  if (nz > 14.8 - pad && nx > 8.6 - pad) {
+    if (curZone === 'bell_tea') nz = 14.8 - pad;
+    else nx = 8.6 - pad;
+  }
+  if (nz > 17.6 - pad && nx > 5.8 - pad) {
+    if (curZone === 'east_corridor') nz = 17.6 - pad;
+    else nx = 5.8 - pad;
+  }
+
+  // Tường ngăn Garden <-> Main Hall (Z = 14.8), chỉ mở tại Cửa Chánh Điện X ∈ [-2.0, 2.0]
+  if (nx < 5.8 && Math.abs(nz - 14.8) < pad && Math.abs(nx) > 2.0 - pad) {
+    nz = (st.pig && st.pig.z >= 14.8) ? (14.8 + pad) : (14.8 - pad);
+  }
+  // Tường ngăn Garden <-> Bell & Tea (X = 6.2), chỉ mở tại Cổng Vòm Tre Z ∈ [10.4, 13.0]
+  if (nz < 14.8 && Math.abs(nx - 6.2) < pad && (nz < 10.4 + pad || nz > 13.0 - pad)) {
+    nx = (st.pig && st.pig.x >= 6.2) ? (6.2 + pad) : (6.2 - pad);
+  }
+  // Tường ngăn Main Hall <-> East Corridor (X = 5.8), chỉ mở tại Z ∈ [15.2, 17.2]
+  if (nz >= 14.8 && Math.abs(nx - 5.8) < pad && (nz < 15.2 + pad || nz > 17.2 - pad)) {
+    nx = (st.pig && st.pig.x >= 5.8) ? (5.8 + pad) : (5.8 - pad);
+  }
+  // Tường ngăn Bell & Tea <-> East Corridor (Z = 14.8), chỉ mở tại X ∈ [6.4, 8.4]
+  if (nx >= 6.2 && Math.abs(nz - 14.8) < pad && (nx < 6.4 + pad || nx > 8.4 - pad)) {
+    nz = (st.pig && st.pig.z >= 14.8) ? (14.8 + pad) : (14.8 - pad);
+  }
+
+  // Chặn va chạm AABB vật thể trong chùa
+  for (var i = 0; i < PAGODA_OBSTACLES.length; i++) {
+    var b = PAGODA_OBSTACLES[i];
+    if (nx > b.x1 - pad && nx < b.x2 + pad && nz > b.z1 - pad && nz < b.z2 + pad) {
+      var dl = Math.abs(nx - (b.x1 - pad)), dr = Math.abs(nx - (b.x2 + pad));
+      var dt = Math.abs(nz - (b.z1 - pad)), db = Math.abs(nz - (b.z2 + pad));
       var m = Math.min(dl, dr, dt, db);
-      if (m === dl) nx = b.x1 - 0.34;
-      else if (m === dr) nx = b.x2 + 0.34;
-      else if (m === dt) nz = b.z1 - 0.34;
-      else nz = b.z2 + 0.34;
+      if (m === dl) nx = b.x1 - pad;
+      else if (m === dr) nx = b.x2 + pad;
+      else if (m === dt) nz = b.z1 - pad;
+      else nz = b.z2 + pad;
     }
   }
   return { x: nx, z: nz };
 }
 
-function triggerPagodaRoom(st, roomId) {
-  if (!roomId || st.pendingRoom || st.room === roomId) return;
-  st.pendingRoom = roomId;
-  st.pig.seated = false;
-  st.pig.walking = false;
-  st.pig.eating = false;
+function segHitsPagodaBox(ax, az, bx, bz, b, pad) {
+  var x1 = b.x1 - pad, x2 = b.x2 + pad, z1 = b.z1 - pad, z2 = b.z2 + pad;
+  var t0 = 0, t1 = 1, dx = bx - ax, dz = bz - az;
+  var p = [-dx, dx, -dz, dz];
+  var q = [ax - x1, x2 - ax, az - z1, z2 - az];
+  for (var i = 0; i < 4; i++) {
+    if (Math.abs(p[i]) < 1e-6) {
+      if (q[i] < 0) return false;
+    } else {
+      var r = q[i] / p[i];
+      if (p[i] < 0) { if (r > t1) return false; if (r > t0) t0 = r; }
+      else { if (r < t0) return false; if (r < t1) t1 = r; }
+    }
+  }
+  return t0 <= t1;
+}
+
+function insertPagodaObstacleDetours(startX, startZ, wps) {
+  var out = [];
+  var cx = startX, cz = startZ;
+  var margin = 0.56;
+  for (var wi = 0; wi < wps.length; wi++) {
+    var wp = wps[wi];
+    var hitBox = null;
+    for (var bi = 0; bi < PAGODA_OBSTACLES.length; bi++) {
+      if (segHitsPagodaBox(cx, cz, wp.x, wp.z, PAGODA_OBSTACLES[bi], 0.34)) {
+        hitBox = PAGODA_OBSTACLES[bi];
+        break;
+      }
+    }
+    if (hitBox) {
+      var corners = [
+        { x: hitBox.x1 - margin, z: hitBox.z1 - margin },
+        { x: hitBox.x2 + margin, z: hitBox.z1 - margin },
+        { x: hitBox.x1 - margin, z: hitBox.z2 + margin },
+        { x: hitBox.x2 + margin, z: hitBox.z2 + margin }
+      ];
+      var bestC = null, bestLen = 99999;
+      for (var ci = 0; ci < corners.length; ci++) {
+        var c = corners[ci];
+        if (Math.abs(c.x - 6.2) < 0.3 && c.z < 14.8 && (c.z < 10.4 || c.z > 13.0)) continue;
+        if (c.x < -5.85 || c.x > 16.45 || c.z < 0.7 || c.z > 27.2) continue;
+        var len = Math.hypot(c.x - cx, c.z - cz) + Math.hypot(wp.x - c.x, wp.z - c.z);
+        if (len < bestLen) { bestLen = len; bestC = c; }
+      }
+      if (bestC) {
+        out.push({ x: bestC.x, y: getPagodaSurfaceY(bestC.x, bestC.z, wp.y || 0), z: bestC.z });
+      }
+    }
+    out.push(wp);
+    cx = wp.x; cz = wp.z;
+  }
+  return out;
+}
+
+function planPagodaRealtimePath(st, tx, targetFloorY, tz, pendingAction) {
+  var p = st.pig;
+  // Seated Auto-Stand (QĐ 250): chạm sàn/vật thể khi đang ngồi lập tức đứng dậy!
+  p.seated = false;
+  p.eating = false;
+
+  if (typeof planNavGraphRealtimePath === 'function') {
+    planNavGraphRealtimePath(PAGODA_NAV_GRAPH, st, tx, targetFloorY, tz, {
+      seatChairId: -1,
+      pendingAction: pendingAction || null
+    });
+    p.waypoints = insertPagodaObstacleDetours(p.x, p.z, p.waypoints || []);
+    if (p.waypoints.length > 0) {
+      p.targetX = p.waypoints[0].x;
+      p.targetZ = p.waypoints[0].z;
+    }
+    return;
+  }
+  // Fallback cho Canvas2D / Test 182
+  p.pendingAction = pendingAction || null;
+  p.waypoints = insertPagodaObstacleDetours(p.x, p.z, [{ x: tx, y: targetFloorY || 0, z: tz }]);
+  p.targetX = p.waypoints[0].x;
+  p.targetZ = p.waypoints[0].z;
+  p.walking = true;
+}
+
+function runPagodaContextAction(st, actionId) {
+  if (!st || !actionId) return;
+  var p = st.pig;
+  if (actionId === 'offer_incense') {
+    st.incenseGlow = 4.5;
+    p.yaw = 0;
+    p.walking = false;
+  } else if (actionId === 'ring_bell') {
+    st.bellRingTimer = 3.4;
+    st.bellSwingPhase = 0;
+    p.yaw = Math.atan2(9.2 - p.x, 11.4 - p.z);
+    p.walking = false;
+  } else if (actionId === 'sit_tea') {
+    p.x = 12.55; p.y = 0.36; p.z = 9.6;
+    p.yaw = Math.PI * 0.5;
+    p.seated = true; p.walking = false; p.eating = false;
+  } else if (actionId === 'sip_tea') {
+    p.eating = true;
+  } else if (actionId === 'exit_pagoda') {
+    st.exiting = true;
+  }
+}
+
+function stepPagodaNpcs(st, dt) {
+  if (!st.npcs) return;
+  for (var i = 0; i < st.npcs.length; i++) {
+    var n = st.npcs[i];
+    if (!n.pts || n.state === 'SIT') {
+      n.moving = false;
+      continue;
+    }
+    if (n.timer > 0) {
+      n.timer -= dt;
+      n.moving = false;
+      continue;
+    }
+    n.moving = true;
+    var tgt = n.pts[(n.stepIdx + 1) % n.pts.length];
+    var dx = tgt.x - n.x, dz = tgt.z - n.z;
+    var d = Math.hypot(dx, dz);
+    if (d < 0.10) {
+      n.x = tgt.x; n.z = tgt.z;
+      n.y = typeof tgt.y === 'number' ? tgt.y : getPagodaSurfaceY(n.x, n.z, n.y);
+      n.stepIdx = (n.stepIdx + 1) % n.pts.length;
+      if (tgt.wait) {
+        n.timer = tgt.wait;
+        n.yaw = typeof tgt.yaw === 'number' ? tgt.yaw : n.yaw;
+        n.moving = false;
+      }
+    } else {
+      var spd = Math.min(d, 1.15 * dt);
+      n.x += (dx / d) * spd;
+      n.z += (dz / d) * spd;
+      n.y = getPagodaSurfaceY(n.x, n.z, n.y);
+      n.yaw = Math.atan2(dx, dz);
+    }
+  }
 }
 
 function stepPagodaTps(st, dt) {
   st.t += dt;
   var p = st.pig;
 
-  // 1. Chuyển phòng mượt 200ms fade (ZERO merging giữa 3 phòng)
-  if (st.pendingRoom) {
-    st.roomFade = Math.min(1, st.roomFade + dt * 5.2);
-    if (st.roomFade >= 0.99) {
-      var prevRoom = st.room;
-      st.room = st.pendingRoom;
-      st.pendingRoom = '';
-      p.seated = false;
-      p.eating = false;
-      if (st.room === 'garden') {
-        if (prevRoom === 'main_hall') {
-          p.x = 0; p.z = 11.8; p.yaw = Math.PI;
-          p.targetX = 0; p.targetZ = 10.5; p.walking = true;
-        } else if (prevRoom === 'bell_tea') {
-          p.x = 3.8; p.z = 12.1; p.yaw = Math.PI;
-          p.targetX = 3.2; p.targetZ = 10.6; p.walking = true;
-        } else {
-          p.x = 0; p.z = 1.6; p.yaw = 0;
-          p.targetX = 0; p.targetZ = 2.6; p.walking = true;
-        }
-        st.toast = 'Vườn Chùa Thanh Tịnh · Hồ Sen, Chùa Một Cột & Cây Đa Cổ Thụ 🪷';
-      } else if (st.room === 'main_hall') {
-        p.x = 0; p.z = 1.6; p.yaw = 0;
-        p.targetX = 0; p.targetZ = 3.2; p.walking = true;
-        st.toast = 'Chánh Điện Trang Nghiêm · Tiến lại Lư Hương để dâng hương cầu bình an 🙏';
-      } else if (st.room === 'bell_tea') {
-        p.x = 0; p.z = 1.6; p.yaw = 0;
-        p.targetX = 0; p.targetZ = 3.2; p.walking = true;
-        st.toast = 'Tháp Chuông & Thiền Trà · Thỉnh Đại Hồng Chung hoặc thưởng trà Bát Tràng 🔔';
-      }
-      st.toastUntil = st.t + 4.8;
-    }
-  } else if (st.roomFade > 0) {
-    st.roomFade = Math.max(0, st.roomFade - dt * 5.0);
+  stepPagodaNpcs(st, dt);
+
+  for (var si = 0; si < st.smokeParticles.length; si++) {
+    var sp = st.smokeParticles[si];
+    sp.y += dt * 0.42;
+    if (sp.y > 2.95) sp.y = 1.46;
   }
 
-  // 2. Di chuyển chú Heo mượt tới điểm chạm sàn
-  if (!p.seated && p.walking && !st.pendingRoom) {
-    var dx = p.targetX - p.x, dz = p.targetZ - p.z;
+  if (!p.seated && p.walking) {
+    var curWp = (p.waypoints && p.waypoints.length > 0) ? p.waypoints[0] : { x: p.targetX, z: p.targetZ };
+    var dx = curWp.x - p.x, dz = curWp.z - p.z;
     var dist = Math.hypot(dx, dz);
-    if (dist < 0.08) {
-      p.walking = false;
+    if (dist < 0.10) {
+      p.x = curWp.x; p.z = curWp.z;
+      if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
+      if (p.waypoints && p.waypoints.length > 0) {
+        p.targetX = p.waypoints[0].x;
+        p.targetZ = p.waypoints[0].z;
+      } else {
+        p.walking = false;
+        if (p.pendingAction) {
+          runPagodaContextAction(st, p.pendingAction);
+          p.pendingAction = null;
+        }
+      }
     } else {
-      var spd = Math.min(dist, 2.85 * dt);
-      var next = clampPagodaWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd);
+      var onRamp = (p.y > 0.02 && p.y < 0.46);
+      var spd = Math.min(dist, (onRamp ? 2.15 : 2.95) * dt);
+      var next = clampPagodaWalkPos(st, p.x + (dx / dist) * spd, p.z + (dz / dist) * spd, p.y);
+      var moved = Math.hypot(next.x - p.x, next.z - p.z);
       p.x = next.x; p.z = next.z;
       p.yaw = Math.atan2(dx, dz);
+      if (moved < 0.002 && p.waypoints && p.waypoints.length <= 1) {
+        p.walking = false;
+      }
     }
   }
 
-  // 3. Sư thầy đi dạo thanh tịnh trong Vườn Chùa
-  if (st.room === 'garden') {
-    var gm = st.gardenMonk;
-    gm.z += gm.patrolDir * 0.62 * dt;
-    gm.yaw = gm.patrolDir > 0 ? 0 : Math.PI;
-    if (gm.z > 9.4) gm.patrolDir = -1;
-    if (gm.z < 3.4) gm.patrolDir = 1;
-  }
+  p.y = getPagodaSurfaceY(p.x, p.z, p.y);
+  st.zone = getPagodaZoneAt(p.x, p.z);
 
-  // 4. Hiệu ứng Dâng Hương & Thỉnh Đại Hồng Chung
-  if (st.incenseGlow > 0) {
-    st.incenseGlow = Math.max(0, st.incenseGlow - dt);
-  }
+  if (st.incenseGlow > 0) st.incenseGlow = Math.max(0, st.incenseGlow - dt);
   if (st.bellRingTimer > 0) {
     st.bellRingTimer = Math.max(0, st.bellRingTimer - dt);
     st.bellSwingPhase += dt * 7.5;
   }
-
-  if (st.exiting) {
-    st.exitFade = Math.min(1, st.exitFade + dt * 4.2);
-  }
+  if (st.exiting) st.exitFade = Math.min(1, st.exitFade + dt * 4.2);
 
   for (var ri = st.ripples.length - 1; ri >= 0; ri--) {
     st.ripples[ri].t += dt;
@@ -179,434 +478,492 @@ function stepPagodaTps(st, dt) {
   }
 }
 
-/* ==================== HELPER VẼ ĐẠO CỤ 3D NGÔI CHÙA ==================== */
-
-function drawOnePillarPagodaAndPond3D(ctx, cam, t) {
-  // 1. Thành đá Hồ Sen (X = -5.1..-1.1, Z = 3.6..9.6)
-  drawBox3D(ctx, cam, -3.1, 0, 3.65, 4.1, 0.24, 0.22, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
-  drawBox3D(ctx, cam, -3.1, 0, 9.55, 4.1, 0.24, 0.22, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
-  drawBox3D(ctx, cam, -5.05, 0, 6.6, 0.22, 0.24, 6.0, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
-  drawBox3D(ctx, cam, -1.15, 0, 6.6, 0.22, 0.24, 6.0, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
-
-  // Mặt nước Hồ Sen xanh ngọc êm ả
-  drawPoly3D(ctx, cam, [[-4.95, 0.08, 3.76], [-1.25, 0.08, 3.76], [-1.25, 0.08, 9.44], [-4.95, 0.08, 9.44]], '#0D9488', '#115E59', 1);
-  drawPoly3D(ctx, cam, [[-4.75, 0.09, 4.1], [-1.45, 0.09, 4.1], [-1.45, 0.09, 9.1], [-4.75, 0.09, 9.1]], '#14B8A6', null, 0);
-
-  // Lá sen xanh & bông sen hồng nổi trên mặt nước
-  var lotuses = [
-    [-4.35, 4.55], [-2.15, 4.75], [-4.45, 7.65], [-1.95, 8.25], [-3.85, 8.85], [-1.85, 6.20]
-  ];
-  for (var li = 0; li < lotuses.length; li++) {
-    var lx = lotuses[li][0], lz = lotuses[li][1];
-    var lp = projectPoint3D(cam, lx, 0.11, lz);
-    if (!lp || lp.cz > 22) continue;
-    var u = Math.max(0.45, Math.min(2.6, lp.scale / 40));
-    var bob = Math.sin(t * 2.2 + li * 1.3) * 0.8 * u;
-    ctx.save();
-    ctx.fillStyle = '#15803D';
-    ctx.beginPath(); ctx.ellipse(lp.sx, lp.sy + bob, 7.5 * u, 3.2 * u, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#22C55E';
-    ctx.beginPath(); ctx.ellipse(lp.sx - 1 * u, lp.sy - 0.5 * u + bob, 5.5 * u, 2.2 * u, 0, 0, Math.PI * 2); ctx.fill();
-    if (li % 2 === 0 || li === 3) {
-      // Hoa sen hồng phấn
-      ctx.fillStyle = '#F472B6';
-      ctx.beginPath(); ctx.arc(lp.sx, lp.sy - 2.6 * u + bob, 3.2 * u, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FBCFE8';
-      ctx.beginPath(); ctx.arc(lp.sx, lp.sy - 3.6 * u + bob, 2.0 * u, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FDE047';
-      ctx.beginPath(); ctx.arc(lp.sx, lp.sy - 3.0 * u + bob, 1.0 * u, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  // 2. CHÙA MỘT CỘT vươn lên duyên dáng giữa Hồ Sen (X = -3.1, Z = 6.6)
-  // Trụ đá tròn giữa hồ
-  drawBox3D(ctx, cam, -3.1, 0.08, 6.6, 0.48, 1.15, 0.48, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
-  // Hệ kèo gỗ son chống đỡ đài Liên Hoa
-  drawPoly3D(ctx, cam, [[-3.32, 0.72, 6.6], [-3.85, 1.24, 6.6], [-3.72, 1.24, 6.6], [-3.22, 0.72, 6.6]], '#7F1D1D', '#450A0A', 1.2);
-  drawPoly3D(ctx, cam, [[-2.88, 0.72, 6.6], [-2.35, 1.24, 6.6], [-2.48, 1.24, 6.6], [-2.98, 0.72, 6.6]], '#7F1D1D', '#450A0A', 1.2);
-  // Sàn gỗ & lan can đài chùa
-  drawBox3D(ctx, cam, -3.1, 1.22, 6.6, 1.72, 0.14, 1.72, { top: '#991B1B', front: '#7F1D1D', side: '#5C1111', stroke: '#2B180E' });
-  // Thân lầu chùa gỗ son cửa vàng
-  drawBox3D(ctx, cam, -3.1, 1.36, 6.6, 1.32, 0.82, 1.32, { top: '#991B1B', front: '#B91C1C', side: '#7F1D1D', stroke: '#450A0A' });
-  drawBox3D(ctx, cam, -3.1, 1.46, 5.92, 0.46, 0.56, 0.06, { top: '#F59E0B', front: '#FDE047', side: '#D97706', stroke: '#78350F' });
-  // Tầng mái cong 1 (ngói đỏ Việt Nam)
-  drawBox3D(ctx, cam, -3.1, 2.18, 6.6, 1.98, 0.22, 1.98, { top: '#B91C1C', front: '#991B1B', side: '#7F1D1D', stroke: '#450A0A' });
-  // Tầng mái cong 2 & chóp bình cam lộ vàng
-  drawBox3D(ctx, cam, -3.1, 2.40, 6.6, 1.34, 0.24, 1.34, { top: '#DC2626', front: '#B91C1C', side: '#991B1B', stroke: '#450A0A' });
-  drawBox3D(ctx, cam, -3.1, 2.64, 6.6, 0.66, 0.20, 0.66, { top: '#EF4444', front: '#DC2626', side: '#B91C1C', stroke: '#450A0A' });
-  drawBox3D(ctx, cam, -3.1, 2.84, 6.6, 0.18, 0.34, 0.18, { top: '#FEF08A', front: '#FACC15', side: '#CA8A04', stroke: '#78350F' });
+/* ==================== 2. RAYCAST 3D ĐA TẦNG + BẬC ĐÁ + ĐẠO CỤ CHÙA ==================== */
+function pagodaRaySphere(ox, oy, oz, dx, dy, dz, cx, cy, cz, rad) {
+  var ocx = cx - ox, ocy = cy - oy, ocz = cz - oz;
+  var proj = ocx * dx + ocy * dy + ocz * dz;
+  if (proj < 0.2 || proj > 28) return -1;
+  var d2 = (ocx * ocx + ocy * ocy + ocz * ocz) - proj * proj;
+  return d2 <= rad * rad ? proj : -1;
 }
 
-function drawBanyanTree3D(ctx, cam, wx, wz, t) {
-  // Bồn gạch cổ quanh gốc Cây Đa
-  drawBox3D(ctx, cam, wx, 0, wz, 1.75, 0.36, 1.75, { top: '#B45309', front: '#9A3412', side: '#7C2D12', stroke: '#451A03' });
-  // Thân cây đa cổ thụ xù xì + rễ phụ buông rủ
-  drawBox3D(ctx, cam, wx, 0.36, wz, 0.68, 1.95, 0.68, { top: '#78350F', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
-  drawBox3D(ctx, cam, wx - 0.42, 0.36, wz - 0.18, 0.14, 1.55, 0.14, { top: '#5C341D', front: '#4A2C1A', side: '#3B2314' });
-  drawBox3D(ctx, cam, wx + 0.44, 0.36, wz + 0.20, 0.14, 1.62, 0.14, { top: '#5C341D', front: '#4A2C1A', side: '#3B2314' });
-  // Tán lá đa xanh um đa tầng đung đưa nhẹ
-  var sway = Math.sin(t * 1.4) * 0.04;
-  drawBox3D(ctx, cam, wx + sway, 2.08, wz, 2.55, 0.72, 2.45, { top: '#22C55E', front: '#15803D', side: '#166534', stroke: '#14532D' });
-  drawBox3D(ctx, cam, wx - 0.35 + sway, 2.66, wz - 0.2, 1.85, 0.56, 1.75, { top: '#4ADE80', front: '#16A34A', side: '#15803D', stroke: '#14532D' });
-  drawBox3D(ctx, cam, wx + 0.35 + sway, 2.52, wz + 0.3, 1.55, 0.48, 1.55, { top: '#4ADE80', front: '#22C55E', side: '#15803D', stroke: '#14532D' });
-}
+function pickPagodaTarget3D(cam, st, sx, sy) {
+  var nx = (sx - cam.vw * 0.5) / (cam.focal || 400);
+  var ny = (cam.vh * 0.5 - sy) / (cam.focal || 400);
+  var dx = cam.F.x + cam.R.x * nx + cam.U.x * ny;
+  var dy = cam.F.y + cam.R.y * nx + cam.U.y * ny;
+  var dz = cam.F.z + cam.R.z * nx + cam.U.z * ny;
+  var dl = Math.hypot(dx, dy, dz) || 1;
+  dx /= dl; dy /= dl; dz /= dl;
+  var ox = cam.pos.x, oy = cam.pos.y, oz = cam.pos.z;
 
-function drawBuddhaStatue3D(ctx, cam, t, incenseGlow) {
-  // 1. Bàn thờ gỗ gụ 3 bậc thếp vàng (X = 0, Z = 12.8)
-  drawBox3D(ctx, cam, 0, 0, 12.8, 5.4, 0.42, 2.4, { top: '#7C2D12', front: '#5C1D14', side: '#4A1810', stroke: '#2B180E' });
-  drawBox3D(ctx, cam, 0, 0.42, 12.9, 4.2, 0.52, 1.8, { top: '#991B1B', front: '#7F1D1D', side: '#5C1111', stroke: '#F59E0B' });
-  // Đôi bình hoa sen đồng 2 bên bàn thờ
-  drawBox3D(ctx, cam, -2.05, 0.94, 12.4, 0.34, 0.52, 0.34, { top: '#F59E0B', front: '#B45309', side: '#78350F', stroke: '#451A03' });
-  drawBox3D(ctx, cam,  2.05, 0.94, 12.4, 0.34, 0.52, 0.34, { top: '#F59E0B', front: '#B45309', side: '#78350F', stroke: '#451A03' });
-
-  // 2. Tòa Sen hồng-vàng nâng đỡ Tượng Phật
-  drawBox3D(ctx, cam, 0, 0.94, 12.8, 1.85, 0.30, 1.35, { top: '#F472B6', front: '#EC4899', side: '#BE185D', stroke: '#FDE047' });
-  drawBox3D(ctx, cam, 0, 1.24, 12.8, 1.48, 0.16, 1.12, { top: '#FDE047', front: '#F59E0B', side: '#D97706', stroke: '#92400E' });
-
-  // 3. Hào Quang Phật tỏa sáng rực rỡ phía sau tượng (Sprite 2D phối cảnh)
-  var haloPr = projectPoint3D(cam, 0, 2.28, 13.05);
-  if (haloPr && haloPr.cz > 0.5) {
-    var hr = Math.max(14, Math.min(76, haloPr.scale * 0.92));
-    var pulse = 1 + Math.sin(t * 2.8) * 0.05 + (incenseGlow > 0 ? 0.12 : 0);
-    ctx.save();
-    ctx.globalAlpha = incenseGlow > 0 ? 0.42 : 0.26;
-    ctx.fillStyle = '#FDE047';
-    ctx.beginPath(); ctx.arc(haloPr.sx, haloPr.sy, hr * 1.28 * pulse, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 0.72;
-    ctx.strokeStyle = '#FACC15';
-    ctx.lineWidth = Math.max(1.5, hr * 0.06);
-    ctx.beginPath(); ctx.arc(haloPr.sx, haloPr.sy, hr * 0.88 * pulse, 0, Math.PI * 2); ctx.stroke();
-    // 12 tia hào quang xoay chậm
-    for (var ray = 0; ray < 12; ray++) {
-      var a = t * 0.35 + (ray * Math.PI * 2) / 12;
-      ctx.beginPath();
-      ctx.moveTo(haloPr.sx + Math.cos(a) * hr * 0.55, haloPr.sy + Math.sin(a) * hr * 0.55);
-      ctx.lineTo(haloPr.sx + Math.cos(a) * hr * 1.18 * pulse, haloPr.sy + Math.sin(a) * hr * 1.18 * pulse);
-      ctx.stroke();
-    }
-    ctx.restore();
+  // 1. Vật thể tương tác (Lư hương, Đại Hồng Chung, Bàn trà TÂM AN, Cổng Tam Quan)
+  if (pagodaRaySphere(ox, oy, oz, dx, dy, dz, 0.0, 1.15, 23.85, 0.85) > 0) {
+    return { kind: 'action', x: 0.0, y: 0.48, z: 22.55, pendingAction: 'offer_incense' };
   }
-
-  // 4. Tượng Phật Thích Ca thếp vàng ngồi kiết già trang nghiêm
-  // Chân xếp kiết già
-  drawBox3D(ctx, cam, 0, 1.40, 12.75, 1.18, 0.32, 0.78, { top: '#FEF08A', front: '#FACC15', side: '#CA8A04', stroke: '#92400E' });
-  // Thân áo cà sa vàng óng
-  drawBox3D(ctx, cam, 0, 1.72, 12.80, 0.78, 0.74, 0.54, { top: '#FEF08A', front: '#F59E0B', side: '#D97706', stroke: '#92400E' });
-  // Đầu Phật & Nhục kế vàng
-  drawBox3D(ctx, cam, 0, 2.46, 12.80, 0.44, 0.42, 0.42, { top: '#FEF08A', front: '#FDE047', side: '#EAB308', stroke: '#92400E' });
-  drawBox3D(ctx, cam, 0, 2.88, 12.80, 0.22, 0.14, 0.22, { top: '#FEF08A', front: '#CA8A04', side: '#A16207', stroke: '#78350F' });
-}
-
-function drawIncenseBurner3D(ctx, cam, wx, wz, t, glowTimer) {
-  // Đế đá & Lư Hương Đồng 3 chân cổ kính
-  drawBox3D(ctx, cam, wx, 0, wz, 1.12, 0.26, 1.12, { top: '#78716C', front: '#57534E', side: '#44403C', stroke: '#292524' });
-  drawBox3D(ctx, cam, wx, 0.26, wz, 0.86, 0.66, 0.86, { top: '#92400E', front: '#78350F', side: '#5C2D0C', stroke: '#F59E0B' });
-  drawBox3D(ctx, cam, wx, 0.84, wz, 0.96, 0.10, 0.96, { top: '#F59E0B', front: '#D97706', side: '#B45309', stroke: '#451A03' });
-
-  // Nén nhang đỏ rực & làn khói trầm bay lên uốn lượn
-  var pr = projectPoint3D(cam, wx, 0.96, wz);
-  if (!pr || pr.cz > 22) return;
-  var u = Math.max(0.45, Math.min(3.0, pr.scale / 38));
-  var px = Math.round(pr.sx), py = Math.round(pr.sy);
-  ctx.save();
-  if (glowTimer > 0) {
-    ctx.globalAlpha = Math.min(0.48, glowTimer * 0.15);
-    ctx.fillStyle = '#FDE047';
-    ctx.beginPath(); ctx.arc(px, py - 8 * u, 18 * u, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1;
+  if (pagodaRaySphere(ox, oy, oz, dx, dy, dz, 9.2, 1.65, 11.4, 1.15) > 0) {
+    return { kind: 'action', x: 9.2, y: 0.36, z: 9.35, pendingAction: 'ring_bell' };
   }
-  var sticks = [-4, 0, 4];
-  for (var si = 0; si < sticks.length; si++) {
-    ctx.strokeStyle = '#B91C1C';
-    ctx.lineWidth = Math.max(1.2, 1.4 * u);
-    ctx.beginPath();
-    ctx.moveTo(px + sticks[si] * u, py);
-    ctx.lineTo(px + sticks[si] * 1.2 * u, py - 9 * u);
-    ctx.stroke();
-    ctx.fillStyle = glowTimer > 0 ? '#FEF08A' : '#FB923C';
-    ctx.beginPath();
-    ctx.arc(px + sticks[si] * 1.2 * u, py - 9.5 * u, (glowTimer > 0 ? 2.1 : 1.3) * u, 0, Math.PI * 2);
-    ctx.fill();
+  if (pagodaRaySphere(ox, oy, oz, dx, dy, dz, 13.8, 0.72, 9.6, 0.85) > 0 ||
+      pagodaRaySphere(ox, oy, oz, dx, dy, dz, 12.55, 0.55, 9.6, 0.65) > 0) {
+    return { kind: 'action', x: 12.55, y: 0.36, z: 9.6, pendingAction: 'sit_tea' };
   }
-  // Khói trầm hương thanh tịnh bay cao
-  var puffs = glowTimer > 0 ? 7 : 4;
-  for (var k = 0; k < puffs; k++) {
-    var prog = (t * 0.55 + k / puffs) % 1;
-    ctx.globalAlpha = (1 - prog) * (glowTimer > 0 ? 0.65 : 0.42);
-    ctx.fillStyle = glowTimer > 0 ? '#FEF3C7' : '#E7E5E4';
-    var sx = px + Math.sin(t * 2.4 + k * 1.7) * (4 + prog * 6) * u;
-    var sy = py - (11 + prog * 28) * u;
-    ctx.beginPath();
-    ctx.arc(sx, sy, (2.2 + prog * 4.2) * u, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.restore();
-}
-
-function drawGreatBellPavilion3D(ctx, cam, wx, wz, t, ringTimer, swingPhase) {
-  // Bệ gạch vuông & 4 cột gỗ son đỏ đỡ Đại Hồng Chung
-  drawBox3D(ctx, cam, wx, 0, wz, 2.45, 0.24, 2.25, { top: '#A8A29E', front: '#78716C', side: '#57534E', stroke: '#292524' });
-  var cols = [[-1.02, -0.92], [1.02, -0.92], [-1.02, 0.92], [1.02, 0.92]];
-  for (var i = 0; i < cols.length; i++) {
-    drawBox3D(ctx, cam, wx + cols[i][0], 0.24, wz + cols[i][1], 0.22, 2.65, 0.22, { top: '#991B1B', front: '#8B1E1E', side: '#5C1111', stroke: '#2B180E' });
-  }
-  // Xà ngang đỉnh khung treo chuông chạm rồng vàng
-  drawBox3D(ctx, cam, wx, 2.86, wz, 2.55, 0.24, 0.34, { top: '#B91C1C', front: '#991B1B', side: '#7F1D1D', stroke: '#F59E0B' });
-
-  // Đại Hồng Chung đồng cổ treo giữa khung (đung đưa khi thỉnh chuông!)
-  var sway = ringTimer > 0 ? Math.sin(swingPhase) * 0.14 * Math.min(1, ringTimer / 1.5) : Math.sin(t * 0.8) * 0.012;
-  drawBox3D(ctx, cam, wx + sway * 0.5, 2.42, wz, 0.22, 0.46, 0.22, { top: '#CA8A04', front: '#A16207', side: '#78350F', stroke: '#2B180E' });
-  drawBox3D(ctx, cam, wx + sway, 1.72, wz, 0.96, 0.72, 0.96, { top: '#786238', front: '#5C4A2A', side: '#46381F', stroke: '#F59E0B' });
-  drawBox3D(ctx, cam, wx + sway * 1.2, 0.86, wz, 1.24, 0.88, 1.24, { top: '#6B5630', front: '#4E3F22', side: '#3B2F19', stroke: '#D97706' });
-  // Chày gỗ ngang treo dây đánh chuông bên phải
-  var strikeOffset = ringTimer > 0 ? -Math.abs(Math.sin(swingPhase)) * 0.36 : 0;
-  drawBox3D(ctx, cam, wx + 1.28 + strikeOffset, 1.26, wz, 0.92, 0.18, 0.18, { top: '#B45309', front: '#92400E', side: '#78350F', stroke: '#2B180E' });
-
-  // Sóng âm thanh vàng lan tỏa khi thỉnh Đại Hồng Chung!
-  if (ringTimer > 0) {
-    var bPr = projectPoint3D(cam, wx, 1.38, wz);
-    if (bPr && bPr.cz > 0.5) {
-      ctx.save();
-      for (var w = 0; w < 3; w++) {
-        var wp = ((3.2 - ringTimer) * 1.1 + w * 0.33) % 1;
-        ctx.strokeStyle = 'rgba(253,224,71,' + ((1 - wp) * 0.85).toFixed(2) + ')';
-        ctx.lineWidth = 2.4;
-        ctx.beginPath();
-        ctx.arc(bPr.sx, bPr.sy, (14 + wp * 58) * Math.max(0.5, Math.min(1.6, bPr.scale / 70)), 0, Math.PI * 2);
-        ctx.stroke();
+  if (dz < -0.02) {
+    var td = (0.15 - oz) / dz;
+    if (td > 0.3 && td < 20) {
+      var ddx = ox + dx * td, ddy = oy + dy * td;
+      if (ddy >= 0 && ddy <= 2.85 && Math.abs(ddx) <= 1.75) {
+        return { kind: 'exit', x: 0.0, y: 0.0, z: 1.15, pendingAction: 'exit_pagoda' };
       }
-      ctx.restore();
     }
   }
+
+  // 2. Raycast 3 cụm Bậc Đá (rayRampQuad)
+  if (typeof rayRampQuad === 'function') {
+    var bestRamp = null;
+    for (var ri = 0; ri < PAGODA_NAV_GRAPH.ramps.length; ri++) {
+      var rh = rayRampQuad(ox, oy, oz, dx, dy, dz, PAGODA_NAV_GRAPH.ramps[ri]);
+      if (rh && (!bestRamp || rh.t < bestRamp.t)) bestRamp = rh;
+    }
+    if (bestRamp) {
+      return { kind: 'ramp', x: bestRamp.x, y: bestRamp.y, z: bestRamp.z, pendingAction: null };
+    }
+  }
+
+  // 3. Sàn đa cao độ (Y = 0.48 -> Y = 0.36 -> Y = 0.00)
+  if (dy < -0.025) {
+    var tMain = (0.48 - oy) / dy;
+    if (tMain > 0.2 && tMain < 32) {
+      var xm = ox + dx * tMain, zm = oz + dz * tMain;
+      var inMain = (xm >= -5.8 && xm <= 5.8 && zm >= 14.8 && zm <= 27.6);
+      var inCorr = (xm >= 5.8 && xm <= 8.6 && zm >= 15.2 && zm <= 17.6);
+      if (inMain || inCorr) return { kind: 'floor', x: xm, y: 0.48, z: zm, pendingAction: null };
+    }
+    var tBell = (0.36 - oy) / dy;
+    if (tBell > 0.2 && tBell < 32) {
+      var xb = ox + dx * tBell, zb = oz + dz * tBell;
+      if (xb >= 6.2 && xb <= 16.8 && zb >= 5.6 && zb <= 14.8) {
+        return { kind: 'floor', x: xb, y: 0.36, z: zb, pendingAction: null };
+      }
+    }
+    var tGar = (0.0 - oy) / dy;
+    if (tGar > 0.2 && tGar < 32) {
+      var xg = ox + dx * tGar, zg = oz + dz * tGar;
+      if (xg >= -6.2 && xg <= 6.2 && zg >= 0.0 && zg <= 14.8) {
+        return { kind: 'floor', x: xg, y: 0.0, z: zg, pendingAction: null };
+      }
+    }
+  }
+  return null;
 }
 
-/* ==================== RENDER CHÍNH 3 PHÒNG NGÔI CHÙA TPS 3D ==================== */
-function renderPagodaTpsScene(ctx, cam, st, W, H) {
-  var rm = st.room;
+/* ==================== 3. RENDER WEBGL 3D QUẦN THỂ TAM BẢO HỢP NHẤT (QĐ 250) ==================== */
+function renderPagodaWebglScene(wgl, cam, st, W, H) {
+  var maxYMap = { garden: 6.2, main_hall: 4.48, bell_tea: 4.16, east_corridor: 3.76 };
+  PAGODA_NAV_CONFIG.outerBounds.maxY = maxYMap[st.zone] || 4.45;
+  if (typeof computeWebglTpsCamera === 'function') {
+    computeWebglTpsCamera(cam, st.pig, PAGODA_NAV_CONFIG);
+  }
+  wgl.beginFrame(W, H, cam, PAGODA_ATMOSPHERE);
+  var dm = wgl.drawMesh;
+  var t = st.t;
 
-  // 1. NỀN TRỜI / NỀN PHÒNG + SÀN + TRẦN + 4 BỨC TƯỜNG RIÊNG BIỆT CHO TỪNG PHÒNG
-  if (rm === 'garden') {
-    // Bầu trời nắng vàng thanh tịnh (KHÔNG dùng khoảng xanh trống lạc lõng!)
-    ctx.fillStyle = '#F5E4BE';
-    ctx.fillRect(0, 0, W, H);
-
-    // Mái vòm trời nắng ấm trên cao (Y = 3.85)
-    drawPoly3D(ctx, cam, [[-6, 3.85, 0], [6, 3.85, 0], [6, 3.85, 14.8], [-6, 3.85, 14.8]], '#F7E8C8', null, 0);
-    drawPoly3D(ctx, cam, [[-4.2, 3.82, 4.5], [4.2, 3.82, 4.5], [4.2, 3.82, 11.5], [-4.2, 3.82, 11.5]], '#FEF3C7', null, 0);
-
-    // Sân gạch tàu đỏ ấm cổ kính
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [6, 0, 0], [6, 0, 14.8], [-6, 0, 14.8]], '#A64B2A', '#7C2D12', 1);
-    for (var tz = 0; tz < 14.8; tz += 1.85) {
-      drawPoly3D(ctx, cam, [[-6, 0.004, tz], [6, 0.004, tz], [6, 0.004, tz + 0.92], [-6, 0.004, tz + 0.92]], '#B55835', '#8A3B1E', 0.4);
-    }
-    // Lối đá phiến trung tâm dẫn từ Cổng Tam Quan tới Chánh Điện
-    drawPoly3D(ctx, cam, [[-1.15, 0.01, 0], [1.15, 0.01, 0], [1.15, 0.01, 13.6], [-1.15, 0.01, 13.6]], '#D6CFC2', '#8C857B', 1);
-
-    // Tường bao chùa vàng đất cổ kính (trái, phải, cuối)
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [-6, 0, 14.8], [-6, 3.02, 14.8], [-6, 3.02, 0]], '#D4A359', '#926227', 1);
-    drawPoly3D(ctx, cam, [[6, 0, 14.8], [6, 0, 0], [6, 3.02, 0], [6, 3.02, 14.8]], '#C48E42', '#926227', 1);
-    drawPoly3D(ctx, cam, [[-6, 0, 14.8], [6, 0, 14.8], [6, 3.18, 14.8], [-6, 3.18, 14.8]], '#C9954A', '#926227', 1);
-
-    // Cổng Tam Quan (Z = 0) sơn son thếp vàng mái ngói đỏ
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [-1.55, 0, 0], [-1.55, 3.10, 0], [-6, 3.10, 0]], '#C48E42', '#78350F', 1);
-    drawPoly3D(ctx, cam, [[1.55, 0, 0], [6, 0, 0], [6, 3.10, 0], [1.55, 3.10, 0]], '#C48E42', '#78350F', 1);
-    drawPoly3D(ctx, cam, [[-1.55, 2.60, 0], [1.55, 2.60, 0], [1.55, 3.45, 0], [-1.55, 3.45, 0]], '#991B1B', '#F59E0B', 1.4);
-    drawPoly3D(ctx, cam, [[-1.55, 0, -0.04], [1.55, 0, -0.04], [1.55, 2.60, -0.04], [-1.55, 2.60, -0.04]], '#FFFDF0', '#FDE68A', 0.8);
-  } else if (rm === 'main_hall') {
-    ctx.fillStyle = '#38150E';
-    ctx.fillRect(0, 0, W, H);
-
-    // Sàn gỗ gụ đỏ sẫm & thảm lễ đỏ viền vàng dọc giữa Chánh Điện
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [6, 0, 0], [6, 0, 14.8], [-6, 0, 14.8]], '#5C261B', '#38150E', 1);
-    drawPoly3D(ctx, cam, [[-1.35, 0.01, 0.2], [1.35, 0.01, 0.2], [1.35, 0.01, 11.4], [-1.35, 0.01, 11.4]], '#991B1B', '#F59E0B', 1.4);
-
-    // Trần gỗ gụ kẻ ô hoa sen mạ vàng (Y = 3.85)
-    drawPoly3D(ctx, cam, [[-6, 3.85, 0], [6, 3.85, 0], [6, 3.85, 14.8], [-6, 3.85, 14.8]], '#4A1810', '#2B0D08', 1);
-    for (var cz = 2.2; cz <= 13.0; cz += 2.7) {
-      drawPoly3D(ctx, cam, [[-6, 3.74, cz - 0.14], [6, 3.74, cz - 0.14], [6, 3.74, cz + 0.14], [-6, 3.74, cz + 0.14]], '#7F1D1D', '#F59E0B', 1);
-      drawPoly3D(ctx, cam, [[-0.65, 3.82, cz - 0.55], [0.65, 3.82, cz - 0.55], [0.65, 3.82, cz + 0.55], [-0.65, 3.82, cz + 0.55]], '#CA8A04', '#FEF08A', 0.9);
-    }
-
-    // 4 bức tường gỗ gụ trang nghiêm
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [-6, 0, 14.8], [-6, 3.85, 14.8], [-6, 3.85, 0]], '#521E14', '#2B0D08', 1);
-    drawPoly3D(ctx, cam, [[6, 0, 14.8], [6, 0, 0], [6, 3.85, 0], [6, 3.85, 14.8]], '#4A1810', '#2B0D08', 1);
-    drawPoly3D(ctx, cam, [[-6, 0, 14.8], [6, 0, 14.8], [6, 3.85, 14.8], [-6, 3.85, 14.8]], '#46160E', '#2B0D08', 1);
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [-1.45, 0, 0], [-1.45, 3.85, 0], [-6, 3.85, 0]], '#521E14', '#2B0D08', 1);
-    drawPoly3D(ctx, cam, [[1.45, 0, 0], [6, 0, 0], [6, 3.85, 0], [1.45, 3.85, 0]], '#521E14', '#2B0D08', 1);
-    drawPoly3D(ctx, cam, [[-1.45, 2.65, 0], [1.45, 2.65, 0], [1.45, 3.85, 0], [-1.45, 3.85, 0]], '#4A1810', '#2B0D08', 1);
-    drawPoly3D(ctx, cam, [[-1.45, 0, -0.04], [1.45, 0, -0.04], [1.45, 2.65, -0.04], [-1.45, 2.65, -0.04]], '#F5E4BE', '#D4A359', 0.8);
-  } else {
-    // 'bell_tea' — Tháp Chuông & Góc Thiền Trà gỗ trầm thanh tịnh
-    ctx.fillStyle = '#4A3423';
-    ctx.fillRect(0, 0, W, H);
-
-    // Sàn ván gỗ trầm ấm
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [6, 0, 0], [6, 0, 14.8], [-6, 0, 14.8]], '#7C5230', '#4A2C1A', 1);
-    for (var fx = -6; fx < 6; fx += 1.2) {
-      drawPoly3D(ctx, cam, [[fx, 0.004, 0], [fx + 0.6, 0.004, 0], [fx + 0.6, 0.004, 14.8], [fx, 0.004, 14.8]], '#6E4728', '#54351C', 0.4);
-    }
-
-    // Trần gỗ xà gồ mộc (Y = 3.85)
-    drawPoly3D(ctx, cam, [[-6, 3.85, 0], [6, 3.85, 0], [6, 3.85, 14.8], [-6, 3.85, 14.8]], '#5C3A21', '#3B2314', 1);
-    for (var bz = 2.0; bz <= 13.6; bz += 2.6) {
-      drawPoly3D(ctx, cam, [[-6, 3.74, bz - 0.14], [6, 3.74, bz - 0.14], [6, 3.74, bz + 0.14], [-6, 3.74, bz + 0.14]], '#4A2C1A', '#2B180E', 1);
-    }
-
-    // 4 bức tường vôi vàng kem cổ & khung gỗ
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [-6, 0, 14.8], [-6, 3.85, 14.8], [-6, 3.85, 0]], '#DFCAA5', '#5C341D', 1);
-    drawPoly3D(ctx, cam, [[6, 0, 14.8], [6, 0, 0], [6, 3.85, 0], [6, 3.85, 14.8]], '#D5BC93', '#5C341D', 1);
-    drawPoly3D(ctx, cam, [[-6, 0, 14.8], [6, 0, 14.8], [6, 3.85, 14.8], [-6, 3.85, 14.8]], '#D9C29C', '#5C341D', 1);
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [-1.45, 0, 0], [-1.45, 3.85, 0], [-6, 3.85, 0]], '#DFCAA5', '#5C341D', 1);
-    drawPoly3D(ctx, cam, [[1.45, 0, 0], [6, 0, 0], [6, 3.85, 0], [1.45, 3.85, 0]], '#DFCAA5', '#5C341D', 1);
-    drawPoly3D(ctx, cam, [[-1.45, 2.65, 0], [1.45, 2.65, 0], [1.45, 3.85, 0], [-1.45, 3.85, 0]], '#C9B084', '#5C341D', 1);
-    drawPoly3D(ctx, cam, [[-1.45, 0, -0.04], [1.45, 0, -0.04], [1.45, 2.65, -0.04], [-1.45, 2.65, -0.04]], '#F5E4BE', '#D4A359', 0.8);
+  // A. CHẾ ĐỘ B — BẦU TRỜI BÌNH MINH / HOÀNG HÔN & RỪNG CÂY BAO QUANH VƯỜN CHÙA (0% VOID)
+  dm('quad', 'skyBackdrop', 0, 7.5, -18, 0, 0, 0, 42, 22, 1, { tint: [1,1,1,1], emissive: 1.0 });
+  dm('quad', 'skyBackdrop', -18, 7.5, 6, 0, Math.PI * 0.5, 0, 36, 22, 1, { tint: [1,1,1,1], emissive: 1.0 });
+  dm('quad', 'skyBackdrop', 18, 7.5, 2, 0, -Math.PI * 0.5, 0, 32, 22, 1, { tint: [1,1,1,1], emissive: 1.0 });
+  dm('quad', 'white', 0, 13.5, 6, Math.PI * 0.5, 0, 0, 46, 46, 1, { tint: [0.99, 0.90, 0.62, 1], emissive: 1.0 });
+  var bgTreePts = [[-8.5, 2.5], [-8.2, 8.5], [-8.4, 13.5], [-4.5, -4.5], [4.5, -4.5], [8.5, 2.2]];
+  for (var bti = 0; bti < bgTreePts.length; bti++) {
+    dm('cyl', 'darkTimber', bgTreePts[bti][0], 1.8, bgTreePts[bti][1], 0, 0, 0, 0.42, 3.6, 0.42, { tint: [0.46, 0.34, 0.22, 1] });
+    dm('sphere', 'white', bgTreePts[bti][0], 4.0, bgTreePts[bti][1], 0, 0, 0, 3.1, 2.3, 3.1, { tint: [0.22, 0.46, 0.20, 1] });
   }
 
-  // 2. Mỹ thuật 4 mặt tường theo phòng (pagodaWallArt.ts)
-  if (typeof drawPagodaWalls3D === 'function') {
-    drawPagodaWalls3D(ctx, cam, rm);
+  // B. KHU 1: VƯỜN CHÙA TIỀN ĐƯỜNG (X ∈ [-6.2, 6.2], Z ∈ [0, 14.8], Y = 0)
+  dm('box', 'redBrickFloor', 0, -0.06, 7.4, 0, 0, 0, 12.4, 0.12, 14.8, { tint: [1,1,1,1], us: 5, vs: 6 });
+  dm('box', 'stonePath', 0, 0.008, 7.0, 0, 0, 0, 2.5, 0.02, 14.0, { tint: [1,1,1,1], us: 1.4, vs: 6 });
+  dm('box', 'stonePath', 3.55, 0.008, 11.7, 0, 0, 0, 4.6, 0.02, 1.8, { tint: [1,1,1,1], us: 2.2, vs: 1 });
+
+  // Tường bao Vườn Chùa + Ngói Âm Dương + Cổng Tam Quan (Z = 0)
+  dm('box', 'ochreWall', -6.2, 1.52, 7.4, 0, 0, 0, 0.18, 3.04, 14.8, { tint: [1,1,1,1], us: 5, vs: 1.5 });
+  dm('box', 'yinYangRoof', -6.2, 3.16, 7.4, 0, 0, 0.22, 0.65, 0.22, 15.0, { tint: [1,1,1,1], us: 1, vs: 6 });
+  dm('box', 'ochreWall', 6.2, 1.52, 5.2, 0, 0, 0, 0.18, 3.04, 10.4, { tint: [1,1,1,1], us: 4, vs: 1.5 });
+  dm('box', 'ochreWall', 6.2, 1.52, 13.9, 0, 0, 0, 0.18, 3.04, 1.8, { tint: [1,1,1,1], us: 1, vs: 1.5 });
+  dm('box', 'ochreWall', 6.2, 2.95, 11.7, 0, 0, 0, 0.20, 0.85, 2.6, { tint: [1,1,1,1] });
+  dm('box', 'yinYangRoof', 6.2, 3.35, 7.4, 0, 0, -0.20, 0.65, 0.22, 14.8, { tint: [1,1,1,1], us: 1, vs: 6 });
+
+  // Cổng Tam Quan (Z = 0)
+  dm('box', 'ochreWall', -3.98, 1.55, 0.0, 0, 0, 0, 4.45, 3.1, 0.28, { tint: [1,1,1,1], us: 2, vs: 1.5 });
+  dm('box', 'ochreWall',  3.98, 1.55, 0.0, 0, 0, 0, 4.45, 3.1, 0.28, { tint: [1,1,1,1], us: 2, vs: 1.5 });
+  dm('box', 'darkTimber', -1.82, 1.65, 0.0, 0, 0, 0, 0.28, 3.3, 0.36, { tint: [0.95, 0.35, 0.25, 1] });
+  dm('box', 'darkTimber',  1.82, 1.65, 0.0, 0, 0, 0, 0.28, 3.3, 0.36, { tint: [0.95, 0.35, 0.25, 1] });
+  dm('box', 'yinYangRoof', 0.0, 3.55, 0.0, 0, 0, 0, 4.4, 0.38, 1.1, { tint: [1,1,1,1], us: 2.5, vs: 1 });
+  dm('box', 'yinYangRoof', 0.0, 4.02, 0.0, 0, 0, 0, 2.9, 0.36, 0.8, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('quad', 'tamQuanSign', 0.0, 3.05, 0.18, 0, 0, 0, 3.2, 0.72, 1, { tint: [1,1,1,1] });
+  dm('quad', 'tamQuanSign', 0.0, 3.05, -0.18, 0, Math.PI, 0, 3.2, 0.72, 1, { tint: [1,1,1,1] });
+
+  // Hồ Sen & Chùa Một Cột (X ∈ [-5.25, -1.05], Z ∈ [3.55, 9.75])
+  dm('box', 'stonePath', -3.15, 0.12, 3.65, 0, 0, 0, 4.2, 0.24, 0.22, { tint: [1,1,1,1] });
+  dm('box', 'stonePath', -3.15, 0.12, 9.65, 0, 0, 0, 4.2, 0.24, 0.22, { tint: [1,1,1,1] });
+  dm('box', 'stonePath', -5.15, 0.12, 6.65, 0, 0, 0, 0.22, 0.24, 6.2, { tint: [1,1,1,1] });
+  dm('box', 'stonePath', -1.15, 0.12, 6.65, 0, 0, 0, 0.22, 0.24, 6.2, { tint: [1,1,1,1] });
+  dm('box', 'lotusPondWater', -3.15, 0.08, 6.65, 0, 0, 0, 3.88, 0.04, 5.88, { tint: [1,1,1,1], us: 2, vs: 3, specPow: 64 });
+  var lotusPos = [[-4.35, 4.55], [-2.15, 4.75], [-4.45, 7.65], [-1.95, 8.25], [-3.85, 8.85]];
+  for (var lpi = 0; lpi < lotusPos.length; lpi++) {
+    var bob = Math.sin(t * 2.0 + lpi * 1.1) * 0.025;
+    dm('sphere', 'white', lotusPos[lpi][0], 0.16 + bob, lotusPos[lpi][1], 0, 0, 0, 0.18, 0.16, 0.18, { tint: [0.96, 0.45, 0.72, 1] });
+  }
+  // Chùa Một Cột giữa hồ (-3.15, 6.65)
+  dm('cyl', 'stonePath', -3.15, 0.65, 6.65, 0, 0, 0, 0.48, 1.24, 0.48, { tint: [1,1,1,1] });
+  dm('box', 'darkTimber', -3.50, 1.05, 6.65, 0, 0, 0.55, 0.12, 0.78, 0.12, { tint: [1,0.3,0.2,1] });
+  dm('box', 'darkTimber', -2.80, 1.05, 6.65, 0, 0, -0.55, 0.12, 0.78, 0.12, { tint: [1,0.3,0.2,1] });
+  dm('box', 'goldLacquer', -3.15, 1.32, 6.65, 0, 0, 0, 1.78, 0.16, 1.78, { tint: [1,1,1,1] });
+  dm('box', 'darkTimber', -3.15, 1.80, 6.65, 0, 0, 0, 1.32, 0.82, 1.32, { tint: [1.05, 0.36, 0.25, 1] });
+  dm('quad', 'goldLacquer', -3.15, 1.78, 5.98, 0, 0, 0, 0.56, 0.64, 1, { tint: [1,1,1,1] });
+  dm('box', 'yinYangRoof', -3.15, 2.30, 6.65, 0, 0, 0, 2.08, 0.22, 2.08, { tint: [1,1,1,1], us: 2, vs: 2 });
+  dm('box', 'yinYangRoof', -3.15, 2.56, 6.65, 0, 0, 0, 1.42, 0.24, 1.42, { tint: [1,1,1,1], us: 1.5, vs: 1.5 });
+  dm('cone', 'yinYangRoof', -3.15, 2.86, 6.65, 0, 0, 0, 0.92, 0.36, 0.92, { tint: [1,1,1,1] });
+  dm('sphere', 'white', -3.15, 3.12, 6.65, 0, 0, 0, 0.22, 0.30, 0.22, { tint: [0.98, 0.82, 0.22, 1], emissive: 0.4 });
+
+  // Cây Đa Cổ Thụ (X ∈ [3.25, 5.05], Z ∈ [5.75, 7.95])
+  dm('box', 'redBrickFloor', 4.15, 0.18, 6.85, 0, 0, 0, 1.72, 0.36, 1.72, { tint: [1,1,1,1] });
+  dm('cyl', 'darkTimber', 4.15, 1.35, 6.85, 0, 0, 0, 0.68, 2.05, 0.68, { tint: [0.85, 0.70, 0.56, 1] });
+  dm('cyl', 'darkTimber', 3.68, 1.15, 6.62, 0, 0, 0.08, 0.12, 1.65, 0.12, { tint: [0.75, 0.62, 0.48, 1] });
+  dm('cyl', 'darkTimber', 4.62, 1.18, 7.05, 0, 0, -0.08, 0.12, 1.70, 0.12, { tint: [0.75, 0.62, 0.48, 1] });
+  var bSway = Math.sin(t * 1.4) * 0.04;
+  dm('sphere', 'white', 4.15 + bSway, 2.65, 6.85, 0, 0, 0, 2.65, 1.15, 2.55, { tint: [0.14, 0.54, 0.22, 1] });
+  dm('sphere', 'white', 3.75 + bSway, 3.12, 6.65, 0, 0, 0, 1.95, 0.92, 1.85, { tint: [0.22, 0.66, 0.28, 1] });
+  dm('sphere', 'white', 4.55 + bSway, 2.98, 7.15, 0, 0, 0, 1.68, 0.85, 1.68, { tint: [0.26, 0.72, 0.32, 1] });
+
+  // C. CONNECTOR 1: 3 BẬC ĐÁ TAM CẤP & MẶT TIỀN CHÁNH ĐIỆN (X ∈ [-2.0, 2.0], Z ∈ [14.0, 15.4], Y: 0 -> 0.48)
+  for (var s1 = 0; s1 < 3; s1++) {
+    var stH = (s1 + 1) * 0.16;
+    var stZ = 14.0 + (s1 + 0.5) * (1.4 / 3);
+    dm('box', 'stonePath', 0.0, stH * 0.5, stZ, 0, 0, 0, 4.0, stH, 0.47, { tint: [1,1,1,1], us: 2, vs: 1 });
+  }
+  // Mặt tiền ngăn Garden <-> Main Hall (Z = 14.8, mở X ∈ [-2.0, 2.0])
+  dm('box', 'ochreWall', -4.0, 2.30, 14.8, 0, 0, 0, 4.0, 4.6, 0.24, { tint: [1,1,1,1], us: 2, vs: 2 });
+  dm('box', 'ochreWall',  4.0, 2.30, 14.8, 0, 0, 0, 4.0, 4.6, 0.24, { tint: [1,1,1,1], us: 2, vs: 2 });
+  dm('box', 'darkTimber', 0.0, 3.78, 14.8, 0, 0, 0, 4.2, 1.65, 0.28, { tint: [1,1,1,1] });
+  dm('quad', 'chanhDienSign', 0.0, 3.35, 14.64, 0, Math.PI, 0, 3.6, 0.76, 1, { tint: [1,1,1,1] });
+  dm('box', 'yinYangRoof', 0.0, 4.48, 14.3, 0.24, 0, 0, 12.6, 0.28, 1.6, { tint: [1,1,1,1], us: 6, vs: 1 });
+  // 2 cánh cửa son mở 2 bên cửa Chánh Điện
+  dm('box', 'goldLacquer', -2.02, 1.72, 15.18, 0, 0.25, 0, 0.10, 2.48, 0.78, { tint: [1,1,1,1] });
+  dm('box', 'goldLacquer',  2.02, 1.72, 15.18, 0, -0.25, 0, 0.10, 2.48, 0.78, { tint: [1,1,1,1] });
+
+  // D. KHU 2: CHÁNH ĐIỆN TRANG NGHIÊM (X ∈ [-5.8, 5.8], Z ∈ [14.8, 27.6], Y = 0.48, CHẾ ĐỘ A KÍN)
+  dm('box', 'mahoganyFloor', 0.0, 0.42, 21.2, 0, 0, 0, 11.6, 0.12, 12.8, { tint: [1,1,1,1], us: 5, vs: 5 });
+  dm('box', 'goldLacquer', 0.0, 0.49, 19.6, 0, 0, 0, 2.7, 0.02, 8.8, { tint: [1,1,1,1], us: 1, vs: 3 });
+  // Tường & Trần Chánh Điện kín 100% (chừa cửa Đông X = 5.8, Z ∈ [15.2, 17.2])
+  dm('box', 'darkTimber', -5.8, 2.53, 21.2, 0, 0, 0, 0.18, 4.10, 12.8, { tint: [1,1,1,1], us: 5, vs: 2 });
+  dm('box', 'darkTimber',  5.8, 2.53, 22.4, 0, 0, 0, 0.18, 4.10, 10.4, { tint: [1,1,1,1], us: 4, vs: 2 });
+  dm('box', 'darkTimber',  5.8, 3.72, 16.2, 0, 0, 0, 0.18, 1.72, 2.0, { tint: [1,1,1,1] });
+  dm('box', 'darkTimber',  0.0, 2.53, 27.6, 0, 0, 0, 11.6, 4.10, 0.18, { tint: [1,1,1,1], us: 4, vs: 2 });
+  dm('box', 'darkTimber',  0.0, 4.58, 21.2, 0, 0, 0, 11.8, 0.16, 13.0, { tint: [1,1,1,1], us: 5, vs: 5 });
+
+  // 6 Cột son thếp vàng (X = ±4.2, Z = 17.8 / 21.6 / 25.4)
+  var colZs = [17.8, 21.6, 25.4];
+  for (var ci = 0; ci < colZs.length; ci++) {
+    var cz = colZs[ci];
+    dm('box', 'darkTimber', 0.0, 4.44, cz, 0, 0, 0, 11.4, 0.24, 0.24, { tint: [1, 0.36, 0.26, 1] });
+    for (var sgn = -1; sgn <= 1; sgn += 2) {
+      var cx = sgn * 4.2;
+      dm('box', 'stonePath', cx, 0.60, cz, 0, 0, 0, 0.58, 0.24, 0.58, { tint: [1,1,1,1] });
+      dm('cyl', 'darkTimber', cx, 2.55, cz, 0, 0, 0, 0.44, 3.90, 0.44, { tint: [1.18, 0.26, 0.20, 1] });
+      dm('cyl', 'white', cx, 4.18, cz, 0, 0, 0, 0.52, 0.16, 0.52, { tint: [0.98, 0.78, 0.20, 1] });
+    }
   }
 
-  // 3. Đèn lồng lụa đỏ / đèn giấy ấm theo từng phòng
-  if (rm === 'main_hall') {
-    var hLamps = [[-2.8, 3.8], [2.8, 3.8], [-2.8, 8.2], [2.8, 8.2], [-2.2, 11.4], [2.2, 11.4]];
-    for (var hi = 0; hi < hLamps.length; hi++) {
-      drawLanternGlow3D(ctx, cam, hLamps[hi][0], 2.95, hLamps[hi][1], '#DC2626', '#FDE047', 0.22, 3.85);
-    }
-  } else if (rm === 'bell_tea') {
-    var tLamps = [[-2.4, 5.2], [2.4, 5.2], [2.4, 8.8], [-2.6, 10.6]];
-    for (var ti = 0; ti < tLamps.length; ti++) {
-      drawLanternGlow3D(ctx, cam, tLamps[ti][0], 3.05, tLamps[ti][1], '#FEF3C7', '#FDE68A', 0.18, 3.85);
-    }
+  // Mỹ thuật tường Chánh Điện (Hoành phi, Câu đối, Tranh Sen/Pháp Luân)
+  dm('quad', 'daiHungSign',  0.0, 3.95, 27.46, 0, Math.PI, 0, 4.6, 0.92, 1, { tint: [1,1,1,1] });
+  dm('quad', 'coupletLeft', -4.2, 2.52, 27.46, 0, Math.PI, 0, 0.85, 2.45, 1, { tint: [1,1,1,1] });
+  dm('quad', 'coupletRight', 4.2, 2.52, 27.46, 0, Math.PI, 0, 0.85, 2.45, 1, { tint: [1,1,1,1] });
+  dm('quad', 'lotusDharmaArt', -5.66, 2.45, 19.6, 0, Math.PI * 0.5, 0, 1.85, 1.85, 1, { tint: [1,1,1,1] });
+  dm('quad', 'lotusDharmaArt', -5.66, 2.45, 23.8, 0, Math.PI * 0.5, 0, 1.85, 1.85, 1, { tint: [1,1,1,1] });
+  dm('quad', 'lotusDharmaArt',  5.66, 2.45, 21.8, 0, -Math.PI * 0.5, 0, 1.85, 1.85, 1, { tint: [1,1,1,1] });
+
+  // 6 Đèn lồng lụa đỏ Chánh Điện
+  var hLamps = [[-2.6, 17.8], [2.6, 17.8], [-2.6, 21.6], [2.6, 21.6], [-2.2, 25.0], [2.2, 25.0]];
+  for (var hli = 0; hli < hLamps.length; hli++) {
+    dm('cyl', 'white', hLamps[hli][0], 4.10, hLamps[hli][1], 0, 0, 0, 0.03, 0.85, 0.03, { tint: [0.18,0.12,0.08,1] });
+    dm('sphere', 'white', hLamps[hli][0], 3.55, hLamps[hli][1], 0, 0, 0, 0.34, 0.42, 0.34, { tint: [0.96, 0.28, 0.16, 1], emissive: 1.25 });
   }
 
-  // 4. Vòng sóng Tap-to-Walk trên sàn
+  // 3 Chiếu lạy / Bồ đoàn đỏ vàng
+  var matsX = [-2.0, 0.0, 2.0];
+  for (var mxi = 0; mxi < matsX.length; mxi++) {
+    dm('box', 'goldLacquer', matsX[mxi], 0.53, 21.8, 0, 0, 0, 0.96, 0.10, 0.96, { tint: [1,1,1,1] });
+  }
+
+  // Phật Đài & Tượng Phật Vàng 12 Tia Hào Quang (Z ∈ [25.4, 27.3])
+  dm('box', 'darkTimber',  0.0, 0.72, 26.35, 0, 0, 0, 5.4, 0.48, 1.85, { tint: [1,1,1,1] });
+  dm('box', 'goldLacquer', 0.0, 1.18, 26.45, 0, 0, 0, 4.2, 0.46, 1.50, { tint: [1,1,1,1] });
+  dm('cyl', 'white', -2.05, 1.68, 26.15, 0, 0, 0, 0.30, 0.52, 0.30, { tint: [0.85, 0.62, 0.18, 1] });
+  dm('cyl', 'white',  2.05, 1.68, 26.15, 0, 0, 0, 0.30, 0.52, 0.30, { tint: [0.85, 0.62, 0.18, 1] });
+  dm('sphere', 'white', -2.05, 2.02, 26.15, 0, 0, 0, 0.24, 0.20, 0.24, { tint: [0.96, 0.45, 0.72, 1] });
+  dm('sphere', 'white',  2.05, 2.02, 26.15, 0, 0, 0, 0.24, 0.20, 0.24, { tint: [0.96, 0.45, 0.72, 1] });
+  // Tòa sen + Tượng Phật Vàng
+  dm('cyl', 'white', 0.0, 1.56, 26.40, 0, 0, 0, 1.68, 0.28, 1.32, { tint: [0.95, 0.42, 0.68, 1] });
+  dm('cyl', 'white', 0.0, 1.76, 26.40, 0, 0, 0, 1.38, 0.14, 1.08, { tint: [0.99, 0.84, 0.22, 1] });
+  dm('box', 'white', 0.0, 1.98, 26.35, 0, 0, 0, 1.16, 0.32, 0.78, { tint: [0.98, 0.78, 0.18, 1], specPow: 64 });
+  dm('cyl', 'white', 0.0, 2.48, 26.40, 0, 0, 0, 0.74, 0.74, 0.56, { tint: [0.96, 0.72, 0.14, 1], specPow: 64 });
+  dm('sphere', 'white', 0.0, 3.06, 26.40, 0, 0, 0, 0.46, 0.46, 0.46, { tint: [0.99, 0.84, 0.26, 1], specPow: 64 });
+  dm('sphere', 'white', 0.0, 3.34, 26.40, 0, 0, 0, 0.20, 0.16, 0.20, { tint: [0.95, 0.72, 0.12, 1] });
+  // 12 Tia Hào Quang Vàng xoay chậm phía sau tượng
+  var haloPulse = 1 + Math.sin(t * 2.8) * 0.05 + (st.incenseGlow > 0 ? 0.14 : 0);
+  dm('torus', 'white', 0.0, 2.95, 26.82, Math.PI * 0.5, 0, 0, 1.95 * haloPulse, 1.95 * haloPulse, 0.25, { tint: [0.99, 0.88, 0.28, 1], emissive: st.incenseGlow > 0 ? 1.55 : 1.18 });
+  for (var ray = 0; ray < 12; ray++) {
+    var rAng = t * 0.35 + (ray * Math.PI * 2) / 12;
+    dm('box', 'white', Math.cos(rAng) * 1.15 * haloPulse, 2.95 + Math.sin(rAng) * 1.15 * haloPulse, 26.86, 0, 0, rAng, 0.72 * haloPulse, 0.07, 0.04, { tint: [0.99, 0.90, 0.32, 1], emissive: 1.3 });
+  }
+
+  // Lư Hương Đồng & Khói Trầm (Z ∈ [23.2, 24.5])
+  dm('box', 'stonePath', 0.0, 0.60, 23.85, 0, 0, 0, 1.12, 0.24, 1.12, { tint: [1,1,1,1] });
+  dm('cup', 'white', 0.0, 1.05, 23.85, 0, 0, 0, 0.88, 0.66, 0.88, { tint: [0.58, 0.38, 0.14, 1], specPow: 72 });
+  dm('torus', 'white', 0.0, 1.38, 23.85, Math.PI * 0.5, 0, 0, 0.82, 0.82, 0.25, { tint: [0.95, 0.72, 0.18, 1] });
+  for (var sk = -1; sk <= 1; sk++) {
+    dm('cyl', 'white', sk * 0.12, 1.52, 23.85, 0, 0, sk * 0.08, 0.03, 0.32, 0.03, { tint: [0.76, 0.16, 0.14, 1] });
+    dm('sphere', 'white', sk * 0.14, 1.68, 23.85, 0, 0, 0, 0.05, 0.05, 0.05, { tint: [1.0, 0.65, 0.20, 1], emissive: st.incenseGlow > 0 ? 1.8 : 1.2 });
+  }
+
+  // E. CONNECTOR 2: CỔNG VÒM TRE + 2 BẬC ĐÁ (X ∈ [5.6, 7.0], Z ∈ [10.4, 13.0], Y: 0 -> 0.36)
+  dm('box', 'stonePath', 5.95, 0.09, 11.7, 0, 0, 0, 0.70, 0.18, 2.55, { tint: [1,1,1,1] });
+  dm('box', 'stonePath', 6.65, 0.18, 11.7, 0, 0, 0, 0.70, 0.36, 2.55, { tint: [1,1,1,1] });
+  dm('cyl', 'white', 6.2, 1.25, 10.48, 0, 0, 0, 0.18, 2.45, 0.18, { tint: [0.38, 0.58, 0.16, 1] });
+  dm('cyl', 'white', 6.2, 1.25, 12.92, 0, 0, 0, 0.18, 2.45, 0.18, { tint: [0.38, 0.58, 0.16, 1] });
+  dm('arch', 'white', 6.2, 2.38, 11.7, 0, Math.PI * 0.5, 0, 2.6, 0.65, 0.28, { tint: [0.46, 0.68, 0.18, 1] });
+  dm('quad', 'thienTraSign', 6.04, 2.68, 11.7, 0, -Math.PI * 0.5, 0, 2.35, 0.52, 1, { tint: [1,1,1,1] });
+
+  // F. KHU 3: HÀNH LANG MÁI CHE ĐÔNG (X ∈ [5.8, 8.6], Z ∈ [14.8, 17.6], CHẾ ĐỘ A KÍN)
+  dm('box', 'stonePath', 7.2, 0.42, 16.4, 0, 0, 0, 2.8, 0.12, 2.4, { tint: [1,1,1,1] });
+  dm('box', 'stonePath', 7.3, 0.21, 14.9, 0, 0, 0, 2.2, 0.42, 0.6, { tint: [1,1,1,1] });
+  dm('box', 'ochreWall', 8.6, 2.15, 16.2, 0, 0, 0, 0.16, 3.7, 2.8, { tint: [1,1,1,1] });
+  dm('quad', 'bambooWindow', 8.50, 2.15, 16.2, 0, -Math.PI * 0.5, 0, 1.8, 1.55, 1, { tint: [1,1,1,1] });
+  dm('box', 'ochreWall', 7.2, 2.15, 17.6, 0, 0, 0, 2.8, 3.7, 0.16, { tint: [1,1,1,1] });
+  dm('box', 'yinYangRoof', 7.2, 3.88, 16.2, 0, 0, 0, 3.0, 0.18, 3.0, { tint: [1,1,1,1], us: 2, vs: 2 });
+  dm('sphere', 'white', 7.2, 3.35, 16.2, 0, 0, 0, 0.24, 0.28, 0.24, { tint: [0.99, 0.90, 0.56, 1], emissive: 1.25 });
+
+  // G. KHU 4: NHÀ CHUÔNG & THIỀN TRÀ CÁNH ĐÔNG (X ∈ [6.2, 16.8], Z ∈ [5.6, 14.8], Y = 0.36, CHẾ ĐỘ A KÍN)
+  dm('box', 'teaWoodFloor', 11.5, 0.30, 10.2, 0, 0, 0, 10.6, 0.12, 9.2, { tint: [1,1,1,1], us: 5, vs: 4 });
+  dm('box', 'ochreWall', 16.8, 2.28, 10.2, 0, 0, 0, 0.18, 3.92, 9.2, { tint: [1,1,1,1], us: 4, vs: 2 });
+  dm('box', 'ochreWall', 11.5, 2.28,  5.6, 0, 0, 0, 10.6, 3.92, 0.18, { tint: [1,1,1,1], us: 4, vs: 2 });
+  // Tường Bắc Nhà Chuông Z = 14.8 (chừa cửa Bắc nối east_corridor X ∈ [6.4, 8.4])
+  dm('box', 'ochreWall', 12.6, 2.28, 14.8, 0, 0, 0, 8.4, 3.92, 0.18, { tint: [1,1,1,1], us: 3.5, vs: 2 });
+  dm('box', 'ochreWall',  7.4, 3.48, 14.8, 0, 0, 0, 2.2, 1.52, 0.18, { tint: [1,1,1,1] });
+  dm('box', 'darkTimber', 11.5, 4.24, 10.2, 0, 0, 0, 10.8, 0.16, 9.4, { tint: [1,1,1,1], us: 4, vs: 4 });
+
+  // Cửa sổ trúc & Thư pháp "TÂM AN" / "TĨNH TÂM" / Biển "ĐẠI HỒNG CHUNG"
+  dm('quad', 'bambooWindow', 10.6, 2.28, 5.72, 0, 0, 0, 2.4, 1.75, 1, { tint: [1,1,1,1] });
+  dm('quad', 'tinhTamScroll', 14.4, 2.38, 5.72, 0, 0, 0, 1.45, 1.75, 1, { tint: [1,1,1,1] });
+  dm('quad', 'bambooWindow', 16.68, 2.28, 7.1, 0, -Math.PI * 0.5, 0, 1.85, 1.65, 1, { tint: [1,1,1,1] });
+  dm('quad', 'bambooWindow', 16.68, 2.28, 12.5, 0, -Math.PI * 0.5, 0, 1.85, 1.65, 1, { tint: [1,1,1,1] });
+  dm('quad', 'tamAnScroll', 16.68, 2.42, 9.6, 0, -Math.PI * 0.5, 0, 2.35, 2.05, 1, { tint: [1,1,1,1] });
+  dm('quad', 'bellSign', 10.2, 3.35, 14.68, 0, Math.PI, 0, 3.2, 0.72, 1, { tint: [1,1,1,1] });
+
+  // Đèn giấy ấm Nhà Chuông & Thiền Trà
+  var tLamps = [[8.6, 8.2], [11.8, 8.2], [13.8, 11.8], [9.6, 13.0]];
+  for (var tli = 0; tli < tLamps.length; tli++) {
+    dm('cyl', 'white', tLamps[tli][0], 3.85, tLamps[tli][1], 0, 0, 0, 0.03, 0.68, 0.03, { tint: [0.22,0.14,0.08,1] });
+    dm('sphere', 'white', tLamps[tli][0], 3.42, tLamps[tli][1], 0, 0, 0, 0.30, 0.34, 0.30, { tint: [0.99, 0.90, 0.62, 1], emissive: 1.2 });
+  }
+
+  // Đại Hồng Chung (9.2, 0.36, 11.4) AABB X ∈ [7.95, 10.45], Z ∈ [10.25, 12.55]
+  dm('box', 'stonePath', 9.2, 0.48, 11.4, 0, 0, 0, 2.40, 0.24, 2.20, { tint: [1,1,1,1] });
+  var bellCols = [[-1.02, -0.92], [1.02, -0.92], [-1.02, 0.92], [1.02, 0.92]];
+  for (var bci = 0; bci < bellCols.length; bci++) {
+    dm('box', 'darkTimber', 9.2 + bellCols[bci][0], 1.88, 11.4 + bellCols[bci][1], 0, 0, 0, 0.20, 2.65, 0.20, { tint: [1.05, 0.28, 0.20, 1] });
+  }
+  dm('box', 'goldLacquer', 9.2, 3.22, 11.4, 0, 0, 0, 2.48, 0.24, 0.34, { tint: [1,1,1,1] });
+  var bSwing = st.bellRingTimer > 0 ? Math.sin(st.bellSwingPhase) * 0.14 * Math.min(1, st.bellRingTimer / 1.5) : Math.sin(t * 0.8) * 0.012;
+  dm('cyl', 'white', 9.2 + bSwing * 0.5, 2.86, 11.4, 0, 0, bSwing, 0.22, 0.44, 0.22, { tint: [0.80, 0.58, 0.14, 1] });
+  dm('cone', 'white', 9.2 + bSwing, 2.28, 11.4, 0, 0, bSwing, 0.98, 0.72, 0.98, { tint: [0.46, 0.36, 0.20, 1], specPow: 72 });
+  dm('cup', 'white', 9.2 + bSwing * 1.15, 1.54, 11.4, 0, 0, bSwing, 1.18, 0.84, 1.18, { tint: [0.38, 0.30, 0.16, 1], specPow: 72 });
+  var strikeOff = st.bellRingTimer > 0 ? -Math.abs(Math.sin(st.bellSwingPhase)) * 0.34 : 0;
+  dm('cyl', 'darkTimber', 10.42 + strikeOff, 1.62, 11.4, 0, 0, Math.PI * 0.5, 0.16, 0.92, 0.16, { tint: [0.78, 0.48, 0.22, 1] });
+  if (st.bellRingTimer > 0) {
+    wgl.setBlend('add');
+    for (var rw = 0; rw < 3; rw++) {
+      var rp = ((3.4 - st.bellRingTimer) * 1.05 + rw * 0.33) % 1;
+      dm('torus', 'white', 9.2, 1.72, 11.4, Math.PI * 0.5, 0, 0, 0.8 + rp * 2.2, 0.8 + rp * 2.2, 0.22, { tint: [0.99, 0.88, 0.32, (1 - rp) * 0.65], emissive: 1.3 });
+    }
+    wgl.setBlend(null);
+  }
+
+  // Bàn Trà Bát Tràng & Chiếu Thiền TÂM AN (13.8, 0.36, 9.6) AABB X ∈ [13.05, 14.55], Z ∈ [8.75, 10.45]
+  dm('box', 'sedgeMat', 13.8, 0.37, 9.6, 0, 0, 0, 3.8, 0.02, 3.4, { tint: [1,1,1,1] });
+  dm('box', 'darkTimber', 13.8, 0.74, 9.6, 0, 0, 0, 1.36, 0.09, 1.56, { tint: [0.72, 0.46, 0.28, 1] });
+  var tLegs = [[-0.54, -0.62], [0.54, -0.62], [-0.54, 0.62], [0.54, 0.62]];
+  for (var tli2 = 0; tli2 < tLegs.length; tli2++) {
+    dm('box', 'darkTimber', 13.8 + tLegs[tli2][0], 0.54, 9.6 + tLegs[tli2][1], 0, 0, 0, 0.12, 0.36, 0.12, { tint: [0.46, 0.28, 0.16, 1] });
+  }
+  // Đệm thiền cho Heo (12.55, 0.36, 9.6) & Thiền sư (15.05, 0.36, 9.6)
+  dm('box', 'white', 12.55, 0.43, 9.6, 0, 0, 0, 0.72, 0.12, 0.72, { tint: [0.30, 0.49, 0.08, 1] });
+  dm('box', 'white', 15.05, 0.43, 9.6, 0, 0, 0, 0.72, 0.12, 0.72, { tint: [0.30, 0.49, 0.08, 1] });
+  // Bộ ấm trà Bát Tràng trên bàn
+  dm('sphere', 'white', 13.80, 0.87, 9.55, 0, 0, 0, 0.18, 0.14, 0.18, { tint: [0.85, 0.92, 0.96, 1], specPow: 84 });
+  dm('cyl', 'white', 13.80, 0.93, 9.55, 0, 0, 0, 0.07, 0.03, 0.07, { tint: [0.16, 0.36, 0.65, 1] });
+  dm('cup', 'white', 13.52, 0.82, 9.75, 0, 0, 0, 0.06, 0.05, 0.06, { tint: [0.96, 0.98, 0.99, 1] });
+  dm('cup', 'white', 14.08, 0.82, 9.45, 0, 0, 0, 0.06, 0.05, 0.06, { tint: [0.96, 0.98, 0.99, 1] });
+  dm('cyl', 'white', 13.80, 0.90, 9.15, 0, 0, 0, 0.10, 0.22, 0.10, { tint: [0.10, 0.46, 0.24, 1] });
+
+  // H. 6 NPC PIXEL BILLBOARD (monk & worshipper) + CHÚ HEO MASCOT 24×20 (gl.NEAREST)
+  if (typeof drawHumanBillboardWebgl === 'function' && st.npcs) {
+    for (var ni = 0; ni < st.npcs.length; ni++) {
+      drawHumanBillboardWebgl(wgl, cam, st.npcs[ni], t);
+    }
+  }
+  if (typeof drawPigBillboardWebgl === 'function') {
+    drawPigBillboardWebgl(wgl, cam, st.pig, t, false);
+  }
+
+  // I. VÒNG SÓNG CHẠM SÀN & KHÓI TRẦM BAY LÊN
+  wgl.setBlend('add');
   for (var ri = 0; ri < st.ripples.length; ri++) {
     var rp = st.ripples[ri];
-    var rPr = projectPoint3D(cam, rp.x, 0.02, rp.z);
+    var rAlpha = Math.max(0, 1 - rp.t / 0.75) * 0.65;
+    dm('torus', 'white', rp.x, (rp.y || 0) + 0.03, rp.z, Math.PI * 0.5, 0, 0, 0.32 + rp.t * 0.85, 0.32 + rp.t * 0.85, 0.2, { tint: [0.98, 0.80, 0.32, rAlpha], emissive: 1.2 });
+  }
+  for (var spi = 0; spi < st.smokeParticles.length; spi++) {
+    var sp = st.smokeParticles[spi];
+    var prog = (sp.y - 1.46) / 1.5;
+    var sAlpha = Math.max(0.04, (1 - prog) * (st.incenseGlow > 0 ? 0.45 : 0.24));
+    dm('sphere', 'white', sp.x + Math.sin(t * 2.2 + sp.phase) * 0.09, sp.y, sp.z, 0, 0, 0, 0.09 + prog * 0.12, 0.11 + prog * 0.12, 0.09 + prog * 0.12, { tint: [0.98, 0.94, 0.84, sAlpha], emissive: 1.0 });
+  }
+  wgl.setBlend(null);
+}
+
+/* ==================== 4. FALLBACK CANVAS2D CHO HEADLESS TEST 182 & THIẾT BỊ KHÔNG WEBGL ==================== */
+function renderPagodaTpsScene(ctx, cam, st, W, H) {
+  var t = st.t;
+  // Bầu trời vàng ấm thanh tịnh
+  ctx.fillStyle = '#F5E4BE';
+  ctx.fillRect(0, 0, W, H);
+
+  // Sân Vườn Chùa & Lối đá phiến (Y = 0)
+  drawPoly3D(ctx, cam, [[-6.2, 0, 0], [6.2, 0, 0], [6.2, 0, 14.8], [-6.2, 0, 14.8]], '#A64B2A', '#7C2D12', 1);
+  for (var tz = 0; tz < 14.8; tz += 2.2) {
+    drawPoly3D(ctx, cam, [[-6.2, 0.004, tz], [6.2, 0.004, tz], [6.2, 0.004, tz + 1.0], [-6.2, 0.004, tz + 1.0]], '#B55835', '#8A3B1E', 0.4);
+  }
+  drawPoly3D(ctx, cam, [[-1.25, 0.01, 0], [1.25, 0.01, 0], [1.25, 0.01, 14.0], [-1.25, 0.01, 14.0]], '#D6CFC2', '#8C857B', 1);
+
+  // Tường bao Vườn Chùa & Cổng Tam Quan (Z = 0)
+  drawPoly3D(ctx, cam, [[-6.2, 0, 0], [-6.2, 0, 14.8], [-6.2, 3.05, 14.8], [-6.2, 3.05, 0]], '#D4A359', '#926227', 1);
+  drawPoly3D(ctx, cam, [[6.2, 0, 10.4], [6.2, 0, 0], [6.2, 3.05, 0], [6.2, 3.05, 10.4]], '#C48E42', '#926227', 1);
+  drawPoly3D(ctx, cam, [[-6.2, 0, 14.8], [-2.0, 0, 14.8], [-2.0, 3.2, 14.8], [-6.2, 3.2, 14.8]], '#C9954A', '#926227', 1);
+  drawPoly3D(ctx, cam, [[2.0, 0, 14.8], [6.2, 0, 14.8], [6.2, 3.2, 14.8], [2.0, 3.2, 14.8]], '#C9954A', '#926227', 1);
+
+  // Sàn Chánh Điện (Y = 0.48), Hành Lang Đông & Nhà Chuông Thiền Trà (Y = 0.36)
+  drawPoly3D(ctx, cam, [[-5.8, 0.48, 14.8], [5.8, 0.48, 14.8], [5.8, 0.48, 27.6], [-5.8, 0.48, 27.6]], '#5C261B', '#38150E', 1);
+  drawPoly3D(ctx, cam, [[-1.35, 0.49, 15.2], [1.35, 0.49, 15.2], [1.35, 0.49, 23.0], [-1.35, 0.49, 23.0]], '#991B1B', '#F59E0B', 1.2);
+  drawPoly3D(ctx, cam, [[5.8, 0.48, 15.2], [8.6, 0.48, 15.2], [8.6, 0.48, 17.6], [5.8, 0.48, 17.6]], '#A8A29E', '#57534E', 1);
+  drawPoly3D(ctx, cam, [[6.2, 0.36, 5.6], [16.8, 0.36, 5.6], [16.8, 0.36, 14.8], [6.2, 0.36, 14.8]], '#7C5230', '#4A2C1A', 1);
+
+  if (typeof drawPagodaWalls3D === 'function') {
+    drawPagodaWalls3D(ctx, cam);
+  }
+
+  for (var ri = 0; ri < st.ripples.length; ri++) {
+    var rp = st.ripples[ri];
+    var rPr = projectPoint3D(cam, rp.x, (rp.y || 0) + 0.02, rp.z);
     if (rPr) {
       ctx.save();
       ctx.strokeStyle = 'rgba(244,185,59,' + (1 - rp.t / 0.75).toFixed(2) + ')';
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.ellipse(rPr.sx, rPr.sy, (6 + rp.t * 28), (3 + rp.t * 12), 0, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(rPr.sx, rPr.sy, (6 + rp.t * 28), (3 + rp.t * 12), 0, 0, Math.PI * 2); ctx.stroke();
       ctx.restore();
     }
   }
 
-  // 5. Painter's Algorithm Z-Sort cho toàn bộ kiến trúc, nội thất & nhân vật
   var items = [];
   function pushItem(wx, wz, fn) {
     items.push({ d: Math.hypot(wx - cam.pos.x, wz - cam.pos.z), fn: fn });
   }
 
-  if (rm === 'garden') {
-    // Hồ Sen & Chùa Một Cột bên trái sân
-    pushItem(-3.1, 6.6, function() { drawOnePillarPagodaAndPond3D(ctx, cam, st.t); });
-    // Cây Đa Cổ Thụ bên phải sân
-    pushItem(4.15, 6.85, function() { drawBanyanTree3D(ctx, cam, 4.15, 6.85, st.t); });
-    // Bậc Tam Cấp đá dẫn vào Chánh Điện cuối sân (X = 0, Z = 13.8)
-    pushItem(0, 13.8, function() {
-      drawBox3D(ctx, cam, 0, 0, 13.45, 3.4, 0.16, 0.58, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
-      drawBox3D(ctx, cam, 0, 0, 14.00, 3.2, 0.32, 0.58, { top: '#E7E5E4', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
-      drawBox3D(ctx, cam, 0, 0, 14.50, 3.0, 0.44, 0.48, { top: '#F5F5F4', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
-    });
-    // Cổng Vòm Tre Trúc góc phải cuối sân dẫn sang Thiền Trà
-    pushItem(4.1, 14.2, function() {
-      drawBox3D(ctx, cam, 3.05, 0, 14.2, 0.22, 2.35, 0.22, { top: '#65A30D', front: '#4D7C0F', side: '#3F6212', stroke: '#1A2E05' });
-      drawBox3D(ctx, cam, 5.15, 0, 14.2, 0.22, 2.35, 0.22, { top: '#65A30D', front: '#4D7C0F', side: '#3F6212', stroke: '#1A2E05' });
-      drawBox3D(ctx, cam, 4.10, 2.24, 14.2, 2.45, 0.22, 0.30, { top: '#84CC16', front: '#4D7C0F', side: '#3F6212', stroke: '#1A2E05' });
-    });
-    // Sư thầy đi dạo trong Vườn Chùa
-    pushItem(st.gardenMonk.x, st.gardenMonk.z, function() { drawHumanTps3D(ctx, cam, st.gardenMonk, st.t); });
-  } else if (rm === 'main_hall') {
-    // 6 Cột son đỏ thếp vàng 2 bên Chánh Điện
-    var pZs = [3.4, 7.6, 11.8];
-    for (var pi = 0; pi < pZs.length; pi++) {
-      (function(pz) {
-        pushItem(-4.2, pz, function() {
-          drawBox3D(ctx, cam, -4.2, 0, pz, 0.46, 3.85, 0.46, { top: '#991B1B', front: '#B91C1C', side: '#7F1D1D', stroke: '#450A0A' });
-          drawBox3D(ctx, cam, -4.2, 0.0, pz, 0.58, 0.26, 0.58, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C' });
-          drawBox3D(ctx, cam, -4.2, 3.45, pz, 0.54, 0.14, 0.54, { top: '#FACC15', front: '#F59E0B', side: '#D97706' });
-        });
-        pushItem(4.2, pz, function() {
-          drawBox3D(ctx, cam, 4.2, 0, pz, 0.46, 3.85, 0.46, { top: '#991B1B', front: '#B91C1C', side: '#7F1D1D', stroke: '#450A0A' });
-          drawBox3D(ctx, cam, 4.2, 0.0, pz, 0.58, 0.26, 0.58, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C' });
-          drawBox3D(ctx, cam, 4.2, 3.45, pz, 0.54, 0.14, 0.54, { top: '#FACC15', front: '#F59E0B', side: '#D97706' });
-        });
-      })(pZs[pi]);
-    }
-    // Tượng Phật Vàng trên tòa sen
-    pushItem(0, 12.8, function() { drawBuddhaStatue3D(ctx, cam, st.t, st.incenseGlow); });
-    // Lư Hương Đồng nghi ngút khói trầm
-    pushItem(0, 9.5, function() { drawIncenseBurner3D(ctx, cam, 0, 9.5, st.t, st.incenseGlow); });
-    // 3 Bồ đoàn / chiếu lạy đỏ-vàng
-    var mats = [-2.25, 0, 2.25];
-    for (var mi = 0; mi < mats.length; mi++) {
-      (function(mx) {
-        pushItem(mx, 7.2, function() {
-          drawBox3D(ctx, cam, mx, 0, 7.2, 0.96, 0.12, 0.96, { top: '#B91C1C', front: '#991B1B', side: '#7F1D1D', stroke: '#F59E0B' });
-        });
-      })(mats[mi]);
-    }
-    // Sư thầy & Phật tử hành lễ
-    for (var wi = 0; wi < st.hallWorshippers.length; wi++) {
-      (function(w) { pushItem(w.x, w.z, function() { drawHumanTps3D(ctx, cam, w, st.t); }); })(st.hallWorshippers[wi]);
-    }
-  } else {
-    // 'bell_tea' — Đại Hồng Chung bên trái + Bàn Thiền Trà Bát Tràng bên phải
-    pushItem(-2.6, 10.5, function() {
-      drawGreatBellPavilion3D(ctx, cam, -2.6, 10.5, st.t, st.bellRingTimer, st.bellSwingPhase);
-    });
-    // Chiếu cói & Bàn Thiền Trà gỗ thấp + Ấm trà Bát Tràng
-    pushItem(2.4, 8.4, function() {
-      drawPoly3D(ctx, cam, [[0.55, 0.014, 6.65], [4.35, 0.014, 6.65], [4.35, 0.014, 10.15], [0.55, 0.014, 10.15]], '#D6BE8A', '#8C6E3B', 1.4);
-      // Bàn trà gỗ gụ thấp
-      drawBox3D(ctx, cam, 2.4, 0.38, 8.4, 1.32, 0.09, 1.56, { top: '#7C4F2B', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
-      drawBox3D(ctx, cam, 1.85, 0, 7.75, 0.14, 0.38, 0.14, { top: '#4A2C1A', front: '#3B2314', side: '#2B180E' });
-      drawBox3D(ctx, cam, 2.95, 0, 7.75, 0.14, 0.38, 0.14, { top: '#4A2C1A', front: '#3B2314', side: '#2B180E' });
-      drawBox3D(ctx, cam, 1.85, 0, 9.05, 0.14, 0.38, 0.14, { top: '#4A2C1A', front: '#3B2314', side: '#2B180E' });
-      drawBox3D(ctx, cam, 2.95, 0, 9.05, 0.14, 0.38, 0.14, { top: '#4A2C1A', front: '#3B2314', side: '#2B180E' });
-      // Đệm thiền cho Heo (trái bàn) & Thiền sư (phải bàn)
-      drawBox3D(ctx, cam, 1.15, 0.01, 8.4, 0.72, 0.12, 0.72, { top: '#4D7C0F', front: '#3F6212', side: '#365314', stroke: '#1A2E05' });
-      drawBox3D(ctx, cam, 3.55, 0.01, 8.4, 0.72, 0.12, 0.72, { top: '#4D7C0F', front: '#3F6212', side: '#365314', stroke: '#1A2E05' });
-      // Bộ ấm trà Bát Tràng men xanh-trắng trên bàn trà
-      drawBatTrangTeapotSprite3D(ctx, cam, 2.35, 0.49, 8.35);
-      // Chén trà nhỏ & bình hoa sen nhỏ trang trí
-      drawBox3D(ctx, cam, 2.02, 0.47, 8.75, 0.14, 0.09, 0.14, { top: '#ECFCCB', front: '#FFFFFF', side: '#CBD5E1', stroke: '#1D4ED8' });
-      drawBox3D(ctx, cam, 2.75, 0.47, 7.98, 0.16, 0.24, 0.16, { top: '#15803D', front: '#166534', side: '#14532D', stroke: '#052E16' });
-    });
-    // Thiền sư ngồi thưởng trà thanh tịnh
-    pushItem(st.teaMaster.x, st.teaMaster.z, function() { drawHumanTps3D(ctx, cam, st.teaMaster, st.t); });
-  }
+  // Hồ Sen & Chùa Một Cột (-3.15, 6.65)
+  pushItem(-3.15, 6.65, function() {
+    drawBox3D(ctx, cam, -3.15, 0, 3.65, 4.1, 0.24, 0.22, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
+    drawBox3D(ctx, cam, -3.15, 0, 9.65, 4.1, 0.24, 0.22, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
+    drawPoly3D(ctx, cam, [[-5.05, 0.08, 3.76], [-1.25, 0.08, 3.76], [-1.25, 0.08, 9.54], [-5.05, 0.08, 9.54]], '#0D9488', '#115E59', 1);
+    drawBox3D(ctx, cam, -3.15, 0.08, 6.65, 0.48, 1.15, 0.48, { top: '#D6D3D1', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
+    drawBox3D(ctx, cam, -3.15, 1.22, 6.65, 1.72, 0.14, 1.72, { top: '#991B1B', front: '#7F1D1D', side: '#5C1111', stroke: '#2B180E' });
+    drawBox3D(ctx, cam, -3.15, 1.36, 6.65, 1.32, 0.82, 1.32, { top: '#991B1B', front: '#B91C1C', side: '#7F1D1D', stroke: '#450A0A' });
+    drawBox3D(ctx, cam, -3.15, 2.18, 6.65, 1.98, 0.22, 1.98, { top: '#B91C1C', front: '#991B1B', side: '#7F1D1D', stroke: '#450A0A' });
+    drawBox3D(ctx, cam, -3.15, 2.40, 6.65, 1.34, 0.24, 1.34, { top: '#DC2626', front: '#B91C1C', side: '#991B1B', stroke: '#450A0A' });
+    drawBox3D(ctx, cam, -3.15, 2.64, 6.65, 0.18, 0.34, 0.18, { top: '#FEF08A', front: '#FACC15', side: '#CA8A04', stroke: '#78350F' });
+  });
 
-  // Chú Heo Mascot 1:1 toàn App
-  pushItem(st.pig.x, st.pig.z, function() { drawPigTps3D(ctx, cam, st.pig, st.t); });
+  // Cây Đa Cổ Thụ (4.15, 6.85)
+  pushItem(4.15, 6.85, function() {
+    drawBox3D(ctx, cam, 4.15, 0, 6.85, 1.75, 0.36, 1.75, { top: '#B45309', front: '#9A3412', side: '#7C2D12', stroke: '#451A03' });
+    drawBox3D(ctx, cam, 4.15, 0.36, 6.85, 0.68, 1.95, 0.68, { top: '#78350F', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
+    drawBox3D(ctx, cam, 4.15, 2.08, 6.85, 2.55, 0.72, 2.45, { top: '#22C55E', front: '#15803D', side: '#166534', stroke: '#14532D' });
+    drawBox3D(ctx, cam, 3.80, 2.66, 6.65, 1.85, 0.56, 1.75, { top: '#4ADE80', front: '#16A34A', side: '#15803D', stroke: '#14532D' });
+  });
+
+  // 3 Bậc Đá Tam Cấp (X ∈ [-2.0, 2.0], Z ∈ [14.0, 15.4])
+  pushItem(0, 14.7, function() {
+    for (var s = 0; s < 3; s++) {
+      drawBox3D(ctx, cam, 0, 0, 14.23 + s * 0.47, 4.0, (s + 1) * 0.16, 0.47, { top: '#E7E5E4', front: '#A8A29E', side: '#78716C', stroke: '#44403C' });
+    }
+  });
+
+  // Cổng Vòm Tre + 2 Bậc Đá (X ∈ [5.6, 7.0], Z ∈ [10.4, 13.0])
+  pushItem(6.2, 11.7, function() {
+    drawBox3D(ctx, cam, 6.2, 0, 10.48, 0.22, 2.35, 0.22, { top: '#65A30D', front: '#4D7C0F', side: '#3F6212', stroke: '#1A2E05' });
+    drawBox3D(ctx, cam, 6.2, 0, 12.92, 0.22, 2.35, 0.22, { top: '#65A30D', front: '#4D7C0F', side: '#3F6212', stroke: '#1A2E05' });
+    drawBox3D(ctx, cam, 6.2, 2.24, 11.70, 0.30, 0.22, 2.60, { top: '#84CC16', front: '#4D7C0F', side: '#3F6212', stroke: '#1A2E05' });
+  });
+
+  // 6 Cột Chánh Điện + Lư Hương + Phật Đài (Y = 0.48)
+  var pZs = [17.8, 21.6, 25.4];
+  for (var pi = 0; pi < pZs.length; pi++) {
+    (function(pz) {
+      pushItem(-4.2, pz, function() {
+        drawBox3D(ctx, cam, -4.2, 0.48, pz, 0.46, 3.85, 0.46, { top: '#991B1B', front: '#B91C1C', side: '#7F1D1D', stroke: '#450A0A' });
+      });
+      pushItem(4.2, pz, function() {
+        drawBox3D(ctx, cam,  4.2, 0.48, pz, 0.46, 3.85, 0.46, { top: '#991B1B', front: '#B91C1C', side: '#7F1D1D', stroke: '#450A0A' });
+      });
+    })(pZs[pi]);
+  }
+  pushItem(0, 23.85, function() {
+    drawBox3D(ctx, cam, 0, 0.48, 23.85, 1.12, 0.26, 1.12, { top: '#78716C', front: '#57534E', side: '#44403C', stroke: '#292524' });
+    drawBox3D(ctx, cam, 0, 0.74, 23.85, 0.86, 0.66, 0.86, { top: '#92400E', front: '#78350F', side: '#5C2D0C', stroke: '#F59E0B' });
+  });
+  pushItem(0, 26.35, function() {
+    drawBox3D(ctx, cam, 0, 0.48, 26.35, 5.4, 0.48, 1.85, { top: '#7C2D12', front: '#5C1D14', side: '#4A1810', stroke: '#2B180E' });
+    drawBox3D(ctx, cam, 0, 0.96, 26.40, 1.85, 0.30, 1.35, { top: '#F472B6', front: '#EC4899', side: '#BE185D', stroke: '#FDE047' });
+    drawBox3D(ctx, cam, 0, 1.26, 26.40, 1.18, 0.42, 0.78, { top: '#FEF08A', front: '#FACC15', side: '#CA8A04', stroke: '#92400E' });
+    drawBox3D(ctx, cam, 0, 1.68, 26.40, 0.78, 0.74, 0.54, { top: '#FEF08A', front: '#F59E0B', side: '#D97706', stroke: '#92400E' });
+  });
+
+  // Đại Hồng Chung (9.2, 0.36, 11.4) & Bàn trà TÂM AN (13.8, 0.36, 9.6)
+  pushItem(9.2, 11.4, function() {
+    drawBox3D(ctx, cam, 9.2, 0.36, 11.4, 2.40, 0.24, 2.20, { top: '#A8A29E', front: '#78716C', side: '#57534E', stroke: '#292524' });
+    drawBox3D(ctx, cam, 9.2, 1.10, 11.4, 1.18, 1.18, 1.18, { top: '#6B5630', front: '#4E3F22', side: '#3B2F19', stroke: '#D97706' });
+  });
+  pushItem(13.8, 9.6, function() {
+    drawBox3D(ctx, cam, 13.8, 0.68, 9.6, 1.32, 0.10, 1.56, { top: '#7C4F2B', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
+    drawBatTrangTeapotSprite3D(ctx, cam, 13.8, 0.85, 9.55);
+  });
+
+  // 6 NPCs + Chú Heo Mascot
+  for (var ni = 0; ni < st.npcs.length; ni++) {
+    (function(npc) {
+      pushItem(npc.x, npc.z, function() { drawHumanTps3D(ctx, cam, npc, t); });
+    })(st.npcs[ni]);
+  }
+  pushItem(st.pig.x, st.pig.z, function() { drawPigTps3D(ctx, cam, st.pig, t); });
 
   items.sort(function(a, b) { return b.d - a.d; });
   for (var ii = 0; ii < items.length; ii++) items[ii].fn();
 
-  // 6. Lớp phủ không khí thanh tịnh + Fade chuyển phòng (200ms) / Fade rời chùa (240ms)
-  ctx.save();
-  if (rm === 'garden') {
-    ctx.fillStyle = 'rgba(255, 232, 165, 0.07)';
-  } else if (rm === 'main_hall') {
-    ctx.fillStyle = st.incenseGlow > 0 ? 'rgba(253, 215, 110, 0.14)' : 'rgba(255, 195, 105, 0.09)';
-  } else {
-    ctx.fillStyle = 'rgba(236, 252, 203, 0.06)';
-  }
-  ctx.fillRect(0, 0, W, H);
-
-  var fAlpha = Math.max(st.exitFade, st.roomFade);
-  if (fAlpha > 0.01) {
-    ctx.fillStyle = st.roomFade > st.exitFade
-      ? 'rgba(42, 22, 14, ' + st.roomFade.toFixed(2) + ')'
-      : 'rgba(246, 238, 220, ' + st.exitFade.toFixed(2) + ')';
+  if (st.exitFade > 0.01) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(246, 238, 220, ' + st.exitFade.toFixed(2) + ')';
     ctx.fillRect(0, 0, W, H);
+    ctx.restore();
   }
-  ctx.restore();
 }
 `;
 }

@@ -1,13 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import { WebView } from 'react-native-webview';
+import React, { useEffect, useMemo, useRef } from 'react';
 import * as Haptics from 'expo-haptics';
-import { buildTps3dEngineScript } from '../pixel/pixelTps3dEngine';
+import { WebglTpsBannerShell } from './WebglTpsBannerShell';
 import { buildCafeWebgl3dEngineScript } from './cafe/cafeWebgl3dEngine';
 import { buildCafeVnWallArtScript } from './cafe/cafeVnWallArt';
 import { buildCafeTps3dSceneScript } from './cafe/cafeTps3dScene';
-
-const SafeWebView = WebView as unknown as React.ComponentType<any>;
 
 interface CafeTpsBannerWebViewProps {
   onExitCafe?: () => void;
@@ -15,17 +11,16 @@ interface CafeTpsBannerWebViewProps {
 }
 
 /**
- * Quán Cộng Cà Phê 2 Tầng WebGL 3D — Sạch Sẽ 0% Card Viền, Chú Heo 24×20 Đồng Bộ & Di Chuyển Real-Time (Quyết định 248)
- * - Gỡ bỏ hoàn toàn mọi toast, pill, dải nút card viền và tấm nắng trần — màn hình 100% không gian 3D.
- * - Chạm sàn / ghế / Quầy Bar / Heo AI / Cửa chính để chú Heo đi bộ real-time 2 tầng không cắt đoạn.
+ * Quán Cộng Cà Phê 2 Tầng WebGL 3D — Chuẩn Tham Chiếu Toàn Hệ Thống (Quyết định 248–250)
+ * - Dùng khung dùng chung WebglTpsBannerShell (0-CDN, SafeWebView + iframe srcDoc, 0% card viền).
+ * - Góc nhìn thứ 3 rộng chuẩn Quán Phở (~64° HFOV), chú Heo 24×20 & Barista/Khách NPC Pixel Art gl.NEAREST rõ khuôn mặt.
+ * - Chạm sàn / bậc cầu thang (rayRampQuad) / 11 ghế / Quầy Bar / Heo AI / Cửa chính để đi bộ real-time 2 tầng không cắt đoạn.
  */
 export const CafeTpsBannerWebView: React.FC<CafeTpsBannerWebViewProps> = ({
   onExitCafe,
   onOpenChat,
 }) => {
-  const webViewRef = useRef<any>(null);
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [ready] = useState(true);
 
   useEffect(() => {
     return () => {
@@ -33,86 +28,18 @@ export const CafeTpsBannerWebView: React.FC<CafeTpsBannerWebViewProps> = ({
     };
   }, []);
 
-  const handleRoomPayload = (d: any) => {
-    if (!d) return;
-    if (d.type === 'HAPTIC_LIGHT') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    } else if (d.type === 'HAPTIC_MEDIUM') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    } else if (d.type === 'EXIT_CAFE' && onExitCafe) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
-      exitTimerRef.current = setTimeout(() => onExitCafe(), 120);
-    } else if (d.type === 'OPEN_AI_CHAT' && onOpenChat) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-      onOpenChat();
-    }
-  };
+  const wallArtScript = useMemo(() => {
+    // Giữ tham chiếu buildCafeWebgl3dEngineScript() đồng bộ shim với WebglTpsBannerShell
+    void buildCafeWebgl3dEngineScript;
+    return buildCafeVnWallArtScript();
+  }, []);
 
-  useEffect(() => {
-    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
-    const onWebMsg = (ev: MessageEvent) => {
-      try {
-        const d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
-        handleRoomPayload(d);
-      } catch (_e) {}
-    };
-    window.addEventListener('message', onWebMsg);
-    return () => window.removeEventListener('message', onWebMsg);
-  }, [onExitCafe, onOpenChat]);
+  const sceneScript = useMemo(() => buildCafeTps3dSceneScript(), []);
 
-  const handleMessage = (event: any) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data);
-      handleRoomPayload(data);
-    } catch (_e) {}
-  };
-
-  const tpsEngineScript = useMemo(() => buildTps3dEngineScript(), []);
-  const webglEngineScript = useMemo(() => buildCafeWebgl3dEngineScript(), []);
-  const cafeWallArtScript = useMemo(() => buildCafeVnWallArtScript(), []);
-  const cafeSceneScript = useMemo(() => buildCafeTps3dSceneScript(), []);
-
-  const htmlContent = useMemo(
-    () => `<!doctype html>
-<html lang="vi">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #2D3522; }
-  canvas {
-    display: block; width: 100%; height: 100%;
-    touch-action: none;
-    cursor: grab;
-  }
-  canvas:active { cursor: grabbing; }
-</style>
-</head>
-<body>
-<canvas id="cafeCv"></canvas>
-<script>
-window.onerror = function(msg, src, line, col) {
-  try {
-    var payload = JSON.stringify({ type: 'JS_ERROR', message: String(msg), line: line, col: col });
-    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(payload);
-    else if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*');
-  } catch(e) {}
-};
-function postRN(obj) {
-  try {
-    var s = JSON.stringify(obj);
-    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(s);
-    else if (window.parent && window.parent !== window) window.parent.postMessage(s, '*');
-  } catch(e) {}
-}
-${tpsEngineScript}
-${webglEngineScript}
-${cafeWallArtScript}
-${cafeSceneScript}
+  const initScript = useMemo(
+    () => `
 (function() {
-  var cv = document.getElementById('cafeCv');
+  var cv = document.getElementById('tpsCv');
   var wgl = createCafeWebglRenderer(cv);
   var ctx = wgl ? null : cv.getContext('2d');
   if (wgl) buildCafeProceduralTextures(wgl);
@@ -135,12 +62,10 @@ ${cafeSceneScript}
     postRN({ type: 'HAPTIC_MEDIUM' });
     postRN({ type: 'OPEN_AI_CHAT' });
   };
-  // Góc nhìn thứ 3 rộng chuẩn Quán Phở (dist = 4.85m, pitch = -0.32, yaw = 0.08)
   var cam = createTpsCamera({ yaw: 0.08, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
   var cafeBounds = { minX: -5.5, maxX: 5.5, minZ: -2.2, maxZ: 14.0, maxY: 6.8 };
   var exitSent = false;
 
-  // Vuốt xoay camera 360° & Chạm sàn / ghế / Heo AI / Quầy Bar / Cửa đi bộ real-time không cắt đoạn
   var dragging = false, moved = false, lastX = 0, lastY = 0, startX = 0, startY = 0;
   function getPt(e) {
     if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -206,74 +131,51 @@ ${cafeSceneScript}
   function loop(now) {
     var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));
     lastNow = now;
-    stepCafeTps(st, dt);
-    if (st.exiting && !exitSent && st.exitFade >= 0.85) {
-      exitSent = true;
-      postRN({ type: 'EXIT_CAFE' });
-    }
-    if (wgl) {
-      cam.vw = W; cam.vh = H;
-      var asp = W / Math.max(1, H);
-      var fovy = asp < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, asp))) : 0.82;
-      cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);
-      renderCafeWebglScene(wgl, cam, st, W, H);
-    } else {
-      updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, cafeBounds);
-      renderCafeTpsScene(ctx, cam, st, W, H);
+    if (window.__isActive !== false) {
+      stepCafeTps(st, dt);
+      if (st.exiting && !exitSent && st.exitFade >= 0.85) {
+        exitSent = true;
+        postRN({ type: 'EXIT_CAFE' });
+      }
+      if (wgl) {
+        cam.vw = W; cam.vh = H;
+        var asp = W / Math.max(1, H);
+        var fovy = asp < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, asp))) : 0.82;
+        cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);
+        renderCafeWebglScene(wgl, cam, st, W, H);
+      } else {
+        updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, cafeBounds);
+        renderCafeTpsScene(ctx, cam, st, W, H);
+      }
     }
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
 })();
-</script>
-</body>
-</html>`,
-    [tpsEngineScript, webglEngineScript, cafeWallArtScript, cafeSceneScript]
+`,
+    []
   );
 
-  const memoizedSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
-
-  if (!ready) return null;
-
-  if (Platform.OS === 'web') {
-    return (
-      <View style={styles.container}>
-        <iframe
-          title="Cộng Cà Phê 2 Tầng WebGL 3D"
-          srcDoc={htmlContent}
-          style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-        />
-      </View>
-    );
-  }
+  const handlePayload = (d: any) => {
+    if (!d) return;
+    if (d.type === 'EXIT_CAFE' && onExitCafe) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = setTimeout(() => onExitCafe(), 120);
+    } else if (d.type === 'OPEN_AI_CHAT' && onOpenChat) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      onOpenChat();
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <SafeWebView
-        ref={webViewRef}
-        source={memoizedSource}
-        originWhitelist={['*']}
-        javaScriptEnabled
-        domStorageEnabled
-        scrollEnabled={false}
-        bounces={false}
-        onMessage={handleMessage}
-        containerStyle={styles.webView}
-        style={styles.webView}
-      />
-    </View>
+    <WebglTpsBannerShell
+      title="Cộng Cà Phê 2 Tầng WebGL 3D"
+      backgroundHex="#2D3522"
+      wallArtScript={wallArtScript}
+      sceneScript={sceneScript}
+      initScript={initScript}
+      onPayload={handlePayload}
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: '#2D3522',
-  },
-  webView: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: '#2D3522',
-  },
-});

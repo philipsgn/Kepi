@@ -480,6 +480,16 @@ function pickCafeTarget3D(cam, st, sx, sy) {
     }
   }
 
+  // 4b. Chạm trực tiếp vào Cầu Thang Gỗ 12 Bậc (rayRampQuad) -> đi bộ từng bậc tới đúng bậc đó!
+  if (typeof rayRampQuad === 'function') {
+    var stairHit = rayRampQuad(ox, oy, oz, dx, dy, dz, {
+      axis: 'z', minX: -3.98, maxX: -1.62, zStart: 8.4, zEnd: 12.8, yStart: 0, yEnd: 3.4
+    });
+    if (stairHit) {
+      return { kind: 'stair', x: stairHit.x, y: stairHit.y, z: stairHit.z };
+    }
+  }
+
   // 5. Chạm vào Sàn Tầng 2 / Ban Công hoặc Sàn Tầng 1
   if (dy < -0.025) {
     var t2 = (3.4 - oy) / dy;
@@ -501,59 +511,10 @@ function pickCafeTarget3D(cam, st, sx, sy) {
   return null;
 }
 
-/* ==================== 4. CHÚ HEO PIXEL ART 24×20 ĐỒNG BỘ 100% (TỈ LỆ GỌN NHƯ QUÁN PHỞ) ==================== */
-function drawPigBillboardWebgl(wgl, cam, pig, t, isAiCoach) {
-  var dm = wgl.drawMesh;
-  var liftY = pig.seated ? 0.24 : 0;
-  var bounce = pig.walking ? Math.abs(Math.sin(t * 11)) * 0.04 : 0;
-  var dxCam = cam.pos.x - pig.x, dzCam = cam.pos.z - pig.z;
-  var faceCamYaw = Math.atan2(dxCam, dzCam);
-  var camLookYaw = Math.atan2(-dxCam, -dzCam);
-
-  var rel = (pig.yaw || 0) - camLookYaw;
-  while (rel > Math.PI) rel -= Math.PI * 2;
-  while (rel < -Math.PI) rel += Math.PI * 2;
-  var absRel = Math.abs(rel);
-  var view = absRel < 0.78 ? 'back' : (absRel > 2.32 ? 'front' : (rel > 0 ? 'right' : 'left'));
-  var frame = (pig.walking && Math.sin(t * 12) > 0) ? '1' : '0';
-  var texKey = (isAiCoach && view === 'front') ? 'pig_ai_front' : ('pig_' + view + '_' + frame);
-
-  wgl.setBlend('alpha');
-  dm('cyl', 'white', pig.x, pig.y + 0.012, pig.z, 0, 0, 0, 0.42, 0.01, 0.42, { tint: [0.08, 0.07, 0.05, 0.34], emissive: 1.0 });
-  wgl.setBlend(null);
-
-  // Tỷ lệ chuẩn 0.72m giống hệt chú Heo Quán Phở, không bao giờ choán kín khung hình!
-  dm('quad', texKey, pig.x, pig.y + liftY + 0.33 + bounce, pig.z, 0, faceCamYaw, 0, 0.72, 0.72, 1, {
-    tint: [1, 1, 1, 1],
-    emissive: 1.0
-  });
-}
-
-/* ==================== 5. ĐỒ NỘI THẤT, THƯ VIỆN, CÂY XANH & ĐỒ MỸ NGHỆ VĂN HÓA VIỆT 3D ==================== */
-function drawHuman3DWebgl(wgl, h, t) {
-  var dm = wgl.drawMesh;
-  var x = h.x, y = h.y || 0, z = h.z, yaw = h.yaw || 0;
-  var shirtCol = h.role === 'barista' ? [0.29, 0.37, 0.21, 1] : (h.shirt || [0.55, 0.28, 0.20, 1]);
-  var pantsCol = h.pants || [0.16, 0.17, 0.20, 1];
-  var skin = [0.98, 0.80, 0.66, 1];
-  var sy = Math.sin(yaw), cy = Math.cos(yaw);
-  var legSwing = (h.state === 'WALK') ? Math.sin(t * 9 + (h.phase || 0)) * 0.25 : 0;
-
-  if (h.state !== 'SIT') {
-    dm('cyl', 'white', x - cy*0.09, y + 0.22, z + sy*0.09, legSwing, yaw, 0, 0.11, 0.42, 0.11, { tint: pantsCol });
-    dm('cyl', 'white', x + cy*0.09, y + 0.22, z - sy*0.09, -legSwing, yaw, 0, 0.11, 0.42, 0.11, { tint: pantsCol });
-  }
-  var seatOff = (h.state === 'SIT') ? -0.14 : 0;
-  dm('cyl', 'white', x, y + 0.62 + seatOff, z, 0, yaw, 0, 0.38, 0.56, 0.24, { tint: shirtCol, rim: 0.18 });
-  dm('sphere', 'white', x, y + 1.05 + seatOff, z, 0, yaw, 0, 0.30, 0.32, 0.30, { tint: skin, rim: 0.22 });
-  dm('sphere', 'white', x, y + 1.15 + seatOff, z, 0, yaw, 0, 0.31, 0.16, 0.31, { tint: h.role === 'barista' ? shirtCol : [0.14,0.11,0.09,1] });
-
-  if (h.handingTag) {
-    dm('cyl', 'white', x + sy*0.30, y + 0.84, z + cy*0.30, 0.9, yaw, 0, 0.08, 0.34, 0.08, { tint: shirtCol });
-    dm('box', 'timber', x + sy*0.48, y + 0.86, z + cy*0.48, 0.1, yaw, 0, 0.12, 0.18, 0.02, { tint: [0.95, 0.78, 0.45, 1] });
-  } else if (h.blending) {
-    var bBob = Math.sin(t * 14) * 0.03;
-    dm('cyl', 'white', x + sy*0.26, y + 0.80 + bBob, z + cy*0.26, 0.7, yaw, 0, 0.08, 0.30, 0.08, { tint: shirtCol });
+/* ==================== 4. CON NGƯỜI & CHÚ HEO PIXEL BILLBOARD (ĐỒNG BỘ QĐ 250) ==================== */
+function drawCafeHumanWebgl(wgl, cam, h, t) {
+  if (typeof drawHumanBillboardWebgl === 'function') {
+    drawHumanBillboardWebgl(wgl, cam, h, t);
   }
 }
 
@@ -707,7 +668,7 @@ function renderCafeWebglScene(wgl, cam, st, W, H) {
     dm('cyl', 'white', 2.4, 2.85, 4.6 + li*1.7, 0, 0, 0, 0.02, 0.8, 0.02, { tint: [0.1,0.1,0.1,1] });
     dm('sphere', 'white', 2.4, 2.42, 4.6 + li*1.7, 0, 0, 0, 0.16, 0.18, 0.16, { tint: [1.0, 0.86, 0.45, 1], emissive: 1.5 });
   }
-  for (var bi = 0; bi < st.baristas.length; bi++) drawHuman3DWebgl(wgl, st.baristas[bi], st.t);
+  for (var bi = 0; bi < st.baristas.length; bi++) drawCafeHumanWebgl(wgl, cam, st.baristas[bi], st.t);
 
   // D. CỤM BÀN GHẾ VĂN HÓA VIỆT TẦNG 1 (BÀN TRÒN, BÀN MÁY MAY THƯ VIỆN, ẤM TRÀ BÁT TRÀNG, LỌ HOA SEN)
   // Bàn tròn 1 + Bàn tròn 2 giữa sảnh
@@ -814,7 +775,7 @@ function renderCafeWebglScene(wgl, cam, st, W, H) {
 
   // H. 7 Khách NPC Nhộn Nhịp + Chú Heo AI & Chú Heo Chủ Nhân 24×20 Đồng Bộ Toàn App
   if (st.npcs) {
-    for (var ni = 0; ni < st.npcs.length; ni++) drawHuman3DWebgl(wgl, st.npcs[ni], st.t);
+    for (var ni = 0; ni < st.npcs.length; ni++) drawCafeHumanWebgl(wgl, cam, st.npcs[ni], st.t);
   }
   drawPigBillboardWebgl(wgl, cam, st.aiCoachPig, st.t, true);
   drawPigBillboardWebgl(wgl, cam, st.pig, st.t, false);

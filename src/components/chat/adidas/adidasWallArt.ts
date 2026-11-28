@@ -1,17 +1,323 @@
 /**
- * Bộ Sưu Tập Mỹ Thuật Tường 3 Phòng Độc Bản — Adidas Originals Hội An TPS 3D (Quyết định 245)
- * - Phòng 1 ('hall' — Sảnh Tầng 1 Hội An): Tường Shoe Display Wall (Samba, Superstar, Gazelle, Predator),
- *   kệ áo thể thao & cửa vòm sang Phòng Thay Đồ (tường phải), bảng ADIDAS ORIGINALS · HỘI AN & biển LÊN LẦU 2 (tường cuối).
- * - Phòng 2 ('fitting' — Phòng Thay Đồ & Gương Toàn Thân): Gương gỗ toàn thân phản chiếu chú Heo trực tiếp,
- *   rèm nhung đỏ đô 2 bên, sào áo khoác 3 Sọc (tường trái) & cửa về Sảnh Tầng 1 (tường phải).
- * - Phòng 3 ('upper' — Lầu 2 Bộ Sưu Tập Việt Nam & Thu Ngân): Tường BST Áo 3 Sọc & Nón Lá Việt Nam (tường trái),
- *   tranh tường Hoa Sen × 3 Sọc nghệ thuật & biển XUỐNG TẦNG 1 (tường cuối), kệ hộp giày sau Quầy Thu Ngân (tường phải).
- * - 100% bảng chữ áp dụng khóa khung 4 góc ctx.clip() + safeW (maxWidth) chống tràn chữ mọi góc 360°.
- * - Tuyệt đối không dùng ctx.roundRect.
+ * Bộ Sinh Texture Thủ Tục WebGL 3D & Mỹ Thuật Tường Fallback — Adidas Originals Hội An (Quyết định 250)
+ * - Sinh các Texture Power-of-Two (256×256 / 512×256) trực tiếp trong RAM (<15ms, 0 CDN mạng):
+ *   1. hoiAnYellowWall: Vôi vàng Hội An cổ kính loang vữa ấm.
+ *   2. gachBong: Gạch bông di sản Hội An 16×16 / 4 cánh cổ điển.
+ *   3. limWood: Gỗ lim Hội An nhiều thớ đậm ấm cho sàn boutique, cầu thang 12 bậc & quầy.
+ *   4. trefoilOriginSign: Bảng gỗ lim chữ vàng ADIDAS ORIGINALS · HỘI AN HERITAGE + logo Cỏ Ba Lá.
+ *   5. vnLotusStripeArt: Tranh Nón Lá × Hoa Sen × 3 Sọc nghệ thuật.
+ *   6. vnCollectionSign: Bảng ★ BỘ SƯU TẬP VIỆT NAM · 3 SỌC ★ kèm Nón Lá & Áo Đấu.
+ *   7. threeStripesWall: Tường 3 sọc Adidas Originals di sản.
+ *   8. velvetCurtain: Rèm nhung đỏ đô xếp nếp có dây tua vàng phòng thử đồ.
+ *   9. fittingGreenWall, shoeDisplayBoard, posShelfTex, mirrorGlass, vnDoorWood.
+ * - Gọi buildPigBillboardTextures(wgl, ['adidas_jacket']) để render chú Heo 24×20 gl.NEAREST.
+ * - Giữ nguyên bộ hàm Canvas2D (drawAdidasRoomWalls3D) làm fallback & cho Headless Smoke Test 182.
  */
 export function buildAdidasWallArtScript(): string {
   return String.raw`
-/* ==================== 1. HELPER KHÓA KHUNG 4 GÓC CHỐNG TRÀN CHỮ 100% ==================== */
+/* ==================== 1. BỘ SINH TEXTURE THỦ TỤC ADIDAS ORIGINALS HỘI AN (WEBGL 3D) ==================== */
+function makeAdidasSeedRng(seed) {
+  var s = seed | 0;
+  return function() {
+    s = (s + 0x6D2B79F5) | 0;
+    var t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function drawAdidasTrefoil2D(g, cx, cy, r, col) {
+  g.save();
+  g.fillStyle = col || '#F4B93B';
+  var angles = [-0.58, 0, 0.58];
+  for (var i = 0; i < angles.length; i++) {
+    g.save();
+    g.translate(cx, cy);
+    g.rotate(angles[i]);
+    g.beginPath();
+    g.ellipse(0, -r * 0.48, r * 0.28, r * 0.62, 0, 0, Math.PI * 2);
+    g.fill();
+    g.restore();
+  }
+  g.fillStyle = '#2B180E';
+  for (var s = -1; s <= 1; s++) {
+    g.fillRect(cx - r * 0.58, cy + s * r * 0.13 + r * 0.02, r * 1.16, Math.max(2, r * 0.07));
+  }
+  g.restore();
+}
+
+function buildAdidasProceduralTextures(wgl) {
+  if (!wgl || typeof document === 'undefined') return;
+  function mkCanvas(w, h) {
+    var c = document.createElement('canvas'); c.width = w; c.height = h; return c;
+  }
+
+  // 1. Vôi vàng Hội An cổ kính (hoiAnYellowWall)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2501);
+    g.fillStyle = '#E0B452'; g.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 240; i++) {
+      g.fillStyle = rng() > 0.45 ? 'rgba(244,205,112,0.18)' : 'rgba(176,126,38,0.16)';
+      g.beginPath(); g.arc(rng() * 256, rng() * 256, 10 + rng() * 34, 0, Math.PI * 2); g.fill();
+    }
+    g.strokeStyle = 'rgba(116,74,24,0.16)'; g.lineWidth = 1;
+    for (var k = 0; k < 24; k++) {
+      var cx = rng() * 256, cy = rng() * 256;
+      g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + (rng() - 0.5) * 24, cy + rng() * 28); g.stroke();
+    }
+    wgl.registerTextureCanvas('hoiAnYellowWall', c, true);
+  })();
+
+  // 2. Gạch bông di sản Hội An (gachBong)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2502);
+    g.fillStyle = '#E6DBC2'; g.fillRect(0, 0, 256, 256);
+    for (var ty = 0; ty < 256; ty += 128) {
+      for (var tx = 0; tx < 256; tx += 128) {
+        var cx = tx + 64, cy = ty + 64;
+        g.fillStyle = ((tx + ty) / 128) % 2 === 0 ? '#EAE0CA' : '#DDD0B4';
+        g.fillRect(tx + 2, ty + 2, 124, 124);
+        g.strokeStyle = '#9C8A67'; g.lineWidth = 3; g.strokeRect(tx + 3, ty + 3, 122, 122);
+        g.fillStyle = '#8C5E28';
+        for (var k = 0; k < 4; k++) {
+          g.save(); g.translate(cx, cy); g.rotate(k * Math.PI / 2);
+          g.beginPath(); g.ellipse(0, -26, 11, 22, 0, 0, Math.PI * 2); g.fill();
+          g.restore();
+        }
+        g.fillStyle = '#2F5241';
+        for (var d = 0; d < 4; d++) {
+          g.save(); g.translate(cx, cy); g.rotate(d * Math.PI / 2 + Math.PI / 4);
+          g.beginPath(); g.ellipse(0, -20, 7, 15, 0, 0, Math.PI * 2); g.fill();
+          g.restore();
+        }
+        g.fillStyle = '#F7EED8'; g.beginPath(); g.arc(cx, cy, 11, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#C88A2E'; g.beginPath(); g.arc(cx, cy, 5, 0, Math.PI * 2); g.fill();
+      }
+    }
+    for (var s = 0; s < 100; s++) {
+      g.fillStyle = 'rgba(92,74,48,0.08)';
+      g.beginPath(); g.arc(rng() * 256, rng() * 256, 4 + rng() * 12, 0, Math.PI * 2); g.fill();
+    }
+    wgl.registerTextureCanvas('gachBong', c, true);
+  })();
+
+  // 3. Gỗ lim Hội An (limWood)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2503);
+    g.fillStyle = '#6B4226'; g.fillRect(0, 0, 256, 256);
+    for (var y = 0; y < 256; y += 3) {
+      g.fillStyle = (y % 6 === 0) ? 'rgba(43,24,14,0.34)' : 'rgba(150,97,55,0.22)';
+      g.fillRect(0, y, 256, 2);
+    }
+    for (var p = 0; p < 256; p += 64) {
+      g.fillStyle = 'rgba(28,14,8,0.45)'; g.fillRect(0, p, 256, 2);
+    }
+    for (var m = 0; m < 10; m++) {
+      g.strokeStyle = 'rgba(35,18,8,0.25)'; g.beginPath();
+      g.ellipse(rng() * 256, rng() * 256, 18, 4, 0, 0, Math.PI * 2); g.stroke();
+    }
+    wgl.registerTextureCanvas('limWood', c, true);
+  })();
+
+  // 4. Bảng Trefoil Origin Hội An (trefoilOriginSign)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#2B180E'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 8; g.strokeRect(10, 10, 492, 236);
+    g.strokeStyle = '#7C4F2B'; g.lineWidth = 3; g.strokeRect(20, 20, 472, 216);
+    drawAdidasTrefoil2D(g, 256, 86, 50, '#F4B93B');
+    g.fillStyle = '#FFFBF1'; g.font = 'bold 38px sans-serif'; g.textAlign = 'center';
+    g.fillText('ADIDAS ORIGINALS', 256, 168);
+    g.fillStyle = '#FDE047'; g.font = 'bold 24px monospace';
+    g.fillText('· HỘI AN HERITAGE ·', 256, 212);
+    wgl.registerTextureCanvas('trefoilOriginSign', c, false);
+  })();
+
+  // 5. Tranh Nón Lá × Hoa Sen × 3 Sọc (vnLotusStripeArt)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#1E3A3D'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 8; g.strokeRect(8, 8, 496, 240);
+    // 3 Dải sọc vàng di sản chéo
+    g.fillStyle = 'rgba(244,185,59,0.28)';
+    for (var st = -1; st <= 1; st++) {
+      g.beginPath();
+      g.moveTo(210 + st * 46, 244); g.lineTo(240 + st * 46, 244);
+      g.lineTo(350 + st * 46, 12);  g.lineTo(320 + st * 46, 12);
+      g.closePath(); g.fill();
+    }
+    // Nón Lá Việt Nam trái
+    g.fillStyle = '#E8C574'; g.strokeStyle = '#78350F'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(124, 62); g.lineTo(54, 158); g.lineTo(194, 158); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#DC2626'; g.fillRect(102, 114, 44, 12);
+    g.fillStyle = '#FFFBF1';
+    g.fillRect(110, 116, 6, 8); g.fillRect(121, 116, 6, 8); g.fillRect(132, 116, 6, 8);
+    // Đóa Hoa Sen Hồng & Lá Sen phải
+    g.fillStyle = '#15803D'; g.beginPath(); g.ellipse(340, 184, 72, 20, 0, 0, Math.PI * 2); g.fill();
+    var petals = [[-44, 10, -0.5], [44, 10, 0.5], [-24, -6, -0.25], [24, -6, 0.25], [0, -18, 0]];
+    for (var pi = 0; pi < petals.length; pi++) {
+      g.save(); g.translate(340 + petals[pi][0], 138 + petals[pi][1]); g.rotate(petals[pi][2]);
+      g.fillStyle = pi === 4 ? '#FB7185' : '#F43F5E';
+      g.beginPath(); g.ellipse(0, 0, 22, 46, 0, 0, Math.PI * 2); g.fill();
+      g.restore();
+    }
+    g.fillStyle = '#FDE047'; g.beginPath(); g.arc(340, 146, 14, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#FFFBF1'; g.font = 'bold 24px serif'; g.textAlign = 'center';
+    g.fillText('NÓN LÁ × HOA SEN × 3 SỌC · HỘI AN', 256, 228);
+    wgl.registerTextureCanvas('vnLotusStripeArt', c, false);
+  })();
+
+  // 6. Bảng BST Việt Nam (vnCollectionSign)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#5C341D'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#FFF5D6'; g.fillRect(14, 52, 484, 190);
+    g.fillStyle = '#991B1B'; g.fillRect(10, 10, 492, 44);
+    g.strokeStyle = '#FDE047'; g.lineWidth = 4; g.strokeRect(10, 10, 492, 236);
+    g.fillStyle = '#FDE047'; g.font = 'bold 22px monospace'; g.textAlign = 'center';
+    g.fillText('★ BỘ SƯU TẬP VIỆT NAM · 3 SỌC ★', 256, 39);
+    // 3 Nón Lá hàng trên
+    for (var ni = -1; ni <= 1; ni++) {
+      var nx = 256 + ni * 144, ny = 92;
+      g.fillStyle = '#E8C574'; g.strokeStyle = '#78350F'; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(nx, ny - 26); g.lineTo(nx - 42, ny + 18); g.lineTo(nx + 42, ny + 18); g.closePath();
+      g.fill(); g.stroke();
+      g.fillStyle = '#DA251D'; g.fillRect(nx - 18, ny, 36, 8);
+    }
+    // 3 Áo Đấu Việt Nam 3 Sọc hàng dưới
+    var jCols = [['#DA251D', '#FDE047'], ['#FFFBF1', '#DA251D'], ['#0F766E', '#FDE047']];
+    for (var ji = 0; ji < 3; ji++) {
+      var jx = 112 + ji * 144, jy = 140;
+      g.fillStyle = jCols[ji][0]; g.fillRect(jx - 38, jy, 76, 22); g.fillRect(jx - 24, jy, 48, 86);
+      g.strokeStyle = '#2B180E'; g.lineWidth = 2; g.strokeRect(jx - 24, jy, 48, 86);
+      g.fillStyle = jCols[ji][1];
+      for (var s = 0; s < 3; s++) {
+        g.fillRect(jx - 34 + s * 5, jy + 2, 3, 18);
+        g.fillRect(jx + 22 + s * 5, jy + 2, 3, 18);
+      }
+      g.fillRect(jx - 7, jy + 24, 14, 14);
+    }
+    wgl.registerTextureCanvas('vnCollectionSign', c, false);
+  })();
+
+  // 7. Tường 3 sọc Adidas (threeStripesWall)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#18241C'; g.fillRect(0, 0, 256, 256);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 6; g.strokeRect(8, 8, 240, 240);
+    g.fillStyle = '#FFFBF1';
+    for (var s = -1; s <= 1; s++) {
+      g.fillRect(128 + s * 36 - 10, 28, 20, 200);
+    }
+    g.fillStyle = '#F4B93B'; g.fillRect(28, 204, 200, 8);
+    wgl.registerTextureCanvas('threeStripesWall', c, false);
+  })();
+
+  // 8. Rèm nhung đỏ đô (velvetCurtain)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#7F1D1D'; g.fillRect(0, 0, 256, 256);
+    for (var f = 0; f < 8; f++) {
+      g.fillStyle = f % 2 === 0 ? '#991B1B' : '#5F1111';
+      g.fillRect(f * 32, 0, 32, 256);
+      g.fillStyle = 'rgba(255,200,200,0.08)';
+      g.fillRect(f * 32 + 6, 0, 6, 256);
+    }
+    g.fillStyle = '#F4B93B'; g.fillRect(0, 148, 256, 12);
+    g.strokeStyle = '#450A0A'; g.lineWidth = 4; g.strokeRect(2, 2, 252, 252);
+    wgl.registerTextureCanvas('velvetCurtain', c, false);
+  })();
+
+  // 9. Tường xanh ngọc-rêu boutique Phòng Thay Đồ (fittingGreenWall)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2509);
+    g.fillStyle = '#253C2B'; g.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 180; i++) {
+      g.fillStyle = rng() > 0.5 ? 'rgba(54,88,63,0.18)' : 'rgba(24,40,28,0.20)';
+      g.beginPath(); g.arc(rng() * 256, rng() * 256, 8 + rng() * 28, 0, Math.PI * 2); g.fill();
+    }
+    g.strokeStyle = '#C89B3C'; g.lineWidth = 4; g.strokeRect(2, 2, 252, 252);
+    wgl.registerTextureCanvas('fittingGreenWall', c, true);
+  })();
+
+  // 10. Kệ Trưng Bày Giày Shoe Wall (shoeDisplayBoard) & Quầy Thu Ngân Hộp Giày (posShelfTex)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#2B180E'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#FDE047'; g.font = 'bold 24px monospace'; g.textAlign = 'center';
+    g.fillText('SHOE WALL · ADIDAS ORIGINALS', 256, 34);
+    var sh = [
+      { n: 'SAMBA OG', b: '#FFFBF1', st: '#111827', so: '#B45309' },
+      { n: 'SUPERSTAR', b: '#FFFFFF', st: '#0F172A', so: '#CBD5E1' },
+      { n: 'GAZELLE', b: '#DC2626', st: '#FFFBF1', so: '#F8FAFC' },
+      { n: 'PREDATOR', b: '#1E293B', st: '#F97316', so: '#0F172A' }
+    ];
+    for (var i = 0; i < 4; i++) {
+      var bx = 20 + i * 120;
+      g.fillStyle = '#3D2616'; g.fillRect(bx, 50, 112, 192);
+      g.strokeStyle = '#C89B3C'; g.lineWidth = 3; g.strokeRect(bx, 50, 112, 192);
+      g.fillStyle = '#FFF5D6'; g.fillRect(bx + 8, 60, 96, 134);
+      g.fillStyle = '#7C4F2B'; g.fillRect(bx + 8, 124, 96, 10);
+      for (var row = 0; row < 2; row++) {
+        var sx = bx + 56, sy = 96 + row * 66;
+        g.fillStyle = sh[i].so; g.fillRect(sx - 34, sy + 6, 68, 12);
+        g.fillStyle = sh[i].b; g.fillRect(sx - 30, sy - 14, 52, 22); g.fillRect(sx + 16, sy - 6, 16, 14);
+        g.fillStyle = sh[i].st;
+        for (var k = 0; k < 3; k++) g.fillRect(sx - 12 + k * 9, sy - 12, 5, 18);
+        g.strokeStyle = '#2B180E'; g.lineWidth = 2; g.strokeRect(sx - 34, sy - 14, 68, 32);
+      }
+      g.fillStyle = '#FDE047'; g.font = 'bold 15px monospace';
+      g.fillText(sh[i].n, bx + 56, 224);
+    }
+    wgl.registerTextureCanvas('shoeDisplayBoard', c, false);
+
+    var p = mkCanvas(512, 256), pg = p.getContext('2d');
+    pg.fillStyle = '#3B2314'; pg.fillRect(0, 0, 512, 256);
+    pg.strokeStyle = '#F4B93B'; pg.lineWidth = 6; pg.strokeRect(6, 6, 500, 244);
+    pg.fillStyle = '#FDE047'; pg.font = 'bold 22px monospace'; pg.textAlign = 'center';
+    pg.fillText('QUẦY THU NGÂN · SAMBA OG', 256, 36);
+    var cols = ['#1D4ED8', '#2563EB', '#D97706', '#1E40AF'];
+    for (var r = 0; r < 3; r++) {
+      var ry = 60 + r * 62;
+      pg.fillStyle = '#2B180E'; pg.fillRect(24, ry + 36, 464, 10);
+      for (var col = 0; col < 5; col++) {
+        var px = 34 + col * 90;
+        pg.fillStyle = cols[(r + col) % cols.length]; pg.fillRect(px, ry, 76, 34);
+        pg.fillStyle = '#FFFBF1'; pg.fillRect(px + 12, ry + 11, 52, 8);
+      }
+    }
+    wgl.registerTextureCanvas('posShelfTex', p, false);
+  })();
+
+  // 11. Mặt kính gương & Cửa gỗ-kính Hội An (mirrorGlass, vnDoorWood)
+  (function() {
+    var m = mkCanvas(256, 256), mg = m.getContext('2d');
+    mg.fillStyle = '#CBE7F5'; mg.fillRect(0, 0, 256, 256);
+    mg.fillStyle = '#DCEFF8'; mg.fillRect(10, 10, 236, 165);
+    mg.fillStyle = '#B89A74'; mg.fillRect(10, 175, 236, 71);
+    mg.fillStyle = 'rgba(255,255,255,0.44)';
+    mg.beginPath(); mg.moveTo(24, 30); mg.lineTo(86, 12); mg.lineTo(222, 188); mg.lineTo(156, 212); mg.closePath(); mg.fill();
+    mg.strokeStyle = '#5C341D'; mg.lineWidth = 14; mg.strokeRect(7, 7, 242, 242);
+    mg.strokeStyle = '#F4B93B'; mg.lineWidth = 3; mg.strokeRect(14, 14, 228, 228);
+    wgl.registerTextureCanvas('mirrorGlass', m, false);
+
+    var d = mkCanvas(256, 256), dg = d.getContext('2d');
+    dg.fillStyle = '#5C341D'; dg.fillRect(0, 0, 256, 256);
+    dg.fillStyle = '#FFFDF0'; dg.fillRect(22, 20, 96, 134); dg.fillRect(138, 20, 96, 134);
+    dg.strokeStyle = '#2B180E'; dg.lineWidth = 6;
+    dg.strokeRect(22, 20, 96, 134); dg.strokeRect(138, 20, 96, 134);
+    dg.fillStyle = '#4A2C1A'; dg.fillRect(22, 166, 96, 70); dg.fillRect(138, 166, 96, 70);
+    dg.fillStyle = '#F4B93B'; dg.beginPath(); dg.arc(118, 152, 7, 0, Math.PI * 2); dg.arc(138, 152, 7, 0, Math.PI * 2); dg.fill();
+    wgl.registerTextureCanvas('vnDoorWood', d, false);
+  })();
+
+  // 12. Bộ Sprite Chú Heo Mascot 24×20 (gl.NEAREST) kèm outfit áo khoác 3 Sọc Adidas
+  if (typeof buildPigBillboardTextures === 'function') {
+    buildPigBillboardTextures(wgl, ['adidas_jacket']);
+  }
+}
+
+/* ==================== 2. FALLBACK CANVAS2D CHO HEADLESS SMOKE TEST 182 ==================== */
 function drawAdidasClippedQuad(ctx, cam, pts, bgCol, borderCol, lineW, drawInner) {
   drawPoly3D(ctx, cam, pts, bgCol, borderCol, lineW || 2);
   var p0 = projectPoint3D(cam, pts[0][0], pts[0][1], pts[0][2]);
@@ -34,70 +340,54 @@ function drawAdidasClippedQuad(ctx, cam, pts, bgCol, borderCol, lineW, drawInner
   ctx.restore();
 }
 
-/* Helper vẽ đôi giày sneaker pixel thu nhỏ bên trong ô trưng bày */
 function drawPixelSneakerIcon(ctx, x, y, w, h, bodyCol, stripeCol, soleCol) {
-  // Đế giày cao su
   ctx.fillStyle = soleCol || '#D9A05B';
   ctx.fillRect(x - w * 0.44, y + h * 0.14, w * 0.88, h * 0.22);
-  // Thân giày trên
   ctx.fillStyle = bodyCol || '#FFFBF1';
   ctx.fillRect(x - w * 0.40, y - h * 0.16, w * 0.72, h * 0.32);
   ctx.fillRect(x + w * 0.22, y - h * 0.04, w * 0.20, h * 0.20);
-  // 3 Sọc chéo đặc trưng Adidas
   ctx.fillStyle = stripeCol || '#111827';
   for (var s = 0; s < 3; s++) {
     ctx.fillRect(x - w * 0.16 + s * w * 0.12, y - h * 0.12, w * 0.06, h * 0.26);
   }
-  // Viền đen pixel sắc nét
   ctx.strokeStyle = '#2B180E';
   ctx.lineWidth = 1;
   ctx.strokeRect(x - w * 0.44, y - h * 0.16, w * 0.88, h * 0.52);
 }
 
-/* Helper vẽ chiếc áo khoác / áo đấu 3 Sọc trên tường */
 function drawPixelJerseyIcon(ctx, cx, cy, w, h, mainCol, stripeCol, accentCol) {
-  // Vai & tay áo
   ctx.fillStyle = mainCol;
   ctx.fillRect(cx - w * 0.42, cy - h * 0.36, w * 0.84, h * 0.24);
-  // Thân áo
   ctx.fillRect(cx - w * 0.28, cy - h * 0.36, w * 0.56, h * 0.72);
-  // 3 Sọc trắng/vàng chạy dọc vai & hông
   ctx.fillStyle = stripeCol || '#FFFBF1';
   for (var s = 0; s < 3; s++) {
     ctx.fillRect(cx - w * 0.40 + s * w * 0.06, cy - h * 0.34, w * 0.03, h * 0.18);
     ctx.fillRect(cx + w * 0.22 + s * w * 0.06, cy - h * 0.34, w * 0.03, h * 0.18);
   }
-  // Cổ áo & logo ngực
   ctx.fillStyle = accentCol || '#FDE047';
   ctx.fillRect(cx - w * 0.10, cy - h * 0.36, w * 0.20, h * 0.08);
   ctx.fillRect(cx + w * 0.05, cy - h * 0.14, w * 0.12, h * 0.10);
-  // Viền
   ctx.strokeStyle = '#2B180E';
   ctx.lineWidth = 1;
   ctx.strokeRect(cx - w * 0.28, cy - h * 0.36, w * 0.56, h * 0.72);
 }
 
-/* ==================== 2. PHÒNG 1 ('hall'): SẢNH TẦNG 1 HỘI AN ==================== */
 function drawAdidasHallWalls3D(ctx, cam) {
-  // ---- TƯỜNG TRÁI (X = -5.93): SHOE DISPLAY WALL (SAMBA, SUPERSTAR, GAZELLE, PREDATOR) ----
   drawAdidasClippedQuad(
     ctx, cam,
-    [[-5.93, 3.42, 2.0], [-5.93, 3.42, 11.4], [-5.93, 2.86, 11.4], [-5.93, 2.86, 2.0]],
+    [[-5.93, 3.42, 1.8], [-5.93, 3.42, 7.6], [-5.93, 2.86, 7.6], [-5.93, 2.86, 1.8]],
     '#2B180E', '#F4B93B', 2.2,
     function(cx, cy, bw, bh, safeW) {
       var px = Math.max(5, Math.min(13, Math.round(bh * 0.42)));
       ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('SHOE WALL · ADIDAS ORIGINALS', cx, cy, safeW);
     }
   );
-
   var shoes = [
-    { z1: 2.1, z2: 4.2, name: 'SAMBA OG', body: '#FFFBF1', stripe: '#111827', sole: '#B45309' },
-    { z1: 4.5, z2: 6.6, name: 'SUPERSTAR', body: '#FFFFFF', stripe: '#0F172A', sole: '#E2E8F0' },
-    { z1: 6.9, z2: 9.0, name: 'GAZELLE', body: '#DC2626', stripe: '#FFFBF1', sole: '#F8FAFC' },
-    { z1: 9.3, z2: 11.4, name: 'PREDATOR', body: '#1E293B', stripe: '#F97316', sole: '#0F172A' }
+    { z1: 1.9, z2: 3.6, name: 'SAMBA OG', body: '#FFFBF1', stripe: '#111827', sole: '#B45309' },
+    { z1: 3.9, z2: 5.6, name: 'SUPERSTAR', body: '#FFFFFF', stripe: '#0F172A', sole: '#E2E8F0' },
+    { z1: 5.9, z2: 7.5, name: 'GAZELLE', body: '#DC2626', stripe: '#FFFBF1', sole: '#F8FAFC' }
   ];
   for (var si = 0; si < shoes.length; si++) {
     (function(sh) {
@@ -106,101 +396,43 @@ function drawAdidasHallWalls3D(ctx, cam) {
         [[-5.93, 2.74, sh.z1], [-5.93, 2.74, sh.z2], [-5.93, 1.05, sh.z2], [-5.93, 1.05, sh.z1]],
         '#3D2616', '#C89B3C', 2.0,
         function(cx, cy, bw, bh, safeW) {
-          // Ánh đèn LED hắt ấm bên trong hộc tủ gỗ
           ctx.fillStyle = '#FFF5D6';
           ctx.fillRect(cx - bw * 0.44, cy - bh * 0.42, bw * 0.88, bh * 0.62);
-          // Kệ gỗ đặt giày
           ctx.fillStyle = '#7C4F2B';
           ctx.fillRect(cx - bw * 0.44, cy + bh * 0.14, bw * 0.88, bh * 0.08);
-          // 2 đôi giày xếp tầng
           drawPixelSneakerIcon(ctx, cx, cy - bh * 0.22, bw * 0.66, bh * 0.28, sh.body, sh.stripe, sh.sole);
           drawPixelSneakerIcon(ctx, cx, cy + bh * 0.02, bw * 0.66, bh * 0.28, sh.body, sh.stripe, sh.sole);
-          // Bảng tên mẫu giày
           var tPx = Math.max(4, Math.min(10, Math.round(bh * 0.13)));
           ctx.font = 'bold ' + tPx + 'px monospace';
-          ctx.fillStyle = '#FDE047';
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
           ctx.fillText(sh.name, cx, cy + bh * 0.34, safeW);
         }
       );
     })(shoes[si]);
   }
-
-  // ---- TƯỜNG PHẢI (X = +5.93): SPORTSWEAR RACK + CỬA VÒM SANG PHÒNG THAY ĐỒ ----
   drawAdidasClippedQuad(
     ctx, cam,
-    [[5.93, 3.30, 7.6], [5.93, 3.30, 2.1], [5.93, 1.05, 2.1], [5.93, 1.05, 7.6]],
+    [[5.93, 3.30, 7.4], [5.93, 3.30, 1.9], [5.93, 1.05, 1.9], [5.93, 1.05, 7.4]],
     '#4A2C1A', '#C89B3C', 2.2,
     function(cx, cy, bw, bh, safeW) {
       ctx.fillStyle = '#F3DFAC';
       ctx.fillRect(cx - bw * 0.46, cy - bh * 0.34, bw * 0.92, bh * 0.78);
       var tPx = Math.max(5, Math.min(11, Math.round(bh * 0.12)));
       ctx.font = 'bold ' + tPx + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('SPORTSWEAR · 3 SỌC', cx, cy - bh * 0.42, safeW);
-      // Thanh treo ngang bằng đồng
       ctx.fillStyle = '#B45309';
       ctx.fillRect(cx - bw * 0.44, cy - bh * 0.22, bw * 0.88, Math.max(2, bh * 0.04));
-      // 3 áo khoác & áo đấu 3 Sọc treo ngay ngắn
       drawPixelJerseyIcon(ctx, cx - bw * 0.28, cy + bh * 0.08, bw * 0.24, bh * 0.50, '#111827', '#FFFBF1', '#FDE047');
       drawPixelJerseyIcon(ctx, cx,            cy + bh * 0.08, bw * 0.24, bh * 0.50, '#1D4ED8', '#FFFBF1', '#93C5FD');
       drawPixelJerseyIcon(ctx, cx + bw * 0.28, cy + bh * 0.08, bw * 0.24, bh * 0.50, '#B91C1C', '#FDE047', '#FDE047');
     }
   );
-
-  // Cửa vòm gỗ mở sang PHÒNG THAY ĐỒ (X = +5.93, Z = 8.4..11.2)
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[5.93, 2.68, 11.1], [5.93, 2.68, 8.5], [5.93, 0.02, 8.5], [5.93, 0.02, 11.1]],
-    '#1F3526', '#4A2C1A', 3.0,
-    function(cx, cy, bw, bh) {
-      // Ánh sáng ấm từ Phòng Thay Đồ & 2 dải rèm nhung đỏ đô vén 2 bên
-      ctx.fillStyle = '#2F4A36';
-      ctx.fillRect(cx - bw * 0.36, cy - bh * 0.46, bw * 0.72, bh * 0.92);
-      ctx.fillStyle = '#7F1D1D';
-      ctx.fillRect(cx - bw * 0.50, cy - bh * 0.50, bw * 0.18, bh);
-      ctx.fillRect(cx + bw * 0.32, cy - bh * 0.50, bw * 0.18, bh);
-      // Gương mờ phía trong phòng thay đồ
-      ctx.fillStyle = 'rgba(224,242,254,0.45)';
-      ctx.fillRect(cx - bw * 0.16, cy - bh * 0.28, bw * 0.32, bh * 0.62);
-    }
-  );
-  // Biển chỉ lối PHÒNG THAY ĐỒ phía trên cửa
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[5.93, 3.38, 11.2], [5.93, 3.38, 8.4], [5.93, 2.76, 8.4], [5.93, 2.76, 11.2]],
-    '#2B180E', '#F4B93B', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(11, Math.round(bh * 0.36)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🪞 PHÒNG THAY ĐỒ →', cx, cy, safeW);
-    }
-  );
-
-  // ---- TƯỜNG CUỐI SẢNH TẦNG 1 (Z = 14.72): ADIDAS ORIGINALS · HỘI AN + BIỂN LÊN LẦU 2 ----
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[-4.95, 3.40, 14.72], [-2.35, 3.40, 14.72], [-2.35, 2.76, 14.72], [-4.95, 2.76, 14.72]],
-    '#2B180E', '#F4B93B', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(12, Math.round(bh * 0.34)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🪜 LÊN LẦU 2 ↑', cx, cy, safeW);
-    }
-  );
-
-  // Bảng hiệu chính ADIDAS ORIGINALS · HỘI AN bằng gỗ lim chữ vàng
   drawAdidasClippedQuad(
     ctx, cam,
     [[-1.35, 3.32, 14.72], [4.95, 3.32, 14.72], [4.95, 1.82, 14.72], [-1.35, 1.82, 14.72]],
     '#2B180E', '#F4B93B', 2.6,
     function(cx, cy, bw, bh, safeW) {
-      // 3 Sọc vàng biểu tượng phía trên
       ctx.fillStyle = '#F4B93B';
       for (var k = -1; k <= 1; k++) {
         ctx.fillRect(cx + k * bw * 0.055 - bw * 0.015, cy - bh * 0.38, bw * 0.03, bh * 0.16);
@@ -208,31 +440,15 @@ function drawAdidasHallWalls3D(ctx, cam) {
       var p1 = Math.max(6, Math.min(14, Math.round(bh * 0.22)));
       var p2 = Math.max(5, Math.min(11, Math.round(bh * 0.16)));
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FFFBF1';
+      ctx.font = 'bold ' + p1 + 'px monospace'; ctx.fillStyle = '#FFFBF1';
       ctx.fillText('ADIDAS ORIGINALS', cx, cy + bh * 0.02, safeW);
-      ctx.font = 'bold ' + p2 + 'px monospace';
-      ctx.fillStyle = '#FDE047';
+      ctx.font = 'bold ' + p2 + 'px monospace'; ctx.fillStyle = '#FDE047';
       ctx.fillText('· HỘI AN HERITAGE ·', cx, cy + bh * 0.28, safeW);
     }
   );
 }
 
-/* ==================== 3. PHÒNG 2 ('fitting'): PHÒNG THAY ĐỒ & GƯƠNG TOÀN THÂN ==================== */
 function drawAdidasFittingWalls3D(ctx, cam, pig, t) {
-  // ---- TƯỜNG TRÁI (X = -5.93): GIÁ TREO ÁO KHOÁC 3 SỌC & BIỂN PHÒNG THAY ĐỒ ----
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[-5.93, 3.34, 2.2], [-5.93, 3.34, 10.6], [-5.93, 2.74, 10.6], [-5.93, 2.74, 2.2]],
-    '#2B180E', '#F4B93B', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(12, Math.round(bh * 0.36)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('👕 ÁO KHOÁC 3 SỌC · VIP FITTING', cx, cy, safeW);
-    }
-  );
   drawAdidasClippedQuad(
     ctx, cam,
     [[-5.93, 2.62, 2.4], [-5.93, 2.62, 10.4], [-5.93, 0.92, 10.4], [-5.93, 0.92, 2.4]],
@@ -240,239 +456,50 @@ function drawAdidasFittingWalls3D(ctx, cam, pig, t) {
     function(cx, cy, bw, bh) {
       ctx.fillStyle = '#243B2B';
       ctx.fillRect(cx - bw * 0.46, cy - bh * 0.44, bw * 0.92, bh * 0.88);
-      ctx.fillStyle = '#D9A05B';
-      ctx.fillRect(cx - bw * 0.44, cy - bh * 0.30, bw * 0.88, Math.max(2, bh * 0.04));
       drawPixelJerseyIcon(ctx, cx - bw * 0.28, cy + bh * 0.04, bw * 0.22, bh * 0.56, '#111827', '#FFFBF1', '#FDE047');
       drawPixelJerseyIcon(ctx, cx,            cy + bh * 0.04, bw * 0.22, bh * 0.56, '#14532D', '#FDE047', '#FDE047');
       drawPixelJerseyIcon(ctx, cx + bw * 0.28, cy + bh * 0.04, bw * 0.22, bh * 0.56, '#991B1B', '#FFFBF1', '#FDE047');
     }
   );
-
-  // ---- TƯỜNG CUỐI (Z = 14.72): RÈM NHUNG ĐỎ ĐÔ 2 BÊN & GƯƠNG GỖ TOÀN THÂN PHẢN CHIẾU HEO ----
-  // Rèm nhung trái
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[-5.55, 3.45, 14.72], [-2.05, 3.45, 14.72], [-2.05, 0.05, 14.72], [-5.55, 0.05, 14.72]],
-    '#7F1D1D', '#450A0A', 2.0,
-    function(cx, cy, bw, bh) {
-      for (var f = 0; f < 6; f++) {
-        ctx.fillStyle = f % 2 === 0 ? '#991B1B' : '#6B1414';
-        ctx.fillRect(cx - bw * 0.5 + f * (bw / 6), cy - bh * 0.5, bw / 6, bh);
-      }
-      ctx.fillStyle = '#F4B93B';
-      ctx.fillRect(cx - bw * 0.5, cy + bh * 0.08, bw, Math.max(2, bh * 0.03));
-    }
-  );
-  // Rèm nhung phải
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[2.05, 3.45, 14.72], [5.55, 3.45, 14.72], [5.55, 0.05, 14.72], [2.05, 0.05, 14.72]],
-    '#7F1D1D', '#450A0A', 2.0,
-    function(cx, cy, bw, bh) {
-      for (var f = 0; f < 6; f++) {
-        ctx.fillStyle = f % 2 === 0 ? '#991B1B' : '#6B1414';
-        ctx.fillRect(cx - bw * 0.5 + f * (bw / 6), cy - bh * 0.5, bw / 6, bh);
-      }
-      ctx.fillStyle = '#F4B93B';
-      ctx.fillRect(cx - bw * 0.5, cy + bh * 0.08, bw, Math.max(2, bh * 0.03));
-    }
-  );
-
-  // GƯƠNG TOÀN THÂN KHUNG GỖ HỘI AN (X = -1.75..+1.75, Y = 0.22..3.32) — PHẢN CHIẾU CHÚ HEO!
   drawAdidasClippedQuad(
     ctx, cam,
     [[-1.75, 3.32, 14.70], [1.75, 3.32, 14.70], [1.75, 0.22, 14.70], [-1.75, 0.22, 14.70]],
     '#CBE7F5', '#5C341D', 3.4,
     function(cx, cy, bw, bh, safeW) {
-      // Nền phản chiếu phòng thay đồ mờ nhẹ trong gương
       ctx.fillStyle = '#DCEFF8';
       ctx.fillRect(cx - bw * 0.46, cy - bh * 0.46, bw * 0.92, bh * 0.62);
-      ctx.fillStyle = '#B89A74';
-      ctx.fillRect(cx - bw * 0.46, cy + bh * 0.16, bw * 0.92, bh * 0.30);
-      // Ánh sáng lóe chéo mặt kính gương
-      ctx.fillStyle = 'rgba(255,255,255,0.42)';
-      ctx.beginPath();
-      ctx.moveTo(cx - bw * 0.45, cy - bh * 0.35);
-      ctx.lineTo(cx - bw * 0.15, cy - bh * 0.46);
-      ctx.lineTo(cx + bw * 0.35, cy + bh * 0.25);
-      ctx.lineTo(cx + bw * 0.05, cy + bh * 0.36);
-      ctx.closePath();
-      ctx.fill();
-
-      // Hình phản chiếu chú Heo Mascot trong gương (dịch chuyển theo pig.x!)
-      var rx = cx + Math.max(-0.28, Math.min(0.28, (pig ? pig.x : 0) * 0.07)) * bw;
-      var ry = cy + bh * 0.20;
-      var u = Math.max(1.2, Math.min(bw, bh) * 0.022);
-      var bob = (pig && pig.walking) ? Math.sin((t || 0) * 10) * u : 0;
-      // Bóng trong gương
-      ctx.fillStyle = 'rgba(43,33,24,0.22)';
-      ctx.beginPath(); ctx.ellipse(rx, ry + 2 * u, 9 * u, 3 * u, 0, 0, Math.PI * 2); ctx.fill();
-      // Thân chú heo hồng
-      ctx.fillStyle = '#2B2118';
-      ctx.fillRect(rx - 9 * u, ry - 15 * u + bob, 18 * u, 13 * u);
-      ctx.fillStyle = '#F48CA4';
-      ctx.fillRect(rx - 8 * u, ry - 14 * u + bob, 16 * u, 11 * u);
-      // 2 Tai vểnh
-      ctx.fillStyle = '#E06784';
-      ctx.fillRect(rx - 8 * u, ry - 17 * u + bob, 4 * u, 3 * u);
-      ctx.fillRect(rx + 4 * u, ry - 17 * u + bob, 4 * u, 3 * u);
-      // Áo khoác 3 Sọc đen khi chú Heo đã thử áo!
-      if (pig && pig.wearingJacket) {
-        ctx.fillStyle = '#111827';
-        ctx.fillRect(rx - 8 * u, ry - 8 * u + bob, 16 * u, 6 * u);
-        ctx.fillStyle = '#FFFBF1';
-        ctx.fillRect(rx - 6 * u, ry - 7 * u + bob, 1.5 * u, 4 * u);
-        ctx.fillRect(rx - 3.5 * u, ry - 7 * u + bob, 1.5 * u, 4 * u);
-        ctx.fillRect(rx + 4.5 * u, ry - 7 * u + bob, 1.5 * u, 4 * u);
-      }
-      // Mắt & Mõm heo chính diện trong gương
-      ctx.fillStyle = '#2B2118';
-      ctx.fillRect(rx - 4 * u, ry - 12 * u + bob, 2 * u, 2.5 * u);
-      ctx.fillRect(rx + 2 * u, ry - 12 * u + bob, 2 * u, 2.5 * u);
-      ctx.fillStyle = '#FBC2CE';
-      ctx.fillRect(rx - 3 * u, ry - 9.5 * u + bob, 6 * u, 3.5 * u);
-      ctx.fillStyle = '#2B2118';
-      ctx.fillRect(rx - 1.5 * u, ry - 8.5 * u + bob, 1 * u, 1.5 * u);
-      ctx.fillRect(rx + 0.5 * u, ry - 8.5 * u + bob, 1 * u, 1.5 * u);
-      // Chân
-      ctx.fillStyle = '#E06784';
-      ctx.fillRect(rx - 6 * u, ry - 2 * u, 3 * u, 3 * u);
-      ctx.fillRect(rx + 3 * u, ry - 2 * u, 3 * u, 3 * u);
-
-      // Nhãn nhỏ góc trên gương
       var tPx = Math.max(4, Math.min(9, Math.round(bh * 0.07)));
       ctx.font = 'bold ' + tPx + 'px monospace';
-      ctx.fillStyle = '#2B180E';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#2B180E'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(pig && pig.wearingJacket ? '✨ 3 SỌC CỰC CHẤT ✨' : 'GƯƠNG TOÀN THÂN', cx, cy - bh * 0.38, safeW);
-    }
-  );
-
-  // ---- TƯỜNG PHẢI (X = +5.93): CỬA VỀ SẢNH TẦNG 1 ----
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[5.93, 2.68, 11.1], [5.93, 2.68, 8.5], [5.93, 0.02, 8.5], [5.93, 0.02, 11.1]],
-    '#E3B857', '#4A2C1A', 3.0,
-    function(cx, cy, bw, bh) {
-      ctx.fillStyle = '#F3D689';
-      ctx.fillRect(cx - bw * 0.38, cy - bh * 0.44, bw * 0.76, bh * 0.88);
-      ctx.fillStyle = '#7C4F2B';
-      ctx.fillRect(cx - bw * 0.50, cy - bh * 0.50, bw * 0.14, bh);
-      ctx.fillRect(cx + bw * 0.36, cy - bh * 0.50, bw * 0.14, bh);
-    }
-  );
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[5.93, 3.38, 11.2], [5.93, 3.38, 8.4], [5.93, 2.76, 8.4], [5.93, 2.76, 11.2]],
-    '#2B180E', '#F4B93B', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(11, Math.round(bh * 0.36)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('← VỀ SẢNH TẦNG 1', cx, cy, safeW);
     }
   );
 }
 
-/* ==================== 4. PHÒNG 3 ('upper'): LẦU 2 BST VIỆT NAM & THU NGÂN ==================== */
 function drawAdidasUpperWalls3D(ctx, cam) {
-  // ---- TƯỜNG TRÁI (X = -5.93): BỘ SƯU TẬP ÁO 3 SỌC & NÓN LÁ VIỆT NAM ----
   drawAdidasClippedQuad(
     ctx, cam,
-    [[-5.93, 3.40, 1.8], [-5.93, 3.40, 11.2], [-5.93, 2.82, 11.2], [-5.93, 2.82, 1.8]],
-    '#991B1B', '#FDE047', 2.2,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(12, Math.round(bh * 0.38)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('★ BỘ SƯU TẬP VIỆT NAM · 3 SỌC ★', cx, cy, safeW);
-    }
-  );
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[-5.93, 2.70, 2.0], [-5.93, 2.70, 11.0], [-5.93, 1.00, 11.0], [-5.93, 1.00, 2.0]],
+    [[-5.93, 2.70, 1.8], [-5.93, 2.70, 7.6], [-5.93, 1.00, 7.6], [-5.93, 1.00, 1.8]],
     '#5C341D', '#C89B3C', 2.2,
     function(cx, cy, bw, bh) {
       ctx.fillStyle = '#FFF5D6';
       ctx.fillRect(cx - bw * 0.46, cy - bh * 0.44, bw * 0.92, bh * 0.88);
-      // 3 Nón Lá Việt Nam treo hàng trên có dải lụa 3 sọc
-      for (var ni = -1; ni <= 1; ni++) {
-        var nx = cx + ni * bw * 0.28, ny = cy - bh * 0.22;
-        ctx.fillStyle = '#E8C574'; ctx.strokeStyle = '#78350F'; ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(nx, ny - bh * 0.16);
-        ctx.lineTo(nx - bw * 0.10, ny + bh * 0.06);
-        ctx.lineTo(nx + bw * 0.10, ny + bh * 0.06);
-        ctx.closePath();
-        ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#DC2626';
-        ctx.fillRect(nx - bw * 0.04, ny - bh * 0.02, bw * 0.08, bh * 0.04);
-      }
-      // 3 Áo Đấu Bộ Sưu Tập Việt Nam hàng dưới
       drawPixelJerseyIcon(ctx, cx - bw * 0.28, cy + bh * 0.18, bw * 0.22, bh * 0.44, '#DA251D', '#FDE047', '#FDE047');
       drawPixelJerseyIcon(ctx, cx,            cy + bh * 0.18, bw * 0.22, bh * 0.44, '#FFFBF1', '#DA251D', '#F43F5E');
       drawPixelJerseyIcon(ctx, cx + bw * 0.28, cy + bh * 0.18, bw * 0.22, bh * 0.44, '#0F766E', '#FDE047', '#FFFBF1');
     }
   );
-
-  // ---- TƯỜNG CUỐI LẦU 2 (Z = 14.72): TRANH TƯỜNG HOA SEN × 3 SỌC + BIỂN XUỐNG TẦNG 1 ----
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[-4.95, 3.40, 14.72], [-2.35, 3.40, 14.72], [-2.35, 2.76, 14.72], [-4.95, 2.76, 14.72]],
-    '#2B180E', '#F4B93B', 2.0,
-    function(cx, cy, bw, bh, safeW) {
-      var px = Math.max(5, Math.min(12, Math.round(bh * 0.34)));
-      ctx.font = 'bold ' + px + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🪜 XUỐNG TẦNG 1 ↓', cx, cy, safeW);
-    }
-  );
-
-  // Tranh Tường Nghệ Thuật HOA SEN × 3 SỌC (Lotus × 3-Stripe Mural)
   drawAdidasClippedQuad(
     ctx, cam,
     [[-1.45, 3.36, 14.72], [5.10, 3.36, 14.72], [5.10, 1.15, 14.72], [-1.45, 1.15, 14.72]],
     '#1F3A3D', '#F4B93B', 2.6,
     function(cx, cy, bw, bh, safeW) {
-      // 3 Dải sọc chéo vàng-kem chạy xuyên tranh
-      ctx.fillStyle = 'rgba(244,185,59,0.28)';
-      for (var st = -1; st <= 1; st++) {
-        ctx.beginPath();
-        ctx.moveTo(cx + st * bw * 0.14 - bw * 0.18, cy + bh * 0.5);
-        ctx.lineTo(cx + st * bw * 0.14 - bw * 0.10, cy + bh * 0.5);
-        ctx.lineTo(cx + st * bw * 0.14 + bw * 0.18, cy - bh * 0.5);
-        ctx.lineTo(cx + st * bw * 0.14 + bw * 0.10, cy - bh * 0.5);
-        ctx.closePath();
-        ctx.fill();
-      }
-      // Lá sen xanh ngọc & Đóa Hoa Sen Hồng rực rỡ ở tâm
-      var r = Math.min(bw, bh) * 0.26;
-      ctx.fillStyle = '#15803D';
-      ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.65, r * 1.4, r * 0.35, 0, 0, Math.PI * 2); ctx.fill();
-      var petals = [[-0.75, 0.1, -0.45], [0.75, 0.1, 0.45], [-0.4, -0.1, -0.22], [0.4, -0.1, 0.22], [0, -0.22, 0]];
-      for (var pi = 0; pi < petals.length; pi++) {
-        ctx.save();
-        ctx.translate(cx + petals[pi][0] * r, cy + petals[pi][1] * r);
-        ctx.rotate(petals[pi][2]);
-        ctx.fillStyle = pi === 4 ? '#FB7185' : '#F43F5E';
-        ctx.beginPath(); ctx.ellipse(0, 0, r * 0.38, r * 0.72, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-      }
-      ctx.fillStyle = '#FDE047';
-      ctx.beginPath(); ctx.arc(cx, cy + r * 0.12, r * 0.22, 0, Math.PI * 2); ctx.fill();
-      // Chữ tiêu đề tranh tường
       var p1 = Math.max(5, Math.min(11, Math.round(bh * 0.12)));
       ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FFFBF1';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#FFFBF1'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('HOA SEN × 3 SỌC · HỘI AN', cx, cy - bh * 0.36, safeW);
     }
   );
-
-  // ---- TƯỜNG PHẢI LẦU 2 (X = +5.93): KỆ HỘP GIÀY ORIGINALS SAU QUẦY THU NGÂN ----
   drawAdidasClippedQuad(
     ctx, cam,
     [[5.93, 3.30, 10.6], [5.93, 3.30, 3.6], [5.93, 1.25, 3.6], [5.93, 1.25, 10.6]],
@@ -480,28 +507,12 @@ function drawAdidasUpperWalls3D(ctx, cam) {
     function(cx, cy, bw, bh, safeW) {
       var p1 = Math.max(5, Math.min(11, Math.round(bh * 0.12)));
       ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FDE047';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('QUẦY THU NGÂN · SAMBA OG', cx, cy - bh * 0.38, safeW);
-      // 3 tầng hộp giày xanh dương Originals & vàng Hội An
-      var cols = ['#1D4ED8', '#2563EB', '#D97706', '#1E40AF'];
-      for (var row = 0; row < 3; row++) {
-        var ry = cy - bh * 0.18 + row * bh * 0.24;
-        ctx.fillStyle = '#2B180E';
-        ctx.fillRect(cx - bw * 0.45, ry + bh * 0.15, bw * 0.90, Math.max(2, bh * 0.04));
-        for (var col = 0; col < 5; col++) {
-          var bx = cx - bw * 0.42 + col * bw * 0.175;
-          ctx.fillStyle = cols[(row + col) % cols.length];
-          ctx.fillRect(bx, ry, bw * 0.145, bh * 0.14);
-          ctx.fillStyle = '#FFFBF1';
-          ctx.fillRect(bx + bw * 0.02, ry + bh * 0.04, bw * 0.10, bh * 0.03);
-        }
-      }
     }
   );
 }
 
-/* ==================== 5. HÀM ĐIỀU PHỐI MỸ THUẬT TƯỜNG 3 PHÒNG ==================== */
 function drawAdidasRoomWalls3D(ctx, cam, room, pig, t) {
   if (room === 'fitting') {
     drawAdidasFittingWalls3D(ctx, cam, pig, t);

@@ -1,16 +1,346 @@
 /**
- * Bộ Sưu Tập Mỹ Thuật Pixel Art Văn Hóa Việt Nam Trên 3 Bức Tường Quán Phở (Quyết định 240–241)
- * Thiết kế điệu nghệ lấy cảm hứng từ 2 bộ moodboard Văn hóa Việt Nam:
- * - Diềm hoa văn chữ Triện & viền chỉ cổ truyền chạy suốt 3 bức tường (Trái, Phải, Đối Diện Bếp).
- * - Tường Trái (X = -5.94): Bảng Thực Đơn Phở Đỏ Son Viền Gỗ Gụ Chữ Vàng Vintage 90s (0% tràn viền),
- *   Tranh Hoa Sen Hồng nhiều lớp cánh, Tranh Xe Xích Lô Đỏ-Vàng Sài Gòn, Bộ Nón Lá dây xanh + Đàn Nguyệt & Sáo Trúc.
- * - Tường Phải (X = +5.94): Tranh Áo Dài Trắng thêu Hoa Sen & Tem Bưu Chính, Tranh Cờ Đỏ Sao Vàng
- *   + Nón Lá + Cành Hoa Mai Vàng, Kệ Gỗ trưng bày Bình Gốm Bát Tràng men xanh + Chum Sành + Hộp Sơn Mài Đỏ.
- * - Tường Đối Diện Sau Bếp (Z = 14.72): 2 Câu Đối Đỏ Chữ Vàng hai bên bảng PHỞ 1990, Bích họa Quang Gánh
- *   Phở xưa, Tranh Saigon Skyline (Nhà Thờ Đức Bà, Bitexco) & Đồng Hồ Quả Lắc Vintage 90s đung đưa 60fps.
+ * Bộ Sưu Tập Mỹ Thuật Pixel Art Văn Hóa Việt Nam Trên 3 Bức Tường Quán Phở (Quyết định 240–241 & 250)
+ * - WebGL 3D Procedural Textures (`buildPhoProceduralTextures`): gạch bông Indochine, tường vàng 90s, gỗ lim,
+ *   biển PHỞ BÒ GIA TRUYỀN 1990 + Câu Đối Đỏ, THỰC ĐƠN PHỞ Đỏ Son, Hoa Sen, Xích Lô, Áo Dài Hoa Sen,
+ *   Cờ Đỏ Sao Vàng & Hoa Mai, Nón Lá & Đàn Nguyệt, Quang Gánh & Saigon Skyline, cửa kính mờ + Sprite Heo 24×20.
+ * - Giữ nguyên 100% hàm Canvas2D fallback (`drawPhoVnCultureWalls3D`, `drawPhoMenuBoardArt`, ...) cho Headless Smoke Test.
  */
 export function buildPhoVnWallArtScript(): string {
   return String.raw`
+/* ==================== 0. BỘ SINH TEXTURE THỦ TỤC WEBGL 3D QUÁN PHỞ 1990S (QĐ 250) ==================== */
+function phoSeedRng(seed) {
+  var s = seed | 0;
+  return function() {
+    s = (s + 0x6D2B79F5) | 0;
+    var t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildPhoProceduralTextures(webgl) {
+  if (!webgl || typeof document === 'undefined') return;
+  function mkCanvas(w, h) {
+    var c = document.createElement('canvas'); c.width = w; c.height = h; return c;
+  }
+
+  // 1. Sàn gạch bông Indochine (phoTile) & Sàn gạch bếp (phoKitchenTile)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = phoSeedRng(19901);
+    g.fillStyle = '#E8D5B0'; g.fillRect(0, 0, 256, 256);
+    for (var ty = 0; ty < 256; ty += 128) {
+      for (var tx = 0; tx < 256; tx += 128) {
+        var even = ((tx / 128 + ty / 128) % 2 === 0);
+        g.fillStyle = even ? '#F4E6C8' : '#E0CCA6';
+        g.fillRect(tx + 2, ty + 2, 124, 124);
+        g.strokeStyle = 'rgba(74,44,26,0.22)'; g.lineWidth = 3;
+        g.strokeRect(tx + 2, ty + 2, 124, 124);
+        var cx = tx + 64, cy = ty + 64;
+        if (even) {
+          g.fillStyle = '#2F6F5B';
+          for (var k = 0; k < 4; k++) {
+            g.save(); g.translate(cx, cy); g.rotate(k * Math.PI / 2);
+            g.beginPath(); g.ellipse(0, -24, 10, 20, 0, 0, Math.PI * 2); g.fill();
+            g.restore();
+          }
+          g.fillStyle = '#B87B3E';
+          for (var d = 0; d < 4; d++) {
+            g.save(); g.translate(cx, cy); g.rotate(d * Math.PI / 2 + Math.PI / 4);
+            g.beginPath(); g.ellipse(0, -18, 7, 14, 0, 0, Math.PI * 2); g.fill();
+            g.restore();
+          }
+          g.fillStyle = '#F8EED8'; g.beginPath(); g.arc(cx, cy, 9, 0, Math.PI * 2); g.fill();
+        } else {
+          g.strokeStyle = 'rgba(47,111,91,0.35)'; g.lineWidth = 2;
+          g.strokeRect(tx + 18, ty + 18, 92, 92);
+        }
+      }
+    }
+    for (var i = 0; i < 120; i++) {
+      g.fillStyle = 'rgba(74,44,26,0.06)';
+      g.beginPath(); g.arc(rng() * 256, rng() * 256, 3 + rng() * 10, 0, Math.PI * 2); g.fill();
+    }
+    webgl.registerTextureCanvas('phoTile', c, true);
+
+    var kc = mkCanvas(256, 256), kg = kc.getContext('2d');
+    kg.fillStyle = '#CBD5E1'; kg.fillRect(0, 0, 256, 256);
+    for (var ky = 0; ky < 256; ky += 64) {
+      for (var kx = 0; kx < 256; kx += 64) {
+        kg.fillStyle = ((kx / 64 + ky / 64) % 2 === 0) ? '#DCE4EE' : '#CBD5E1';
+        kg.fillRect(kx + 1, ky + 1, 62, 62);
+      }
+    }
+    webgl.registerTextureCanvas('phoKitchenTile', kc, true);
+  })();
+
+  // 2. Tường vàng 90s (phoWall)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = phoSeedRng(19902);
+    g.fillStyle = '#DFAA3E'; g.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 220; i++) {
+      g.fillStyle = rng() > 0.5 ? 'rgba(244,205,112,0.16)' : 'rgba(178,124,28,0.15)';
+      g.beginPath(); g.arc(rng() * 256, rng() * 256, 8 + rng() * 34, 0, Math.PI * 2); g.fill();
+    }
+    g.strokeStyle = 'rgba(92,52,29,0.14)'; g.lineWidth = 1;
+    for (var k = 0; k < 22; k++) {
+      var x = rng() * 256, y = rng() * 256;
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rng() - 0.5) * 26, y + rng() * 26); g.stroke();
+    }
+    webgl.registerTextureCanvas('phoWall', c, true);
+  })();
+
+  // 3. Gỗ lim (phoTimber)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = phoSeedRng(19903);
+    g.fillStyle = '#4D2E1B'; g.fillRect(0, 0, 256, 256);
+    for (var y = 0; y < 256; y += 3) {
+      g.fillStyle = (y % 6 === 0) ? 'rgba(32,16,8,0.34)' : 'rgba(116,74,44,0.22)';
+      g.fillRect(0, y, 256, 2);
+    }
+    for (var p = 0; p < 256; p += 64) {
+      g.fillStyle = 'rgba(20,10,4,0.42)'; g.fillRect(0, p, 256, 2);
+    }
+    for (var m = 0; m < 10; m++) {
+      g.strokeStyle = 'rgba(28,14,6,0.24)'; g.beginPath();
+      g.ellipse(rng() * 256, rng() * 256, 20, 4, 0, 0, Math.PI * 2); g.stroke();
+    }
+    webgl.registerTextureCanvas('phoTimber', c, true);
+  })();
+
+  // 4. Biển PHỞ BÒ GIA TRUYỀN 1990 + Câu Đối Đỏ (phoSign1990, phoCouplet, phoWelcomeSign)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#991B1B'; g.fillRect(10, 10, 492, 236);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 6; g.strokeRect(18, 18, 476, 220);
+    // Hoa văn góc chữ Triện vàng
+    g.fillStyle = '#FACC15';
+    g.fillRect(26, 26, 18, 6); g.fillRect(26, 26, 6, 18);
+    g.fillRect(468, 26, 18, 6); g.fillRect(480, 26, 6, 18);
+    g.fillRect(26, 224, 18, 6); g.fillRect(26, 212, 6, 18);
+    g.fillRect(468, 224, 18, 6); g.fillRect(480, 212, 6, 18);
+    // Dải câu đối đỏ mini 2 bên & chữ chính
+    g.fillStyle = '#7F1D1D'; g.fillRect(32, 42, 40, 172); g.fillRect(440, 42, 40, 172);
+    g.strokeStyle = '#FACC15'; g.lineWidth = 2; g.strokeRect(32, 42, 40, 172); g.strokeRect(440, 42, 40, 172);
+    g.fillStyle = '#FACC15'; g.font = 'bold 34px serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('PHỞ BÒ', 256, 86);
+    g.fillText('GIA TRUYỀN 1990', 256, 148);
+    g.fillStyle = '#FFF7DF'; g.font = 'bold 18px serif';
+    g.fillText('★ HƯƠNG VỊ CỔ TRUYỀN SÀI GÒN ★', 256, 200);
+    webgl.registerTextureCanvas('phoSign1990', c, false);
+
+    var cp = mkCanvas(128, 256), cg = cp.getContext('2d');
+    cg.fillStyle = '#B91C1C'; cg.fillRect(0, 0, 128, 256);
+    cg.strokeStyle = '#F4B93B'; cg.lineWidth = 5; cg.strokeRect(8, 8, 112, 240);
+    cg.fillStyle = '#FACC15'; cg.font = 'bold 24px serif'; cg.textAlign = 'center';
+    var chars = ['HƯƠNG', 'VỊ', 'PHỞ', 'XƯA'];
+    for (var ci = 0; ci < chars.length; ci++) cg.fillText(chars[ci], 64, 54 + ci * 50);
+    webgl.registerTextureCanvas('phoCouplet', cp, false);
+
+    var w = mkCanvas(512, 128), wg = w.getContext('2d');
+    wg.fillStyle = '#7F1D1D'; wg.fillRect(0, 0, 512, 128);
+    wg.fillStyle = '#991B1B'; wg.fillRect(10, 10, 492, 108);
+    wg.strokeStyle = '#F4B93B'; wg.lineWidth = 5; wg.strokeRect(14, 14, 484, 100);
+    wg.fillStyle = '#FACC15'; wg.font = 'bold 32px serif'; wg.textAlign = 'center'; wg.textBaseline = 'middle';
+    wg.fillText('KÍNH CHÀO QUÝ KHÁCH', 256, 66);
+    webgl.registerTextureCanvas('phoWelcomeSign', w, false);
+  })();
+
+  // 5. THỰC ĐƠN PHỞ Đỏ Son Viền Gỗ Gụ (phoMenu90)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#991B1B'; g.fillRect(12, 12, 232, 232);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 4; g.strokeRect(18, 18, 220, 220);
+    // Bát phở mini
+    g.fillStyle = '#FFFBF1'; g.strokeStyle = '#F4B93B'; g.lineWidth = 2;
+    g.beginPath(); g.arc(128, 52, 18, 0, Math.PI, false); g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = 'rgba(255,251,241,0.8)';
+    g.beginPath(); g.moveTo(120, 44); g.lineTo(124, 30); g.moveTo(134, 44); g.lineTo(138, 30); g.stroke();
+    g.fillStyle = '#FDE047'; g.font = 'bold 21px serif'; g.textAlign = 'center';
+    g.fillText('THỰC ĐƠN PHỞ', 128, 88);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(32, 100); g.lineTo(224, 100); g.stroke();
+    var items = [['TÁI', '15K'], ['NẠM', '15K'], ['GẦU', '18K'], ['ĐẶC BIỆT', '25K']];
+    g.font = 'bold 19px monospace';
+    for (var i = 0; i < items.length; i++) {
+      var ry = 130 + i * 28;
+      g.fillStyle = '#FFF7DF'; g.textAlign = 'left'; g.fillText(items[i][0], 34, ry);
+      g.fillStyle = '#FACC15'; g.textAlign = 'right'; g.fillText(items[i][1], 222, ry);
+    }
+    webgl.registerTextureCanvas('phoMenu90', c, false);
+  })();
+
+  // 6. Tranh Hoa Sen (phoLotus)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#FAF0D7'; g.fillRect(14, 14, 228, 228);
+    g.strokeStyle = '#B45309'; g.lineWidth = 3; g.strokeRect(20, 20, 216, 216);
+    g.fillStyle = '#15803D';
+    g.beginPath(); g.ellipse(86, 178, 42, 18, -0.25, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.ellipse(170, 178, 42, 18, 0.25, 0, Math.PI * 2); g.fill();
+    var petals = [[-42, 8, -0.55, '#EC4899'], [42, 8, 0.55, '#EC4899'], [-24, -12, -0.32, '#F472B6'], [24, -12, 0.32, '#F472B6'], [0, -24, 0, '#FBCFE8']];
+    for (var i = 0; i < petals.length; i++) {
+      g.save(); g.translate(128 + petals[i][0], 132 + petals[i][1]); g.rotate(petals[i][2]);
+      g.fillStyle = petals[i][3]; g.strokeStyle = '#9D174D'; g.lineWidth = 2;
+      g.beginPath(); g.ellipse(0, 0, 22, 48, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.restore();
+    }
+    g.fillStyle = '#FACC15'; g.beginPath(); g.arc(128, 134, 16, 0, Math.PI * 2); g.fill();
+    webgl.registerTextureCanvas('phoLotus', c, false);
+  })();
+
+  // 7. Tranh Xích Lô (phoCyclo)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#FAF0D7'; g.fillRect(14, 14, 228, 228);
+    g.strokeStyle = '#991B1B'; g.lineWidth = 3; g.strokeRect(20, 20, 216, 216);
+    g.strokeStyle = '#1E293B'; g.lineWidth = 6;
+    g.beginPath(); g.arc(82, 168, 28, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.arc(174, 168, 28, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = '#5C341D';
+    g.beginPath(); g.moveTo(54, 108); g.quadraticCurveTo(86, 56, 132, 92); g.lineTo(118, 120); g.closePath(); g.fill();
+    g.fillStyle = '#DC2626'; g.fillRect(62, 114, 68, 42);
+    g.fillStyle = '#FACC15'; g.fillRect(70, 122, 48, 26);
+    g.strokeStyle = '#B45309'; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(130, 146); g.lineTo(174, 168); g.lineTo(158, 112); g.lineTo(132, 106); g.stroke();
+    webgl.registerTextureCanvas('phoCyclo', c, false);
+  })();
+
+  // 8. Tranh Áo Dài Hoa Sen (phoAoDai)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#FAF0D7'; g.fillRect(14, 14, 228, 228);
+    g.strokeStyle = '#15803D'; g.lineWidth = 3; g.strokeRect(20, 20, 216, 216);
+    g.fillStyle = '#CBD5C0'; g.fillRect(98, 148, 60, 54);
+    g.fillStyle = '#FFFBF1'; g.strokeStyle = '#8F6E42'; g.lineWidth = 3;
+    g.beginPath();
+    g.moveTo(110, 44); g.lineTo(146, 44); g.lineTo(182, 88); g.lineTo(164, 104);
+    g.lineTo(150, 82); g.lineTo(166, 194); g.lineTo(90, 194); g.lineTo(106, 82);
+    g.lineTo(92, 104); g.lineTo(74, 88); g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = '#15803D'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(124, 84); g.quadraticCurveTo(140, 128, 122, 178); g.stroke();
+    g.fillStyle = '#F472B6';
+    g.beginPath(); g.arc(130, 104, 10, 0, Math.PI * 2); g.arc(136, 144, 12, 0, Math.PI * 2); g.fill();
+    webgl.registerTextureCanvas('phoAoDai', c, false);
+  })();
+
+  // 9. Tranh Cờ Đỏ Sao Vàng & Hoa Mai (phoFlagMai)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#FAF0D7'; g.fillRect(14, 14, 228, 228);
+    g.fillStyle = '#DA251D'; g.fillRect(34, 34, 152, 98);
+    g.fillStyle = '#FFFF00'; g.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var r = (i % 2 === 0 ? 32 : 13);
+      var ang = -Math.PI / 2 + i * Math.PI / 5;
+      var px = 110 + Math.cos(ang) * r, py = 83 + Math.sin(ang) * r;
+      if (i === 0) g.moveTo(px, py); else g.lineTo(px, py);
+    }
+    g.closePath(); g.fill();
+    g.fillStyle = '#E8CF9E'; g.strokeStyle = '#7C4F2B'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(74, 152); g.lineTo(34, 206); g.lineTo(114, 206); g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = '#5C341D'; g.lineWidth = 4;
+    g.beginPath(); g.moveTo(138, 218); g.quadraticCurveTo(180, 168, 222, 118); g.stroke();
+    var mais = [[164, 184], [190, 154], [214, 126], [174, 142], [204, 174]];
+    g.fillStyle = '#FACC15';
+    for (var mi = 0; mi < mais.length; mi++) {
+      g.beginPath(); g.arc(mais[mi][0], mais[mi][1], 11, 0, Math.PI * 2); g.fill();
+    }
+    webgl.registerTextureCanvas('phoFlagMai', c, false);
+  })();
+
+  // 10. Nón Lá & Đàn Nguyệt (phoNonLa) & Kệ Gốm Bát Tràng (phoPotteryArt)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#DFAA3E'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#E8CF9E'; g.strokeStyle = '#7C4F2B'; g.lineWidth = 4;
+    g.beginPath(); g.moveTo(92, 42); g.lineTo(24, 118); g.lineTo(160, 118); g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = '#15803D'; g.lineWidth = 5;
+    g.beginPath(); g.moveTo(56, 118); g.quadraticCurveTo(92, 162, 128, 118); g.stroke();
+    g.strokeStyle = '#4A2C1A'; g.lineWidth = 7;
+    g.beginPath(); g.moveTo(192, 34); g.lineTo(192, 164); g.stroke();
+    g.fillStyle = '#F3DFC1'; g.strokeStyle = '#5C341D'; g.lineWidth = 4;
+    g.beginPath(); g.arc(192, 184, 38, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.strokeStyle = '#C6833C'; g.lineWidth = 9;
+    g.beginPath(); g.moveTo(34, 214); g.lineTo(148, 168); g.stroke();
+    webgl.registerTextureCanvas('phoNonLa', c, false);
+
+    var p = mkCanvas(256, 256), pg = p.getContext('2d');
+    pg.fillStyle = '#D99B26'; pg.fillRect(0, 0, 256, 256);
+    pg.fillStyle = '#4A2C1A'; pg.fillRect(14, 184, 228, 22);
+    pg.fillStyle = '#FFFFFF'; pg.strokeStyle = '#1E3A8A'; pg.lineWidth = 4;
+    pg.beginPath(); pg.ellipse(64, 134, 30, 44, 0, 0, Math.PI * 2); pg.fill(); pg.stroke();
+    pg.fillStyle = '#1D4ED8'; pg.beginPath(); pg.arc(64, 134, 14, 0, Math.PI * 2); pg.fill();
+    pg.fillStyle = '#A65432'; pg.strokeStyle = '#5C2812';
+    pg.beginPath(); pg.ellipse(134, 140, 28, 40, 0, 0, Math.PI * 2); pg.fill(); pg.stroke();
+    pg.fillStyle = '#B91C1C'; pg.strokeStyle = '#7F1D1D';
+    pg.beginPath(); pg.ellipse(198, 156, 26, 22, 0, 0, Math.PI * 2); pg.fill(); pg.stroke();
+    pg.fillStyle = '#FACC15'; pg.beginPath(); pg.arc(198, 152, 7, 0, Math.PI * 2); pg.fill();
+    webgl.registerTextureCanvas('phoPotteryArt', p, false);
+  })();
+
+  // 11. Quang Gánh & Saigon Skyline (phoSkyline, phoQuangGanh)
+  (function() {
+    var q = mkCanvas(256, 256), qg = q.getContext('2d');
+    qg.fillStyle = '#4A2C1A'; qg.fillRect(0, 0, 256, 256);
+    qg.fillStyle = '#FAF0D7'; qg.fillRect(14, 14, 228, 228);
+    qg.strokeStyle = '#92400E'; qg.lineWidth = 8;
+    qg.beginPath(); qg.moveTo(36, 94); qg.quadraticCurveTo(128, 66, 220, 94); qg.stroke();
+    qg.strokeStyle = '#B45309'; qg.lineWidth = 3;
+    qg.beginPath(); qg.moveTo(64, 86); qg.lineTo(42, 166); qg.moveTo(64, 86); qg.lineTo(86, 166); qg.stroke();
+    qg.beginPath(); qg.moveTo(192, 86); qg.lineTo(170, 166); qg.moveTo(192, 86); qg.lineTo(214, 166); qg.stroke();
+    qg.fillStyle = '#C6833C'; qg.strokeStyle = '#78350F'; qg.lineWidth = 3;
+    qg.beginPath(); qg.ellipse(64, 178, 34, 22, 0, 0, Math.PI * 2); qg.fill(); qg.stroke();
+    qg.beginPath(); qg.ellipse(192, 178, 34, 22, 0, 0, Math.PI * 2); qg.fill(); qg.stroke();
+    webgl.registerTextureCanvas('phoQuangGanh', q, false);
+
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#4A2C1A'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#FAF0D7'; g.fillRect(14, 14, 484, 228);
+    // Saigon Skyline (Bitexco + Nhà Thờ Đức Bà)
+    g.fillStyle = '#BAE6FD'; g.fillRect(28, 36, 260, 182);
+    g.fillStyle = '#38BDF8'; g.fillRect(68, 56, 56, 142);
+    g.fillStyle = '#B83224'; g.fillRect(156, 98, 92, 100);
+    g.fillStyle = '#22C55E'; g.fillRect(28, 196, 260, 22);
+    // Đồng hồ quả lắc Vintage 90s bên phải
+    g.fillStyle = '#5C341D'; g.strokeStyle = '#2B180E'; g.lineWidth = 4;
+    g.fillRect(326, 28, 144, 200); g.strokeRect(326, 28, 144, 200);
+    g.fillStyle = '#FFFBF1'; g.beginPath(); g.arc(398, 86, 42, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#2B2118'; g.lineWidth = 4;
+    g.beginPath(); g.moveTo(398, 86); g.lineTo(398, 60); g.moveTo(398, 86); g.lineTo(420, 96); g.stroke();
+    g.fillStyle = '#2B180E'; g.fillRect(354, 140, 88, 72);
+    webgl.registerTextureCanvas('phoSkyline', c, false);
+  })();
+
+  // 12. Cửa gỗ lá sách kính mờ (phoDoorGlass)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#5C341D'; g.fillRect(0, 0, 256, 256);
+    g.strokeStyle = '#2B180E'; g.lineWidth = 8; g.strokeRect(4, 4, 248, 248);
+    // Ô kính mờ sương nửa trên có chia đố gỗ
+    g.fillStyle = '#F7E7C4'; g.fillRect(24, 20, 208, 128);
+    g.strokeStyle = '#4A2C1A'; g.lineWidth = 6; g.strokeRect(24, 20, 208, 128);
+    g.fillStyle = '#4A2C1A'; g.fillRect(24, 80, 208, 8); g.fillRect(124, 20, 8, 128);
+    // Lá sách gỗ nửa dưới
+    g.fillStyle = '#4A2C1A'; g.fillRect(24, 162, 208, 76);
+    g.fillStyle = '#3B2314';
+    for (var y = 170; y <= 228; y += 14) g.fillRect(30, y, 196, 6);
+    // Tay nắm đồng vàng
+    g.fillStyle = '#F4B93B'; g.fillRect(204, 134, 12, 26);
+    webgl.registerTextureCanvas('phoDoorGlass', c, false);
+  })();
+
+  // 13. Bộ Sprite Chú Heo 24×20 gl.NEAREST dùng chung
+  if (typeof buildPigBillboardTextures === 'function') {
+    buildPigBillboardTextures(webgl);
+  }
+}
+
 /* ==================== 1. HELPER CHIẾU MỸ THUẬT TƯỜNG 3D CÓ CO GIÃN PHỐI CẢNH ==================== */
 function wallArtAnchor(cam, wx, wy, wz, wallAxis) {
   var pr = projectPoint3D(cam, wx, wy, wz);

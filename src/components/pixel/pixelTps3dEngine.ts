@@ -773,7 +773,7 @@ function drawCroissantPlateSprite3D(ctx, cam, wx, wy, wz) {
 
 /* ==================== 4. NHÂN VẬT CON NGƯỜI 3D CHI TIẾT (ĐẦU BẾP / PHỤC VỤ / KHÁCH HÀNG) ==================== */
 function drawHumanTps3D(ctx, cam, h, t) {
-  var liftY = h.seated ? 0.34 : 0;
+  var liftY = (h.y || 0) + (h.seated ? 0.34 : 0);
   var pr = projectPoint3D(cam, h.x, liftY, h.z);
   if (!pr) return;
   var u = Math.max(0.45, Math.min(3.8, pr.scale / 34));
@@ -807,8 +807,20 @@ function drawHumanTps3D(ctx, cam, h, t) {
   // Thân áo + Tạp dề cổ điển đẹp mắt (Đầu bếp / Phục vụ / Barista Xanh Lính — QĐ 236 & QĐ 242)
   var isAnyChef = h.role === 'chef' || h.role === 'chef_butcher' || h.role === 'chef_noodle';
   var isBarista = h.role === 'barista' || h.role === 'cafe_waiter';
+  var shirtCol = isBarista ? '#4A5D36' :
+    (h.role === 'adidas_staff' ? '#111827' :
+    (h.role === 'monk' ? '#B45309' :
+    (h.role === 'worshipper' ? '#64748B' :
+    (h.role === 'vn_player' || h.role === 'vn_captain' ? '#DC2626' :
+    (h.role === 'vn_coach' ? '#1E3A8A' :
+    (h.role === 'away_player' ? '#2563EB' :
+    (h.role === 'gk' ? '#16A34A' :
+    (h.role === 'referee' ? '#0F172A' : (h.shirt || '#3B82F6')))))))));
   hr(-6, -21, 12, 13, '#2B2118');
-  hr(-5, -20, 10, 11, isBarista ? '#4A5D36' : (h.shirt || '#3B82F6'));
+  hr(-5, -20, 10, 11, shirtCol);
+  if (h.role === 'adidas_staff') { hr(-5, -20, 1, 8, '#FFFFFF'); hr(4, -20, 1, 8, '#FFFFFF'); }
+  else if (h.role === 'vn_player' || h.role === 'vn_captain') { hr(-2, -17, 4, 3, '#FFFF00'); }
+  else if (h.role === 'monk') { hr(-5, -20, 5, 11, '#D97706'); }
   if (isAnyChef) {
     hr(-4, -19, 8, 10, '#FFFDF7');
     hr(-5, -16, 10, 1, '#94A3B8');
@@ -857,7 +869,7 @@ function drawHumanTps3D(ctx, cam, h, t) {
   // Đầu & Khuôn mặt chi tiết (tóc, mắt, lông mày, miệng)
   hr(-5, -31, 10, 10, '#2B2118');
   hr(-4, -30, 8, 8, '#FFD8B8');
-  hr(-4, -31, 8, 3, h.hair || '#2B2118');
+  if (h.role !== 'monk') hr(-4, -31, 8, 3, h.hair || '#2B2118');
   if (isAnyChef) {
     // Mũ đầu bếp cao trắng nổi bật
     hr(-5, -37, 10, 6, '#2B2118');
