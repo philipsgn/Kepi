@@ -52,8 +52,8 @@ export const StadiumBannerWebView: React.FC<StadiumBannerWebViewProps> = ({
   window.addEventListener('resize', resizeCanvas);
 
   var st = createStadiumTpsState();
-  var cam = createTpsCamera({ yaw: 0.06, pitch: -0.26, dist: 4.85, targetHeight: 0.72 });
-  var stadiumBounds = { minX: -24.5, maxX: 24.5, minZ: -10.5, maxZ: 64.0, maxY: 16.0 };
+  var cam = createTpsCamera({ yaw: 0.04, pitch: -0.22, dist: 4.85, targetHeight: 0.72 });
+  var stadiumBounds = { minX: -26.0, maxX: 26.0, minZ: -0.5, maxZ: 88.0, maxY: 18.0 };
   var exitSent = false;
   var currentCtxAction = null;
   var wasSeated = false;
@@ -61,17 +61,18 @@ export const StadiumBannerWebView: React.FC<StadiumBannerWebViewProps> = ({
   function updateContextPill() {
     if (!ctxBtn) return;
     var p = st.pig;
-    var z = st.zone || 'gate_plaza';
+    var z = st.zone || 'fan_concourse';
     var nextAct = null;
 
     if (p.seated) {
       nextAct = { id: 'cheer_wave', label: '📣 Hô Vang "Việt Nam Vô Địch!" (Sóng Người)' };
-    } else if (z === 'gate_plaza') {
-      if (p.z <= -6.2) {
-        nextAct = { id: 'exit_stadium', label: '🚪 Ra lại Đại Lộ Sài Gòn' };
-      } else {
-        nextAct = { id: 'enter_gate', label: '🎫 Qua Cổng Soát Vé → Đường Hầm & Khán Đài' };
-      }
+    } else if (z === 'fan_concourse' && p.z <= 1.8 && Math.abs(p.x) <= 2.6) {
+      nextAct = { id: 'exit_stadium', label: '🚪 Ra khỏi SVĐ Trống Đồng' };
+    } else if (z === 'fan_concourse' && p.x >= 1.2 && p.z >= 5.2 && p.z <= 10.2) {
+      nextAct = {
+        id: 'wear_kit',
+        label: p.wearingVietnamKit ? '👕 Cất Áo Đấu ĐT Việt Nam' : '🧣 Mặc Áo & Khăn Cổ Vũ Việt Nam'
+      };
     } else if (z === 'home_locker') {
       nextAct = {
         id: 'wear_kit',
@@ -79,10 +80,10 @@ export const StadiumBannerWebView: React.FC<StadiumBannerWebViewProps> = ({
       };
     } else if (z === 'away_locker') {
       nextAct = { id: 'inspect_away_tactics', label: '📋 Xem Sa Bàn Chiến Thuật Đội Khách' };
-    } else if (z === 'main_tunnel' || z === 'player_tunnel' || z === 'pitchside') {
+    } else if (z === 'fan_concourse' || z === 'player_tunnel' || z === 'pitchside') {
       nextAct = { id: 'go_stands_seat', label: '🪜 Lên Khán Đài Ngồi Xem Trận 11v11' };
     } else if (z === 'stands_south') {
-      nextAct = { id: 'sit_nearest_seat', label: '🪑 Ngồi Ghế Khán Đài Xem Trận 11v11' };
+      nextAct = { id: 'sit_nearest_seat', label: '🪑 Ngồi Ghế VIP Khán Đài Xem 11v11' };
     } else if (z === 'trophy_vip') {
       nextAct = { id: 'lift_trophy', label: '🏆 Nâng Cúp Vàng Vô Địch Việt Nam!' };
     }
@@ -97,7 +98,7 @@ export const StadiumBannerWebView: React.FC<StadiumBannerWebViewProps> = ({
   }
 
   function findNearestSeat(px) {
-    if (!st.stools || !st.stools.length) return { id: 4, x: -2.0, z: 23.6 };
+    if (!st.stools || !st.stools.length) return { id: 2, x: -0.36, z: 37.2 };
     var best = st.stools[0], bestD = 999;
     for (var i = 0; i < st.stools.length; i++) {
       var d = Math.abs(st.stools[i].x - px);
@@ -109,9 +110,7 @@ export const StadiumBannerWebView: React.FC<StadiumBannerWebViewProps> = ({
   function triggerContextAction(act) {
     if (!act) return;
     postRN({ type: 'HAPTIC_MEDIUM' });
-    if (act.id === 'enter_gate') {
-      planStadiumRealtimePath(st, 0.0, 0.0, 6.2, {});
-    } else if (act.id === 'wear_kit' || act.id === 'inspect_away_tactics' || act.id === 'cheer_wave' || act.id === 'lift_trophy' || act.id === 'exit_stadium') {
+    if (act.id === 'wear_kit' || act.id === 'inspect_away_tactics' || act.id === 'cheer_wave' || act.id === 'lift_trophy' || act.id === 'exit_stadium') {
       executeStadiumAction(st, act.id);
     } else if (act.id === 'go_stands_seat' || act.id === 'sit_nearest_seat') {
       var seat = findNearestSeat(st.pig.x || 0);

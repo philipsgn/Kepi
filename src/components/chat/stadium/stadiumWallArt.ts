@@ -411,7 +411,75 @@ function buildStadiumProceduralTextures(wgl) {
     wgl.registerTextureCanvas('standConcrete', c, true);
   })();
 
-  // 23. Sprite chú Heo Mascot 24×20 (bao gồm bộ trang phục Áo Đấu ĐT Việt Nam 'vn_kit')
+  // 23. Biển Quầy Bar Nước & Bắp Rang + Quầy Fan Shop Cổ Vũ Đường Hầm CĐV
+  (function() {
+    var c1 = mkCanvas(512, 128), g1 = c1.getContext('2d');
+    g1.fillStyle = '#0F172A'; g1.fillRect(0, 0, 512, 128);
+    g1.strokeStyle = '#38BDF8'; g1.lineWidth = 5; g1.strokeRect(5, 5, 502, 118);
+    g1.fillStyle = '#FACC15'; g1.font = 'bold 26px monospace'; g1.textAlign = 'center'; g1.textBaseline = 'middle';
+    g1.fillText('🥤 STADIUM BAR · BẮP RANG & NƯỚC MÁT', 256, 46);
+    g1.fillStyle = '#38BDF8'; g1.font = 'bold 18px monospace';
+    g1.fillText('PEPSI · TRÀ ĐÀO · CÀ PHÊ · POPCORN 25K', 256, 90);
+    wgl.registerTextureCanvas('stadiumBarSign', c1, false);
+
+    var c2 = mkCanvas(512, 128), g2 = c2.getContext('2d');
+    g2.fillStyle = '#7F1D1D'; g2.fillRect(0, 0, 512, 128);
+    g2.strokeStyle = '#FDE047'; g2.lineWidth = 5; g2.strokeRect(5, 5, 502, 118);
+    g2.fillStyle = '#FDE047'; g2.font = 'bold 26px monospace'; g2.textAlign = 'center'; g2.textBaseline = 'middle';
+    g2.fillText('🧣 FAN SHOP · ÁO ĐỎ & CỜ SAO VÀNG 🇻🇳', 256, 46);
+    g2.fillStyle = '#FFFBEB'; g2.font = 'bold 18px monospace';
+    g2.fillText('KHĂN CỔ VŨ · NÓN LÁ · KÈN VUVUZELA', 256, 90);
+    wgl.registerTextureCanvas('fanShopSign', c2, false);
+  })();
+
+  // 24. Tranh Hộp Đèn LED Hào Khí Bóng Đá Việt Nam & Biển Chỉ Dẫn Vomitory
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#1E1B4B'; g.fillRect(0, 0, 512, 256);
+    var grd = g.createLinearGradient(0, 0, 512, 256);
+    grd.addColorStop(0, '#7F1D1D'); grd.addColorStop(0.5, '#B91C1C'); grd.addColorStop(1, '#450A0A');
+    g.fillStyle = grd; g.fillRect(10, 10, 492, 236);
+    drawDongSonStarAndRays2D(g, 256, 128, 90, '#FDE047', '#FEF08A');
+    g.strokeStyle = '#FACC15'; g.lineWidth = 6; g.strokeRect(8, 8, 496, 240);
+    g.fillStyle = '#FEF08A'; g.font = 'bold 24px monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('★ HÀO KHÍ ĐÔNG SƠN · ĐT VIỆT NAM ★', 256, 38);
+    g.fillStyle = '#FFFFFF'; g.font = 'bold 18px monospace';
+    g.fillText('TRỐNG ĐỒNG FIFA WORLD CUP ARENA', 256, 222);
+    wgl.registerTextureCanvas('tunnelMuralVN', c, false);
+
+    var cv = mkCanvas(512, 128), gv = cv.getContext('2d');
+    gv.fillStyle = '#064E3B'; gv.fillRect(0, 0, 512, 128);
+    gv.strokeStyle = '#4ADE80'; gv.lineWidth = 5; gv.strokeRect(5, 5, 502, 118);
+    gv.fillStyle = '#FEF08A'; gv.font = 'bold 25px monospace'; gv.textAlign = 'center'; gv.textBaseline = 'middle';
+    gv.fillText('↗ LỐI LÊN KHÁN ĐÀI A-B · SEATING ↗', 256, 46);
+    gv.fillStyle = '#A7F3D0'; gv.font = 'bold 17px monospace';
+    gv.fillText('HÀNG GHẾ CỔ ĐỘNG VIÊN & SẢNH CÚP VÀNG', 256, 90);
+    wgl.registerTextureCanvas('vomitorySign', cv, false);
+  })();
+
+  // 25. Dải LED Ribbon Board tầng 2 khán đài & Sàn Đường hầm Terrazzo LED
+  (function() {
+    var cr = mkCanvas(512, 64), gr = cr.getContext('2d');
+    gr.fillStyle = '#090D16'; gr.fillRect(0, 0, 512, 64);
+    gr.fillStyle = '#B91C1C'; gr.fillRect(4, 8, 504, 48);
+    gr.strokeStyle = '#FDE047'; gr.lineWidth = 3; gr.strokeRect(4, 8, 504, 48);
+    gr.fillStyle = '#FEF08A'; gr.font = 'bold 21px monospace'; gr.textAlign = 'center'; gr.textBaseline = 'middle';
+    gr.fillText('★ TRỐNG ĐỒNG FIFA 135,000 · VIỆT NAM VÔ ĐỊCH ★', 256, 32);
+    wgl.registerTextureCanvas('ribbonLedTex', cr, true);
+
+    var cf = mkCanvas(256, 256), gf = cf.getContext('2d');
+    gf.fillStyle = '#1E293B'; gf.fillRect(0, 0, 256, 256);
+    for (var y = 0; y < 256; y += 64) {
+      for (var x = 0; x < 256; x += 64) {
+        gf.fillStyle = ((x / 64 + y / 64) % 2 === 0) ? '#283548' : '#1E293B';
+        gf.fillRect(x + 2, y + 2, 60, 60);
+      }
+    }
+    gf.fillStyle = '#FACC15'; gf.fillRect(6, 0, 6, 256); gf.fillRect(244, 0, 6, 256);
+    wgl.registerTextureCanvas('tunnelFloorTex', cf, true);
+  })();
+
+  // 26. Sprite chú Heo Mascot 24×20 (bao gồm bộ trang phục Áo Đấu ĐT Việt Nam 'vn_kit')
   if (typeof buildPigBillboardTextures === 'function') {
     buildPigBillboardTextures(wgl, ['vn_kit']);
   }
