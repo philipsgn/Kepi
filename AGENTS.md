@@ -107,6 +107,17 @@
   - Không đặt các nhãn mang tính kỹ thuật/backend trên giao diện người dùng như `"Định vị"`, `"Gần bạn tính từ GPS thật"`, `"Gần bạn tính từ vị trí mẫu"`. Nút `"Tự gắn vị trí khi lưu chi ở tab Chụp"` nằm trong **Cài đặt** (`SettingsView`), không nằm trên màn Quán Quen.
 * **NGUỒN CHÂN LÝ MỚI NHẤT:** Luôn đối chiếu đồng thời `prototype/Ví Heo Con 24_11.html` và `prototype/MASTER-PROMPTS.md` (ưu tiên PLAN 15–19 mới nhất khi có mâu thuẫn).
 
+### 6. QUY TẮC RAYCAST WEBGL 3D & CỬ CHỈ CHẠM/VUỐT TPS 3D (CHỐNG ĐƠ CHẠM & TỰ ĐI LỆCH — QUYẾT ĐỊNH 252)
+* **Khớp Tuyệt Đối Hệ Trục `cam.U` Với `M4.lookAt` (CẤM LỘN NGƯỢC TRỤC DỌC):**
+  - Trong `pixelWebgl3dEngine.ts` (`M4.lookAt`) và mọi hàm `compute*WebglCamera`, khi `F = normalize(look - pos)` và `R = normalize(-Fz, 0, Fx)`, vector Up `cam.U` BẮT BUỘC phải là **`{ x: -fy * rz, y: fx * rz - fz * rx, z: fy * rx }`** sao cho **`cam.U.y = fx² + fz² > 0`** (chuẩn Quán Phở).
+  - **Tuyệt đối CẤM** viết ngược dấu `{ x: fy * rz, y: fz * rx - fx * rz, z: -fy * rx }` làm `cam.U.y < 0` — lỗi này đảo lộn toàn bộ tia chạm theo chiều dọc, khiến chạm nửa dưới màn hình (mặt sàn) bị bắn tia lên trần (`return null` → chú Heo đứng yên) còn chạm nửa trên bị cắm xuống điểm ngẫu nhiên khiến Heo tự di chuyển sai chỗ.
+* **Cơ Chế Bắt Chạm/Vuốt Duy Nhất `bindTpsCanvasGestures` (`src/components/pixel/pixelTps3dEngine.ts`):**
+  - **Cấm gắn trùng `pointerdown/up` + `touchstart/end`** không khử trùng trên `<canvas>` ở toàn bộ 7 công trình TPS 3D (`Cafe`, `Pho`, `Adidas`, `Cathedral`, `Pagoda`, `Market`, `Stadium`). Bắt buộc tái sử dụng helper dùng chung **`bindTpsCanvasGestures(cv, cam, opts)`**.
+  - Ưu tiên `PointerEvent` khi trình duyệt hỗ trợ (nhờ CSS `touch-action: none`), khóa chặt theo **`activePointerId`** và `setPointerCapture`, chỉ fallback sang `touch*` khi `!window.PointerEvent`, bắt buộc reset trạng thái ở `pointercancel`/`touchcancel`, kiểm tra `rect.width >= 2 && rect.height >= 2`, và dùng ngưỡng phân biệt tap/vuốt **`13px`** để tránh ngón tay rung nhẹ trên màn hình Retina làm mất thao tác chạm.
+* **Cấm Fallback `unprojectFloorTap` Xuyên Tầng Trong Chế Độ WebGL (`!wgl` Only):**
+  - Khi WebGL (`wgl !== null`) đang hoạt động, `pick<Venue>Target3D` đã chịu trách nhiệm bắn tia lên toàn bộ sàn các tầng, cầu thang (`rayRampQuad`) và vật thể tương tác; nếu `pick<Venue>Target3D` trả về `null` (người dùng chạm vào tường cao, trần, tranh treo hoặc bầu trời), **TUYỆT ĐỐI CẤM** rơi về `unprojectFloorTap(cam, sx, sy)` chiếu xuyên sàn xuống `Y = 0` gây tự chạy xuống tầng dưới hoặc ra ngoài rìa. Chỉ gọi `unprojectFloorTap` khi **`!wgl`** (Canvas2D fallback).
+* **Kiểm Chứng Raycast Bắt Buộc Trong `run-all-tests.js`:** Mọi nâng cấp TPS 3D đều phải kiểm chứng bằng code thật: `cam.U.y > 0`, chạm vùng sàn nửa dưới màn hình (`sy = 0.72 * H`) cho tia đi xuống trúng sàn trước mặt Heo, chạm vùng tường/trời trên cao không tạo bước đi lạc, và `bindTpsCanvasGestures` không bắn kép `onTap`.
+
 ---
 
 ## 🧠 NGUYÊN TẮC HỌC TẬP TỪ GLOBAL SKILLS (UI/UX PRO MAX, FRONTEND DESIGN & CODE REVIEW STANDARDS)

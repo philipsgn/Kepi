@@ -90,36 +90,11 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
     });
   }
 
-  var dragging = false, moved = false, lastX = 0, lastY = 0, startX = 0, startY = 0;
-  function getPt(e) {
-    if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
-    return { x: e.clientX, y: e.clientY };
-  }
-  function onDown(e) {
-    var pt = getPt(e);
-    dragging = true; moved = false; lastX = startX = pt.x; lastY = startY = pt.y;
-  }
-  function onMove(e) {
-    if (!dragging) return;
-    var pt = getPt(e);
-    var dx = pt.x - lastX, dy = pt.y - lastY;
-    if (Math.hypot(pt.x - startX, pt.y - startY) > 7) moved = true;
-    cam.yaw -= dx * 0.0085;
-    cam.pitch = Math.max(-0.68, Math.min(-0.08, cam.pitch - dy * 0.0055));
-    lastX = pt.x; lastY = pt.y;
-    if (e.cancelable) e.preventDefault();
-  }
-  function onUp(e) {
-    if (!dragging) return;
-    dragging = false;
-    if (!moved) {
-      var pt = getPt(e);
-      var rect = cv.getBoundingClientRect();
-      var sx = ((pt.x - rect.left) / Math.max(1, rect.width)) * W;
-      var sy = ((pt.y - rect.top) / Math.max(1, rect.height)) * H;
+  bindTpsCanvasGestures(cv, cam, {
+    getSize: function() { return { w: W, h: H }; },
+    onTap: function(sx, sy) {
       var target = wgl ? pickPhoTarget3D(cam, world, sx, sy) : null;
-      if (!target) {
+      if (!wgl && !target) {
         var hit = unprojectFloorTap(cam, sx, sy);
         if (hit) target = { kind: 'floor', x: hit.x, z: hit.z, seatRef: null, actionTag: null };
       }
@@ -130,15 +105,7 @@ export const PhoRestaurantBannerWebView: React.FC<PhoRestaurantBannerWebViewProp
         postRN({ type: target.kind === 'seat' ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });
       }
     }
-  }
-  cv.addEventListener('pointerdown', onDown);
-  window.addEventListener('pointermove', onMove, { passive: false });
-  window.addEventListener('pointerup', onUp);
-  window.addEventListener('pointercancel', function() { dragging = false; });
-  cv.addEventListener('touchstart', onDown, { passive: false });
-  window.addEventListener('touchmove', onMove, { passive: false });
-  window.addEventListener('touchend', onUp);
-  window.addEventListener('touchcancel', function() { dragging = false; });
+  });
 
   window.addEventListener('keydown', function(e) { keys[String(e.key || '').toLowerCase()] = true; });
   window.addEventListener('keyup', function(e) { keys[String(e.key || '').toLowerCase()] = false; });

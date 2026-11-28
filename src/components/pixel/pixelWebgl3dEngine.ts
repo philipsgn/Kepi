@@ -604,7 +604,7 @@ function computeWebglTpsCamera(cam, pig, navConfig) {
   rx /= rl; rz /= rl;
   cam.F = { x: fx, y: fy, z: fz };
   cam.R = { x: rx, y: 0, z: rz };
-  cam.U = { x: fy * rz, y: fz * rx - fx * rz, z: -fy * rx };
+  cam.U = { x: -fy * rz, y: fx * rz - fz * rx, z: fy * rx };
 }
 `;
 }

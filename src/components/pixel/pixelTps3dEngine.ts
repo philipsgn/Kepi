@@ -125,6 +125,80 @@ function unprojectFloorTap(cam, sx, sy) {
   return { x: cam.pos.x + dx * t, z: cam.pos.z + dz * t };
 }
 
+function bindTpsCanvasGestures(cv, cam, opts) {
+  var dragging = false, moved = false, activeId = null;
+  var lastX = 0, lastY = 0, startX = 0, startY = 0;
+  var minPitch = (opts && typeof opts.minPitch === 'number') ? opts.minPitch : -0.68;
+  var maxPitch = (opts && typeof opts.maxPitch === 'number') ? opts.maxPitch : -0.08;
+  var dragSlop = (opts && typeof opts.dragSlop === 'number') ? opts.dragSlop : 13;
+
+  function getPt(e) {
+    if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+  function onDown(e) {
+    if (typeof e.button === 'number' && e.button !== 0 && e.pointerType === 'mouse') return;
+    if (dragging && typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
+    var pt = getPt(e);
+    dragging = true; moved = false;
+    activeId = (typeof e.pointerId === 'number') ? e.pointerId : null;
+    lastX = startX = pt.x; lastY = startY = pt.y;
+    if (typeof e.pointerId === 'number' && cv.setPointerCapture) {
+      try { cv.setPointerCapture(e.pointerId); } catch (_err) {}
+    }
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
+    var pt = getPt(e);
+    var dx = pt.x - lastX, dy = pt.y - lastY;
+    if (Math.hypot(pt.x - startX, pt.y - startY) > dragSlop) moved = true;
+    cam.yaw -= dx * 0.0085;
+    cam.pitch = Math.max(minPitch, Math.min(maxPitch, cam.pitch - dy * 0.0055));
+    lastX = pt.x; lastY = pt.y;
+    if (e.cancelable) e.preventDefault();
+  }
+  function onUp(e) {
+    if (!dragging) return;
+    if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
+    if (typeof e.pointerId === 'number' && cv.releasePointerCapture) {
+      try { cv.releasePointerCapture(e.pointerId); } catch (_err) {}
+    }
+    dragging = false;
+    activeId = null;
+    if (!moved && opts && typeof opts.onTap === 'function') {
+      var pt = getPt(e);
+      var rect = cv.getBoundingClientRect ? cv.getBoundingClientRect() : null;
+      if (!rect || rect.width < 2 || rect.height < 2) return;
+      var sz = opts.getSize ? opts.getSize() : { w: cv.width, h: cv.height };
+      var sx = ((pt.x - rect.left) / rect.width) * sz.w;
+      var sy = ((pt.y - rect.top) / rect.height) * sz.h;
+      opts.onTap(sx, sy);
+    }
+  }
+  function onCancel(e) {
+    if (typeof e.pointerId === 'number' && activeId !== null && e.pointerId !== activeId) return;
+    dragging = false; moved = false; activeId = null;
+  }
+
+  var hasPointer = typeof window !== 'undefined' && typeof window.PointerEvent !== 'undefined';
+  if (hasPointer) {
+    cv.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onCancel);
+  } else {
+    cv.addEventListener('touchstart', onDown, { passive: false });
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
+    window.addEventListener('touchcancel', onCancel);
+  }
+  if (typeof window !== 'undefined') {
+    window.addEventListener('blur', function() { dragging = false; moved = false; activeId = null; });
+  }
+}
+
 /* ==================== 2. DỰNG HÌNH ĐA GIÁC & KHỐI HỘP 3D (NEAR-PLANE CLIPPING) ==================== */
 function clipPolyNear(camPts, nearZ) {
   var out = [];

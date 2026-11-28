@@ -103,36 +103,11 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
     }
   }
 
-  var dragging = false, moved = false, lastX = 0, lastY = 0, startX = 0, startY = 0;
-  function getPt(e) {
-    if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
-    return { x: e.clientX, y: e.clientY };
-  }
-  function onDown(e) {
-    var pt = getPt(e);
-    dragging = true; moved = false; lastX = startX = pt.x; lastY = startY = pt.y;
-  }
-  function onMove(e) {
-    if (!dragging) return;
-    var pt = getPt(e);
-    var dx = pt.x - lastX, dy = pt.y - lastY;
-    if (Math.hypot(pt.x - startX, pt.y - startY) > 7) moved = true;
-    cam.yaw -= dx * 0.0085;
-    cam.pitch = Math.max(-0.68, Math.min(-0.08, cam.pitch - dy * 0.0055));
-    lastX = pt.x; lastY = pt.y;
-    if (e.cancelable) e.preventDefault();
-  }
-  function onUp(e) {
-    if (!dragging) return;
-    dragging = false;
-    if (!moved) {
-      var pt = getPt(e);
-      var rect = cv.getBoundingClientRect();
-      var sx = ((pt.x - rect.left) / rect.width) * W;
-      var sy = ((pt.y - rect.top) / rect.height) * H;
+  bindTpsCanvasGestures(cv, cam, {
+    getSize: function() { return { w: W, h: H }; },
+    onTap: function(sx, sy) {
       var target = wgl ? pickAdidasTarget3D(cam, st, sx, sy) : null;
-      if (!target) {
+      if (!wgl && !target) {
         var hit = unprojectFloorTap(cam, sx, sy);
         if (hit) target = { kind: 'floor', x: hit.x, y: st.pig.y >= 1.9 ? 3.4 : 0, z: hit.z };
       }
@@ -142,13 +117,7 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
         postRN({ type: target.action ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });
       }
     }
-  }
-  cv.addEventListener('pointerdown', onDown);
-  window.addEventListener('pointermove', onMove, { passive: false });
-  window.addEventListener('pointerup', onUp);
-  cv.addEventListener('touchstart', onDown, { passive: false });
-  window.addEventListener('touchmove', onMove, { passive: false });
-  window.addEventListener('touchend', onUp);
+  });
 
   var lastNow = performance.now();
   function loop(now) {

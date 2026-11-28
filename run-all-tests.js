@@ -8850,4 +8850,133 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log(`✅ Test 186 Passed: 6-Landmark WebGL 3D, Clear-Face Pixel Human & Continuous Multi-Floor Stair Walk Audit (${results.join(' | ')}, 0 NaN — Quyết định 250) Audit verified cleanly`);
 }
 
-console.log('\n🎉 ALL 186 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (186/186)!');
+// =========================================================================
+// TEST 187: SỬA LỖI NGƯỢC TRỤC cam.U RAYCAST & GESTURE CHẠM/VUỐT THỐNG NHẤT 7 CÔNG TRÌNH (QĐ 252)
+// =========================================================================
+{
+  const agentsDoc = fs.readFileSync('AGENTS.md', 'utf8');
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const tpsEng = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const wglEng = fs.readFileSync('src/components/pixel/pixelWebgl3dEngine.ts', 'utf8');
+  const cafeScene = fs.readFileSync('src/components/chat/cafe/cafeTps3dScene.ts', 'utf8');
+  const navEng = fs.readFileSync('src/components/pixel/pixelNavGraph3d.ts', 'utf8');
+  const bbEng = fs.readFileSync('src/components/pixel/pixelTpsBillboards.ts', 'utf8');
+  const cafeWall = fs.readFileSync('src/components/chat/cafe/cafeVnWallArt.ts', 'utf8');
+
+  assert.ok(
+    agentsDoc.includes('QUYẾT ĐỊNH 252') &&
+      agentsDoc.includes('bindTpsCanvasGestures') &&
+      tpsDoc.includes('QĐ 252') &&
+      decDoc.includes('Quyết định 252') &&
+      tpsEng.includes('function bindTpsCanvasGestures') &&
+      !wglEng.includes('y: fz * rx - fx * rz') &&
+      !cafeScene.includes('y: fz * rx - fx * rz'),
+    'AGENTS.md Sec 6, docs, bindTpsCanvasGestures and positive cam.U must be synced for QD 252'
+  );
+
+  const bannerFiles = [
+    'src/components/chat/CafeTpsBannerWebView.tsx',
+    'src/components/chat/PhoRestaurantBannerWebView.tsx',
+    'src/components/chat/AdidasStoreBannerWebView.tsx',
+    'src/components/chat/NotreDameCathedralBannerWebView.tsx',
+    'src/components/chat/PagodaTempleBannerWebView.tsx',
+    'src/components/chat/BenThanhMarketBannerWebView.tsx',
+    'src/components/chat/StadiumBannerWebView.tsx',
+  ];
+  for (const bf of bannerFiles) {
+    const code = fs.readFileSync(bf, 'utf8');
+    assert.ok(
+      code.includes('bindTpsCanvasGestures(cv, cam') &&
+        !code.includes("cv.addEventListener('touchstart', onDown") &&
+        code.includes('if (!wgl'),
+      bf + ' must use bindTpsCanvasGestures and restrict unprojectFloorTap to !wgl'
+    );
+  }
+
+  const extractRaw = (src) => {
+    const m = src.match(/return String\.raw`([\s\S]*?)`;/);
+    assert.ok(m && m[1], 'Must export String.raw script');
+    return m[1];
+  };
+
+  // Kiểm chứng toán học cam.U.y > 0, pickCafeTarget3D chạm sàn nửa dưới & từ chối chạm trần trên cao, và gesture slop/cancel
+  const mockListeners = { cv: {}, win: {} };
+  const fakeWin = {
+    PointerEvent: function() {},
+    addEventListener(ev, fn) { mockListeners.win[ev] = fn; },
+  };
+  const fakeCv = {
+    width: 390,
+    height: 844,
+    getBoundingClientRect() { return { left: 0, top: 0, width: 390, height: 844 }; },
+    addEventListener(ev, fn) { mockListeners.cv[ev] = fn; },
+    setPointerCapture() {},
+    releasePointerCapture() {},
+  };
+
+  const verifyFn = new Function(
+    'window',
+    'cv',
+    extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + '\n' + extractRaw(bbEng) + '\n' + extractRaw(navEng) + '\n' + extractRaw(cafeWall) + '\n' + extractRaw(cafeScene) + `\n
+    var camShared = createTpsCamera({ yaw: 0.08, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
+    camShared.vw = 390; camShared.vh = 844; camShared.focal = 280;
+    computeWebglTpsCamera(camShared, { x: 0, y: 0, z: 5.0 }, null);
+
+    var camCafe = createTpsCamera({ yaw: 0.08, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
+    camCafe.vw = 390; camCafe.vh = 844;
+    var fovy = Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, 390 / 844)));
+    camCafe.focal = (844 * 0.5) / Math.tan(fovy * 0.5);
+    var st = createCafeTpsState();
+    computeCafeWebglCamera(camCafe, st);
+
+    var lowHit = pickCafeTarget3D(camCafe, st, 195, 620);
+    var aheadHit = pickCafeTarget3D(camCafe, st, 195, 430);
+    var highHit = pickCafeTarget3D(camCafe, st, 195, 60);
+
+    var taps = [];
+    bindTpsCanvasGestures(cv, camCafe, {
+      getSize: function() { return { w: 390, h: 844 }; },
+      onTap: function(sx, sy) { taps.push({ sx: sx, sy: sy }); }
+    });
+
+    return {
+      sharedUy: camShared.U.y,
+      cafeUy: camCafe.U.y,
+      camZ: camCafe.pos.z,
+      lowHit: lowHit,
+      aheadHit: aheadHit,
+      highHit: highHit,
+      pigZ: st.pig.z,
+      taps: taps
+    };
+  `
+  );
+  const v = verifyFn(fakeWin, fakeCv);
+  assert.ok(v.sharedUy > 0.7 && v.cafeUy > 0.7, 'cam.U.y must be positive (> 0.7) matching M4.lookAt (shared=' + v.sharedUy + ', cafe=' + v.cafeUy + ')');
+  assert.ok(v.lowHit && v.lowHit.z > v.camZ && v.lowHit.z < v.pigZ, 'Tapping foreground floor (sy=620) must hit floor between camera and Pig (got ' + JSON.stringify(v.lowHit) + ')');
+  assert.ok(v.aheadHit && v.aheadHit.z > v.pigZ, 'Tapping further down hall (sy=430) must hit floor ahead of Pig (got ' + JSON.stringify(v.aheadHit) + ')');
+  assert.strictEqual(v.highHit, null, 'Tapping ceiling/sky must return null instead of projecting random teleport');
+
+  // Test 1: Chạm có độ rung ngón tay 10px (< 13px slop) vẫn đi đúng 1 lần
+  mockListeners.cv.pointerdown({ pointerId: 1, button: 0, pointerType: 'touch', clientX: 200, clientY: 600 });
+  mockListeners.win.pointermove({ pointerId: 1, clientX: 208, clientY: 605, cancelable: true, preventDefault() {} });
+  mockListeners.win.pointerup({ pointerId: 1, clientX: 208, clientY: 605 });
+  assert.strictEqual(v.taps.length, 1, '10px finger jitter on Retina must still register cleanly as 1 tap');
+
+  // Test 2: Vuốt xoay camera 25px (> 13px slop) không kích hoạt tap đi lạc
+  mockListeners.cv.pointerdown({ pointerId: 2, button: 0, pointerType: 'touch', clientX: 200, clientY: 500 });
+  mockListeners.win.pointermove({ pointerId: 2, clientX: 225, clientY: 500, cancelable: true, preventDefault() {} });
+  mockListeners.win.pointerup({ pointerId: 2, clientX: 225, clientY: 500 });
+  assert.strictEqual(v.taps.length, 1, 'Orbit drag > 13px must NOT trigger walk tap');
+
+  // Test 3: pointercancel phải reset sạch không gây tap nhầm
+  mockListeners.cv.pointerdown({ pointerId: 3, button: 0, pointerType: 'touch', clientX: 195, clientY: 620 });
+  mockListeners.win.pointercancel({ pointerId: 3 });
+  mockListeners.win.pointerup({ pointerId: 3, clientX: 195, clientY: 620 });
+  assert.strictEqual(v.taps.length, 1, 'Canceled gesture must NOT trigger walk tap');
+
+  console.log(`✅ Test 187 Passed: Fixed Inverted cam.U Raycast (sharedUy=${v.sharedUy.toFixed(2)}, cafeUy=${v.cafeUy.toFixed(2)}), Unified bindTpsCanvasGestures (7/7 Venues) & Strict !wgl Floor Fallback + AGENTS.md Sec 6 (Quyết định 252) Audit verified cleanly`);
+}
+
+console.log('\n🎉 ALL 187 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (187/187)!');
