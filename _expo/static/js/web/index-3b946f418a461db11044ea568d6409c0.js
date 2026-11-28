@@ -48,7 +48,7 @@ __d(function(g,r,i,a,m,_e,_d){"use strict";function n(n){return n&&n.__esModule?
 __d(function(g,r,_i,_a,m,_e,_d){"use strict";function t(t){return t&&t.__esModule?t:{default:t}}Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"PIXEL_KINDS",{enumerable:!0,get:function(){return C}}),_e.lngLatToWorld=function(t,e,i){const l=256*Math.pow(2,i),o=(t+180)/360*l,n=Math.sin(e*Math.PI/180),a=Math.max(-.9999,Math.min(.9999,n)),s=(.5-Math.log((1+a)/(1-a))/(4*Math.PI))*l;return{x:o,y:s}},_e.worldToLngLat=function(t,e,i){const l=256*Math.pow(2,i),o=t/l*360-180,n=Math.PI-2*Math.PI*e/l,a=180/Math.PI*Math.atan(.5*(Math.exp(n)-Math.exp(-n)));return{lng:o,lat:a}},_e.haversineM=w,_e.extractDistrictFromNameOrCoords=T,_e.mapTransactionsToSpendPoints=P,_e.buildPlaces=R,Object.defineProperty(_e,"drawPinCanvas",{enumerable:!0,get:function(){return S}}),Object.defineProperty(_e,"drawPigFaceCanvas",{enumerable:!0,get:function(){return v}}),Object.defineProperty(_e,"renderKindVectorIcon",{enumerable:!0,get:function(){return k}}),Object.defineProperty(_e,"PixelKindThumb",{enumerable:!0,get:function(){return E}}),_e.openExternalMapDirections=M,Object.defineProperty(_e,"PiggySpendMapView",{enumerable:!0,get:function(){return W}}),Object.defineProperty(_e,"__REGRESSION_META",{enumerable:!0,get:function(){return O}});var e=r(_d[0]),i=t(r(_d[1])),l=t(r(_d[2])),o=t(r(_d[3]));r(_d[4]);var n=t(r(_d[5])),a=t(r(_d[6])),s=t(r(_d[7])),d=t(r(_d[8])),c=t(r(_d[9])),h=r(_d[10]),u=r(_d[11]),p=t(u),f=(function(t){if(t&&t.__esModule)return t;var e={};return t&&Object.keys(t).forEach(function(i){if('default'!==i){var l=Object.getOwnPropertyDescriptor(t,i);Object.defineProperty(e,i,l.get?l:{enumerable:!0,get:function(){return t[i]}})}}),e.default=t,e})(r(_d[12])),x=r(_d[13]),y=r(_d[14]),b=r(_d[15]),B=r(_d[16]);const C={food:{name:'Qu\xe1n \u0103n',color:'#E0452B',glyph:['.....','#####','#####','.###.','.....']},cafe:{name:'C\xe0 ph\xea, tr\xe0',color:'#D9822B',glyph:['.#.#.','.....','#####','#...#','.###.']},market:{name:'Ch\u1ee3',color:'#5E9A57',glyph:['#####','#.#.#','#####','#...#','#####']},shop:{name:'C\u1eeda h\xe0ng',color:'#E8548C',glyph:['.###.','#####','#####','#####','#####']},gym:{name:'Th\u1ec3 thao',color:'#4B6FA5',glyph:['##.##','#####','#####','#####','##.##']},gas:{name:'X\u0103ng xe',color:'#7A7A84',glyph:['..#..','.###.','#####','#####','.###.']},pharm:{name:'Nh\xe0 thu\u1ed1c',color:'#3FA796',glyph:['..#..','..#..','#####','..#..','..#..']},fun:{name:'Gi\u1ea3i tr\xed',color:'#8A5BB5',glyph:['..#..','#####','.###.','##.##','#...#']}};function w(t,e,i,l){const o=t=>t*Math.PI/180,n=o(i-t),a=o(l-e),s=Math.sin(n/2)**2+Math.cos(o(t))*Math.cos(o(i))*Math.sin(a/2)**2;return 12742e3*Math.atan2(Math.sqrt(s),Math.sqrt(1-s))}function j(t){return t>=1e6?(t/1e6).toFixed(1).replace(/\.0$/,'')+'tr':t>=1e3?Math.round(t/1e3)+'k':String(t)}function F(t){const e=Math.max(0,(Date.now()-t)/36e5);return e<1?'V\u1eeba xong':e<24?`${Math.floor(e)} gi\u1edd tr\u01b0\u1edbc`:e<48?'H\xf4m qua':`${Math.floor(e/24)} ng\xe0y tr\u01b0\u1edbc`}function T(t,e,i){const l=(t||'').toLowerCase(),o=[[/qu\u1eadn\s*1\b/i,'Qu\u1eadn 1'],[/qu\u1eadn\s*3\b/i,'Qu\u1eadn 3'],[/qu\u1eadn\s*4\b/i,'Qu\u1eadn 4'],[/qu\u1eadn\s*5\b/i,'Qu\u1eadn 5'],[/qu\u1eadn\s*7\b/i,'Qu\u1eadn 7'],[/qu\u1eadn\s*10\b/i,'Qu\u1eadn 10'],[/b\xecnh th\u1ea1nh/i,'B\xecnh Th\u1ea1nh'],[/ph\xfa nhu\u1eadn/i,'Ph\xfa Nhu\u1eadn'],[/t\xe2n b\xecnh/i,'T\xe2n B\xecnh'],[/th\u1ee7 \u0111\u1ee9c/i,'Th\u1ee7 \u0110\u1ee9c'],[/g\xf2 v\u1ea5p/i,'G\xf2 V\u1ea5p'],[/ho\xe0n ki\u1ebfm/i,'Ho\xe0n Ki\u1ebfm'],[/ba \u0111\xecnh/i,'Ba \u0110\xecnh'],[/\u0111\u1ed1ng \u0111a/i,'\u0110\u1ed1ng \u0110a'],[/c\u1ea7u gi\u1ea5y/i,'C\u1ea7u Gi\u1ea5y'],[/h\u1ea3i ch\xe2u/i,'H\u1ea3i Ch\xe2u']];for(const[t,e]of o)if(t.test(l))return e;if(t.includes(',')){const e=t.split(',').map(t=>t.trim()).filter(Boolean);if(e.length>=2){const t=e[e.length-1];if(t.length<=24&&!t.toLowerCase().includes('vi\u1ec7t nam'))return t}}return''}function P(t){return t.filter(t=>'EXPENSE'===t.type&&'CANCELLED'!==t.status&&('number'==typeof t.lat&&'number'==typeof t.lng&&Number.isFinite(t.lat)&&Number.isFinite(t.lng)||Boolean(t.location_name))).map((t,e)=>{let i='food';const l=String(t.category||'').toLowerCase(),o=String(t.description||'').toLowerCase();l.includes('cafe')||o.includes('cafe')||o.includes('c\xe0 ph\xea')||o.includes('tr\xe0')?i='cafe':l.includes('xe')||l.includes('di')||o.includes('x\u0103ng')||o.includes('grab')?i='gas':l.includes('mua')||o.includes('qu\u1ea7n')||o.includes('\xe1o')||o.includes('shop')?i='shop':l.includes('ch\u1ee3')||o.includes('ch\u1ee3')||o.includes('si\xeau th\u1ecb')?i='market':l.includes('gym')||o.includes('gym')||o.includes('th\u1ec3 thao')?i='gym':l.includes('thu\u1ed1c')||o.includes('thu\u1ed1c')||o.includes('d\u01b0\u1ee3c')?i='pharm':(l.includes('game')||o.includes('phim')||o.includes('vui')||o.includes('gi\u1ea3i tr\xed'))&&(i='fun');const n=String(t.location_name||t.description||t.category||`\u0110\u1ecba \u0111i\u1ec3m #${e+1}`).trim(),a='number'==typeof t.lat&&Number.isFinite(t.lat)?t.lat:null,s='number'==typeof t.lng&&Number.isFinite(t.lng)?t.lng:null;let d=String(t.district||'').trim();return d&&'Vi\u1ec7t Nam'!==d&&'TP. H\u1ed3 Ch\xed Minh'!==d&&'Khu v\u1ef1c quen'!==d||(d=T(n)),{id:String(t.id||`tx-${e}`),name:n,district:d,kind:i,amount:Number(t.amount)||0,ts:new Date(t.occurred_at||t.created_at||Date.now()).getTime(),lat:a,lng:s,photoUrl:t.thumbnail_url||t.photo_url||null}})}function R(t){const e=[];return t.forEach(t=>{let i=null;for(let l=0;l<e.length;l++){const o=e[l].lat,n=e[l].lng,a=null!==o&&null!==n&&null!==t.lat&&null!==t.lng&&w(o,n,t.lat,t.lng)<=40,s=e[l].name.toLowerCase().trim()===t.name.toLowerCase().trim();if(a||s&&t.name.length>3){i=e[l];break}}i?(i.visits+=1,i.total+=t.amount,t.ts>i.lastTs&&(i.lastTs=t.ts),t.photoUrl&&!i.photoUrls.includes(t.photoUrl)&&(i.photoUrls.unshift(t.photoUrl),i.photoUrl=t.photoUrl),!i.district&&t.district&&(i.district=t.district),null!==i.lat&&null!==i.lng||null===t.lat||null===t.lng||(i.lat=t.lat,i.lng=t.lng)):e.push({id:`place-${t.id}`,name:t.name,district:t.district||'',kind:t.kind,lat:t.lat,lng:t.lng,visits:1,total:t.amount,lastTs:t.ts,photoUrl:t.photoUrl||null,photoUrls:t.photoUrl?[t.photoUrl]:[]})}),e}const S=(t="#E0452B",e=3)=>(0,B.jsxs)(p.default,{width:18,height:24,viewBox:"0 0 9 12",children:[(0,B.jsx)(u.Rect,{x:2,y:0,width:5,height:1,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:1,y:1,width:7,height:1,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:0,y:2,width:9,height:5,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:1,y:7,width:7,height:1,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:2,y:8,width:5,height:1,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:3,y:9,width:3,height:2,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:4,y:11,width:1,height:1,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:2,y:1,width:5,height:1,fill:t}),(0,B.jsx)(u.Rect,{x:1,y:2,width:7,height:5,fill:t}),(0,B.jsx)(u.Rect,{x:2,y:7,width:5,height:1,fill:t}),(0,B.jsx)(u.Rect,{x:3,y:8,width:3,height:1,fill:t}),(0,B.jsx)(u.Rect,{x:4,y:9,width:1,height:1,fill:t}),(0,B.jsx)(u.Rect,{x:3,y:3,width:3,height:3,fill:"#FFFBF1"})]}),v=(t=22)=>(0,B.jsxs)(p.default,{width:t,height:t,viewBox:"0 0 16 16",children:[(0,B.jsx)(u.Rect,{x:2,y:2,width:3,height:3,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:11,y:2,width:3,height:3,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:3,y:3,width:1,height:1,fill:"#F9B8C4"}),(0,B.jsx)(u.Rect,{x:12,y:3,width:1,height:1,fill:"#F9B8C4"}),(0,B.jsx)(u.Rect,{x:3,y:4,width:10,height:9,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:2,y:5,width:12,height:7,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:4,y:5,width:8,height:7,fill:"#F9B8C4"}),(0,B.jsx)(u.Rect,{x:3,y:6,width:10,height:5,fill:"#F9B8C4"}),(0,B.jsx)(u.Rect,{x:5,y:7,width:1,height:2,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:10,y:7,width:1,height:2,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:6,y:9,width:4,height:3,fill:"#F08DA4"}),(0,B.jsx)(u.Rect,{x:7,y:10,width:1,height:1,fill:"#2B2118"}),(0,B.jsx)(u.Rect,{x:8,y:10,width:1,height:1,fill:"#2B2118"})]}),k=(t,e,i)=>{switch(t){case'food':return(0,B.jsx)(h.Utensils,{size:e,color:i,strokeWidth:2});case'cafe':return(0,B.jsx)(h.Coffee,{size:e,color:i,strokeWidth:2});case'market':return(0,B.jsx)(h.ShoppingBag,{size:e,color:i,strokeWidth:2});case'shop':return(0,B.jsx)(h.Store,{size:e,color:i,strokeWidth:2});case'gym':return(0,B.jsx)(h.Dumbbell,{size:e,color:i,strokeWidth:2});case'gas':return(0,B.jsx)(h.Fuel,{size:e,color:i,strokeWidth:2});case'pharm':return(0,B.jsx)(h.Pill,{size:e,color:i,strokeWidth:2});default:return(0,B.jsx)(h.Sparkles,{size:e,color:i,strokeWidth:2})}},E=({kind:t,size:e=52,photoUrl:i})=>{if(i)return(0,B.jsx)(l.default,{source:{uri:i},style:{width:e,height:e,borderRadius:10},resizeMode:"cover"});const o=(C[t]||C.food).color;return(0,B.jsx)(c.default,{style:[I.pThumb,{width:e,height:e,backgroundColor:`${o}18`,borderColor:'#2B2118',borderWidth:2,borderRadius:12,alignItems:'center',justifyContent:'center'}],children:k(t,Math.round(.48*e),o)})};function M(t,e,l,n){if(f.impactAsync(f.ImpactFeedbackStyle.Light),null!==t&&null!==e&&Number.isFinite(t)&&Number.isFinite(e)){const i=`https://www.google.com/maps/dir/?api=1&destination=${t},${e}&travelmode=driving`;let l=i;return void o.default.canOpenURL(l).then(t=>o.default.openURL(t?l:i)).catch(()=>{o.default.openURL(i).catch(()=>{})})}const a=[l,n].filter(Boolean).join(', ');if(!a)return void i.default.alert('Ch\u01b0a c\xf3 \u0111\u1ecba ch\u1ec9','\u0110\u1ecba \u0111i\u1ec3m n\xe0y ch\u01b0a c\xf3 t\u1ecda \u0111\u1ed9 ho\u1eb7c t\xean \u0111\u01b0\u1eddng \u0111\u1ec3 ch\u1ec9 \u0111\u01b0\u1eddng.');const s=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}`;o.default.openURL(s).catch(()=>{})}const W=({onBack:t,onEnterMarket:l})=>{const{transactions:o,updateTransaction:a}=(0,x.useTransactionStore)(),[u,p]=(0,e.useState)('recent14'),[C,v]=(0,e.useState)((0,y.getCachedLocationSync)());(0,e.useEffect)(()=>{let t=!0;return(0,y.getCurrentPositionSafeAsync)(5e3,!1).then(e=>{t&&e&&v(e)}),()=>{t=!1}},[]);const k=(0,e.useMemo)(()=>P(o),[o]),W=(0,e.useMemo)(()=>R(k),[k]),O=(0,e.useMemo)(()=>o.filter(t=>'EXPENSE'===t.type&&'CANCELLED'!==t.status&&Boolean(t.photo_url||t.thumbnail_url)&&(!t.lat||!t.lng||!t.location_name)),[o]),L=(0,e.useCallback)(async()=>{f.impactAsync(f.ImpactFeedbackStyle.Light);const t=await(0,y.getQuickPinCoordsIfOptedIn)(6e3);if(!t)return void i.default.alert('Ch\u01b0a c\xf3 v\u1ecb tr\xed','Vui l\xf2ng b\u1eadt quy\u1ec1n V\u1ecb tr\xed & "T\u1ef1 g\u1eafn v\u1ecb tr\xed khi l\u01b0u chi \u1edf tab Ch\u1ee5p" trong C\xe0i \u0111\u1eb7t.');const e=await(0,y.reverseGeocodePlaceAsync)(t.lat,t.lng);e?(O.forEach(i=>{a(i.id,{lat:t.lat,lng:t.lng,location_name:e.shortPlaceName,district:e.district||T(e.shortPlaceName)})}),f.notificationAsync(f.NotificationFeedbackType.Success),i.default.alert('\u0110\xe3 g\u1eafn v\u1ecb tr\xed!',`\u0110\xe3 g\u1eafn "${e.shortPlaceName}" cho ${O.length} \u1ea3nh.`)):i.default.alert('Kh\xf4ng l\u1ea5y \u0111\u01b0\u1ee3c \u0111\u1ecba ch\u1ec9','Thi\u1ebft b\u1ecb ch\u01b0a x\xe1c \u0111\u1ecbnh \u0111\u01b0\u1ee3c t\xean \u0111\u01b0\u1eddng/qu\u1eadn th\u1eadt.')},[O,a]),_=(0,e.useMemo)(()=>{let t=[...W];const e=Date.now();if('recent14'===u){const i=t.filter(t=>e-t.lastTs<=12096e5);t=i.sort((t,e)=>e.lastTs-t.lastTs)}else'frequent'===u?t=t.sort((t,e)=>e.visits-t.visits||e.total-t.total):'trail'===u?t=t.sort((t,e)=>(C&&null!==t.lat&&null!==t.lng?w(C.lat,C.lng,t.lat,t.lng):Number.MAX_SAFE_INTEGER)-(C&&null!==e.lat&&null!==e.lng?w(C.lat,C.lng,e.lat,e.lng):Number.MAX_SAFE_INTEGER)):'top'===u&&(t=t.sort((t,e)=>e.total-t.total||e.visits-t.visits));return t},[W,u,C]),A=(0,e.useMemo)(()=>{const t=W.reduce((t,e)=>t+e.visits,0),e=W.reduce((t,e)=>t+e.total,0),i=new Set(W.map(t=>t.district.trim()).filter(Boolean)),l=[...W].sort((t,e)=>e.visits-t.visits)[0]||null;return{totalPlaces:W.length,totalVisits:t,totalAmount:e,totalDistricts:i.size,topPlace:l}},[W]),z=(0,e.useMemo)(()=>{const t={};return W.forEach(e=>{const i=(e.district||'').trim();i&&(t[i]=(t[i]||0)+e.visits)}),Object.keys(t).map(e=>({district:e,count:t[e]})).sort((t,e)=>e.count-t.count)},[W]);return(0,B.jsxs)(c.default,{style:I.container,children:[(0,B.jsxs)(c.default,{style:I.topHeader,children:[(0,B.jsx)(d.default,{style:I.iconBtn,onPress:()=>{f.impactAsync(f.ImpactFeedbackStyle.Light),t()},activeOpacity:.8,accessibilityLabel:"Quay l\u1ea1i",children:(0,B.jsx)(h.ArrowLeft,{size:18,color:"#2B2118",strokeWidth:2.8})}),(0,B.jsx)(c.default,{style:I.titleWrap,children:(0,B.jsx)(s.default,{style:I.titleText,children:"Qu\xe1n quen"})}),(0,B.jsx)(c.default,{style:I.headerSpacer})]}),(0,B.jsxs)(n.default,{style:I.scrollBody,contentContainerStyle:I.scrollContent,showsVerticalScrollIndicator:!1,children:[(0,B.jsx)(b.BenThanhStreetBannerWebView,{active:!0,onEnterMarket:l}),(0,B.jsxs)(c.default,{style:I.heroPassportCard,children:[(0,B.jsxs)(c.default,{style:I.psCompactRow,children:[(0,B.jsxs)(c.default,{style:I.psCompactCol,children:[(0,B.jsx)(s.default,{style:I.psgridLabel,children:"\u0110\xe3 gh\xe9"}),(0,B.jsxs)(s.default,{style:I.psgridValue,numberOfLines:1,children:[A.totalPlaces," qu\xe1n",A.totalDistricts>0?` \xb7 ${A.totalDistricts} qu\u1eadn`:'']})]}),(0,B.jsx)(c.default,{style:I.psCompactDivider}),(0,B.jsxs)(c.default,{style:I.psCompactCol,children:[(0,B.jsx)(s.default,{style:I.psgridLabel,children:"Qu\xe1n ru\u1ed9t"}),(0,B.jsx)(s.default,{style:I.psgridValue,numberOfLines:1,children:A.topPlace?A.topPlace.name:'\u2014'})]}),(0,B.jsx)(c.default,{style:I.psCompactDivider}),(0,B.jsxs)(c.default,{style:[I.psCompactCol,{alignItems:'flex-end'}],children:[(0,B.jsx)(s.default,{style:I.psgridLabel,children:"T\u1ed5ng chi"}),(0,B.jsx)(s.default,{style:I.psgridValue,numberOfLines:1,children:j(A.totalAmount)})]})]}),z.length>0&&(0,B.jsx)(c.default,{style:I.psstamps,children:z.map((t,e)=>(0,B.jsx)(c.default,{style:[I.psstamp,{transform:[{rotate:e%2==0?'-2deg':'2deg'}]}],children:(0,B.jsxs)(s.default,{style:I.psstampText,children:[t.district," \xb7 ",t.count]})},t.district))})]}),O.length>0&&(0,B.jsxs)(d.default,{style:I.retroTagBanner,activeOpacity:.85,onPress:L,children:[(0,B.jsx)(h.Camera,{size:16,color:"#2B2118",strokeWidth:2}),(0,B.jsxs)(s.default,{style:I.retroTagText,children:["B\u1ea1n c\xf3 ",(0,B.jsxs)(s.default,{style:I.retroTagBold,children:[O.length," \u1ea3nh"]})," ch\u01b0a g\u1eafn v\u1ecb tr\xed"]}),(0,B.jsx)(c.default,{style:I.retroTagBtn,children:(0,B.jsx)(s.default,{style:I.retroTagBtnText,children:"G\u1eafn v\u1ecb tr\xed hi\u1ec7n t\u1ea1i"})})]}),(0,B.jsx)(c.default,{style:I.filterPillsRow,children:[{id:'recent14',label:'G\u1ea7n \u0111\xe2y',icon:t=>(0,B.jsx)(h.Clock,{size:14,color:t?'#FFFBF1':'#2B2118',strokeWidth:2})},{id:'frequent',label:'Quen',icon:t=>(0,B.jsx)(h.Star,{size:14,color:t?'#FFFBF1':'#2B2118',strokeWidth:2})},{id:'trail',label:'G\u1ea7n b\u1ea1n',icon:t=>(0,B.jsx)(h.LocateFixed,{size:14,color:t?'#FFFBF1':'#2B2118',strokeWidth:2})},{id:'top',label:'Chi nhi\u1ec1u',icon:t=>(0,B.jsx)(h.Coins,{size:14,color:t?'#FFFBF1':'#2B2118',strokeWidth:2})}].map(t=>{const e=u===t.id;return(0,B.jsxs)(d.default,{style:[I.pillBtn,e&&I.pillBtnActive],activeOpacity:.8,onPress:()=>{f.impactAsync(f.ImpactFeedbackStyle.Light),p(t.id)},children:[t.icon(e),(0,B.jsx)(s.default,{style:[I.pillText,e&&I.pillTextActive],children:t.label})]},t.id)})}),0===_.length?(0,B.jsxs)(c.default,{style:I.emptyCard,children:[(0,B.jsx)(c.default,{style:I.emptyIconWrap,children:S('#2B2118',3)}),(0,B.jsx)(s.default,{style:I.emptyTitle,children:'recent14'===u?'Ch\u01b0a c\xf3 qu\xe1n n\xe0o trong 14 ng\xe0y g\u1ea7n \u0111\xe2y':'Ch\u01b0a c\xf3 \u0111\u1ecba \u0111i\u1ec3m chi ti\xeau n\xe0o'}),(0,B.jsx)(s.default,{style:I.emptyDesc,children:"Ch\u1ee5p \u1ea3nh \u1edf Tab Ch\u1ee5p \u0111\u1ec3 l\u01b0u l\u1ea1i \u0111\u1ecba \u0111i\u1ec3m v\xe0 qu\xe1n quen t\u1ea1i \u0111\xe2y nh\xe9."})]}):(0,B.jsx)(c.default,{style:I.placeList,children:_.map(t=>{const e=C&&null!==t.lat&&null!==t.lng?w(C.lat,C.lng,t.lat,t.lng):null;return(0,B.jsxs)(c.default,{style:I.placeCard,children:[(0,B.jsx)(c.default,{style:I.cardThumbWrap,children:(0,B.jsx)(E,{kind:t.kind,size:52,photoUrl:t.photoUrl})}),(0,B.jsxs)(c.default,{style:I.cardInfoCol,children:[(0,B.jsx)(s.default,{style:I.cardPlaceName,numberOfLines:1,children:t.name}),Boolean(t.district)&&(0,B.jsx)(s.default,{style:I.cardAddress,numberOfLines:1,children:t.district}),(0,B.jsxs)(c.default,{style:I.cardBadgeRow,children:[(0,B.jsx)(c.default,{style:I.badgePill,children:(0,B.jsxs)(s.default,{style:I.badgePillText,children:["Gh\xe9 ",t.visits," l\u1ea7n"]})}),(0,B.jsx)(c.default,{style:[I.badgePill,I.badgePillAmount],children:(0,B.jsxs)(s.default,{style:I.badgePillAmountText,children:[j(t.total)," t\u1ed5ng"]})}),null!==e&&(0,B.jsx)(c.default,{style:I.badgePill,children:(0,B.jsx)(s.default,{style:I.badgePillText,children:(i=e,i<1e3?`${Math.round(i)} m`:`${(i/1e3).toFixed(1).replace('.',',')} km`)})})]}),(0,B.jsxs)(s.default,{style:I.cardLastText,numberOfLines:1,children:["G\u1ea7n nh\u1ea5t ",F(t.lastTs)]})]}),(0,B.jsxs)(d.default,{style:I.directionBtn,activeOpacity:.8,onPress:()=>M(t.lat,t.lng,t.name,t.district),accessibilityLabel:`Ch\u1ec9 \u0111\u01b0\u1eddng t\u1edbi ${t.name}`,children:[(0,B.jsx)(h.MapPin,{size:14,color:"#FFFBF1",strokeWidth:2}),(0,B.jsx)(s.default,{style:I.directionBtnText,children:"Ch\u1ec9 \u0111\u01b0\u1eddng"})]})]},t.id);var i})})]})]})},I=a.default.create({container:{flex:1,backgroundColor:'#F6EEDC'},topHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:14,paddingVertical:8,backgroundColor:'#F6EEDC',borderBottomWidth:0,gap:8},iconBtn:{width:38,height:38,borderRadius:12,borderWidth:2.5,borderColor:'#2B2118',backgroundColor:'#FFFBF1',alignItems:'center',justifyContent:'center',shadowColor:'#2B2118',shadowOffset:{width:0,height:3},shadowOpacity:1,shadowRadius:0,elevation:3},iconBtnActive:{backgroundColor:'#F4B93B'},titleWrap:{flex:1,flexDirection:'row',alignItems:'center',gap:8},titleText:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:22,letterSpacing:.3,color:'#2B2118',lineHeight:26},headerSpacer:{width:38},scrollBody:{flex:1},scrollContent:{paddingHorizontal:14,paddingTop:6,paddingBottom:110,gap:10},heroPassportCard:{padding:10,borderRadius:20,borderWidth:3,borderColor:'#2B2118',backgroundColor:'#FFFBF1',shadowColor:'#2B2118',shadowOffset:{width:0,height:4},shadowOpacity:1,shadowRadius:0,elevation:4,gap:8},psCompactRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8},psCompactCol:{flex:1,minWidth:0},psCompactDivider:{width:1.5,height:28,backgroundColor:'#E8DEC8'},psgridLabel:{fontFamily:'Nunito_700Bold',fontWeight:'800',fontSize:10,color:'#85735E',textTransform:'uppercase',letterSpacing:.4},psgridValue:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:14,color:'#2B2118',marginTop:1,fontVariant:['tabular-nums']},psstamps:{flexDirection:'row',flexWrap:'wrap',gap:6,paddingTop:6,borderTopWidth:1.5,borderTopColor:'#E8DEC8'},psstamp:{paddingHorizontal:10,paddingVertical:3,borderRadius:10,borderWidth:2.5,borderColor:'#2B2118',backgroundColor:'#FFFBF1'},psstampText:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:12,color:'#2B2118'},retroTagBanner:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8,paddingVertical:9,paddingHorizontal:12,borderRadius:16,borderWidth:2.5,borderColor:'#2B2118',backgroundColor:'#F4B93B'},retroTagText:{fontFamily:'Nunito_700Bold',fontWeight:'800',fontSize:12,color:'#2B2118',flex:1},retroTagBold:{fontWeight:'900'},retroTagBtn:{paddingHorizontal:10,paddingVertical:5,borderRadius:999,backgroundColor:'#FFFBF1',borderWidth:2,borderColor:'#2B2118'},retroTagBtnText:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:11,color:'#2B2118'},filterPillsRow:{flexDirection:'row',gap:6},pillBtn:{flex:1,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:4,paddingVertical:7,paddingHorizontal:6,borderRadius:999,borderWidth:2.5,borderColor:'#2B2118',backgroundColor:'#FFFBF1',shadowColor:'#2B2118',shadowOffset:{width:0,height:2},shadowOpacity:1,shadowRadius:0,elevation:2},pillBtnActive:{backgroundColor:'#2B2118'},pillText:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:11.5,color:'#2B2118'},pillTextActive:{color:'#FFFBF1'},placeList:{gap:10},placeCard:{flexDirection:'row',alignItems:'center',padding:12,borderRadius:22,borderWidth:3,borderColor:'#2B2118',backgroundColor:'#FFFBF1',shadowColor:'#2B2118',shadowOffset:{width:0,height:3},shadowOpacity:1,shadowRadius:0,elevation:3,gap:12},cardThumbWrap:{width:52,height:52,borderRadius:12,borderWidth:2.5,borderColor:'#2B2118',overflow:'hidden',backgroundColor:'#F6EEDC',shadowColor:'#2B2118',shadowOffset:{width:0,height:2},shadowOpacity:1,shadowRadius:0,elevation:2},pThumb:{width:52,height:52,borderRadius:10,backgroundColor:'#EDE3CC',alignItems:'center',justifyContent:'center'},cardInfoCol:{flex:1,minWidth:0,gap:2},cardPlaceName:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:15,color:'#2B2118'},cardAddress:{fontFamily:'Nunito_700Bold',fontWeight:'700',fontSize:12,color:'#85735E'},cardBadgeRow:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',gap:5,marginTop:4,marginBottom:2},badgePill:{paddingHorizontal:7,paddingVertical:2,borderRadius:999,backgroundColor:'#F6EEDC',borderWidth:2,borderColor:'#2B2118'},badgePillText:{fontFamily:'Nunito_700Bold',fontWeight:'800',fontSize:10.5,color:'#2B2118'},badgePillAmount:{backgroundColor:'#E6F3DF'},badgePillAmountText:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:10.5,color:'#2B2118'},cardLastText:{fontFamily:'Nunito_700Bold',fontWeight:'700',fontSize:11,color:'#85735E'},directionBtn:{flexDirection:'row',alignItems:'center',gap:4,paddingHorizontal:10,paddingVertical:8,borderRadius:14,borderWidth:2.5,borderColor:'#2B2118',backgroundColor:'#F4B93B',shadowColor:'#2B2118',shadowOffset:{width:0,height:2},shadowOpacity:1,shadowRadius:0,elevation:2},directionBtnText:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:11.5,color:'#2B2118'},emptyCard:{padding:20,borderRadius:22,borderWidth:3,borderColor:'#2B2118',backgroundColor:'#FFFBF1',alignItems:'center',gap:8,shadowColor:'#2B2118',shadowOffset:{width:0,height:3},shadowOpacity:1,shadowRadius:0,elevation:3},emptyIconWrap:{marginBottom:4},emptyTitle:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:15,color:'#2B2118',textAlign:'center'},emptyDesc:{fontFamily:'Nunito_700Bold',fontWeight:'700',fontSize:12,color:'#85735E',textAlign:'center',lineHeight:18}}),O={engine:'PlaceCheckinStreet',selectedPlacePhotoUrl:'selectedPlace.photoUrl',stylesPThumb:'styles.pThumb',visaStampsClass:'psstamps',pixelGlyphs:'PIXEL_KINDS',aliases:['Qu\xe1n Quen','PixelIconBack','backButton','PixelIconCrosshair','PixelIconClock','PixelIconStar','PixelIconCoin','PixelIconMapPin','PixelIconCameraMini','NativeSlippyTile','PanResponder.create','GeoJSONSource','buildHeoconOsmVectorStyle','maps.track-asia.com/styles/v2/streets.json','https://tiles.track-asia.com/raster-tiles/v2/${z}/${x}/${y}.png','server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map','tile.openstreetmap.org','OpenFreeMap','OpenStreetMap','SAIGON_RIVER_COORDS','SAIGON_ARTERIAL_ROADS','SAIGON_PARKS','Qu\u1ea7n \u0111\u1ea3o Ho\xe0ng Sa (Vi\u1ec7t Nam)','Qu\u1ea7n \u0111\u1ea3o Tr\u01b0\u1eddng Sa (Vi\u1ec7t Nam)','function flyTo','zoomIn','memoizedSource','webViewContainer','mpReal','vnMap','data-m="pixel"','data-m="real"','CARTO','[lng, lat]','loadMapLibreModule',"execEnv === 'storeClient'",'MapLibreGL.Map','MapLibreGL.Camera','MapLibreGL.Marker','lngLat={[p.lng, p.lat]}','pigfly-places-cluster-src','cluster={true}','clusterRadius={40}','resolveActiveVectorSourceUrlAsync','https://tiles.openfreemap.org/styles/liberty']}},833,[39,147,219,262,29,177,80,229,270,154,777,776,775,947,935,834,60]);
 __d(function(g,r,i,a,m,_e2,_d){"use strict";function n(n){return n&&n.__esModule?n:{default:n}}Object.defineProperty(_e2,'__esModule',{value:!0}),Object.defineProperty(_e2,"BEN_THANH_STALLS",{enumerable:!0,get:function(){return y}}),Object.defineProperty(_e2,"BenThanhStreetBannerWebView",{enumerable:!0,get:function(){return R}});var e=r(_d[0]);r(_d[1]);var t=n(r(_d[2])),x=n(r(_d[3])),o=n(r(_d[4])),c=n(r(_d[5])),s=n(r(_d[6])),h=r(_d[7]),B=(function(n){if(n&&n.__esModule)return n;var e={};return n&&Object.keys(n).forEach(function(t){if('default'!==t){var x=Object.getOwnPropertyDescriptor(n,t);Object.defineProperty(e,t,x.get?x:{enumerable:!0,get:function(){return n[t]}})}}),e.default=n,e})(r(_d[8])),d=r(_d[9]),l=r(_d[10]),p=r(_d[11]),F=r(_d[12]);h.WebView;const y=[{name:'Ph\u1edf b\xf2',price:'55k',kind:'food'},{name:'B\xfan b\xf2',price:'50k',kind:'food'},{name:'Tr\xe0 \u0111\xe1 v\u1ec9a h\xe8',price:'5k',kind:'food'},{name:'C\xe0 ph\xea b\u1ec7t',price:'25k',kind:'food'},{name:'B\xe1nh m\xec',price:'25k',kind:'food'},{name:'C\u01a1m t\u1ea5m',price:'45k',kind:'food'},{name:'B\xe1nh x\xe8o',price:'40k',kind:'food'},{name:'Ch\xe8 Ba M\xe0u',price:'20k',kind:'food'},{name:'N\xf3n l\xe1 & \xc1o d\xe0i',price:'120k',kind:'souvenir'},{name:'G\u1ed1m & S\u01a1n m\xe0i',price:'150k',kind:'souvenir'},{name:'B\xe1nh p\xeda & C\xe0 ph\xea',price:'95k',kind:'souvenir'},{name:'L\u1ed3ng \u0111\xe8n & Heo \u0111\u1ea5t',price:'80k',kind:'souvenir'}],R=({active:n=!0,onEnterMarket:x})=>{(0,e.useRef)(null);const h=(0,e.useRef)(null),R=(0,e.useRef)(null),{transactions:b}=(0,l.useTransactionStore)(),f=(0,e.useMemo)(()=>b.filter(n=>('CONFIRMED'===n.status||!n.status)&&(null!=n.lat&&null!=n.lng||Boolean(n.location_name))).length,[b]),[w,P]=(0,e.useState)(0),[E,C]=(0,e.useState)('Heo gh\xe9 Ph\u1edf b\xf2 \xb7 55k'),A=(0,e.useMemo)(()=>(0,p.buildOpenRoomEngineScript)({canvasId:'psCv',worldWidth:584,worldHeight:160,viewWidth:192,viewHeight:100,walkBounds:{minX:20,maxX:560,minY:84,maxY:148},initialX:256,initialY:86,initialCamX:185,initialCamY:0,speed:44,hotspots:[{id:'ben_thanh_gate',x:238,y:4,w:92,h:66,standX:283,standY:84,standFace:1,actionType:'look_window',fastDash:!0,bubbleText:"\u0110ang b\u01b0\u1edbc v\xe0o Ch\u1ee3 B\u1ebfn Th\xe0nh..."},{id:'real_places',x:16,y:10,w:72,h:48,standX:52,standY:86,standFace:1,actionType:'check_ledger',bubbleText:`B\u1ea1n \u0111\xe3 l\u01b0u ${f} qu\xe1n quen th\u1eadt!`},{id:'xich_lo',x:108,y:112,w:64,h:44,standX:140,standY:146,standFace:1,actionType:'jump_joy',bubbleText:`X\xedch l\xf4 S\xe0i G\xf2n \xb7 ${f} \u0111i\u1ec3m check-in`},{id:'cafe_bet_square',x:268,y:110,w:92,h:46,standX:314,standY:146,standFace:-1,actionType:'sip_coffee',bubbleText:"Qu\u1ea3ng tr\u01b0\u1eddng c\xe0 ph\xea b\u1ec7t & \u0110\xe8n l\u1ed3ng H\u1ed9i An"},{id:'banh_trang_cart',x:420,y:110,w:76,h:46,standX:458,standY:146,standFace:1,actionType:'eat_snack',bubbleText:"Xe b\xe1nh tr\xe1ng tr\u1ed9n ph\u1ed1 \u0111i b\u1ed9 \u0111\xeam!"}]}),[f]),v=n=>{Number(n.index);try{h.current?.contentWindow?.postMessage(JSON.stringify(n),'*')}catch(n){}};(0,e.useEffect)(()=>{},[n]);const k=n=>{B.impactAsync(B.ImpactFeedbackStyle.Light),P(n);const e=y[n];e&&C(`Heo gh\xe9 ${e.name} \xb7 ${e.price}`),v({type:'GO_TO',index:n})};(0,e.useEffect)(()=>()=>{R.current&&clearTimeout(R.current)},[]);(0,e.useEffect)(()=>{if('undefined'==typeof window)return;const n=n=>{try{const t='string'==typeof n.data?JSON.parse(n.data):n.data;(e=t)&&('STALL_VISIT'===e.type?('number'==typeof e.index&&P(e.index),e.label&&C(e.label)):'HAPTIC_LIGHT'===e.type?B.impactAsync(B.ImpactFeedbackStyle.Light).catch(()=>{}):'ROOM_ACTION'===e.type&&(e.text&&C(String(e.text)),'ben_thanh_gate'===e.id&&e.userTriggered&&x&&(B.impactAsync(B.ImpactFeedbackStyle.Medium).catch(()=>{}),R.current&&clearTimeout(R.current),R.current=setTimeout(()=>{x()},120))))}catch(n){}var e};return window.addEventListener('message',n),()=>window.removeEventListener('message',n)},[x]);const X=(0,e.useMemo)(()=>`<!doctype html>\n<html lang="vi">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">\n<style>\n*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}\nhtml,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#8F76CC;display:flex;align-items:center;justify-content:center}\n#psCv{\n  width:100%;\n  height:100%;\n  display:block;\n  image-rendering:pixelated;\n  image-rendering:-webkit-crisp-edges;\n  image-rendering:-moz-crisp-edges;\n  image-rendering:crisp-edges;\n  touch-action:none;\n  cursor:pointer;\n}\n</style>\n<script>\nwindow.onerror = function(msg, src, line) {\n  if (window.ReactNativeWebView) {\n    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'JS_ERROR', msg: String(msg), line: line }));\n  }\n  return false;\n};\n<\/script>\n</head>\n<body>\n<canvas id="psCv" width="192" height="100" role="img" aria-label="Ph\u1ed1 \u1ea9m th\u1ef1c v\xe0 \u0111\u1ed3 l\u01b0u ni\u1ec7m Ch\u1ee3 B\u1ebfn Th\xe0nh"></canvas>\n<script>\n(function(){\n'use strict';\nvar VW = 192, VH = 100, WORLD_W = 584;\nvar PBI = '#2B2118';\nvar reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;\nvar isActive = true;\n\nfunction notify(type, data) {\n  var msg = JSON.stringify(Object.assign({ type: type }, data || {}));\n  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {\n    window.ReactNativeWebView.postMessage(msg);\n  } else if (window.parent && window.parent !== window) {\n    window.parent.postMessage(msg, '*');\n  }\n}\n\nfunction mulberry32(a){\n  return function(){\n    a|=0; a=a+0x6D2B79F5|0;\n    var t=Math.imul(a^a>>>15,1|a);\n    t=t+Math.imul(t^t>>>7,61|t)^t;\n    return((t^t>>>14)>>>0)/4294967296;\n  };\n}\nfunction R(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(x,y,w,h);}\nfunction E(c,cx,cy,rx,ry,col){\n  c.fillStyle=col;\n  for(var y=-ry;y<=ry;y++)for(var x=-rx;x<=rx;x++)if((x*x)/(rx*rx)+(y*y)/(ry*ry)<=1)c.fillRect(cx+x,cy+y,1,1);\n}\nfunction mk(w,h,fn){\n  var cv=document.createElement('canvas');cv.width=w;cv.height=h;\n  var ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;fn(ctx);return cv;\n}\n\n// Sprite Heo 24x20 chu\u1ea9n prototype\nvar PAL={o:'#4B2B21',p:'#F9B8C4',s:'#EE90A6',n:'#F08DA4',h:'#FFE3E8',k:'#2B2118',g:'#F4B93B',G:'#B97A14',w:'#FFFFFF'};\nfunction shape(c,rows,fill,ox,oy){\n  c.fillStyle=PAL.o;\n  for(var d=0;d<4;d++){var ax=[[-1,0],[1,0],[0,-1],[0,1]][d][0],ay=[[-1,0],[1,0],[0,-1],[0,1]][d][1];\n    for(var i=0;i<rows.length;i++)c.fillRect(ox+rows[i][1]+ax,oy+rows[i][0]+ay,rows[i][2]-rows[i][1]+1,1);}\n  c.fillStyle=fill;\n  for(var i=0;i<rows.length;i++)c.fillRect(ox+rows[i][1],oy+rows[i][0],rows[i][2]-rows[i][1]+1,1);\n}\nfunction drawPigSprite(c,o){\n  var ox=1,oy=3,sleep=o.pose==='sleep',eat=o.pose==='eat',walk=o.pose==='walk',sad=o.mood==='sad'&&!o.happy;\n  var bob=(walk&&o.frame===1)?-1:0;\n  var bodyDy=sleep?3:bob,headDy=sleep?5:eat?4:sad?1:bob,headDx=sleep?-1:eat?1:0;\n  if(!sleep){\n    var raised=function(i){return walk&&(o.frame===0?(i===1||i===2):(i===0||i===3));};\n    var legs=[[3,PAL.p],[9,PAL.p],[6,PAL.s],[12,PAL.s]];\n    [2,3,0,1].forEach(function(i){var x=legs[i][0];\n      var rows=[[11,x,x+1],[12,x,x+1],[13,x,x+1]];if(!raised(i))rows.push([14,x,x+1]);\n      shape(c,rows,legs[i][1],ox,oy);});\n  }\n  shape(c,[[4,0,1],[5,0,0],[6,0,1]],PAL.p,ox,oy+bodyDy+(o.tail?1:0));\n  shape(c,[[4,4,12],[5,3,13],[6,2,14],[7,2,14],[8,2,14],[9,2,14],[10,2,14],[11,3,13]],PAL.p,ox,oy+bodyDy);\n  R(c,ox+5,oy+bodyDy+5,3,1,PAL.h);\n  var hx=ox+headDx,hy=oy+headDy,hp=function(x,y,col){R(c,hx+x,hy+y,1,1,col);};\n  shape(c,[[6,20,21],[7,20,21],[8,20,21]],PAL.n,hx,hy);\n  shape(c,[[3,14,18],[4,13,19],[5,13,19],[6,13,19],[7,13,19],[8,13,19],[9,14,18]],PAL.p,hx,hy);\n  shape(c,[[1,15,16],[2,14,17]],PAL.p,hx,hy);R(c,hx+14,hy+3,5,1,PAL.p);hp(16,2,PAL.s);\n  R(c,hx+14,hy+4,2,1,PAL.h);\n  hp(21,6,PAL.k);hp(21,8,PAL.k);\n  if(o.happy){hp(16,6,PAL.k);hp(17,5,PAL.k);hp(18,6,PAL.k);}\n  else if(o.blink||sleep||eat){hp(16,6,PAL.k);hp(17,6,PAL.k);}\n  else{R(c,hx+16,hy+5,2,2,PAL.k);hp(16,5,PAL.w);}\n  if(sad){hp(16,4,PAL.k);hp(17,3,PAL.k);hp(18,7,'#7EC8F0');hp(18,8,'#7EC8F0');}\n  else{hp(17,8,PAL.s);hp(18,8,PAL.s);}\n  R(c,ox+11,oy+bodyDy+9,2,1,PAL.g);R(c,ox+11,oy+bodyDy+10,2,1,PAL.G);\n}\n\nvar hp=mk(24,20,function(){}), hpx=hp.getContext('2d');\n\nvar PB_CX=[24,70,116,162,208,256,304,352,400,448,496,544];\nvar PB_DISH=[\n  {n:'Ph\u1edf b\xf2',p:'55k'},\n  {n:'B\xfan b\xf2',p:'50k'},\n  {n:'Tr\xe0 \u0111\xe1 v\u1ec9a h\xe8',p:'5k'},\n  {n:'C\xe0 ph\xea b\u1ec7t',p:'25k'},\n  {n:'B\xe1nh m\xec',p:'25k'},\n  {n:'C\u01a1m t\u1ea5m',p:'45k'},\n  {n:'B\xe1nh x\xe8o',p:'40k'},\n  {n:'Ch\xe8 Ba M\xe0u',p:'20k'},\n  {n:'N\xf3n l\xe1 & \xc1o d\xe0i',p:'120k'},\n  {n:'G\u1ed1m & S\u01a1n m\xe0i',p:'150k'},\n  {n:'B\xe1nh p\xeda & C\xe0 ph\xea',p:'95k'},\n  {n:'L\u1ed3ng \u0111\xe8n & Heo \u0111\u1ea5t',p:'80k'}\n];\n\nfunction pbUmb(x,cx,y,w,c1,c2){\n  var l=cx-(w>>1);\n  R(x,l+2,y-2,w-4,2,c1);R(x,l,y,w,3,c1);\n  for(var k=0;k<w;k+=6)R(x,l+k+2,y-2,3,5,c2);\n  R(x,l,y+3,w,1,PBI);R(x,cx,y+4,1,14,PBI);\n}\nfunction pbCounter(x,cx,col){\n  R(x,cx-12,63,24,12,PBI);R(x,cx-11,64,22,10,col);R(x,cx-12,62,24,2,'#C49A6E');\n}\nfunction pbBowl(x,ox,oy,broth,top){\n  R(x,ox+1,oy+4,9,3,'#FFFBF1');R(x,ox+2,oy+7,7,1,'#FFFBF1');\n  R(x,ox+1,oy+3,9,1,broth);R(x,ox+3,oy+2,2,1,top);R(x,ox+6,oy+2,2,1,'#6BBF59');\n  R(x,ox+8,oy,1,4,'#8A5A34');\n}\nfunction pbIcon(x,i,ox,oy){\n  if(i===0)pbBowl(x,ox,oy,'#E8C77A','#B5473A');\n  else if(i===1)pbBowl(x,ox,oy,'#E0452B','#F9B8C4');\n  else if(i===2){R(x,ox+3,oy+1,5,7,'#CFEFF6');R(x,ox+4,oy+2,2,2,'#FFFFFF');R(x,ox+3,oy+5,5,3,'#E8B96B');R(x,ox+7,oy,1,4,'#E0452B');}\n  else if(i===3){R(x,ox+2,oy+3,6,5,'#FFFBF1');R(x,ox+3,oy+4,4,1,'#6B4A2B');R(x,ox+8,oy+4,2,2,'#FFFBF1');R(x,ox+4,oy,1,2,'#B9B3C4');}\n  else if(i===4){R(x,ox+1,oy+3,9,4,'#D9A55B');R(x,ox+2,oy+2,7,1,'#E8B96B');R(x,ox+2,oy+4,7,1,'#6BBF59');R(x,ox+3,oy+5,5,1,'#F9B8C4');}\n  else if(i===5){R(x,ox+1,oy+2,9,5,'#FFFBF1');R(x,ox+2,oy+3,4,3,'#9E4528');R(x,ox+7,oy+3,2,2,'#F4B93B');R(x,ox+6,oy+5,2,1,'#6BBF59');}\n  else if(i===6){R(x,ox+1,oy+3,9,4,'#F4B93B');R(x,ox+2,oy+2,7,2,'#FFE08A');R(x,ox+4,oy+4,3,1,'#5E9A57');}\n  else if(i===7){R(x,ox+3,oy+1,5,7,'#CFEFF6');R(x,ox+3,oy+3,5,2,'#E0452B');R(x,ox+3,oy+5,5,2,'#F4B93B');R(x,ox+3,oy+6,5,2,'#5E9A57');}\n  else if(i===8){R(x,ox+2,oy+3,7,2,'#E7D3A0');R(x,ox+4,oy+1,3,2,'#E7D3A0');R(x,ox+5,oy+5,1,2,'#E0452B');}\n  else if(i===9){R(x,ox+4,oy+1,3,1,'#3F8F95');R(x,ox+3,oy+2,5,5,'#6DB7C9');R(x,ox+4,oy+7,3,1,'#3F8F95');}\n  else if(i===10){R(x,ox+2,oy+2,7,5,'#E0452B');R(x,ox+3,oy+3,5,3,'#F4B93B');}\n  else{R(x,ox+3,oy+1,5,6,'#F9B8C4');R(x,ox+4,oy+2,3,3,'#F4B93B');R(x,ox+5,oy,1,2,'#E0452B');}\n}\n\nfunction getStreetTimePalette(){\n  var h=new Date().getHours();\n  if(h>=6&&h<16){\n    return {mode:'day',bands:['#6FB5F7','#85C2FA','#9CD0FC','#B4DCFE','#CCE7FF','#E0F2FE','#EBF7FF','#F4FAFF'],skyline:'#7BA9DF',plaza1:'#E6D6BC',plaza2:'#DAC5A3',lanternGlow:false};\n  }\n  if(h>=16&&h<19){\n    return {mode:'sunset',bands:['#6B5FC0','#8F76CC','#B685CB','#E391BF','#F8A6B0','#FFC096','#FFDA9C','#FFEBB8'],skyline:'#7B66AE',plaza1:'#D8C3A5',plaza2:'#CBB292',lanternGlow:true};\n  }\n  return {mode:'night',bands:['#161A36','#1F264D','#2B3363','#384178','#444C88','#525894','#5F649E','#6D71A8'],skyline:'#232952',plaza1:'#B8A48A',plaza2:'#A89378',lanternGlow:true};\n}\nvar ST_PAL=getStreetTimePalette();\n\nfunction drawTouristStanding(c,px,py,shirt,pants,hatType){\n  R(c,px-1,py-1,7,2,'rgba(43,33,24,0.24)'); // b\xf3ng ti\u1ebfp x\xfac 2px\n  R(c,px,py-4,2,4,pants);R(c,px+3,py-4,2,4,pants);\n  R(c,px,py-9,5,5,shirt);\n  R(c,px+1,py-12,3,3,'#F4C9A0');\n  if(hatType==='nonla'){\n    R(c,px-1,py-13,7,1,'#E8C56E');R(c,px,py-14,5,1,'#F7DF94');R(c,px+1,py-15,3,1,'#FFF1C2');\n  }else if(hatType==='bucket'){\n    R(c,px-1,py-13,7,1,'#FFFBF1');R(c,px+1,py-15,3,2,'#D8CFC0');\n  }else{\n    R(c,px+1,py-13,3,1,PBI);\n  }\n}\n\nfunction drawTouristEating(c,tx,ty,shirt1,shirt2,stoolCol,foodCol){\n  // B\xf3ng ti\u1ebfp x\xfac b\xe0n gh\u1ebf d\u01b0\u1edbi s\xe0n\n  R(c,tx-9,ty+7,26,2,'rgba(43,33,24,0.22)');\n  // Gh\u1ebf nh\u1ef1a tr\xe1i + Ng\u01b0\u1eddi ng\u1ed3i tr\xe1i\n  R(c,tx-8,ty+2,6,5,PBI);R(c,tx-7,ty+3,4,3,stoolCol);\n  R(c,tx-7,ty-4,5,6,shirt1);R(c,tx-6,ty-7,3,3,'#F4C9A0');R(c,tx-6,ty-8,3,1,PBI);\n  // B\xe0n inox th\u1ea5p + t\xf4/\u0111\u0129a th\u1ee9c \u0103n + ly n\u01b0\u1edbc\n  R(c,tx,ty-2,10,5,PBI);R(c,tx+1,ty-1,8,2,'#DCE4EE');R(c,tx+4,ty+3,2,4,PBI);\n  R(c,tx+2,ty-4,3,2,foodCol);R(c,tx+6,ty-4,2,2,'#FFFBF1');\n  // Gh\u1ebf nh\u1ef1a ph\u1ea3i + Ng\u01b0\u1eddi ng\u1ed3i ph\u1ea3i (\u0111\u1ed9i m\u0169/n\xf3n)\n  R(c,tx+11,ty+2,6,5,PBI);R(c,tx+12,ty+3,4,3,stoolCol==='#2563EB'?'#E0452B':'#2563EB');\n  R(c,tx+11,ty-4,5,6,shirt2);R(c,tx+12,ty-7,3,3,'#F4C9A0');\n  R(c,tx+10,ty-8,7,1,'#F7DF94');R(c,tx+12,ty-9,3,1,'#FFF1C2');\n}\n\nvar skyTile=mk(VW,66,function(x){\n  var bands=ST_PAL.bands;\n  for(var i=0;i<bands.length;i++){\n    R(x,0,i*8,VW,8,bands[i]);\n    if(i<bands.length-1){for(var px=0;px<VW;px+=2)R(x,px,i*8+7,1,1,bands[i+1]);}\n  }\n  R(x,0,60,VW,6,bands[bands.length-1]);\n  if(ST_PAL.mode==='night'){\n    E(x,150,24,8,8,'#FFF8D6');E(x,153,22,6,6,bands[2]); // tr\u0103ng khuy\u1ebft\n  }else if(ST_PAL.mode==='day'){\n    E(x,150,22,11,11,'#FFF3B0');E(x,150,22,8,8,'#FFF9D6');\n  }else{\n    E(x,150,34,17,17,'#FFE9A8');E(x,150,34,13,13,'#FFF6CF');\n    R(x,136,36,28,1,'#FFC096');R(x,138,40,24,1,'#FFDA9C');R(x,141,44,18,2,'#FFEBB8');\n  }\n});\n\nvar worldBg=mk(WORLD_W,VH,function(x){\n  var rd=mulberry32(19);\n  // T\xf2a nh\xe0 xa ch\xe2n tr\u1eddi\n  for(var tx=8;tx<WORLD_W;tx+=28){\n    var h=18+((rd()*22)|0), w=10+((rd()*12)|0);\n    R(x,tx,64-h,w,h,ST_PAL.skyline);R(x,tx+2,64-h-3,2,3,ST_PAL.skyline);\n  }\n  // NH\xc0 PH\u1ed0 D\u1eccC CON PH\u1ed0 + CH\u1ee2 B\u1ebeN TH\xc0NH \u1ede TRUNG T\xc2M (x=242..330)\n  var HC=['#F2C9A0','#E8A0A8','#A8CBA0','#F5E0A0','#9FC4DC','#D9A8D0'];\n  var hx=0, idx=0;\n  while(hx<WORLD_W){\n    if(hx>=238 && hx<328){\n      // KHU V\u1ef0C C\u1eecA NAM CH\u1ee2 B\u1ebeN TH\xc0NH 1:1 THEO \u1ea2NH 2 (M\u1eb7t ti\u1ec1n kem v\xe0ng, th\xe1p \u0111\u1ed3ng h\u1ed3, ch\u1eef xanh CH\u1ee2 B\u1ebeN TH\xc0NH, 4 c\xe2y bonsai & v\u1ea1ch sang \u0111\u01b0\u1eddng)\n      var bx=238, bw=90;\n      R(x,bx,32,bw,32,PBI);R(x,bx+2,34,bw-4,30,'#F7E3B5'); // hai c\xe1nh c\u1eeda v\xf2m kem v\xe0ng\n      R(x,bx,29,bw,4,'#C4603A');R(x,bx+2,28,bw-4,2,'#9E4528'); // m\xe1i ng\xf3i \u0111\u1ecf hai c\xe1nh\n      // Kh\u1ed1i c\u1ed5ng ch\xednh gi\u1eefa + Th\xe1p \u0111\u1ed3ng h\u1ed3 bi\u1ec3u t\u01b0\u1ee3ng\n      R(x,bx+28,24,34,40,PBI);R(x,bx+29,25,32,39,'#F9E9C2');\n      R(x,bx+34,8,22,20,PBI);R(x,bx+35,9,20,19,'#FAF0D4');\n      R(x,bx+32,6,26,3,'#9E4528');R(x,bx+44,2,2,4,'#6B7280'); // m\xe1i th\xe1p & c\u1ed9t thu l\xf4i\n      // M\u1eb7t \u0111\u1ed3ng h\u1ed3 xanh ng\u1ecdc + kim\n      E(x,bx+45,16,5,5,PBI);E(x,bx+45,16,4,4,'#DCEEFA');\n      R(x,bx+45,13,1,3,'#2E6B47');R(x,bx+45,16,3,1,'#2E6B47');\n      // D\xf2ng ch\u1eef xanh "CH\u1ee2 B\u1ebeN TH\xc0NH" & Ph\xf9 \u0111i\xeau nh\u1ecf b\xean d\u01b0\u1edbi\n      R(x,bx+32,23,26,2,'#2E6B47');\n      R(x,bx+42,27,6,5,PBI);R(x,bx+43,28,4,3,'#D49B35');\n      // C\u1ed5ng v\xf2m ch\xednh t\u1ed1i s\xe2u (m\u1eddi v\xe0o l\xf2ng ch\u1ee3)\n      R(x,bx+37,38,16,26,PBI);R(x,bx+38,39,14,25,'#23202E');E(x,bx+45,39,7,6,'#23202E');\n      R(x,bx+40,42,10,4,'rgba(255,224,138,0.28)'); // \xe1nh s\xe1ng h\u1eaft t\u1eeb b\xean trong ch\u1ee3\n      // 2 d\xe3y c\u1eeda cu\u1ed1n x\xe1m hai b\xean c\u1ed5ng\n      R(x,bx+16,42,10,22,PBI);R(x,bx+17,43,8,21,'#9CA3AF');\n      R(x,bx+64,42,10,22,PBI);R(x,bx+65,43,8,21,'#9CA3AF');\n      // 4 c\xe2y bonsai t\u1ec9a t\u1ea7ng xanh m\u01b0\u1edbt trong ch\u1eadu \u0111\u1ecf\n      [bx+6,bx+28,bx+61,bx+83].forEach(function(tx){\n        R(x,tx-3,60,6,4,'#A65434');R(x,tx-1,54,2,6,'#6E4223');\n        R(x,tx-4,51,8,3,'#3E8A47');R(x,tx-3,47,6,3,'#52A85C');R(x,tx-2,44,4,3,'#6BC473');\n      });\n      // V\u1ea1ch k\u1ebb \u0111\u01b0\u1eddng tr\u1eafng cho ng\u01b0\u1eddi \u0111i b\u1ed9 ngay tr\u01b0\u1edbc c\u1ed5ng (y=80..98)\n      for(var zy=81;zy<97;zy+=4){R(x,bx+33,zy,24,2,'#EAE4D7');}\n      hx=328; continue;\n    }\n    var w=28+((rd()*10)|0), h=26+((rd()*14)|0), top=64-h;\n    R(x,hx,top,w,h,PBI);R(x,hx+1,top+1,w-2,h-1,HC[idx%HC.length]);\n    R(x,hx,top,w,2,'#4B3F86');R(x,hx+2,top+2,w-4,1,'rgba(255,255,255,.35)');\n    var rows=((h-12)/9)|0;\n    for(var r=0;r<rows;r++)for(var k=0;k<2;k++){\n      var wx=hx+5+k*((w-14)>>1)+k*2, wy=top+6+r*9;\n      R(x,wx,wy,7,6,PBI);R(x,wx+1,wy+1,5,4,rd()<.55?'#FFE08A':'#2B2A5E');R(x,wx-1,wy+6,9,1,'#8A5A34');\n    }\n    R(x,hx+w-1,top,1,h,'rgba(0,0,0,.18)');\n    if(idx%2===0){R(x,hx+w-6,35,5,13,'#E0452B');R(x,hx+w-5,37,3,1,'#F4B93B');}\n    hx+=w; idx++;\n  }\n  // V\u1ec9a h\xe8, l\u1ec1 \u0111\u01b0\u1eddng, l\xf2ng \u0111\u01b0\u1eddng su\u1ed1t 584px\n  R(x,0,64,WORLD_W,12,'#D8CDB8');for(var xx=0;xx<WORLD_W;xx+=12)R(x,xx,64,1,12,'#C4B8A0');R(x,0,64,WORLD_W,1,PBI);\n  R(x,0,76,WORLD_W,2,'#F4E7A8');R(x,0,78,WORLD_W,1,PBI);R(x,0,79,WORLD_W,21,'#4A4658');\n  for(var xx=4;xx<WORLD_W;xx+=20)R(x,xx,92,9,1,'#F4E7A8');\n\n  // 0 PH\u1ede B\xd2\n  var cx=PB_CX[0];pbUmb(x,cx,48,28,'#E0452B','#FFFBF1');pbCounter(x,cx,'#8A5A34');E(x,cx-3,61,6,4,'#9AA0AE');R(x,cx-9,59,12,2,'#CFD3DC');R(x,cx+5,58,6,2,'#FFFBF1');R(x,cx+5,60,6,2,'#FFFBF1');R(x,cx-8,66,16,7,'#E0452B');pbIcon(x,0,cx-5,66);\n  // 1 B\xdaN B\xd2\n  cx=PB_CX[1];pbUmb(x,cx,48,28,'#F08A2B','#FFF1D0');pbCounter(x,cx,'#6B4A2B');R(x,cx-9,58,6,2,'#FFFBF1');R(x,cx-9,60,6,2,'#FFFBF1');E(x,cx+3,61,6,4,'#C0562B');R(x,cx-2,59,10,2,'#E8A07A');R(x,cx-8,66,16,7,'#F4B93B');pbIcon(x,1,cx-5,66);\n  // 2 TR\xc0 \u0110\xc1 V\u1ec8A H\xc8\n  cx=PB_CX[2];R(x,cx-8,46,16,9,PBI);R(x,cx-7,47,14,7,'#8EC9E8');pbIcon(x,2,cx-5,46);R(x,cx,55,1,6,PBI);R(x,cx-12,63,24,4,PBI);R(x,cx-11,64,22,2,'#F9B8C4');R(x,cx-11,67,2,8,PBI);R(x,cx+9,67,2,8,PBI);R(x,cx-10,56,7,8,PBI);R(x,cx-9,57,5,6,'#3E9A57');\n  [[-16,'#E0452B'],[11,'#4B6FA5'],[-5,'#F4B93B']].forEach(function(s){var sx=cx+s[0],sy=s[0]===-5?73:70;R(x,sx,sy,7,3,PBI);R(x,sx+1,sy,5,2,s[1]);R(x,sx+1,sy+3,1,3,PBI);R(x,sx+5,sy+3,1,3,PBI);});\n  // 3 C\xc0 PH\xca B\u1ec6T\n  cx=PB_CX[3];R(x,cx+7,50,4,26,'#6B4A2B');E(x,cx+9,47,14,9,'#3E7A3A');E(x,cx+9,45,10,6,'#5E9A57');R(x,cx-15,73,26,3,PBI);R(x,cx-14,74,24,1,'#E7C76A');\n  [[-9,'#4B6FA5',false],[1,'#F9B8C4',true]].forEach(function(p){var bx=cx+p[0];R(x,bx-1,63,7,8,PBI);R(x,bx,64,5,6,p[1]);E(x,bx+2,60,3,3,PBI);E(x,bx+2,60,2,2,'#F2C9A0');if(p[2]){R(x,bx-3,57,11,1,PBI);R(x,bx-2,56,9,1,'#E7D3A0');R(x,bx,55,5,1,'#E7D3A0');}});\n  // 4 B\xc1NH M\xcc\n  cx=PB_CX[4];R(x,cx-15,49,30,3,PBI);for(var k=0;k<30;k+=6)R(x,cx-14+k,50,3,2,k%12?'#FFFBF1':'#E0452B');R(x,cx-13,55,26,13,PBI);R(x,cx-12,56,24,11,'#CFEFF6');R(x,cx-10,59,11,2,'#D9A55B');R(x,cx-8,62,13,2,'#E8B96B');R(x,cx-13,67,26,7,'#4B6FA5');R(x,cx-8,69,16,4,'#F4B93B');pbIcon(x,4,cx-5,66);\n  // 5 C\u01a0M T\u1ea4M\n  cx=PB_CX[5];pbUmb(x,cx,48,28,'#3E9A57','#FFFBF1');pbCounter(x,cx,'#A65E38');R(x,cx-9,59,18,3,'#4A4658');R(x,cx-6,57,5,2,'#9E4528');R(x,cx+1,57,5,2,'#B5473A');R(x,cx-8,66,16,7,'#F08A2B');pbIcon(x,5,cx-5,66);\n  // 6 B\xc1NH X\xc8O\n  cx=PB_CX[6];pbUmb(x,cx,48,28,'#F4B93B','#FFFBF1');pbCounter(x,cx,'#6B4A2B');E(x,cx-4,60,6,3,'#3A3A44');E(x,cx-4,60,4,2,'#F4B93B');R(x,cx+4,58,6,4,'#5E9A57');R(x,cx-8,66,16,7,'#5E9A57');pbIcon(x,6,cx-5,66);\n  // 7 CH\xc8 BA M\xc0U\n  cx=PB_CX[7];R(x,cx-13,52,26,15,PBI);R(x,cx-12,53,24,13,'#FFFBF1');R(x,cx-10,56,5,5,'#E0452B');R(x,cx-3,56,5,5,'#F4B93B');R(x,cx+4,56,5,5,'#5E9A57');R(x,cx-13,67,26,7,'#E8548C');pbIcon(x,7,cx-5,66);\n  // 8 L\u01afU NI\u1ec6M: N\xd3N L\xc1 & \xc1O D\xc0I\n  cx=PB_CX[8];R(x,cx-15,47,30,3,PBI);for(var k=0;k<30;k+=6)R(x,cx-14+k,48,3,2,k%12?'#FFFBF1':'#4B6FA5');R(x,cx-14,50,28,24,PBI);R(x,cx-13,51,26,22,'#FFF6E5');\n  // Treo \xe1o d\xe0i h\u1ed3ng & \u0111\u1ecf + n\xf3n l\xe1\n  R(x,cx-10,54,5,11,'#F9B8C4');R(x,cx-3,54,5,11,'#E0452B');R(x,cx+5,55,7,2,'#E7D3A0');R(x,cx+7,53,3,2,'#E7D3A0');pbIcon(x,8,cx-5,66);\n  // 9 L\u01afU NI\u1ec6M: G\u1ed0M & S\u01a0N M\xc0I\n  cx=PB_CX[9];pbUmb(x,cx,48,28,'#4B6FA5','#FFFBF1');pbCounter(x,cx,'#8A5A34');R(x,cx-9,56,4,6,'#6DB7C9');R(x,cx-2,55,5,7,'#3F8F95');R(x,cx+5,57,5,5,'#E0452B');R(x,cx-8,66,16,7,'#3F8F95');pbIcon(x,9,cx-5,66);\n  // 10 \u0110\u1eb6C S\u1ea2N: B\xc1NH P\xcdA & C\xc0 PH\xca QU\xc0\n  cx=PB_CX[10];pbUmb(x,cx,48,28,'#E0452B','#F4B93B');pbCounter(x,cx,'#6B4A2B');R(x,cx-9,56,6,6,'#F4B93B');R(x,cx-1,56,6,6,'#E0452B');R(x,cx+7,57,4,5,'#6B4A2B');R(x,cx-8,66,16,7,'#E0452B');pbIcon(x,10,cx-5,66);\n  // 11 L\u1ed2NG \u0110\xc8N & HEO \u0110\u1ea4T L\u01afU NI\u1ec6M\n  cx=PB_CX[11];R(x,cx-15,47,30,3,PBI);R(x,cx-14,50,28,24,PBI);R(x,cx-13,51,26,22,'#2B1B2E');\n  E(x,cx-7,56,3,4,'#E0452B');E(x,cx,55,3,4,'#F4B93B');E(x,cx+7,56,3,4,'#F9B8C4');\n  R(x,cx-9,65,5,4,'#F9B8C4');R(x,cx-1,65,5,4,'#F4B93B');R(x,cx+6,65,5,4,'#F9B8C4');pbIcon(x,11,cx-5,66);\n\n  // DU KH\xc1CH \u0110\u1ee8NG L\u1ef0A M\xd3N D\u1eccC V\u1ec8A H\xc8 TR\xcaN TR\u01af\u1edaC C\xc1C QU\u1ea6Y \u0102N & QU\u1ea6Y L\u01afU NI\u1ec6M\n  drawTouristStanding(x, 40, 75, '#E0452B', '#1F2937', 'nonla');\n  drawTouristStanding(x, 86, 75, '#38BDF8', '#374151', 'bucket');\n  drawTouristStanding(x, 140, 75, '#F4B93B', '#1F2937', 'none');\n  drawTouristStanding(x, 192, 75, '#EC4899', '#374151', 'nonla');\n  drawTouristStanding(x, 368, 75, '#10B981', '#1F2937', 'bucket');\n  drawTouristStanding(x, 418, 75, '#FFFBF1', '#4B6FA5', 'nonla');\n  drawTouristStanding(x, 472, 75, '#F97316', '#1F2937', 'bucket');\n  drawTouristStanding(x, 524, 75, '#A855F7', '#1F2937', 'none');\n});\n\nvar cv=document.getElementById('psCv'), X=cv.getContext('2d');\nX.imageSmoothingEnabled=false;\n\nvar PB={i:0,px:PB_CX[0]-12,tx:PB_CX[0]-12,camX:0,dir:1,mode:'eat',tm:2.6,hop:0,t:0,last:0,spk:[],run:false};\nfunction pbGo(i){\n  i=((i%PB_DISH.length)+PB_DISH.length)%PB_DISH.length;\n  PB.i=i;PB.tx=PB_CX[i]-12;PB.hop=0.5;\n  if(reduced){PB.px=PB.tx;PB.mode='eat';PB.dir=1;PB.camX=Math.max(0,Math.min(WORLD_W-VW,PB.px+12-96));notify('STALL_VISIT',{index:i,label:'Heo gh\xe9 '+PB_DISH[i].n+' \xb7 '+PB_DISH[i].p});draw(3);}\n  else{PB.mode='walk';PB.dir=PB.tx<PB.px?-1:1;}\n}\nwindow.__pbGo=pbGo;\nwindow.__pbSetActive=function(v){isActive=!!v;if(isActive&&!PB.run&&!reduced){PB.run=true;PB.last=performance.now();requestAnimationFrame(frame);}};\n\nfunction pbSteam(x,sx,sy,t,n){\n  for(var k=0;k<n;k++){\n    var ph=(t*0.7+k/n)%1, yy=sy-ph*13, xx=sx+Math.round(Math.sin((t+k)*3)*1.6);\n    R(x,xx,Math.round(yy),2,2,'rgba(255,251,241,'+(0.85*(1-ph)).toFixed(2)+')');\n  }\n}\nfunction pbHeart(x,hx,hy,c){\n  R(x,hx,hy,2,1,c);R(x,hx+3,hy,2,1,c);R(x,hx-1,hy+1,7,1,c);R(x,hx,hy+2,5,1,c);R(x,hx+1,hy+3,3,1,c);R(x,hx+2,hy+4,1,1,c);\n}\nfunction fbRider(x,rx,ry,t,rev){\n  var bob=(t*12|0)%2;\n  R(x,rx,ry+bob,10,4,'#E0452B');R(x,rx+1,ry+4,2,2,PBI);R(x,rx+7,ry+4,2,2,PBI);\n  R(x,rx+(rev?2:4),ry-5+bob,4,5,'#4B6FA5');E(x,rx+(rev?4:6),ry-7+bob,2,2,'#F9B8C4');R(x,rx+(rev?3:5),ry-9+bob,4,2,'#F4B93B');\n}\n\nfunction draw(t){\n  var cx=Math.round(PB.camX);\n  X.drawImage(skyTile,0,0);\n  // M\xe2y tr\xf4i ch\u1eadm\n  [[0,8,9],[1,20,13]].forEach(function(c){\n    var mox=((t*c[2]+c[0]*90)%(VW+50))-25;\n    R(X,Math.round(mox),c[1],20,4,'#FFE6EE');R(X,Math.round(mox+4),c[1]-3,11,4,'#FFE6EE');\n  });\n  // Th\u1ebf gi\u1edbi ph\u1ed1 Ch\u1ee3 B\u1ebfn Th\xe0nh c\u1eaft theo camX!\n  X.drawImage(worldBg,cx,0,VW,VH,0,0,VW,VH);\n\n  // D\xe2y \u0111\xe8n nh\u1ea5p nh\xe1y d\u1ecdc th\u1ebf gi\u1edbi\n  var cols=['#FF8A6B','#FFE08A','#8EE0B0'];\n  for(var xx=0;xx<VW;xx++){\n    var wx=xx+cx;\n    R(X,xx,36+Math.round(4*Math.sin((wx%48)/48*Math.PI)),1,1,PBI);\n    if(wx%6===3){var dy=Math.round(4*Math.sin((wx%48)/48*Math.PI));R(X,xx,37+dy,2,2,cols[(((wx/6)|0)+Math.floor(t*2))%3]);}\n  }\n  // H\u01a1i n\xf3ng b\u1ed1c l\xean t\u1eeb c\xe1c qu\u1ea7y ph\u1edf, b\xfan, c\xe0 ph\xea, c\u01a1m t\u1ea5m, b\xe1nh x\xe8o\n  [PB_CX[0]-3,PB_CX[1]+3,PB_CX[3]-6,PB_CX[5]-4,PB_CX[6]-4].forEach(function(sx){\n    var screenX=sx-cx;\n    if(screenX>-10 && screenX<VW+10) pbSteam(X,screenX,57,t,2);\n  });\n  // Xe m\xe1y ch\u1ea1y ngang l\xf2ng \u0111\u01b0\u1eddng tr\xean th\u1ebf gi\u1edbi\n  var moto1=(WORLD_W+40-((t*32)%(WORLD_W+90)))-cx;\n  if(moto1>-20&&moto1<VW+20) fbRider(X,Math.round(moto1),85,t,false);\n  var moto2=(((t*24+220)%(WORLD_W+90))-30)-cx;\n  if(moto2>-20&&moto2<VW+20) fbRider(X,Math.round(moto2),81,t,true);\n\n  // M\u0169i t\xean v\xe0ng nh\u1ea5p nh\xf4 ch\u1ec9 qu\xe1n \u0111\xedch\n  if(PB.mode==='walk'){\n    var ax=PB_CX[PB.i]-cx, b=Math.round(Math.sin(t*6)*2), ay=42+b;\n    if(ax>-10 && ax<VW+10){\n      R(X,ax-3,ay+1,7,1,PBI);R(X,ax-2,ay+2,5,1,PBI);R(X,ax-1,ay+3,3,1,PBI);\n      R(X,ax-3,ay,7,1,'#F4B93B');R(X,ax-2,ay+1,5,1,'#F4B93B');R(X,ax-1,ay+2,3,1,'#F4B93B');R(X,ax,ay+3,1,1,'#F4B93B');\n    }\n  }\n\n  // V\u1ebd ch\xfa heo theo t\u1ecda \u0111\u1ed9 m\xe0n h\xecnh (px - camX)\n  var jy=PB.hop>0?-Math.round(Math.abs(Math.sin(PB.hop*10))*6):0, py=79+jy, eat=PB.mode==='eat';\n  hpx.clearRect(0,0,24,20);\n  drawPigSprite(hpx,{pose:eat?'eat':'walk',frame:eat?0:(t*5|0)%2,happy:PB.hop>0||eat,blink:(t%4)<0.15,tail:Math.floor(t*3)%2===1});\n  var px=Math.round(PB.px)-cx;\n  X.save();\n  if(PB.dir<0){X.translate(px+24,py);X.scale(-1,1);X.drawImage(hp,0,0,24,20,0,0,24,20);}\n  else X.drawImage(hp,0,0,24,20,px,py,24,20);\n  X.restore();\n\n  // Bong b\xf3ng m\xf3n \u0103n / \u0111\u1ed3 l\u01b0u ni\u1ec7m tr\xean \u0111\u1ea7u heo\n  if(eat||PB.hop>0){\n    var bx=Math.max(2,Math.min(VW-22,px+12-10)), by=py-17;\n    R(X,bx,by,20,15,PBI);R(X,bx+1,by+1,18,13,'#FFFBF1');\n    R(X,bx+8,by+15,4,2,PBI);R(X,bx+9,by+15,2,1,'#FFFBF1');\n    pbIcon(X,PB.i,bx+4,by+3);\n  }\n  if(eat){var h=(t*2)%1;pbHeart(X,px+14,Math.round(py-26-h*8),'#E0452B');}\n\n  PB.spk=PB.spk.filter(function(s){s.l-=0.03;return s.l>0;});\n  PB.spk.forEach(function(s){s.x+=s.vx;s.y+=s.vy;R(X,Math.round(s.x)-cx,Math.round(s.y),2,2,s.c);});\n\n  R(X,0,0,VW,2,PBI);R(X,0,VH-2,VW,2,PBI);\n}\n\nfunction drawLowerVietnamSquare(X, camX, camY, t) {\n  // T\u1ea7ng d\u01b0\u1edbi m\u1edf r\u1ed9ng (y: 100..160): Ph\u1ed1 L\u1ec5 H\u1ed9i \u1ea8m Th\u1ef1c 2 b\xean \u0111\u01b0\u1eddng, d\xe3y b\xe0n gh\u1ebf nh\u1ef1a du kh\xe1ch ng\u1ed3i \u0103n u\u1ed1ng & \u0111\xe8n l\u1ed3ng H\u1ed9i An\n  X.save();\n  X.translate(-Math.round(camX), -Math.round(camY));\n  for (var sx = 0; sx < WORLD_W; sx += 16) {\n    for (var sy = 100; sy < 160; sy += 16) {\n      R(X, sx, sy, 16, 16, ((sx / 16 + sy / 16) % 2 === 0) ? ST_PAL.plaza1 : ST_PAL.plaza2);\n    }\n  }\n  R(X, 0, 100, WORLD_W, 2, PBI);\n\n  // D\xe2y \u0111\xe8n l\u1ed3ng H\u1ed9i An gi\u0103ng d\u1ecdc ph\u1ed1 l\u1ec5 h\u1ed9i (t\u1ecfa s\xe1ng ban \u0111\xeam/chi\u1ec1u)\n  R(X, 0, 105, WORLD_W, 1, PBI);\n  var lanCols = ['#E0452B', '#F4B93B', '#38BDF8', '#EC4899'];\n  for (var lx = 20; lx < WORLD_W - 10; lx += 32) {\n    var col = lanCols[((lx / 32) | 0) % lanCols.length];\n    var ly = 110 + Math.round(Math.sin(t * 2.2 + lx * 0.2) * 0.9);\n    if (ST_PAL.lanternGlow) {\n      X.save();\n      X.globalAlpha = 0.22;\n      E(X, lx, ly, 7, 7, '#FFE08A');\n      X.restore();\n    }\n    E(X, lx, ly, 4, 4, PBI);\n    E(X, lx, ly, 3, 3, col);\n  }\n\n  // H\xe0ng qu\xe1n v\u1ec9a h\xe8 ph\xeda d\u01b0\u1edbi: 5 nh\xf3m b\xe0n inox + gh\u1ebf nh\u1ef1a xanh/\u0111\u1ecf c\xf3 du kh\xe1ch ng\u1ed3i \u0103n & tr\xf2 chuy\u1ec7n\n  drawTouristEating(X, 46, 134, '#E0452B', '#38BDF8', '#2563EB', '#F4B93B');   // Qu\xe1n Ph\u1edf & Tr\xe0 \u0111\xe1\n  drawTouristEating(X, 198, 136, '#10B981', '#F43F5E', '#E0452B', '#FFE08A');  // Qu\xe1n B\xe1nh X\xe8o & Ch\xe8\n  drawTouristEating(X, 294, 132, '#4B6FA5', '#F9B8C4', '#2563EB', '#8A5A34');  // Qu\u1ea3ng tr\u01b0\u1eddng C\xe0 ph\xea b\u1ec7t\n  drawTouristEating(X, 376, 136, '#F59E0B', '#FFFBF1', '#E0452B', '#E0452B');  // Qu\xe1n Xi\xean n\u01b0\u1edbng\n  drawTouristEating(X, 518, 134, '#EC4899', '#3B82F6', '#2563EB', '#5E9A57');  // Tr\xe0 chanh & Qu\xe0 ph\u1ed1 \u0111\xeam\n\n  // X\xedch l\xf4 S\xe0i G\xf2n (x: 118, y: 122)\n  R(X, 118, 122, 24, 16, PBI); R(X, 119, 123, 22, 14, '#4B6FA5');\n  R(X, 116, 116, 28, 6, '#F4B93B');\n  E(X, 122, 140, 4, 4, PBI); E(X, 138, 140, 4, 4, PBI); E(X, 152, 140, 4, 4, PBI);\n  R(X, 142, 128, 12, 3, PBI);\n\n  // Xe b\xe1nh tr\xe1ng tr\u1ed9n (x: 428, y: 118) + Du kh\xe1ch \u0111\u1ee9ng ch\u1edd mua \u0111\u1ed3\n  R(X, 428, 118, 44, 24, PBI); R(X, 429, 119, 42, 10, '#DCEEFA'); R(X, 429, 129, 42, 12, '#5E9A57');\n  R(X, 426, 114, 48, 4, '#E0452B');\n  E(X, 436, 144, 4, 4, PBI); E(X, 464, 144, 4, 4, PBI);\n  drawTouristStanding(X, 418, 144, '#38BDF8', '#1F2937', 'nonla');\n  drawTouristStanding(X, 478, 144, '#F4B93B', '#374151', 'bucket');\n  X.restore();\n}\n\nfunction step(dt, now){\n  PB.t+=dt;\n  if(PB.hop>0) PB.hop=Math.max(0,PB.hop-dt);\n  if (window.__openRoom) {\n    var rm = window.__openRoom.state;\n    window.__openRoom.step(dt, now);\n    PB.px = rm.x - 12;\n    PB.py = rm.y;\n    PB.dir = rm.facing;\n    PB.mode = rm.walking ? 'walk' : 'eat';\n    PB.camX = rm.camX;\n    PB.camY = rm.camY;\n  }\n}\n\nfunction frame(now){\n  if(!isActive){PB.run=false;return;}\n  var dt=Math.min(0.05,(now-PB.last)/1000);PB.last=now;\n  step(dt, now);\n  var camY = PB.camY || 0;\n  X.save();\n  X.translate(0, -Math.round(camY));\n  draw(PB.t);\n  X.restore();\n  drawLowerVietnamSquare(X, PB.camX, camY, PB.t);\n  // N\u1ebfu heo \u0111ang \u1edf t\u1ea7ng d\u01b0\u1edbi (y > 96), v\u1ebd heo n\u1ed5i tr\xean qu\u1ea3ng tr\u01b0\u1eddng \u0111\xeam\n  if (PB.py && PB.py > 96) {\n    var pxScreen = Math.round(PB.px - PB.camX);\n    var pyScreen = Math.round(PB.py - 20 - camY);\n    hpx.clearRect(0, 0, 24, 20);\n    drawPigSprite(hpx, { pose: PB.mode === 'walk' ? 'walk' : 'stand', frame: ((PB.t * 6) | 0) % 2, happy: PB.hop > 0, blink: (PB.t % 4) < 0.15, tail: true });\n    X.save();\n    if (PB.dir < 0) { X.translate(pxScreen + 24, pyScreen); X.scale(-1, 1); X.drawImage(hp, 0, 0, 24, 20, 0, 0, 24, 20); }\n    else X.drawImage(hp, 0, 0, 24, 20, pxScreen, pyScreen, 24, 20);\n    X.restore();\n  }\n  if(window.__openRoom)window.__openRoom.drawOverlays(X, now);\n  requestAnimationFrame(frame);\n}\n\nwindow.addEventListener('message',function(ev){\n  try{\n    var d=JSON.parse(ev.data);\n    if(d&&d.type==='GO_TO') {\n      var idx = Number(d.index) || 0;\n      pbGo(idx);\n      if (window.__openRoom && PB_CX[idx] !== undefined) {\n        window.__openRoom.walkTo(PB_CX[idx], 86);\n      }\n    }\n  }catch(e){}\n});\n\n${A}\n\nPB.px=256-12; PB.tx=PB.px; PB.camX=185;\nif(reduced){draw(3);}else{PB.run=true;PB.last=performance.now();requestAnimationFrame(frame);}\n})();\n<\/script>\n</body>\n</html>`,[A]);(0,e.useMemo)(()=>({html:X}),[X]);return(0,F.jsxs)(s.default,{style:u.wrapper,children:[(0,F.jsxs)(s.default,{style:u.bannerFrame,children:[(0,F.jsx)("iframe",{ref:h,srcDoc:X,style:{width:'100%',height:'100%',border:'none'},title:"Ben Thanh Street Banner"}),(0,F.jsxs)(s.default,{style:u.floatingToast,pointerEvents:"none",children:[(0,F.jsx)(d.PixelIconStar,{size:12}),(0,F.jsx)(o.default,{style:u.floatingToastText,numberOfLines:1,children:E})]})]}),(0,F.jsx)(t.default,{horizontal:!0,showsHorizontalScrollIndicator:!1,contentContainerStyle:u.stallChipsRow,children:y.map((n,e)=>{const t=w===e;return(0,F.jsx)(c.default,{style:[u.stallChip,t&&u.stallChipActive],onPress:()=>k(e),activeOpacity:.8,children:(0,F.jsx)(o.default,{style:[u.stallChipText,t&&u.stallChipTextActive],children:n.name})},n.name)})})]})},u=x.default.create({wrapper:{gap:8},bannerFrame:{position:'relative',width:'100%',aspectRatio:1.92,borderRadius:22,borderWidth:3,borderColor:'#2B2118',overflow:'hidden',backgroundColor:'#8F76CC',shadowColor:'#2B2118',shadowOffset:{width:0,height:3},shadowOpacity:1,shadowRadius:0,elevation:3},webContainer:{flex:1,width:'100%',backgroundColor:'#8F76CC'},webStyle:{flex:1,width:'100%',backgroundColor:'#8F76CC'},floatingToast:{position:'absolute',top:7,alignSelf:'center',flexDirection:'row',alignItems:'center',gap:5,paddingHorizontal:10,paddingVertical:3,borderRadius:999,backgroundColor:'#FFFBF1',borderWidth:2,borderColor:'#2B2118',shadowColor:'#2B2118',shadowOffset:{width:0,height:2},shadowOpacity:1,shadowRadius:0,elevation:2},floatingToastText:{fontFamily:'Baloo2_800ExtraBold',fontWeight:'800',fontSize:11.5,color:'#2B2118'},stallChipsRow:{gap:6,paddingVertical:2},stallChip:{paddingHorizontal:10,paddingVertical:5,borderRadius:999,borderWidth:2,borderColor:'#2B2118',backgroundColor:'#FFFBF1',shadowColor:'#2B2118',shadowOffset:{width:0,height:2},shadowOpacity:1,shadowRadius:0,elevation:2},stallChipActive:{backgroundColor:'#F4B93B'},stallChipText:{fontFamily:'Nunito_700Bold',fontWeight:'800',fontSize:11.5,color:'#2B2118'},stallChipTextActive:{fontFamily:'Baloo2_800ExtraBold'}})},834,[39,29,177,80,229,270,154,959,775,825,947,829,60]);
 __d(function(g,r,i,a,m,_e,_d){"use strict";function e(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"BenThanhMarketView",{enumerable:!0,get:function(){return b}});var t=r(_d[0]),o=e(r(_d[1])),n=e(r(_d[2])),s=e(r(_d[3])),l=r(_d[4]),u=r(_d[5]),c=(function(e){if(e&&e.__esModule)return e;var t={};return e&&Object.keys(e).forEach(function(o){if('default'!==o){var n=Object.getOwnPropertyDescriptor(e,o);Object.defineProperty(t,o,n.get?n:{enumerable:!0,get:function(){return e[o]}})}}),t.default=e,t})(r(_d[6])),d=r(_d[7]),f=r(_d[8]),h=r(_d[9]),p=r(_d[10]);const b=({onBack:e})=>{const o=(0,l.useSafeAreaInsets)(),{transactions:b}=(0,d.useTransactionStore)(),T=(0,t.useMemo)(()=>{const e=b.filter(e=>('CONFIRMED'===e.status||!e.status)&&'INCOME'!==e.type);let t=0,o=0,n=0;return e.forEach(e=>{const s=String(e.category||'').toLowerCase();s.includes('mua')||s.includes('shopping')||s.includes('qu\u1ea7n')?t+=e.amount||0:(s.includes('\u0103n')||s.includes('u\u1ed1ng')||s.includes('food')||s.includes('cafe'))&&(o+=e.amount||0),(null!=e.lat&&null!=e.lng||Boolean(e.location_name))&&(n+=1)}),{shoppingTotalText:(0,f.formatVND)(t),foodTotalText:(0,f.formatVND)(o),visitsCount:n}},[b]);return(0,p.jsxs)(s.default,{style:y.fullscreenContainer,children:[(0,p.jsx)(h.BenThanhMarketBannerWebView,{active:!0,shoppingTotalText:T.shoppingTotalText,foodTotalText:T.foodTotalText,visitsCount:T.visitsCount,onExitToMap:e}),(0,p.jsx)(n.default,{style:[y.floatingBackBtn,{top:Math.max(o.top,10)+6}],onPress:()=>{c.impactAsync(c.ImpactFeedbackStyle.Light),e()},activeOpacity:.8,accessibilityLabel:"Quay l\u1ea1i",hitSlop:{top:10,bottom:10,left:10,right:10},children:(0,p.jsx)(u.ArrowLeft,{size:18,color:"#2B2118",strokeWidth:2.8})})]})},y=o.default.create({fullscreenContainer:{flex:1,width:'100%',height:'100%',backgroundColor:'#3A2D25'},floatingBackBtn:{position:'absolute',left:12,width:36,height:36,borderRadius:18,borderWidth:2,borderColor:'#2B2118',backgroundColor:'rgba(255, 251, 241, 0.82)',alignItems:'center',justifyContent:'center',shadowColor:'#2B2118',shadowOffset:{width:0,height:2},shadowOpacity:.9,shadowRadius:0,elevation:4,zIndex:20}})},835,[39,80,270,154,311,777,775,947,780,836,60]);
-__d(function(g,r,i,a,m,_e,_d){"use strict";Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"BenThanhMarketBannerWebView",{enumerable:!0,get:function(){return l}});var t=r(_d[0]),n=(function(t){if(t&&t.__esModule)return t;var n={};return t&&Object.keys(t).forEach(function(e){if('default'!==e){var o=Object.getOwnPropertyDescriptor(t,e);Object.defineProperty(n,e,o.get?o:{enumerable:!0,get:function(){return t[e]}})}}),n.default=t,n})(r(_d[1])),e=r(_d[2]),o=r(_d[3]),s=r(_d[4]),c=r(_d[5]);const l=({active:l=!0,shoppingTotalText:p="0\u0111",foodTotalText:u="0\u0111",visitsCount:d=0,selectedZone:h,onExitToMap:f,onSelectZoneFromCanvas:x})=>{const v=(0,t.useRef)(null),M=(0,t.useRef)(null),_=(0,t.useRef)(0),[z,T]=(0,t.useState)(null);(0,t.useEffect)(()=>()=>{v.current&&clearTimeout(v.current)},[]),(0,t.useEffect)(()=>{if('number'!=typeof h)return;if(M.current===h)return void(M.current=null);const t=['south_hall','south_hall','food_court','fruit_craft'][h]||'south_hall';_.current+=1,T({type:'NAV_ZONE',zone:t,seq:_.current})},[h]);const C=(0,t.useMemo)(()=>(0,o.buildMarketWallArtScript)(),[]),y=(0,t.useMemo)(()=>(0,s.buildMarketTps3dSceneScript)(),[]),k=(0,t.useMemo)(()=>"\n(function() {\n  var cv = document.getElementById('tpsCv');\n  var ctxBtn = document.getElementById('ctxPillBtn');\n  var wgl = createPixelWebglRenderer(cv);\n  var ctx = wgl ? null : cv.getContext('2d');\n  if (wgl) buildMarketProceduralTextures(wgl);\n\n  var W = 400, H = 720;\n  function resizeCanvas() {\n    var dw = Math.max(320, window.innerWidth || 390);\n    var dh = Math.max(480, window.innerHeight || 760);\n    var dpr = wgl ? Math.min(2, window.devicePixelRatio || 1) : (dw > 460 ? 0.72 : 0.84);\n    W = Math.round(dw * dpr);\n    H = Math.round(dh * dpr);\n    cv.width = W; cv.height = H;\n    if (ctx) ctx.imageSmoothingEnabled = false;\n  }\n  resizeCanvas();\n  window.addEventListener('resize', resizeCanvas);\n\n  var st = createMarketTpsState();\n  st.onZoneChanged = function(zoneId) {\n    postRN({ type: 'SELECT_ZONE', zone: zoneId });\n  };\n  var cam = createTpsCamera({ yaw: 0.06, pitch: -0.32, dist: 4.75, targetHeight: 0.76 });\n  var marketBounds = { minX: -6.0, maxX: 17.2, minZ: 0.0, maxZ: 26.8, maxY: 5.8 };\n  var currentAction = null;\n  var exitSent = false;\n\n  window.__handleVenueCmd = function(cmd) {\n    if (!cmd) return;\n    if (cmd.type === 'NAV_ZONE' && cmd.zone && cmd.zone !== st.zone) {\n      navigateMarketToZone(st, cmd.zone);\n    }\n  };\n\n  function resolveContextAction() {\n    var p = st.pig;\n    // 1. Ng\u01b0\u1ee1ng C\u1eeda S\u1ed1 1 (C\u1eeda Nam) ho\u1eb7c C\u1eeda B\u1eafc\n    if ((p.z <= 2.35 && Math.abs(p.x) <= 2.40) || (p.z >= 24.6 && p.x >= 9.0 && p.x <= 14.2)) {\n      return { id: 'exit_market', label: '\ud83d\udeaa Ra kh\u1ecfi Ch\u1ee3 B\u1ebfn Th\xe0nh' };\n    }\n    // 2. S\u1ea1p V\u1ea3i H\u01b0\u01a1ng Trinh (th\u1eed \xc1o D\xe0i)\n    if (p.x <= -2.2 && p.z >= 1.5 && p.z <= 11.5) {\n      return { id: 'try_aodai', label: p.wearingAoDai ? '\ud83d\udc58 C\u1ea5t \xc1o D\xe0i L\u1ee5a' : '\ud83d\udc58 \u01af\u1edbm \xc1o D\xe0i H\u01b0\u01a1ng Trinh' };\n    }\n    // 3. Khu \u1ea8m Th\u1ef1c S\u1ea1p 1044 + B\xe1nh Cu\u1ed1n + B\xe1nh B\xe8o\n    if (p.seated) {\n      return { id: 'eat_banhcuon', label: p.eating ? '\ud83e\udd65 G\u1ecdi th\xeam D\u1eeba Xi\xeam 1044' : '\ud83e\udd5e \u0102n B\xe1nh Cu\u1ed1n & B\xe1nh B\xe8o' };\n    }\n    if (p.x >= -2.5 && p.x <= 2.5 && p.z >= 17.6 && p.z <= 20.2) {\n      return { id: 'sit_food', label: '\ud83e\ude91 Ng\u1ed3i gh\u1ebf inox S\u1ea1p 1044' };\n    }\n    if ((p.x <= -2.2 && p.z >= 15.4 && p.z <= 24.8) || (p.x >= 2.2 && p.x <= 5.95 && p.z >= 15.4 && p.z <= 21.8)) {\n      return { id: 'eat_banhcuon', label: '\ud83e\udd5e \u0102n B\xe1nh Cu\u1ed1n 50K & B\xe1nh B\xe8o 20K' };\n    }\n    // 4. \u0110\u1ea3o Tr\xe1i C\xe2y 1029 Ng\u1ecdc H\u1ea3o\n    if (p.x >= 8.2 && p.x <= 15.0 && p.z >= 16.6 && p.z <= 23.6) {\n      return { id: 'buy_mango', label: '\ud83e\udd6d Ch\u1ecdn mua Xo\xe0i C\xe1t Ng\u1ecdc H\u1ea3o' };\n    }\n    return null;\n  }\n\n  function runContextAction(act) {\n    if (!act) return;\n    postRN({ type: 'HAPTIC_MEDIUM' });\n    if (act.id === 'try_aodai') {\n      planMarketRealtimePath(st, -3.4, 0, 6.5, { pendingAction: 'try_aodai' });\n    } else if (act.id === 'sit_food') {\n      planMarketRealtimePath(st, -0.38, 0, 19.15, { seatChairId: 1, pendingAction: 'sit_food' });\n    } else if (act.id === 'eat_banhcuon') {\n      if (st.pig.seated) {\n        st.pig.eating = true;\n        st.pig.ateFood = true;\n      } else {\n        planMarketRealtimePath(st, 0.38, 0, 19.15, { seatChairId: 2, pendingAction: 'eat_banhcuon' });\n      }\n    } else if (act.id === 'buy_mango') {\n      planMarketRealtimePath(st, 11.6, 0, 17.9, { pendingAction: 'buy_mango' });\n    } else if (act.id === 'exit_market') {\n      if (!st.exiting) {\n        st.exiting = true;\n      }\n    }\n  }\n\n  if (ctxBtn) {\n    ctxBtn.addEventListener('click', function(e) {\n      e.stopPropagation();\n      runContextAction(currentAction);\n    });\n  }\n\n  bindTpsCanvasGestures(cv, cam, {\n    getSize: function() { return { w: W, h: H }; },\n    onTap: function(sx, sy) {\n      var target = wgl ? pickMarketTarget3D(cam, st, sx, sy) : null;\n      if (!wgl && !target) {\n        var hit = unprojectFloorTap(cam, sx, sy);\n        if (hit) {\n          var cl = clampMarketWalkPos(st, hit.x, hit.z);\n          target = { kind: 'floor', x: cl.x, y: 0, z: cl.z };\n        }\n      }\n      if (target) {\n        if (target.kind === 'stool' && target.stool) {\n          planMarketRealtimePath(st, target.x, 0, target.z, { seatChairId: target.stool.id, pendingAction: 'sit_food' });\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_MEDIUM' });\n        } else if (target.kind === 'aodai') {\n          planMarketRealtimePath(st, target.x, 0, target.z, { pendingAction: 'try_aodai' });\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_LIGHT' });\n        } else if (target.kind === 'food') {\n          planMarketRealtimePath(st, target.x, 0, target.z, { seatChairId: target.stoolId || 1, pendingAction: 'eat_banhcuon' });\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_LIGHT' });\n        } else if (target.kind === 'fruit') {\n          planMarketRealtimePath(st, target.x, 0, target.z, { pendingAction: 'buy_mango' });\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_LIGHT' });\n        } else if (target.kind === 'exit') {\n          planMarketRealtimePath(st, target.x, 0, target.z, { pendingAction: 'exit_market' });\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_MEDIUM' });\n        } else {\n          planMarketRealtimePath(st, target.x, 0, target.z, {});\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_LIGHT' });\n        }\n      }\n    }\n  });\n\n  var lastNow = performance.now();\n  function loop(now) {\n    var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));\n    lastNow = now;\n    if (window.__isActive !== false) {\n      stepMarketTps(st, dt);\n      if (st.exiting && !exitSent && st.exitFade >= 0.85) {\n        exitSent = true;\n        postRN({ type: 'EXIT_MARKET' });\n      }\n      if (wgl) {\n        cam.vw = W; cam.vh = H;\n        var asp = W / Math.max(1, H);\n        var fovy = asp < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, asp))) : 0.82;\n        cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);\n        renderMarketWebglScene(wgl, cam, st, W, H);\n      } else {\n        updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, marketBounds);\n        renderMarketTpsScene(ctx, cam, st, W, H);\n      }\n      currentAction = resolveContextAction();\n      if (ctxBtn) {\n        if (currentAction) {\n          ctxBtn.textContent = currentAction.label;\n          ctxBtn.hidden = false;\n        } else {\n          ctxBtn.hidden = true;\n        }\n      }\n    }\n    requestAnimationFrame(loop);\n  }\n  requestAnimationFrame(loop);\n})();\n",[]);return(0,c.jsx)(e.WebglTpsBannerShell,{title:"Ch\u1ee3 B\u1ebfn Th\xe0nh S\xe0i G\xf2n WebGL 3D",backgroundHex:"#2B180E",active:l,wallArtScript:C,sceneScript:y,initScript:k,commandPayload:z,onPayload:t=>{if(t)if('SELECT_ZONE'===t.type&&x){const n='food_court'===t.zone?2:'fruit_craft'===t.zone?3:1;M.current=n,x(n)}else'EXIT_MARKET'===t.type&&f&&(n.impactAsync(n.ImpactFeedbackStyle.Medium).catch(()=>{}),v.current&&clearTimeout(v.current),v.current=setTimeout(()=>f(),120))}})}},836,[39,775,837,843,844,60]);
+__d(function(g,r,i,a,m,_e,_d){"use strict";Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"BenThanhMarketBannerWebView",{enumerable:!0,get:function(){return l}});var n=r(_d[0]),t=(function(n){if(n&&n.__esModule)return n;var t={};return n&&Object.keys(n).forEach(function(e){if('default'!==e){var o=Object.getOwnPropertyDescriptor(n,e);Object.defineProperty(t,e,o.get?o:{enumerable:!0,get:function(){return n[e]}})}}),t.default=n,t})(r(_d[1])),e=r(_d[2]),o=r(_d[3]),s=r(_d[4]),c=r(_d[5]);const l=({active:l=!0,shoppingTotalText:d="0\u0111",foodTotalText:p="0\u0111",visitsCount:u=0,selectedZone:f,onExitToMap:h,onSelectZoneFromCanvas:_})=>{const x=(0,n.useRef)(null),y=(0,n.useRef)(null),b=(0,n.useRef)(0),[M,v]=(0,n.useState)(null);(0,n.useEffect)(()=>()=>{x.current&&clearTimeout(x.current)},[]),(0,n.useEffect)(()=>{if('number'!=typeof f)return;if(y.current===f)return void(y.current=null);const n=['south_hall','south_hall','food_court','fruit_craft'][f]||'south_hall';b.current+=1,v({type:'NAV_ZONE',zone:n,seq:b.current})},[f]);const z=(0,n.useMemo)(()=>(0,o.buildMarketWallArtScript)(),[]),T=(0,n.useMemo)(()=>(0,s.buildMarketTps3dSceneScript)(),[]),k=(0,n.useMemo)(()=>"\n(function() {\n  var cv = document.getElementById('tpsCv');\n  var ctxBtn = document.getElementById('ctxPillBtn');\n  var wgl = createPixelWebglRenderer(cv);\n  var ctx = wgl ? null : cv.getContext('2d');\n  if (wgl) buildMarketProceduralTextures(wgl);\n\n  var W = 400, H = 720;\n  function resizeCanvas() {\n    var dw = Math.max(320, window.innerWidth || 390);\n    var dh = Math.max(480, window.innerHeight || 760);\n    var dpr = wgl ? Math.min(2, window.devicePixelRatio || 1) : (dw > 460 ? 0.72 : 0.84);\n    W = Math.round(dw * dpr);\n    H = Math.round(dh * dpr);\n    cv.width = W; cv.height = H;\n    if (ctx) ctx.imageSmoothingEnabled = false;\n  }\n  resizeCanvas();\n  window.addEventListener('resize', resizeCanvas);\n\n  var st = createMarketTpsState();\n  st.onZoneChanged = function(zoneId) {\n    postRN({ type: 'SELECT_ZONE', zone: zoneId });\n  };\n  var cam = createTpsCamera({ yaw: 0.06, pitch: -0.32, dist: 4.75, targetHeight: 0.76 });\n  var marketBounds = { minX: -18.0, maxX: 18.0, minZ: 0.0, maxZ: 36.0, maxY: 7.2 };\n  var currentAction = null;\n  var exitSent = false;\n\n  window.__handleVenueCmd = function(cmd) {\n    if (!cmd) return;\n    if (cmd.type === 'NAV_ZONE' && cmd.zone && cmd.zone !== st.zone) {\n      navigateMarketToZone(st, cmd.zone);\n    }\n  };\n\n  function resolveContextAction() {\n    var p = st.pig;\n    // 1. Tho\xe1t \u1edf b\u1ea5t k\u1ef3 c\u1eeda n\xe0o trong 4 C\u1eeda \u0110\xf4ng \u2013 T\xe2y \u2013 Nam \u2013 B\u1eafc\n    if ((p.z <= 2.35 && Math.abs(p.x) <= 2.8) || (p.z >= 33.6 && Math.abs(p.x) <= 2.8) ||\n        (p.x >= 15.8 && Math.abs(p.z - 17.0) <= 2.8) || (p.x <= -15.8 && Math.abs(p.z - 17.0) <= 2.8)) {\n      return { id: 'exit_market', label: '\ud83d\udeaa Ra kh\u1ecfi Ch\u1ee3 B\u1ebfn Th\xe0nh' };\n    }\n    // 2. S\u1ea1p Adidas 208 & Nike 212 & Gi\xe0y D\xe9p 306 & V\u1ea3i \xc1o D\xe0i H\u01b0\u01a1ng Trinh 415\n    if (p.x <= -3.5 && p.x >= -10.5 && p.z >= 2.5 && p.z <= 10.2) {\n      return { id: 'try_adidas', label: '\ud83e\udde5 Th\u1eed \xe1o Adidas 3 S\u1ecdc (S\u1ea1p 208)' };\n    }\n    if (p.x >= 3.5 && p.x <= 10.5 && p.z >= 2.5 && p.z <= 10.2) {\n      return { id: 'try_nike', label: '\ud83d\udc55 Th\u1eed \xe1o Nike Swoosh (S\u1ea1p 212)' };\n    }\n    if (Math.abs(p.x) >= 3.5 && Math.abs(p.x) <= 10.5 && p.z >= 10.2 && p.z <= 14.6) {\n      return { id: 'buy_shoes_bags', label: '\ud83d\udc5f Xem Gi\xe0y, Vali & \u0110\u1ed3ng H\u1ed3 306' };\n    }\n    if (p.x <= -11.5 && p.z >= 2.0 && p.z <= 15.0) {\n      return { id: 'try_aodai', label: p.wearingAoDai ? '\ud83d\udc58 C\u1ea5t \xc1o D\xe0i L\u1ee5a' : '\ud83d\udc58 \u01af\u1edbm \xc1o D\xe0i H\u01b0\u01a1ng Trinh 415' };\n    }\n    // 3. Khu \u1ea8m Th\u1ef1c (S\u1ea1p 1044 + Ph\u1edf, B\xfan B\xf2, C\u01a1m T\u1ea5m, B\xe1nh X\xe8o, B\xe1nh Cu\u1ed1n, Ch\xe8)\n    if (p.seated) {\n      return { id: 'eat_banhcuon', label: '\ud83c\udf5c Th\u01b0\u1edfng th\u1ee9c M\xf3n Vi\u1ec7t & D\u1eeba Xi\xeam' };\n    }\n    if (Math.abs(p.x) <= 2.8 && p.z >= 17.6 && p.z <= 20.5) {\n      return { id: 'sit_food', label: '\ud83e\ude91 Ng\u1ed3i gh\u1ebf inox S\u1ea1p 1044' };\n    }\n    if (Math.abs(p.x) <= 10.5 && p.z >= 20.0 && p.z <= 29.2) {\n      return { id: 'eat_banhcuon', label: '\ud83e\udd5e \u0102n Ph\u1edf, C\u01a1m T\u1ea5m, B\xe1nh X\xe8o & Ch\xe8' };\n    }\n    // 4. Tr\xe1i C\xe2y 1029 Ng\u1ecdc H\u1ea3o & C\u1eeda B\u1eafc Hoa/H\u1ea3i S\u1ea3n\n    if ((p.x >= 8.2 && p.x <= 14.5 && p.z >= 17.0 && p.z <= 23.6) || (p.x <= -2.0 && p.x >= -9.0 && p.z >= 29.0)) {\n      return { id: 'buy_mango', label: '\ud83e\udd6d Ch\u1ecdn S\u1ea7u Ri\xeang, M\u0103ng C\u1ee5t & Xo\xe0i C\xe1t' };\n    }\n    if (p.x >= 2.0 && p.x <= 13.5 && p.z >= 29.0) {\n      return { id: 'buy_seafood_flower', label: '\ud83e\udd9e Mua Hoa T\u01b0\u01a1i & H\u1ea3i S\u1ea3n C\u1eeda B\u1eafc' };\n    }\n    // 5. \u0110\u1ed3 Kh\xf4, C\xe0 Ph\xea C\u1eeda \u0110\xf4ng & M\u1ef9 Ngh\u1ec7 C\u1eeda T\xe2y\n    if (p.x >= 11.5 && p.z <= 31.5) {\n      return { id: 'buy_coffee_dry', label: '\u2615 Mua C\xe0 Ph\xea, Tr\xe0 Sen & M\u1ee9t C\u1eeda \u0110\xf4ng' };\n    }\n    if (p.x <= -11.5 && p.z >= 19.0) {\n      return { id: 'buy_craft', label: '\ud83c\udffa Xem G\u1ed1m B\xe1t Tr\xe0ng & N\xf3n L\xe1 C\u1eeda T\xe2y' };\n    }\n    return null;\n  }\n\n  function runContextAction(act) {\n    if (!act) return;\n    postRN({ type: 'HAPTIC_MEDIUM' });\n    if (act.id === 'try_aodai') {\n      planMarketRealtimePath(st, -12.6, 0, 7.0, { pendingAction: 'try_aodai' });\n    } else if (act.id === 'try_adidas') {\n      planMarketRealtimePath(st, -4.8, 0, 6.5, { pendingAction: 'try_adidas' });\n    } else if (act.id === 'try_nike') {\n      planMarketRealtimePath(st, 4.8, 0, 6.5, { pendingAction: 'try_nike' });\n    } else if (act.id === 'buy_shoes_bags') {\n      planMarketRealtimePath(st, -4.8, 0, 12.2, { pendingAction: 'buy_shoes_bags' });\n    } else if (act.id === 'sit_food') {\n      planMarketRealtimePath(st, -0.38, 0, 19.15, { seatChairId: 1, pendingAction: 'sit_food' });\n    } else if (act.id === 'eat_banhcuon') {\n      if (st.pig.seated) {\n        st.pig.eating = true;\n        st.pig.ateFood = true;\n      } else {\n        planMarketRealtimePath(st, 0.38, 0, 19.15, { seatChairId: 2, pendingAction: 'eat_banhcuon' });\n      }\n    } else if (act.id === 'buy_mango') {\n      planMarketRealtimePath(st, 11.6, 0, 18.0, { pendingAction: 'buy_mango' });\n    } else if (act.id === 'buy_seafood_flower') {\n      planMarketRealtimePath(st, 5.3, 0, 29.8, { pendingAction: 'buy_seafood_flower' });\n    } else if (act.id === 'buy_coffee_dry') {\n      planMarketRealtimePath(st, 12.6, 0, 6.2, { pendingAction: 'buy_coffee_dry' });\n    } else if (act.id === 'buy_craft') {\n      planMarketRealtimePath(st, -12.6, 0, 24.0, { pendingAction: 'buy_craft' });\n    } else if (act.id === 'exit_market') {\n      if (!st.exiting) {\n        st.exiting = true;\n      }\n    }\n  }\n\n  if (ctxBtn) {\n    ctxBtn.addEventListener('click', function(e) {\n      e.stopPropagation();\n      runContextAction(currentAction);\n    });\n  }\n\n  bindTpsCanvasGestures(cv, cam, {\n    getSize: function() { return { w: W, h: H }; },\n    onTap: function(sx, sy) {\n      var target = wgl ? pickMarketTarget3D(cam, st, sx, sy) : null;\n      if (!wgl && !target) {\n        var hit = unprojectFloorTap(cam, sx, sy);\n        if (hit) {\n          var cl = clampMarketWalkPos(st, hit.x, hit.z);\n          target = { kind: 'floor', x: cl.x, y: 0, z: cl.z };\n        }\n      }\n      if (target) {\n        var actionMap = {\n          aodai: 'try_aodai',\n          try_adidas: 'try_adidas',\n          try_nike: 'try_nike',\n          buy_shoes: 'buy_shoes_bags',\n          fruit: 'buy_mango',\n          buy_fresh: 'buy_seafood_flower',\n          buy_coffee: 'buy_coffee_dry',\n          buy_craft: 'buy_craft',\n          exit: 'exit_market'\n        };\n        if (target.kind === 'stool' && target.stool) {\n          planMarketRealtimePath(st, target.x, 0, target.z, { seatChairId: target.stool.id, pendingAction: 'sit_food' });\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_MEDIUM' });\n        } else if (target.kind === 'food') {\n          planMarketRealtimePath(st, target.x, 0, target.z, { seatChairId: target.stoolId || 1, dish: target.dish || 'banhcuon', pendingAction: 'eat_banhcuon' });\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_MEDIUM' });\n        } else if (actionMap[target.kind]) {\n          planMarketRealtimePath(st, target.x, 0, target.z, { pendingAction: actionMap[target.kind] });\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_MEDIUM' });\n        } else {\n          planMarketRealtimePath(st, target.x, 0, target.z, {});\n          st.ripples.push({ x: target.x, z: target.z, t: 0 });\n          postRN({ type: 'HAPTIC_LIGHT' });\n        }\n      }\n    }\n  });\n\n  var lastNow = performance.now();\n  function loop(now) {\n    var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));\n    lastNow = now;\n    if (window.__isActive !== false) {\n      stepMarketTps(st, dt);\n      if (st.exiting && !exitSent && st.exitFade >= 0.85) {\n        exitSent = true;\n        postRN({ type: 'EXIT_MARKET' });\n      }\n      if (wgl) {\n        cam.vw = W; cam.vh = H;\n        var asp = W / Math.max(1, H);\n        var fovy = asp < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, asp))) : 0.82;\n        cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);\n        renderMarketWebglScene(wgl, cam, st, W, H);\n      } else {\n        updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, marketBounds);\n        renderMarketTpsScene(ctx, cam, st, W, H);\n      }\n      currentAction = resolveContextAction();\n      if (ctxBtn) {\n        if (currentAction) {\n          ctxBtn.textContent = currentAction.label;\n          ctxBtn.hidden = false;\n        } else {\n          ctxBtn.hidden = true;\n        }\n      }\n    }\n    requestAnimationFrame(loop);\n  }\n  requestAnimationFrame(loop);\n})();\n",[]);return(0,c.jsx)(e.WebglTpsBannerShell,{title:"Ch\u1ee3 B\u1ebfn Th\xe0nh S\xe0i G\xf2n WebGL 3D",backgroundHex:"#2B180E",active:l,wallArtScript:z,sceneScript:T,initScript:k,commandPayload:M,onPayload:n=>{if(n)if('SELECT_ZONE'===n.type&&_){const t='food_court'===n.zone?2:'fruit_craft'===n.zone?3:1;y.current=t,_(t)}else'EXIT_MARKET'===n.type&&h&&(t.impactAsync(t.ImpactFeedbackStyle.Medium).catch(()=>{}),x.current&&clearTimeout(x.current),x.current=setTimeout(()=>h(),120))}})}},836,[39,775,837,843,844,60]);
 __d(function(g,r,i,a,m,_e2,_d){"use strict";function e(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(_e2,'__esModule',{value:!0}),Object.defineProperty(_e2,"WebglTpsBannerShell",{enumerable:!0,get:function(){return b}});var n=r(_d[0]);r(_d[1]);var t=e(r(_d[2])),o=e(r(_d[3])),s=r(_d[4]),c=(function(e){if(e&&e.__esModule)return e;var n={};return e&&Object.keys(e).forEach(function(t){if('default'!==t){var o=Object.getOwnPropertyDescriptor(e,t);Object.defineProperty(n,t,o.get?o:{enumerable:!0,get:function(){return e[t]}})}}),n.default=e,n})(r(_d[5])),d=r(_d[6]),l=r(_d[7]),p=r(_d[8]),u=r(_d[9]),w=r(_d[10]),f=r(_d[11]);s.WebView;const b=({title:e,backgroundHex:t="#2B2118",active:s=!0,wallArtScript:b,sceneScript:h,initScript:v,commandPayload:x,onPayload:S})=>{(0,n.useRef)(null);const _=(0,n.useRef)(null),M=(0,n.useRef)(S);M.current=S;const E=e=>{const n=JSON.stringify(e);try{_.current?.contentWindow?.postMessage(n,'*')}catch(e){}};(0,n.useEffect)(()=>{E({type:'SET_ACTIVE',active:s})},[s]),(0,n.useEffect)(()=>{x&&E(x)},[x]);const R=n=>{n&&('HAPTIC_LIGHT'===n.type?c.impactAsync(c.ImpactFeedbackStyle.Light).catch(()=>{}):'HAPTIC_MEDIUM'===n.type?c.impactAsync(c.ImpactFeedbackStyle.Medium).catch(()=>{}):'JS_ERROR'===n.type&&console.warn('[WebglTpsBannerShell]',e,n.message,n.line),M.current?.(n))};(0,n.useEffect)(()=>{if('undefined'==typeof window)return;const e=e=>{try{const n='string'==typeof e.data?JSON.parse(e.data):e.data;R(n)}catch(e){}};return window.addEventListener('message',e),()=>window.removeEventListener('message',e)},[]);const k=(0,n.useMemo)(()=>(0,d.buildTps3dEngineScript)(),[]),B=(0,n.useMemo)(()=>(0,l.buildPixelWebgl3dEngineScript)(),[]),O=(0,n.useMemo)(()=>(0,p.buildPixelTpsBillboardsScript)(),[]),P=(0,n.useMemo)(()=>(0,u.buildPixelNavGraph3dScript)(),[]),N=(0,n.useMemo)(()=>(0,w.buildSaigonStreetBackdrop3dScript)(),[]),T=(0,n.useMemo)(()=>`<!doctype html>\n<html lang="vi">\n<head>\n<meta charset="utf-8" />\n<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />\n<style>\n  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }\n  html, body { width: 100%; height: 100%; overflow: hidden; background: ${t}; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }\n  canvas {\n    display: block; width: 100%; height: 100%;\n    touch-action: none; cursor: grab;\n  }\n  canvas:active { cursor: grabbing; }\n  .ctx-pill-bar {\n    position: fixed; bottom: 26px; left: 16px; right: 16px;\n    display: flex; justify-content: center; pointer-events: none; z-index: 15;\n  }\n  .ctx-pill-btn {\n    pointer-events: auto;\n    background: #F4B93B; color: #2B2118;\n    border: 3px solid #2B2118; border-radius: 16px;\n    padding: 10px 18px; font-size: 14px; font-weight: 900;\n    box-shadow: 0 4px 0 #2B2118; cursor: pointer;\n  }\n  .ctx-pill-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2B2118; }\n  [hidden] { display: none !important; }\n</style>\n</head>\n<body>\n<canvas id="tpsCv"></canvas>\n<div class="ctx-pill-bar"><button id="ctxPillBtn" class="ctx-pill-btn" hidden></button></div>\n<script>\nwindow.onerror = function(msg, src, line, col) {\n  try {\n    var payload = JSON.stringify({ type: 'JS_ERROR', message: String(msg), line: line, col: col });\n    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(payload);\n    else if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*');\n  } catch(e) {}\n};\nfunction postRN(obj) {\n  try {\n    var s = JSON.stringify(obj);\n    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(s);\n    else if (window.parent && window.parent !== window) window.parent.postMessage(s, '*');\n  } catch(e) {}\n}\nwindow.__isActive = ${s?'true':'false'};\nwindow.__onHostCmd = function(cmd) {\n  if (!cmd) return;\n  if (cmd.type === 'SET_ACTIVE') window.__isActive = !!cmd.active;\n  if (typeof window.__handleVenueCmd === 'function') window.__handleVenueCmd(cmd);\n};\nif (typeof window !== 'undefined') {\n  window.addEventListener('message', function(ev) {\n    try {\n      var d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;\n      window.__onHostCmd(d);\n    } catch(e) {}\n  });\n}\n${k}\n${B}\n${O}\n${P}\n${N}\n${b}\n${h}\n${v}\n<\/script>\n</body>\n</html>`,[e,t,s,k,B,O,P,N,b,h,v]);(0,n.useMemo)(()=>({html:T}),[T]);return(0,f.jsx)(o.default,{style:[y.container,{backgroundColor:t}],children:(0,f.jsx)("iframe",{ref:_,title:e,srcDoc:T,style:{width:'100%',height:'100%',border:'none',display:'block'}})})},y=t.default.create({container:{flex:1,width:'100%'},webView:{flex:1,width:'100%'}})},837,[39,29,80,154,959,775,838,839,840,841,842,60]);
 __d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.buildTps3dEngineScript=function(){return String.raw`
 /* ==================== 1. HỆ CHIẾU PHỐI CẢNH 3D & CAMERA TPS 360° ==================== */
@@ -1837,6 +1837,12 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
       r(-8, -16, 16, 10, '#DC2626'); r(-7, -16, 1, 8, '#FACC15'); r(6, -16, 1, 8, '#FACC15');
       // Số 10 pixel sau lưng áo đấu
       r(-3, -13, 1, 5, '#FFFBF1'); r(0, -13, 3, 5, '#FFFBF1'); r(1, -12, 1, 3, '#DC2626');
+    } else if (ofName === 'nike_tee') {
+      r(-8, -16, 16, 9, '#0F172A'); r(-4, -13, 5, 2, '#F97316'); r(1, -14, 3, 2, '#F97316');
+      r(-3, -16, 6, 1, '#FFFBF1');
+    } else if (ofName === 'nike_hoodie') {
+      r(-8, -16, 16, 10, '#EA580C'); r(-6, -17, 12, 3, '#1E293B');
+      r(-4, -12, 5, 2, '#FFFBF1'); r(1, -13, 3, 2, '#FFFBF1');
     } else if (ofName === 'aodai') {
       r(-8, -16, 16, 11, '#DC2626'); r(-2, -14, 4, 4, '#FACC15');
     } else if (ofName === 'vn_kit') {
@@ -1864,6 +1870,10 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
       r(-8, -11, 16, 5, '#334155'); r(-7, -11, 1, 5, '#FFFFFF'); r(6, -11, 1, 5, '#FFFFFF'); r(-2, -10, 4, 1, '#FFFBF1');
     } else if (ofName === 'adidas_kit') {
       r(-8, -11, 16, 5, '#DC2626'); r(-7, -11, 2, 4, '#FACC15'); r(5, -11, 2, 4, '#FACC15');
+    } else if (ofName === 'nike_tee') {
+      r(-8, -11, 16, 5, '#0F172A'); r(-3, -10, 4, 2, '#F97316'); r(1, -11, 2, 2, '#F97316');
+    } else if (ofName === 'nike_hoodie') {
+      r(-8, -11, 16, 6, '#EA580C'); r(-2, -11, 4, 6, '#1E293B'); r(3, -10, 3, 1, '#FFFBF1');
     } else if (ofName === 'aodai') {
       r(-8, -11, 16, 6, '#DC2626'); r(-1, -10, 2, 2, '#FACC15');
     } else if (ofName === 'vn_kit') {
@@ -1909,6 +1919,10 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
       sr(-8, -14, 15, 4, '#F8FAFC');
     } else if (ofName === 'adidas_kit') {
       sr(-8, -13, 15, 7, '#DC2626'); sr(-2, -13, 3, 6, '#FACC15');
+    } else if (ofName === 'nike_tee') {
+      sr(-8, -13, 15, 6, '#0F172A'); sr(-2, -11, 4, 2, '#F97316'); sr(2, -12, 2, 1, '#F97316');
+    } else if (ofName === 'nike_hoodie') {
+      sr(-8, -13, 15, 7, '#EA580C'); sr(-7, -15, 6, 3, '#1E293B'); sr(0, -11, 4, 2, '#FFFBF1');
     } else if (ofName === 'aodai' || ofName === 'vn_kit') {
       sr(-8, -12, 15, 7, '#DC2626'); sr(-1, -10, 2, 2, '#FACC15');
     }
@@ -3093,9 +3107,198 @@ function buildMarketProceduralTextures(wgl) {
     wgl.registerTextureCanvas('artFruitDisplay', f, false);
   })();
 
-  // 13. Bộ Sprite Chú Heo 24×20 + Trang Phục Áo Dài ('aodai') gl.NEAREST
+  // 13. Cửa Đông / Cửa Tây & Cửa Gió Louvers Kiến Trúc Chợ Bến Thành 1914 (QĐ 259)
+  regSign('signCuaDong', '#14532D', '#F4B93B', 'CỬA ĐÔNG · PHAN BỘI CHÂU', 'CÀ PHÊ · TRÀ SEN · MỨT SẤY · GIA VỊ');
+  regSign('signCuaTay',  '#1E3A8A', '#F4B93B', 'CỬA TÂY · PHAN CHU TRINH', 'GIÀY DÉP · GỐM SỨ · SƠN MÀI · MỸ NGHỆ');
+  regSign('signAdidasMarket', '#0F172A', '#F8FAFC', 'SẠP 208 · ADIDAS 3 SỌC', 'HOODIE · ÁO KHOÁC · POLO · JOGGER');
+  regSign('signNikeMarket',   '#1E293B', '#FB923C', 'SẠP 212 · NIKE SPORTS', 'SWOOSH TEE · HOODIE · QUẦN THỂ THAO');
+  regSign('signShoesBags',    '#7C2D12', '#FACC15', 'SẠP 306 · GIÀY DÉP & TÚI XÁCH', 'SNEAKER · VALI KÉO · ĐỒNG HỒ · MẮT KÍNH');
+  regSign('signSaigonTees',   '#9F1239', '#FDE047', 'SẠP 224 · I ♥ SAIGON', 'ÁO THUN DU LỊCH · QUẦN VOI · NÓN');
+  regSign('signPhoHuTieu',    '#7F1D1D', '#FDE047', 'PHỞ BÒ · HỦ TIẾU NAM VANG', 'NƯỚC LÈO XƯƠNG HẦM · TÁI NẠM GẦU');
+  regSign('signBunBoComTam',  '#991B1B', '#FDE047', 'BÚN BÒ HUẾ · BÚN MẮM · CƠM TẤM', 'SƯỜN NƯỚNG · BÌ CHẢ · TRỨNG ỐP LA');
+  regSign('signBanhXeoBanhMi','#B45309', '#FFFBEB', 'BÁNH XÈO MIỀN TÂY · GỎI CUỐN', 'BÁNH MÌ SÀI GÒN · CHẢ LỤA PA TÊ');
+  regSign('signCheSinhTo',    '#065F46', '#FDE047', 'CHÈ 3 MIỀN · SINH TỐ · NƯỚC MÍA', 'CHÈ BA MÀU · CHÈ BƯỞI · DỪA XIÊM');
+  regSign('signFreshFlowers', '#831843', '#FDE047', 'SẠP HOA TƯƠI CỬA BẮC', 'HOA SEN · CÚC VÀNG · HỒNG ĐỎ · HOA LY');
+  regSign('signWetSeafood',   '#0C4A6E', '#38BDF8', 'HẢI SẢN TƯƠI SỐNG & THỊT RAU', 'TÔM SÚ · CUA GHẸ · CÁ THU · RAU SẠCH');
+  regSign('signCoffeeSpices', '#451A03', '#F4B93B', 'CÀ PHÊ CHỒN · TIÊU PHÚ QUỐC', 'HẠT ĐIỀU · MỰC KHÔ · TÔM KHÔ · NƯỚC MẮM');
+
+  // Cửa gió lá sách louvers thông gió 1914 (marketLouvers)
+  (function() {
+    var c = mk(256, 128), g = c.getContext('2d');
+    g.fillStyle = '#365314'; g.fillRect(0, 0, 256, 128);
+    for (var ly = 6; ly < 124; ly += 14) {
+      g.fillStyle = '#FEF3C7'; g.fillRect(4, ly, 248, 5);
+      g.fillStyle = '#1A2E05'; g.fillRect(4, ly + 5, 248, 4);
+    }
+    g.strokeStyle = '#78350F'; g.lineWidth = 6; g.strokeRect(3, 3, 250, 122);
+    wgl.registerTextureCanvas('marketLouvers', c, true);
+  })();
+
+  // 14. Thời trang Adidas / Nike / Giày Túi / I Love Saigon (512×256)
+  (function() {
+    function drawShirtWall(key, bg, items) {
+      var c = mk(512, 256), g = c.getContext('2d');
+      g.fillStyle = bg; g.fillRect(0, 0, 512, 256);
+      g.strokeStyle = '#F4B93B'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 244);
+      g.fillStyle = '#E2E8F0'; g.fillRect(24, 38, 464, 8); g.fillRect(24, 146, 464, 8);
+      for (var r = 0; r < 2; r++) {
+        for (var i = 0; i < 4; i++) {
+          var sx = 82 + i * 114, sy = 50 + r * 108;
+          var col = items[(r * 4 + i) % items.length];
+          g.fillStyle = col.body;
+          g.fillRect(sx - 34, sy + 4, 68, 26);
+          g.fillRect(sx - 22, sy + 4, 44, 68);
+          g.fillStyle = col.trim;
+          if (col.kind === 'adidas') {
+            g.fillRect(sx - 18, sy + 12, 4, 52); g.fillRect(sx - 10, sy + 12, 4, 52); g.fillRect(sx - 2, sy + 12, 4, 52);
+          } else if (col.kind === 'nike') {
+            g.beginPath(); g.moveTo(sx - 12, sy + 28); g.quadraticCurveTo(sx, sy + 44, sx + 18, sy + 20);
+            g.lineWidth = 5; g.strokeStyle = col.trim; g.stroke();
+          } else {
+            g.fillRect(sx - 14, sy + 22, 28, 12);
+          }
+          g.strokeStyle = '#0F172A'; g.lineWidth = 2; g.strokeRect(sx - 22, sy + 4, 44, 68);
+        }
+      }
+      wgl.registerTextureCanvas(key, c, false);
+    }
+    drawShirtWall('artAdidasMarket', '#1E293B', [
+      { kind: 'adidas', body: '#111827', trim: '#FFFFFF' },
+      { kind: 'adidas', body: '#1D4ED8', trim: '#F8FAFC' },
+      { kind: 'adidas', body: '#DC2626', trim: '#FFFFFF' },
+      { kind: 'adidas', body: '#F8FAFC', trim: '#0F172A' }
+    ]);
+    drawShirtWall('artNikeMarket', '#0F172A', [
+      { kind: 'nike', body: '#EA580C', trim: '#FFFFFF' },
+      { kind: 'nike', body: '#111827', trim: '#F97316' },
+      { kind: 'nike', body: '#F8FAFC', trim: '#111827' },
+      { kind: 'nike', body: '#047857', trim: '#FDE047' }
+    ]);
+    drawShirtWall('artSaigonTees', '#881337', [
+      { kind: 'sg', body: '#FFFFFF', trim: '#EF4444' },
+      { kind: 'sg', body: '#FACC15', trim: '#DC2626' },
+      { kind: 'sg', body: '#0EA5E9', trim: '#FFFFFF' },
+      { kind: 'sg', body: '#16A34A', trim: '#FDE047' }
+    ]);
+
+    // Kệ giày Sneaker, Vali & Túi xách (artShoesBags)
+    var sb = mk(512, 256), sg = sb.getContext('2d');
+    sg.fillStyle = '#FFFBEB'; sg.fillRect(0, 0, 512, 256);
+    sg.strokeStyle = '#7C2D12'; sg.lineWidth = 8; sg.strokeRect(6, 6, 500, 244);
+    var shCols = ['#F8FAFC', '#DC2626', '#2563EB', '#111827', '#F59E0B'];
+    for (var row = 0; row < 2; row++) {
+      var y0 = 96 + row * 104;
+      sg.fillStyle = '#78350F'; sg.fillRect(24, y0, 464, 10);
+      for (var cIdx = 0; cIdx < 5; cIdx++) {
+        var x0 = 56 + cIdx * 92;
+        if (row === 0) {
+          sg.fillStyle = shCols[cIdx]; sg.fillRect(x0, y0 - 32, 48, 22);
+          sg.fillStyle = '#E2E8F0'; sg.fillRect(x0 - 2, y0 - 10, 56, 10);
+          sg.fillStyle = '#0F172A'; sg.fillRect(x0 + 16, y0 - 26, 16, 6);
+        } else {
+          sg.fillStyle = shCols[(cIdx + 2) % 5]; sg.fillRect(x0, y0 - 54, 46, 52);
+          sg.strokeStyle = '#1E293B'; sg.lineWidth = 2; sg.strokeRect(x0, y0 - 54, 46, 52);
+          sg.fillStyle = '#FACC15'; sg.fillRect(x0 + 14, y0 - 34, 18, 8);
+        }
+      }
+    }
+    wgl.registerTextureCanvas('artShoesBags', sb, false);
+  })();
+
+  // 15. Toàn Bộ Món Ăn Việt Nam: Phở/Hủ Tiếu, Bún Bò/Cơm Tấm, Bánh Xèo/Bánh Mì, Chè 3 Miền (512×256)
+  (function() {
+    function drawDishBoard(key, bg, title, dishes) {
+      var c = mk(512, 256), g = c.getContext('2d');
+      g.fillStyle = bg; g.fillRect(0, 0, 512, 256);
+      g.strokeStyle = '#FDE047'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 244);
+      g.fillStyle = '#7F1D1D'; g.fillRect(28, 22, 456, 54);
+      g.fillStyle = '#FDE047'; g.font = 'bold 24px monospace'; g.textAlign = 'center';
+      g.fillText(title, 256, 56, 430);
+      for (var i = 0; i < dishes.length; i++) {
+        var dx = 94 + i * 162, dy = 162;
+        g.fillStyle = '#F8FAFC'; g.beginPath(); g.arc(dx, dy, 48, 0, Math.PI * 2); g.fill();
+        g.fillStyle = dishes[i].fill; g.beginPath(); g.arc(dx, dy, 38, 0, Math.PI * 2); g.fill();
+        g.fillStyle = dishes[i].top; g.fillRect(dx - 20, dy - 10, 40, 14);
+        g.fillStyle = '#16A34A'; g.fillRect(dx - 8, dy - 18, 16, 10);
+      }
+      wgl.registerTextureCanvas(key, c, false);
+    }
+    drawDishBoard('artPhoHuTieu', '#FFFBEB', 'PHỞ BÒ · HỦ TIẾU NAM VANG', [
+      { fill: '#D97706', top: '#7F1D1D' }, { fill: '#FDE68A', top: '#DC2626' }, { fill: '#F59E0B', top: '#FFFBF1' }
+    ]);
+    drawDishBoard('artBunBoComTam', '#FEF2F2', 'BÚN BÒ HUẾ · BÚN MẮM · CƠM TẤM', [
+      { fill: '#DC2626', top: '#991B1B' }, { fill: '#FFFBEB', top: '#B45309' }, { fill: '#F59E0B', top: '#EF4444' }
+    ]);
+    drawDishBoard('artBanhXeoBanhMi', '#FFF7ED', 'BÁNH XÈO · GỎI CUỐN · BÁNH MÌ', [
+      { fill: '#FACC15', top: '#EA580C' }, { fill: '#F1F5F9', top: '#EF4444' }, { fill: '#D97706', top: '#FEF3C7' }
+    ]);
+    drawDishBoard('artCheSinhTo', '#ECFDF5', 'CHÈ 3 MIỀN · NƯỚC MÍA · SINH TỐ', [
+      { fill: '#F43F5E', top: '#FACC15' }, { fill: '#22C55E', top: '#FFFBEB' }, { fill: '#A855F7', top: '#FDE047' }
+    ]);
+  })();
+
+  // 16. Trái Cây Nhiệt Đới Đủ Loại, Hoa Tươi, Hải Sản, Cà Phê Đồ Khô & Mây Tre Đan
+  (function() {
+    var tf = mk(512, 256), tg = tf.getContext('2d');
+    tg.fillStyle = '#14532D'; tg.fillRect(0, 0, 512, 256);
+    tg.strokeStyle = '#FACC15'; tg.lineWidth = 6; tg.strokeRect(6, 6, 500, 244);
+    var trop = [
+      [68, 84, 30, '#A16207'], [148, 84, 24, '#7E22CE'], [228, 84, 24, '#DC2626'], [308, 84, 26, '#FACC15'], [388, 84, 26, '#E11D48'], [456, 84, 24, '#22C55E'],
+      [78, 178, 26, '#15803D'], [162, 178, 28, '#EAB308'], [246, 178, 26, '#4ADE80'], [330, 178, 24, '#FB923C'], [414, 178, 26, '#FEF08A']
+    ];
+    for (var ti = 0; ti < trop.length; ti++) {
+      tg.fillStyle = trop[ti][3]; tg.strokeStyle = '#052E16'; tg.lineWidth = 3;
+      tg.beginPath(); tg.arc(trop[ti][0], trop[ti][1], trop[ti][2], 0, Math.PI * 2); tg.fill(); tg.stroke();
+    }
+    wgl.registerTextureCanvas('artTropicalFruits', tf, false);
+
+    var fl = mk(512, 256), fg = fl.getContext('2d');
+    fg.fillStyle = '#831843'; fg.fillRect(0, 0, 512, 256);
+    var flCols = ['#F472B6', '#FACC15', '#EF4444', '#FFFFFF', '#FB923C'];
+    for (var fi = 0; fi < 10; fi++) {
+      var fx = 46 + (fi % 5) * 102, fy = fi < 5 ? 76 : 182;
+      fg.fillStyle = '#15803D'; fg.fillRect(fx - 12, fy, 24, 48);
+      fg.fillStyle = flCols[fi % 5];
+      fg.beginPath(); fg.arc(fx, fy - 12, 26, 0, Math.PI * 2); fg.fill();
+    }
+    wgl.registerTextureCanvas('artFreshFlowers', fl, false);
+
+    var ws = mk(512, 256), wg = ws.getContext('2d');
+    wg.fillStyle = '#0C4A6E'; wg.fillRect(0, 0, 512, 256);
+    wg.fillStyle = '#E0F2FE'; wg.fillRect(18, 28, 476, 200);
+    for (var si = 0; si < 6; si++) {
+      var sx = 64 + si * 78;
+      wg.fillStyle = (si % 2 === 0) ? '#EF4444' : '#64748B';
+      wg.beginPath(); wg.ellipse(sx, 128, 26, 16, 0, 0, Math.PI * 2); wg.fill();
+    }
+    wgl.registerTextureCanvas('artWetSeafood', ws, false);
+
+    var cs = mk(512, 256), cg = cs.getContext('2d');
+    cg.fillStyle = '#451A03'; cg.fillRect(0, 0, 512, 256);
+    cg.fillStyle = '#FEF3C7'; cg.fillRect(16, 16, 480, 224);
+    for (var ci = 0; ci < 6; ci++) {
+      var cx = 56 + ci * 76;
+      cg.fillStyle = (ci % 2 === 0) ? '#78350F' : '#B45309';
+      cg.fillRect(cx - 22, 46, 44, 72);
+      cg.fillStyle = '#DC2626'; cg.fillRect(cx - 22, 46, 44, 14);
+      cg.fillStyle = '#D97706'; cg.fillRect(cx - 20, 144, 40, 66);
+    }
+    wgl.registerTextureCanvas('artCoffeeSpices', cs, false);
+
+    var rt = mk(512, 256), rg = rt.getContext('2d');
+    rg.fillStyle = '#7C2D12'; rg.fillRect(0, 0, 512, 256);
+    rg.fillStyle = '#FFFBEB'; rg.fillRect(14, 14, 484, 228);
+    for (var ri = 0; ri < 4; ri++) {
+      var rx = 74 + ri * 116;
+      rg.fillStyle = '#D97706'; rg.beginPath(); rg.arc(rx, 92, 34, 0, Math.PI * 2); rg.fill();
+      rg.fillStyle = '#E11D48'; rg.fillRect(rx - 22, 144, 44, 62);
+    }
+    wgl.registerTextureCanvas('artHandicraftRattan', rt, false);
+  })();
+
+  // 17. Bộ Sprite Chú Heo 24×20 + Đầy Đủ Trang Phục Chợ Bến Thành (Áo Dài, Adidas & Nike) gl.NEAREST
   if (typeof buildPigBillboardTextures === 'function') {
-    buildPigBillboardTextures(wgl, ['aodai']);
+    buildPigBillboardTextures(wgl, ['aodai', 'adidas_jacket', 'adidas_polo', 'adidas_jogger', 'nike_tee', 'nike_hoodie']);
   }
 }
 
@@ -3274,94 +3477,82 @@ function drawMarketRoomWalls3D(ctx, cam, room) {
 }
 `}},843,[]);
 __d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.buildMarketTps3dSceneScript=function(){return String.raw`
-/* ==================== 1. ĐỒ THỊ KHÔNG GIAN HỢP NHẤT & PORTAL-AWARE WALLS (QĐ 250) ==================== */
+/* ==================== 1. ĐỒ THỊ KHÔNG GIAN Ô BÀN CỜ 36m × 36m (4 CỬA ĐÔNG-TÂY-NAM-BẮC) ==================== */
 var MARKET_NAV_GRAPH = {
-  wallMargin: 0.38,
-  outerBounds: { minX: -6.0, maxX: 17.2, minZ: 0.0, maxZ: 26.8, minY: 0.45, maxY: 5.8 },
+  wallMargin: 0.40,
+  outerBounds: { minX: -18.0, maxX: 18.0, minZ: 0.0, maxZ: 36.0, minY: 0.45, maxY: 7.2 },
   zones: [
-    { id: 'south_hall',  minX: -6.0, maxX:  6.0, minZ:  0.0, maxZ: 13.6, floorY: 0 },
-    { id: 'food_court',  minX: -6.0, maxX:  6.0, minZ: 13.6, maxZ: 26.8, floorY: 0 },
-    { id: 'fruit_craft', minX:  6.0, maxX: 17.2, minZ: 13.6, maxZ: 26.8, floorY: 0 }
+    { id: 'south_hall',  minX: -18.0, maxX: 18.0, minZ:  0.0, maxZ: 15.0, floorY: 0 },
+    { id: 'food_court',  minX: -18.0, maxX: 18.0, minZ: 15.0, maxZ: 28.8, floorY: 0 },
+    { id: 'fruit_craft', minX: -18.0, maxX: 18.0, minZ: 15.0, maxZ: 36.0, floorY: 0 }
   ],
-  dividerWalls: [
-    // Vách ngăn South Hall <-> Food Court (Z = 13.6), mở cổng vòm KHU ĂN UỐNG [-1.8, 1.8]
-    { axis: 'z', pos: 13.6, minSpan: -6.0, maxSpan: 6.0, minY: 0, maxY: 5.8, openings: [{ a1: -1.8, a2: 1.8, y1: 0, y2: 3.45 }] },
-    // Vách ngăn Food Court <-> Fruit Craft (X = 6.0), mở Ngã tư Chợ Đông [22.6, 25.8]
-    { axis: 'x', pos: 6.0, minSpan: 13.6, maxSpan: 26.8, minY: 0, maxY: 5.8, openings: [{ a1: 22.6, a2: 25.8, y1: 0, y2: 3.45 }] },
-    // Tường Đông khép kín của South Hall (X = 6.0, Z = 0..13.6) & Tường Nam của Fruit Craft (Z = 13.6, X = 6..17.2)
-    { axis: 'x', pos: 6.0, minSpan: 0.0, maxSpan: 13.6, minY: 0, maxY: 5.8, openings: [] },
-    { axis: 'z', pos: 13.6, minSpan: 6.0, maxSpan: 17.2, minY: 0, maxY: 5.8, openings: [] }
-  ],
+  dividerWalls: [],
   camBoxes: [
-    // Sạp trung tâm 1044 & Đảo Trái Cây 1029 tránh camera góc khuất sát sạp
-    { x1: -1.75, y1: 0, z1: 19.7, x2: 1.75, y2: 1.4, z2: 22.9 },
-    { x1:  9.95, y1: 0, z1: 18.8, x2: 13.25, y2: 1.4, z2: 22.0 }
+    // Các đảo sạp trung tâm tránh camera xoay sát gây góc khuất
+    { x1: -1.75, y1: 0, z1: 19.7, x2: 1.75, y2: 1.45, z2: 22.9 },  // Sạp 1044
+    { x1:  9.95, y1: 0, z1: 18.8, x2: 13.25, y2: 1.45, z2: 22.0 }, // Đảo 1029 Ngọc Hảo
+    { x1: -9.2,  y1: 0, z1: 3.5,  x2: -5.6, y2: 2.1, z2: 9.5 },    // Sạp Adidas
+    { x1:  5.6,  y1: 0, z1: 3.5,  x2:  9.2, y2: 2.1, z2: 9.5 }     // Sạp Nike
   ],
-  edges: [
-    {
-      from: 'south_hall', to: 'food_court',
-      waypointsForward:  [{ x: 0, y: 0, z: 12.6 }, { x: 0, y: 0, z: 14.6 }],
-      waypointsBackward: [{ x: 0, y: 0, z: 14.6 }, { x: 0, y: 0, z: 12.6 }]
-    },
-    {
-      from: 'food_court', to: 'fruit_craft',
-      waypointsForward:  [{ x: 4.8, y: 0, z: 24.2 }, { x: 7.2, y: 0, z: 24.2 }],
-      waypointsBackward: [{ x: 7.2, y: 0, z: 24.2 }, { x: 4.8, y: 0, z: 24.2 }]
-    }
-  ]
+  edges: []
 };
 
 var MARKET_ZONE_CENTERS = {
-  south_hall:  { x: 0.0,  y: 0, z: 6.2 },
-  food_court:  { x: 0.0,  y: 0, z: 17.6 },
-  fruit_craft: { x: 11.6, y: 0, z: 17.6 }
+  south_hall:  { x:  0.0, y: 0, z:  6.5 },
+  food_court:  { x:  0.0, y: 0, z: 18.2 },
+  fruit_craft: { x: 11.6, y: 0, z: 17.6 },
+  east_dry:    { x: 11.8, y: 0, z: 17.0 },
+  west_craft:  { x: -11.8, y: 0, z: 17.0 }
 };
 
 function getMarketZoneAt(x, z) {
-  if (z < 13.6) return 'south_hall';
-  if (x >= 6.0) return 'fruit_craft';
+  if (z < 15.0) return 'south_hall';
+  if (x >= 8.0 && z < 26.5) return 'fruit_craft';
+  if (z >= 28.8) return 'fruit_craft';
   return 'food_court';
 }
 
 function createMarketStools() {
-  // 4 ghế đẩu inox tương tác phía trước Sạp 1044 (Z = 19.15, đối diện quầy Z = 19.7..22.9)
+  // 6 ghế đẩu inox tương tác quanh Đảo Sạp 1044 & dãy bàn ăn khu Ẩm Thực
   return [
     { id: 0, floorY: 0, x: -1.15, y: 0, z: 19.15, lookX: -1.15, lookZ: 20.1, yaw: 0 },
     { id: 1, floorY: 0, x: -0.38, y: 0, z: 19.15, lookX: -0.38, lookZ: 20.1, yaw: 0 },
     { id: 2, floorY: 0, x:  0.38, y: 0, z: 19.15, lookX:  0.38, lookZ: 20.1, yaw: 0 },
-    { id: 3, floorY: 0, x:  1.15, y: 0, z: 19.15, lookX:  1.15, lookZ: 20.1, yaw: 0 }
+    { id: 3, floorY: 0, x:  1.15, y: 0, z: 19.15, lookX:  1.15, lookZ: 20.1, yaw: 0 },
+    { id: 4, floorY: 0, x: -2.45, y: 0, z: 26.80, lookX: -2.45, lookZ: 25.8, yaw: Math.PI },
+    { id: 5, floorY: 0, x:  2.45, y: 0, z: 26.80, lookX:  2.45, lookZ: 25.8, yaw: Math.PI }
   ];
 }
 
 function createMarketNpcs() {
-  // 12 NPC đầy đủ vai trò tiểu thương (waiter), đầu bếp (chef, chef_noodle) & khách (customer)
+  // 12 NPC gọn nhẹ dàn đều 4 Cửa Đông–Tây–Nam–Bắc (tiểu thương, đầu bếp, du khách)
   return [
-    // Sảnh Cửa Nam (4 NPC)
-    { id: 'sh_w1', x: -3.70, y: 0, z: 4.80, yaw:  Math.PI * 0.5, role: 'waiter',      shirt: '#E11D48', hair: '#1C1917', moving: false, seated: false, phase: 0.2 },
-    { id: 'sh_c1', x: -3.70, y: 0, z: 8.80, yaw:  Math.PI * 0.5, role: 'customer',    shirt: '#F59E0B', hair: '#292524', moving: false, seated: false, phase: 1.4 },
-    { id: 'sh_w2', x:  3.70, y: 0, z: 5.20, yaw: -Math.PI * 0.5, role: 'waiter',      shirt: '#15803D', hair: '#1C1917', moving: false, seated: false, phase: 0.8 },
+    // Khu Thời Trang & Thể Thao (Cửa Nam)
+    { id: 'sh_w1', x: -12.6, y: 0, z: 6.5, yaw: -Math.PI * 0.5, role: 'waiter',   shirt: '#E11D48', hair: '#1C1917', moving: false, seated: false, phase: 0.2 },
+    { id: 'sh_w2', x: -4.8,  y: 0, z: 6.5, yaw: -Math.PI * 0.5, role: 'waiter',   shirt: '#0F172A', hair: '#1C1917', moving: false, seated: false, phase: 0.6 },
+    { id: 'sh_w3', x:  4.8,  y: 0, z: 6.5, yaw:  Math.PI * 0.5, role: 'waiter',   shirt: '#EA580C', hair: '#292524', moving: false, seated: false, phase: 1.1 },
     {
-      id: 'sh_c2', x: 0.90, y: 0, z: 7.40, yaw: 0, role: 'customer', shirt: '#2563EB', hair: '#451A03',
-      moving: true, seated: false, phase: 2.1, stepIdx: 0,
-      pts: [{ x: 0.90, z: 4.6 }, { x: 0.90, z: 12.2 }, { x: 0.90, z: 16.4 }, { x: 0.90, z: 12.2 }]
+      id: 'sh_c2', x: 0.8, y: 0, z: 4.5, yaw: 0, role: 'customer', shirt: '#2563EB', hair: '#451A03',
+      moving: true, seated: false, phase: 2.0, stepIdx: 0,
+      pts: [{ x: 0.8, z: 3.5 }, { x: 0.8, z: 16.5 }, { x: -11.0, z: 16.5 }, { x: 0.8, z: 16.5 }]
     },
-    // Khu Ẩm Thực 1044 (5 NPC)
-    { id: 'fc_chef',   x: -0.20, y: 0, z: 23.35, yaw: Math.PI,        role: 'chef',        shirt: '#FFFFFF', hair: '#1C1917', moving: false, seated: false, phase: 0.4, carryProp: 'bowl' },
-    { id: 'fc_noodle', x: -3.80, y: 0, z: 19.80, yaw:  Math.PI * 0.5, role: 'chef_noodle', shirt: '#FFFFFF', hair: '#292524', moving: false, seated: false, phase: 1.2 },
-    { id: 'fc_waiter', x:  3.75, y: 0, z: 18.60, yaw: -Math.PI * 0.5, role: 'waiter',      shirt: '#B45309', hair: '#1C1917', moving: false, seated: false, phase: 1.9, carryProp: 'tray' },
-    { id: 'fc_c1',     x: -1.15, y: 0, z: 19.15, yaw: 0,              role: 'customer',    shirt: '#0284C7', hair: '#1C1917', moving: false, seated: true,  eating: true, phase: 0.7 },
+    // Khu Ẩm Thực (Trung Tâm)
+    { id: 'fc_chef',   x: -0.2, y: 0, z: 23.4, yaw: Math.PI,        role: 'chef',        shirt: '#FFFFFF', hair: '#1C1917', moving: false, seated: false, phase: 0.4, carryProp: 'bowl' },
+    { id: 'fc_noodle', x: -3.7, y: 0, z: 21.8, yaw: -Math.PI * 0.5, role: 'chef_noodle', shirt: '#FFFFFF', hair: '#292524', moving: false, seated: false, phase: 1.2 },
+    { id: 'fc_waiter', x:  3.7, y: 0, z: 21.8, yaw:  Math.PI * 0.5, role: 'waiter',      shirt: '#B45309', hair: '#1C1917', moving: false, seated: false, phase: 1.9, carryProp: 'tray' },
+    { id: 'fc_c1',     x: -1.15,y: 0, z: 19.15,yaw: 0,              role: 'customer',    shirt: '#0284C7', hair: '#1C1917', moving: false, seated: true,  eating: true, phase: 0.7 },
     {
-      id: 'fc_c2', x: 3.10, y: 0, z: 24.20, yaw: Math.PI * 0.5, role: 'customer', shirt: '#E11D48', hair: '#451A03',
+      id: 'fc_c2', x: 3.2, y: 0, z: 17.2, yaw: Math.PI * 0.5, role: 'customer', shirt: '#E11D48', hair: '#451A03',
       moving: true, seated: false, phase: 2.3, stepIdx: 0,
-      pts: [{ x: 3.10, z: 24.2 }, { x: 8.60, z: 24.2 }, { x: 11.60, z: 24.2 }, { x: 8.60, z: 24.2 }]
+      pts: [{ x: 3.2, z: 17.2 }, { x: 11.4, z: 17.2 }, { x: 11.4, z: 23.8 }, { x: 3.2, z: 23.8 }]
     },
-    // Cánh Đông Trái Cây & Lưu Niệm (3 NPC)
-    { id: 'fr_w1', x: 11.60, y: 0, z: 22.55, yaw: Math.PI,        role: 'waiter',   shirt: '#16A34A', hair: '#1C1917', moving: false, seated: false, phase: 0.5 },
-    { id: 'fr_w2', x:  8.25, y: 0, z: 18.20, yaw: -Math.PI * 0.5, role: 'waiter',   shirt: '#1D4ED8', hair: '#292524', moving: false, seated: false, phase: 1.6 },
+    // Khu Trái Cây (Cửa Bắc) & Đồ Khô (Cửa Đông) & Mỹ Nghệ (Cửa Tây)
+    { id: 'fr_w1', x: 11.6, y: 0, z: 18.0, yaw: 0,               role: 'waiter',   shirt: '#16A34A', hair: '#1C1917', moving: false, seated: false, phase: 0.5 },
+    { id: 'fr_w2', x: 12.6, y: 0, z: 6.4,  yaw: -Math.PI * 0.5,  role: 'waiter',   shirt: '#15803D', hair: '#292524', moving: false, seated: false, phase: 1.5 },
     {
-      id: 'fr_c1', x: 14.80, y: 0, z: 18.40, yaw: 0, role: 'customer', shirt: '#D97706', hair: '#1C1917',
+      id: 'ws_c1', x: -11.2, y: 0, z: 22.4, yaw: 0, role: 'customer', shirt: '#D97706', hair: '#1C1917',
       moving: true, seated: false, phase: 2.4, stepIdx: 0,
-      pts: [{ x: 14.80, z: 16.4 }, { x: 14.80, z: 22.2 }, { x: 11.60, z: 24.6 }, { x: 14.80, z: 22.2 }]
+      pts: [{ x: -11.2, z: 18.0 }, { x: -11.2, z: 29.0 }, { x: -2.0, z: 29.4 }, { x: -11.2, z: 29.0 }]
     }
   ];
 }
@@ -3378,64 +3569,66 @@ function createMarketTpsState() {
       waypoints: [],
       walking: true, seated: false, seatChairId: -1,
       pendingSeatId: -1, pendingAction: null,
-      eating: false,
-      wearingAoDai: false, ateFood: false, boughtFruit: false
+      eating: false, activeDish: 'banhcuon',
+      wearingAoDai: false, outfit: 'none', boughtSamba: false,
+      ateFood: false, boughtFruit: false,
+      _stuckTimer: 0
     },
     stools: stools,
     npcs: npcs,
-    // Giữ alias mảng cho các kiểm tra tương thích cũ
     southPeople: npcs.slice(0, 4),
     foodPeople: npcs.slice(4, 9),
     fruitPeople: npcs.slice(9, 12),
     southGateOpen: 0.0,
     northGateOpen: 0.0,
+    eastGateOpen: 0.0,
+    westGateOpen: 0.0,
     rightDoorOpen: 0.0,
     exitFade: 0,
     exiting: false,
     onZoneChanged: null,
     ripples: [],
-    toast: 'Chợ Bến Thành · Sảnh Cửa Nam! Đi bộ xuyên vòm Khu Ăn Uống & Ngã tư Chợ Đông 👘',
+    toast: 'Chợ Bến Thành 1914 · Ô bàn cờ 4 Cửa Đông-Tây-Nam-Bắc! Tự do dạo sạp Adidas, Nike, Món Việt & Trái Cây 🏪',
     toastUntil: 5.0,
     t: 0
   };
 }
 
 var MARKET_STALL_AABBS = [
-  // South Hall
-  { x1: -5.95, z1:  1.50, x2: -4.15, z2: 11.50 }, // Sạp Vải Hương Trinh
-  { x1:  4.15, z1:  1.50, x2:  5.95, z2:  8.20 }, // Đặc Sản Liên Sài Gòn
-  // Food Court
-  { x1: -1.75, z1: 19.70, x2:  1.75, z2: 22.90 }, // Sạp 1044 trung tâm
-  { x1: -5.95, z1: 15.40, x2: -4.15, z2: 24.80 }, // Bánh Cuốn Nóng 50K
-  { x1:  4.15, z1: 15.40, x2:  5.95, z2: 21.80 }, // Bánh Bèo Huế 20K
-  // Fruit Craft (Cánh Đông)
-  { x1:  9.95, z1: 18.80, x2: 13.25, z2: 22.00 }, // Đảo Trái Cây 1029 Ngọc Hảo
-  { x1:  6.05, z1: 14.80, x2:  7.80, z2: 21.60 }, // Kệ Gốm Sứ Bát Tràng
-  { x1: 15.40, z1: 15.40, x2: 17.15, z2: 21.80 }  // Kệ Nón Lá & Quà Lưu Niệm
+  // Cửa Nam & Tây Nam (Thời trang, Thể thao, Giày, Túi xách, Vải Áo Dài)
+  { id: 'ao_dai_huong_trinh', x1: -16.6, z1:  2.5, x2: -13.4, z2: 11.5 }, // Hương Trinh 415
+  { id: 'saigon_tees',        x1: -16.6, z1: 12.4, x2: -13.4, z2: 14.8 }, // Áo "I ♥ SAIGON"
+  { id: 'adidas_stall',       x1:  -9.2, z1:  3.5, x2:  -5.6, z2:  9.5 }, // Adidas 3 Sọc 208
+  { id: 'shoes_bags_west',    x1:  -9.2, z1: 10.6, x2:  -5.6, z2: 13.8 }, // Giày Sneaker & Dép 306
+  { id: 'nike_stall',         x1:   5.6, z1:  3.5, x2:   9.2, z2:  9.5 }, // Nike Swoosh 212
+  { id: 'bags_watches_east',  x1:   5.6, z1: 10.6, x2:   9.2, z2: 13.8 }, // Túi Xách, Vali, Đồng Hồ
+  // Cửa Đông (Đồ khô, Cà phê, Gia vị)
+  { id: 'lien_sai_gon_823',   x1:  13.4, z1:  2.8, x2:  16.6, z2:  9.6 }, // Liên Sài Gòn 823
+  { id: 'coffee_chon_stall',  x1:  13.4, z1: 10.8, x2:  16.6, z2: 14.6 }, // Cà phê & Phin
+  { id: 'dried_fruits_stall', x1:  13.4, z1: 20.4, x2:  16.6, z2: 25.0 }, // Mứt dẻo & Hạt điều
+  { id: 'seafood_dry_spices', x1:  13.4, z1: 26.2, x2:  16.6, z2: 30.8 }, // Mực khô, Tôm khô, Tiêu Phú Quốc
+  // Khu Ẩm Thực Trung Tâm (Sạp 1044 & đủ món Việt)
+  { id: 'sap_1044',           x1:  -1.75, z1: 19.7, x2:  1.75, z2: 22.9 }, // Sạp 1044 trung tâm
+  { id: 'banh_cuon_50k',      x1:  -6.6,  z1: 19.8, x2: -4.4,  z2: 24.2 }, // Bánh Cuốn 50K
+  { id: 'banh_beo_20k',       x1:   4.4,  z1: 19.8, x2:  6.6,  z2: 24.2 }, // Bánh Bèo 20K
+  { id: 'pho_hutieu_stall',   x1: -10.0,  z1: 25.6, x2: -7.2,  z2: 28.6 }, // Phở & Hủ Tiếu
+  { id: 'bunbo_comtam_stall', x1:  -4.4,  z1: 25.6, x2: -1.2,  z2: 28.6 }, // Bún Bò Huế & Cơm Tấm
+  { id: 'banhxeo_banhmi',     x1:   1.2,  z1: 25.6, x2:  4.4,  z2: 28.6 }, // Bánh Xèo, Gỏi Cuốn & Bánh Mì
+  { id: 'che_sinhto_stall',   x1:   5.4,  z1: 25.6, x2:  8.6,  z2: 28.6 }, // Chè 3 Miền & Sinh Tố/Nước Mía
+  // Cửa Tây (Thủ công mỹ nghệ, Gốm Bát Tràng, Nón Lá, Mây tre)
+  { id: 'gom_su_son_mai',     x1: -16.6, z1: 20.2, x2: -13.4, z2: 25.0 }, // Gốm Sứ & Sơn Mài
+  { id: 'non_la_lantern',     x1: -16.6, z1: 26.2, x2: -13.4, z2: 31.0 }, // Nón Lá & Đèn Lồng
+  { id: 'rattan_wood_craft',  x1: -10.0, z1: 20.2, x2:  -7.2, z2: 24.4 }, // Mây Tre Đan & Tượng Gỗ
+  // Khu Trái Cây Nhiệt Đới, Hoa Tươi & Hải Sản Tươi Sống (Cửa Bắc + Cánh Đông)
+  { id: 'ngoc_hao_1029',      x1:   9.95, z1: 18.8, x2: 13.25, z2: 22.0 }, // Đảo 1029 Ngọc Hảo
+  { id: 'tropical_fruits_n',  x1:  -7.4,  z1: 30.6, x2:  -3.2, z2: 33.8 }, // Sầu riêng, Măng cụt, Chôm chôm, Vú sữa
+  { id: 'fresh_flowers_n',    x1:   3.2,  z1: 30.6, x2:   7.4, z2: 33.8 }, // Hoa Tươi Cửa Bắc
+  { id: 'wet_seafood_n',      x1:   8.4,  z1: 30.6, x2:  12.6, z2: 33.8 }  // Hải Sản Tươi Sống, Thịt & Rau
 ];
 
 function clampMarketWalkPos(st, x, z) {
-  var nz = Math.max(0.55, Math.min(26.25, z));
-  var nx = x;
-  if (nz < 13.6) {
-    nx = Math.max(-5.62, Math.min(5.62, nx));
-  } else {
-    nx = Math.max(-5.62, Math.min(16.82, nx));
-  }
-  // Cấm xuyên tường ngăn Z = 13.6 ngoài vòm KHU ĂN UỐNG [-1.8, 1.8]
-  if (nx < 6.0 && nz > 13.22 && nz < 13.98 && Math.abs(nx) > 1.46) {
-    nz = (st && st.pig && st.pig.z >= 13.6) ? 13.98 : 13.22;
-  }
-  // Tường Nam của Cánh Đông (X >= 6.0, Z = 13.6)
-  if (nx >= 5.66 && nz < 13.98) {
-    if (st && st.pig && st.pig.z < 13.6) nx = 5.62;
-    else nz = 13.98;
-  }
-  // Vách ngăn Food Court <-> Fruit Craft tại X = 6.0 ngoài Ngã tư Chợ Đông [22.6, 25.8]
-  if (nz >= 13.6 && nx > 5.64 && nx < 6.36 && (nz < 22.92 || nz > 25.48)) {
-    nx = (st && st.pig && st.pig.x >= 6.0) ? 6.36 : 5.64;
-  }
-  // Chặn va chạm 8 quầy sạp với đệm 0.34m
+  var nx = Math.max(-17.45, Math.min(17.45, x));
+  var nz = Math.max(0.65, Math.min(35.35, z));
   for (var i = 0; i < MARKET_STALL_AABBS.length; i++) {
     var b = MARKET_STALL_AABBS[i];
     if (nx > b.x1 - 0.34 && nx < b.x2 + 0.34 && nz > b.z1 - 0.34 && nz < b.z2 + 0.34) {
@@ -3451,51 +3644,117 @@ function clampMarketWalkPos(st, x, z) {
   return { x: nx, z: nz };
 }
 
-function planMarketRealtimePath(st, tx, ty, tz, extraOpts) {
+function marketSegHitsBox(ax, az, bx, bz, b, pad) {
+  var x1 = b.x1 - pad, x2 = b.x2 + pad, z1 = b.z1 - pad, z2 = b.z2 + pad;
+  var dx = bx - ax, dz = bz - az;
+  var t0 = 0, t1 = 1;
+  var p = [-dx, dx, -dz, dz];
+  var q = [ax - x1, x2 - ax, az - z1, z2 - az];
+  for (var i = 0; i < 4; i++) {
+    if (Math.abs(p[i]) < 1e-6) {
+      if (q[i] < 0) return false;
+    } else {
+      var t = q[i] / p[i];
+      if (p[i] < 0) { if (t > t1) return false; if (t > t0) t0 = t; }
+      else { if (t < t0) return false; if (t < t1) t1 = t; }
+    }
+  }
+  return t0 < t1;
+}
+
+function routeAroundMarketObstacles(startPt, endPt) {
+  var out = [];
+  var cur = startPt;
+  var obs = MARKET_STALL_AABBS;
+  for (var iter = 0; iter < 6; iter++) {
+    var hitBox = null, pad = 0.28;
+    for (var i = 0; i < obs.length; i++) {
+      if (marketSegHitsBox(cur.x, cur.z, endPt.x, endPt.z, obs[i], pad)) {
+        hitBox = obs[i];
+        break;
+      }
+    }
+    if (!hitBox) break;
+    var cands = [
+      { x: hitBox.x1 - 0.52, z: hitBox.z1 - 0.52, y: 0 },
+      { x: hitBox.x2 + 0.52, z: hitBox.z1 - 0.52, y: 0 },
+      { x: hitBox.x1 - 0.52, z: hitBox.z2 + 0.52, y: 0 },
+      { x: hitBox.x2 + 0.52, z: hitBox.z2 + 0.52, y: 0 }
+    ];
+    var best = null, bestScore = 99999;
+    for (var ci = 0; ci < cands.length; ci++) {
+      var cp = cands[ci];
+      if (cp.x < -17.3 || cp.x > 17.3 || cp.z < 0.8 || cp.z > 35.2) continue;
+      if (Math.hypot(cp.x - cur.x, cp.z - cur.z) < 0.20) continue;
+      var blocked = false;
+      for (var j = 0; j < obs.length; j++) {
+        if (marketSegHitsBox(cur.x, cur.z, cp.x, cp.z, obs[j], 0.16)) { blocked = true; break; }
+      }
+      if (blocked) continue;
+      var stillHits = marketSegHitsBox(cp.x, cp.z, endPt.x, endPt.z, hitBox, pad) ? 40 : 0;
+      var score = stillHits + Math.hypot(cp.x - cur.x, cp.z - cur.z) + Math.hypot(endPt.x - cp.x, endPt.z - cp.z);
+      if (score < bestScore) { bestScore = score; best = cp; }
+    }
+    if (!best) break;
+    out.push(best);
+    cur = best;
+  }
+  out.push(endPt);
+  return out;
+}
+
+function planMarketRealtimePath(st, tx, targetFloorY, tz, extraOpts) {
   var p = st.pig;
   var eo = extraOpts || {};
-  // Seated Pig Auto-Stand (QĐ 250)
   p.seated = false;
   p.seatChairId = -1;
   p.eating = false;
   p.pendingSeatId = typeof eo.seatChairId === 'number' ? eo.seatChairId : -1;
   p.pendingAction = eo.pendingAction || null;
+  if (eo.dish) p.activeDish = eo.dish;
+  p._stuckTimer = 0;
 
-  var cl = clampMarketWalkPos(st, tx, tz);
+  var pushed = (typeof pushPointOutOfBoxes === 'function')
+    ? pushPointOutOfBoxes(tx, tz, MARKET_STALL_AABBS, 0.38)
+    : { x: tx, z: tz };
+  var cl = clampMarketWalkPos(st, pushed.x, pushed.z);
   tx = cl.x; tz = cl.z;
 
+  var rawWps = [{ x: tx, y: 0, z: tz }];
   if (typeof planNavGraphRealtimePath === 'function') {
     planNavGraphRealtimePath(MARKET_NAV_GRAPH, st, tx, 0, tz, eo);
-    // Vòng tránh Đảo Sạp 1044 hoặc Đảo Trái Cây 1029 nếu đi thẳng xuyên tâm đảo trong cùng zone
-    if (p.waypoints && p.waypoints.length > 0) {
-      var out = [];
-      var prevX = p.x, prevZ = p.z;
-      for (var i = 0; i < p.waypoints.length; i++) {
-        var wp = p.waypoints[i];
-        // Tránh xuyên qua Sạp 1044 (X ∈ [-2.0, 2.0], Z ∈ [19.4, 23.2])
-        if (Math.min(prevX, wp.x) < 2.0 && Math.max(prevX, wp.x) > -2.0 &&
-            Math.min(prevZ, wp.z) < 23.2 && Math.max(prevZ, wp.z) > 19.4) {
-          var sideX = ((prevX + wp.x) * 0.5 >= 0) ? 2.55 : -2.55;
-          out.push({ x: sideX, y: 0, z: 21.3 });
-        }
-        // Tránh xuyên qua Đảo Trái Cây 1029 (X ∈ [9.6, 13.6], Z ∈ [18.5, 22.3])
-        if (Math.min(prevX, wp.x) < 13.5 && Math.max(prevX, wp.x) > 9.7 &&
-            Math.min(prevZ, wp.z) < 22.3 && Math.max(prevZ, wp.z) > 18.5) {
-          var fSideX = ((prevX + wp.x) * 0.5 >= 11.6) ? 14.05 : 9.15;
-          out.push({ x: fSideX, y: 0, z: 20.4 });
-        }
-        out.push(wp);
-        prevX = wp.x; prevZ = wp.z;
-      }
-      p.waypoints = out;
-      p.targetX = out[0].x;
-      p.targetZ = out[0].z;
-    }
-    return;
+    rawWps = p.waypoints || rawWps;
   }
 
-  p.waypoints = [{ x: tx, y: 0, z: tz }];
-  p.targetX = tx; p.targetZ = tz; p.walking = true;
+  // Bước 1: giữ hành vi rẽ ngang Sạp 1044 / 1029 Ngọc Hảo; Bước 2: vòng tránh mọi quầy sạp 36m × 36m
+  var pre = [];
+  var prevX = p.x, prevZ = p.z;
+  for (var i = 0; i < rawWps.length; i++) {
+    var wp = rawWps[i];
+    if (Math.min(prevX, wp.x) < 2.0 && Math.max(prevX, wp.x) > -2.0 &&
+        Math.min(prevZ, wp.z) < 23.2 && Math.max(prevZ, wp.z) > 19.4) {
+      var sideX = ((prevX + wp.x) * 0.5 >= 0) ? 2.55 : -2.55;
+      pre.push({ x: sideX, y: 0, z: 21.3 });
+    }
+    if (Math.min(prevX, wp.x) < 13.5 && Math.max(prevX, wp.x) > 9.7 &&
+        Math.min(prevZ, wp.z) < 22.3 && Math.max(prevZ, wp.z) > 18.5) {
+      var fSideX = ((prevX + wp.x) * 0.5 >= 11.6) ? 14.05 : 9.15;
+      pre.push({ x: fSideX, y: 0, z: 20.4 });
+    }
+    pre.push(wp);
+    prevX = wp.x; prevZ = wp.z;
+  }
+  var out = [];
+  var curPt = { x: p.x, y: 0, z: p.z };
+  for (var pi = 0; pi < pre.length; pi++) {
+    var segs = routeAroundMarketObstacles(curPt, pre[pi]);
+    for (var si = 0; si < segs.length; si++) out.push(segs[si]);
+    curPt = pre[pi];
+  }
+  p.waypoints = out;
+  p.targetX = out[0].x;
+  p.targetZ = out[0].z;
+  p.walking = true;
 }
 
 function navigateMarketToZone(st, zoneId) {
@@ -3535,7 +3794,7 @@ function stepMarketTps(st, dt) {
     var curWp = (p.waypoints && p.waypoints.length > 0) ? p.waypoints[0] : { x: p.targetX, z: p.targetZ };
     var dx = curWp.x - p.x, dz = curWp.z - p.z;
     var dist = Math.hypot(dx, dz);
-    if (dist < 0.10) {
+    if (dist < 0.12) {
       p.x = curWp.x; p.z = curWp.z;
       if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
       if (p.waypoints && p.waypoints.length > 0) {
@@ -3548,29 +3807,57 @@ function stepMarketTps(st, dt) {
           p.x = sl.x; p.z = sl.z; p.y = 0;
           p.yaw = Math.atan2(sl.lookX - sl.x, sl.lookZ - sl.z);
           p.seated = true; p.seatChairId = sl.id;
-          p.eating = (p.pendingAction === 'eat_banhcuon');
+          p.eating = (p.pendingAction === 'eat_banhcuon' || p.pendingAction === 'eat_dish');
           if (p.eating) {
             p.ateFood = true;
-            st.toast = 'Sạp 1044: Bánh Cuốn Nóng 50K, Bánh Bèo Huế 20K & Dừa Xiêm ngọt lịm! 🥞🥥';
+            st.toast = 'Sạp 1044: Đủ Phở, Bún Bò Huế, Cơm Tấm, Bánh Xèo, Bánh Cuốn 50K, Chè & Dừa Xiêm! 🍜🥞';
             st.toastUntil = st.t + 4.4;
           } else {
-            st.toast = 'Đã ngồi ghế inox Sạp 1044! Chạm nút để ăn hoặc chạm sàn tự đứng dậy đi tiếp 🪑';
+            st.toast = 'Đã ngồi ghế inox Chợ Bến Thành! Bấm gọi món Việt hoặc chạm sàn tự đứng dậy 🪑';
             st.toastUntil = st.t + 3.8;
           }
           p.pendingSeatId = -1;
         }
         if (p.pendingAction === 'try_aodai') {
           p.wearingAoDai = !p.wearingAoDai;
+          p.outfit = p.wearingAoDai ? 'aodai' : 'none';
           p.yaw = -Math.PI * 0.5;
-          st.toast = p.wearingAoDai
-            ? 'Sạp Hương Trinh: Đã ướm thử Áo Dài Lụa Hà Đông thêu Hoa Sen cực duyên! 👘✨'
-            : 'Đã xếp gọn Áo Dài Lụa & dạo tiếp Chợ Bến Thành!';
-          st.toastUntil = st.t + 4.2;
-        } else if (p.pendingAction === 'buy_mango') {
-          p.boughtFruit = true;
-          p.yaw = 0;
-          st.toast = 'Sạp 1029 Ngọc Hảo: Đã chọn Xoài Cát Hòa Lộc chín vàng, Nón Lá & Gốm Bát Tràng! 🥭👒';
+          st.toast = p.wearingAoDai ? 'Sạp Hương Trinh 415: Đã ướm thử Áo Dài Lụa Hà Đông! 👘✨' : 'Đã xếp gọn Áo Dài Lụa!';
+          st.toastUntil = st.t + 4.0;
+        } else if (p.pendingAction === 'try_adidas') {
+          var adSeq = ['adidas_jacket', 'adidas_polo', 'adidas_jogger', 'none'];
+          var ai = adSeq.indexOf(p.outfit);
+          p.outfit = adSeq[(ai + 1) % adSeq.length];
+          p.wearingAoDai = false; p.boughtSamba = true;
+          st.toast = p.outfit === 'none' ? 'Đã cởi đồ Adidas!' : 'Sạp Adidas 208: Đang thử bộ Adidas 3 Sọc + Giày & Túi! 🧥👟';
+          st.toastUntil = st.t + 4.0;
+        } else if (p.pendingAction === 'try_nike') {
+          var nkSeq = ['nike_tee', 'nike_hoodie', 'none'];
+          var ni = nkSeq.indexOf(p.outfit);
+          p.outfit = nkSeq[(ni + 1) % nkSeq.length];
+          p.wearingAoDai = false; p.boughtSamba = true;
+          st.toast = p.outfit === 'none' ? 'Đã cởi đồ Nike!' : 'Sạp Nike 212: Đang thử áo Nike Swoosh thể thao cực ngầu! ✔️👕';
+          st.toastUntil = st.t + 4.0;
+        } else if (p.pendingAction === 'buy_shoes_bags') {
+          p.boughtSamba = true;
+          st.toast = 'Sạp 306: Đã chọn Giày Sneaker, Dép Da, Túi Xách & Đồng Hồ Bến Thành! 👟🎒';
+          st.toastUntil = st.t + 4.0;
+        } else if (p.pendingAction === 'buy_mango' || p.pendingAction === 'buy_tropical') {
+          p.boughtFruit = true; p.boughtSamba = true;
+          st.toast = 'Trái Cây 1029 Ngọc Hảo & Cửa Bắc: Sầu riêng Ri6, Măng cụt, Chôm chôm, Xoài cát & Dừa xiêm! 🥭🍈';
           st.toastUntil = st.t + 4.4;
+        } else if (p.pendingAction === 'buy_coffee_dry') {
+          p.boughtSamba = true;
+          st.toast = 'Cửa Đông · Liên Sài Gòn 823: Cà phê Chồn, Trà Sen, Hạt Điều, Tiêu & Nước Mắm Phú Quốc! ☕📦';
+          st.toastUntil = st.t + 4.2;
+        } else if (p.pendingAction === 'buy_craft') {
+          p.boughtSamba = true;
+          st.toast = 'Cửa Tây Mỹ Nghệ: Gốm Bát Tràng, Sơn Mài, Nón Lá Bài Thơ & Mây Tre Đan! 🏺👒';
+          st.toastUntil = st.t + 4.2;
+        } else if (p.pendingAction === 'buy_seafood_flower') {
+          p.boughtSamba = true;
+          st.toast = 'Cửa Bắc Tươi Sống: Tôm Sú, Cua Ghẹ, Hoa Sen & Hoa Cúc Tươi Rực Rỡ! 🦞💐';
+          st.toastUntil = st.t + 4.2;
         } else if (p.pendingAction === 'exit_market') {
           st.exiting = true;
         }
@@ -3596,29 +3883,19 @@ function stepMarketTps(st, dt) {
       }
     }
 
-    // Cập nhật thụ động zone khi Heo đi bộ vượt cổng (0% teleport)
     var newZone = getMarketZoneAt(p.x, p.z);
     if (newZone !== st.zone) {
       st.zone = newZone;
       st.room = newZone;
-      if (newZone === 'food_court') {
-        st.toast = 'Khu Ẩm Thực Trung Tâm Sạp 1044 · Bánh Cuốn 50K, Bánh Bèo Huế 20K 🥞';
-      } else if (newZone === 'fruit_craft') {
-        st.toast = 'Cánh Đông · Đảo Trái Cây 1029 Ngọc Hảo, Gốm Bát Tràng & Nón Lá 🥭';
-      } else {
-        st.toast = 'Sảnh Cửa Nam · Sạp Vải Áo Dài Hương Trinh & Đặc Sản Liên Sài Gòn 👘';
-      }
-      st.toastUntil = st.t + 3.8;
       if (typeof st.onZoneChanged === 'function') st.onZoneChanged(newZone);
     }
   }
 
-  // Cổng sắt xếp Cửa Nam & Cửa Bắc mở mượt khi rời chợ
-  var nearNorth = p.z > 21.0 && p.x > 6.0;
-  var targetSouth = (st.exiting && !nearNorth) ? 0.92 : 0.0;
-  var targetNorth = (st.exiting && nearNorth) ? 0.92 : 0.0;
-  st.southGateOpen += (targetSouth - st.southGateOpen) * Math.min(1, dt * 6.0);
-  st.northGateOpen += (targetNorth - st.northGateOpen) * Math.min(1, dt * 6.0);
+  // Cổng sắt xếp cả 4 Cửa Đông – Tây – Nam – Bắc mở mượt khi rời chợ
+  st.southGateOpen += (((st.exiting && p.z < 5.0) ? 0.92 : 0.0) - st.southGateOpen) * Math.min(1, dt * 6.0);
+  st.northGateOpen += (((st.exiting && p.z > 31.0) ? 0.92 : 0.0) - st.northGateOpen) * Math.min(1, dt * 6.0);
+  st.eastGateOpen  += (((st.exiting && p.x > 13.0) ? 0.92 : 0.0) - st.eastGateOpen)  * Math.min(1, dt * 6.0);
+  st.westGateOpen  += (((st.exiting && p.x < -13.0) ? 0.92 : 0.0) - st.westGateOpen) * Math.min(1, dt * 6.0);
   st.rightDoorOpen = st.southGateOpen;
   if (st.exiting) st.exitFade = Math.min(1, st.exitFade + dt * 4.2);
 
@@ -3628,11 +3905,11 @@ function stepMarketTps(st, dt) {
   }
 }
 
-/* ==================== 2. RAYCAST 3D TƯƠNG TÁC (GHẾ, QUẦY, CỔNG & SÀN CHỮ L) ==================== */
+/* ==================== 2. RAYCAST 3D TƯƠNG TÁC MỌI SẠP HÀNG & 4 CỬA (QĐ 259) ==================== */
 function rayMarketSphere(ox, oy, oz, dx, dy, dz, cx, cy, cz, rad) {
   var ocx = cx - ox, ocy = cy - oy, ocz = cz - oz;
   var proj = ocx * dx + ocy * dy + ocz * dz;
-  if (proj < 0.2 || proj > 26) return -1;
+  if (proj < 0.2 || proj > 38) return -1;
   var d2 = (ocx * ocx + ocy * ocy + ocz * ocz) - proj * proj;
   return d2 <= rad * rad ? proj : -1;
 }
@@ -3647,46 +3924,59 @@ function pickMarketTarget3D(cam, st, sx, sy) {
   dx /= dl; dy /= dl; dz /= dl;
   var ox = cam.pos.x, oy = cam.pos.y, oz = cam.pos.z;
 
-  // 1. Chạm vào bất kỳ Ghế đẩu inox nào tại Sạp 1044
+  // 1. Ghế đẩu inox tại Food Court
   if (st.stools) {
     var bestS = null, bestT = 999;
     for (var i = 0; i < st.stools.length; i++) {
       var sl = st.stools[i];
-      var ht = rayMarketSphere(ox, oy, oz, dx, dy, dz, sl.x, 0.32, sl.z, 0.52);
+      var ht = rayMarketSphere(ox, oy, oz, dx, dy, dz, sl.x, 0.32, sl.z, 0.55);
       if (ht > 0 && ht < bestT) { bestT = ht; bestS = sl; }
     }
     if (bestS) return { kind: 'stool', stool: bestS, x: bestS.x, y: 0, z: bestS.z };
   }
 
-  // 2. Chạm Sạp Vải Hương Trinh (thử Áo Dài)
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, -4.9, 1.0, 6.5, 1.75) > 0) {
-    return { kind: 'aodai', x: -3.4, y: 0, z: 6.5 };
+  // 2. Các sạp hàng tương tác toàn Chợ (tìm theo khoảng cách tia gần nhất!)
+  var spots = [
+    // Cửa Nam Thời Trang & Thể Thao
+    { cx: -15.0, cy: 1.0, cz: 7.0,  r: 2.2, tgt: { kind: 'aodai',         x: -12.6, y: 0, z: 7.0 } },
+    { cx:  -7.4, cy: 1.0, cz: 6.5,  r: 2.0, tgt: { kind: 'try_adidas',    x:  -4.8, y: 0, z: 6.5 } },
+    { cx:   7.4, cy: 1.0, cz: 6.5,  r: 2.0, tgt: { kind: 'try_nike',      x:   4.8, y: 0, z: 6.5 } },
+    { cx:  -7.4, cy: 0.9, cz: 12.2, r: 1.8, tgt: { kind: 'buy_shoes',     x:  -4.8, y: 0, z: 12.2 } },
+    { cx:   7.4, cy: 0.9, cz: 12.2, r: 1.8, tgt: { kind: 'buy_shoes',     x:   4.8, y: 0, z: 12.2 } },
+    // Ẩm Thực VN & Sạp 1044
+    { cx:   0.0, cy: 0.9, cz: 21.3, r: 2.0, tgt: { kind: 'food',          x: -0.38, y: 0, z: 19.15, stoolId: 1, dish: 'banhcuon' } },
+    { cx:  -5.5, cy: 0.9, cz: 22.0, r: 1.9, tgt: { kind: 'food',          x: -2.45, y: 0, z: 26.80, stoolId: 4, dish: 'pho' } },
+    { cx:  -2.8, cy: 0.9, cz: 27.1, r: 1.8, tgt: { kind: 'food',          x: -2.45, y: 0, z: 26.80, stoolId: 4, dish: 'bunbo' } },
+    { cx:   2.8, cy: 0.9, cz: 27.1, r: 1.8, tgt: { kind: 'food',          x:  2.45, y: 0, z: 26.80, stoolId: 5, dish: 'banhxeo' } },
+    { cx:   7.0, cy: 0.9, cz: 27.1, r: 1.8, tgt: { kind: 'food',          x:  2.45, y: 0, z: 26.80, stoolId: 5, dish: 'che' } },
+    // Trái Cây, Hoa, Hải Sản, Đồ Khô, Mỹ Nghệ
+    { cx:  11.6, cy: 0.9, cz: 20.4, r: 2.0, tgt: { kind: 'fruit',         x: 11.6,  y: 0, z: 18.0 } },
+    { cx:  -5.3, cy: 1.0, cz: 32.2, r: 2.0, tgt: { kind: 'fruit',         x: -5.3,  y: 0, z: 29.8 } },
+    { cx:   5.3, cy: 1.0, cz: 32.2, r: 1.9, tgt: { kind: 'buy_fresh',     x:  5.3,  y: 0, z: 29.8 } },
+    { cx:  10.5, cy: 1.0, cz: 32.2, r: 1.9, tgt: { kind: 'buy_fresh',     x: 10.5,  y: 0, z: 29.8 } },
+    { cx:  15.0, cy: 1.0, cz: 6.2,  r: 2.2, tgt: { kind: 'buy_coffee',    x: 12.6,  y: 0, z: 6.2 } },
+    { cx:  15.0, cy: 1.0, cz: 24.0, r: 2.2, tgt: { kind: 'buy_coffee',    x: 12.6,  y: 0, z: 24.0 } },
+    { cx: -15.0, cy: 1.0, cz: 24.0, r: 2.2, tgt: { kind: 'buy_craft',     x: -12.6, y: 0, z: 24.0 } },
+    // 4 Cửa Đông – Tây – Nam – Bắc (rời Chợ)
+    { cx:   0.0, cy: 1.4, cz:  0.1, r: 1.8, tgt: { kind: 'exit',          x:  0.0,  y: 0, z: 1.2 } },
+    { cx:   0.0, cy: 1.4, cz: 35.9, r: 1.8, tgt: { kind: 'exit',          x:  0.0,  y: 0, z: 34.8 } },
+    { cx:  17.9, cy: 1.4, cz: 17.0, r: 1.8, tgt: { kind: 'exit',          x: 16.8,  y: 0, z: 17.0 } },
+    { cx: -17.9, cy: 1.4, cz: 17.0, r: 1.8, tgt: { kind: 'exit',          x: -16.8, y: 0, z: 17.0 } }
+  ];
+  var bestSpot = null, bestSpotT = 999;
+  for (var si = 0; si < spots.length; si++) {
+    var sp = spots[si];
+    var ts = rayMarketSphere(ox, oy, oz, dx, dy, dz, sp.cx, sp.cy, sp.cz, sp.r);
+    if (ts > 0 && ts < bestSpotT) { bestSpotT = ts; bestSpot = sp.tgt; }
   }
-  // 3. Chạm Quầy Sạp 1044 / Bánh Cuốn
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, 0.0, 0.9, 21.3, 1.85) > 0) {
-    return { kind: 'food', x: -0.38, y: 0, z: 19.15, stoolId: 1 };
-  }
-  // 4. Chạm Đảo Trái Cây 1029 Ngọc Hảo
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, 11.6, 0.9, 20.4, 1.75) > 0) {
-    return { kind: 'fruit', x: 11.6, y: 0, z: 17.9 };
-  }
-  // 5. Chạm Cửa Số 1 (Cửa Nam) hoặc Cửa Bắc -> đi ra khỏi chợ
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, 0.0, 1.3, 0.1, 1.55) > 0) {
-    return { kind: 'exit', x: 0.0, y: 0, z: 1.05 };
-  }
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, 11.6, 1.3, 26.7, 1.55) > 0) {
-    return { kind: 'exit', x: 11.6, y: 0, z: 25.65 };
-  }
+  if (bestSpot) return bestSpot;
 
-  // 6. Chạm Sàn 3D ở bất kỳ zone nào của Chợ Bến Thành chữ L
+  // 3. Chạm Sàn 3D ở bất kỳ ô nào trong Chợ 36m × 36m
   if (dy < -0.025) {
     var tFloor = -oy / dy;
-    if (tFloor > 0.2 && tFloor < 34) {
+    if (tFloor > 0.2 && tFloor < 42) {
       var fx = ox + dx * tFloor, fz = oz + dz * tFloor;
-      var inSouth = (fx >= -6.0 && fx <= 6.0 && fz >= 0.0 && fz <= 13.6);
-      var inFood  = (fx >= -6.0 && fx <= 6.0 && fz >= 13.6 && fz <= 26.8);
-      var inFruit = (fx >= 6.0 && fx <= 17.2 && fz >= 13.6 && fz <= 26.8);
-      if (inSouth || inFood || inFruit) {
+      if (fx >= -18.0 && fx <= 18.0 && fz >= 0.0 && fz <= 36.0) {
         var cl = clampMarketWalkPos(st, fx, fz);
         return { kind: 'floor', x: cl.x, y: 0, z: cl.z };
       }
@@ -3695,46 +3985,48 @@ function pickMarketTarget3D(cam, st, sx, sy) {
   return null;
 }
 
-/* ==================== 3. RENDER WEBGL 3D ĐẠI SẢNH CHỢ BẾN THÀNH LIÊN HOÀN (QĐ 250) ==================== */
+/* ==================== 3. RENDER WEBGL 3D CHỢ BẾN THÀNH 1914 (36m × 36m, 4 CỬA, ĐỦ MỌI MẶT HÀNG) ==================== */
 var MARKET_ATMO = {
   clearColor: [0.22, 0.14, 0.08, 1.0],
-  hemiLow: [0.36, 0.28, 0.18],
-  hemiHigh: [0.76, 0.66, 0.48],
-  sunDir: [0.26, 0.86, -0.44],
-  sunCol: [1.08, 0.92, 0.66],
-  wrapBias: 0.46,
+  hemiLow: [0.38, 0.30, 0.20],
+  hemiHigh: [0.80, 0.72, 0.54],
+  sunDir: [0.24, 0.88, -0.40],
+  sunCol: [1.10, 0.94, 0.68],
+  wrapBias: 0.48,
   outdoorRect: [0.0, 0.0, 0.0, 0.0],
-  fogCol: [0.34, 0.24, 0.14],
-  fogParams: [14.0, 30.0, 0.40]
+  fogCol: [0.34, 0.25, 0.16],
+  fogParams: [22.0, 48.0, 0.34]
 };
 
 function drawMarketHangingLampWebgl(wgl, x, z, col) {
   var dm = wgl.drawMesh;
-  dm('cyl', 'white', x, 4.90, z, 0, 0, 0, 0.03, 1.8, 0.03, { tint: [0.18, 0.14, 0.10, 1] });
-  dm('cone', 'white', x, 3.92, z, 0, 0, 0, 0.42, 0.24, 0.42, { tint: col || [0.92, 0.62, 0.18, 1] });
-  dm('sphere', 'white', x, 3.78, z, 0, 0, 0, 0.16, 0.16, 0.16, { tint: [1.0, 0.90, 0.54, 1], emissive: 1.45 });
+  dm('cyl', 'white', x, 5.4, z, 0, 0, 0, 0.03, 3.4, 0.03, { tint: [0.16, 0.12, 0.08, 1] });
+  dm('cone', 'white', x, 3.75, z, 0, 0, 0, 0.56, 0.22, 0.56, { tint: col });
+  dm('sphere', 'white', x, 3.62, z, 0, 0, 0, 0.16, 0.16, 0.16, { tint: [1.0, 0.90, 0.50, 1], emissive: 1.5 });
 }
 
 function drawMarketCeilingFanWebgl(wgl, x, z, t, phase) {
   var dm = wgl.drawMesh;
-  var rot = t * 5.2 + (phase || 0);
-  dm('cyl', 'white', x, 5.10, z, 0, 0, 0, 0.05, 1.35, 0.05, { tint: [0.22, 0.42, 0.28, 1] });
-  dm('cyl', 'white', x, 4.42, z, 0, rot, 0, 0.24, 0.10, 0.24, { tint: [0.24, 0.52, 0.34, 1] });
-  dm('box', 'white', x, 4.42, z, 0, rot, 0, 1.45, 0.03, 0.16, { tint: [0.24, 0.52, 0.34, 1] });
-  dm('box', 'white', x, 4.42, z, 0, rot + Math.PI * 0.5, 0, 1.45, 0.03, 0.16, { tint: [0.24, 0.52, 0.34, 1] });
+  dm('cyl', 'white', x, 5.9, z, 0, 0, 0, 0.06, 2.2, 0.06, { tint: [0.20, 0.22, 0.26, 1] });
+  dm('cyl', 'white', x, 4.82, z, 0, 0, 0, 0.32, 0.10, 0.32, { tint: [0.28, 0.32, 0.38, 1] });
+  var base = t * 5.6 + (phase || 0);
+  for (var i = 0; i < 3; i++) {
+    var a = base + (i * Math.PI * 2) / 3;
+    dm('box', 'white', x + Math.sin(a) * 0.62, 4.80, z + Math.cos(a) * 0.62, 0, a, 0, 0.18, 0.025, 1.12, { tint: [0.46, 0.52, 0.60, 1] });
+  }
 }
 
 function drawMarketPropPhoPotWebgl(wgl, x, y, z) {
   var dm = wgl.drawMesh;
-  dm('cyl', 'white', x, y + 0.18, z, 0, 0, 0, 0.38, 0.36, 0.38, { tint: [0.80, 0.84, 0.88, 1], specPow: 96 });
-  dm('cyl', 'white', x, y + 0.35, z, 0, 0, 0, 0.35, 0.03, 0.35, { tint: [0.76, 0.42, 0.12, 1] });
+  dm('cyl', 'white', x, y + 0.26, z, 0, 0, 0, 0.66, 0.52, 0.66, { tint: [0.80, 0.84, 0.88, 1], specPow: 96, rim: 0.28 });
+  dm('cyl', 'white', x, y + 0.53, z, 0, 0, 0, 0.56, 0.02, 0.56, { tint: [0.88, 0.56, 0.14, 1] });
 }
 
 function drawMarketPropCoconutClusterWebgl(wgl, x, y, z) {
   var dm = wgl.drawMesh;
-  var pts = [[-0.14, 0.10, -0.06], [0.12, 0.10, -0.06], [0, 0.10, 0.12], [0, 0.26, 0]];
+  var pts = [[-0.18, 0, 0], [0.18, 0, 0], [0, 0, 0.20], [-0.08, 0.24, 0.08], [0.10, 0.24, 0.10]];
   for (var i = 0; i < pts.length; i++) {
-    dm('sphere', 'white', x + pts[i][0], y + pts[i][1], z + pts[i][2], 0, 0, 0, 0.22, 0.22, 0.22, { tint: [0.10, 0.54, 0.24, 1] });
+    dm('sphere', 'white', x + pts[i][0], y + 0.14 + pts[i][1], z + pts[i][2], 0, 0, 0, 0.28, 0.26, 0.28, { tint: [0.12, 0.56, 0.22, 1], specPow: 48 });
   }
 }
 
@@ -3762,120 +4054,157 @@ function renderMarketWebglScene(wgl, cam, st, W, H) {
     fogCol: MARKET_ATMO.fogCol,
     fogParams: MARKET_ATMO.fogParams,
     lights: [
-      { pos: [0.0, 4.4, 6.2],  col: [1.05, 0.78, 0.36] },
-      { pos: [0.0, 4.4, 20.4], col: [1.15, 0.80, 0.38] },
-      { pos: [11.6, 4.4, 20.4], col: [1.05, 0.84, 0.42] },
-      { pos: [p.x, 3.6, p.z],  col: [0.55, 0.45, 0.25] }
+      { pos: [0.0,  5.5,  8.0],  col: [1.08, 0.86, 0.52] },
+      { pos: [0.0,  5.5, 22.0],  col: [1.14, 0.88, 0.50] },
+      { pos: [-11.0,5.5, 18.0],  col: [1.05, 0.86, 0.50] },
+      { pos: [11.0, 5.5, 18.0],  col: [1.05, 0.86, 0.50] }
     ]
   };
   wgl.beginFrame(W, H, cam, atmo);
   var dm = wgl.drawMesh;
 
-  // Zone visibility culling giữ ~250-450 drawElements calls/frame mà không cắt tầm nhìn qua cổng!
-  var showSouth = (p.z < 21.0 || cam.pos.z < 21.0);
-  var showFood  = true;
-  var showFruit = (p.z > 13.0 || cam.pos.z > 13.0 || p.x > 3.5);
-
-  /* ---------------- A. SẢNH CỬA NAM & VẢI ÁO DÀI (X ∈ [-6, 6], Z ∈ [0, 13.6]) ---------------- */
-  if (showSouth) {
-    // Sàn gạch & Dải dẫn hướng đỏ đô + Mái kèo thép 5.8m + Giếng trời kính mờ
-    dm('box', 'marketTileSouth', 0, -0.05, 6.8, 0, 0, 0, 12.0, 0.10, 13.6, { tint: [1,1,1,1], us: 4.5, vs: 5.0 });
-    dm('box', 'white', 0, 0.008, 6.9, 0, 0, 0, 2.5, 0.012, 13.0, { tint: [0.55, 0.08, 0.22, 1] });
-    dm('box', 'marketRoofPanel', 0, 5.88, 6.8, 0, 0, 0, 12.0, 0.16, 13.6, { tint: [1,1,1,1], us: 4, vs: 4 });
-    dm('quad', 'marketSkylight', 0, 5.78, 6.8, Math.PI * 0.5, 0, 0, 3.2, 11.6, 1, { tint: [1,1,1,1], emissive: 1.05, us: 1, vs: 3 });
-    for (var sz = 2.2; sz <= 12.2; sz += 2.5) {
-      dm('box', 'white', 0, 5.56, sz, 0, 0, 0, 11.8, 0.22, 0.22, { tint: [0.30, 0.34, 0.40, 1] });
-      dm('box', 'white', -4.2, 4.95, sz, 0, 0, 0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-      dm('box', 'white',  4.2, 4.95, sz, 0, 0, -0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-    }
-    // Tường Trái, Tường Phải, Cột Chợ & Mặt tiền Cửa Số 1 (Z = 0)
-    dm('box', 'marketWallGold', -6.08, 2.9, 6.8, 0, 0, 0, 0.16, 5.8, 13.6, { tint: [1,1,1,1], us: 4, vs: 2 });
-    dm('box', 'marketWallGold',  6.08, 2.9, 6.8, 0, 0, 0, 0.16, 5.8, 13.6, { tint: [1,1,1,1], us: 4, vs: 2 });
-    for (var pz = 2.5; pz <= 11.5; pz += 4.5) {
-      dm('box', 'marketWallGold', -5.84, 2.9, pz, 0, 0, 0, 0.26, 5.8, 0.26, { tint: [0.92, 0.78, 0.48, 1] });
-      dm('box', 'marketWallGold',  5.84, 2.9, pz, 0, 0, 0, 0.26, 5.8, 0.26, { tint: [0.92, 0.78, 0.48, 1] });
-    }
-    dm('box', 'marketWallGold', -3.78, 2.9, -0.06, 0, 0, 0, 4.45, 5.8, 0.14, { tint: [1,1,1,1], us: 1.6, vs: 2 });
-    dm('box', 'marketWallGold',  3.78, 2.9, -0.06, 0, 0, 0, 4.45, 5.8, 0.14, { tint: [1,1,1,1], us: 1.6, vs: 2 });
-    dm('box', 'marketWallGold',  0.0,  4.45, -0.06, 0, 0, 0, 3.12, 2.7, 0.14, { tint: [1,1,1,1], us: 1.2, vs: 1 });
-    // Ánh sáng ấm ngoài quảng trường Quách Thị Trang & 2 cánh cổng sắt xếp Cửa Số 1
-    dm('quad', 'white', 0, 1.55, -0.18, 0, 0, 0, 3.2, 3.1, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
-    dm('quad', 'marketIronGate', -1.16, 1.48, 0.04, 0, 0, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });
-    var sgAng = st.southGateOpen * 1.15;
-    dm('quad', 'marketIronGate', 1.55 - Math.cos(sgAng) * 0.39, 1.48, 0.04 + Math.sin(sgAng) * 0.39, 0, -sgAng, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });
-
-    // Biển CỬA SỐ 1 · CỬA NAM & Tranh Tường Hương Trinh + Liên Sài Gòn 823
-    dm('quad', 'signCuaSo1', 0, 3.35, 0.04, 0, 0, 0, 3.8, 0.92, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signHuongTrinh', -5.94, 3.28, 6.5, 0, Math.PI * 0.5, 0, 8.6, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artAoDaiFabric', -5.94, 1.92, 3.6, 0, Math.PI * 0.5, 0, 3.4, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artAoDaiFabric', -5.94, 1.92, 8.6, 0, Math.PI * 0.5, 0, 3.4, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signLienSaiGon',  5.94, 3.28, 4.9, 0, -Math.PI * 0.5, 0, 6.2, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artLienTeaShelves', 5.94, 1.92, 4.9, 0, -Math.PI * 0.5, 0, 5.8, 1.75, 1, { tint: [1,1,1,1] });
-
-    // Sạp vải Hương Trinh (X ∈ [-5.95, -4.15], Z ∈ [1.5, 11.5]) + Cuộn lụa 3D & Nón lá treo
-    dm('box', 'marketWood', -5.05, 0.44, 6.5, 0, 0, 0, 1.72, 0.88, 9.8, { tint: [1,1,1,1], us: 3, vs: 1 });
-    var silkCols = [[0.88, 0.11, 0.28, 1], [0.98, 0.80, 0.08, 1], [0.06, 0.72, 0.50, 1], [0.15, 0.39, 0.92, 1], [0.58, 0.20, 0.92, 1], [0.96, 0.45, 0.09, 1]];
-    for (var sc = 0; sc < 6; sc++) {
-      var szPos = 2.2 + sc * 1.65;
-      dm('box', 'white', -4.70, 0.98, szPos, 0, 0, 0, 0.68, 0.20, 0.95, { tint: silkCols[sc] });
-      dm('cyl', 'white', -5.35, 1.04, szPos, Math.PI * 0.5, 0, 0, 0.22, 0.85, 0.22, { tint: silkCols[(sc + 2) % 6] });
-      dm('cone', 'white', -4.45, 2.55, szPos, 0.25, Math.PI * 0.5, 0, 0.46, 0.18, 0.46, { tint: [0.92, 0.82, 0.54, 1] });
-    }
-    // Sạp Đặc Sản Liên Sài Gòn 823 (X ∈ [4.15, 5.95], Z ∈ [1.5, 8.2]) + Hũ mứt nắp đỏ & hộp trà
-    dm('box', 'marketWood', 5.05, 0.44, 4.85, 0, 0, 0, 1.72, 0.88, 6.5, { tint: [1,1,1,1], us: 2, vs: 1 });
-    var jarCols = [[0.96, 0.62, 0.04, 1], [0.09, 0.64, 0.29, 1], [0.85, 0.45, 0.12, 1], [0.18, 0.48, 0.28, 1], [0.78, 0.22, 0.18, 1]];
-    for (var jc = 0; jc < 5; jc++) {
-      var jzPos = 2.2 + jc * 1.32;
-      dm('cyl', 'white', 4.60, 1.04, jzPos, 0, 0, 0, 0.34, 0.30, 0.34, { tint: jarCols[jc] });
-      dm('cyl', 'white', 4.60, 1.21, jzPos, 0, 0, 0, 0.36, 0.06, 0.36, { tint: [0.86, 0.12, 0.12, 1] });
-      dm('box', 'white', 5.25, 1.04, jzPos, 0, 0, 0, 0.42, 0.32, 0.55, { tint: [0.12, 0.46, 0.24, 1] });
-    }
-    // Đèn & Quạt trần Sảnh Cửa Nam
-    drawMarketHangingLampWebgl(wgl, -2.5, 4.2, [0.96, 0.62, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl,  2.5, 4.2, [0.96, 0.62, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl, -2.5, 9.8, [0.92, 0.45, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl,  2.5, 9.8, [0.92, 0.45, 0.08, 1]);
-    drawMarketCeilingFanWebgl(wgl, 0, 5.2, st.t, 0.2);
-    drawMarketCeilingFanWebgl(wgl, 0, 10.6, st.t, 1.4);
+  // Distance Culling 26m giữ mượt 60fps cho props nhỏ trong đại sảnh 36m × 36m
+  function nearCam(wx, wz, rad) {
+    return Math.hypot(wx - cam.pos.x, wz - cam.pos.z) <= (rad || 26.0);
   }
 
-  /* ---------------- VÁCH CỔNG VÒM Z = 13.6 (SOUTH_HALL <-> FOOD_COURT, MỞ [-1.8, 1.8]) ---------------- */
-  dm('box', 'marketWallGold', -3.9, 2.9, 13.6, 0, 0, 0, 4.2, 5.8, 0.22, { tint: [1,1,1,1], us: 1.5, vs: 2 });
-  dm('box', 'marketWallGold',  3.9, 2.9, 13.6, 0, 0, 0, 4.2, 5.8, 0.22, { tint: [1,1,1,1], us: 1.5, vs: 2 });
-  dm('box', 'marketWallGold',  0.0, 4.6, 13.6, 0, 0, 0, 3.6, 2.4, 0.22, { tint: [1,1,1,1], us: 1.4, vs: 1 });
-  dm('quad', 'signKhuAnUong', 0, 3.22, 13.47, 0, Math.PI, 0, 4.2, 0.88, 1, { tint: [1,1,1,1] });
-  dm('quad', 'signKhuAnUong', 0, 3.22, 13.73, 0, 0, 0, 4.2, 0.88, 1, { tint: [1,1,1,1] });
+  /* ---------------- A. NỀN Ô BÀN CỜ, ĐẠI SẢNH CHỮ THẬP & MÁI VÒM KÈO THÉP + LOUVERS 1914 ---------------- */
+  dm('box', 'marketTileSouth',  -9.0, -0.05,  9.0, 0, 0, 0, 18.0, 0.10, 18.0, { tint: [1,1,1,1], us: 6, vs: 6 });
+  dm('box', 'marketTileSouth',   9.0, -0.05,  9.0, 0, 0, 0, 18.0, 0.10, 18.0, { tint: [1,1,1,1], us: 6, vs: 6 });
+  dm('box', 'marketTileFood',   -9.0, -0.05, 27.0, 0, 0, 0, 18.0, 0.10, 18.0, { tint: [1,1,1,1], us: 6, vs: 6 });
+  dm('box', 'marketTileFruit',   9.0, -0.05, 27.0, 0, 0, 0, 18.0, 0.10, 18.0, { tint: [1,1,1,1], us: 6, vs: 6 });
+  // Trục hành lang chữ thập đỏ đất dẫn lối thẳng giữa 4 Cửa Đông–Tây–Nam–Bắc
+  dm('box', 'white', 0.0, 0.008, 18.0, 0, 0, 0, 4.2, 0.012, 35.6, { tint: [0.56, 0.11, 0.15, 1] });
+  dm('box', 'white', 0.0, 0.009, 17.0, 0, 0, 0, 35.6, 0.012, 4.0, { tint: [0.56, 0.11, 0.15, 1] });
 
-  /* ---------------- B. KHU ẨM THỰC TRUNG TÂM SẠP 1044 (X ∈ [-6, 6], Z ∈ [13.6, 26.8]) ---------------- */
-  if (showFood) {
-    dm('box', 'marketTileFood', 0, -0.05, 20.2, 0, 0, 0, 12.0, 0.10, 13.2, { tint: [1,1,1,1], us: 4.5, vs: 5.0 });
-    dm('box', 'white', 0, 0.008, 21.3, 0, 0, 0, 5.0, 0.012, 5.8, { tint: [0.50, 0.11, 0.11, 1] });
-    dm('box', 'marketRoofPanel', 0, 5.88, 20.2, 0, 0, 0, 12.0, 0.16, 13.2, { tint: [1,1,1,1], us: 4, vs: 4 });
-    dm('quad', 'marketSkylight', 0, 5.78, 20.2, Math.PI * 0.5, 0, 0, 3.2, 11.2, 1, { tint: [1,1,1,1], emissive: 1.05, us: 1, vs: 3 });
-    for (var fz = 15.6; fz <= 25.4; fz += 2.6) {
-      dm('box', 'white', 0, 5.56, fz, 0, 0, 0, 11.8, 0.22, 0.22, { tint: [0.30, 0.34, 0.40, 1] });
-      dm('box', 'white', -4.2, 4.95, fz, 0, 0, 0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-      dm('box', 'white',  4.2, 4.95, fz, 0, 0, -0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
+  // Mái lồng chợ 1914 cao 7.2m + 2 trục giếng trời & hàng cửa gió lá sách louvers trên cao
+  dm('box', 'marketRoofPanel', 0.0, 7.28, 18.0, 0, 0, 0, 36.2, 0.18, 36.2, { tint: [1,1,1,1], us: 10, vs: 10 });
+  dm('quad', 'marketSkylight', 0.0, 7.16, 18.0, Math.PI * 0.5, 0, 0, 4.2, 34.4, 1, { tint: [1,1,1,1], emissive: 1.0, us: 1, vs: 8 });
+  dm('quad', 'marketSkylight', 0.0, 7.14, 17.0, Math.PI * 0.5, 0, Math.PI * 0.5, 4.0, 34.4, 1, { tint: [1,1,1,1], emissive: 1.0, us: 1, vs: 8 });
+  for (var tr = 4.0; tr <= 32.0; tr += 5.6) {
+    dm('box', 'white', 0.0, 6.72, tr, 0, 0, 0, 35.6, 0.22, 0.24, { tint: [0.22, 0.34, 0.26, 1] });
+    dm('quad', 'marketLouvers', -9.0, 6.45, tr, 0, 0, 0, 8.0, 0.72, 1, { tint: [1,1,1,1], emissive: 0.55 });
+    dm('quad', 'marketLouvers',  9.0, 6.45, tr, 0, 0, 0, 8.0, 0.72, 1, { tint: [1,1,1,1], emissive: 0.55 });
+  }
+  // Cột thép xanh rêu nâng kèo dọc 2 bên trục hành lang trung tâm
+  var colXs = [-11.5, -3.5, 3.5, 11.5];
+  var colZs = [3.5, 14.2, 19.6, 29.2];
+  for (var cxi = 0; cxi < colXs.length; cxi++) {
+    for (var czi = 0; czi < colZs.length; czi++) {
+      dm('box', 'white', colXs[cxi], 3.45, colZs[czi], 0, 0, 0, 0.32, 6.9, 0.32, { tint: [0.20, 0.32, 0.24, 1] });
     }
-    // Tường Tây (X = -6.0), Tường Bắc (Z = 26.8), Tường Đông có Ngã tư Chợ Đông [22.6, 25.8]
-    dm('box', 'marketWallGold', -6.08, 2.9, 20.2, 0, 0, 0, 0.16, 5.8, 13.2, { tint: [1,1,1,1], us: 4, vs: 2 });
-    dm('box', 'marketWallGold',  0.0,  2.9, 26.88, 0, 0, 0, 12.2, 5.8, 0.16, { tint: [1,1,1,1], us: 4, vs: 2 });
-    // Vách ngăn Đông (X = 6.0): đoạn đặc Z ∈ [13.6, 22.6] & [25.8, 26.8], phần trên cổng Z ∈ [22.6, 25.8]
-    dm('box', 'marketWallGold', 6.0, 2.9, 18.1, 0, 0, 0, 0.22, 5.8, 9.0, { tint: [1,1,1,1], us: 3, vs: 2 });
-    dm('box', 'marketWallGold', 6.0, 2.9, 26.3, 0, 0, 0, 0.22, 5.8, 1.0, { tint: [1,1,1,1], us: 0.5, vs: 2 });
-    dm('box', 'marketWallGold', 6.0, 4.6, 24.2, 0, 0, 0, 0.22, 2.4, 3.2, { tint: [1,1,1,1], us: 1, vs: 1 });
+  }
 
-    // Biển & Mỹ thuật tường Khu Ẩm Thực
-    dm('quad', 'signBanhCuon50k', -5.94, 3.28, 20.1, 0, Math.PI * 0.5, 0, 8.2, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artBanhCuonWall', -5.94, 1.92, 20.1, 0, Math.PI * 0.5, 0, 7.6, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signBanhBeo20k',   5.86, 3.28, 18.6, 0, -Math.PI * 0.5, 0, 5.8, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artBanhBeoWall',   5.86, 1.92, 18.6, 0, -Math.PI * 0.5, 0, 5.4, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signSap1044',      0.0,  2.70, 26.74, 0, Math.PI, 0, 7.2, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signNgocHao1029',  5.86, 3.30, 24.2, 0, -Math.PI * 0.5, 0, 3.4, 0.72, 1, { tint: [1,1,1,1] });
+  /* ---------------- B. 4 BỨC TƯỜNG BAO & 4 CỬA ĐÔNG–TÂY–NAM–BẮC (KÈM BIỂN TÊN & CỔNG SẮT) ---------------- */
+  // Tường Nam (Z = 0, mở Cửa Số 1 X ∈ [-2.2, 2.2])
+  dm('box', 'marketWallGold', -10.1, 3.6, -0.08, 0, 0, 0, 15.8, 7.2, 0.16, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',  10.1, 3.6, -0.08, 0, 0, 0, 15.8, 7.2, 0.16, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',   0.0, 5.4, -0.08, 0, 0, 0,  4.4, 3.6, 0.16, { tint: [1,1,1,1], us: 1.5, vs: 1.5 });
+  dm('quad', 'white', 0.0, 1.8, -0.18, 0, 0, 0, 4.4, 3.6, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
+  dm('quad', 'marketIronGate', -1.65, 1.75, 0.04, 0, 0, 0, 1.1, 3.5, 1, { tint: [1,1,1,1] });
+  var sgA = st.southGateOpen * 1.15;
+  dm('quad', 'marketIronGate', 2.2 - Math.cos(sgA) * 0.55, 1.75, 0.04 + Math.sin(sgA) * 0.55, 0, -sgA, 0, 1.1, 3.5, 1, { tint: [1,1,1,1] });
+  dm('quad', 'signCuaSo1', 0.0, 4.05, 0.06, 0, 0, 0, 4.8, 1.05, 1, { tint: [1,1,1,1] });
 
-    // Đảo Quầy SẠP 1044 (X ∈ [-1.75, 1.75], Z ∈ [19.7, 22.9]) + Nồi nước lèo + Dừa xiêm + Tô Phở
-    dm('box', 'marketCeramicTile', 0, 0.46, 21.3, 0, 0, 0, 3.4, 0.92, 3.0, { tint: [1,1,1,1], us: 2, vs: 1 });
-    dm('box', 'white', 0, 0.96, 21.3, 0, 0, 0, 3.5, 0.08, 3.1, { tint: [0.88, 0.91, 0.94, 1], specPow: 64 });
+  // Tường Bắc (Z = 36, mở Cửa Bắc X ∈ [-2.2, 2.2])
+  dm('box', 'marketWallGold', -10.1, 3.6, 36.08, 0, 0, 0, 15.8, 7.2, 0.16, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',  10.1, 3.6, 36.08, 0, 0, 0, 15.8, 7.2, 0.16, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',   0.0, 5.4, 36.08, 0, 0, 0,  4.4, 3.6, 0.16, { tint: [1,1,1,1], us: 1.5, vs: 1.5 });
+  dm('quad', 'white', 0.0, 1.8, 36.18, 0, Math.PI, 0, 4.4, 3.6, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
+  dm('quad', 'marketIronGate', -1.65, 1.75, 35.96, 0, Math.PI, 0, 1.1, 3.5, 1, { tint: [1,1,1,1] });
+  var ngA = st.northGateOpen * 1.15;
+  dm('quad', 'marketIronGate', 2.2 - Math.cos(ngA) * 0.55, 1.75, 35.96 - Math.sin(ngA) * 0.55, 0, Math.PI + ngA, 0, 1.1, 3.5, 1, { tint: [1,1,1,1] });
+  dm('quad', 'signCuaBac', 0.0, 4.05, 35.94, 0, Math.PI, 0, 5.2, 1.05, 1, { tint: [1,1,1,1] });
+
+  // Tường Tây (X = -18, mở Cửa Tây Z ∈ [15.0, 19.0])
+  dm('box', 'marketWallGold', -18.08, 3.6,  7.5, 0, 0, 0, 0.16, 7.2, 15.0, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold', -18.08, 3.6, 27.5, 0, 0, 0, 0.16, 7.2, 17.0, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold', -18.08, 5.4, 17.0, 0, 0, 0, 0.16, 3.6,  4.0, { tint: [1,1,1,1], us: 1.5, vs: 1.5 });
+  dm('quad', 'white', -18.18, 1.8, 17.0, 0, Math.PI * 0.5, 0, 4.0, 3.6, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
+  dm('quad', 'marketIronGate', -17.94, 1.75, 15.5, 0, Math.PI * 0.5, 0, 1.0, 3.5, 1, { tint: [1,1,1,1] });
+  dm('quad', 'signCuaTay', -17.94, 4.05, 17.0, 0, Math.PI * 0.5, 0, 4.6, 1.05, 1, { tint: [1,1,1,1] });
+
+  // Tường Đông (X = +18, mở Cửa Đông Z ∈ [15.0, 19.0])
+  dm('box', 'marketWallGold',  18.08, 3.6,  7.5, 0, 0, 0, 0.16, 7.2, 15.0, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',  18.08, 3.6, 27.5, 0, 0, 0, 0.16, 7.2, 17.0, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',  18.08, 5.4, 17.0, 0, 0, 0, 0.16, 3.6,  4.0, { tint: [1,1,1,1], us: 1.5, vs: 1.5 });
+  dm('quad', 'white',  18.18, 1.8, 17.0, 0, -Math.PI * 0.5, 0, 4.0, 3.6, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
+  dm('quad', 'marketIronGate',  17.94, 1.75, 15.5, 0, -Math.PI * 0.5, 0, 1.0, 3.5, 1, { tint: [1,1,1,1] });
+  dm('quad', 'signCuaDong', 17.94, 4.05, 17.0, 0, -Math.PI * 0.5, 0, 4.6, 1.05, 1, { tint: [1,1,1,1] });
+
+  /* ---------------- C. KHU THỜI TRANG, THỂ THAO (ADIDAS, NIKE, GIÀY DÉP, TÚI) & ÁO DÀI (CỬA NAM) ---------------- */
+  // 1. Sạp Vải Lụa Áo Dài Hương Trinh 415 ([-16.6..-13.4, 2.5..11.5]) & Áo "I ♥ SAIGON"
+  dm('box', 'marketWood', -15.0, 0.44, 7.0, 0, 0, 0, 3.1, 0.88, 8.8, { tint: [1,1,1,1], us: 3, vs: 1 });
+  dm('quad', 'signHuongTrinh', -15.0, 3.25, 7.0, 0, Math.PI * 0.5, 0, 7.2, 0.85, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artAoDaiFabric', -13.42, 1.75, 7.0, 0, Math.PI * 0.5, 0, 6.2, 1.75, 1, { tint: [1,1,1,1] });
+  if (nearCam(-15.0, 7.0)) {
+    var silkCols = [[0.88, 0.11, 0.28, 1], [0.98, 0.80, 0.08, 1], [0.06, 0.72, 0.50, 1], [0.15, 0.39, 0.92, 1]];
+    for (var sc = 0; sc < 4; sc++) {
+      dm('box', 'white', -14.1, 0.98, 3.8 + sc * 2.0, 0, 0, 0, 0.8, 0.22, 1.1, { tint: silkCols[sc] });
+    }
+  }
+  dm('box', 'marketWood', -15.0, 0.44, 13.6, 0, 0, 0, 3.0, 0.88, 2.2, { tint: [0.75, 0.22, 0.32, 1] });
+  dm('quad', 'signSaigonTees', -13.45, 2.8, 13.6, 0, Math.PI * 0.5, 0, 2.4, 0.65, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artSaigonTees',  -13.45, 1.55, 13.6, 0, Math.PI * 0.5, 0, 2.2, 1.45, 1, { tint: [1,1,1,1] });
+
+  // 2. Sạp Quần Áo Adidas 3 Sọc 208 ([-9.2..-5.6, 3.5..9.5]) & Sạp Giày Sneaker/Dép 306 ([-9.2..-5.6, 10.6..13.8])
+  dm('box', 'marketWood', -7.4, 0.44, 6.5, 0, 0, 0, 3.4, 0.88, 5.8, { tint: [0.18, 0.22, 0.28, 1] });
+  dm('quad', 'signAdidasMarket', -5.66, 2.95, 6.5, 0, Math.PI * 0.5, 0, 5.2, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artAdidasMarket',  -5.66, 1.72, 6.5, 0, Math.PI * 0.5, 0, 5.0, 1.60, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artAdidasMarket',  -9.14, 1.72, 6.5, 0, -Math.PI * 0.5, 0, 5.0, 1.60, 1, { tint: [1,1,1,1] });
+  if (nearCam(-7.4, 6.5)) {
+    dm('box', 'white', -6.8, 1.05, 4.8, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.08, 0.10, 0.14, 1] });
+    dm('box', 'white', -6.8, 1.05, 6.5, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.15, 0.38, 0.86, 1] });
+    dm('box', 'white', -6.8, 1.05, 8.2, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.88, 0.16, 0.18, 1] });
+  }
+  dm('box', 'marketWood', -7.4, 0.44, 12.2, 0, 0, 0, 3.4, 0.88, 3.0, { tint: [0.55, 0.34, 0.20, 1] });
+  dm('quad', 'signShoesBags', -5.66, 2.85, 12.2, 0, Math.PI * 0.5, 0, 2.8, 0.68, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artShoesBags',  -5.66, 1.62, 12.2, 0, Math.PI * 0.5, 0, 2.8, 1.50, 1, { tint: [1,1,1,1] });
+
+  // 3. Sạp Quần Áo Nike Swoosh 212 ([5.6..9.2, 3.5..9.5]) & Sạp Túi Xách / Vali / Đồng Hồ ([5.6..9.2, 10.6..13.8])
+  dm('box', 'marketWood', 7.4, 0.44, 6.5, 0, 0, 0, 3.4, 0.88, 5.8, { tint: [0.16, 0.18, 0.24, 1] });
+  dm('quad', 'signNikeMarket', 5.56, 2.95, 6.5, 0, -Math.PI * 0.5, 0, 5.2, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artNikeMarket',  5.56, 1.72, 6.5, 0, -Math.PI * 0.5, 0, 5.0, 1.60, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artNikeMarket',  9.24, 1.72, 6.5, 0,  Math.PI * 0.5, 0, 5.0, 1.60, 1, { tint: [1,1,1,1] });
+  if (nearCam(7.4, 6.5)) {
+    dm('box', 'white', 6.8, 1.05, 4.8, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.92, 0.36, 0.08, 1] });
+    dm('box', 'white', 6.8, 1.05, 6.5, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.09, 0.11, 0.16, 1] });
+    dm('box', 'white', 6.8, 1.05, 8.2, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.96, 0.96, 0.98, 1] });
+  }
+  dm('box', 'marketWood', 7.4, 0.44, 12.2, 0, 0, 0, 3.4, 0.88, 3.0, { tint: [0.55, 0.34, 0.20, 1] });
+  dm('quad', 'signShoesBags', 5.56, 2.85, 12.2, 0, -Math.PI * 0.5, 0, 2.8, 0.68, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artShoesBags',  5.56, 1.62, 12.2, 0, -Math.PI * 0.5, 0, 2.8, 1.50, 1, { tint: [1,1,1,1] });
+
+  /* ---------------- D. KHU ĐỒ KHÔ, CÀ PHÊ, TRÀ & GIA VỊ (CỬA ĐÔNG: X = 13.4..16.6) ---------------- */
+  dm('box', 'marketWood', 15.0, 0.44, 6.2, 0, 0, 0, 3.1, 0.88, 6.6, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('quad', 'signLienSaiGon',   13.42, 3.05, 6.2, 0, -Math.PI * 0.5, 0, 6.0, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artLienTeaShelves',13.42, 1.75, 6.2, 0, -Math.PI * 0.5, 0, 5.6, 1.65, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', 15.0, 0.44, 12.7, 0, 0, 0, 3.1, 0.88, 3.6, { tint: [0.45, 0.24, 0.12, 1] });
+  dm('quad', 'signCoffeeSpices', 13.42, 2.95, 12.7, 0, -Math.PI * 0.5, 0, 3.4, 0.74, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artCoffeeSpices',  13.42, 1.72, 12.7, 0, -Math.PI * 0.5, 0, 3.2, 1.50, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', 15.0, 0.44, 22.7, 0, 0, 0, 3.1, 0.88, 4.4, { tint: [0.65, 0.38, 0.16, 1] });
+  dm('quad', 'artLienTeaShelves',13.42, 1.72, 22.7, 0, -Math.PI * 0.5, 0, 4.0, 1.50, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', 15.0, 0.44, 28.5, 0, 0, 0, 3.1, 0.88, 4.4, { tint: [0.50, 0.28, 0.14, 1] });
+  dm('quad', 'signCoffeeSpices', 13.42, 2.95, 28.5, 0, -Math.PI * 0.5, 0, 4.0, 0.74, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artCoffeeSpices',  13.42, 1.72, 28.5, 0, -Math.PI * 0.5, 0, 4.0, 1.50, 1, { tint: [1,1,1,1] });
+
+  /* ---------------- E. KHU THỦ CÔNG MỸ NGHỆ, GỐM SỨ, NÓN LÁ & MÂY TRE (CỬA TÂY: X = -16.6..-7.2) ---------------- */
+  dm('box', 'marketWood', -15.0, 0.44, 22.6, 0, 0, 0, 3.1, 0.88, 4.6, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('quad', 'signGomSu',    -13.42, 3.05, 22.6, 0, Math.PI * 0.5, 0, 4.4, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artGomSonMai', -13.42, 1.72, 22.6, 0, Math.PI * 0.5, 0, 4.2, 1.55, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', -15.0, 0.44, 28.6, 0, 0, 0, 3.1, 0.88, 4.6, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('quad', 'signNonLa',    -13.42, 3.05, 28.6, 0, Math.PI * 0.5, 0, 4.4, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artNonLaRack', -13.42, 1.72, 28.6, 0, Math.PI * 0.5, 0, 4.2, 1.55, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood',  -8.6, 0.44, 22.3, 0, 0, 0, 2.6, 0.88, 4.0, { tint: [0.78, 0.52, 0.24, 1] });
+  dm('quad', 'artHandicraftRattan', -7.25, 1.65, 22.3, 0, Math.PI * 0.5, 0, 3.6, 1.45, 1, { tint: [1,1,1,1] });
+
+  /* ---------------- F. KHU ẨM THỰC TOÀN BỘ MÓN ĂN VIỆT NAM (SẠP 1044 + PHỞ, BÚN BÒ, CƠM TẤM, BÁNH XÈO, CHÈ...) ---------------- */
+  // Đảo Sạp 1044 (X ∈ [-1.75, 1.75], Z ∈ [19.7, 22.9]) + Cổng vòm KHU ĂN UỐNG
+  dm('quad', 'signKhuAnUong', 0.0, 3.85, 19.2, 0, 0, 0, 4.6, 0.92, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketCeramicTile', 0, 0.46, 21.3, 0, 0, 0, 3.4, 0.92, 3.0, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('box', 'white', 0, 0.96, 21.3, 0, 0, 0, 3.5, 0.08, 3.1, { tint: [0.88, 0.91, 0.94, 1], specPow: 64 });
+  dm('quad', 'signSap1044', 0, 2.45, 22.95, 0, Math.PI, 0, 3.6, 1.10, 1, { tint: [1,1,1,1] });
+  if (nearCam(0, 21.3)) {
     drawMarketPropPhoPotWebgl(wgl, -0.85, 1.0, 20.9);
     drawMarketPropPhoPotWebgl(wgl, -0.15, 1.0, 21.3);
     drawMarketPropCoconutClusterWebgl(wgl, 1.05, 1.0, 20.6);
@@ -3885,119 +4214,97 @@ function renderMarketWebglScene(wgl, cam, st, W, H) {
       dm('cup', 'white', bx, 1.06, 19.95, 0, 0, 0, 0.24, 0.12, 0.24, { tint: [0.98, 0.98, 0.96, 1] });
       dm('cyl', 'white', bx, 1.11, 19.95, 0, 0, 0, 0.20, 0.02, 0.20, { tint: [0.88, 0.56, 0.18, 1] });
     }
-
-    // 4 Ghế đẩu inox tương tác tại Sạp 1044 (Z = 19.15)
-    for (var si = 0; si < st.stools.length; si++) {
-      var sl = st.stools[si];
-      dm('cyl', 'white', sl.x, 0.24, sl.z, 0, 0, 0, 0.24, 0.48, 0.24, { tint: [0.64, 0.70, 0.78, 1], specPow: 80 });
-      dm('cyl', 'white', sl.x, 0.49, sl.z, 0, 0, 0, 0.40, 0.05, 0.40, { tint: [0.90, 0.93, 0.96, 1], specPow: 96 });
-    }
-
-    // Quầy Bánh Cuốn Nóng 50K (X ∈ [-5.95, -4.15], Z ∈ [15.4, 24.8])
-    dm('box', 'marketCeramicTile', -5.05, 0.44, 20.1, 0, 0, 0, 1.72, 0.88, 9.2, { tint: [1,1,1,1], us: 3, vs: 1 });
-    drawMarketPropPhoPotWebgl(wgl, -4.65, 0.88, 17.6);
-    drawMarketPropPhoPotWebgl(wgl, -4.65, 0.88, 20.1);
-    drawMarketPropPhoPotWebgl(wgl, -4.65, 0.88, 22.6);
-    for (var bci = 0; bci < 4; bci++) {
-      dm('cyl', 'white', -4.55, 0.92, 16.4 + bci * 2.2, 0, 0, 0, 0.36, 0.04, 0.36, { tint: [0.96, 0.97, 0.99, 1] });
-    }
-
-    // Quầy Bánh Bèo Huế 20K (X ∈ [4.15, 5.95], Z ∈ [15.4, 21.8])
-    dm('box', 'marketWood', 5.05, 0.44, 18.6, 0, 0, 0, 1.72, 0.88, 6.2, { tint: [0.95, 0.82, 0.58, 1], us: 2, vs: 1 });
-    drawMarketPropBanhBeoTrayWebgl(wgl, 4.65, 0.88, 16.6);
-    drawMarketPropBanhBeoTrayWebgl(wgl, 4.65, 0.88, 18.6);
-    drawMarketPropBanhBeoTrayWebgl(wgl, 4.65, 0.88, 20.6);
-
-    drawMarketHangingLampWebgl(wgl, -2.5, 17.5, [0.96, 0.55, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl,  2.5, 17.5, [0.96, 0.55, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl, -2.5, 23.6, [0.92, 0.45, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl,  2.5, 23.6, [0.92, 0.45, 0.08, 1]);
-    drawMarketCeilingFanWebgl(wgl, 0, 16.8, st.t, 0.7);
-    drawMarketCeilingFanWebgl(wgl, 0, 23.8, st.t, 2.1);
+  }
+  // 6 Ghế đẩu inox tương tác
+  for (var si = 0; si < st.stools.length; si++) {
+    var sl = st.stools[si];
+    dm('cyl', 'white', sl.x, 0.24, sl.z, 0, 0, 0, 0.24, 0.48, 0.24, { tint: [0.64, 0.70, 0.78, 1], specPow: 80 });
+    dm('cyl', 'white', sl.x, 0.49, sl.z, 0, 0, 0, 0.40, 0.05, 0.40, { tint: [0.90, 0.93, 0.96, 1], specPow: 96 });
+  }
+  // Món ăn hiện trước mặt chú Heo khi ngồi ăn tại bất kỳ bàn inox nào
+  if (st.pig.seated && st.pig.eating) {
+    var dCol = st.pig.activeDish === 'che' ? [0.96, 0.35, 0.58, 1] : (st.pig.activeDish === 'bunbo' ? [0.86, 0.16, 0.14, 1] : [0.92, 0.62, 0.18, 1]);
+    var dZ = st.pig.z < 23.0 ? 19.85 : 26.05;
+    dm('cup', 'white', st.pig.x, 1.06, dZ, 0, 0, 0, 0.26, 0.14, 0.26, { tint: [0.99, 0.99, 0.98, 1] });
+    dm('cyl', 'white', st.pig.x, 1.12, dZ, 0, 0, 0, 0.22, 0.02, 0.22, { tint: dCol });
   }
 
-  /* ---------------- C. CÁNH ĐÔNG TRÁI CÂY 1029 & CỬA BẮC (X ∈ [6.0, 17.2], Z ∈ [13.6, 26.8]) ---------------- */
-  if (showFruit) {
-    dm('box', 'marketTileFruit', 11.6, -0.05, 20.2, 0, 0, 0, 11.2, 0.10, 13.2, { tint: [1,1,1,1], us: 4.5, vs: 5.0 });
-    dm('box', 'white', 11.6, 0.008, 20.4, 0, 0, 0, 4.8, 0.012, 4.8, { tint: [0.08, 0.34, 0.18, 1] });
-    dm('box', 'marketRoofPanel', 11.6, 5.88, 20.2, 0, 0, 0, 11.2, 0.16, 13.2, { tint: [1,1,1,1], us: 4, vs: 4 });
-    dm('quad', 'marketSkylight', 11.6, 5.78, 20.2, Math.PI * 0.5, 0, 0, 3.0, 10.6, 1, { tint: [1,1,1,1], emissive: 1.05, us: 1, vs: 3 });
-    for (var fcz = 15.6; fcz <= 25.4; fcz += 2.6) {
-      dm('box', 'white', 11.6, 5.56, fcz, 0, 0, 0, 11.0, 0.22, 0.22, { tint: [0.30, 0.34, 0.40, 1] });
-      dm('box', 'white',  7.8, 4.95, fcz, 0, 0, 0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-      dm('box', 'white', 15.4, 4.95, fcz, 0, 0, -0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-    }
-    // Tường Nam Cánh Đông (Z = 13.6), Tường Đông (X = 17.2), Mặt tiền Cửa Bắc (Z = 26.8, mở [10.05, 13.15])
-    dm('box', 'marketWallGold', 11.6, 2.9, 13.6, 0, 0, 0, 11.2, 5.8, 0.20, { tint: [1,1,1,1], us: 4, vs: 2 });
-    dm('box', 'marketWallGold', 17.28, 2.9, 20.2, 0, 0, 0, 0.16, 5.8, 13.2, { tint: [1,1,1,1], us: 4, vs: 2 });
-    dm('box', 'marketWallGold', 8.02, 2.9, 26.88, 0, 0, 0, 4.05, 5.8, 0.16, { tint: [1,1,1,1], us: 1.5, vs: 2 });
-    dm('box', 'marketWallGold', 15.18, 2.9, 26.88, 0, 0, 0, 4.05, 5.8, 0.16, { tint: [1,1,1,1], us: 1.5, vs: 2 });
-    dm('box', 'marketWallGold', 11.6, 4.45, 26.88, 0, 0, 0, 3.12, 2.7, 0.16, { tint: [1,1,1,1], us: 1.2, vs: 1 });
-    // Ánh nắng & Cửa sắt xếp Cửa Bắc (X ∈ [10.05, 13.15], Z = 26.8)
-    dm('quad', 'white', 11.6, 1.55, 26.96, 0, Math.PI, 0, 3.2, 3.1, 1, { tint: [1.0, 0.96, 0.80, 1], emissive: 1.1 });
-    dm('quad', 'marketIronGate', 10.44, 1.48, 26.76, 0, Math.PI, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });
-    var ngAng = st.northGateOpen * 1.15;
-    dm('quad', 'marketIronGate', 13.15 - Math.cos(ngAng) * 0.39, 1.48, 26.76 - Math.sin(ngAng) * 0.39, 0, Math.PI + ngAng, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });
+  // Bánh Cuốn Nóng 50K & Bánh Bèo Huế 20K
+  dm('box', 'marketCeramicTile', -5.5, 0.44, 22.0, 0, 0, 0, 2.1, 0.88, 4.2, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('quad', 'signBanhCuon50k', -4.42, 2.75, 22.0, 0, Math.PI * 0.5, 0, 3.8, 0.68, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artBanhCuonWall', -4.42, 1.55, 22.0, 0, Math.PI * 0.5, 0, 3.6, 1.35, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', 5.5, 0.44, 22.0, 0, 0, 0, 2.1, 0.88, 4.2, { tint: [0.95, 0.82, 0.58, 1] });
+  dm('quad', 'signBanhBeo20k',  4.42, 2.75, 22.0, 0, -Math.PI * 0.5, 0, 3.8, 0.68, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artBanhBeoWall',  4.42, 1.55, 22.0, 0, -Math.PI * 0.5, 0, 3.6, 1.35, 1, { tint: [1,1,1,1] });
 
-    // Biển & Mỹ thuật tường Cánh Đông
-    dm('quad', 'signCuaBac', 11.6, 3.35, 26.76, 0, Math.PI, 0, 4.4, 0.94, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signGomSu',  6.14, 3.28, 18.2, 0, Math.PI * 0.5, 0, 6.2, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artGomSonMai', 6.14, 1.92, 18.2, 0, Math.PI * 0.5, 0, 5.8, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signNonLa',  17.14, 3.28, 18.6, 0, -Math.PI * 0.5, 0, 6.0, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artNonLaRack', 17.14, 1.92, 18.6, 0, -Math.PI * 0.5, 0, 5.6, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signKhuAnUong', 6.14, 3.30, 24.2, 0, Math.PI * 0.5, 0, 3.4, 0.72, 1, { tint: [1,1,1,1] });
+  // 4 Quầy Món Việt Nam đầy đủ (Phở/Hủ Tiếu, Bún Bò/Cơm Tấm, Bánh Xèo/Gỏi Cuốn/Bánh Mì, Chè 3 Miền/Sinh Tố)
+  var foodStalls = [
+    { x: -8.6, z: 27.1, w: 2.6, d: 2.8, sign: 'signPhoHuTieu',    art: 'artPhoHuTieu',    pot: true },
+    { x: -2.8, z: 27.1, w: 3.0, d: 2.8, sign: 'signBunBoComTam',  art: 'artBunBoComTam',  pot: true },
+    { x:  2.8, z: 27.1, w: 3.0, d: 2.8, sign: 'signBanhXeoBanhMi',art: 'artBanhXeoBanhMi',pot: false },
+    { x:  7.0, z: 27.1, w: 3.0, d: 2.8, sign: 'signCheSinhTo',    art: 'artCheSinhTo',    pot: false }
+  ];
+  for (var fsi = 0; fsi < foodStalls.length; fsi++) {
+    var fs = foodStalls[fsi];
+    dm('box', 'marketCeramicTile', fs.x, 0.44, fs.z, 0, 0, 0, fs.w, 0.88, fs.d, { tint: [1,1,1,1], us: 2, vs: 1 });
+    dm('quad', fs.sign, fs.x, 2.85, fs.z - fs.d * 0.5, 0, 0, 0, fs.w * 0.96, 0.68, 1, { tint: [1,1,1,1] });
+    dm('quad', fs.art,  fs.x, 1.62, fs.z - fs.d * 0.5, 0, 0, 0, fs.w * 0.92, 1.32, 1, { tint: [1,1,1,1] });
+    if (fs.pot && nearCam(fs.x, fs.z)) drawMarketPropPhoPotWebgl(wgl, fs.x, 0.88, fs.z);
+  }
 
-    // Đảo Trái Cây 1029 NGỌC HẢO (X ∈ [9.95, 13.25], Z ∈ [18.8, 22.0]) + Mâm ngũ quả + Cân Nhơn Hòa
-    dm('box', 'marketWood', 11.6, 0.42, 20.4, 0, 0, 0, 3.2, 0.84, 3.0, { tint: [0.22, 0.58, 0.28, 1], us: 2, vs: 1 });
-    dm('box', 'artFruitDisplay', 11.6, 0.94, 20.4, 0, 0, 0, 2.7, 0.20, 2.4, { tint: [1,1,1,1] });
-    // Tháp xoài cát, thanh long, bưởi da xanh & sầu riêng nổi khối 3D
+  /* ---------------- G. KHU TRÁI CÂY NHIỆT ĐỚI 3D, HOA TƯƠI & HẢI SẢN TƯƠI SỐNG (1029 NGỌC HẢO + CỬA BẮC) ---------------- */
+  // Đảo Trái Cây 1029 Ngọc Hảo (giữ tọa độ [9.95..13.25, 18.8..22.0] tương thích Test 186 & 190)
+  dm('box', 'marketWood', 11.6, 0.42, 20.4, 0, 0, 0, 3.2, 0.84, 3.0, { tint: [0.22, 0.58, 0.28, 1], us: 2, vs: 1 });
+  dm('box', 'artFruitDisplay', 11.6, 0.94, 20.4, 0, 0, 0, 2.7, 0.20, 2.4, { tint: [1,1,1,1] });
+  dm('quad', 'signNgocHao1029', 11.6, 2.65, 20.4, 0, 0, 0, 3.4, 0.72, 1, { tint: [1,1,1,1] });
+  if (nearCam(11.6, 20.4)) {
     var fColors = [[0.98, 0.80, 0.08, 1], [0.88, 0.11, 0.28, 1], [0.13, 0.77, 0.37, 1], [0.63, 0.38, 0.05, 1]];
     for (var fi = 0; fi < 8; fi++) {
-      var fx = 10.55 + (fi % 4) * 0.68, fzp = 19.65 + Math.floor(fi / 4) * 1.45;
-      dm('sphere', 'white', fx, 1.14, fzp, 0, 0, 0, 0.28, 0.24, 0.28, { tint: fColors[fi % 4] });
+      dm('sphere', 'white', 10.55 + (fi % 4) * 0.68, 1.14, 19.65 + Math.floor(fi / 4) * 1.45, 0, 0, 0, 0.28, 0.24, 0.28, { tint: fColors[fi % 4] });
     }
-    // Cân Nhơn Hòa xanh lá + đĩa inox
     dm('box', 'white', 11.6, 1.18, 20.4, 0, 0, 0, 0.28, 0.28, 0.26, { tint: [0.08, 0.50, 0.22, 1] });
     dm('cyl', 'white', 11.6, 1.35, 20.4, 0, 0, 0, 0.36, 0.04, 0.36, { tint: [0.86, 0.90, 0.94, 1], specPow: 80 });
     drawMarketPropCoconutClusterWebgl(wgl, 10.65, 0.86, 19.25);
-    drawMarketPropCoconutClusterWebgl(wgl, 12.55, 0.86, 19.25);
-
-    // Kệ Gốm Sứ Bát Tràng (X ∈ [6.05, 7.80], Z ∈ [14.8, 21.6]) & Kệ Nón Lá (X ∈ [15.4, 17.15], Z ∈ [15.4, 21.8])
-    dm('box', 'marketWood', 6.92, 0.43, 18.2, 0, 0, 0, 1.68, 0.86, 6.6, { tint: [1,1,1,1], us: 2, vs: 1 });
-    for (var gi = 0; gi < 5; gi++) {
-      var gz = 15.5 + gi * 1.35;
-      dm('cyl', 'white', 6.95, 1.06, gz, 0, 0, 0, 0.28, 0.38, 0.28, { tint: [0.96, 0.97, 1.0, 1] });
-      dm('cyl', 'white', 6.95, 1.10, gz, 0, 0, 0, 0.30, 0.12, 0.30, { tint: [0.11, 0.31, 0.85, 1] });
-    }
-    dm('box', 'marketWood', 16.28, 0.43, 18.6, 0, 0, 0, 1.68, 0.86, 6.2, { tint: [1,1,1,1], us: 2, vs: 1 });
-    for (var ni = 0; ni < 5; ni++) {
-      var nz = 16.0 + ni * 1.30;
-      dm('cone', 'white', 16.15, 1.02, nz, 0, 0, 0, 0.52, 0.20, 0.52, { tint: [0.92, 0.82, 0.54, 1] });
-      dm('cone', 'white', 16.35, 2.35, nz, 0.15, -Math.PI * 0.5, 0, 0.52, 0.20, 0.52, { tint: [0.94, 0.85, 0.58, 1] });
-    }
-
-    drawMarketHangingLampWebgl(wgl, 9.2, 17.5, [0.96, 0.62, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl, 14.0, 17.5, [0.96, 0.62, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl, 11.6, 23.6, [0.24, 0.72, 0.34, 1]);
-    drawMarketCeilingFanWebgl(wgl, 11.6, 17.2, st.t, 0.9);
-    drawMarketCeilingFanWebgl(wgl, 11.6, 23.8, st.t, 2.3);
   }
 
-  /* ---------------- D. 12 NPC PIXEL BILLBOARD & CHÚ HEO 24×20 (GL.NEAREST) ---------------- */
+  // Cụm Sạp Cửa Bắc: Trái Cây Nhiệt Đới Đủ Loại, Hoa Tươi & Hải Sản Tươi Sống
+  dm('box', 'marketWood', -5.3, 0.44, 32.2, 0, 0, 0, 4.0, 0.88, 3.0, { tint: [0.22, 0.58, 0.28, 1] });
+  dm('quad', 'signNgocHao1029', -5.3, 2.90, 30.68, 0, 0, 0, 3.8, 0.72, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artTropicalFruits', -5.3, 1.65, 30.68, 0, 0, 0, 3.8, 1.45, 1, { tint: [1,1,1,1] });
+  if (nearCam(-5.3, 32.2)) {
+    var tCols = [[0.65, 0.42, 0.06, 1], [0.50, 0.14, 0.68, 1], [0.88, 0.12, 0.18, 1], [0.98, 0.80, 0.08, 1], [0.16, 0.72, 0.32, 1]];
+    for (var tfi = 0; tfi < 5; tfi++) {
+      dm('sphere', 'white', -6.6 + tfi * 0.65, 1.08, 31.8, 0, 0, 0, 0.30, 0.26, 0.30, { tint: tCols[tfi] });
+    }
+  }
+  dm('box', 'marketWood', 5.3, 0.44, 32.2, 0, 0, 0, 4.0, 0.88, 3.0, { tint: [0.55, 0.16, 0.36, 1] });
+  dm('quad', 'signFreshFlowers', 5.3, 2.90, 30.68, 0, 0, 0, 3.8, 0.72, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artFreshFlowers',  5.3, 1.65, 30.68, 0, 0, 0, 3.8, 1.45, 1, { tint: [1,1,1,1] });
+
+  dm('box', 'marketCeramicTile', 10.5, 0.44, 32.2, 0, 0, 0, 4.0, 0.88, 3.0, { tint: [0.82, 0.92, 0.98, 1] });
+  dm('quad', 'signWetSeafood', 10.5, 2.90, 30.68, 0, 0, 0, 3.8, 0.72, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artWetSeafood',  10.5, 1.65, 30.68, 0, 0, 0, 3.8, 1.45, 1, { tint: [1,1,1,1] });
+
+  // Đèn & Quạt Trần Lồng Chợ
+  var lampPts = [[-3.2, 6.5], [3.2, 6.5], [-10.0, 17.0], [10.0, 17.0], [-3.2, 24.5], [3.2, 24.5]];
+  for (var li = 0; li < lampPts.length; li++) {
+    drawMarketHangingLampWebgl(wgl, lampPts[li][0], lampPts[li][1], [0.96, 0.62, 0.08, 1]);
+  }
+  drawMarketCeilingFanWebgl(wgl, 0, 8.0, st.t, 0.2);
+  drawMarketCeilingFanWebgl(wgl, 0, 17.0, st.t, 1.2);
+  drawMarketCeilingFanWebgl(wgl, 0, 26.5, st.t, 2.2);
+
+  /* ---------------- H. 12 NPC PIXEL BILLBOARD & CHÚ HEO 24×20 (GL.NEAREST) ---------------- */
   if (st.npcs && typeof drawHumanBillboardWebgl === 'function') {
     for (var npi = 0; npi < st.npcs.length; npi++) {
-      var npc = st.npcs[npi];
-      var inSouthNpc = npc.z < 13.6;
-      var inFruitNpc = npc.z >= 13.6 && npc.x >= 6.0;
-      if ((inSouthNpc && !showSouth) || (inFruitNpc && !showFruit)) continue;
-      drawHumanBillboardWebgl(wgl, cam, npc, st.t);
+      drawHumanBillboardWebgl(wgl, cam, st.npcs[npi], st.t);
     }
   }
   if (typeof drawPigBillboardWebgl === 'function') {
     drawPigBillboardWebgl(wgl, cam, st.pig, st.t, false);
   }
 
-  /* ---------------- E. VÒNG SÓNG CHẠM SÀN TAP-TO-WALK ---------------- */
+  /* ---------------- I. VÒNG SÓNG CHẠM SÀN TAP-TO-WALK ---------------- */
   wgl.setBlend('add');
   for (var ri = 0; ri < st.ripples.length; ri++) {
     var rp = st.ripples[ri];
@@ -4078,25 +4385,19 @@ function renderMarketTpsScene(ctx, cam, st, W, H) {
       }
     }
   }
-  // Trần kèo thép & giếng trời
   drawPoly3D(ctx, cam, [[-6, 3.85, 0], [6, 3.85, 0], [6, 3.85, 14.8], [-6, 3.85, 14.8]], '#6B4423', '#2B180E', 1);
   drawPoly3D(ctx, cam, [[-1.6, 3.83, 1.2], [1.6, 3.83, 1.2], [1.6, 3.83, 13.6], [-1.6, 3.83, 13.6]], '#FEF3C7', '#D97706', 1.2);
-  // 4 Bức tường
   drawPoly3D(ctx, cam, [[-6, 0, 0], [-6, 0, 14.8], [-6, 3.85, 14.8], [-6, 3.85, 0]], '#E5B85B', '#5C341D', 1);
   drawPoly3D(ctx, cam, [[6, 0, 14.8], [6, 0, 0], [6, 3.85, 0], [6, 3.85, 14.8]], '#DBA94E', '#5C341D', 1);
   drawPoly3D(ctx, cam, [[-6, 0, 14.8], [6, 0, 14.8], [6, 3.85, 14.8], [-6, 3.85, 14.8]], '#D29E44', '#5C341D', 1);
   drawPoly3D(ctx, cam, [[-6, 0, 0], [6, 0, 0], [6, 3.85, 0], [-6, 3.85, 0]], '#DBA94E', '#5C341D', 1);
 
-  if (typeof drawMarketRoomWalls3D === 'function') {
-    drawMarketRoomWalls3D(ctx, cam, room);
-  }
+  if (typeof drawMarketRoomWalls3D === 'function') drawMarketRoomWalls3D(ctx, cam, room);
   if (typeof drawLanternGlow3D === 'function') {
     drawLanternGlow3D(ctx, cam, -2.4, 3.02, 4.2, '#F59E0B', '#FDE68A', 0.21, 3.85);
     drawLanternGlow3D(ctx, cam,  2.4, 3.02, 4.2, '#F59E0B', '#FDE68A', 0.21, 3.85);
   }
-  if (typeof drawCeilingFan3D === 'function') {
-    drawCeilingFan3D(ctx, cam, 0, 3.42, 5.2, st.t, 0.2);
-  }
+  if (typeof drawCeilingFan3D === 'function') drawCeilingFan3D(ctx, cam, 0, 3.42, 5.2, st.t, 0.2);
 
   var items = [];
   function pushItem(wx, wz, fn) {
