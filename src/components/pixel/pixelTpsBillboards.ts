@@ -246,8 +246,8 @@ function renderHumanBillboardCanvas(role, angleKey, stepPhase, seated, blink, ea
   var step = seated ? 0 : (stepPhase || 0) * 2;
   var isAnyChef = role === 'chef' || role === 'chef_butcher' || role === 'chef_noodle';
   var isBarista = role === 'barista' || role === 'cafe_waiter';
-  var pantsCol = role === 'vn_player' || role === 'vn_captain' ? '#991B1B' :
-    (role === 'away_player' ? '#1E3A8A' : (role === 'monk' ? '#78350F' : '#1E293B'));
+  var pantsCol = (role === 'vn_player' || role === 'vn_captain' || role === 'sub_home') ? '#991B1B' :
+    ((role === 'away_player' || role === 'sub_away') ? '#1E3A8A' : (role === 'monk' ? '#78350F' : '#1E293B'));
 
   // 1. Chân / Quần
   if (!seated) {
@@ -262,12 +262,16 @@ function renderHumanBillboardCanvas(role, angleKey, stepPhase, seated, blink, ea
     (role === 'adidas_staff' ? '#111827' :
     (role === 'monk' ? '#B45309' :
     (role === 'worshipper' ? '#64748B' :
-    (role === 'vn_player' || role === 'vn_captain' ? '#DC2626' :
+    (role === 'vn_player' || role === 'vn_captain' || role === 'vn_fan' ? '#DC2626' :
     (role === 'vn_coach' ? '#1E3A8A' :
+    (role === 'away_coach' ? '#0F172A' :
+    (role === 'sub_home' ? '#F97316' :
+    (role === 'sub_away' ? '#84CC16' :
+    (role === 'steward' ? '#FACC15' :
     (role === 'away_player' ? '#2563EB' :
-    (role === 'gk' ? '#16A34A' :
-    (role === 'referee' ? '#0F172A' :
-    (role === 'press' ? '#475569' : (shirtHex || '#3B82F6'))))))))));
+    (role === 'gk' ? (shirtHex || '#16A34A') :
+    (role === 'referee' || role === 'linesman' ? '#0F172A' :
+    (role === 'press' ? '#475569' : (shirtHex || '#3B82F6'))))))))))))));
 
   hr(-6, -21, 12, 13, '#2B2118');
   hr(-5, -20, 10, 11, bodyFill);
@@ -292,10 +296,22 @@ function renderHumanBillboardCanvas(role, angleKey, stepPhase, seated, blink, ea
   } else if (role === 'monk') {
     hr(-5, -20, 5, 11, '#D97706');
     hr(-2, -17, 2, 2, '#FACC15');
-  } else if (role === 'vn_player' || role === 'vn_captain') {
+  } else if (role === 'vn_player' || role === 'vn_captain' || role === 'vn_fan') {
     hr(-2, -17, 4, 3, '#FFFF00');
     if (role === 'vn_captain') hr(-5, -18, 2, 2, '#FACC15');
-  } else if (role === 'referee') {
+  } else if (role === 'steward') {
+    // Áo phản quang An Ninh SVĐ + sọc bạc phản quang ngang
+    hr(-5, -16, 10, 2, '#E2E8F0');
+    hr(-5, -12, 10, 1, '#E2E8F0');
+    hr(-1, -19, 2, 2, '#1E293B');
+  } else if (role === 'sub_home' || role === 'sub_away') {
+    // Áo bib tập luyện cho cầu thủ dự bị
+    hr(-4, -19, 8, 8, role === 'sub_home' ? '#EA580C' : '#65A30D');
+    hr(-2, -16, 4, 2, '#FEF08A');
+  } else if (role === 'vn_coach' || role === 'away_coach') {
+    hr(-1, -20, 2, 10, '#F8FAFC');
+    hr(-1, -19, 2, 7, role === 'vn_coach' ? '#DC2626' : '#3B82F6');
+  } else if (role === 'referee' || role === 'linesman') {
     hr(-3, -20, 1, 11, '#F8FAFC'); hr(0, -20, 1, 11, '#F8FAFC'); hr(3, -20, 1, 11, '#F8FAFC');
   } else if (role === 'gk') {
     hr(-5, -20, 1, 10, '#FACC15'); hr(4, -20, 1, 10, '#FACC15');
@@ -325,6 +341,12 @@ function renderHumanBillboardCanvas(role, angleKey, stepPhase, seated, blink, ea
     hr(4, -17, 4, 2, '#FCD5B5'); hr(6, -19, 5, 4, '#1E293B'); hr(10, -18, 2, 2, '#94A3B8');
   } else if (carryProp === 'mic') {
     hr(4, -16, 4, 2, '#FCD5B5'); hr(8, -20, 2, 5, '#0F172A'); hr(8, -22, 2, 2, '#EF4444');
+  } else if (carryProp === 'flag') {
+    hr(4, -18, 4, 2, '#FCD5B5'); hr(7, -26, 1, 10, '#E2E8F0'); hr(8, -26, 5, 4, '#FACC15'); hr(8, -24, 3, 2, '#DC2626');
+  } else if (carryProp === 'vn_flag') {
+    hr(4, -19, 3, 2, '#FCD5B5'); hr(6, -29, 1, 12, '#F8FAFC'); hr(7, -29, 6, 5, '#DA251D'); hr(9, -27, 2, 2, '#FDE047');
+  } else if (carryProp === 'board') {
+    hr(4, -16, 4, 2, '#FCD5B5'); hr(6, -19, 5, 6, '#15803D'); hr(7, -18, 3, 4, '#F8FAFC');
   } else if (carryProp === 'ball') {
     hr(5, -10, 4, 4, '#FFFFFF'); hr(6, -9, 2, 2, '#1E293B');
   } else if (eating) {
@@ -356,11 +378,11 @@ function renderHumanBillboardCanvas(role, angleKey, stepPhase, seated, blink, ea
     }
   }
 
-  // Mũ đặc trưng (Đầu bếp / Barista)
+  // Mũ đặc trưng (Đầu bếp / Barista / An Ninh)
   if (isAnyChef) {
     hr(-5, -37, 10, 6, '#2B2118'); hr(-4, -36, 8, 5, '#FFFFFF');
-  } else if (isBarista) {
-    hr(-5, -34, 10, 4, '#2B2118'); hr(-4, -33, 8, 3, '#556B3E'); hr(-4, -31, 9, 1, '#3B4D2B');
+  } else if (isBarista || role === 'steward') {
+    hr(-5, -34, 10, 4, '#2B2118'); hr(-4, -33, 8, 3, role === 'steward' ? '#0F172A' : '#556B3E'); hr(-4, -31, 9, 1, role === 'steward' ? '#FACC15' : '#3B4D2B');
   }
   return c;
 }

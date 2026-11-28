@@ -52,27 +52,38 @@ export const StadiumBannerWebView: React.FC<StadiumBannerWebViewProps> = ({
   window.addEventListener('resize', resizeCanvas);
 
   var st = createStadiumTpsState();
-  var cam = createTpsCamera({ yaw: 0.06, pitch: -0.30, dist: 4.85, targetHeight: 0.72 });
-  var stadiumBounds = { minX: -18.5, maxX: 18.5, minZ: -0.2, maxZ: 50.0, maxY: 14.0 };
+  var cam = createTpsCamera({ yaw: 0.06, pitch: -0.26, dist: 4.85, targetHeight: 0.72 });
+  var stadiumBounds = { minX: -24.5, maxX: 24.5, minZ: -10.5, maxZ: 64.0, maxY: 16.0 };
   var exitSent = false;
   var currentCtxAction = null;
+  var wasSeated = false;
 
   function updateContextPill() {
     if (!ctxBtn) return;
     var p = st.pig;
-    var z = st.zone || 'locker_tunnel';
+    var z = st.zone || 'gate_plaza';
     var nextAct = null;
 
-    if (z === 'locker_tunnel' && p.z <= 2.15 && Math.abs(p.x) <= 2.25) {
-      nextAct = { id: 'exit_stadium', label: '🚪 Ra lại Đại Lộ Sài Gòn' };
-    } else if (z === 'locker_tunnel' && p.x <= -2.1 && p.z >= 1.5 && p.z <= 11.9) {
+    if (p.seated) {
+      nextAct = { id: 'cheer_wave', label: '📣 Hô Vang "Việt Nam Vô Địch!" (Sóng Người)' };
+    } else if (z === 'gate_plaza') {
+      if (p.z <= -6.2) {
+        nextAct = { id: 'exit_stadium', label: '🚪 Ra lại Đại Lộ Sài Gòn' };
+      } else {
+        nextAct = { id: 'enter_gate', label: '🎫 Qua Cổng Soát Vé → Đường Hầm & Khán Đài' };
+      }
+    } else if (z === 'home_locker') {
       nextAct = {
         id: 'wear_kit',
         label: p.wearingVietnamKit ? '👕 Cất Áo Đấu ĐT Việt Nam' : '⚽ Mặc Áo Đấu ĐT Việt Nam #10'
       };
-    } else if (z === 'pitch_arena') {
-      nextAct = { id: 'shoot_goal', label: '🥅 Sút Bóng Ghi Bàn Cho Việt Nam!' };
-    } else if ((z === 'trophy_vip' || z === 'skybox') && p.z >= 7.8 && p.z <= 14.5) {
+    } else if (z === 'away_locker') {
+      nextAct = { id: 'inspect_away_tactics', label: '📋 Xem Sa Bàn Chiến Thuật Đội Khách' };
+    } else if (z === 'main_tunnel' || z === 'player_tunnel' || z === 'pitchside') {
+      nextAct = { id: 'go_stands_seat', label: '🪜 Lên Khán Đài Ngồi Xem Trận 11v11' };
+    } else if (z === 'stands_south') {
+      nextAct = { id: 'sit_nearest_seat', label: '🪑 Ngồi Ghế Khán Đài Xem Trận 11v11' };
+    } else if (z === 'trophy_vip') {
       nextAct = { id: 'lift_trophy', label: '🏆 Nâng Cúp Vàng Vô Địch Việt Nam!' };
     }
 
@@ -85,17 +96,26 @@ export const StadiumBannerWebView: React.FC<StadiumBannerWebViewProps> = ({
     }
   }
 
+  function findNearestSeat(px) {
+    if (!st.stools || !st.stools.length) return { id: 4, x: -2.0, z: 23.6 };
+    var best = st.stools[0], bestD = 999;
+    for (var i = 0; i < st.stools.length; i++) {
+      var d = Math.abs(st.stools[i].x - px);
+      if (d < bestD) { bestD = d; best = st.stools[i]; }
+    }
+    return best;
+  }
+
   function triggerContextAction(act) {
     if (!act) return;
     postRN({ type: 'HAPTIC_MEDIUM' });
-    if (act.id === 'wear_kit') {
-      executeStadiumAction(st, 'wear_kit');
-    } else if (act.id === 'shoot_goal') {
-      executeStadiumAction(st, 'shoot_goal');
-    } else if (act.id === 'lift_trophy') {
-      executeStadiumAction(st, 'lift_trophy');
-    } else if (act.id === 'exit_stadium') {
-      executeStadiumAction(st, 'exit_stadium');
+    if (act.id === 'enter_gate') {
+      planStadiumRealtimePath(st, 0.0, 0.0, 6.2, {});
+    } else if (act.id === 'wear_kit' || act.id === 'inspect_away_tactics' || act.id === 'cheer_wave' || act.id === 'lift_trophy' || act.id === 'exit_stadium') {
+      executeStadiumAction(st, act.id);
+    } else if (act.id === 'go_stands_seat' || act.id === 'sit_nearest_seat') {
+      var seat = findNearestSeat(st.pig.x || 0);
+      planStadiumRealtimePath(st, seat.x, 3.4, seat.z, { targetKind: 'seat', seatChairId: seat.id });
     }
   }
 
@@ -118,10 +138,11 @@ export const StadiumBannerWebView: React.FC<StadiumBannerWebViewProps> = ({
       if (target) {
         planStadiumRealtimePath(st, target.x, target.y, target.z, {
           targetKind: target.kind,
+          seatChairId: target.seatChairId,
           pendingAction: target.pendingAction || null
         });
         st.ripples.push({ x: target.x, y: target.y, z: target.z, t: 0 });
-        postRN({ type: target.pendingAction ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });
+        postRN({ type: (target.pendingAction || target.kind === 'seat') ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });
       }
     }
   });
@@ -132,6 +153,12 @@ export const StadiumBannerWebView: React.FC<StadiumBannerWebViewProps> = ({
     lastNow = now;
     if (window.__isActive !== false) {
       stepStadiumTps(st, dt);
+      if (st.pig.seated && !wasSeated) {
+        wasSeated = true;
+        cam.yaw = 0.0; cam.pitch = -0.22; cam.dist = 4.35;
+      } else if (!st.pig.seated) {
+        wasSeated = false;
+      }
       if (st.exiting && !exitSent && st.exitFade >= 0.85) {
         exitSent = true;
         postRN({ type: 'EXIT_STADIUM' });

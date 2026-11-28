@@ -9787,4 +9787,145 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log(`✅ Test 194 Passed: Chợ Bến Thành 1914 Mở Rộng 4× [${res194.width}x${res194.depth}m, CHỈ 2 Lối Ra Trước/Sau + Sông Bạch Đằng Mờ Mờ, stalls=${res194.stalls}, npcs=${res194.npcs}, draws=${draws}, 0 NaN — Quyết định 260] verified cleanly`);
 }
 
-console.log('\n🎉 ALL 194 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (194/194)!');
+// =========================================================================
+// TEST 195: SVĐ TRỐNG ĐỒNG CHUẨN FIFA WORLD CUP — LUỒNG CỔ ĐỘNG VIÊN (CỔNG A → ĐƯỜNG HẦM 2 NHÁNH PHÒNG THAY ĐỒ → KHÁN ĐÀI 11v11) (QĐ 261)
+// =========================================================================
+{
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const tpsEng = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const wglEng = fs.readFileSync('src/components/pixel/pixelWebgl3dEngine.ts', 'utf8');
+  const bbEng = fs.readFileSync('src/components/pixel/pixelTpsBillboards.ts', 'utf8');
+  const navEng = fs.readFileSync('src/components/pixel/pixelNavGraph3d.ts', 'utf8');
+  const bdEng = fs.readFileSync('src/components/pixel/saigonStreetBackdrop3d.ts', 'utf8');
+  const stWall = fs.readFileSync('src/components/chat/stadium/stadiumWallArt.ts', 'utf8');
+  const stScene = fs.readFileSync('src/components/chat/stadium/stadiumTps3dScene.ts', 'utf8');
+  const stBanner = fs.readFileSync('src/components/chat/StadiumBannerWebView.tsx', 'utf8');
+
+  assert.ok(
+    decDoc.includes('Quyết định 261') &&
+      tpsDoc.includes('QĐ 261') &&
+      bbEng.includes("role === 'steward'") &&
+      bbEng.includes("role === 'linesman'") &&
+      bbEng.includes("role === 'sub_home'") &&
+      bbEng.includes("role === 'away_coach'") &&
+      stBanner.includes('cheer_wave') &&
+      stBanner.includes('go_stands_seat') &&
+      stBanner.includes('home_locker') &&
+      stBanner.includes('away_locker'),
+    'QĐ 261 docs, FIFA staff/fan roles, and Stadium fan flow banner wiring must be synced cleanly'
+  );
+
+  const extractRaw = (src) => src.match(/return String\.raw`([\s\S]*?)`;/)[1];
+  const regTex = [];
+  let nans = 0, draws = 0;
+  const chk = (a) => { for (let i = 0; i < a.length; i++) if (typeof a[i] === 'number' && !Number.isFinite(a[i])) nans++; };
+  const mockGl = {
+    VERTEX_SHADER: 1, FRAGMENT_SHADER: 2, ARRAY_BUFFER: 3, ELEMENT_ARRAY_BUFFER: 4, STATIC_DRAW: 5,
+    TEXTURE_2D: 6, RGBA: 7, UNSIGNED_BYTE: 8, TEXTURE_WRAP_S: 9, TEXTURE_WRAP_T: 10, REPEAT: 11, CLAMP_TO_EDGE: 12,
+    TEXTURE_MIN_FILTER: 13, TEXTURE_MAG_FILTER: 14, LINEAR_MIPMAP_LINEAR: 15, LINEAR: 16, NEAREST: 99,
+    DEPTH_TEST: 17, BLEND: 18, SRC_ALPHA: 19, ONE: 20, ONE_MINUS_SRC_ALPHA: 21, COLOR_BUFFER_BIT: 22, DEPTH_BUFFER_BIT: 24,
+    FLOAT: 25, UNSIGNED_SHORT: 26, TRIANGLES: 27, TEXTURE0: 28,
+    createShader() { return {}; }, shaderSource() {}, compileShader() {},
+    createProgram() { return {}; }, attachShader() {}, linkProgram() {}, useProgram() {},
+    getAttribLocation() { return 0; }, getUniformLocation() { return {}; },
+    createBuffer() { return {}; }, bindBuffer() {}, bufferData() {},
+    createTexture() { return {}; }, bindTexture() {}, texImage2D() {}, texParameteri() {}, generateMipmap() {},
+    activeTexture() {}, viewport() {}, clearColor() {}, clear() {}, enable() {}, disable() {}, depthMask() {}, blendFunc() {},
+    enableVertexAttribArray() {}, vertexAttribPointer() {},
+    uniformMatrix4fv(_l, _t, v) { chk(v); }, uniform1i() {}, uniform1f(_l, v) { chk([v]); },
+    uniform2f(_l, a, b) { chk([a, b]); }, uniform3f(_l, a, b, c) { chk([a, b, c]); }, uniform4f(_l, a, b, c, d) { chk([a, b, c, d]); },
+    drawElements() { draws++; },
+  };
+  const mock2d = {
+    fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left', textBaseline: 'alphabetic',
+    save() {}, restore() {}, beginPath() {}, closePath() {}, clip() {}, translate() {}, rotate() {}, scale() {},
+    moveTo() {}, lineTo() {}, quadraticCurveTo() {}, bezierCurveTo() {}, arcTo() {}, rect() {}, arc() {}, ellipse() {},
+    fill() {}, stroke() {}, fillRect() {}, clearRect() {}, strokeRect() {}, fillText() {},
+    createLinearGradient() { return { addColorStop() {} }; },
+    createRadialGradient() { return { addColorStop() {} }; },
+  };
+  const mockDoc = { createElement() { return { width: 256, height: 256, getContext() { return mock2d; } }; } };
+  const mockCv = { getContext(kind) { return kind === 'webgl' ? mockGl : mock2d; } };
+
+  const res195 = new Function(
+    'document',
+    'cv',
+    'regTex',
+    extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + '\n' + extractRaw(bbEng) + '\n' + extractRaw(navEng) + '\n' +
+      extractRaw(bdEng) + '\n' + extractRaw(stWall) + '\n' + extractRaw(stScene) + `
+    var wgl = createPixelWebglRenderer(cv);
+    var origReg = wgl.registerTextureCanvas;
+    wgl.registerTextureCanvas = function(k, c, r, n) { regTex.push(k); return origReg(k, c, r, n); };
+    buildStadiumProceduralTextures(wgl);
+    var st = createStadiumTpsState();
+    var cam = createTpsCamera({ yaw: 0.06, pitch: -0.26, dist: 4.85, targetHeight: 0.72 });
+    var startZone = st.zone;
+    renderStadiumWebglScene(wgl, cam, st, 390, 844);
+
+    // 1. Qua Cổng A Soát Vé vào Trục Đường Hầm → Rẽ Trái vào Phòng Thay Đồ ĐT Việt Nam mặc áo #10
+    planStadiumRealtimePath(st, -8.5, 0.0, 6.2, { pendingAction: 'wear_kit' });
+    for (var i = 0; i < 260; i++) { stepStadiumTps(st, 0.05); if (!st.pig.walking) break; }
+    var visitedHomeLocker = st.zone === 'home_locker' && st.pig.wearingVietnamKit === true;
+
+    // 2. Sang nhánh Phải Đường Hầm: Phòng Thay Đồ Đội Khách đối xứng chuẩn FIFA
+    planStadiumRealtimePath(st, 8.5, 0.0, 6.2, { pendingAction: 'inspect_away_tactics' });
+    for (var j = 0; j < 280; j++) { stepStadiumTps(st, 0.05); if (!st.pig.walking) break; }
+    var visitedAwayLocker = st.zone === 'away_locker';
+
+    // 3. Thử xuống sát đường piste -> Bị rào An Ninh chặn tại Z <= 27.2 (không xâm nhập cỏ 11v11)
+    planStadiumRealtimePath(st, 0.0, 0.8, 35.0, {});
+    for (var k = 0; k < 280; k++) { stepStadiumTps(st, 0.05); if (!st.pig.walking) break; }
+    var blockedFromPitch = st.zone === 'pitchside' && st.pig.z <= 27.2;
+
+    // 4. Leo Cầu Thang Vomitory lên Khán Đài Nam & Ngồi Ghế xem trận 11v11 + Bấm Sóng Người Cổ Vũ
+    planStadiumRealtimePath(st, -2.0, 3.4, 23.6, { targetKind: 'seat', seatChairId: 4 });
+    for (var m = 0; m < 450; m++) { stepStadiumTps(st, 0.05); if (!st.pig.walking) break; }
+    var seatedOnStand = st.pig.seated === true && st.zone === 'stands_south' && Math.abs(st.pig.y - 3.4) < 0.05;
+    executeStadiumAction(st, 'cheer_wave');
+    stepStadiumTps(st, 0.05);
+    renderStadiumWebglScene(wgl, cam, st, 390, 844);
+
+    // Đếm đúng quân số FIFA 11v11 + Trọng tài + HLV + Dự bị + An ninh + CĐV
+    var counts = { home: 0, away: 0, refs: 0, coaches: 0, subs: 0, stewards: 0, fans: 0 };
+    for (var ni = 0; ni < st.npcs.length; ni++) {
+      var r = st.npcs[ni].role;
+      if (r === 'vn_player' || r === 'vn_captain' || (r === 'gk' && st.npcs[ni].x < 0)) counts.home++;
+      else if (r === 'away_player' || (r === 'gk' && st.npcs[ni].x > 0)) counts.away++;
+      else if (r === 'referee' || r === 'linesman') counts.refs++;
+      else if (r === 'vn_coach' || r === 'away_coach') counts.coaches++;
+      else if (r === 'sub_home' || r === 'sub_away') counts.subs++;
+      else if (r === 'steward') counts.stewards++;
+      else if (r === 'vn_fan') counts.fans++;
+    }
+
+    return {
+      startZone: startZone,
+      visitedHomeLocker: visitedHomeLocker,
+      visitedAwayLocker: visitedAwayLocker,
+      blockedFromPitch: blockedFromPitch,
+      seatedOnStand: seatedOnStand,
+      waveActive: !!(st.waveUntil && st.waveUntil > st.t),
+      totalNpcs: st.npcs.length,
+      counts: counts
+    };
+  `
+  )(mockDoc, mockCv, regTex);
+
+  const reqTex195 = ['gateSign', 'awayLockerCabinet', 'awayTacticsBoard', 'ledPitchBoard', 'standConcrete', 'grandstandRedGold', 'dongSonCenter', 'roofTrongDong'];
+  for (const tk of reqTex195) {
+    assert.ok(regTex.includes(tk), 'Stadium must register FIFA world-cup texture: ' + tk);
+  }
+  assert.strictEqual(nans, 0, 'Trong Dong FIFA Stadium WebGL scene must emit 0 NaN values');
+  assert.ok(draws >= 300, 'Trong Dong FIFA Stadium must draw full 11v11 bowl + stands + gates (draws=' + draws + ')');
+  assert.strictEqual(res195.startZone, 'gate_plaza', 'Fan Pig must spawn outside Gate A plaza first');
+  assert.ok(res195.visitedHomeLocker && res195.visitedAwayLocker, 'Pig must traverse Tunnel into symmetrical Home & Away locker rooms');
+  assert.ok(res195.blockedFromPitch, 'Security stewards & LED barrier must prevent fan from running onto 11v11 pitch');
+  assert.ok(res195.seatedOnStand && res195.waveActive, 'Pig must climb Vomitory stairs up to Grandstand seat & trigger Mexican Wave');
+  assert.ok(res195.counts.home >= 11 && res195.counts.away >= 11, 'Match must have full 11v11 (11 Home + 11 Away)');
+  assert.ok(res195.counts.refs >= 3 && res195.counts.coaches >= 2 && res195.counts.subs >= 8 && res195.counts.stewards >= 10 && res195.counts.fans >= 16, 'Must include 3 refs, 2 coaches, 8 bench subs, 10 stewards & cheering fans');
+
+  console.log(`✅ Test 195 Passed: SVĐ Trống Đồng Chuẩn FIFA World Cup [${res195.counts.home}v${res195.counts.away} + ${res195.counts.refs} refs + ${res195.counts.coaches} coaches + ${res195.counts.subs} subs + ${res195.counts.stewards} stewards + ${res195.counts.fans} 3D fans, Cổng→Hầm 2 nhánh→Khán đài, draws=${draws}, 0 NaN — Quyết định 261] verified cleanly`);
+}
+
+console.log('\n🎉 ALL 195 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (195/195)!');

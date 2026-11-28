@@ -230,23 +230,26 @@ function buildStadiumProceduralTextures(wgl) {
     wgl.registerTextureCanvas('dongSonCenter', c, false);
   })();
 
-  // 10. Khán đài Cờ Đỏ Sao Vàng cổ động viên 4 phía (grandstandRedGold)
+  // 10. Khán đài Cờ Đỏ Sao Vàng cổ động viên 4 phía mật độ cao (grandstandRedGold)
   (function() {
     var c = mkCanvas(512, 256), g = c.getContext('2d'), rng = makeStadiumSeedRng(2510);
-    g.fillStyle = '#450A0A'; g.fillRect(0, 0, 512, 256);
-    for (var r = 0; r < 5; r++) {
-      var ry = 10 + r * 48;
+    g.fillStyle = '#3B0707'; g.fillRect(0, 0, 512, 256);
+    for (var r = 0; r < 8; r++) {
+      var ry = 4 + r * 31;
       g.fillStyle = r % 2 === 0 ? '#7F1D1D' : '#991B1B';
-      g.fillRect(0, ry + 26, 512, 16);
-      for (var cx = 12; cx < 504; cx += 24) {
-        var j = (rng() - 0.5) * 4;
-        g.fillStyle = ((cx + r) % 3 === 0) ? '#FACC15' : '#DC2626';
-        g.fillRect(cx - 7, ry + 10 + j, 14, 18);
+      g.fillRect(0, ry + 18, 512, 11);
+      for (var cx = 8; cx < 508; cx += 16) {
+        var j = (rng() - 0.5) * 3;
+        var shirtPick = (cx / 16 + r) % 7;
+        g.fillStyle = shirtPick === 0 ? '#FACC15' : (shirtPick === 3 ? '#FFFFFF' : '#DC2626');
+        g.fillRect(cx - 5, ry + 7 + j, 10, 13);
         g.fillStyle = '#FDE68A';
-        g.fillRect(cx - 4, ry + 2 + j, 8, 8);
-        if ((cx / 24 + r) % 4 === 0) {
-          g.fillStyle = '#DA251D'; g.fillRect(cx + 5, ry - 4 + j, 16, 11);
-          g.fillStyle = '#FFFF00'; g.fillRect(cx + 11, ry - 1 + j, 4, 4);
+        g.fillRect(cx - 3, ry + 1 + j, 6, 6);
+        g.fillStyle = '#1E293B';
+        g.fillRect(cx - 3, ry - 1 + j, 6, 2);
+        if ((cx / 16 + r * 2) % 3 === 0) {
+          g.fillStyle = '#DA251D'; g.fillRect(cx + 3, ry - 3 + j, 11, 8);
+          g.fillStyle = '#FFFF00'; g.fillRect(cx + 7, ry - 1 + j, 3, 3);
         }
       }
     }
@@ -339,7 +342,76 @@ function buildStadiumProceduralTextures(wgl) {
     wgl.registerTextureCanvas('roofTrongDong', c, true);
   })();
 
-  // 18. Sprite chú Heo Mascot 24×20 (bao gồm bộ trang phục Áo Đấu ĐT Việt Nam 'vn_kit')
+  // 18. Biển Cổng Soát Vé Trống Đồng FIFA (gateSign)
+  (function() {
+    var c = mkCanvas(512, 128), g = c.getContext('2d');
+    g.fillStyle = '#0F172A'; g.fillRect(0, 0, 512, 128);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 6; g.strokeRect(5, 5, 502, 118);
+    g.fillStyle = '#DA251D'; g.fillRect(14, 14, 484, 34);
+    g.fillStyle = '#FDE047'; g.font = 'bold 21px monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('★ TRỐNG ĐỒNG FIFA STADIUM · CỔNG A ★', 256, 31);
+    g.fillStyle = '#38BDF8'; g.font = 'bold 18px monospace';
+    g.fillText('🎫 SOÁT VÉ VÀO HẦM & KHÁN ĐÀI 11v11 →', 256, 84);
+    wgl.registerTextureCanvas('gateSign', c, false);
+  })();
+
+  // 19. Tủ áo Đội Khách chuẩn đối xứng FIFA (awayLockerCabinet)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#0F172A'; g.fillRect(0, 0, 512, 256);
+    var xs = [72, 194, 318, 440], nums = ['1', '7', '9', '11'];
+    for (var i = 0; i < 4; i++) {
+      var lx = xs[i] - 54;
+      g.fillStyle = '#1E293B'; g.fillRect(lx, 14, 108, 224);
+      g.strokeStyle = '#38BDF8'; g.lineWidth = 3; g.strokeRect(lx, 14, 108, 224);
+      g.fillStyle = '#2563EB';
+      g.fillRect(xs[i] - 32, 48, 64, 18);
+      g.fillRect(xs[i] - 22, 48, 44, 62);
+      g.fillStyle = '#F8FAFC'; g.font = 'bold 22px monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(nums[i], xs[i], 80);
+    }
+    wgl.registerTextureCanvas('awayLockerCabinet', c, false);
+  })();
+
+  // 20. Bảng Chiến Thuật Đội Khách (awayTacticsBoard)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#0F172A'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#14532D'; g.fillRect(16, 44, 480, 196);
+    g.strokeStyle = '#38BDF8'; g.lineWidth = 5; g.strokeRect(14, 42, 484, 200);
+    g.fillStyle = '#38BDF8'; g.font = 'bold 20px monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('TACTICS 4-2-3-1 · AWAY TEAM', 256, 24);
+    var pts = [[72,142],[152,72],[152,118],[152,166],[152,212],[242,102],[242,182],[338,76],[338,142],[338,208],[430,142]];
+    for (var p = 0; p < pts.length; p++) {
+      g.fillStyle = p === 0 ? '#EAB308' : '#2563EB';
+      g.beginPath(); g.arc(pts[p][0], pts[p][1], 11, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = '#FFF'; g.lineWidth = 2; g.stroke();
+    }
+    wgl.registerTextureCanvas('awayTacticsBoard', c, false);
+  })();
+
+  // 21. Bảng LED rào An Ninh dọc đường biên (ledPitchBoard)
+  (function() {
+    var c = mkCanvas(512, 64), g = c.getContext('2d');
+    g.fillStyle = '#090D16'; g.fillRect(0, 0, 512, 64);
+    g.fillStyle = '#DA251D'; g.fillRect(6, 6, 500, 52);
+    g.strokeStyle = '#FACC15'; g.lineWidth = 3; g.strokeRect(6, 6, 500, 52);
+    g.fillStyle = '#FEF08A'; g.font = 'bold 20px monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('★ TRỐNG ĐỒNG FIFA 11v11 · AN NINH SÂN CỎ ★', 256, 32);
+    wgl.registerTextureCanvas('ledPitchBoard', c, true);
+  })();
+
+  // 22. Sàn bậc bê tông khán đài hiện đại (standConcrete)
+  (function() {
+    var c = mkCanvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#475569'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#334155';
+    for (var y = 0; y < 256; y += 32) g.fillRect(0, y, 256, 4);
+    g.fillStyle = '#FACC15'; g.fillRect(0, 248, 256, 6);
+    wgl.registerTextureCanvas('standConcrete', c, true);
+  })();
+
+  // 23. Sprite chú Heo Mascot 24×20 (bao gồm bộ trang phục Áo Đấu ĐT Việt Nam 'vn_kit')
   if (typeof buildPigBillboardTextures === 'function') {
     buildPigBillboardTextures(wgl, ['vn_kit']);
   }
