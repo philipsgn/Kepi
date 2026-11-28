@@ -213,13 +213,13 @@ function planMarketRealtimePath(st, tx, ty, tz, extraOpts) {
         var wp = p.waypoints[i];
         // Tránh xuyên qua Sạp 1044 (X ∈ [-2.0, 2.0], Z ∈ [19.4, 23.2])
         if (Math.min(prevX, wp.x) < 2.0 && Math.max(prevX, wp.x) > -2.0 &&
-            Math.min(prevZ, wp.z) < 19.5 && Math.max(prevZ, wp.z) > 23.1) {
+            Math.min(prevZ, wp.z) < 23.2 && Math.max(prevZ, wp.z) > 19.4) {
           var sideX = ((prevX + wp.x) * 0.5 >= 0) ? 2.55 : -2.55;
           out.push({ x: sideX, y: 0, z: 21.3 });
         }
         // Tránh xuyên qua Đảo Trái Cây 1029 (X ∈ [9.6, 13.6], Z ∈ [18.5, 22.3])
         if (Math.min(prevX, wp.x) < 13.5 && Math.max(prevX, wp.x) > 9.7 &&
-            Math.min(prevZ, wp.z) < 18.6 && Math.max(prevZ, wp.z) > 22.2) {
+            Math.min(prevZ, wp.z) < 22.3 && Math.max(prevZ, wp.z) > 18.5) {
           var fSideX = ((prevX + wp.x) * 0.5 >= 11.6) ? 14.05 : 9.15;
           out.push({ x: fSideX, y: 0, z: 20.4 });
         }

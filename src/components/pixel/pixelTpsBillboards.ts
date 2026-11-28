@@ -37,36 +37,67 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
     g.fillRect(Math.round(cx + ox * u), Math.round(cy + (oy + bodyOffY) * u), Math.round(rw * u), Math.round(rh * u));
   }
   var st = seated ? 0 : (stepPhase || 0);
+  var rawOf = outfit || 'none';
+  var hasBag = rawOf.indexOf('+bag') >= 0;
+  var ofName = hasBag ? rawOf.replace('+bag', '') : rawOf;
+  var isJogger = ofName === 'adidas_jogger';
+  var legMainCol = isJogger ? '#334155' : null;
+  var shoeSamba = isJogger;
 
   if (view === 'back') {
-    r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, '#D96D85');
-    r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, '#D96D85');
+    r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, legMainCol || '#D96D85');
+    r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, legMainCol || '#D96D85');
+    if (shoeSamba) { r(-6, -1 + st, 4, 1, '#B45309'); r(2, -1 - st, 4, 1, '#B45309'); }
     r(-8, -18, 16, 15, '#2B2118'); r(-10, -16, 20, 11, '#2B2118');
     r(-7, -17, 14, 13, '#F596A8'); r(-9, -15, 18, 9, '#F596A8');
     r(-7, -17, 14, 4, '#FDBAC7');  r(-7, -6, 14, 2, '#D96D85');
-    if (outfit === 'adidas_jacket') {
+    if (ofName === 'adidas_jacket') {
       r(-8, -15, 16, 9, '#1E293B'); r(-7, -15, 1, 9, '#FFFFFF'); r(6, -15, 1, 9, '#FFFFFF');
-    } else if (outfit === 'aodai') {
+      r(-2, -12, 4, 1, '#FFFFFF');
+    } else if (ofName === 'adidas_polo') {
+      r(-8, -16, 16, 9, '#1E3A8A'); r(-5, -17, 10, 2, '#FFFBF1');
+      r(-7, -15, 1, 7, '#60A5FA'); r(6, -15, 1, 7, '#60A5FA');
+    } else if (ofName === 'adidas_jogger') {
+      r(-8, -12, 16, 7, '#334155'); r(-7, -12, 1, 7, '#FFFFFF'); r(6, -12, 1, 7, '#FFFFFF');
+      r(-8, -16, 16, 4, '#F8FAFC'); r(-2, -15, 4, 2, '#111827');
+    } else if (ofName === 'adidas_kit') {
+      r(-8, -16, 16, 10, '#DC2626'); r(-7, -16, 1, 8, '#FACC15'); r(6, -16, 1, 8, '#FACC15');
+      // Số 10 pixel sau lưng áo đấu
+      r(-3, -13, 1, 5, '#FFFBF1'); r(0, -13, 3, 5, '#FFFBF1'); r(1, -12, 1, 3, '#DC2626');
+    } else if (ofName === 'aodai') {
       r(-8, -16, 16, 11, '#DC2626'); r(-2, -14, 4, 4, '#FACC15');
-    } else if (outfit === 'vn_kit') {
+    } else if (ofName === 'vn_kit') {
       r(-8, -16, 16, 10, '#DC2626'); r(-2, -14, 4, 4, '#FFFF00');
+    }
+    if (hasBag) {
+      r(8, -12, 5, 7, '#111827'); r(9, -14, 3, 2, '#FACC15'); r(9, -10, 3, 1, '#FFFFFF'); r(9, -8, 3, 1, '#FFFFFF');
     }
     r(-8, -22, 4, 5, '#2B2118');   r(-7, -21, 2, 3, '#F596A8');
     r(4, -22, 4, 5, '#2B2118');    r(5, -21, 2, 3, '#F596A8');
     r(-3, -16, 6, 2, '#2B2118');   r(-2, -16, 4, 1, '#F4B93B');
     r(-2 + st, -11, 4, 3, '#2B2118'); r(-1 + st, -10, 2, 1, '#FDBAC7');
   } else if (view === 'front') {
-    r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, '#F596A8');
-    r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, '#F596A8');
+    r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, legMainCol || '#F596A8');
+    r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, legMainCol || '#F596A8');
+    if (shoeSamba) { r(-6, -1 + st, 4, 1, '#FFFBF1'); r(2, -1 - st, 4, 1, '#FFFBF1'); }
     r(-8, -18, 16, 15, '#2B2118'); r(-10, -16, 20, 11, '#2B2118');
     r(-7, -17, 14, 13, '#F596A8'); r(-9, -15, 18, 9, '#F596A8');
     r(-7, -17, 14, 4, '#FDBAC7');
-    if (outfit === 'adidas_jacket') {
+    if (ofName === 'adidas_jacket') {
       r(-8, -11, 16, 5, '#111827'); r(-1, -11, 2, 5, '#FFFFFF');
-    } else if (outfit === 'aodai') {
+    } else if (ofName === 'adidas_polo') {
+      r(-8, -11, 16, 5, '#1E3A8A'); r(-5, -11, 3, 2, '#FFFBF1'); r(2, -11, 3, 2, '#FFFBF1'); r(-1, -10, 2, 3, '#FFFFFF');
+    } else if (ofName === 'adidas_jogger') {
+      r(-8, -11, 16, 5, '#334155'); r(-7, -11, 1, 5, '#FFFFFF'); r(6, -11, 1, 5, '#FFFFFF'); r(-2, -10, 4, 1, '#FFFBF1');
+    } else if (ofName === 'adidas_kit') {
+      r(-8, -11, 16, 5, '#DC2626'); r(-7, -11, 2, 4, '#FACC15'); r(5, -11, 2, 4, '#FACC15');
+    } else if (ofName === 'aodai') {
       r(-8, -11, 16, 6, '#DC2626'); r(-1, -10, 2, 2, '#FACC15');
-    } else if (outfit === 'vn_kit') {
+    } else if (ofName === 'vn_kit') {
       r(-8, -11, 16, 5, '#DC2626'); r(-1, -10, 2, 2, '#FFFF00');
+    }
+    if (hasBag) {
+      r(-12, -11, 4, 7, '#111827'); r(-11, -13, 2, 2, '#FACC15'); r(-11, -9, 2, 1, '#FFFFFF');
     }
     r(-8, -22, 4, 5, '#2B2118');   r(-7, -21, 2, 3, '#FDBAC7');
     r(4, -22, 4, 5, '#2B2118');    r(5, -21, 2, 3, '#FDBAC7');
@@ -90,15 +121,26 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
     function sr(ox, oy, rw, rh, col) {
       r(dir > 0 ? ox : -(ox + rw), oy, rw, rh, col);
     }
-    sr(-7, -4 + st, 3, 4, '#2B2118'); sr(-6, -4 + st, 2, 3, '#D96D85');
-    sr(4, -4 - st, 3, 4, '#2B2118');  sr(5, -4 - st, 2, 3, '#F596A8');
+    sr(-7, -4 + st, 3, 4, '#2B2118'); sr(-6, -4 + st, 2, 3, legMainCol || '#D96D85');
+    sr(4, -4 - st, 3, 4, '#2B2118');  sr(5, -4 - st, 2, 3, legMainCol || '#F596A8');
+    if (shoeSamba) { sr(-7, -1 + st, 3, 1, '#B45309'); sr(4, -1 - st, 3, 1, '#B45309'); }
     sr(-9, -17, 17, 14, '#2B2118');   sr(-11, -15, 21, 10, '#2B2118');
     sr(-8, -16, 15, 12, '#F596A8');   sr(-10, -14, 19, 8, '#F596A8');
     sr(-8, -16, 15, 3, '#FDBAC7');
-    if (outfit === 'adidas_jacket') {
+    if (ofName === 'adidas_jacket') {
       sr(-8, -12, 15, 6, '#111827'); sr(-2, -12, 3, 6, '#FFFFFF');
-    } else if (outfit === 'aodai' || outfit === 'vn_kit') {
+    } else if (ofName === 'adidas_polo') {
+      sr(-8, -13, 15, 6, '#1E3A8A'); sr(3, -14, 4, 2, '#FFFBF1'); sr(-2, -12, 3, 5, '#60A5FA');
+    } else if (ofName === 'adidas_jogger') {
+      sr(-8, -10, 15, 5, '#334155'); sr(-1, -10, 2, 5, '#FFFFFF');
+      sr(-8, -14, 15, 4, '#F8FAFC');
+    } else if (ofName === 'adidas_kit') {
+      sr(-8, -13, 15, 7, '#DC2626'); sr(-2, -13, 3, 6, '#FACC15');
+    } else if (ofName === 'aodai' || ofName === 'vn_kit') {
       sr(-8, -12, 15, 7, '#DC2626'); sr(-1, -10, 2, 2, '#FACC15');
+    }
+    if (hasBag) {
+      sr(-4, -10, 5, 6, '#111827'); sr(-3, -12, 3, 2, '#FACC15'); sr(-3, -8, 3, 1, '#FFFFFF');
     }
     sr(-2, -17, 5, 2, '#F4B93B');
     sr(2, -21, 4, 5, '#2B2118');      sr(3, -20, 2, 3, '#FDBAC7');
@@ -161,7 +203,8 @@ function drawPigBillboardWebgl(wgl, cam, pig, t, isAiCoach) {
   var blink = (t % 3.8) < 0.14 ? 1 : 0;
   var eating = pig.eating ? 1 : 0;
   var ai = (isAiCoach || pig.isAiCoach) ? 1 : 0;
-  var outfit = pig.outfit || (pig.wearingJacket ? 'adidas_jacket' : (pig.wearingAoDai ? 'aodai' : (pig.wearingKit ? 'vn_kit' : 'none')));
+  var baseOutfit = pig.outfit || (pig.wearingJacket ? 'adidas_jacket' : (pig.wearingAoDai ? 'aodai' : (pig.wearingKit ? 'vn_kit' : 'none')));
+  var outfit = (pig.boughtSamba && baseOutfit.indexOf('+bag') < 0) ? (baseOutfit + '+bag') : baseOutfit;
   var texKey = ensurePigBillboardTex(wgl, view, stepPhase, seated, blink, eating, ai, outfit);
 
   wgl.setBlend('alpha');
@@ -240,6 +283,10 @@ function renderHumanBillboardCanvas(role, angleKey, stepPhase, seated, blink, ea
     if (role === 'vn_captain') hr(-5, -18, 2, 2, '#FACC15');
   } else if (role === 'referee') {
     hr(-3, -20, 1, 11, '#F8FAFC'); hr(0, -20, 1, 11, '#F8FAFC'); hr(3, -20, 1, 11, '#F8FAFC');
+  } else if (role === 'gk') {
+    hr(-5, -20, 1, 10, '#FACC15'); hr(4, -20, 1, 10, '#FACC15');
+    hr(-2, -17, 4, 2, '#FFFBF1');
+    hr(-8, -16, 3, 4, '#FDE047'); hr(5, -16, 3, 4, '#FDE047');
   } else if (role === 'press') {
     hr(-4, -19, 8, 9, '#78716C');
     hr(-3, -14, 3, 3, '#44403C'); hr(1, -14, 3, 3, '#44403C');

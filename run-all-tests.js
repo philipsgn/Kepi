@@ -8731,21 +8731,28 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       wallPath: 'src/components/chat/adidas/adidasWallArt.ts',
       scenePath: 'src/components/chat/adidas/adidasTps3dScene.ts',
       bannerPath: 'src/components/chat/AdidasStoreBannerWebView.tsx',
-      minDraws: 220,
+      minDraws: 260,
       testScript: `
         var wgl = createPixelWebglRenderer(cv); buildAdidasProceduralTextures(wgl);
-        var st = createAdidasTpsState(); var cam = createTpsCamera({ yaw: 0.06, pitch: -0.32, dist: 4.7, targetHeight: 0.72 });
+        var st = createAdidasTpsState(); var cam = createTpsCamera({ yaw: 0.06, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
         renderAdidasWebglScene(wgl, cam, st, 390, 844);
         var fovy = Number((cam.activeFovy || 0).toFixed(2));
-        planAdidasRealtimePath(st, 1.0, 3.4, 7.5);
-        var mid = false;
-        for (var i = 0; i < 320; i++) {
+        // Bước 1: Đi xuyên sảnh vòng qua Đảo Predator qua Vòm Phòng Thay Đồ & thử Áo Khoác 3 Sọc
+        planAdidasRealtimePath(st, 11.8, 0, 9.8, 'try_jacket');
+        for (var i = 0; i < 360; i++) {
           stepAdidasTps(st, 0.05);
-          if (st.pig.y > 0.3 && st.pig.y < 3.1) mid = true;
           if (!st.pig.walking) break;
         }
+        var woreJacket = st.pig.outfit === 'adidas_jacket' && st.pig.x > 10.5;
+        // Bước 2: Đi tiếp qua cửa thông sang Sân Turf Football Kick Zone & sút bóng
+        planAdidasRealtimePath(st, 10.0, 0, 17.8, 'kick_spot');
+        for (var j = 0; j < 260; j++) {
+          stepAdidasTps(st, 0.05);
+          if (!st.pig.walking) break;
+        }
+        var inKick = !!(st.kickGame && st.kickGame.active && st.pig.z >= 16.5);
         renderAdidasWebglScene(wgl, cam, st, 390, 844);
-        return { fovy: fovy, mid: mid, y: st.pig.y, ok: mid && Math.abs(st.pig.y - 3.4) < 0.1 };
+        return { fovy: fovy, woreJacket: woreJacket, inKick: inKick, ok: woreJacket && inKick && Math.abs(st.pig.y) < 0.05 };
       `,
     }),
     runWebglVenueAudit({
@@ -9214,4 +9221,156 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log(`✅ Test 189 Passed: 7/7 Venues Unified Spring-Arm, Dynamic Zoom [walk=${res.walkDist.toFixed(2)}m > seat=${res.seatDist.toFixed(2)}m], Soft-Chase=${res.chasedYaw.toFixed(2)}, Pinch & Wheel Zoom (Quyết định 254) Audit verified cleanly`);
 }
 
-console.log('\n🎉 ALL 189 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (189/189)!');
+// =========================================================================
+// TEST 190: ADIDAS MEGA MALL 1 TẦNG 16 GIAN HÀNG (0 HỘI AN), 4 OUTFIT HEO, SÚT BÓNG 3D, 12 NPCS & VÁ LỖI ĐƯỜNG ĐI ADIDAS + MARKET (QĐ 255)
+// =========================================================================
+{
+  const tpsEng = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const wglEng = fs.readFileSync('src/components/pixel/pixelWebgl3dEngine.ts', 'utf8');
+  const bbEng = fs.readFileSync('src/components/pixel/pixelTpsBillboards.ts', 'utf8');
+  const navEng = fs.readFileSync('src/components/pixel/pixelNavGraph3d.ts', 'utf8');
+  const adWall = fs.readFileSync('src/components/chat/adidas/adidasWallArt.ts', 'utf8');
+  const adScene = fs.readFileSync('src/components/chat/adidas/adidasTps3dScene.ts', 'utf8');
+  const adBanner = fs.readFileSync('src/components/chat/AdidasStoreBannerWebView.tsx', 'utf8');
+  const mktWall = fs.readFileSync('src/components/chat/market/marketWallArt.ts', 'utf8');
+  const mktScene = fs.readFileSync('src/components/chat/market/marketTps3dScene.ts', 'utf8');
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+
+  const extractRaw = (src) => {
+    const m = src.match(/return String\.raw`([\s\S]*?)`;/);
+    assert.ok(m && m[1], 'Must export String.raw script');
+    return m[1];
+  };
+
+  // 1. Bỏ hoàn toàn chữ "Hội An" trong Shop Adidas 3D
+  assert.ok(
+    !/Hội An|HOI AN|Hoi An/i.test(adWall) &&
+      !/Hội An|HOI AN|Hoi An/i.test(adScene) &&
+      !/Hội An|HOI AN|Hoi An/i.test(adBanner),
+    'Adidas 3D store (wallArt, scene, banner) must contain ZERO "Hội An" strings'
+  );
+
+  // 2. Đăng ký đủ 4 trang phục Adidas cho Chú Heo + biến thể túi mua sắm POS
+  assert.ok(
+    bbEng.includes("ofName === 'adidas_polo'") &&
+      bbEng.includes("ofName === 'adidas_jogger'") &&
+      bbEng.includes("ofName === 'adidas_kit'") &&
+      bbEng.includes("hasBag"),
+    'pixelTpsBillboards must support all 4 Adidas outfits (jacket, polo, jogger, kit) + POS bag'
+  );
+
+  // 3. Chạy thật WebGL mock cho Adidas Mega Mall: kiểm 16 gian hàng, 12 NPCs, né AABB, không xuyên tường & Mini-game Sút Bóng 3D
+  const regTexNames = [];
+  const mockGl = {
+    VERTEX_SHADER: 1, FRAGMENT_SHADER: 2, ARRAY_BUFFER: 3, ELEMENT_ARRAY_BUFFER: 4, STATIC_DRAW: 5,
+    TEXTURE_2D: 6, RGBA: 7, UNSIGNED_BYTE: 8, TEXTURE_WRAP_S: 9, TEXTURE_WRAP_T: 10, REPEAT: 11, CLAMP_TO_EDGE: 12,
+    TEXTURE_MIN_FILTER: 13, TEXTURE_MAG_FILTER: 14, LINEAR_MIPMAP_LINEAR: 15, LINEAR: 16, NEAREST: 99,
+    DEPTH_TEST: 17, BLEND: 18, SRC_ALPHA: 19, ONE: 20, ONE_MINUS_SRC_ALPHA: 21, COLOR_BUFFER_BIT: 22, DEPTH_BUFFER_BIT: 24,
+    FLOAT: 25, UNSIGNED_SHORT: 26, TRIANGLES: 27, TEXTURE0: 28,
+    createShader() { return {}; }, shaderSource() {}, compileShader() {},
+    createProgram() { return {}; }, attachShader() {}, linkProgram() {}, useProgram() {},
+    getAttribLocation() { return 0; }, getUniformLocation() { return {}; },
+    createBuffer() { return {}; }, bindBuffer() {}, bufferData() {},
+    createTexture() { return {}; }, bindTexture() {}, texImage2D() {}, texParameteri() {}, generateMipmap() {},
+    activeTexture() {}, viewport() {}, clearColor() {}, clear() {}, enable() {}, disable() {}, depthMask() {}, blendFunc() {},
+    enableVertexAttribArray() {}, vertexAttribPointer() {},
+    uniformMatrix4fv() {}, uniform1i() {}, uniform1f() {}, uniform2f() {}, uniform3f() {}, uniform4f() {}, drawElements() {},
+  };
+  const mock2d = {
+    fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left', textBaseline: 'alphabetic',
+    save() {}, restore() {}, beginPath() {}, closePath() {}, clip() {}, translate() {}, rotate() {}, scale() {},
+    moveTo() {}, lineTo() {}, quadraticCurveTo() {}, bezierCurveTo() {}, arcTo() {}, rect() {}, arc() {}, ellipse() {},
+    fill() {}, stroke() {}, fillRect() {}, clearRect() {}, strokeRect() {}, fillText() {},
+    createLinearGradient() { return { addColorStop() {} }; },
+    createRadialGradient() { return { addColorStop() {} }; },
+  };
+  const mockDoc = { createElement() { return { width: 256, height: 256, getContext() { return mock2d; } }; } };
+  const mockCv = { getContext(kind) { return kind === 'webgl' ? mockGl : mock2d; } };
+
+  const adRun = new Function(
+    'document',
+    'cv',
+    'regTexNames',
+    extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + '\n' + extractRaw(bbEng) + '\n' + extractRaw(navEng) + '\n' +
+      extractRaw(adWall) + '\n' + extractRaw(adScene) + `
+    var wgl = createPixelWebglRenderer(cv);
+    var origReg = wgl.registerTextureCanvas;
+    wgl.registerTextureCanvas = function(name, c, rep, near) {
+      regTexNames.push(name);
+      return origReg(name, c, rep, near);
+    };
+    buildAdidasProceduralTextures(wgl);
+
+    var obsCount = getAdidasObstacles().length;
+    var st = createAdidasTpsState();
+    var cam = createTpsCamera({ yaw: 0.04, pitch: -0.30, dist: 4.85, targetHeight: 0.72 });
+    renderAdidasWebglScene(wgl, cam, st, 390, 844);
+
+    // 3a. Né Đảo Predator khi đi từ (0, 2.2) tới (0, 10.5)
+    planAdidasRealtimePath(st, 0, 0, 10.5, null);
+    var detourCount = st.pig.waypoints.length;
+
+    // 3b. Chặn tia xuyên vách ngăn X = 6.0 (đứng X=2, Z=6 nhìn sang phải về phía POS cashier sau vách kín)
+    st.pig.x = 2.0; st.pig.z = 6.4; st.pig.walking = false;
+    cam.yaw = -Math.PI * 0.5; cam.pitch = -0.15; cam.vw = 390; cam.vh = 844; cam.focal = 400;
+    computeAdidasWebglCamera(cam, st);
+    var occludedPick = pickAdidasTarget3D(cam, st, 195, 422);
+    var leakedAcrossWall = !!(occludedPick && occludedPick.x > 6.0);
+
+    // 3c. Sút bóng 3D vào Gôn (chọn góc lệch không bị thủ môn cản -> ghi bàn!)
+    st.pig.x = 10.0; st.pig.z = 17.8; st.kickGame.active = true;
+    st.kickGame.ball.goalieX = 8.6;
+    triggerAdidasGoalKick(st, 0.25);
+    st.kickGame.ball.goalieTargetX = 8.6;
+    for (var s = 0; s < 40; s++) stepAdidasTps(st, 0.05);
+
+    return {
+      obsCount: obsCount,
+      npcCount: st.npcs.length,
+      zoneCount: ADIDAS_NAV_GRAPH.zones.length,
+      rampCount: ADIDAS_NAV_GRAPH.ramps.length,
+      detourCount: detourCount,
+      leakedAcrossWall: leakedAcrossWall,
+      goalsScored: st.kickGame.goals
+    };
+  `
+  );
+  const adRes = adRun(mockDoc, mockCv, regTexNames);
+  assert.ok(adRes.obsCount >= 16, 'Adidas Mega Mall must have >= 16 obstacle/stall zones (got ' + adRes.obsCount + ')');
+  assert.strictEqual(adRes.npcCount, 12, 'Adidas Mega Mall must have 12 NPCs (got ' + adRes.npcCount + ')');
+  assert.strictEqual(adRes.zoneCount, 4, 'Adidas Mega Mall must unite 4 seamless 1-floor zones');
+  assert.strictEqual(adRes.rampCount, 0, 'Adidas Mega Mall must be 100% 1-floor with 0 stairs');
+  assert.ok(adRes.detourCount >= 2, 'routeAroundAdidasObstacles must detour around center Predator island (wps=' + adRes.detourCount + ')');
+  assert.strictEqual(adRes.leakedAcrossWall, false, 'pickAdidasTarget3D must NOT shoot through solid divider wall X=6.0');
+  assert.ok(adRes.goalsScored >= 1, '3D Football Kick Zone must score goals cleanly (goals=' + adRes.goalsScored + ')');
+  assert.ok(
+    regTexNames.includes('poloDisplayTex') &&
+      regTexNames.includes('joggerRackTex') &&
+      regTexNames.includes('slidesBoardTex') &&
+      regTexNames.includes('footballGearTex') &&
+      regTexNames.includes('gymPickleTex') &&
+      regTexNames.includes('makerLabTex') &&
+      regTexNames.includes('turfPitchTex') &&
+      regTexNames.includes('goalNetTex'),
+    'All detailed Mega Mall procedural textures (Polo, Jogger, Slides, Football, Gym, MakerLab, Turf, Net) must be registered'
+  );
+
+  // 4. Kiểm chứng vá lỗi đảo dấu AABB Chợ Bến Thành (Sạp 1044 & Đảo Trái Cây 1029)
+  const mktRun = new Function(
+    extractRaw(tpsEng) + '\n' + extractRaw(navEng) + '\n' + extractRaw(mktWall) + '\n' + extractRaw(mktScene) + `
+    var st = createMarketTpsState();
+    st.pig.x = -0.5; st.pig.z = 21.0;
+    planMarketRealtimePath(st, 0.5, 0, 24.5, {});
+    var wps = st.pig.waypoints || [];
+    return { wpCount: wps.length, hasDetour: wps.some(function(w) { return Math.abs(w.x) >= 2.4 && w.z > 20 && w.z < 23; }) };
+  `
+  );
+  const mktRes = mktRun();
+  assert.ok(mktRes.hasDetour, 'Market fixed AABB check must detour around Sạp 1044 when exiting from stall perimeter');
+
+  assert.ok(decDoc.includes('Quyết định 255') && tpsDoc.includes('QĐ 255'), 'DECISIONS.md and TPS_3D_OPEN_WORLD_SPEC.md must record QD 255');
+  console.log(`✅ Test 190 Passed: Adidas Mega Mall 1 Tầng [stalls=${adRes.obsCount}, npcs=${adRes.npcCount}, goal=${adRes.goalsScored}, 0 Hội An] + Vá lỗi đường đi Adidas & Market (Quyết định 255) verified cleanly`);
+}
+
+console.log('\n🎉 ALL 190 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (190/190)!');

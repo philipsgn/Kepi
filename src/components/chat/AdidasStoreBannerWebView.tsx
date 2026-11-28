@@ -9,13 +9,11 @@ interface AdidasStoreBannerWebViewProps {
 }
 
 /**
- * Cửa Hàng Adidas Originals Hội An WebGL 3D Hợp Nhất Liên Hoàn (Quyết định 250)
+ * Adidas Mall Flagship 1 Tầng Siêu Rộng WebGL 3D (24m × 24m, 16 Gian Hàng & Sút Bóng 3D — Quyết định 255)
  * - Sử dụng khung WebglTpsBannerShell (0-CDN, SafeWebView + iframe srcDoc, 0% card viền/switcher).
- * - Hợp nhất không gian Chế độ A kín 100%: hall (Tầng 1) ↔ fitting (Phòng Thay Đồ cánh phải qua vòm X=6.0)
- *   ↔ Cầu thang gỗ Hội An 12 bậc ↔ upper (Lầu 2 BST Việt Nam & Thu ngân POS).
- * - Giữ nguyên chú Heo Pixel Art 24×20 (gl.NEAREST, mặc áo khoác 3 Sọc khi thử đồ) & 5 NPC rõ mặt.
- * - 1 Context Action Pill duy nhất ở cạnh dưới cho 5 tương tác: inspect_island, try_jacket, buy_samba,
- *   inspect_vn_col, exit_adidas.
+ * - Hợp nhất 1 mặt sàn duy nhất Y = 0 gồm 4 phân khu liên hoàn: hall, apparel_sports, fitting_pos, kick_zone.
+ * - Hỗ trợ 4 bộ trang phục Heo 24×20 (Áo Khoác 3 Sọc, Polo Cổ Bẻ, Quần Jogger + Samba, Áo Đấu #10) + Túi POS,
+ *   12 NPC mua sắm & Thủ môn pixel, cùng Mini-game Sút Bóng vào Gôn trực tiếp 3D.
  */
 export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> = ({
   onExitAdidas,
@@ -42,6 +40,12 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
     buildAdidasProceduralTextures(wgl);
   }
 
+  // HUD gọn nổi góc trên phải chỉ hiện khi vào Sân Sút Bóng hoặc vừa thử đồ
+  var hudEl = document.createElement('div');
+  hudEl.style.cssText = 'position:fixed;top:52px;right:14px;z-index:16;pointer-events:none;background:#FFFBF1;color:#2B2118;border:3px solid #2B2118;border-radius:14px;padding:6px 12px;font:900 13px/1.2 -apple-system,sans-serif;box-shadow:0 3px 0 #2B2118;';
+  hudEl.hidden = true;
+  document.body.appendChild(hudEl);
+
   var W = 400, H = 720;
   function resizeCanvas() {
     var dw = Math.max(320, window.innerWidth || 390);
@@ -56,30 +60,58 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
   window.addEventListener('resize', resizeCanvas);
 
   var st = createAdidasTpsState();
-  var cam = createTpsCamera({ yaw: 0.04, pitch: -0.30, dist: 4.65, targetHeight: 0.72 });
-  var adidasBounds = { minX: -6.0, maxX: 15.6, minZ: 0.0, maxZ: 14.8, maxY: 6.75 };
+  var cam = createTpsCamera({ yaw: 0.04, pitch: -0.30, dist: 4.85, targetHeight: 0.72 });
+  var adidasBounds = { minX: -10.0, maxX: 14.0, minZ: 0.0, maxZ: 24.0, maxY: 4.65 };
   var currentAction = null;
   var exitSent = false;
+
+  function toggleOutfit(ofKey, toast) {
+    st.pig.outfit = (st.pig.outfit === ofKey) ? 'none' : ofKey;
+    st.pig.wearingJacket = (st.pig.outfit === 'adidas_jacket');
+    st.actionFlashText = st.pig.outfit === ofKey ? toast : '👕 ĐÃ CỞI TRANG PHỤC';
+    st.actionFlashUntil = st.t + 2.6;
+  }
 
   function runContextAction(act) {
     if (!act) return;
     postRN({ type: 'HAPTIC_MEDIUM' });
-    if (act.id === 'try_jacket') {
-      st.pig.wearingJacket = !st.pig.wearingJacket;
-      st.pig.outfit = st.pig.wearingJacket ? 'adidas_jacket' : 'none';
-      planAdidasRealtimePath(st, 13.4, 0, 9.0, null);
-      st.ripples.push({ x: 13.4, y: 0, z: 9.0, t: 0 });
-    } else if (act.id === 'buy_samba') {
-      st.pig.boughtSamba = true;
-      st.ripples.push({ x: 3.8, y: 3.4, z: 6.8, t: 0 });
-    } else if (act.id === 'inspect_island') {
-      st.ripples.push({ x: 0, y: 0.05, z: 6.2, t: 0 });
-    } else if (act.id === 'inspect_vn_col') {
-      st.ripples.push({ x: -4.2, y: 3.4, z: 4.7, t: 0 });
-    } else if (act.id === 'exit_adidas') {
-      if (!st.exiting) {
-        st.exiting = true;
+    if (act.id === 'kick_shoot') {
+      if (st.kickGame && st.kickGame.active) {
+        if (typeof triggerAdidasGoalKick === 'function') triggerAdidasGoalKick(st, null);
+      } else {
+        planAdidasRealtimePath(st, 10.0, 0, 17.8, 'kick_spot');
+        st.ripples.push({ x: 10.0, y: 0, z: 17.8, t: 0 });
       }
+    } else if (act.id === 'try_jacket') {
+      toggleOutfit('adidas_jacket', '🧥 MẶC ÁO KHOÁC 3 SỌC');
+      planAdidasRealtimePath(st, 11.8, 0, 9.8, null);
+      st.ripples.push({ x: 11.8, y: 0, z: 9.8, t: 0 });
+    } else if (act.id === 'try_polo') {
+      toggleOutfit('adidas_polo', '👔 MẶC ÁO POLO CỔ BẺ 3 SỌC');
+      st.ripples.push({ x: st.pig.x, y: 0, z: st.pig.z, t: 0 });
+    } else if (act.id === 'try_jogger') {
+      toggleOutfit('adidas_jogger', '👖 MẶC QUẦN JOGGER + SAMBA');
+      st.ripples.push({ x: st.pig.x, y: 0, z: st.pig.z, t: 0 });
+    } else if (act.id === 'try_kit') {
+      toggleOutfit('adidas_kit', '⚽ MẶC ÁO ĐẤU #10');
+      st.ripples.push({ x: st.pig.x, y: 0, z: st.pig.z, t: 0 });
+    } else if (act.id === 'maker_custom') {
+      st.pig.customBadge = 'VIP-10';
+      st.pig.outfit = 'adidas_kit';
+      st.actionFlashText = '🎨 MAKER LAB · ÉP NHIỆT SỐ 10!';
+      st.actionFlashUntil = st.t + 2.8;
+      st.ripples.push({ x: 1.0, y: 0, z: 19.7, t: 0 });
+    } else if (act.id === 'buy_bag') {
+      st.pig.boughtSamba = true;
+      st.actionFlashText = '🛍️ CHECKOUT POS · NHẬN TÚI 3 SỌC!';
+      st.actionFlashUntil = st.t + 3.0;
+      st.ripples.push({ x: 9.4, y: 0, z: 3.4, t: 0 });
+    } else if (act.id === 'inspect_shoes') {
+      st.actionFlashText = '👟 SAMBA OG · ADILETTE · ULTRABOOST';
+      st.actionFlashUntil = st.t + 2.6;
+      st.ripples.push({ x: st.pig.x, y: 0, z: st.pig.z, t: 0 });
+    } else if (act.id === 'exit_adidas') {
+      if (!st.exiting) st.exiting = true;
     }
   }
 
@@ -101,6 +133,19 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
     } else {
       ctxPillBtn.hidden = true;
     }
+    var showKickHud = st.kickGame && st.kickGame.active;
+    var showFlash = st.actionFlashUntil > st.t && st.actionFlashText;
+    if (showKickHud) {
+      var arrowPct = Math.round(((st.kickGame.aimAngle + 0.46) / 0.92) * 100);
+      var txt = '⚽ BÀN THẮNG: ' + st.kickGame.goals + ' · CHUỖI: ' + st.kickGame.streak + ' | HƯỚNG: ' + arrowPct + '%';
+      if (hudEl.textContent !== txt) hudEl.textContent = txt;
+      hudEl.hidden = false;
+    } else if (showFlash) {
+      if (hudEl.textContent !== st.actionFlashText) hudEl.textContent = st.actionFlashText;
+      hudEl.hidden = false;
+    } else {
+      hudEl.hidden = true;
+    }
   }
 
   bindTpsCanvasGestures(cv, cam, {
@@ -109,13 +154,19 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
       var target = wgl ? pickAdidasTarget3D(cam, st, sx, sy) : null;
       if (!wgl && !target) {
         var hit = unprojectFloorTap(cam, sx, sy);
-        if (hit) target = { kind: 'floor', x: hit.x, y: st.pig.y >= 1.9 ? 3.4 : 0, z: hit.z };
+        if (hit) target = { kind: 'floor', x: hit.x, y: 0, z: hit.z };
       }
-      if (target) {
-        planAdidasRealtimePath(st, target.x, target.y, target.z, target.action || null);
-        st.ripples.push({ x: target.x, y: target.y || 0, z: target.z, t: 0 });
-        postRN({ type: target.action ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });
+      if (!target) return;
+      if (target.kind === 'goal_shoot') {
+        if (typeof triggerAdidasGoalKick === 'function') {
+          triggerAdidasGoalKick(st, target.aimOffset);
+          postRN({ type: 'HAPTIC_MEDIUM' });
+        }
+        return;
       }
+      planAdidasRealtimePath(st, target.x, 0, target.z, target.action || null);
+      st.ripples.push({ x: target.x, y: 0, z: target.z, t: 0 });
+      postRN({ type: target.action ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });
     }
   });
 
@@ -136,7 +187,7 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
         cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);
         renderAdidasWebglScene(wgl, cam, st, W, H);
       } else {
-        updateTpsCamera(cam, st.pig.x, st.pig.y || 0, st.pig.z, W, H, adidasBounds);
+        updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, adidasBounds);
         renderAdidasTpsScene(ctx, cam, st, W, H);
       }
       syncContextPill();
@@ -160,7 +211,7 @@ export const AdidasStoreBannerWebView: React.FC<AdidasStoreBannerWebViewProps> =
 
   return (
     <WebglTpsBannerShell
-      title="Adidas Originals Hội An WebGL 3D"
+      title="Adidas Mall Flagship WebGL 3D"
       backgroundHex="#2B180E"
       wallArtScript={wallArtScript}
       sceneScript={sceneScript}
