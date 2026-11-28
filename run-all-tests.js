@@ -8050,7 +8050,9 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
       engineCode.includes("h.role === 'barista'") &&
       wallCode.includes('function drawCafeVnCultureWalls3D') &&
       wallCode.includes('ĐỘC LẬP · TỰ DO') &&
-      wallCode.includes('CỘNG CÀ PHÊ') &&
+      wallCode.includes('CÀ PHÊ SÀI GÒN') &&
+      !wallCode.includes('CỘNG CÀ PHÊ') &&
+      !wallCode.includes('Cộng Cà Phê') &&
       wallCode.includes('ctx.clip()') &&
       sceneCode.includes('function createCafeTpsState') &&
       sceneCode.includes('function renderCafeTpsScene') &&
@@ -8066,7 +8068,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     'Vietnamese Cafe TPS 3D / WebGL 3D and docs must be synced for QD 242-247'
   );
 
-  console.log('✅ Test 179 Passed: Quán Cà Phê Việt Nam TPS 3D — Cộng Cà Phê Bao Cấp Ấm Cúng & Độc Lập Tự Do Hạnh Phúc (Quyết định 242) Audit verified cleanly');
+  console.log('✅ Test 179 Passed: Quán Cà Phê Sài Gòn TPS 3D — Ấm Cúng & Độc Lập Tự Do Hạnh Phúc (Quyết định 242–251) Audit verified cleanly');
 }
 
 // =========================================================================
@@ -8213,8 +8215,8 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   const decisionsCode = fs.readFileSync('docs/DECISIONS.md', 'utf8');
 
   assert.ok(
-    (tpsDocCode.includes('QĐ 242–244') || tpsDocCode.includes('QĐ 242–248') || tpsDocCode.includes('QĐ 242–249')) &&
-      (chatDocCode.includes('Quyết định 242–244') || chatDocCode.includes('Quyết định 242–248') || chatDocCode.includes('Quyết định 242–249')) &&
+    (tpsDocCode.includes('QĐ 242–244') || tpsDocCode.includes('QĐ 242–248') || tpsDocCode.includes('QĐ 242–249') || tpsDocCode.includes('QĐ 242–251')) &&
+      (chatDocCode.includes('Quyết định 242–244') || chatDocCode.includes('Quyết định 242–248') || chatDocCode.includes('Quyết định 242–249') || chatDocCode.includes('Quyết định 242–251')) &&
       decisionsCode.includes('Quyết định 244') &&
       wallCode.includes('function drawCafeFloor1Walls3D') &&
       wallCode.includes('function drawCafeFloor2Walls3D') &&
@@ -8455,7 +8457,7 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   };
   const mockCanvas = { getContext(kind) { return kind === 'webgl' ? mockGl : mock2d; } };
 
-  // Chạy mô phỏng Real-Time 100% không cắt đoạn: từ giữa sảnh Tầng 1 (-0.15,0,3.20) với góc nhìn rộng chuẩn Quán Phở trên màn hình dọc (390x844), rồi đi lên cầu thang 12 bậc ra Ghế Ban Công #10 (-0.35, 3.4, -0.58) và tự ngồi!
+  // Chạy mô phỏng Real-Time 100% không cắt đoạn: từ giữa sảnh Tầng 1 (-0.25,0,5.20), đi lên cầu thang 14 bậc tới Bàn Tròn Ngắm Sông #6 (-4.60, 3.4, 2.65) và tự ngồi! (QĐ 251)
   const runner = new Function(
     'document',
     'cv',
@@ -8470,20 +8472,27 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     var initCamDist = Math.hypot(st.pig.x - cam.pos.x, st.pig.z - cam.pos.z);
     var initFovy = cam.activeFovy || 0;
     var npc0Start = { x: st.npcs[1].x, z: st.npcs[1].z };
-    var stairRampHit = rayRampQuad(-2.8, 2.2, 6.0, 0, -0.35, 1.0, {
-      axis: 'z', minX: -3.98, maxX: -1.62, zStart: 8.4, zEnd: 12.8, yStart: 0, yEnd: 3.4
+    var boat0StartX = st.riverBoats[0].x;
+    var balconyClamp = clampCafeWalkPos(st, 0, -2.5, 3.4);
+    var stairRampHit = rayRampQuad(-4.2, 2.2, 7.2, 0, -0.35, 1.0, {
+      axis: 'z', minX: -5.4, maxX: -3.0, zStart: 9.6, zEnd: 14.4, yStart: 0, yEnd: 3.4
     });
 
-    // Chạm Ghế Ban Công #10 -> đi real-time qua chân cầu thang -> leo từng bậc (0 < y < 3.4) -> tầng 2 -> ban công -> tự ngồi!
-    var balconyChair = st.chairs[10];
-    planCafeRealtimePath(st, balconyChair.x, balconyChair.floorY, balconyChair.z, balconyChair.id, null);
+    // Chạm Ghế Cửa Sổ Tầng 2 #6 -> đi tránh vật cản -> leo 14 bậc (0 < y < 3.4) với camera nội suy mượt -> tự ngồi!
+    var riverChair = st.chairs[6];
+    planCafeRealtimePath(st, riverChair.x, riverChair.floorY, riverChair.z, riverChair.id, null);
     var sawMidStair = false;
     var arrivedSeated = false;
-    for (var frame = 0; frame < 440; frame++) {
+    var prevCamY = cam.pos.y;
+    var maxCamStepY = 0;
+    for (var frame = 0; frame < 560; frame++) {
       stepCafeTps(st, 0.05);
       if (st.pig.y > 0.3 && st.pig.y < 3.1) sawMidStair = true;
-      if (frame % 40 === 0) renderCafeWebglScene(wgl, cam, st, 390, 844);
-      if (st.pig.seated && st.pig.seatChairId === 10) {
+      renderCafeWebglScene(wgl, cam, st, 390, 844);
+      var dyCam = Math.abs(cam.pos.y - prevCamY);
+      if (st.pig.y > 0.1 && st.pig.y < 3.3 && dyCam > maxCamStepY) maxCamStepY = dyCam;
+      prevCamY = cam.pos.y;
+      if (st.pig.seated && st.pig.seatChairId === 6) {
         arrivedSeated = true;
         renderCafeWebglScene(wgl, cam, st, 390, 844);
         break;
@@ -8491,14 +8500,24 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
     }
     var tapChair = pickCafeTarget3D(cam, st, 195, 422);
     var npcMoved = Math.hypot(st.npcs[1].x - npc0Start.x, st.npcs[1].z - npc0Start.z) > 0.25;
+    var boatMoved = Math.abs(st.riverBoats[0].x - boat0StartX) > 1.0;
+    var f2Kinds = {};
+    for (var ti = 0; ti < st.f2Tables.length; ti++) f2Kinds[st.f2Tables[ti].kind] = true;
     return {
       initCamDist: Number(initCamDist.toFixed(2)),
       initFovy: Number(initFovy.toFixed(2)),
       chairsCount: st.chairs.length,
+      f2TablesCount: st.f2Tables.length,
+      f2HasAllKinds: !!(f2Kinds.round && f2Kinds.sofa && f2Kinds.long && f2Kinds.stool && f2Kinds.ai),
+      hasBalcony: st.hasBalcony,
+      balconyClampZ: Number(balconyClamp.z.toFixed(2)),
+      riverBoatsCount: st.riverBoats ? st.riverBoats.length : 0,
+      boatMoved: boatMoved,
       npcsCount: st.npcs ? st.npcs.length : 0,
       npcMoved: npcMoved,
       sawMidStair: sawMidStair,
       arrivedSeated: arrivedSeated,
+      maxCamStepY: Number(maxCamStepY.toFixed(3)),
       finalY: Number(st.pig.y.toFixed(2)),
       finalZ: Number(st.pig.z.toFixed(2)),
       seated: st.pig.seated,
@@ -8510,49 +8529,67 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   );
   const res = runner(mockDoc, mockCanvas);
   assert.strictEqual(glNanHits, 0, 'WebGL 3D real-time walk must emit 0 NaN matrix/uniform values');
-  assert.ok(glTexCount >= 28, 'Must generate 1980s + VN cultural wall textures + NEAREST pixel pig/human sprites (got ' + glTexCount + ')');
+  assert.ok(glTexCount >= 32, 'Must generate Cafe + Noel + River + VN cultural wall textures + NEAREST sprites (got ' + glTexCount + ')');
   assert.ok(glNearestCount >= 24, 'Pig 24x20 and Human drawHumanTps3D textures must use gl.NEAREST crisp pixel filtering (got ' + glNearestCount + ')');
   assert.ok(glDraws > 260, 'WebGL 3D must submit > 260 drawElements mesh calls (got ' + glDraws + ')');
-  assert.strictEqual(res.hasStairHit, true, 'rayRampQuad must intersect Cafe 12-step stairs at intermediate height');
+  assert.strictEqual(res.hasStairHit, true, 'rayRampQuad must intersect Cafe 14-step stairs at intermediate height');
   assert.ok(res.initFovy >= 1.15, 'Portrait 390x844 WebGL perspective must widen fovy >= 1.15 rad (~60 deg HFOV like Pho) (got ' + res.initFovy + ')');
   assert.ok(res.initCamDist >= 2.5, 'Opening TPS camera must stay >= 2.5m behind Pig (got ' + res.initCamDist + 'm)');
-  assert.strictEqual(res.chairsCount, 11, 'Must provide 11 interactive clickable chairs across Floor 1, Library, Floor 2 & Balcony');
+  assert.ok(res.chairsCount >= 20, 'Must provide >= 20 interactive clickable chairs across Floor 1 & Floor 2 (got ' + res.chairsCount + ')');
+  assert.ok(res.f2TablesCount >= 15 && res.f2HasAllKinds, 'Floor 2 must have >= 15 diverse tables (round, sofa, long, stool, ai) (got ' + res.f2TablesCount + ')');
+  assert.strictEqual(res.hasBalcony, false, 'Cafe Floor 2 must have 0 Balcony per QD 251');
+  assert.ok(res.balconyClampZ >= 0.25, 'Walk clamp must block stepping outside front facade Z < 0.25 (got ' + res.balconyClampZ + ')');
+  assert.ok(res.riverBoatsCount >= 2 && res.boatMoved, 'Must animate >= 2 river boats on Bach Dang River outside arched windows');
   assert.ok(res.npcsCount >= 7 && res.npcMoved, 'Must simulate >= 7 lively moving NPCs across 2 floors');
   assert.strictEqual(res.sawMidStair, true, 'Pig must walk continuously through intermediate stair heights (0 < y < 3.4) with ZERO teleportation');
-  assert.strictEqual(res.arrivedSeated, true, 'Pig must arrive at Balcony chair #10 and sit down automatically in real time');
-  assert.ok(Math.abs(res.finalY - 3.4) < 0.05 && res.finalZ < 0, 'Final position must be on Floor 2 Balcony');
+  assert.ok(res.maxCamStepY <= 0.35, 'Stair climb camera Y must interpolate smoothly without jump (maxStep=' + res.maxCamStepY + 'm)');
+  assert.strictEqual(res.arrivedSeated, true, 'Pig must navigate obstacles, climb stairs, and sit at Floor 2 river-view chair #6');
+  assert.ok(Math.abs(res.finalY - 3.4) < 0.05 && res.finalZ >= 0.4, 'Final position must be inside Floor 2 overlooking the river');
 
-  // Xác thực 0% Card Viền + Mỹ Thuật Văn Hóa Việt + Human Pixel Billboards (QĐ 248–250 Wave 0)
+  // Xác thực Bỏ "Cộng" + Chuyển động tự nhiên chuẩn Quán Phở + Mặt tiền Cửa Sổ & Sông + Nội thất Noel/Xe Cổ (QĐ 248–251)
   assert.ok(
-    !bannerCode.includes('hud-toast-pill') &&
+    !bannerCode.includes('Cộng') &&
+      !bannerCode.includes('CỘNG') &&
+      !wallCode.includes('Cộng') &&
+      !wallCode.includes('CỘNG') &&
+      !sceneCode.includes('Cộng') &&
+      !sceneCode.includes('CỘNG') &&
+      !bannerCode.includes('hud-toast-pill') &&
       !bannerCode.includes('floor-pill') &&
       !bannerCode.includes('seq-bar') &&
       !bannerCode.includes('action-bar') &&
       shellCode.includes('WebglTpsBannerShell') &&
-      tpsDoc.includes('QĐ 250') &&
-      chatDoc.includes('Quyết định 250') &&
-      decDoc.includes('Quyết định 250') &&
+      tpsDoc.includes('QĐ 251') &&
+      chatDoc.includes('Quyết định 242–251') &&
+      decDoc.includes('Quyết định 251') &&
       wglCode.includes('gl.NEAREST') &&
       wglCode.includes('activeFovy') &&
       bbCode.includes('function drawPigBillboardWebgl') &&
+      bbCode.includes('Math.sin(t * 14) >= 0 ? 1 : -1') &&
       bbCode.includes('function drawHumanBillboardWebgl') &&
       navCode.includes('function rayRampQuad') &&
+      wallCode.includes('cafeCreamWall') &&
+      wallCode.includes('riverWater') &&
       wallCode.includes('vnAoDaiArt') &&
       wallCode.includes('vnLotusArt') &&
-      wallCode.includes('vnCycloArt') &&
       wallCode.includes('vnBookShelfTex') &&
-      wallCode.includes('vnQuietSign') &&
       wallCode.includes('function buildPigPixelBillboardTextures') &&
+      sceneCode.includes('function drawChristmasTree3D') &&
+      sceneCode.includes('function drawVintageMotorbike3D') &&
+      sceneCode.includes('function drawGrandfatherClock3D') &&
+      sceneCode.includes('function drawDetailedBookshelf3D') &&
+      sceneCode.includes('function drawSofaBooth3D') &&
+      sceneCode.includes('function routeAroundCafeObstacles') &&
+      sceneCode.includes('function cafeLerpAngle') &&
+      sceneCode.includes('2.6 : 3.6') &&
       sceneCode.includes('function drawCafeHumanWebgl') &&
       sceneCode.includes('function stepCafeNpcs') &&
-      sceneCode.includes('function drawAoDaiRack3D') &&
-      sceneCode.includes('function drawHangingNonLa3D') &&
       sceneCode.includes('function planCafeRealtimePath') &&
       sceneCode.includes('function pickCafeTarget3D'),
-    'Wave 0 shared WebGL 3D framework + Cong Ca Phe human/pig gl.NEAREST billboards + stair rayRampQuad must be synced'
+    'QD 251 Natural Pig movement, zero-Cong branding, 3 river windows, Floor 1 Noel/Motorbike & Floor 2 15-table Cafe must be synced'
   );
 
-  console.log(`✅ Test 184 & 185 Passed: Cộng Cà Phê WebGL 3D Wave 0 (${glTexCount} textures, ${glDraws} draws, fovy=${res.initFovy}, camDist=${res.initCamDist}m, chairs=${res.chairsCount}, npcs=${res.npcsCount}, midStair=${res.sawMidStair}, autoSit=#${res.seatChairId}, 0% cards, 0 NaN — Quyết định 247–250) Audit verified cleanly`);
+  console.log(`✅ Test 184 & 185 Passed: Quán Cà Phê Sài Gòn WebGL 3D (0 Cộng, 0 ban công, ${glTexCount} textures, ${glDraws} draws, f2Tables=${res.f2TablesCount}, chairs=${res.chairsCount}, camStepMax=${res.maxCamStepY}m, boats=${res.riverBoatsCount}, 0 NaN — Quyết định 247–251) Audit verified cleanly`);
 }
 
 // =========================================================================

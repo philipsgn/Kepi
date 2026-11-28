@@ -104,7 +104,7 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
     sr(2, -21, 4, 5, '#2B2118');      sr(3, -20, 2, 3, '#FDBAC7');
     sr(9, -12, 4, 5, '#2B2118');      sr(10, -11, 2, 3, '#FBC2CE');
     sr(5, -13, 2, blink ? 1 : 3, '#2B2118');
-    sr(-13, -12, 3, 3, '#2B2118');
+    sr(-13, -12 - st, 3, 3, '#2B2118');
     if (eating) {
       sr(9, -12, 6, 1, '#D97706'); sr(9, -10, 6, 1, '#F59E0B');
     }
@@ -148,7 +148,7 @@ function ensurePigBillboardTex(wgl, view, stepPhase, seated, blink, eating, isAi
 function drawPigBillboardWebgl(wgl, cam, pig, t, isAiCoach) {
   var dm = wgl.drawMesh;
   var liftY = pig.seated ? 0.24 : 0;
-  var bounce = pig.walking ? Math.abs(Math.sin(t * 11)) * 0.04 : (pig.eating ? Math.abs(Math.sin(t * 7)) * 0.02 : 0);
+  var bounce = pig.walking ? Math.abs(Math.sin(t * 14)) * 0.05 : (pig.eating ? Math.abs(Math.sin(t * 7)) * 0.02 : 0);
   var dxCam = cam.pos.x - pig.x, dzCam = cam.pos.z - pig.z;
   var faceCamYaw = Math.atan2(dxCam, dzCam);
   var camLookYaw = Math.atan2(-dxCam, -dzCam);
@@ -156,7 +156,7 @@ function drawPigBillboardWebgl(wgl, cam, pig, t, isAiCoach) {
   var rel = bbNormAngle((pig.yaw || 0) - camLookYaw);
   var absRel = Math.abs(rel);
   var view = absRel < 0.78 ? 'back' : (absRel > 2.32 ? 'front' : (rel > 0 ? 'right' : 'left'));
-  var stepPhase = pig.walking ? (Math.sin(t * 12) > 0.3 ? 1 : (Math.sin(t * 12) < -0.3 ? -1 : 0)) : 0;
+  var stepPhase = pig.walking ? (Math.sin(t * 14) >= 0 ? 1 : -1) : 0;
   var seated = pig.seated ? 1 : 0;
   var blink = (t % 3.8) < 0.14 ? 1 : 0;
   var eating = pig.eating ? 1 : 0;

@@ -11,10 +11,10 @@ interface CafeTpsBannerWebViewProps {
 }
 
 /**
- * Quán Cộng Cà Phê 2 Tầng WebGL 3D — Chuẩn Tham Chiếu Toàn Hệ Thống (Quyết định 248–250)
+ * Quán Cà Phê Sài Gòn 2 Tầng WebGL 3D — Chuẩn Tham Chiếu Toàn Hệ Thống (Quyết định 248–251)
  * - Dùng khung dùng chung WebglTpsBannerShell (0-CDN, SafeWebView + iframe srcDoc, 0% card viền).
- * - Góc nhìn thứ 3 rộng chuẩn Quán Phở (~64° HFOV), chú Heo 24×20 & Barista/Khách NPC Pixel Art gl.NEAREST rõ khuôn mặt.
- * - Chạm sàn / bậc cầu thang (rayRampQuad) / 11 ghế / Quầy Bar / Heo AI / Cửa chính để đi bộ real-time 2 tầng không cắt đoạn.
+ * - Mặt tiền vàng kem #F7E7C6 đồng bộ Tab Banner nhìn ra Sông Bạch Đằng, 0 ban công, 15 bàn Tầng 2, Cây Noel 3D & Xe máy cổ 3D Tầng 1.
+ * - Góc nhìn thứ 3 rộng chuẩn Quán Phở (~64° HFOV), chú Heo 24×20 đi bộ 3.6 m/s mượt & Barista/Khách NPC Pixel Art gl.NEAREST rõ khuôn mặt.
  */
 export const CafeTpsBannerWebView: React.FC<CafeTpsBannerWebViewProps> = ({
   onExitCafe,
@@ -63,7 +63,7 @@ export const CafeTpsBannerWebView: React.FC<CafeTpsBannerWebViewProps> = ({
     postRN({ type: 'OPEN_AI_CHAT' });
   };
   var cam = createTpsCamera({ yaw: 0.08, pitch: -0.32, dist: 4.85, targetHeight: 0.72 });
-  var cafeBounds = { minX: -5.5, maxX: 5.5, minZ: -2.2, maxZ: 14.0, maxY: 6.8 };
+  var cafeBounds = { minX: -7.0, maxX: 7.0, minZ: 0.0, maxZ: 16.2, maxY: 6.9 };
   var exitSent = false;
 
   var dragging = false, moved = false, lastX = 0, lastY = 0, startX = 0, startY = 0;
@@ -170,7 +170,7 @@ export const CafeTpsBannerWebView: React.FC<CafeTpsBannerWebViewProps> = ({
 
   return (
     <WebglTpsBannerShell
-      title="Cộng Cà Phê 2 Tầng WebGL 3D"
+      title="Quán Cà Phê Sài Gòn 2 Tầng WebGL 3D"
       backgroundHex="#2D3522"
       wallArtScript={wallArtScript}
       sceneScript={sceneScript}

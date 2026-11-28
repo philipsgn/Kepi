@@ -1,20 +1,21 @@
 /**
- * Bộ Sinh Texture Thủ Tục Chân Thực 1980s Cộng Cà Phê + Mỹ Thuật Tường Fallback (Quyết định 247)
+ * Bộ Sinh Texture Thủ Tục Chân Thực Quán Cà Phê Sài Gòn + Mỹ Thuật Tường Fallback (Quyết định 247–251)
  * - Sinh các Texture Power-of-Two (256×256 / 512×256) trực tiếp trong RAM (<15ms, 0 CDN mạng):
- *   1. oliveWall: Tường vôi xanh rêu thập niên 1980s loang vữa ấm & vết thời gian.
+ *   1. oliveWall: Tường vôi xanh rêu loang vữa ấm & vết thời gian.
  *   2. timber: Vân gỗ gụ/lim sẫm màu nhiều thớ tự nhiên & mắt gỗ.
  *   3. gachBong: Gạch bông Đông Dương Tầng 2 họa tiết hoa 4 cánh sờn nhẹ & đường ron.
  *   4. cementFloor: Sàn xi măng mài Tầng 1 ẩm mát xám-rêu có độ sần nhẹ.
  *   5. peacockFabric: Vải Chăn Con Công đỏ thắm rực rỡ với hoa mẫu đơn hồng & lá xanh cốm.
  *   6. aoTranThu: Áo trấn thủ xanh bộ đội chần bông đường chỉ quả trám đặc trưng.
- *   7. fernLeaf: Lá dương xỉ xanh mướt có ánh nắng xuyên lá cho ban công Tầng 2.
+ *   7. fernLeaf: Lá cây nhiệt đới xanh mướt.
  *   8. enamelMenu: Bảng thực đơn sơn tay cổ điển trên nền xanh rêu (Cà Phê Cốt Dừa, Bạc Xỉu, Hướng Dương).
- *   9. photos1980s: Khung ảnh đen trắng Việt Nam thập niên 80 & poster cổ động Độc Lập - Tự Do - Hạnh Phúc.
- *  10. colonialStreet: Mặt tiền nhà Pháp cổ vàng ấm & cửa sổ chớp xanh nhìn từ ban công.
+ *   9. photos1980s: Khung ảnh đen trắng Việt Nam & poster cổ động Độc Lập - Tự Do - Hạnh Phúc.
+ *  10. cafeCreamWall / awningStripe / cafeWoodSign / riverWater / riverShipTex / sofaVelvet / treePine:
+ *      Mặt tiền vàng kem #F7E7C6 đồng bộ Tab Banner nhìn ra Sông Bạch Đằng + nội thất Noel & Sofa.
  */
 export function buildCafeVnWallArtScript(): string {
   return String.raw`
-/* ==================== 1. BỘ SINH TEXTURE THỦ TỤC 1980S CỘNG CÀ PHÊ CHO WEBGL 3D ==================== */
+/* ==================== 1. BỘ SINH TEXTURE THỦ TỤC QUÁN CÀ PHÊ SÀI GÒN CHO WEBGL 3D ==================== */
 function makeSeedRng(seed) {
   var s = seed | 0;
   return function() {
@@ -160,13 +161,13 @@ function buildCafeProceduralTextures(webgl) {
     webgl.registerTextureCanvas('fernLeaf', c, false);
   })();
 
-  // 8. Bảng Thực Đơn sơn tay tráng men Cộng Cà Phê (enamelMenu)
+  // 8. Bảng Thực Đơn sơn tay tráng men Cà Phê Sài Gòn (enamelMenu)
   (function() {
     var c = mkCanvas(512, 256), g = c.getContext('2d');
     g.fillStyle = '#2F3D21'; g.fillRect(0, 0, 512, 256);
     g.strokeStyle = '#EAB308'; g.lineWidth = 6; g.strokeRect(10, 10, 492, 236);
     g.fillStyle = '#FDE047'; g.font = 'bold 30px serif'; g.textAlign = 'center';
-    g.fillText('CỘNG CÀ PHÊ · THỰC ĐƠN', 256, 48);
+    g.fillText('CÀ PHÊ SÀI GÒN · THỰC ĐƠN', 256, 48);
     g.fillStyle = '#FFFDF5'; g.font = 'bold 22px monospace';
     var items = [
       ['CÀ PHÊ CỐT DỪA', '35.000Đ'],
@@ -217,7 +218,7 @@ function buildCafeProceduralTextures(webgl) {
     webgl.registerTextureCanvas('colonialStreet', c, true);
   })();
 
-  // 11. Bộ Tranh & Mỹ Thuật Văn Hóa Việt Nam Trên Tường Cộng Cà Phê (QĐ 249)
+  // 11. Bộ Tranh & Mỹ Thuật Văn Hóa Việt Nam Trên Tường Quán Cà Phê (QĐ 249–251)
   // 11a. Tranh Hoa Sen Hồng nhiều tầng cánh khung gỗ gụ (vnLotusArt)
   (function() {
     var c = mkCanvas(256, 256), g = c.getContext('2d');
@@ -368,6 +369,62 @@ function buildCafeProceduralTextures(webgl) {
     webgl.registerTextureCanvas('vnDoorWood', d, false);
   })();
 
+  // 11f. Texture Mặt Tiền Tab Banner (#F7E7C6), Mái Hiên, Biển CÀ PHÊ, Sông Bạch Đằng & Nội Thất Mới (QĐ 251)
+  (function() {
+    var cw = mkCanvas(256, 256), cwg = cw.getContext('2d'), rng = makeSeedRng(2510);
+    cwg.fillStyle = '#F7E7C6'; cwg.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 160; i++) {
+      cwg.fillStyle = rng() > 0.5 ? 'rgba(217,191,150,0.20)' : 'rgba(255,250,238,0.22)';
+      cwg.beginPath(); cwg.arc(rng()*256, rng()*256, 8 + rng()*24, 0, Math.PI*2); cwg.fill();
+    }
+    webgl.registerTextureCanvas('cafeCreamWall', cw, true);
+
+    var aw = mkCanvas(256, 128), awg = aw.getContext('2d');
+    for (var ax = 0; ax < 256; ax += 32) {
+      awg.fillStyle = ((ax / 32) % 2 === 0) ? '#D94330' : '#FFF6E5';
+      awg.fillRect(ax, 0, 32, 128);
+    }
+    awg.fillStyle = 'rgba(43,33,24,0.16)'; awg.fillRect(0, 108, 256, 20);
+    webgl.registerTextureCanvas('awningStripe', aw, true);
+
+    var sg = mkCanvas(512, 128), sgg = sg.getContext('2d');
+    sgg.fillStyle = '#6B4226'; sgg.fillRect(0, 0, 512, 128);
+    sgg.strokeStyle = '#FACC15'; sgg.lineWidth = 6; sgg.strokeRect(8, 8, 496, 112);
+    sgg.fillStyle = '#FFF6E5'; sgg.font = 'bold 48px serif'; sgg.textAlign = 'center'; sgg.textBaseline = 'middle';
+    sgg.fillText('★  CÀ PHÊ SÀI GÒN  ★', 256, 66);
+    webgl.registerTextureCanvas('cafeWoodSign', sg, false);
+
+    var rw = mkCanvas(256, 256), rwg = rw.getContext('2d'), rrng = makeSeedRng(2511);
+    rwg.fillStyle = '#256D91'; rwg.fillRect(0, 0, 256, 256);
+    for (var wy = 0; wy < 256; wy += 12) {
+      rwg.fillStyle = wy % 24 === 0 ? 'rgba(94,185,222,0.28)' : 'rgba(18,62,88,0.24)';
+      rwg.fillRect(0, wy, 256, 5);
+    }
+    for (var wi = 0; wi < 48; wi++) {
+      rwg.fillStyle = 'rgba(255,248,214,0.32)';
+      rwg.fillRect(rrng()*220, rrng()*248, 12 + rrng()*22, 2);
+    }
+    webgl.registerTextureCanvas('riverWater', rw, true);
+
+    var sf = mkCanvas(256, 256), sfg = sf.getContext('2d');
+    sfg.fillStyle = '#365842'; sfg.fillRect(0, 0, 256, 256);
+    sfg.strokeStyle = 'rgba(24,42,30,0.45)'; sfg.lineWidth = 4;
+    for (var sy = 32; sy < 256; sy += 64) {
+      for (var sx = 32; sx < 256; sx += 64) {
+        sfg.beginPath(); sfg.arc(sx, sy, 5, 0, Math.PI*2); sfg.stroke();
+      }
+    }
+    webgl.registerTextureCanvas('sofaVelvet', sf, true);
+
+    var tp = mkCanvas(256, 256), tpg = tp.getContext('2d'), trng = makeSeedRng(2512);
+    tpg.fillStyle = '#1E5B35'; tpg.fillRect(0, 0, 256, 256);
+    for (var ti = 0; ti < 180; ti++) {
+      tpg.fillStyle = trng() > 0.45 ? '#2B7A46' : '#144425';
+      tpg.fillRect(trng()*248, trng()*248, 10, 6);
+    }
+    webgl.registerTextureCanvas('treePine', tp, true);
+  })();
+
   // 12. Bộ Sprite Chú Heo Mascot Pixel Art 24×20 Đồng Bộ 100% Toàn App (QĐ 248, NEAREST 1:1!)
   buildPigPixelBillboardTextures(webgl);
 }
@@ -405,19 +462,19 @@ function drawClippedWallQuad(ctx, cam, pts, bgCol, borderCol, lineW, drawInner) 
 function drawCafeFloor1Walls3D(ctx, cam) {
   drawClippedWallQuad(
     ctx, cam,
-    [[5.93, 3.18, 7.60], [5.93, 3.18, 4.55], [5.93, 1.72, 4.55], [5.93, 1.72, 7.60]],
+    [[6.93, 3.18, 8.60], [6.93, 3.18, 5.20], [6.93, 1.72, 5.20], [6.93, 1.72, 8.60]],
     '#2F3D21', '#EAB308', 2.2,
     function(cx, cy, bw, bh, safeW) {
       ctx.font = 'bold ' + Math.max(5, Math.min(12, Math.round(bh * 0.15))) + 'px monospace';
       ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('CỘNG CÀ PHÊ · THỰC ĐƠN', cx, cy - bh * 0.24, safeW);
+      ctx.fillText('CÀ PHÊ SÀI GÒN · THỰC ĐƠN', cx, cy - bh * 0.24, safeW);
       ctx.fillStyle = '#FFF7DF';
       ctx.fillText('CÀ PHÊ CỐT DỪA 35K', cx, cy + bh * 0.08, safeW);
     }
   );
   drawClippedWallQuad(
     ctx, cam,
-    [[-4.8, 2.8, 14.72], [-1.2, 2.8, 14.72], [-1.2, 1.6, 14.72], [-4.8, 1.6, 14.72]],
+    [[-4.8, 2.8, 16.12], [-1.2, 2.8, 16.12], [-1.2, 1.6, 16.12], [-4.8, 1.6, 16.12]],
     '#5C341D', '#FACC15', 2.2,
     function(cx, cy, bw, bh, safeW) {
       ctx.font = 'bold ' + Math.max(5, Math.min(11, Math.round(bh * 0.22))) + 'px monospace';
@@ -430,12 +487,12 @@ function drawCafeFloor1Walls3D(ctx, cam) {
 function drawCafeFloor2Walls3D(ctx, cam) {
   drawClippedWallQuad(
     ctx, cam,
-    [[-5.93, 5.95, 3.2], [-5.93, 5.95, 7.2], [-5.93, 4.65, 7.2], [-5.93, 4.65, 3.2]],
+    [[-6.93, 5.95, 3.6], [-6.93, 5.95, 8.0], [-6.93, 4.65, 8.0], [-6.93, 4.65, 3.6]],
     '#4F6335', '#FACC15', 2.0,
     function(cx, cy, bw, bh, safeW) {
       ctx.font = 'bold ' + Math.max(5, Math.min(11, Math.round(bh * 0.22))) + 'px monospace';
       ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('CỘNG CÀ PHÊ · LẦU 2', cx, cy, safeW);
+      ctx.fillText('CÀ PHÊ SÀI GÒN · LẦU 2', cx, cy, safeW);
     }
   );
 }
