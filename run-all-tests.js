@@ -9650,4 +9650,124 @@ console.log('=== VÍ LOCKET LOGIC & REGRESSION TEST SUITE (BƯỚC E–F) ===');
   console.log(`✅ Test 193 Passed: Ngoại Cảnh Đại Lộ + Sông Bạch Đằng 3 Quán Mặt Phố, Xóa Mảng Trời Thô, Camera Chống Cắt Sàn/Góc Khuất (${res193.totalSweeps} sweeps, 0 clips) & Di Chuyển Chuẩn Quán Phở 7/7 (Quyết định 258) verified cleanly`);
 }
 
-console.log('\n🎉 ALL 193 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (193/193)!');
+// =========================================================================
+// TEST 194: CHỢ BẾN THÀNH 1914 CHUẨN THỰC TẾ 100% — Ô BÀN CỜ 36m × 36m, 4 CỬA ĐÔNG-TÂY-NAM-BẮC, ADIDAS/NIKE, TOÀN BỘ MÓN VIỆT & TRÁI CÂY (QĐ 259)
+// =========================================================================
+{
+  const decDoc = fs.readFileSync('docs/DECISIONS.md', 'utf8');
+  const tpsDoc = fs.readFileSync('docs/TPS_3D_OPEN_WORLD_SPEC.md', 'utf8');
+  const tpsEng = fs.readFileSync('src/components/pixel/pixelTps3dEngine.ts', 'utf8');
+  const wglEng = fs.readFileSync('src/components/pixel/pixelWebgl3dEngine.ts', 'utf8');
+  const bbEng = fs.readFileSync('src/components/pixel/pixelTpsBillboards.ts', 'utf8');
+  const navEng = fs.readFileSync('src/components/pixel/pixelNavGraph3d.ts', 'utf8');
+  const mktWall = fs.readFileSync('src/components/chat/market/marketWallArt.ts', 'utf8');
+  const mktScene = fs.readFileSync('src/components/chat/market/marketTps3dScene.ts', 'utf8');
+  const mktBanner = fs.readFileSync('src/components/chat/BenThanhMarketBannerWebView.tsx', 'utf8');
+
+  assert.ok(
+    decDoc.includes('Quyết định 259') &&
+      tpsDoc.includes('QĐ 259') &&
+      bbEng.includes("ofName === 'nike_tee'") &&
+      bbEng.includes("ofName === 'nike_hoodie'") &&
+      mktBanner.includes('try_nike') &&
+      mktBanner.includes('try_adidas') &&
+      mktBanner.includes('buy_coffee_dry'),
+    'QĐ 259 docs, Nike outfits, and 4-gate market banner wiring must be synced cleanly'
+  );
+
+  const extractRaw = (src) => src.match(/return String\.raw`([\s\S]*?)`;/)[1];
+  const regTex = [];
+  let nans = 0, draws = 0;
+  const chk = (a) => { for (let i = 0; i < a.length; i++) if (typeof a[i] === 'number' && !Number.isFinite(a[i])) nans++; };
+  const mockGl = {
+    VERTEX_SHADER: 1, FRAGMENT_SHADER: 2, ARRAY_BUFFER: 3, ELEMENT_ARRAY_BUFFER: 4, STATIC_DRAW: 5,
+    TEXTURE_2D: 6, RGBA: 7, UNSIGNED_BYTE: 8, TEXTURE_WRAP_S: 9, TEXTURE_WRAP_T: 10, REPEAT: 11, CLAMP_TO_EDGE: 12,
+    TEXTURE_MIN_FILTER: 13, TEXTURE_MAG_FILTER: 14, LINEAR_MIPMAP_LINEAR: 15, LINEAR: 16, NEAREST: 99,
+    DEPTH_TEST: 17, BLEND: 18, SRC_ALPHA: 19, ONE: 20, ONE_MINUS_SRC_ALPHA: 21, COLOR_BUFFER_BIT: 22, DEPTH_BUFFER_BIT: 24,
+    FLOAT: 25, UNSIGNED_SHORT: 26, TRIANGLES: 27, TEXTURE0: 28,
+    createShader() { return {}; }, shaderSource() {}, compileShader() {},
+    createProgram() { return {}; }, attachShader() {}, linkProgram() {}, useProgram() {},
+    getAttribLocation() { return 0; }, getUniformLocation() { return {}; },
+    createBuffer() { return {}; }, bindBuffer() {}, bufferData() {},
+    createTexture() { return {}; }, bindTexture() {}, texImage2D() {}, texParameteri() {}, generateMipmap() {},
+    activeTexture() {}, viewport() {}, clearColor() {}, clear() {}, enable() {}, disable() {}, depthMask() {}, blendFunc() {},
+    enableVertexAttribArray() {}, vertexAttribPointer() {},
+    uniformMatrix4fv(_l, _t, v) { chk(v); }, uniform1i() {}, uniform1f(_l, v) { chk([v]); },
+    uniform2f(_l, a, b) { chk([a, b]); }, uniform3f(_l, a, b, c) { chk([a, b, c]); }, uniform4f(_l, a, b, c, d) { chk([a, b, c, d]); },
+    drawElements() { draws++; },
+  };
+  const mock2d = {
+    fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left', textBaseline: 'alphabetic',
+    save() {}, restore() {}, beginPath() {}, closePath() {}, clip() {}, translate() {}, rotate() {}, scale() {},
+    moveTo() {}, lineTo() {}, quadraticCurveTo() {}, bezierCurveTo() {}, arcTo() {}, rect() {}, arc() {}, ellipse() {},
+    fill() {}, stroke() {}, fillRect() {}, clearRect() {}, strokeRect() {}, fillText() {},
+    createLinearGradient() { return { addColorStop() {} }; },
+    createRadialGradient() { return { addColorStop() {} }; },
+  };
+  const mockDoc = { createElement() { return { width: 256, height: 256, getContext() { return mock2d; } }; } };
+  const mockCv = { getContext(kind) { return kind === 'webgl' ? mockGl : mock2d; } };
+
+  const res194 = new Function(
+    'document',
+    'cv',
+    'regTex',
+    extractRaw(tpsEng) + '\n' + extractRaw(wglEng) + '\n' + extractRaw(bbEng) + '\n' + extractRaw(navEng) + '\n' +
+      extractRaw(mktWall) + '\n' + extractRaw(mktScene) + `
+    var wgl = createPixelWebglRenderer(cv);
+    var origReg = wgl.registerTextureCanvas;
+    wgl.registerTextureCanvas = function(k, c, r, n) { regTex.push(k); return origReg(k, c, r, n); };
+    buildMarketProceduralTextures(wgl);
+    var st = createMarketTpsState();
+    var cam = createTpsCamera({ yaw: 0.06, pitch: -0.32, dist: 4.75, targetHeight: 0.76 });
+    renderMarketWebglScene(wgl, cam, st, 390, 844);
+
+    // 1. Thử đồ Adidas tại Sạp 208
+    planMarketRealtimePath(st, -4.8, 0, 6.5, { pendingAction: 'try_adidas' });
+    for (var i = 0; i < 120; i++) { stepMarketTps(st, 0.05); if (!st.pig.walking) break; }
+    var woreAdidas = st.pig.outfit === 'adidas_jacket';
+
+    // 2. Sang Sạp 212 thử đồ Nike
+    planMarketRealtimePath(st, 4.8, 0, 6.5, { pendingAction: 'try_nike' });
+    for (var j = 0; j < 180; j++) { stepMarketTps(st, 0.05); if (!st.pig.walking) break; }
+    var woreNike = st.pig.outfit === 'nike_tee';
+
+    // 3. Ngồi ghế Sạp 1044 ăn món Việt rồi đi thẳng sang Cửa Đông
+    planMarketRealtimePath(st, 0.38, 0, 19.15, { seatChairId: 2, dish: 'bunbo', pendingAction: 'eat_banhcuon' });
+    for (var k = 0; k < 220; k++) { stepMarketTps(st, 0.05); if (!st.pig.walking) break; }
+    var ateBunBo = st.pig.seated && st.pig.eating && st.pig.activeDish === 'bunbo';
+    planMarketRealtimePath(st, 16.5, 0, 17.0, {});
+    for (var m = 0; m < 220; m++) { stepMarketTps(st, 0.05); if (!st.pig.walking) break; }
+    renderMarketWebglScene(wgl, cam, st, 390, 844);
+
+    return {
+      width: MARKET_NAV_GRAPH.outerBounds.maxX - MARKET_NAV_GRAPH.outerBounds.minX,
+      depth: MARKET_NAV_GRAPH.outerBounds.maxZ - MARKET_NAV_GRAPH.outerBounds.minZ,
+      stalls: MARKET_STALL_AABBS.length,
+      npcs: st.npcs.length,
+      woreAdidas: woreAdidas,
+      woreNike: woreNike,
+      ateBunBo: ateBunBo,
+      reachedEastGate: st.pig.x > 15.0
+    };
+  `
+  )(mockDoc, mockCv, regTex);
+
+  const reqTex = [
+    'signCuaSo1', 'signCuaBac', 'signCuaDong', 'signCuaTay', 'marketLouvers',
+    'artAdidasMarket', 'artNikeMarket', 'artShoesBags', 'artAoDaiFabric', 'artSaigonTees',
+    'artPhoHuTieu', 'artBunBoComTam', 'artBanhXeoBanhMi', 'artCheSinhTo', 'artBanhCuonWall', 'artBanhBeoWall',
+    'artTropicalFruits', 'artFreshFlowers', 'artWetSeafood', 'artCoffeeSpices', 'artHandicraftRattan'
+  ];
+  for (const tk of reqTex) {
+    assert.ok(regTex.includes(tk), 'Ben Thanh Market must register real-market texture: ' + tk);
+  }
+  assert.strictEqual(nans, 0, 'Ben Thanh Market 36x36 WebGL scene must emit 0 NaN values');
+  assert.ok(res194.width === 36 && res194.depth === 36, 'Ben Thanh Market must expand to 36m x 36m cross-grid hall');
+  assert.ok(res194.stalls >= 24, 'Ben Thanh Market must have >= 24 realistic stall blocks (got ' + res194.stalls + ')');
+  assert.strictEqual(res194.npcs, 12, 'Ben Thanh Market must keep 12 lively NPCs');
+  assert.ok(res194.woreAdidas && res194.woreNike && res194.ateBunBo && res194.reachedEastGate, 'Pig must try Adidas, Nike, eat VN dish & walk freely to East Gate');
+
+  console.log(`✅ Test 194 Passed: Chợ Bến Thành 1914 Chuẩn Thực Tế [${res194.width}x${res194.depth}m, 4 Cửa Đ-T-N-B, stalls=${res194.stalls}, draws=${draws}, Adidas/Nike/Món Việt/Trái Cây 3D, 0 NaN — Quyết định 259] verified cleanly`);
+}
+
+console.log('\n🎉 ALL 194 VERIFICATION & REGRESSION TESTS PASSED CLEANLY (194/194)!');

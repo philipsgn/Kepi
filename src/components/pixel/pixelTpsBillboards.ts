@@ -64,6 +64,12 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
       r(-8, -16, 16, 10, '#DC2626'); r(-7, -16, 1, 8, '#FACC15'); r(6, -16, 1, 8, '#FACC15');
       // Số 10 pixel sau lưng áo đấu
       r(-3, -13, 1, 5, '#FFFBF1'); r(0, -13, 3, 5, '#FFFBF1'); r(1, -12, 1, 3, '#DC2626');
+    } else if (ofName === 'nike_tee') {
+      r(-8, -16, 16, 9, '#0F172A'); r(-4, -13, 5, 2, '#F97316'); r(1, -14, 3, 2, '#F97316');
+      r(-3, -16, 6, 1, '#FFFBF1');
+    } else if (ofName === 'nike_hoodie') {
+      r(-8, -16, 16, 10, '#EA580C'); r(-6, -17, 12, 3, '#1E293B');
+      r(-4, -12, 5, 2, '#FFFBF1'); r(1, -13, 3, 2, '#FFFBF1');
     } else if (ofName === 'aodai') {
       r(-8, -16, 16, 11, '#DC2626'); r(-2, -14, 4, 4, '#FACC15');
     } else if (ofName === 'vn_kit') {
@@ -91,6 +97,10 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
       r(-8, -11, 16, 5, '#334155'); r(-7, -11, 1, 5, '#FFFFFF'); r(6, -11, 1, 5, '#FFFFFF'); r(-2, -10, 4, 1, '#FFFBF1');
     } else if (ofName === 'adidas_kit') {
       r(-8, -11, 16, 5, '#DC2626'); r(-7, -11, 2, 4, '#FACC15'); r(5, -11, 2, 4, '#FACC15');
+    } else if (ofName === 'nike_tee') {
+      r(-8, -11, 16, 5, '#0F172A'); r(-3, -10, 4, 2, '#F97316'); r(1, -11, 2, 2, '#F97316');
+    } else if (ofName === 'nike_hoodie') {
+      r(-8, -11, 16, 6, '#EA580C'); r(-2, -11, 4, 6, '#1E293B'); r(3, -10, 3, 1, '#FFFBF1');
     } else if (ofName === 'aodai') {
       r(-8, -11, 16, 6, '#DC2626'); r(-1, -10, 2, 2, '#FACC15');
     } else if (ofName === 'vn_kit') {
@@ -136,6 +146,10 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
       sr(-8, -14, 15, 4, '#F8FAFC');
     } else if (ofName === 'adidas_kit') {
       sr(-8, -13, 15, 7, '#DC2626'); sr(-2, -13, 3, 6, '#FACC15');
+    } else if (ofName === 'nike_tee') {
+      sr(-8, -13, 15, 6, '#0F172A'); sr(-2, -11, 4, 2, '#F97316'); sr(2, -12, 2, 1, '#F97316');
+    } else if (ofName === 'nike_hoodie') {
+      sr(-8, -13, 15, 7, '#EA580C'); sr(-7, -15, 6, 3, '#1E293B'); sr(0, -11, 4, 2, '#FFFBF1');
     } else if (ofName === 'aodai' || ofName === 'vn_kit') {
       sr(-8, -12, 15, 7, '#DC2626'); sr(-1, -10, 2, 2, '#FACC15');
     }

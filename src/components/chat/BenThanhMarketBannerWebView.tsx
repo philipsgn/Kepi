@@ -89,7 +89,7 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
     postRN({ type: 'SELECT_ZONE', zone: zoneId });
   };
   var cam = createTpsCamera({ yaw: 0.06, pitch: -0.32, dist: 4.75, targetHeight: 0.76 });
-  var marketBounds = { minX: -6.0, maxX: 17.2, minZ: 0.0, maxZ: 26.8, maxY: 5.8 };
+  var marketBounds = { minX: -18.0, maxX: 18.0, minZ: 0.0, maxZ: 36.0, maxY: 7.2 };
   var currentAction = null;
   var exitSent = false;
 
@@ -102,27 +102,47 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
 
   function resolveContextAction() {
     var p = st.pig;
-    // 1. Ngưỡng Cửa Số 1 (Cửa Nam) hoặc Cửa Bắc
-    if ((p.z <= 2.35 && Math.abs(p.x) <= 2.40) || (p.z >= 24.6 && p.x >= 9.0 && p.x <= 14.2)) {
+    // 1. Thoát ở bất kỳ cửa nào trong 4 Cửa Đông – Tây – Nam – Bắc
+    if ((p.z <= 2.35 && Math.abs(p.x) <= 2.8) || (p.z >= 33.6 && Math.abs(p.x) <= 2.8) ||
+        (p.x >= 15.8 && Math.abs(p.z - 17.0) <= 2.8) || (p.x <= -15.8 && Math.abs(p.z - 17.0) <= 2.8)) {
       return { id: 'exit_market', label: '🚪 Ra khỏi Chợ Bến Thành' };
     }
-    // 2. Sạp Vải Hương Trinh (thử Áo Dài)
-    if (p.x <= -2.2 && p.z >= 1.5 && p.z <= 11.5) {
-      return { id: 'try_aodai', label: p.wearingAoDai ? '👘 Cất Áo Dài Lụa' : '👘 Ướm Áo Dài Hương Trinh' };
+    // 2. Sạp Adidas 208 & Nike 212 & Giày Dép 306 & Vải Áo Dài Hương Trinh 415
+    if (p.x <= -3.5 && p.x >= -10.5 && p.z >= 2.5 && p.z <= 10.2) {
+      return { id: 'try_adidas', label: '🧥 Thử áo Adidas 3 Sọc (Sạp 208)' };
     }
-    // 3. Khu Ẩm Thực Sạp 1044 + Bánh Cuốn + Bánh Bèo
+    if (p.x >= 3.5 && p.x <= 10.5 && p.z >= 2.5 && p.z <= 10.2) {
+      return { id: 'try_nike', label: '👕 Thử áo Nike Swoosh (Sạp 212)' };
+    }
+    if (Math.abs(p.x) >= 3.5 && Math.abs(p.x) <= 10.5 && p.z >= 10.2 && p.z <= 14.6) {
+      return { id: 'buy_shoes_bags', label: '👟 Xem Giày, Vali & Đồng Hồ 306' };
+    }
+    if (p.x <= -11.5 && p.z >= 2.0 && p.z <= 15.0) {
+      return { id: 'try_aodai', label: p.wearingAoDai ? '👘 Cất Áo Dài Lụa' : '👘 Ướm Áo Dài Hương Trinh 415' };
+    }
+    // 3. Khu Ẩm Thực (Sạp 1044 + Phở, Bún Bò, Cơm Tấm, Bánh Xèo, Bánh Cuốn, Chè)
     if (p.seated) {
-      return { id: 'eat_banhcuon', label: p.eating ? '🥥 Gọi thêm Dừa Xiêm 1044' : '🥞 Ăn Bánh Cuốn & Bánh Bèo' };
+      return { id: 'eat_banhcuon', label: '🍜 Thưởng thức Món Việt & Dừa Xiêm' };
     }
-    if (p.x >= -2.5 && p.x <= 2.5 && p.z >= 17.6 && p.z <= 20.2) {
+    if (Math.abs(p.x) <= 2.8 && p.z >= 17.6 && p.z <= 20.5) {
       return { id: 'sit_food', label: '🪑 Ngồi ghế inox Sạp 1044' };
     }
-    if ((p.x <= -2.2 && p.z >= 15.4 && p.z <= 24.8) || (p.x >= 2.2 && p.x <= 5.95 && p.z >= 15.4 && p.z <= 21.8)) {
-      return { id: 'eat_banhcuon', label: '🥞 Ăn Bánh Cuốn 50K & Bánh Bèo 20K' };
+    if (Math.abs(p.x) <= 10.5 && p.z >= 20.0 && p.z <= 29.2) {
+      return { id: 'eat_banhcuon', label: '🥞 Ăn Phở, Cơm Tấm, Bánh Xèo & Chè' };
     }
-    // 4. Đảo Trái Cây 1029 Ngọc Hảo
-    if (p.x >= 8.2 && p.x <= 15.0 && p.z >= 16.6 && p.z <= 23.6) {
-      return { id: 'buy_mango', label: '🥭 Chọn mua Xoài Cát Ngọc Hảo' };
+    // 4. Trái Cây 1029 Ngọc Hảo & Cửa Bắc Hoa/Hải Sản
+    if ((p.x >= 8.2 && p.x <= 14.5 && p.z >= 17.0 && p.z <= 23.6) || (p.x <= -2.0 && p.x >= -9.0 && p.z >= 29.0)) {
+      return { id: 'buy_mango', label: '🥭 Chọn Sầu Riêng, Măng Cụt & Xoài Cát' };
+    }
+    if (p.x >= 2.0 && p.x <= 13.5 && p.z >= 29.0) {
+      return { id: 'buy_seafood_flower', label: '🦞 Mua Hoa Tươi & Hải Sản Cửa Bắc' };
+    }
+    // 5. Đồ Khô, Cà Phê Cửa Đông & Mỹ Nghệ Cửa Tây
+    if (p.x >= 11.5 && p.z <= 31.5) {
+      return { id: 'buy_coffee_dry', label: '☕ Mua Cà Phê, Trà Sen & Mứt Cửa Đông' };
+    }
+    if (p.x <= -11.5 && p.z >= 19.0) {
+      return { id: 'buy_craft', label: '🏺 Xem Gốm Bát Tràng & Nón Lá Cửa Tây' };
     }
     return null;
   }
@@ -131,7 +151,13 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
     if (!act) return;
     postRN({ type: 'HAPTIC_MEDIUM' });
     if (act.id === 'try_aodai') {
-      planMarketRealtimePath(st, -3.4, 0, 6.5, { pendingAction: 'try_aodai' });
+      planMarketRealtimePath(st, -12.6, 0, 7.0, { pendingAction: 'try_aodai' });
+    } else if (act.id === 'try_adidas') {
+      planMarketRealtimePath(st, -4.8, 0, 6.5, { pendingAction: 'try_adidas' });
+    } else if (act.id === 'try_nike') {
+      planMarketRealtimePath(st, 4.8, 0, 6.5, { pendingAction: 'try_nike' });
+    } else if (act.id === 'buy_shoes_bags') {
+      planMarketRealtimePath(st, -4.8, 0, 12.2, { pendingAction: 'buy_shoes_bags' });
     } else if (act.id === 'sit_food') {
       planMarketRealtimePath(st, -0.38, 0, 19.15, { seatChairId: 1, pendingAction: 'sit_food' });
     } else if (act.id === 'eat_banhcuon') {
@@ -142,7 +168,13 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
         planMarketRealtimePath(st, 0.38, 0, 19.15, { seatChairId: 2, pendingAction: 'eat_banhcuon' });
       }
     } else if (act.id === 'buy_mango') {
-      planMarketRealtimePath(st, 11.6, 0, 17.9, { pendingAction: 'buy_mango' });
+      planMarketRealtimePath(st, 11.6, 0, 18.0, { pendingAction: 'buy_mango' });
+    } else if (act.id === 'buy_seafood_flower') {
+      planMarketRealtimePath(st, 5.3, 0, 29.8, { pendingAction: 'buy_seafood_flower' });
+    } else if (act.id === 'buy_coffee_dry') {
+      planMarketRealtimePath(st, 12.6, 0, 6.2, { pendingAction: 'buy_coffee_dry' });
+    } else if (act.id === 'buy_craft') {
+      planMarketRealtimePath(st, -12.6, 0, 24.0, { pendingAction: 'buy_craft' });
     } else if (act.id === 'exit_market') {
       if (!st.exiting) {
         st.exiting = true;
@@ -169,24 +201,27 @@ export const BenThanhMarketBannerWebView: React.FC<BenThanhMarketBannerWebViewPr
         }
       }
       if (target) {
+        var actionMap = {
+          aodai: 'try_aodai',
+          try_adidas: 'try_adidas',
+          try_nike: 'try_nike',
+          buy_shoes: 'buy_shoes_bags',
+          fruit: 'buy_mango',
+          buy_fresh: 'buy_seafood_flower',
+          buy_coffee: 'buy_coffee_dry',
+          buy_craft: 'buy_craft',
+          exit: 'exit_market'
+        };
         if (target.kind === 'stool' && target.stool) {
           planMarketRealtimePath(st, target.x, 0, target.z, { seatChairId: target.stool.id, pendingAction: 'sit_food' });
           st.ripples.push({ x: target.x, z: target.z, t: 0 });
           postRN({ type: 'HAPTIC_MEDIUM' });
-        } else if (target.kind === 'aodai') {
-          planMarketRealtimePath(st, target.x, 0, target.z, { pendingAction: 'try_aodai' });
-          st.ripples.push({ x: target.x, z: target.z, t: 0 });
-          postRN({ type: 'HAPTIC_LIGHT' });
         } else if (target.kind === 'food') {
-          planMarketRealtimePath(st, target.x, 0, target.z, { seatChairId: target.stoolId || 1, pendingAction: 'eat_banhcuon' });
+          planMarketRealtimePath(st, target.x, 0, target.z, { seatChairId: target.stoolId || 1, dish: target.dish || 'banhcuon', pendingAction: 'eat_banhcuon' });
           st.ripples.push({ x: target.x, z: target.z, t: 0 });
-          postRN({ type: 'HAPTIC_LIGHT' });
-        } else if (target.kind === 'fruit') {
-          planMarketRealtimePath(st, target.x, 0, target.z, { pendingAction: 'buy_mango' });
-          st.ripples.push({ x: target.x, z: target.z, t: 0 });
-          postRN({ type: 'HAPTIC_LIGHT' });
-        } else if (target.kind === 'exit') {
-          planMarketRealtimePath(st, target.x, 0, target.z, { pendingAction: 'exit_market' });
+          postRN({ type: 'HAPTIC_MEDIUM' });
+        } else if (actionMap[target.kind]) {
+          planMarketRealtimePath(st, target.x, 0, target.z, { pendingAction: actionMap[target.kind] });
           st.ripples.push({ x: target.x, z: target.z, t: 0 });
           postRN({ type: 'HAPTIC_MEDIUM' });
         } else {

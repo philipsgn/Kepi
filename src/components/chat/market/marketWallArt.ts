@@ -342,9 +342,198 @@ function buildMarketProceduralTextures(wgl) {
     wgl.registerTextureCanvas('artFruitDisplay', f, false);
   })();
 
-  // 13. Bộ Sprite Chú Heo 24×20 + Trang Phục Áo Dài ('aodai') gl.NEAREST
+  // 13. Cửa Đông / Cửa Tây & Cửa Gió Louvers Kiến Trúc Chợ Bến Thành 1914 (QĐ 259)
+  regSign('signCuaDong', '#14532D', '#F4B93B', 'CỬA ĐÔNG · PHAN BỘI CHÂU', 'CÀ PHÊ · TRÀ SEN · MỨT SẤY · GIA VỊ');
+  regSign('signCuaTay',  '#1E3A8A', '#F4B93B', 'CỬA TÂY · PHAN CHU TRINH', 'GIÀY DÉP · GỐM SỨ · SƠN MÀI · MỸ NGHỆ');
+  regSign('signAdidasMarket', '#0F172A', '#F8FAFC', 'SẠP 208 · ADIDAS 3 SỌC', 'HOODIE · ÁO KHOÁC · POLO · JOGGER');
+  regSign('signNikeMarket',   '#1E293B', '#FB923C', 'SẠP 212 · NIKE SPORTS', 'SWOOSH TEE · HOODIE · QUẦN THỂ THAO');
+  regSign('signShoesBags',    '#7C2D12', '#FACC15', 'SẠP 306 · GIÀY DÉP & TÚI XÁCH', 'SNEAKER · VALI KÉO · ĐỒNG HỒ · MẮT KÍNH');
+  regSign('signSaigonTees',   '#9F1239', '#FDE047', 'SẠP 224 · I ♥ SAIGON', 'ÁO THUN DU LỊCH · QUẦN VOI · NÓN');
+  regSign('signPhoHuTieu',    '#7F1D1D', '#FDE047', 'PHỞ BÒ · HỦ TIẾU NAM VANG', 'NƯỚC LÈO XƯƠNG HẦM · TÁI NẠM GẦU');
+  regSign('signBunBoComTam',  '#991B1B', '#FDE047', 'BÚN BÒ HUẾ · BÚN MẮM · CƠM TẤM', 'SƯỜN NƯỚNG · BÌ CHẢ · TRỨNG ỐP LA');
+  regSign('signBanhXeoBanhMi','#B45309', '#FFFBEB', 'BÁNH XÈO MIỀN TÂY · GỎI CUỐN', 'BÁNH MÌ SÀI GÒN · CHẢ LỤA PA TÊ');
+  regSign('signCheSinhTo',    '#065F46', '#FDE047', 'CHÈ 3 MIỀN · SINH TỐ · NƯỚC MÍA', 'CHÈ BA MÀU · CHÈ BƯỞI · DỪA XIÊM');
+  regSign('signFreshFlowers', '#831843', '#FDE047', 'SẠP HOA TƯƠI CỬA BẮC', 'HOA SEN · CÚC VÀNG · HỒNG ĐỎ · HOA LY');
+  regSign('signWetSeafood',   '#0C4A6E', '#38BDF8', 'HẢI SẢN TƯƠI SỐNG & THỊT RAU', 'TÔM SÚ · CUA GHẸ · CÁ THU · RAU SẠCH');
+  regSign('signCoffeeSpices', '#451A03', '#F4B93B', 'CÀ PHÊ CHỒN · TIÊU PHÚ QUỐC', 'HẠT ĐIỀU · MỰC KHÔ · TÔM KHÔ · NƯỚC MẮM');
+
+  // Cửa gió lá sách louvers thông gió 1914 (marketLouvers)
+  (function() {
+    var c = mk(256, 128), g = c.getContext('2d');
+    g.fillStyle = '#365314'; g.fillRect(0, 0, 256, 128);
+    for (var ly = 6; ly < 124; ly += 14) {
+      g.fillStyle = '#FEF3C7'; g.fillRect(4, ly, 248, 5);
+      g.fillStyle = '#1A2E05'; g.fillRect(4, ly + 5, 248, 4);
+    }
+    g.strokeStyle = '#78350F'; g.lineWidth = 6; g.strokeRect(3, 3, 250, 122);
+    wgl.registerTextureCanvas('marketLouvers', c, true);
+  })();
+
+  // 14. Thời trang Adidas / Nike / Giày Túi / I Love Saigon (512×256)
+  (function() {
+    function drawShirtWall(key, bg, items) {
+      var c = mk(512, 256), g = c.getContext('2d');
+      g.fillStyle = bg; g.fillRect(0, 0, 512, 256);
+      g.strokeStyle = '#F4B93B'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 244);
+      g.fillStyle = '#E2E8F0'; g.fillRect(24, 38, 464, 8); g.fillRect(24, 146, 464, 8);
+      for (var r = 0; r < 2; r++) {
+        for (var i = 0; i < 4; i++) {
+          var sx = 82 + i * 114, sy = 50 + r * 108;
+          var col = items[(r * 4 + i) % items.length];
+          g.fillStyle = col.body;
+          g.fillRect(sx - 34, sy + 4, 68, 26);
+          g.fillRect(sx - 22, sy + 4, 44, 68);
+          g.fillStyle = col.trim;
+          if (col.kind === 'adidas') {
+            g.fillRect(sx - 18, sy + 12, 4, 52); g.fillRect(sx - 10, sy + 12, 4, 52); g.fillRect(sx - 2, sy + 12, 4, 52);
+          } else if (col.kind === 'nike') {
+            g.beginPath(); g.moveTo(sx - 12, sy + 28); g.quadraticCurveTo(sx, sy + 44, sx + 18, sy + 20);
+            g.lineWidth = 5; g.strokeStyle = col.trim; g.stroke();
+          } else {
+            g.fillRect(sx - 14, sy + 22, 28, 12);
+          }
+          g.strokeStyle = '#0F172A'; g.lineWidth = 2; g.strokeRect(sx - 22, sy + 4, 44, 68);
+        }
+      }
+      wgl.registerTextureCanvas(key, c, false);
+    }
+    drawShirtWall('artAdidasMarket', '#1E293B', [
+      { kind: 'adidas', body: '#111827', trim: '#FFFFFF' },
+      { kind: 'adidas', body: '#1D4ED8', trim: '#F8FAFC' },
+      { kind: 'adidas', body: '#DC2626', trim: '#FFFFFF' },
+      { kind: 'adidas', body: '#F8FAFC', trim: '#0F172A' }
+    ]);
+    drawShirtWall('artNikeMarket', '#0F172A', [
+      { kind: 'nike', body: '#EA580C', trim: '#FFFFFF' },
+      { kind: 'nike', body: '#111827', trim: '#F97316' },
+      { kind: 'nike', body: '#F8FAFC', trim: '#111827' },
+      { kind: 'nike', body: '#047857', trim: '#FDE047' }
+    ]);
+    drawShirtWall('artSaigonTees', '#881337', [
+      { kind: 'sg', body: '#FFFFFF', trim: '#EF4444' },
+      { kind: 'sg', body: '#FACC15', trim: '#DC2626' },
+      { kind: 'sg', body: '#0EA5E9', trim: '#FFFFFF' },
+      { kind: 'sg', body: '#16A34A', trim: '#FDE047' }
+    ]);
+
+    // Kệ giày Sneaker, Vali & Túi xách (artShoesBags)
+    var sb = mk(512, 256), sg = sb.getContext('2d');
+    sg.fillStyle = '#FFFBEB'; sg.fillRect(0, 0, 512, 256);
+    sg.strokeStyle = '#7C2D12'; sg.lineWidth = 8; sg.strokeRect(6, 6, 500, 244);
+    var shCols = ['#F8FAFC', '#DC2626', '#2563EB', '#111827', '#F59E0B'];
+    for (var row = 0; row < 2; row++) {
+      var y0 = 96 + row * 104;
+      sg.fillStyle = '#78350F'; sg.fillRect(24, y0, 464, 10);
+      for (var cIdx = 0; cIdx < 5; cIdx++) {
+        var x0 = 56 + cIdx * 92;
+        if (row === 0) {
+          sg.fillStyle = shCols[cIdx]; sg.fillRect(x0, y0 - 32, 48, 22);
+          sg.fillStyle = '#E2E8F0'; sg.fillRect(x0 - 2, y0 - 10, 56, 10);
+          sg.fillStyle = '#0F172A'; sg.fillRect(x0 + 16, y0 - 26, 16, 6);
+        } else {
+          sg.fillStyle = shCols[(cIdx + 2) % 5]; sg.fillRect(x0, y0 - 54, 46, 52);
+          sg.strokeStyle = '#1E293B'; sg.lineWidth = 2; sg.strokeRect(x0, y0 - 54, 46, 52);
+          sg.fillStyle = '#FACC15'; sg.fillRect(x0 + 14, y0 - 34, 18, 8);
+        }
+      }
+    }
+    wgl.registerTextureCanvas('artShoesBags', sb, false);
+  })();
+
+  // 15. Toàn Bộ Món Ăn Việt Nam: Phở/Hủ Tiếu, Bún Bò/Cơm Tấm, Bánh Xèo/Bánh Mì, Chè 3 Miền (512×256)
+  (function() {
+    function drawDishBoard(key, bg, title, dishes) {
+      var c = mk(512, 256), g = c.getContext('2d');
+      g.fillStyle = bg; g.fillRect(0, 0, 512, 256);
+      g.strokeStyle = '#FDE047'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 244);
+      g.fillStyle = '#7F1D1D'; g.fillRect(28, 22, 456, 54);
+      g.fillStyle = '#FDE047'; g.font = 'bold 24px monospace'; g.textAlign = 'center';
+      g.fillText(title, 256, 56, 430);
+      for (var i = 0; i < dishes.length; i++) {
+        var dx = 94 + i * 162, dy = 162;
+        g.fillStyle = '#F8FAFC'; g.beginPath(); g.arc(dx, dy, 48, 0, Math.PI * 2); g.fill();
+        g.fillStyle = dishes[i].fill; g.beginPath(); g.arc(dx, dy, 38, 0, Math.PI * 2); g.fill();
+        g.fillStyle = dishes[i].top; g.fillRect(dx - 20, dy - 10, 40, 14);
+        g.fillStyle = '#16A34A'; g.fillRect(dx - 8, dy - 18, 16, 10);
+      }
+      wgl.registerTextureCanvas(key, c, false);
+    }
+    drawDishBoard('artPhoHuTieu', '#FFFBEB', 'PHỞ BÒ · HỦ TIẾU NAM VANG', [
+      { fill: '#D97706', top: '#7F1D1D' }, { fill: '#FDE68A', top: '#DC2626' }, { fill: '#F59E0B', top: '#FFFBF1' }
+    ]);
+    drawDishBoard('artBunBoComTam', '#FEF2F2', 'BÚN BÒ HUẾ · BÚN MẮM · CƠM TẤM', [
+      { fill: '#DC2626', top: '#991B1B' }, { fill: '#FFFBEB', top: '#B45309' }, { fill: '#F59E0B', top: '#EF4444' }
+    ]);
+    drawDishBoard('artBanhXeoBanhMi', '#FFF7ED', 'BÁNH XÈO · GỎI CUỐN · BÁNH MÌ', [
+      { fill: '#FACC15', top: '#EA580C' }, { fill: '#F1F5F9', top: '#EF4444' }, { fill: '#D97706', top: '#FEF3C7' }
+    ]);
+    drawDishBoard('artCheSinhTo', '#ECFDF5', 'CHÈ 3 MIỀN · NƯỚC MÍA · SINH TỐ', [
+      { fill: '#F43F5E', top: '#FACC15' }, { fill: '#22C55E', top: '#FFFBEB' }, { fill: '#A855F7', top: '#FDE047' }
+    ]);
+  })();
+
+  // 16. Trái Cây Nhiệt Đới Đủ Loại, Hoa Tươi, Hải Sản, Cà Phê Đồ Khô & Mây Tre Đan
+  (function() {
+    var tf = mk(512, 256), tg = tf.getContext('2d');
+    tg.fillStyle = '#14532D'; tg.fillRect(0, 0, 512, 256);
+    tg.strokeStyle = '#FACC15'; tg.lineWidth = 6; tg.strokeRect(6, 6, 500, 244);
+    var trop = [
+      [68, 84, 30, '#A16207'], [148, 84, 24, '#7E22CE'], [228, 84, 24, '#DC2626'], [308, 84, 26, '#FACC15'], [388, 84, 26, '#E11D48'], [456, 84, 24, '#22C55E'],
+      [78, 178, 26, '#15803D'], [162, 178, 28, '#EAB308'], [246, 178, 26, '#4ADE80'], [330, 178, 24, '#FB923C'], [414, 178, 26, '#FEF08A']
+    ];
+    for (var ti = 0; ti < trop.length; ti++) {
+      tg.fillStyle = trop[ti][3]; tg.strokeStyle = '#052E16'; tg.lineWidth = 3;
+      tg.beginPath(); tg.arc(trop[ti][0], trop[ti][1], trop[ti][2], 0, Math.PI * 2); tg.fill(); tg.stroke();
+    }
+    wgl.registerTextureCanvas('artTropicalFruits', tf, false);
+
+    var fl = mk(512, 256), fg = fl.getContext('2d');
+    fg.fillStyle = '#831843'; fg.fillRect(0, 0, 512, 256);
+    var flCols = ['#F472B6', '#FACC15', '#EF4444', '#FFFFFF', '#FB923C'];
+    for (var fi = 0; fi < 10; fi++) {
+      var fx = 46 + (fi % 5) * 102, fy = fi < 5 ? 76 : 182;
+      fg.fillStyle = '#15803D'; fg.fillRect(fx - 12, fy, 24, 48);
+      fg.fillStyle = flCols[fi % 5];
+      fg.beginPath(); fg.arc(fx, fy - 12, 26, 0, Math.PI * 2); fg.fill();
+    }
+    wgl.registerTextureCanvas('artFreshFlowers', fl, false);
+
+    var ws = mk(512, 256), wg = ws.getContext('2d');
+    wg.fillStyle = '#0C4A6E'; wg.fillRect(0, 0, 512, 256);
+    wg.fillStyle = '#E0F2FE'; wg.fillRect(18, 28, 476, 200);
+    for (var si = 0; si < 6; si++) {
+      var sx = 64 + si * 78;
+      wg.fillStyle = (si % 2 === 0) ? '#EF4444' : '#64748B';
+      wg.beginPath(); wg.ellipse(sx, 128, 26, 16, 0, 0, Math.PI * 2); wg.fill();
+    }
+    wgl.registerTextureCanvas('artWetSeafood', ws, false);
+
+    var cs = mk(512, 256), cg = cs.getContext('2d');
+    cg.fillStyle = '#451A03'; cg.fillRect(0, 0, 512, 256);
+    cg.fillStyle = '#FEF3C7'; cg.fillRect(16, 16, 480, 224);
+    for (var ci = 0; ci < 6; ci++) {
+      var cx = 56 + ci * 76;
+      cg.fillStyle = (ci % 2 === 0) ? '#78350F' : '#B45309';
+      cg.fillRect(cx - 22, 46, 44, 72);
+      cg.fillStyle = '#DC2626'; cg.fillRect(cx - 22, 46, 44, 14);
+      cg.fillStyle = '#D97706'; cg.fillRect(cx - 20, 144, 40, 66);
+    }
+    wgl.registerTextureCanvas('artCoffeeSpices', cs, false);
+
+    var rt = mk(512, 256), rg = rt.getContext('2d');
+    rg.fillStyle = '#7C2D12'; rg.fillRect(0, 0, 512, 256);
+    rg.fillStyle = '#FFFBEB'; rg.fillRect(14, 14, 484, 228);
+    for (var ri = 0; ri < 4; ri++) {
+      var rx = 74 + ri * 116;
+      rg.fillStyle = '#D97706'; rg.beginPath(); rg.arc(rx, 92, 34, 0, Math.PI * 2); rg.fill();
+      rg.fillStyle = '#E11D48'; rg.fillRect(rx - 22, 144, 44, 62);
+    }
+    wgl.registerTextureCanvas('artHandicraftRattan', rt, false);
+  })();
+
+  // 17. Bộ Sprite Chú Heo 24×20 + Đầy Đủ Trang Phục Chợ Bến Thành (Áo Dài, Adidas & Nike) gl.NEAREST
   if (typeof buildPigBillboardTextures === 'function') {
-    buildPigBillboardTextures(wgl, ['aodai']);
+    buildPigBillboardTextures(wgl, ['aodai', 'adidas_jacket', 'adidas_polo', 'adidas_jogger', 'nike_tee', 'nike_hoodie']);
   }
 }
 

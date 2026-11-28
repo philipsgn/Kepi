@@ -1,111 +1,96 @@
 /**
- * Chợ Bến Thành Sài Gòn WebGL 3D Hợp Nhất Không Cắt Cảnh (Quyết định 250)
- * - Không gian Chế độ A kín 100% (Mái kèo thép cao 5.8m + ô giếng trời kính mờ):
- *   + 'south_hall'  (Sảnh Cửa Nam & Áo Dài): X ∈ [-6.0, 6.0], Z ∈ [0, 13.6], Y = 0
- *     Cửa Số 1 (X ∈ [-1.55, 1.55], Z = 0), Hương Trinh (X ∈ [-5.95, -4.15], Z ∈ [1.5, 11.5]),
- *     Liên Sài Gòn 823 (X ∈ [4.15, 5.95], Z ∈ [1.5, 8.2]).
- *   + 'food_court'  (Khu Ẩm Thực Sạp 1044): X ∈ [-6.0, 6.0], Z ∈ [13.6, 26.8], Y = 0
- *     Vòm KHU ĂN UỐNG (X ∈ [-1.8, 1.8], Z = 13.6), Sạp 1044 (X ∈ [-1.75, 1.75], Z ∈ [19.7, 22.9])
- *     + 4 ghế đẩu inox tương tác (Seated Auto-Stand), Bánh Cuốn 50K (X ∈ [-5.95, -4.15], Z ∈ [15.4, 24.8]),
- *     Bánh Bèo Huế 20K (X ∈ [4.15, 5.95], Z ∈ [15.4, 21.8]).
- *   + 'fruit_craft' (Cánh Đông Trái Cây & Lưu Niệm): X ∈ [6.0, 17.2], Z ∈ [13.6, 26.8], Y = 0
- *     Ngã tư Chợ Đông phía Bắc tại X = 6.0, Z ∈ [22.6, 25.8] (rộng 3.2m),
- *     Đảo Trái Cây 1029 Ngọc Hảo (X ∈ [9.95, 13.25], Z ∈ [18.8, 22.0]),
- *     Kệ Gốm Sứ (X ∈ [6.05, 7.80], Z ∈ [14.8, 21.6]), Kệ Nón Lá (X ∈ [15.4, 17.15], Z ∈ [15.4, 21.8]),
- *     Cửa Bắc (X ∈ [10.05, 13.15], Z = 26.8).
- * - 12 NPC (waiter, chef, chef_noodle, customer) + Chú Heo 24×20 (áo dài 'aodai') dùng gl.NEAREST Billboard.
- * - Giữ Canvas2D fallback (renderMarketTpsScene) phục vụ Test 183 và thiết bị không có WebGL.
+ * Chợ Bến Thành Sài Gòn 1914 — Đại Sảnh Ô Bàn Cờ 36m × 36m, 4 Cửa Đông–Tây–Nam–Bắc (QĐ 250–259)
+ * - Kiến trúc thật 100%: Nhà lồng chữ thập ô bàn cờ, mái vòm kèo thép xanh rêu cao 7.2m + cửa gió lá sách louvers
+ *   & giếng trời lấy sáng tự nhiên (Chế độ A kín 100%, 0% hở void).
+ * - 4 Cửa Đông – Tây – Nam – Bắc nối thông suốt:
+ *   + Cửa Nam (Cửa Số 1, Z = 0): Thời trang (Adidas 3 Sọc, Nike Swoosh, Giày Sneaker & Dép, Túi Xách/Vali/Đồng Hồ,
+ *     Áo thun "I ♥ SAIGON", Vải Lụa & Áo Dài Hương Trinh 415).
+ *   + Cửa Tây (X = -18): Gốm Sứ Bát Tràng & Sơn Mài, Nón Lá & Đèn Lồng, Mây Tre Đan & Tượng Gỗ.
+ *   + Cửa Đông (X = +18): Đặc Sản Liên Sài Gòn 823, Cà Phê Chồn & Phin, Trái Cây Sấy/Hạt Điều, Hải Sản Khô/Nước Mắm/Tiêu.
+ *   + Cửa Bắc (Z = 36) & Trung tâm Bắc: Toàn bộ món ăn VN (Phở, Hủ Tiếu, Bún Bò Huế, Bún Mắm, Cơm Tấm, Bánh Xèo,
+ *     Gỏi Cuốn, Bánh Mì, Bánh Cuốn 50K, Bánh Bèo 20K, Sạp 1044, Chè 3 Miền, Sinh Tố/Nước Mía/Dừa Xiêm),
+ *     Trái Cây 3D đủ loại (1029 Ngọc Hảo + Cửa Bắc: Sầu riêng, Măng cụt, Chôm chôm, Xoài, Thanh long, Vú sữa, Mít, Bưởi, Chuối),
+ *     Hoa Tươi & Hải Sản/Thịt/Rau Tươi Sống.
+ * - Tối ưu 60fps: 12 NPCs gọn nhẹ + distance culling 26m cho chi tiết nhỏ; di chuyển trượt cạnh chuẩn Quán Phở.
  */
 export function buildMarketTps3dSceneScript(): string {
   return String.raw`
-/* ==================== 1. ĐỒ THỊ KHÔNG GIAN HỢP NHẤT & PORTAL-AWARE WALLS (QĐ 250) ==================== */
+/* ==================== 1. ĐỒ THỊ KHÔNG GIAN Ô BÀN CỜ 36m × 36m (4 CỬA ĐÔNG-TÂY-NAM-BẮC) ==================== */
 var MARKET_NAV_GRAPH = {
-  wallMargin: 0.38,
-  outerBounds: { minX: -6.0, maxX: 17.2, minZ: 0.0, maxZ: 26.8, minY: 0.45, maxY: 5.8 },
+  wallMargin: 0.40,
+  outerBounds: { minX: -18.0, maxX: 18.0, minZ: 0.0, maxZ: 36.0, minY: 0.45, maxY: 7.2 },
   zones: [
-    { id: 'south_hall',  minX: -6.0, maxX:  6.0, minZ:  0.0, maxZ: 13.6, floorY: 0 },
-    { id: 'food_court',  minX: -6.0, maxX:  6.0, minZ: 13.6, maxZ: 26.8, floorY: 0 },
-    { id: 'fruit_craft', minX:  6.0, maxX: 17.2, minZ: 13.6, maxZ: 26.8, floorY: 0 }
+    { id: 'south_hall',  minX: -18.0, maxX: 18.0, minZ:  0.0, maxZ: 15.0, floorY: 0 },
+    { id: 'food_court',  minX: -18.0, maxX: 18.0, minZ: 15.0, maxZ: 28.8, floorY: 0 },
+    { id: 'fruit_craft', minX: -18.0, maxX: 18.0, minZ: 15.0, maxZ: 36.0, floorY: 0 }
   ],
-  dividerWalls: [
-    // Vách ngăn South Hall <-> Food Court (Z = 13.6), mở cổng vòm KHU ĂN UỐNG [-1.8, 1.8]
-    { axis: 'z', pos: 13.6, minSpan: -6.0, maxSpan: 6.0, minY: 0, maxY: 5.8, openings: [{ a1: -1.8, a2: 1.8, y1: 0, y2: 3.45 }] },
-    // Vách ngăn Food Court <-> Fruit Craft (X = 6.0), mở Ngã tư Chợ Đông [22.6, 25.8]
-    { axis: 'x', pos: 6.0, minSpan: 13.6, maxSpan: 26.8, minY: 0, maxY: 5.8, openings: [{ a1: 22.6, a2: 25.8, y1: 0, y2: 3.45 }] },
-    // Tường Đông khép kín của South Hall (X = 6.0, Z = 0..13.6) & Tường Nam của Fruit Craft (Z = 13.6, X = 6..17.2)
-    { axis: 'x', pos: 6.0, minSpan: 0.0, maxSpan: 13.6, minY: 0, maxY: 5.8, openings: [] },
-    { axis: 'z', pos: 13.6, minSpan: 6.0, maxSpan: 17.2, minY: 0, maxY: 5.8, openings: [] }
-  ],
+  dividerWalls: [],
   camBoxes: [
-    // Sạp trung tâm 1044 & Đảo Trái Cây 1029 tránh camera góc khuất sát sạp
-    { x1: -1.75, y1: 0, z1: 19.7, x2: 1.75, y2: 1.4, z2: 22.9 },
-    { x1:  9.95, y1: 0, z1: 18.8, x2: 13.25, y2: 1.4, z2: 22.0 }
+    // Các đảo sạp trung tâm tránh camera xoay sát gây góc khuất
+    { x1: -1.75, y1: 0, z1: 19.7, x2: 1.75, y2: 1.45, z2: 22.9 },  // Sạp 1044
+    { x1:  9.95, y1: 0, z1: 18.8, x2: 13.25, y2: 1.45, z2: 22.0 }, // Đảo 1029 Ngọc Hảo
+    { x1: -9.2,  y1: 0, z1: 3.5,  x2: -5.6, y2: 2.1, z2: 9.5 },    // Sạp Adidas
+    { x1:  5.6,  y1: 0, z1: 3.5,  x2:  9.2, y2: 2.1, z2: 9.5 }     // Sạp Nike
   ],
-  edges: [
-    {
-      from: 'south_hall', to: 'food_court',
-      waypointsForward:  [{ x: 0, y: 0, z: 12.6 }, { x: 0, y: 0, z: 14.6 }],
-      waypointsBackward: [{ x: 0, y: 0, z: 14.6 }, { x: 0, y: 0, z: 12.6 }]
-    },
-    {
-      from: 'food_court', to: 'fruit_craft',
-      waypointsForward:  [{ x: 4.8, y: 0, z: 24.2 }, { x: 7.2, y: 0, z: 24.2 }],
-      waypointsBackward: [{ x: 7.2, y: 0, z: 24.2 }, { x: 4.8, y: 0, z: 24.2 }]
-    }
-  ]
+  edges: []
 };
 
 var MARKET_ZONE_CENTERS = {
-  south_hall:  { x: 0.0,  y: 0, z: 6.2 },
-  food_court:  { x: 0.0,  y: 0, z: 17.6 },
-  fruit_craft: { x: 11.6, y: 0, z: 17.6 }
+  south_hall:  { x:  0.0, y: 0, z:  6.5 },
+  food_court:  { x:  0.0, y: 0, z: 18.2 },
+  fruit_craft: { x: 11.6, y: 0, z: 17.6 },
+  east_dry:    { x: 11.8, y: 0, z: 17.0 },
+  west_craft:  { x: -11.8, y: 0, z: 17.0 }
 };
 
 function getMarketZoneAt(x, z) {
-  if (z < 13.6) return 'south_hall';
-  if (x >= 6.0) return 'fruit_craft';
+  if (z < 15.0) return 'south_hall';
+  if (x >= 8.0 && z < 26.5) return 'fruit_craft';
+  if (z >= 28.8) return 'fruit_craft';
   return 'food_court';
 }
 
 function createMarketStools() {
-  // 4 ghế đẩu inox tương tác phía trước Sạp 1044 (Z = 19.15, đối diện quầy Z = 19.7..22.9)
+  // 6 ghế đẩu inox tương tác quanh Đảo Sạp 1044 & dãy bàn ăn khu Ẩm Thực
   return [
     { id: 0, floorY: 0, x: -1.15, y: 0, z: 19.15, lookX: -1.15, lookZ: 20.1, yaw: 0 },
     { id: 1, floorY: 0, x: -0.38, y: 0, z: 19.15, lookX: -0.38, lookZ: 20.1, yaw: 0 },
     { id: 2, floorY: 0, x:  0.38, y: 0, z: 19.15, lookX:  0.38, lookZ: 20.1, yaw: 0 },
-    { id: 3, floorY: 0, x:  1.15, y: 0, z: 19.15, lookX:  1.15, lookZ: 20.1, yaw: 0 }
+    { id: 3, floorY: 0, x:  1.15, y: 0, z: 19.15, lookX:  1.15, lookZ: 20.1, yaw: 0 },
+    { id: 4, floorY: 0, x: -2.45, y: 0, z: 26.80, lookX: -2.45, lookZ: 25.8, yaw: Math.PI },
+    { id: 5, floorY: 0, x:  2.45, y: 0, z: 26.80, lookX:  2.45, lookZ: 25.8, yaw: Math.PI }
   ];
 }
 
 function createMarketNpcs() {
-  // 12 NPC đầy đủ vai trò tiểu thương (waiter), đầu bếp (chef, chef_noodle) & khách (customer)
+  // 12 NPC gọn nhẹ dàn đều 4 Cửa Đông–Tây–Nam–Bắc (tiểu thương, đầu bếp, du khách)
   return [
-    // Sảnh Cửa Nam (4 NPC)
-    { id: 'sh_w1', x: -3.70, y: 0, z: 4.80, yaw:  Math.PI * 0.5, role: 'waiter',      shirt: '#E11D48', hair: '#1C1917', moving: false, seated: false, phase: 0.2 },
-    { id: 'sh_c1', x: -3.70, y: 0, z: 8.80, yaw:  Math.PI * 0.5, role: 'customer',    shirt: '#F59E0B', hair: '#292524', moving: false, seated: false, phase: 1.4 },
-    { id: 'sh_w2', x:  3.70, y: 0, z: 5.20, yaw: -Math.PI * 0.5, role: 'waiter',      shirt: '#15803D', hair: '#1C1917', moving: false, seated: false, phase: 0.8 },
+    // Khu Thời Trang & Thể Thao (Cửa Nam)
+    { id: 'sh_w1', x: -12.6, y: 0, z: 6.5, yaw: -Math.PI * 0.5, role: 'waiter',   shirt: '#E11D48', hair: '#1C1917', moving: false, seated: false, phase: 0.2 },
+    { id: 'sh_w2', x: -4.8,  y: 0, z: 6.5, yaw: -Math.PI * 0.5, role: 'waiter',   shirt: '#0F172A', hair: '#1C1917', moving: false, seated: false, phase: 0.6 },
+    { id: 'sh_w3', x:  4.8,  y: 0, z: 6.5, yaw:  Math.PI * 0.5, role: 'waiter',   shirt: '#EA580C', hair: '#292524', moving: false, seated: false, phase: 1.1 },
     {
-      id: 'sh_c2', x: 0.90, y: 0, z: 7.40, yaw: 0, role: 'customer', shirt: '#2563EB', hair: '#451A03',
-      moving: true, seated: false, phase: 2.1, stepIdx: 0,
-      pts: [{ x: 0.90, z: 4.6 }, { x: 0.90, z: 12.2 }, { x: 0.90, z: 16.4 }, { x: 0.90, z: 12.2 }]
+      id: 'sh_c2', x: 0.8, y: 0, z: 4.5, yaw: 0, role: 'customer', shirt: '#2563EB', hair: '#451A03',
+      moving: true, seated: false, phase: 2.0, stepIdx: 0,
+      pts: [{ x: 0.8, z: 3.5 }, { x: 0.8, z: 16.5 }, { x: -11.0, z: 16.5 }, { x: 0.8, z: 16.5 }]
     },
-    // Khu Ẩm Thực 1044 (5 NPC)
-    { id: 'fc_chef',   x: -0.20, y: 0, z: 23.35, yaw: Math.PI,        role: 'chef',        shirt: '#FFFFFF', hair: '#1C1917', moving: false, seated: false, phase: 0.4, carryProp: 'bowl' },
-    { id: 'fc_noodle', x: -3.80, y: 0, z: 19.80, yaw:  Math.PI * 0.5, role: 'chef_noodle', shirt: '#FFFFFF', hair: '#292524', moving: false, seated: false, phase: 1.2 },
-    { id: 'fc_waiter', x:  3.75, y: 0, z: 18.60, yaw: -Math.PI * 0.5, role: 'waiter',      shirt: '#B45309', hair: '#1C1917', moving: false, seated: false, phase: 1.9, carryProp: 'tray' },
-    { id: 'fc_c1',     x: -1.15, y: 0, z: 19.15, yaw: 0,              role: 'customer',    shirt: '#0284C7', hair: '#1C1917', moving: false, seated: true,  eating: true, phase: 0.7 },
+    // Khu Ẩm Thực (Trung Tâm)
+    { id: 'fc_chef',   x: -0.2, y: 0, z: 23.4, yaw: Math.PI,        role: 'chef',        shirt: '#FFFFFF', hair: '#1C1917', moving: false, seated: false, phase: 0.4, carryProp: 'bowl' },
+    { id: 'fc_noodle', x: -3.7, y: 0, z: 21.8, yaw: -Math.PI * 0.5, role: 'chef_noodle', shirt: '#FFFFFF', hair: '#292524', moving: false, seated: false, phase: 1.2 },
+    { id: 'fc_waiter', x:  3.7, y: 0, z: 21.8, yaw:  Math.PI * 0.5, role: 'waiter',      shirt: '#B45309', hair: '#1C1917', moving: false, seated: false, phase: 1.9, carryProp: 'tray' },
+    { id: 'fc_c1',     x: -1.15,y: 0, z: 19.15,yaw: 0,              role: 'customer',    shirt: '#0284C7', hair: '#1C1917', moving: false, seated: true,  eating: true, phase: 0.7 },
     {
-      id: 'fc_c2', x: 3.10, y: 0, z: 24.20, yaw: Math.PI * 0.5, role: 'customer', shirt: '#E11D48', hair: '#451A03',
+      id: 'fc_c2', x: 3.2, y: 0, z: 17.2, yaw: Math.PI * 0.5, role: 'customer', shirt: '#E11D48', hair: '#451A03',
       moving: true, seated: false, phase: 2.3, stepIdx: 0,
-      pts: [{ x: 3.10, z: 24.2 }, { x: 8.60, z: 24.2 }, { x: 11.60, z: 24.2 }, { x: 8.60, z: 24.2 }]
+      pts: [{ x: 3.2, z: 17.2 }, { x: 11.4, z: 17.2 }, { x: 11.4, z: 23.8 }, { x: 3.2, z: 23.8 }]
     },
-    // Cánh Đông Trái Cây & Lưu Niệm (3 NPC)
-    { id: 'fr_w1', x: 11.60, y: 0, z: 22.55, yaw: Math.PI,        role: 'waiter',   shirt: '#16A34A', hair: '#1C1917', moving: false, seated: false, phase: 0.5 },
-    { id: 'fr_w2', x:  8.25, y: 0, z: 18.20, yaw: -Math.PI * 0.5, role: 'waiter',   shirt: '#1D4ED8', hair: '#292524', moving: false, seated: false, phase: 1.6 },
+    // Khu Trái Cây (Cửa Bắc) & Đồ Khô (Cửa Đông) & Mỹ Nghệ (Cửa Tây)
+    { id: 'fr_w1', x: 11.6, y: 0, z: 18.0, yaw: 0,               role: 'waiter',   shirt: '#16A34A', hair: '#1C1917', moving: false, seated: false, phase: 0.5 },
+    { id: 'fr_w2', x: 12.6, y: 0, z: 6.4,  yaw: -Math.PI * 0.5,  role: 'waiter',   shirt: '#15803D', hair: '#292524', moving: false, seated: false, phase: 1.5 },
     {
-      id: 'fr_c1', x: 14.80, y: 0, z: 18.40, yaw: 0, role: 'customer', shirt: '#D97706', hair: '#1C1917',
+      id: 'ws_c1', x: -11.2, y: 0, z: 22.4, yaw: 0, role: 'customer', shirt: '#D97706', hair: '#1C1917',
       moving: true, seated: false, phase: 2.4, stepIdx: 0,
-      pts: [{ x: 14.80, z: 16.4 }, { x: 14.80, z: 22.2 }, { x: 11.60, z: 24.6 }, { x: 14.80, z: 22.2 }]
+      pts: [{ x: -11.2, z: 18.0 }, { x: -11.2, z: 29.0 }, { x: -2.0, z: 29.4 }, { x: -11.2, z: 29.0 }]
     }
   ];
 }
@@ -122,64 +107,66 @@ function createMarketTpsState() {
       waypoints: [],
       walking: true, seated: false, seatChairId: -1,
       pendingSeatId: -1, pendingAction: null,
-      eating: false,
-      wearingAoDai: false, ateFood: false, boughtFruit: false
+      eating: false, activeDish: 'banhcuon',
+      wearingAoDai: false, outfit: 'none', boughtSamba: false,
+      ateFood: false, boughtFruit: false,
+      _stuckTimer: 0
     },
     stools: stools,
     npcs: npcs,
-    // Giữ alias mảng cho các kiểm tra tương thích cũ
     southPeople: npcs.slice(0, 4),
     foodPeople: npcs.slice(4, 9),
     fruitPeople: npcs.slice(9, 12),
     southGateOpen: 0.0,
     northGateOpen: 0.0,
+    eastGateOpen: 0.0,
+    westGateOpen: 0.0,
     rightDoorOpen: 0.0,
     exitFade: 0,
     exiting: false,
     onZoneChanged: null,
     ripples: [],
-    toast: 'Chợ Bến Thành · Sảnh Cửa Nam! Đi bộ xuyên vòm Khu Ăn Uống & Ngã tư Chợ Đông 👘',
+    toast: 'Chợ Bến Thành 1914 · Ô bàn cờ 4 Cửa Đông-Tây-Nam-Bắc! Tự do dạo sạp Adidas, Nike, Món Việt & Trái Cây 🏪',
     toastUntil: 5.0,
     t: 0
   };
 }
 
 var MARKET_STALL_AABBS = [
-  // South Hall
-  { x1: -5.95, z1:  1.50, x2: -4.15, z2: 11.50 }, // Sạp Vải Hương Trinh
-  { x1:  4.15, z1:  1.50, x2:  5.95, z2:  8.20 }, // Đặc Sản Liên Sài Gòn
-  // Food Court
-  { x1: -1.75, z1: 19.70, x2:  1.75, z2: 22.90 }, // Sạp 1044 trung tâm
-  { x1: -5.95, z1: 15.40, x2: -4.15, z2: 24.80 }, // Bánh Cuốn Nóng 50K
-  { x1:  4.15, z1: 15.40, x2:  5.95, z2: 21.80 }, // Bánh Bèo Huế 20K
-  // Fruit Craft (Cánh Đông)
-  { x1:  9.95, z1: 18.80, x2: 13.25, z2: 22.00 }, // Đảo Trái Cây 1029 Ngọc Hảo
-  { x1:  6.05, z1: 14.80, x2:  7.80, z2: 21.60 }, // Kệ Gốm Sứ Bát Tràng
-  { x1: 15.40, z1: 15.40, x2: 17.15, z2: 21.80 }  // Kệ Nón Lá & Quà Lưu Niệm
+  // Cửa Nam & Tây Nam (Thời trang, Thể thao, Giày, Túi xách, Vải Áo Dài)
+  { id: 'ao_dai_huong_trinh', x1: -16.6, z1:  2.5, x2: -13.4, z2: 11.5 }, // Hương Trinh 415
+  { id: 'saigon_tees',        x1: -16.6, z1: 12.4, x2: -13.4, z2: 14.8 }, // Áo "I ♥ SAIGON"
+  { id: 'adidas_stall',       x1:  -9.2, z1:  3.5, x2:  -5.6, z2:  9.5 }, // Adidas 3 Sọc 208
+  { id: 'shoes_bags_west',    x1:  -9.2, z1: 10.6, x2:  -5.6, z2: 13.8 }, // Giày Sneaker & Dép 306
+  { id: 'nike_stall',         x1:   5.6, z1:  3.5, x2:   9.2, z2:  9.5 }, // Nike Swoosh 212
+  { id: 'bags_watches_east',  x1:   5.6, z1: 10.6, x2:   9.2, z2: 13.8 }, // Túi Xách, Vali, Đồng Hồ
+  // Cửa Đông (Đồ khô, Cà phê, Gia vị)
+  { id: 'lien_sai_gon_823',   x1:  13.4, z1:  2.8, x2:  16.6, z2:  9.6 }, // Liên Sài Gòn 823
+  { id: 'coffee_chon_stall',  x1:  13.4, z1: 10.8, x2:  16.6, z2: 14.6 }, // Cà phê & Phin
+  { id: 'dried_fruits_stall', x1:  13.4, z1: 20.4, x2:  16.6, z2: 25.0 }, // Mứt dẻo & Hạt điều
+  { id: 'seafood_dry_spices', x1:  13.4, z1: 26.2, x2:  16.6, z2: 30.8 }, // Mực khô, Tôm khô, Tiêu Phú Quốc
+  // Khu Ẩm Thực Trung Tâm (Sạp 1044 & đủ món Việt)
+  { id: 'sap_1044',           x1:  -1.75, z1: 19.7, x2:  1.75, z2: 22.9 }, // Sạp 1044 trung tâm
+  { id: 'banh_cuon_50k',      x1:  -6.6,  z1: 19.8, x2: -4.4,  z2: 24.2 }, // Bánh Cuốn 50K
+  { id: 'banh_beo_20k',       x1:   4.4,  z1: 19.8, x2:  6.6,  z2: 24.2 }, // Bánh Bèo 20K
+  { id: 'pho_hutieu_stall',   x1: -10.0,  z1: 25.6, x2: -7.2,  z2: 28.6 }, // Phở & Hủ Tiếu
+  { id: 'bunbo_comtam_stall', x1:  -4.4,  z1: 25.6, x2: -1.2,  z2: 28.6 }, // Bún Bò Huế & Cơm Tấm
+  { id: 'banhxeo_banhmi',     x1:   1.2,  z1: 25.6, x2:  4.4,  z2: 28.6 }, // Bánh Xèo, Gỏi Cuốn & Bánh Mì
+  { id: 'che_sinhto_stall',   x1:   5.4,  z1: 25.6, x2:  8.6,  z2: 28.6 }, // Chè 3 Miền & Sinh Tố/Nước Mía
+  // Cửa Tây (Thủ công mỹ nghệ, Gốm Bát Tràng, Nón Lá, Mây tre)
+  { id: 'gom_su_son_mai',     x1: -16.6, z1: 20.2, x2: -13.4, z2: 25.0 }, // Gốm Sứ & Sơn Mài
+  { id: 'non_la_lantern',     x1: -16.6, z1: 26.2, x2: -13.4, z2: 31.0 }, // Nón Lá & Đèn Lồng
+  { id: 'rattan_wood_craft',  x1: -10.0, z1: 20.2, x2:  -7.2, z2: 24.4 }, // Mây Tre Đan & Tượng Gỗ
+  // Khu Trái Cây Nhiệt Đới, Hoa Tươi & Hải Sản Tươi Sống (Cửa Bắc + Cánh Đông)
+  { id: 'ngoc_hao_1029',      x1:   9.95, z1: 18.8, x2: 13.25, z2: 22.0 }, // Đảo 1029 Ngọc Hảo
+  { id: 'tropical_fruits_n',  x1:  -7.4,  z1: 30.6, x2:  -3.2, z2: 33.8 }, // Sầu riêng, Măng cụt, Chôm chôm, Vú sữa
+  { id: 'fresh_flowers_n',    x1:   3.2,  z1: 30.6, x2:   7.4, z2: 33.8 }, // Hoa Tươi Cửa Bắc
+  { id: 'wet_seafood_n',      x1:   8.4,  z1: 30.6, x2:  12.6, z2: 33.8 }  // Hải Sản Tươi Sống, Thịt & Rau
 ];
 
 function clampMarketWalkPos(st, x, z) {
-  var nz = Math.max(0.55, Math.min(26.25, z));
-  var nx = x;
-  if (nz < 13.6) {
-    nx = Math.max(-5.62, Math.min(5.62, nx));
-  } else {
-    nx = Math.max(-5.62, Math.min(16.82, nx));
-  }
-  // Cấm xuyên tường ngăn Z = 13.6 ngoài vòm KHU ĂN UỐNG [-1.8, 1.8]
-  if (nx < 6.0 && nz > 13.22 && nz < 13.98 && Math.abs(nx) > 1.46) {
-    nz = (st && st.pig && st.pig.z >= 13.6) ? 13.98 : 13.22;
-  }
-  // Tường Nam của Cánh Đông (X >= 6.0, Z = 13.6)
-  if (nx >= 5.66 && nz < 13.98) {
-    if (st && st.pig && st.pig.z < 13.6) nx = 5.62;
-    else nz = 13.98;
-  }
-  // Vách ngăn Food Court <-> Fruit Craft tại X = 6.0 ngoài Ngã tư Chợ Đông [22.6, 25.8]
-  if (nz >= 13.6 && nx > 5.64 && nx < 6.36 && (nz < 22.92 || nz > 25.48)) {
-    nx = (st && st.pig && st.pig.x >= 6.0) ? 6.36 : 5.64;
-  }
-  // Chặn va chạm 8 quầy sạp với đệm 0.34m
+  var nx = Math.max(-17.45, Math.min(17.45, x));
+  var nz = Math.max(0.65, Math.min(35.35, z));
   for (var i = 0; i < MARKET_STALL_AABBS.length; i++) {
     var b = MARKET_STALL_AABBS[i];
     if (nx > b.x1 - 0.34 && nx < b.x2 + 0.34 && nz > b.z1 - 0.34 && nz < b.z2 + 0.34) {
@@ -195,51 +182,117 @@ function clampMarketWalkPos(st, x, z) {
   return { x: nx, z: nz };
 }
 
-function planMarketRealtimePath(st, tx, ty, tz, extraOpts) {
+function marketSegHitsBox(ax, az, bx, bz, b, pad) {
+  var x1 = b.x1 - pad, x2 = b.x2 + pad, z1 = b.z1 - pad, z2 = b.z2 + pad;
+  var dx = bx - ax, dz = bz - az;
+  var t0 = 0, t1 = 1;
+  var p = [-dx, dx, -dz, dz];
+  var q = [ax - x1, x2 - ax, az - z1, z2 - az];
+  for (var i = 0; i < 4; i++) {
+    if (Math.abs(p[i]) < 1e-6) {
+      if (q[i] < 0) return false;
+    } else {
+      var t = q[i] / p[i];
+      if (p[i] < 0) { if (t > t1) return false; if (t > t0) t0 = t; }
+      else { if (t < t0) return false; if (t < t1) t1 = t; }
+    }
+  }
+  return t0 < t1;
+}
+
+function routeAroundMarketObstacles(startPt, endPt) {
+  var out = [];
+  var cur = startPt;
+  var obs = MARKET_STALL_AABBS;
+  for (var iter = 0; iter < 6; iter++) {
+    var hitBox = null, pad = 0.28;
+    for (var i = 0; i < obs.length; i++) {
+      if (marketSegHitsBox(cur.x, cur.z, endPt.x, endPt.z, obs[i], pad)) {
+        hitBox = obs[i];
+        break;
+      }
+    }
+    if (!hitBox) break;
+    var cands = [
+      { x: hitBox.x1 - 0.52, z: hitBox.z1 - 0.52, y: 0 },
+      { x: hitBox.x2 + 0.52, z: hitBox.z1 - 0.52, y: 0 },
+      { x: hitBox.x1 - 0.52, z: hitBox.z2 + 0.52, y: 0 },
+      { x: hitBox.x2 + 0.52, z: hitBox.z2 + 0.52, y: 0 }
+    ];
+    var best = null, bestScore = 99999;
+    for (var ci = 0; ci < cands.length; ci++) {
+      var cp = cands[ci];
+      if (cp.x < -17.3 || cp.x > 17.3 || cp.z < 0.8 || cp.z > 35.2) continue;
+      if (Math.hypot(cp.x - cur.x, cp.z - cur.z) < 0.20) continue;
+      var blocked = false;
+      for (var j = 0; j < obs.length; j++) {
+        if (marketSegHitsBox(cur.x, cur.z, cp.x, cp.z, obs[j], 0.16)) { blocked = true; break; }
+      }
+      if (blocked) continue;
+      var stillHits = marketSegHitsBox(cp.x, cp.z, endPt.x, endPt.z, hitBox, pad) ? 40 : 0;
+      var score = stillHits + Math.hypot(cp.x - cur.x, cp.z - cur.z) + Math.hypot(endPt.x - cp.x, endPt.z - cp.z);
+      if (score < bestScore) { bestScore = score; best = cp; }
+    }
+    if (!best) break;
+    out.push(best);
+    cur = best;
+  }
+  out.push(endPt);
+  return out;
+}
+
+function planMarketRealtimePath(st, tx, targetFloorY, tz, extraOpts) {
   var p = st.pig;
   var eo = extraOpts || {};
-  // Seated Pig Auto-Stand (QĐ 250)
   p.seated = false;
   p.seatChairId = -1;
   p.eating = false;
   p.pendingSeatId = typeof eo.seatChairId === 'number' ? eo.seatChairId : -1;
   p.pendingAction = eo.pendingAction || null;
+  if (eo.dish) p.activeDish = eo.dish;
+  p._stuckTimer = 0;
 
-  var cl = clampMarketWalkPos(st, tx, tz);
+  var pushed = (typeof pushPointOutOfBoxes === 'function')
+    ? pushPointOutOfBoxes(tx, tz, MARKET_STALL_AABBS, 0.38)
+    : { x: tx, z: tz };
+  var cl = clampMarketWalkPos(st, pushed.x, pushed.z);
   tx = cl.x; tz = cl.z;
 
+  var rawWps = [{ x: tx, y: 0, z: tz }];
   if (typeof planNavGraphRealtimePath === 'function') {
     planNavGraphRealtimePath(MARKET_NAV_GRAPH, st, tx, 0, tz, eo);
-    // Vòng tránh Đảo Sạp 1044 hoặc Đảo Trái Cây 1029 nếu đi thẳng xuyên tâm đảo trong cùng zone
-    if (p.waypoints && p.waypoints.length > 0) {
-      var out = [];
-      var prevX = p.x, prevZ = p.z;
-      for (var i = 0; i < p.waypoints.length; i++) {
-        var wp = p.waypoints[i];
-        // Tránh xuyên qua Sạp 1044 (X ∈ [-2.0, 2.0], Z ∈ [19.4, 23.2])
-        if (Math.min(prevX, wp.x) < 2.0 && Math.max(prevX, wp.x) > -2.0 &&
-            Math.min(prevZ, wp.z) < 23.2 && Math.max(prevZ, wp.z) > 19.4) {
-          var sideX = ((prevX + wp.x) * 0.5 >= 0) ? 2.55 : -2.55;
-          out.push({ x: sideX, y: 0, z: 21.3 });
-        }
-        // Tránh xuyên qua Đảo Trái Cây 1029 (X ∈ [9.6, 13.6], Z ∈ [18.5, 22.3])
-        if (Math.min(prevX, wp.x) < 13.5 && Math.max(prevX, wp.x) > 9.7 &&
-            Math.min(prevZ, wp.z) < 22.3 && Math.max(prevZ, wp.z) > 18.5) {
-          var fSideX = ((prevX + wp.x) * 0.5 >= 11.6) ? 14.05 : 9.15;
-          out.push({ x: fSideX, y: 0, z: 20.4 });
-        }
-        out.push(wp);
-        prevX = wp.x; prevZ = wp.z;
-      }
-      p.waypoints = out;
-      p.targetX = out[0].x;
-      p.targetZ = out[0].z;
-    }
-    return;
+    rawWps = p.waypoints || rawWps;
   }
 
-  p.waypoints = [{ x: tx, y: 0, z: tz }];
-  p.targetX = tx; p.targetZ = tz; p.walking = true;
+  // Bước 1: giữ hành vi rẽ ngang Sạp 1044 / 1029 Ngọc Hảo; Bước 2: vòng tránh mọi quầy sạp 36m × 36m
+  var pre = [];
+  var prevX = p.x, prevZ = p.z;
+  for (var i = 0; i < rawWps.length; i++) {
+    var wp = rawWps[i];
+    if (Math.min(prevX, wp.x) < 2.0 && Math.max(prevX, wp.x) > -2.0 &&
+        Math.min(prevZ, wp.z) < 23.2 && Math.max(prevZ, wp.z) > 19.4) {
+      var sideX = ((prevX + wp.x) * 0.5 >= 0) ? 2.55 : -2.55;
+      pre.push({ x: sideX, y: 0, z: 21.3 });
+    }
+    if (Math.min(prevX, wp.x) < 13.5 && Math.max(prevX, wp.x) > 9.7 &&
+        Math.min(prevZ, wp.z) < 22.3 && Math.max(prevZ, wp.z) > 18.5) {
+      var fSideX = ((prevX + wp.x) * 0.5 >= 11.6) ? 14.05 : 9.15;
+      pre.push({ x: fSideX, y: 0, z: 20.4 });
+    }
+    pre.push(wp);
+    prevX = wp.x; prevZ = wp.z;
+  }
+  var out = [];
+  var curPt = { x: p.x, y: 0, z: p.z };
+  for (var pi = 0; pi < pre.length; pi++) {
+    var segs = routeAroundMarketObstacles(curPt, pre[pi]);
+    for (var si = 0; si < segs.length; si++) out.push(segs[si]);
+    curPt = pre[pi];
+  }
+  p.waypoints = out;
+  p.targetX = out[0].x;
+  p.targetZ = out[0].z;
+  p.walking = true;
 }
 
 function navigateMarketToZone(st, zoneId) {
@@ -279,7 +332,7 @@ function stepMarketTps(st, dt) {
     var curWp = (p.waypoints && p.waypoints.length > 0) ? p.waypoints[0] : { x: p.targetX, z: p.targetZ };
     var dx = curWp.x - p.x, dz = curWp.z - p.z;
     var dist = Math.hypot(dx, dz);
-    if (dist < 0.10) {
+    if (dist < 0.12) {
       p.x = curWp.x; p.z = curWp.z;
       if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
       if (p.waypoints && p.waypoints.length > 0) {
@@ -292,29 +345,57 @@ function stepMarketTps(st, dt) {
           p.x = sl.x; p.z = sl.z; p.y = 0;
           p.yaw = Math.atan2(sl.lookX - sl.x, sl.lookZ - sl.z);
           p.seated = true; p.seatChairId = sl.id;
-          p.eating = (p.pendingAction === 'eat_banhcuon');
+          p.eating = (p.pendingAction === 'eat_banhcuon' || p.pendingAction === 'eat_dish');
           if (p.eating) {
             p.ateFood = true;
-            st.toast = 'Sạp 1044: Bánh Cuốn Nóng 50K, Bánh Bèo Huế 20K & Dừa Xiêm ngọt lịm! 🥞🥥';
+            st.toast = 'Sạp 1044: Đủ Phở, Bún Bò Huế, Cơm Tấm, Bánh Xèo, Bánh Cuốn 50K, Chè & Dừa Xiêm! 🍜🥞';
             st.toastUntil = st.t + 4.4;
           } else {
-            st.toast = 'Đã ngồi ghế inox Sạp 1044! Chạm nút để ăn hoặc chạm sàn tự đứng dậy đi tiếp 🪑';
+            st.toast = 'Đã ngồi ghế inox Chợ Bến Thành! Bấm gọi món Việt hoặc chạm sàn tự đứng dậy 🪑';
             st.toastUntil = st.t + 3.8;
           }
           p.pendingSeatId = -1;
         }
         if (p.pendingAction === 'try_aodai') {
           p.wearingAoDai = !p.wearingAoDai;
+          p.outfit = p.wearingAoDai ? 'aodai' : 'none';
           p.yaw = -Math.PI * 0.5;
-          st.toast = p.wearingAoDai
-            ? 'Sạp Hương Trinh: Đã ướm thử Áo Dài Lụa Hà Đông thêu Hoa Sen cực duyên! 👘✨'
-            : 'Đã xếp gọn Áo Dài Lụa & dạo tiếp Chợ Bến Thành!';
-          st.toastUntil = st.t + 4.2;
-        } else if (p.pendingAction === 'buy_mango') {
-          p.boughtFruit = true;
-          p.yaw = 0;
-          st.toast = 'Sạp 1029 Ngọc Hảo: Đã chọn Xoài Cát Hòa Lộc chín vàng, Nón Lá & Gốm Bát Tràng! 🥭👒';
+          st.toast = p.wearingAoDai ? 'Sạp Hương Trinh 415: Đã ướm thử Áo Dài Lụa Hà Đông! 👘✨' : 'Đã xếp gọn Áo Dài Lụa!';
+          st.toastUntil = st.t + 4.0;
+        } else if (p.pendingAction === 'try_adidas') {
+          var adSeq = ['adidas_jacket', 'adidas_polo', 'adidas_jogger', 'none'];
+          var ai = adSeq.indexOf(p.outfit);
+          p.outfit = adSeq[(ai + 1) % adSeq.length];
+          p.wearingAoDai = false; p.boughtSamba = true;
+          st.toast = p.outfit === 'none' ? 'Đã cởi đồ Adidas!' : 'Sạp Adidas 208: Đang thử bộ Adidas 3 Sọc + Giày & Túi! 🧥👟';
+          st.toastUntil = st.t + 4.0;
+        } else if (p.pendingAction === 'try_nike') {
+          var nkSeq = ['nike_tee', 'nike_hoodie', 'none'];
+          var ni = nkSeq.indexOf(p.outfit);
+          p.outfit = nkSeq[(ni + 1) % nkSeq.length];
+          p.wearingAoDai = false; p.boughtSamba = true;
+          st.toast = p.outfit === 'none' ? 'Đã cởi đồ Nike!' : 'Sạp Nike 212: Đang thử áo Nike Swoosh thể thao cực ngầu! ✔️👕';
+          st.toastUntil = st.t + 4.0;
+        } else if (p.pendingAction === 'buy_shoes_bags') {
+          p.boughtSamba = true;
+          st.toast = 'Sạp 306: Đã chọn Giày Sneaker, Dép Da, Túi Xách & Đồng Hồ Bến Thành! 👟🎒';
+          st.toastUntil = st.t + 4.0;
+        } else if (p.pendingAction === 'buy_mango' || p.pendingAction === 'buy_tropical') {
+          p.boughtFruit = true; p.boughtSamba = true;
+          st.toast = 'Trái Cây 1029 Ngọc Hảo & Cửa Bắc: Sầu riêng Ri6, Măng cụt, Chôm chôm, Xoài cát & Dừa xiêm! 🥭🍈';
           st.toastUntil = st.t + 4.4;
+        } else if (p.pendingAction === 'buy_coffee_dry') {
+          p.boughtSamba = true;
+          st.toast = 'Cửa Đông · Liên Sài Gòn 823: Cà phê Chồn, Trà Sen, Hạt Điều, Tiêu & Nước Mắm Phú Quốc! ☕📦';
+          st.toastUntil = st.t + 4.2;
+        } else if (p.pendingAction === 'buy_craft') {
+          p.boughtSamba = true;
+          st.toast = 'Cửa Tây Mỹ Nghệ: Gốm Bát Tràng, Sơn Mài, Nón Lá Bài Thơ & Mây Tre Đan! 🏺👒';
+          st.toastUntil = st.t + 4.2;
+        } else if (p.pendingAction === 'buy_seafood_flower') {
+          p.boughtSamba = true;
+          st.toast = 'Cửa Bắc Tươi Sống: Tôm Sú, Cua Ghẹ, Hoa Sen & Hoa Cúc Tươi Rực Rỡ! 🦞💐';
+          st.toastUntil = st.t + 4.2;
         } else if (p.pendingAction === 'exit_market') {
           st.exiting = true;
         }
@@ -340,29 +421,19 @@ function stepMarketTps(st, dt) {
       }
     }
 
-    // Cập nhật thụ động zone khi Heo đi bộ vượt cổng (0% teleport)
     var newZone = getMarketZoneAt(p.x, p.z);
     if (newZone !== st.zone) {
       st.zone = newZone;
       st.room = newZone;
-      if (newZone === 'food_court') {
-        st.toast = 'Khu Ẩm Thực Trung Tâm Sạp 1044 · Bánh Cuốn 50K, Bánh Bèo Huế 20K 🥞';
-      } else if (newZone === 'fruit_craft') {
-        st.toast = 'Cánh Đông · Đảo Trái Cây 1029 Ngọc Hảo, Gốm Bát Tràng & Nón Lá 🥭';
-      } else {
-        st.toast = 'Sảnh Cửa Nam · Sạp Vải Áo Dài Hương Trinh & Đặc Sản Liên Sài Gòn 👘';
-      }
-      st.toastUntil = st.t + 3.8;
       if (typeof st.onZoneChanged === 'function') st.onZoneChanged(newZone);
     }
   }
 
-  // Cổng sắt xếp Cửa Nam & Cửa Bắc mở mượt khi rời chợ
-  var nearNorth = p.z > 21.0 && p.x > 6.0;
-  var targetSouth = (st.exiting && !nearNorth) ? 0.92 : 0.0;
-  var targetNorth = (st.exiting && nearNorth) ? 0.92 : 0.0;
-  st.southGateOpen += (targetSouth - st.southGateOpen) * Math.min(1, dt * 6.0);
-  st.northGateOpen += (targetNorth - st.northGateOpen) * Math.min(1, dt * 6.0);
+  // Cổng sắt xếp cả 4 Cửa Đông – Tây – Nam – Bắc mở mượt khi rời chợ
+  st.southGateOpen += (((st.exiting && p.z < 5.0) ? 0.92 : 0.0) - st.southGateOpen) * Math.min(1, dt * 6.0);
+  st.northGateOpen += (((st.exiting && p.z > 31.0) ? 0.92 : 0.0) - st.northGateOpen) * Math.min(1, dt * 6.0);
+  st.eastGateOpen  += (((st.exiting && p.x > 13.0) ? 0.92 : 0.0) - st.eastGateOpen)  * Math.min(1, dt * 6.0);
+  st.westGateOpen  += (((st.exiting && p.x < -13.0) ? 0.92 : 0.0) - st.westGateOpen) * Math.min(1, dt * 6.0);
   st.rightDoorOpen = st.southGateOpen;
   if (st.exiting) st.exitFade = Math.min(1, st.exitFade + dt * 4.2);
 
@@ -372,11 +443,11 @@ function stepMarketTps(st, dt) {
   }
 }
 
-/* ==================== 2. RAYCAST 3D TƯƠNG TÁC (GHẾ, QUẦY, CỔNG & SÀN CHỮ L) ==================== */
+/* ==================== 2. RAYCAST 3D TƯƠNG TÁC MỌI SẠP HÀNG & 4 CỬA (QĐ 259) ==================== */
 function rayMarketSphere(ox, oy, oz, dx, dy, dz, cx, cy, cz, rad) {
   var ocx = cx - ox, ocy = cy - oy, ocz = cz - oz;
   var proj = ocx * dx + ocy * dy + ocz * dz;
-  if (proj < 0.2 || proj > 26) return -1;
+  if (proj < 0.2 || proj > 38) return -1;
   var d2 = (ocx * ocx + ocy * ocy + ocz * ocz) - proj * proj;
   return d2 <= rad * rad ? proj : -1;
 }
@@ -391,46 +462,59 @@ function pickMarketTarget3D(cam, st, sx, sy) {
   dx /= dl; dy /= dl; dz /= dl;
   var ox = cam.pos.x, oy = cam.pos.y, oz = cam.pos.z;
 
-  // 1. Chạm vào bất kỳ Ghế đẩu inox nào tại Sạp 1044
+  // 1. Ghế đẩu inox tại Food Court
   if (st.stools) {
     var bestS = null, bestT = 999;
     for (var i = 0; i < st.stools.length; i++) {
       var sl = st.stools[i];
-      var ht = rayMarketSphere(ox, oy, oz, dx, dy, dz, sl.x, 0.32, sl.z, 0.52);
+      var ht = rayMarketSphere(ox, oy, oz, dx, dy, dz, sl.x, 0.32, sl.z, 0.55);
       if (ht > 0 && ht < bestT) { bestT = ht; bestS = sl; }
     }
     if (bestS) return { kind: 'stool', stool: bestS, x: bestS.x, y: 0, z: bestS.z };
   }
 
-  // 2. Chạm Sạp Vải Hương Trinh (thử Áo Dài)
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, -4.9, 1.0, 6.5, 1.75) > 0) {
-    return { kind: 'aodai', x: -3.4, y: 0, z: 6.5 };
+  // 2. Các sạp hàng tương tác toàn Chợ (tìm theo khoảng cách tia gần nhất!)
+  var spots = [
+    // Cửa Nam Thời Trang & Thể Thao
+    { cx: -15.0, cy: 1.0, cz: 7.0,  r: 2.2, tgt: { kind: 'aodai',         x: -12.6, y: 0, z: 7.0 } },
+    { cx:  -7.4, cy: 1.0, cz: 6.5,  r: 2.0, tgt: { kind: 'try_adidas',    x:  -4.8, y: 0, z: 6.5 } },
+    { cx:   7.4, cy: 1.0, cz: 6.5,  r: 2.0, tgt: { kind: 'try_nike',      x:   4.8, y: 0, z: 6.5 } },
+    { cx:  -7.4, cy: 0.9, cz: 12.2, r: 1.8, tgt: { kind: 'buy_shoes',     x:  -4.8, y: 0, z: 12.2 } },
+    { cx:   7.4, cy: 0.9, cz: 12.2, r: 1.8, tgt: { kind: 'buy_shoes',     x:   4.8, y: 0, z: 12.2 } },
+    // Ẩm Thực VN & Sạp 1044
+    { cx:   0.0, cy: 0.9, cz: 21.3, r: 2.0, tgt: { kind: 'food',          x: -0.38, y: 0, z: 19.15, stoolId: 1, dish: 'banhcuon' } },
+    { cx:  -5.5, cy: 0.9, cz: 22.0, r: 1.9, tgt: { kind: 'food',          x: -2.45, y: 0, z: 26.80, stoolId: 4, dish: 'pho' } },
+    { cx:  -2.8, cy: 0.9, cz: 27.1, r: 1.8, tgt: { kind: 'food',          x: -2.45, y: 0, z: 26.80, stoolId: 4, dish: 'bunbo' } },
+    { cx:   2.8, cy: 0.9, cz: 27.1, r: 1.8, tgt: { kind: 'food',          x:  2.45, y: 0, z: 26.80, stoolId: 5, dish: 'banhxeo' } },
+    { cx:   7.0, cy: 0.9, cz: 27.1, r: 1.8, tgt: { kind: 'food',          x:  2.45, y: 0, z: 26.80, stoolId: 5, dish: 'che' } },
+    // Trái Cây, Hoa, Hải Sản, Đồ Khô, Mỹ Nghệ
+    { cx:  11.6, cy: 0.9, cz: 20.4, r: 2.0, tgt: { kind: 'fruit',         x: 11.6,  y: 0, z: 18.0 } },
+    { cx:  -5.3, cy: 1.0, cz: 32.2, r: 2.0, tgt: { kind: 'fruit',         x: -5.3,  y: 0, z: 29.8 } },
+    { cx:   5.3, cy: 1.0, cz: 32.2, r: 1.9, tgt: { kind: 'buy_fresh',     x:  5.3,  y: 0, z: 29.8 } },
+    { cx:  10.5, cy: 1.0, cz: 32.2, r: 1.9, tgt: { kind: 'buy_fresh',     x: 10.5,  y: 0, z: 29.8 } },
+    { cx:  15.0, cy: 1.0, cz: 6.2,  r: 2.2, tgt: { kind: 'buy_coffee',    x: 12.6,  y: 0, z: 6.2 } },
+    { cx:  15.0, cy: 1.0, cz: 24.0, r: 2.2, tgt: { kind: 'buy_coffee',    x: 12.6,  y: 0, z: 24.0 } },
+    { cx: -15.0, cy: 1.0, cz: 24.0, r: 2.2, tgt: { kind: 'buy_craft',     x: -12.6, y: 0, z: 24.0 } },
+    // 4 Cửa Đông – Tây – Nam – Bắc (rời Chợ)
+    { cx:   0.0, cy: 1.4, cz:  0.1, r: 1.8, tgt: { kind: 'exit',          x:  0.0,  y: 0, z: 1.2 } },
+    { cx:   0.0, cy: 1.4, cz: 35.9, r: 1.8, tgt: { kind: 'exit',          x:  0.0,  y: 0, z: 34.8 } },
+    { cx:  17.9, cy: 1.4, cz: 17.0, r: 1.8, tgt: { kind: 'exit',          x: 16.8,  y: 0, z: 17.0 } },
+    { cx: -17.9, cy: 1.4, cz: 17.0, r: 1.8, tgt: { kind: 'exit',          x: -16.8, y: 0, z: 17.0 } }
+  ];
+  var bestSpot = null, bestSpotT = 999;
+  for (var si = 0; si < spots.length; si++) {
+    var sp = spots[si];
+    var ts = rayMarketSphere(ox, oy, oz, dx, dy, dz, sp.cx, sp.cy, sp.cz, sp.r);
+    if (ts > 0 && ts < bestSpotT) { bestSpotT = ts; bestSpot = sp.tgt; }
   }
-  // 3. Chạm Quầy Sạp 1044 / Bánh Cuốn
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, 0.0, 0.9, 21.3, 1.85) > 0) {
-    return { kind: 'food', x: -0.38, y: 0, z: 19.15, stoolId: 1 };
-  }
-  // 4. Chạm Đảo Trái Cây 1029 Ngọc Hảo
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, 11.6, 0.9, 20.4, 1.75) > 0) {
-    return { kind: 'fruit', x: 11.6, y: 0, z: 17.9 };
-  }
-  // 5. Chạm Cửa Số 1 (Cửa Nam) hoặc Cửa Bắc -> đi ra khỏi chợ
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, 0.0, 1.3, 0.1, 1.55) > 0) {
-    return { kind: 'exit', x: 0.0, y: 0, z: 1.05 };
-  }
-  if (rayMarketSphere(ox, oy, oz, dx, dy, dz, 11.6, 1.3, 26.7, 1.55) > 0) {
-    return { kind: 'exit', x: 11.6, y: 0, z: 25.65 };
-  }
+  if (bestSpot) return bestSpot;
 
-  // 6. Chạm Sàn 3D ở bất kỳ zone nào của Chợ Bến Thành chữ L
+  // 3. Chạm Sàn 3D ở bất kỳ ô nào trong Chợ 36m × 36m
   if (dy < -0.025) {
     var tFloor = -oy / dy;
-    if (tFloor > 0.2 && tFloor < 34) {
+    if (tFloor > 0.2 && tFloor < 42) {
       var fx = ox + dx * tFloor, fz = oz + dz * tFloor;
-      var inSouth = (fx >= -6.0 && fx <= 6.0 && fz >= 0.0 && fz <= 13.6);
-      var inFood  = (fx >= -6.0 && fx <= 6.0 && fz >= 13.6 && fz <= 26.8);
-      var inFruit = (fx >= 6.0 && fx <= 17.2 && fz >= 13.6 && fz <= 26.8);
-      if (inSouth || inFood || inFruit) {
+      if (fx >= -18.0 && fx <= 18.0 && fz >= 0.0 && fz <= 36.0) {
         var cl = clampMarketWalkPos(st, fx, fz);
         return { kind: 'floor', x: cl.x, y: 0, z: cl.z };
       }
@@ -439,46 +523,48 @@ function pickMarketTarget3D(cam, st, sx, sy) {
   return null;
 }
 
-/* ==================== 3. RENDER WEBGL 3D ĐẠI SẢNH CHỢ BẾN THÀNH LIÊN HOÀN (QĐ 250) ==================== */
+/* ==================== 3. RENDER WEBGL 3D CHỢ BẾN THÀNH 1914 (36m × 36m, 4 CỬA, ĐỦ MỌI MẶT HÀNG) ==================== */
 var MARKET_ATMO = {
   clearColor: [0.22, 0.14, 0.08, 1.0],
-  hemiLow: [0.36, 0.28, 0.18],
-  hemiHigh: [0.76, 0.66, 0.48],
-  sunDir: [0.26, 0.86, -0.44],
-  sunCol: [1.08, 0.92, 0.66],
-  wrapBias: 0.46,
+  hemiLow: [0.38, 0.30, 0.20],
+  hemiHigh: [0.80, 0.72, 0.54],
+  sunDir: [0.24, 0.88, -0.40],
+  sunCol: [1.10, 0.94, 0.68],
+  wrapBias: 0.48,
   outdoorRect: [0.0, 0.0, 0.0, 0.0],
-  fogCol: [0.34, 0.24, 0.14],
-  fogParams: [14.0, 30.0, 0.40]
+  fogCol: [0.34, 0.25, 0.16],
+  fogParams: [22.0, 48.0, 0.34]
 };
 
 function drawMarketHangingLampWebgl(wgl, x, z, col) {
   var dm = wgl.drawMesh;
-  dm('cyl', 'white', x, 4.90, z, 0, 0, 0, 0.03, 1.8, 0.03, { tint: [0.18, 0.14, 0.10, 1] });
-  dm('cone', 'white', x, 3.92, z, 0, 0, 0, 0.42, 0.24, 0.42, { tint: col || [0.92, 0.62, 0.18, 1] });
-  dm('sphere', 'white', x, 3.78, z, 0, 0, 0, 0.16, 0.16, 0.16, { tint: [1.0, 0.90, 0.54, 1], emissive: 1.45 });
+  dm('cyl', 'white', x, 5.4, z, 0, 0, 0, 0.03, 3.4, 0.03, { tint: [0.16, 0.12, 0.08, 1] });
+  dm('cone', 'white', x, 3.75, z, 0, 0, 0, 0.56, 0.22, 0.56, { tint: col });
+  dm('sphere', 'white', x, 3.62, z, 0, 0, 0, 0.16, 0.16, 0.16, { tint: [1.0, 0.90, 0.50, 1], emissive: 1.5 });
 }
 
 function drawMarketCeilingFanWebgl(wgl, x, z, t, phase) {
   var dm = wgl.drawMesh;
-  var rot = t * 5.2 + (phase || 0);
-  dm('cyl', 'white', x, 5.10, z, 0, 0, 0, 0.05, 1.35, 0.05, { tint: [0.22, 0.42, 0.28, 1] });
-  dm('cyl', 'white', x, 4.42, z, 0, rot, 0, 0.24, 0.10, 0.24, { tint: [0.24, 0.52, 0.34, 1] });
-  dm('box', 'white', x, 4.42, z, 0, rot, 0, 1.45, 0.03, 0.16, { tint: [0.24, 0.52, 0.34, 1] });
-  dm('box', 'white', x, 4.42, z, 0, rot + Math.PI * 0.5, 0, 1.45, 0.03, 0.16, { tint: [0.24, 0.52, 0.34, 1] });
+  dm('cyl', 'white', x, 5.9, z, 0, 0, 0, 0.06, 2.2, 0.06, { tint: [0.20, 0.22, 0.26, 1] });
+  dm('cyl', 'white', x, 4.82, z, 0, 0, 0, 0.32, 0.10, 0.32, { tint: [0.28, 0.32, 0.38, 1] });
+  var base = t * 5.6 + (phase || 0);
+  for (var i = 0; i < 3; i++) {
+    var a = base + (i * Math.PI * 2) / 3;
+    dm('box', 'white', x + Math.sin(a) * 0.62, 4.80, z + Math.cos(a) * 0.62, 0, a, 0, 0.18, 0.025, 1.12, { tint: [0.46, 0.52, 0.60, 1] });
+  }
 }
 
 function drawMarketPropPhoPotWebgl(wgl, x, y, z) {
   var dm = wgl.drawMesh;
-  dm('cyl', 'white', x, y + 0.18, z, 0, 0, 0, 0.38, 0.36, 0.38, { tint: [0.80, 0.84, 0.88, 1], specPow: 96 });
-  dm('cyl', 'white', x, y + 0.35, z, 0, 0, 0, 0.35, 0.03, 0.35, { tint: [0.76, 0.42, 0.12, 1] });
+  dm('cyl', 'white', x, y + 0.26, z, 0, 0, 0, 0.66, 0.52, 0.66, { tint: [0.80, 0.84, 0.88, 1], specPow: 96, rim: 0.28 });
+  dm('cyl', 'white', x, y + 0.53, z, 0, 0, 0, 0.56, 0.02, 0.56, { tint: [0.88, 0.56, 0.14, 1] });
 }
 
 function drawMarketPropCoconutClusterWebgl(wgl, x, y, z) {
   var dm = wgl.drawMesh;
-  var pts = [[-0.14, 0.10, -0.06], [0.12, 0.10, -0.06], [0, 0.10, 0.12], [0, 0.26, 0]];
+  var pts = [[-0.18, 0, 0], [0.18, 0, 0], [0, 0, 0.20], [-0.08, 0.24, 0.08], [0.10, 0.24, 0.10]];
   for (var i = 0; i < pts.length; i++) {
-    dm('sphere', 'white', x + pts[i][0], y + pts[i][1], z + pts[i][2], 0, 0, 0, 0.22, 0.22, 0.22, { tint: [0.10, 0.54, 0.24, 1] });
+    dm('sphere', 'white', x + pts[i][0], y + 0.14 + pts[i][1], z + pts[i][2], 0, 0, 0, 0.28, 0.26, 0.28, { tint: [0.12, 0.56, 0.22, 1], specPow: 48 });
   }
 }
 
@@ -506,120 +592,157 @@ function renderMarketWebglScene(wgl, cam, st, W, H) {
     fogCol: MARKET_ATMO.fogCol,
     fogParams: MARKET_ATMO.fogParams,
     lights: [
-      { pos: [0.0, 4.4, 6.2],  col: [1.05, 0.78, 0.36] },
-      { pos: [0.0, 4.4, 20.4], col: [1.15, 0.80, 0.38] },
-      { pos: [11.6, 4.4, 20.4], col: [1.05, 0.84, 0.42] },
-      { pos: [p.x, 3.6, p.z],  col: [0.55, 0.45, 0.25] }
+      { pos: [0.0,  5.5,  8.0],  col: [1.08, 0.86, 0.52] },
+      { pos: [0.0,  5.5, 22.0],  col: [1.14, 0.88, 0.50] },
+      { pos: [-11.0,5.5, 18.0],  col: [1.05, 0.86, 0.50] },
+      { pos: [11.0, 5.5, 18.0],  col: [1.05, 0.86, 0.50] }
     ]
   };
   wgl.beginFrame(W, H, cam, atmo);
   var dm = wgl.drawMesh;
 
-  // Zone visibility culling giữ ~250-450 drawElements calls/frame mà không cắt tầm nhìn qua cổng!
-  var showSouth = (p.z < 21.0 || cam.pos.z < 21.0);
-  var showFood  = true;
-  var showFruit = (p.z > 13.0 || cam.pos.z > 13.0 || p.x > 3.5);
-
-  /* ---------------- A. SẢNH CỬA NAM & VẢI ÁO DÀI (X ∈ [-6, 6], Z ∈ [0, 13.6]) ---------------- */
-  if (showSouth) {
-    // Sàn gạch & Dải dẫn hướng đỏ đô + Mái kèo thép 5.8m + Giếng trời kính mờ
-    dm('box', 'marketTileSouth', 0, -0.05, 6.8, 0, 0, 0, 12.0, 0.10, 13.6, { tint: [1,1,1,1], us: 4.5, vs: 5.0 });
-    dm('box', 'white', 0, 0.008, 6.9, 0, 0, 0, 2.5, 0.012, 13.0, { tint: [0.55, 0.08, 0.22, 1] });
-    dm('box', 'marketRoofPanel', 0, 5.88, 6.8, 0, 0, 0, 12.0, 0.16, 13.6, { tint: [1,1,1,1], us: 4, vs: 4 });
-    dm('quad', 'marketSkylight', 0, 5.78, 6.8, Math.PI * 0.5, 0, 0, 3.2, 11.6, 1, { tint: [1,1,1,1], emissive: 1.05, us: 1, vs: 3 });
-    for (var sz = 2.2; sz <= 12.2; sz += 2.5) {
-      dm('box', 'white', 0, 5.56, sz, 0, 0, 0, 11.8, 0.22, 0.22, { tint: [0.30, 0.34, 0.40, 1] });
-      dm('box', 'white', -4.2, 4.95, sz, 0, 0, 0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-      dm('box', 'white',  4.2, 4.95, sz, 0, 0, -0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-    }
-    // Tường Trái, Tường Phải, Cột Chợ & Mặt tiền Cửa Số 1 (Z = 0)
-    dm('box', 'marketWallGold', -6.08, 2.9, 6.8, 0, 0, 0, 0.16, 5.8, 13.6, { tint: [1,1,1,1], us: 4, vs: 2 });
-    dm('box', 'marketWallGold',  6.08, 2.9, 6.8, 0, 0, 0, 0.16, 5.8, 13.6, { tint: [1,1,1,1], us: 4, vs: 2 });
-    for (var pz = 2.5; pz <= 11.5; pz += 4.5) {
-      dm('box', 'marketWallGold', -5.84, 2.9, pz, 0, 0, 0, 0.26, 5.8, 0.26, { tint: [0.92, 0.78, 0.48, 1] });
-      dm('box', 'marketWallGold',  5.84, 2.9, pz, 0, 0, 0, 0.26, 5.8, 0.26, { tint: [0.92, 0.78, 0.48, 1] });
-    }
-    dm('box', 'marketWallGold', -3.78, 2.9, -0.06, 0, 0, 0, 4.45, 5.8, 0.14, { tint: [1,1,1,1], us: 1.6, vs: 2 });
-    dm('box', 'marketWallGold',  3.78, 2.9, -0.06, 0, 0, 0, 4.45, 5.8, 0.14, { tint: [1,1,1,1], us: 1.6, vs: 2 });
-    dm('box', 'marketWallGold',  0.0,  4.45, -0.06, 0, 0, 0, 3.12, 2.7, 0.14, { tint: [1,1,1,1], us: 1.2, vs: 1 });
-    // Ánh sáng ấm ngoài quảng trường Quách Thị Trang & 2 cánh cổng sắt xếp Cửa Số 1
-    dm('quad', 'white', 0, 1.55, -0.18, 0, 0, 0, 3.2, 3.1, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
-    dm('quad', 'marketIronGate', -1.16, 1.48, 0.04, 0, 0, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });
-    var sgAng = st.southGateOpen * 1.15;
-    dm('quad', 'marketIronGate', 1.55 - Math.cos(sgAng) * 0.39, 1.48, 0.04 + Math.sin(sgAng) * 0.39, 0, -sgAng, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });
-
-    // Biển CỬA SỐ 1 · CỬA NAM & Tranh Tường Hương Trinh + Liên Sài Gòn 823
-    dm('quad', 'signCuaSo1', 0, 3.35, 0.04, 0, 0, 0, 3.8, 0.92, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signHuongTrinh', -5.94, 3.28, 6.5, 0, Math.PI * 0.5, 0, 8.6, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artAoDaiFabric', -5.94, 1.92, 3.6, 0, Math.PI * 0.5, 0, 3.4, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artAoDaiFabric', -5.94, 1.92, 8.6, 0, Math.PI * 0.5, 0, 3.4, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signLienSaiGon',  5.94, 3.28, 4.9, 0, -Math.PI * 0.5, 0, 6.2, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artLienTeaShelves', 5.94, 1.92, 4.9, 0, -Math.PI * 0.5, 0, 5.8, 1.75, 1, { tint: [1,1,1,1] });
-
-    // Sạp vải Hương Trinh (X ∈ [-5.95, -4.15], Z ∈ [1.5, 11.5]) + Cuộn lụa 3D & Nón lá treo
-    dm('box', 'marketWood', -5.05, 0.44, 6.5, 0, 0, 0, 1.72, 0.88, 9.8, { tint: [1,1,1,1], us: 3, vs: 1 });
-    var silkCols = [[0.88, 0.11, 0.28, 1], [0.98, 0.80, 0.08, 1], [0.06, 0.72, 0.50, 1], [0.15, 0.39, 0.92, 1], [0.58, 0.20, 0.92, 1], [0.96, 0.45, 0.09, 1]];
-    for (var sc = 0; sc < 6; sc++) {
-      var szPos = 2.2 + sc * 1.65;
-      dm('box', 'white', -4.70, 0.98, szPos, 0, 0, 0, 0.68, 0.20, 0.95, { tint: silkCols[sc] });
-      dm('cyl', 'white', -5.35, 1.04, szPos, Math.PI * 0.5, 0, 0, 0.22, 0.85, 0.22, { tint: silkCols[(sc + 2) % 6] });
-      dm('cone', 'white', -4.45, 2.55, szPos, 0.25, Math.PI * 0.5, 0, 0.46, 0.18, 0.46, { tint: [0.92, 0.82, 0.54, 1] });
-    }
-    // Sạp Đặc Sản Liên Sài Gòn 823 (X ∈ [4.15, 5.95], Z ∈ [1.5, 8.2]) + Hũ mứt nắp đỏ & hộp trà
-    dm('box', 'marketWood', 5.05, 0.44, 4.85, 0, 0, 0, 1.72, 0.88, 6.5, { tint: [1,1,1,1], us: 2, vs: 1 });
-    var jarCols = [[0.96, 0.62, 0.04, 1], [0.09, 0.64, 0.29, 1], [0.85, 0.45, 0.12, 1], [0.18, 0.48, 0.28, 1], [0.78, 0.22, 0.18, 1]];
-    for (var jc = 0; jc < 5; jc++) {
-      var jzPos = 2.2 + jc * 1.32;
-      dm('cyl', 'white', 4.60, 1.04, jzPos, 0, 0, 0, 0.34, 0.30, 0.34, { tint: jarCols[jc] });
-      dm('cyl', 'white', 4.60, 1.21, jzPos, 0, 0, 0, 0.36, 0.06, 0.36, { tint: [0.86, 0.12, 0.12, 1] });
-      dm('box', 'white', 5.25, 1.04, jzPos, 0, 0, 0, 0.42, 0.32, 0.55, { tint: [0.12, 0.46, 0.24, 1] });
-    }
-    // Đèn & Quạt trần Sảnh Cửa Nam
-    drawMarketHangingLampWebgl(wgl, -2.5, 4.2, [0.96, 0.62, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl,  2.5, 4.2, [0.96, 0.62, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl, -2.5, 9.8, [0.92, 0.45, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl,  2.5, 9.8, [0.92, 0.45, 0.08, 1]);
-    drawMarketCeilingFanWebgl(wgl, 0, 5.2, st.t, 0.2);
-    drawMarketCeilingFanWebgl(wgl, 0, 10.6, st.t, 1.4);
+  // Distance Culling 26m giữ mượt 60fps cho props nhỏ trong đại sảnh 36m × 36m
+  function nearCam(wx, wz, rad) {
+    return Math.hypot(wx - cam.pos.x, wz - cam.pos.z) <= (rad || 26.0);
   }
 
-  /* ---------------- VÁCH CỔNG VÒM Z = 13.6 (SOUTH_HALL <-> FOOD_COURT, MỞ [-1.8, 1.8]) ---------------- */
-  dm('box', 'marketWallGold', -3.9, 2.9, 13.6, 0, 0, 0, 4.2, 5.8, 0.22, { tint: [1,1,1,1], us: 1.5, vs: 2 });
-  dm('box', 'marketWallGold',  3.9, 2.9, 13.6, 0, 0, 0, 4.2, 5.8, 0.22, { tint: [1,1,1,1], us: 1.5, vs: 2 });
-  dm('box', 'marketWallGold',  0.0, 4.6, 13.6, 0, 0, 0, 3.6, 2.4, 0.22, { tint: [1,1,1,1], us: 1.4, vs: 1 });
-  dm('quad', 'signKhuAnUong', 0, 3.22, 13.47, 0, Math.PI, 0, 4.2, 0.88, 1, { tint: [1,1,1,1] });
-  dm('quad', 'signKhuAnUong', 0, 3.22, 13.73, 0, 0, 0, 4.2, 0.88, 1, { tint: [1,1,1,1] });
+  /* ---------------- A. NỀN Ô BÀN CỜ, ĐẠI SẢNH CHỮ THẬP & MÁI VÒM KÈO THÉP + LOUVERS 1914 ---------------- */
+  dm('box', 'marketTileSouth',  -9.0, -0.05,  9.0, 0, 0, 0, 18.0, 0.10, 18.0, { tint: [1,1,1,1], us: 6, vs: 6 });
+  dm('box', 'marketTileSouth',   9.0, -0.05,  9.0, 0, 0, 0, 18.0, 0.10, 18.0, { tint: [1,1,1,1], us: 6, vs: 6 });
+  dm('box', 'marketTileFood',   -9.0, -0.05, 27.0, 0, 0, 0, 18.0, 0.10, 18.0, { tint: [1,1,1,1], us: 6, vs: 6 });
+  dm('box', 'marketTileFruit',   9.0, -0.05, 27.0, 0, 0, 0, 18.0, 0.10, 18.0, { tint: [1,1,1,1], us: 6, vs: 6 });
+  // Trục hành lang chữ thập đỏ đất dẫn lối thẳng giữa 4 Cửa Đông–Tây–Nam–Bắc
+  dm('box', 'white', 0.0, 0.008, 18.0, 0, 0, 0, 4.2, 0.012, 35.6, { tint: [0.56, 0.11, 0.15, 1] });
+  dm('box', 'white', 0.0, 0.009, 17.0, 0, 0, 0, 35.6, 0.012, 4.0, { tint: [0.56, 0.11, 0.15, 1] });
 
-  /* ---------------- B. KHU ẨM THỰC TRUNG TÂM SẠP 1044 (X ∈ [-6, 6], Z ∈ [13.6, 26.8]) ---------------- */
-  if (showFood) {
-    dm('box', 'marketTileFood', 0, -0.05, 20.2, 0, 0, 0, 12.0, 0.10, 13.2, { tint: [1,1,1,1], us: 4.5, vs: 5.0 });
-    dm('box', 'white', 0, 0.008, 21.3, 0, 0, 0, 5.0, 0.012, 5.8, { tint: [0.50, 0.11, 0.11, 1] });
-    dm('box', 'marketRoofPanel', 0, 5.88, 20.2, 0, 0, 0, 12.0, 0.16, 13.2, { tint: [1,1,1,1], us: 4, vs: 4 });
-    dm('quad', 'marketSkylight', 0, 5.78, 20.2, Math.PI * 0.5, 0, 0, 3.2, 11.2, 1, { tint: [1,1,1,1], emissive: 1.05, us: 1, vs: 3 });
-    for (var fz = 15.6; fz <= 25.4; fz += 2.6) {
-      dm('box', 'white', 0, 5.56, fz, 0, 0, 0, 11.8, 0.22, 0.22, { tint: [0.30, 0.34, 0.40, 1] });
-      dm('box', 'white', -4.2, 4.95, fz, 0, 0, 0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-      dm('box', 'white',  4.2, 4.95, fz, 0, 0, -0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
+  // Mái lồng chợ 1914 cao 7.2m + 2 trục giếng trời & hàng cửa gió lá sách louvers trên cao
+  dm('box', 'marketRoofPanel', 0.0, 7.28, 18.0, 0, 0, 0, 36.2, 0.18, 36.2, { tint: [1,1,1,1], us: 10, vs: 10 });
+  dm('quad', 'marketSkylight', 0.0, 7.16, 18.0, Math.PI * 0.5, 0, 0, 4.2, 34.4, 1, { tint: [1,1,1,1], emissive: 1.0, us: 1, vs: 8 });
+  dm('quad', 'marketSkylight', 0.0, 7.14, 17.0, Math.PI * 0.5, 0, Math.PI * 0.5, 4.0, 34.4, 1, { tint: [1,1,1,1], emissive: 1.0, us: 1, vs: 8 });
+  for (var tr = 4.0; tr <= 32.0; tr += 5.6) {
+    dm('box', 'white', 0.0, 6.72, tr, 0, 0, 0, 35.6, 0.22, 0.24, { tint: [0.22, 0.34, 0.26, 1] });
+    dm('quad', 'marketLouvers', -9.0, 6.45, tr, 0, 0, 0, 8.0, 0.72, 1, { tint: [1,1,1,1], emissive: 0.55 });
+    dm('quad', 'marketLouvers',  9.0, 6.45, tr, 0, 0, 0, 8.0, 0.72, 1, { tint: [1,1,1,1], emissive: 0.55 });
+  }
+  // Cột thép xanh rêu nâng kèo dọc 2 bên trục hành lang trung tâm
+  var colXs = [-11.5, -3.5, 3.5, 11.5];
+  var colZs = [3.5, 14.2, 19.6, 29.2];
+  for (var cxi = 0; cxi < colXs.length; cxi++) {
+    for (var czi = 0; czi < colZs.length; czi++) {
+      dm('box', 'white', colXs[cxi], 3.45, colZs[czi], 0, 0, 0, 0.32, 6.9, 0.32, { tint: [0.20, 0.32, 0.24, 1] });
     }
-    // Tường Tây (X = -6.0), Tường Bắc (Z = 26.8), Tường Đông có Ngã tư Chợ Đông [22.6, 25.8]
-    dm('box', 'marketWallGold', -6.08, 2.9, 20.2, 0, 0, 0, 0.16, 5.8, 13.2, { tint: [1,1,1,1], us: 4, vs: 2 });
-    dm('box', 'marketWallGold',  0.0,  2.9, 26.88, 0, 0, 0, 12.2, 5.8, 0.16, { tint: [1,1,1,1], us: 4, vs: 2 });
-    // Vách ngăn Đông (X = 6.0): đoạn đặc Z ∈ [13.6, 22.6] & [25.8, 26.8], phần trên cổng Z ∈ [22.6, 25.8]
-    dm('box', 'marketWallGold', 6.0, 2.9, 18.1, 0, 0, 0, 0.22, 5.8, 9.0, { tint: [1,1,1,1], us: 3, vs: 2 });
-    dm('box', 'marketWallGold', 6.0, 2.9, 26.3, 0, 0, 0, 0.22, 5.8, 1.0, { tint: [1,1,1,1], us: 0.5, vs: 2 });
-    dm('box', 'marketWallGold', 6.0, 4.6, 24.2, 0, 0, 0, 0.22, 2.4, 3.2, { tint: [1,1,1,1], us: 1, vs: 1 });
+  }
 
-    // Biển & Mỹ thuật tường Khu Ẩm Thực
-    dm('quad', 'signBanhCuon50k', -5.94, 3.28, 20.1, 0, Math.PI * 0.5, 0, 8.2, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artBanhCuonWall', -5.94, 1.92, 20.1, 0, Math.PI * 0.5, 0, 7.6, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signBanhBeo20k',   5.86, 3.28, 18.6, 0, -Math.PI * 0.5, 0, 5.8, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artBanhBeoWall',   5.86, 1.92, 18.6, 0, -Math.PI * 0.5, 0, 5.4, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signSap1044',      0.0,  2.70, 26.74, 0, Math.PI, 0, 7.2, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signNgocHao1029',  5.86, 3.30, 24.2, 0, -Math.PI * 0.5, 0, 3.4, 0.72, 1, { tint: [1,1,1,1] });
+  /* ---------------- B. 4 BỨC TƯỜNG BAO & 4 CỬA ĐÔNG–TÂY–NAM–BẮC (KÈM BIỂN TÊN & CỔNG SẮT) ---------------- */
+  // Tường Nam (Z = 0, mở Cửa Số 1 X ∈ [-2.2, 2.2])
+  dm('box', 'marketWallGold', -10.1, 3.6, -0.08, 0, 0, 0, 15.8, 7.2, 0.16, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',  10.1, 3.6, -0.08, 0, 0, 0, 15.8, 7.2, 0.16, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',   0.0, 5.4, -0.08, 0, 0, 0,  4.4, 3.6, 0.16, { tint: [1,1,1,1], us: 1.5, vs: 1.5 });
+  dm('quad', 'white', 0.0, 1.8, -0.18, 0, 0, 0, 4.4, 3.6, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
+  dm('quad', 'marketIronGate', -1.65, 1.75, 0.04, 0, 0, 0, 1.1, 3.5, 1, { tint: [1,1,1,1] });
+  var sgA = st.southGateOpen * 1.15;
+  dm('quad', 'marketIronGate', 2.2 - Math.cos(sgA) * 0.55, 1.75, 0.04 + Math.sin(sgA) * 0.55, 0, -sgA, 0, 1.1, 3.5, 1, { tint: [1,1,1,1] });
+  dm('quad', 'signCuaSo1', 0.0, 4.05, 0.06, 0, 0, 0, 4.8, 1.05, 1, { tint: [1,1,1,1] });
 
-    // Đảo Quầy SẠP 1044 (X ∈ [-1.75, 1.75], Z ∈ [19.7, 22.9]) + Nồi nước lèo + Dừa xiêm + Tô Phở
-    dm('box', 'marketCeramicTile', 0, 0.46, 21.3, 0, 0, 0, 3.4, 0.92, 3.0, { tint: [1,1,1,1], us: 2, vs: 1 });
-    dm('box', 'white', 0, 0.96, 21.3, 0, 0, 0, 3.5, 0.08, 3.1, { tint: [0.88, 0.91, 0.94, 1], specPow: 64 });
+  // Tường Bắc (Z = 36, mở Cửa Bắc X ∈ [-2.2, 2.2])
+  dm('box', 'marketWallGold', -10.1, 3.6, 36.08, 0, 0, 0, 15.8, 7.2, 0.16, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',  10.1, 3.6, 36.08, 0, 0, 0, 15.8, 7.2, 0.16, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',   0.0, 5.4, 36.08, 0, 0, 0,  4.4, 3.6, 0.16, { tint: [1,1,1,1], us: 1.5, vs: 1.5 });
+  dm('quad', 'white', 0.0, 1.8, 36.18, 0, Math.PI, 0, 4.4, 3.6, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
+  dm('quad', 'marketIronGate', -1.65, 1.75, 35.96, 0, Math.PI, 0, 1.1, 3.5, 1, { tint: [1,1,1,1] });
+  var ngA = st.northGateOpen * 1.15;
+  dm('quad', 'marketIronGate', 2.2 - Math.cos(ngA) * 0.55, 1.75, 35.96 - Math.sin(ngA) * 0.55, 0, Math.PI + ngA, 0, 1.1, 3.5, 1, { tint: [1,1,1,1] });
+  dm('quad', 'signCuaBac', 0.0, 4.05, 35.94, 0, Math.PI, 0, 5.2, 1.05, 1, { tint: [1,1,1,1] });
+
+  // Tường Tây (X = -18, mở Cửa Tây Z ∈ [15.0, 19.0])
+  dm('box', 'marketWallGold', -18.08, 3.6,  7.5, 0, 0, 0, 0.16, 7.2, 15.0, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold', -18.08, 3.6, 27.5, 0, 0, 0, 0.16, 7.2, 17.0, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold', -18.08, 5.4, 17.0, 0, 0, 0, 0.16, 3.6,  4.0, { tint: [1,1,1,1], us: 1.5, vs: 1.5 });
+  dm('quad', 'white', -18.18, 1.8, 17.0, 0, Math.PI * 0.5, 0, 4.0, 3.6, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
+  dm('quad', 'marketIronGate', -17.94, 1.75, 15.5, 0, Math.PI * 0.5, 0, 1.0, 3.5, 1, { tint: [1,1,1,1] });
+  dm('quad', 'signCuaTay', -17.94, 4.05, 17.0, 0, Math.PI * 0.5, 0, 4.6, 1.05, 1, { tint: [1,1,1,1] });
+
+  // Tường Đông (X = +18, mở Cửa Đông Z ∈ [15.0, 19.0])
+  dm('box', 'marketWallGold',  18.08, 3.6,  7.5, 0, 0, 0, 0.16, 7.2, 15.0, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',  18.08, 3.6, 27.5, 0, 0, 0, 0.16, 7.2, 17.0, { tint: [1,1,1,1], us: 5, vs: 2.5 });
+  dm('box', 'marketWallGold',  18.08, 5.4, 17.0, 0, 0, 0, 0.16, 3.6,  4.0, { tint: [1,1,1,1], us: 1.5, vs: 1.5 });
+  dm('quad', 'white',  18.18, 1.8, 17.0, 0, -Math.PI * 0.5, 0, 4.0, 3.6, 1, { tint: [0.96, 0.88, 0.68, 1], emissive: 0.72 });
+  dm('quad', 'marketIronGate',  17.94, 1.75, 15.5, 0, -Math.PI * 0.5, 0, 1.0, 3.5, 1, { tint: [1,1,1,1] });
+  dm('quad', 'signCuaDong', 17.94, 4.05, 17.0, 0, -Math.PI * 0.5, 0, 4.6, 1.05, 1, { tint: [1,1,1,1] });
+
+  /* ---------------- C. KHU THỜI TRANG, THỂ THAO (ADIDAS, NIKE, GIÀY DÉP, TÚI) & ÁO DÀI (CỬA NAM) ---------------- */
+  // 1. Sạp Vải Lụa Áo Dài Hương Trinh 415 ([-16.6..-13.4, 2.5..11.5]) & Áo "I ♥ SAIGON"
+  dm('box', 'marketWood', -15.0, 0.44, 7.0, 0, 0, 0, 3.1, 0.88, 8.8, { tint: [1,1,1,1], us: 3, vs: 1 });
+  dm('quad', 'signHuongTrinh', -15.0, 3.25, 7.0, 0, Math.PI * 0.5, 0, 7.2, 0.85, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artAoDaiFabric', -13.42, 1.75, 7.0, 0, Math.PI * 0.5, 0, 6.2, 1.75, 1, { tint: [1,1,1,1] });
+  if (nearCam(-15.0, 7.0)) {
+    var silkCols = [[0.88, 0.11, 0.28, 1], [0.98, 0.80, 0.08, 1], [0.06, 0.72, 0.50, 1], [0.15, 0.39, 0.92, 1]];
+    for (var sc = 0; sc < 4; sc++) {
+      dm('box', 'white', -14.1, 0.98, 3.8 + sc * 2.0, 0, 0, 0, 0.8, 0.22, 1.1, { tint: silkCols[sc] });
+    }
+  }
+  dm('box', 'marketWood', -15.0, 0.44, 13.6, 0, 0, 0, 3.0, 0.88, 2.2, { tint: [0.75, 0.22, 0.32, 1] });
+  dm('quad', 'signSaigonTees', -13.45, 2.8, 13.6, 0, Math.PI * 0.5, 0, 2.4, 0.65, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artSaigonTees',  -13.45, 1.55, 13.6, 0, Math.PI * 0.5, 0, 2.2, 1.45, 1, { tint: [1,1,1,1] });
+
+  // 2. Sạp Quần Áo Adidas 3 Sọc 208 ([-9.2..-5.6, 3.5..9.5]) & Sạp Giày Sneaker/Dép 306 ([-9.2..-5.6, 10.6..13.8])
+  dm('box', 'marketWood', -7.4, 0.44, 6.5, 0, 0, 0, 3.4, 0.88, 5.8, { tint: [0.18, 0.22, 0.28, 1] });
+  dm('quad', 'signAdidasMarket', -5.66, 2.95, 6.5, 0, Math.PI * 0.5, 0, 5.2, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artAdidasMarket',  -5.66, 1.72, 6.5, 0, Math.PI * 0.5, 0, 5.0, 1.60, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artAdidasMarket',  -9.14, 1.72, 6.5, 0, -Math.PI * 0.5, 0, 5.0, 1.60, 1, { tint: [1,1,1,1] });
+  if (nearCam(-7.4, 6.5)) {
+    dm('box', 'white', -6.8, 1.05, 4.8, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.08, 0.10, 0.14, 1] });
+    dm('box', 'white', -6.8, 1.05, 6.5, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.15, 0.38, 0.86, 1] });
+    dm('box', 'white', -6.8, 1.05, 8.2, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.88, 0.16, 0.18, 1] });
+  }
+  dm('box', 'marketWood', -7.4, 0.44, 12.2, 0, 0, 0, 3.4, 0.88, 3.0, { tint: [0.55, 0.34, 0.20, 1] });
+  dm('quad', 'signShoesBags', -5.66, 2.85, 12.2, 0, Math.PI * 0.5, 0, 2.8, 0.68, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artShoesBags',  -5.66, 1.62, 12.2, 0, Math.PI * 0.5, 0, 2.8, 1.50, 1, { tint: [1,1,1,1] });
+
+  // 3. Sạp Quần Áo Nike Swoosh 212 ([5.6..9.2, 3.5..9.5]) & Sạp Túi Xách / Vali / Đồng Hồ ([5.6..9.2, 10.6..13.8])
+  dm('box', 'marketWood', 7.4, 0.44, 6.5, 0, 0, 0, 3.4, 0.88, 5.8, { tint: [0.16, 0.18, 0.24, 1] });
+  dm('quad', 'signNikeMarket', 5.56, 2.95, 6.5, 0, -Math.PI * 0.5, 0, 5.2, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artNikeMarket',  5.56, 1.72, 6.5, 0, -Math.PI * 0.5, 0, 5.0, 1.60, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artNikeMarket',  9.24, 1.72, 6.5, 0,  Math.PI * 0.5, 0, 5.0, 1.60, 1, { tint: [1,1,1,1] });
+  if (nearCam(7.4, 6.5)) {
+    dm('box', 'white', 6.8, 1.05, 4.8, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.92, 0.36, 0.08, 1] });
+    dm('box', 'white', 6.8, 1.05, 6.5, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.09, 0.11, 0.16, 1] });
+    dm('box', 'white', 6.8, 1.05, 8.2, 0, 0, 0, 0.6, 0.3, 0.8, { tint: [0.96, 0.96, 0.98, 1] });
+  }
+  dm('box', 'marketWood', 7.4, 0.44, 12.2, 0, 0, 0, 3.4, 0.88, 3.0, { tint: [0.55, 0.34, 0.20, 1] });
+  dm('quad', 'signShoesBags', 5.56, 2.85, 12.2, 0, -Math.PI * 0.5, 0, 2.8, 0.68, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artShoesBags',  5.56, 1.62, 12.2, 0, -Math.PI * 0.5, 0, 2.8, 1.50, 1, { tint: [1,1,1,1] });
+
+  /* ---------------- D. KHU ĐỒ KHÔ, CÀ PHÊ, TRÀ & GIA VỊ (CỬA ĐÔNG: X = 13.4..16.6) ---------------- */
+  dm('box', 'marketWood', 15.0, 0.44, 6.2, 0, 0, 0, 3.1, 0.88, 6.6, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('quad', 'signLienSaiGon',   13.42, 3.05, 6.2, 0, -Math.PI * 0.5, 0, 6.0, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artLienTeaShelves',13.42, 1.75, 6.2, 0, -Math.PI * 0.5, 0, 5.6, 1.65, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', 15.0, 0.44, 12.7, 0, 0, 0, 3.1, 0.88, 3.6, { tint: [0.45, 0.24, 0.12, 1] });
+  dm('quad', 'signCoffeeSpices', 13.42, 2.95, 12.7, 0, -Math.PI * 0.5, 0, 3.4, 0.74, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artCoffeeSpices',  13.42, 1.72, 12.7, 0, -Math.PI * 0.5, 0, 3.2, 1.50, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', 15.0, 0.44, 22.7, 0, 0, 0, 3.1, 0.88, 4.4, { tint: [0.65, 0.38, 0.16, 1] });
+  dm('quad', 'artLienTeaShelves',13.42, 1.72, 22.7, 0, -Math.PI * 0.5, 0, 4.0, 1.50, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', 15.0, 0.44, 28.5, 0, 0, 0, 3.1, 0.88, 4.4, { tint: [0.50, 0.28, 0.14, 1] });
+  dm('quad', 'signCoffeeSpices', 13.42, 2.95, 28.5, 0, -Math.PI * 0.5, 0, 4.0, 0.74, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artCoffeeSpices',  13.42, 1.72, 28.5, 0, -Math.PI * 0.5, 0, 4.0, 1.50, 1, { tint: [1,1,1,1] });
+
+  /* ---------------- E. KHU THỦ CÔNG MỸ NGHỆ, GỐM SỨ, NÓN LÁ & MÂY TRE (CỬA TÂY: X = -16.6..-7.2) ---------------- */
+  dm('box', 'marketWood', -15.0, 0.44, 22.6, 0, 0, 0, 3.1, 0.88, 4.6, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('quad', 'signGomSu',    -13.42, 3.05, 22.6, 0, Math.PI * 0.5, 0, 4.4, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artGomSonMai', -13.42, 1.72, 22.6, 0, Math.PI * 0.5, 0, 4.2, 1.55, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', -15.0, 0.44, 28.6, 0, 0, 0, 3.1, 0.88, 4.6, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('quad', 'signNonLa',    -13.42, 3.05, 28.6, 0, Math.PI * 0.5, 0, 4.4, 0.78, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artNonLaRack', -13.42, 1.72, 28.6, 0, Math.PI * 0.5, 0, 4.2, 1.55, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood',  -8.6, 0.44, 22.3, 0, 0, 0, 2.6, 0.88, 4.0, { tint: [0.78, 0.52, 0.24, 1] });
+  dm('quad', 'artHandicraftRattan', -7.25, 1.65, 22.3, 0, Math.PI * 0.5, 0, 3.6, 1.45, 1, { tint: [1,1,1,1] });
+
+  /* ---------------- F. KHU ẨM THỰC TOÀN BỘ MÓN ĂN VIỆT NAM (SẠP 1044 + PHỞ, BÚN BÒ, CƠM TẤM, BÁNH XÈO, CHÈ...) ---------------- */
+  // Đảo Sạp 1044 (X ∈ [-1.75, 1.75], Z ∈ [19.7, 22.9]) + Cổng vòm KHU ĂN UỐNG
+  dm('quad', 'signKhuAnUong', 0.0, 3.85, 19.2, 0, 0, 0, 4.6, 0.92, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketCeramicTile', 0, 0.46, 21.3, 0, 0, 0, 3.4, 0.92, 3.0, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('box', 'white', 0, 0.96, 21.3, 0, 0, 0, 3.5, 0.08, 3.1, { tint: [0.88, 0.91, 0.94, 1], specPow: 64 });
+  dm('quad', 'signSap1044', 0, 2.45, 22.95, 0, Math.PI, 0, 3.6, 1.10, 1, { tint: [1,1,1,1] });
+  if (nearCam(0, 21.3)) {
     drawMarketPropPhoPotWebgl(wgl, -0.85, 1.0, 20.9);
     drawMarketPropPhoPotWebgl(wgl, -0.15, 1.0, 21.3);
     drawMarketPropCoconutClusterWebgl(wgl, 1.05, 1.0, 20.6);
@@ -629,119 +752,97 @@ function renderMarketWebglScene(wgl, cam, st, W, H) {
       dm('cup', 'white', bx, 1.06, 19.95, 0, 0, 0, 0.24, 0.12, 0.24, { tint: [0.98, 0.98, 0.96, 1] });
       dm('cyl', 'white', bx, 1.11, 19.95, 0, 0, 0, 0.20, 0.02, 0.20, { tint: [0.88, 0.56, 0.18, 1] });
     }
-
-    // 4 Ghế đẩu inox tương tác tại Sạp 1044 (Z = 19.15)
-    for (var si = 0; si < st.stools.length; si++) {
-      var sl = st.stools[si];
-      dm('cyl', 'white', sl.x, 0.24, sl.z, 0, 0, 0, 0.24, 0.48, 0.24, { tint: [0.64, 0.70, 0.78, 1], specPow: 80 });
-      dm('cyl', 'white', sl.x, 0.49, sl.z, 0, 0, 0, 0.40, 0.05, 0.40, { tint: [0.90, 0.93, 0.96, 1], specPow: 96 });
-    }
-
-    // Quầy Bánh Cuốn Nóng 50K (X ∈ [-5.95, -4.15], Z ∈ [15.4, 24.8])
-    dm('box', 'marketCeramicTile', -5.05, 0.44, 20.1, 0, 0, 0, 1.72, 0.88, 9.2, { tint: [1,1,1,1], us: 3, vs: 1 });
-    drawMarketPropPhoPotWebgl(wgl, -4.65, 0.88, 17.6);
-    drawMarketPropPhoPotWebgl(wgl, -4.65, 0.88, 20.1);
-    drawMarketPropPhoPotWebgl(wgl, -4.65, 0.88, 22.6);
-    for (var bci = 0; bci < 4; bci++) {
-      dm('cyl', 'white', -4.55, 0.92, 16.4 + bci * 2.2, 0, 0, 0, 0.36, 0.04, 0.36, { tint: [0.96, 0.97, 0.99, 1] });
-    }
-
-    // Quầy Bánh Bèo Huế 20K (X ∈ [4.15, 5.95], Z ∈ [15.4, 21.8])
-    dm('box', 'marketWood', 5.05, 0.44, 18.6, 0, 0, 0, 1.72, 0.88, 6.2, { tint: [0.95, 0.82, 0.58, 1], us: 2, vs: 1 });
-    drawMarketPropBanhBeoTrayWebgl(wgl, 4.65, 0.88, 16.6);
-    drawMarketPropBanhBeoTrayWebgl(wgl, 4.65, 0.88, 18.6);
-    drawMarketPropBanhBeoTrayWebgl(wgl, 4.65, 0.88, 20.6);
-
-    drawMarketHangingLampWebgl(wgl, -2.5, 17.5, [0.96, 0.55, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl,  2.5, 17.5, [0.96, 0.55, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl, -2.5, 23.6, [0.92, 0.45, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl,  2.5, 23.6, [0.92, 0.45, 0.08, 1]);
-    drawMarketCeilingFanWebgl(wgl, 0, 16.8, st.t, 0.7);
-    drawMarketCeilingFanWebgl(wgl, 0, 23.8, st.t, 2.1);
+  }
+  // 6 Ghế đẩu inox tương tác
+  for (var si = 0; si < st.stools.length; si++) {
+    var sl = st.stools[si];
+    dm('cyl', 'white', sl.x, 0.24, sl.z, 0, 0, 0, 0.24, 0.48, 0.24, { tint: [0.64, 0.70, 0.78, 1], specPow: 80 });
+    dm('cyl', 'white', sl.x, 0.49, sl.z, 0, 0, 0, 0.40, 0.05, 0.40, { tint: [0.90, 0.93, 0.96, 1], specPow: 96 });
+  }
+  // Món ăn hiện trước mặt chú Heo khi ngồi ăn tại bất kỳ bàn inox nào
+  if (st.pig.seated && st.pig.eating) {
+    var dCol = st.pig.activeDish === 'che' ? [0.96, 0.35, 0.58, 1] : (st.pig.activeDish === 'bunbo' ? [0.86, 0.16, 0.14, 1] : [0.92, 0.62, 0.18, 1]);
+    var dZ = st.pig.z < 23.0 ? 19.85 : 26.05;
+    dm('cup', 'white', st.pig.x, 1.06, dZ, 0, 0, 0, 0.26, 0.14, 0.26, { tint: [0.99, 0.99, 0.98, 1] });
+    dm('cyl', 'white', st.pig.x, 1.12, dZ, 0, 0, 0, 0.22, 0.02, 0.22, { tint: dCol });
   }
 
-  /* ---------------- C. CÁNH ĐÔNG TRÁI CÂY 1029 & CỬA BẮC (X ∈ [6.0, 17.2], Z ∈ [13.6, 26.8]) ---------------- */
-  if (showFruit) {
-    dm('box', 'marketTileFruit', 11.6, -0.05, 20.2, 0, 0, 0, 11.2, 0.10, 13.2, { tint: [1,1,1,1], us: 4.5, vs: 5.0 });
-    dm('box', 'white', 11.6, 0.008, 20.4, 0, 0, 0, 4.8, 0.012, 4.8, { tint: [0.08, 0.34, 0.18, 1] });
-    dm('box', 'marketRoofPanel', 11.6, 5.88, 20.2, 0, 0, 0, 11.2, 0.16, 13.2, { tint: [1,1,1,1], us: 4, vs: 4 });
-    dm('quad', 'marketSkylight', 11.6, 5.78, 20.2, Math.PI * 0.5, 0, 0, 3.0, 10.6, 1, { tint: [1,1,1,1], emissive: 1.05, us: 1, vs: 3 });
-    for (var fcz = 15.6; fcz <= 25.4; fcz += 2.6) {
-      dm('box', 'white', 11.6, 5.56, fcz, 0, 0, 0, 11.0, 0.22, 0.22, { tint: [0.30, 0.34, 0.40, 1] });
-      dm('box', 'white',  7.8, 4.95, fcz, 0, 0, 0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-      dm('box', 'white', 15.4, 4.95, fcz, 0, 0, -0.45, 0.14, 1.5, 0.14, { tint: [0.36, 0.40, 0.46, 1] });
-    }
-    // Tường Nam Cánh Đông (Z = 13.6), Tường Đông (X = 17.2), Mặt tiền Cửa Bắc (Z = 26.8, mở [10.05, 13.15])
-    dm('box', 'marketWallGold', 11.6, 2.9, 13.6, 0, 0, 0, 11.2, 5.8, 0.20, { tint: [1,1,1,1], us: 4, vs: 2 });
-    dm('box', 'marketWallGold', 17.28, 2.9, 20.2, 0, 0, 0, 0.16, 5.8, 13.2, { tint: [1,1,1,1], us: 4, vs: 2 });
-    dm('box', 'marketWallGold', 8.02, 2.9, 26.88, 0, 0, 0, 4.05, 5.8, 0.16, { tint: [1,1,1,1], us: 1.5, vs: 2 });
-    dm('box', 'marketWallGold', 15.18, 2.9, 26.88, 0, 0, 0, 4.05, 5.8, 0.16, { tint: [1,1,1,1], us: 1.5, vs: 2 });
-    dm('box', 'marketWallGold', 11.6, 4.45, 26.88, 0, 0, 0, 3.12, 2.7, 0.16, { tint: [1,1,1,1], us: 1.2, vs: 1 });
-    // Ánh nắng & Cửa sắt xếp Cửa Bắc (X ∈ [10.05, 13.15], Z = 26.8)
-    dm('quad', 'white', 11.6, 1.55, 26.96, 0, Math.PI, 0, 3.2, 3.1, 1, { tint: [1.0, 0.96, 0.80, 1], emissive: 1.1 });
-    dm('quad', 'marketIronGate', 10.44, 1.48, 26.76, 0, Math.PI, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });
-    var ngAng = st.northGateOpen * 1.15;
-    dm('quad', 'marketIronGate', 13.15 - Math.cos(ngAng) * 0.39, 1.48, 26.76 - Math.sin(ngAng) * 0.39, 0, Math.PI + ngAng, 0, 0.78, 2.96, 1, { tint: [1,1,1,1] });
+  // Bánh Cuốn Nóng 50K & Bánh Bèo Huế 20K
+  dm('box', 'marketCeramicTile', -5.5, 0.44, 22.0, 0, 0, 0, 2.1, 0.88, 4.2, { tint: [1,1,1,1], us: 2, vs: 1 });
+  dm('quad', 'signBanhCuon50k', -4.42, 2.75, 22.0, 0, Math.PI * 0.5, 0, 3.8, 0.68, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artBanhCuonWall', -4.42, 1.55, 22.0, 0, Math.PI * 0.5, 0, 3.6, 1.35, 1, { tint: [1,1,1,1] });
+  dm('box', 'marketWood', 5.5, 0.44, 22.0, 0, 0, 0, 2.1, 0.88, 4.2, { tint: [0.95, 0.82, 0.58, 1] });
+  dm('quad', 'signBanhBeo20k',  4.42, 2.75, 22.0, 0, -Math.PI * 0.5, 0, 3.8, 0.68, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artBanhBeoWall',  4.42, 1.55, 22.0, 0, -Math.PI * 0.5, 0, 3.6, 1.35, 1, { tint: [1,1,1,1] });
 
-    // Biển & Mỹ thuật tường Cánh Đông
-    dm('quad', 'signCuaBac', 11.6, 3.35, 26.76, 0, Math.PI, 0, 4.4, 0.94, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signGomSu',  6.14, 3.28, 18.2, 0, Math.PI * 0.5, 0, 6.2, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artGomSonMai', 6.14, 1.92, 18.2, 0, Math.PI * 0.5, 0, 5.8, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signNonLa',  17.14, 3.28, 18.6, 0, -Math.PI * 0.5, 0, 6.0, 0.78, 1, { tint: [1,1,1,1] });
-    dm('quad', 'artNonLaRack', 17.14, 1.92, 18.6, 0, -Math.PI * 0.5, 0, 5.6, 1.75, 1, { tint: [1,1,1,1] });
-    dm('quad', 'signKhuAnUong', 6.14, 3.30, 24.2, 0, Math.PI * 0.5, 0, 3.4, 0.72, 1, { tint: [1,1,1,1] });
+  // 4 Quầy Món Việt Nam đầy đủ (Phở/Hủ Tiếu, Bún Bò/Cơm Tấm, Bánh Xèo/Gỏi Cuốn/Bánh Mì, Chè 3 Miền/Sinh Tố)
+  var foodStalls = [
+    { x: -8.6, z: 27.1, w: 2.6, d: 2.8, sign: 'signPhoHuTieu',    art: 'artPhoHuTieu',    pot: true },
+    { x: -2.8, z: 27.1, w: 3.0, d: 2.8, sign: 'signBunBoComTam',  art: 'artBunBoComTam',  pot: true },
+    { x:  2.8, z: 27.1, w: 3.0, d: 2.8, sign: 'signBanhXeoBanhMi',art: 'artBanhXeoBanhMi',pot: false },
+    { x:  7.0, z: 27.1, w: 3.0, d: 2.8, sign: 'signCheSinhTo',    art: 'artCheSinhTo',    pot: false }
+  ];
+  for (var fsi = 0; fsi < foodStalls.length; fsi++) {
+    var fs = foodStalls[fsi];
+    dm('box', 'marketCeramicTile', fs.x, 0.44, fs.z, 0, 0, 0, fs.w, 0.88, fs.d, { tint: [1,1,1,1], us: 2, vs: 1 });
+    dm('quad', fs.sign, fs.x, 2.85, fs.z - fs.d * 0.5, 0, 0, 0, fs.w * 0.96, 0.68, 1, { tint: [1,1,1,1] });
+    dm('quad', fs.art,  fs.x, 1.62, fs.z - fs.d * 0.5, 0, 0, 0, fs.w * 0.92, 1.32, 1, { tint: [1,1,1,1] });
+    if (fs.pot && nearCam(fs.x, fs.z)) drawMarketPropPhoPotWebgl(wgl, fs.x, 0.88, fs.z);
+  }
 
-    // Đảo Trái Cây 1029 NGỌC HẢO (X ∈ [9.95, 13.25], Z ∈ [18.8, 22.0]) + Mâm ngũ quả + Cân Nhơn Hòa
-    dm('box', 'marketWood', 11.6, 0.42, 20.4, 0, 0, 0, 3.2, 0.84, 3.0, { tint: [0.22, 0.58, 0.28, 1], us: 2, vs: 1 });
-    dm('box', 'artFruitDisplay', 11.6, 0.94, 20.4, 0, 0, 0, 2.7, 0.20, 2.4, { tint: [1,1,1,1] });
-    // Tháp xoài cát, thanh long, bưởi da xanh & sầu riêng nổi khối 3D
+  /* ---------------- G. KHU TRÁI CÂY NHIỆT ĐỚI 3D, HOA TƯƠI & HẢI SẢN TƯƠI SỐNG (1029 NGỌC HẢO + CỬA BẮC) ---------------- */
+  // Đảo Trái Cây 1029 Ngọc Hảo (giữ tọa độ [9.95..13.25, 18.8..22.0] tương thích Test 186 & 190)
+  dm('box', 'marketWood', 11.6, 0.42, 20.4, 0, 0, 0, 3.2, 0.84, 3.0, { tint: [0.22, 0.58, 0.28, 1], us: 2, vs: 1 });
+  dm('box', 'artFruitDisplay', 11.6, 0.94, 20.4, 0, 0, 0, 2.7, 0.20, 2.4, { tint: [1,1,1,1] });
+  dm('quad', 'signNgocHao1029', 11.6, 2.65, 20.4, 0, 0, 0, 3.4, 0.72, 1, { tint: [1,1,1,1] });
+  if (nearCam(11.6, 20.4)) {
     var fColors = [[0.98, 0.80, 0.08, 1], [0.88, 0.11, 0.28, 1], [0.13, 0.77, 0.37, 1], [0.63, 0.38, 0.05, 1]];
     for (var fi = 0; fi < 8; fi++) {
-      var fx = 10.55 + (fi % 4) * 0.68, fzp = 19.65 + Math.floor(fi / 4) * 1.45;
-      dm('sphere', 'white', fx, 1.14, fzp, 0, 0, 0, 0.28, 0.24, 0.28, { tint: fColors[fi % 4] });
+      dm('sphere', 'white', 10.55 + (fi % 4) * 0.68, 1.14, 19.65 + Math.floor(fi / 4) * 1.45, 0, 0, 0, 0.28, 0.24, 0.28, { tint: fColors[fi % 4] });
     }
-    // Cân Nhơn Hòa xanh lá + đĩa inox
     dm('box', 'white', 11.6, 1.18, 20.4, 0, 0, 0, 0.28, 0.28, 0.26, { tint: [0.08, 0.50, 0.22, 1] });
     dm('cyl', 'white', 11.6, 1.35, 20.4, 0, 0, 0, 0.36, 0.04, 0.36, { tint: [0.86, 0.90, 0.94, 1], specPow: 80 });
     drawMarketPropCoconutClusterWebgl(wgl, 10.65, 0.86, 19.25);
-    drawMarketPropCoconutClusterWebgl(wgl, 12.55, 0.86, 19.25);
-
-    // Kệ Gốm Sứ Bát Tràng (X ∈ [6.05, 7.80], Z ∈ [14.8, 21.6]) & Kệ Nón Lá (X ∈ [15.4, 17.15], Z ∈ [15.4, 21.8])
-    dm('box', 'marketWood', 6.92, 0.43, 18.2, 0, 0, 0, 1.68, 0.86, 6.6, { tint: [1,1,1,1], us: 2, vs: 1 });
-    for (var gi = 0; gi < 5; gi++) {
-      var gz = 15.5 + gi * 1.35;
-      dm('cyl', 'white', 6.95, 1.06, gz, 0, 0, 0, 0.28, 0.38, 0.28, { tint: [0.96, 0.97, 1.0, 1] });
-      dm('cyl', 'white', 6.95, 1.10, gz, 0, 0, 0, 0.30, 0.12, 0.30, { tint: [0.11, 0.31, 0.85, 1] });
-    }
-    dm('box', 'marketWood', 16.28, 0.43, 18.6, 0, 0, 0, 1.68, 0.86, 6.2, { tint: [1,1,1,1], us: 2, vs: 1 });
-    for (var ni = 0; ni < 5; ni++) {
-      var nz = 16.0 + ni * 1.30;
-      dm('cone', 'white', 16.15, 1.02, nz, 0, 0, 0, 0.52, 0.20, 0.52, { tint: [0.92, 0.82, 0.54, 1] });
-      dm('cone', 'white', 16.35, 2.35, nz, 0.15, -Math.PI * 0.5, 0, 0.52, 0.20, 0.52, { tint: [0.94, 0.85, 0.58, 1] });
-    }
-
-    drawMarketHangingLampWebgl(wgl, 9.2, 17.5, [0.96, 0.62, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl, 14.0, 17.5, [0.96, 0.62, 0.08, 1]);
-    drawMarketHangingLampWebgl(wgl, 11.6, 23.6, [0.24, 0.72, 0.34, 1]);
-    drawMarketCeilingFanWebgl(wgl, 11.6, 17.2, st.t, 0.9);
-    drawMarketCeilingFanWebgl(wgl, 11.6, 23.8, st.t, 2.3);
   }
 
-  /* ---------------- D. 12 NPC PIXEL BILLBOARD & CHÚ HEO 24×20 (GL.NEAREST) ---------------- */
+  // Cụm Sạp Cửa Bắc: Trái Cây Nhiệt Đới Đủ Loại, Hoa Tươi & Hải Sản Tươi Sống
+  dm('box', 'marketWood', -5.3, 0.44, 32.2, 0, 0, 0, 4.0, 0.88, 3.0, { tint: [0.22, 0.58, 0.28, 1] });
+  dm('quad', 'signNgocHao1029', -5.3, 2.90, 30.68, 0, 0, 0, 3.8, 0.72, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artTropicalFruits', -5.3, 1.65, 30.68, 0, 0, 0, 3.8, 1.45, 1, { tint: [1,1,1,1] });
+  if (nearCam(-5.3, 32.2)) {
+    var tCols = [[0.65, 0.42, 0.06, 1], [0.50, 0.14, 0.68, 1], [0.88, 0.12, 0.18, 1], [0.98, 0.80, 0.08, 1], [0.16, 0.72, 0.32, 1]];
+    for (var tfi = 0; tfi < 5; tfi++) {
+      dm('sphere', 'white', -6.6 + tfi * 0.65, 1.08, 31.8, 0, 0, 0, 0.30, 0.26, 0.30, { tint: tCols[tfi] });
+    }
+  }
+  dm('box', 'marketWood', 5.3, 0.44, 32.2, 0, 0, 0, 4.0, 0.88, 3.0, { tint: [0.55, 0.16, 0.36, 1] });
+  dm('quad', 'signFreshFlowers', 5.3, 2.90, 30.68, 0, 0, 0, 3.8, 0.72, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artFreshFlowers',  5.3, 1.65, 30.68, 0, 0, 0, 3.8, 1.45, 1, { tint: [1,1,1,1] });
+
+  dm('box', 'marketCeramicTile', 10.5, 0.44, 32.2, 0, 0, 0, 4.0, 0.88, 3.0, { tint: [0.82, 0.92, 0.98, 1] });
+  dm('quad', 'signWetSeafood', 10.5, 2.90, 30.68, 0, 0, 0, 3.8, 0.72, 1, { tint: [1,1,1,1] });
+  dm('quad', 'artWetSeafood',  10.5, 1.65, 30.68, 0, 0, 0, 3.8, 1.45, 1, { tint: [1,1,1,1] });
+
+  // Đèn & Quạt Trần Lồng Chợ
+  var lampPts = [[-3.2, 6.5], [3.2, 6.5], [-10.0, 17.0], [10.0, 17.0], [-3.2, 24.5], [3.2, 24.5]];
+  for (var li = 0; li < lampPts.length; li++) {
+    drawMarketHangingLampWebgl(wgl, lampPts[li][0], lampPts[li][1], [0.96, 0.62, 0.08, 1]);
+  }
+  drawMarketCeilingFanWebgl(wgl, 0, 8.0, st.t, 0.2);
+  drawMarketCeilingFanWebgl(wgl, 0, 17.0, st.t, 1.2);
+  drawMarketCeilingFanWebgl(wgl, 0, 26.5, st.t, 2.2);
+
+  /* ---------------- H. 12 NPC PIXEL BILLBOARD & CHÚ HEO 24×20 (GL.NEAREST) ---------------- */
   if (st.npcs && typeof drawHumanBillboardWebgl === 'function') {
     for (var npi = 0; npi < st.npcs.length; npi++) {
-      var npc = st.npcs[npi];
-      var inSouthNpc = npc.z < 13.6;
-      var inFruitNpc = npc.z >= 13.6 && npc.x >= 6.0;
-      if ((inSouthNpc && !showSouth) || (inFruitNpc && !showFruit)) continue;
-      drawHumanBillboardWebgl(wgl, cam, npc, st.t);
+      drawHumanBillboardWebgl(wgl, cam, st.npcs[npi], st.t);
     }
   }
   if (typeof drawPigBillboardWebgl === 'function') {
     drawPigBillboardWebgl(wgl, cam, st.pig, st.t, false);
   }
 
-  /* ---------------- E. VÒNG SÓNG CHẠM SÀN TAP-TO-WALK ---------------- */
+  /* ---------------- I. VÒNG SÓNG CHẠM SÀN TAP-TO-WALK ---------------- */
   wgl.setBlend('add');
   for (var ri = 0; ri < st.ripples.length; ri++) {
     var rp = st.ripples[ri];
@@ -822,25 +923,19 @@ function renderMarketTpsScene(ctx, cam, st, W, H) {
       }
     }
   }
-  // Trần kèo thép & giếng trời
   drawPoly3D(ctx, cam, [[-6, 3.85, 0], [6, 3.85, 0], [6, 3.85, 14.8], [-6, 3.85, 14.8]], '#6B4423', '#2B180E', 1);
   drawPoly3D(ctx, cam, [[-1.6, 3.83, 1.2], [1.6, 3.83, 1.2], [1.6, 3.83, 13.6], [-1.6, 3.83, 13.6]], '#FEF3C7', '#D97706', 1.2);
-  // 4 Bức tường
   drawPoly3D(ctx, cam, [[-6, 0, 0], [-6, 0, 14.8], [-6, 3.85, 14.8], [-6, 3.85, 0]], '#E5B85B', '#5C341D', 1);
   drawPoly3D(ctx, cam, [[6, 0, 14.8], [6, 0, 0], [6, 3.85, 0], [6, 3.85, 14.8]], '#DBA94E', '#5C341D', 1);
   drawPoly3D(ctx, cam, [[-6, 0, 14.8], [6, 0, 14.8], [6, 3.85, 14.8], [-6, 3.85, 14.8]], '#D29E44', '#5C341D', 1);
   drawPoly3D(ctx, cam, [[-6, 0, 0], [6, 0, 0], [6, 3.85, 0], [-6, 3.85, 0]], '#DBA94E', '#5C341D', 1);
 
-  if (typeof drawMarketRoomWalls3D === 'function') {
-    drawMarketRoomWalls3D(ctx, cam, room);
-  }
+  if (typeof drawMarketRoomWalls3D === 'function') drawMarketRoomWalls3D(ctx, cam, room);
   if (typeof drawLanternGlow3D === 'function') {
     drawLanternGlow3D(ctx, cam, -2.4, 3.02, 4.2, '#F59E0B', '#FDE68A', 0.21, 3.85);
     drawLanternGlow3D(ctx, cam,  2.4, 3.02, 4.2, '#F59E0B', '#FDE68A', 0.21, 3.85);
   }
-  if (typeof drawCeilingFan3D === 'function') {
-    drawCeilingFan3D(ctx, cam, 0, 3.42, 5.2, st.t, 0.2);
-  }
+  if (typeof drawCeilingFan3D === 'function') drawCeilingFan3D(ctx, cam, 0, 3.42, 5.2, st.t, 0.2);
 
   var items = [];
   function pushItem(wx, wz, fn) {
