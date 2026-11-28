@@ -1714,36 +1714,67 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
     g.fillRect(Math.round(cx + ox * u), Math.round(cy + (oy + bodyOffY) * u), Math.round(rw * u), Math.round(rh * u));
   }
   var st = seated ? 0 : (stepPhase || 0);
+  var rawOf = outfit || 'none';
+  var hasBag = rawOf.indexOf('+bag') >= 0;
+  var ofName = hasBag ? rawOf.replace('+bag', '') : rawOf;
+  var isJogger = ofName === 'adidas_jogger';
+  var legMainCol = isJogger ? '#334155' : null;
+  var shoeSamba = isJogger;
 
   if (view === 'back') {
-    r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, '#D96D85');
-    r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, '#D96D85');
+    r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, legMainCol || '#D96D85');
+    r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, legMainCol || '#D96D85');
+    if (shoeSamba) { r(-6, -1 + st, 4, 1, '#B45309'); r(2, -1 - st, 4, 1, '#B45309'); }
     r(-8, -18, 16, 15, '#2B2118'); r(-10, -16, 20, 11, '#2B2118');
     r(-7, -17, 14, 13, '#F596A8'); r(-9, -15, 18, 9, '#F596A8');
     r(-7, -17, 14, 4, '#FDBAC7');  r(-7, -6, 14, 2, '#D96D85');
-    if (outfit === 'adidas_jacket') {
+    if (ofName === 'adidas_jacket') {
       r(-8, -15, 16, 9, '#1E293B'); r(-7, -15, 1, 9, '#FFFFFF'); r(6, -15, 1, 9, '#FFFFFF');
-    } else if (outfit === 'aodai') {
+      r(-2, -12, 4, 1, '#FFFFFF');
+    } else if (ofName === 'adidas_polo') {
+      r(-8, -16, 16, 9, '#1E3A8A'); r(-5, -17, 10, 2, '#FFFBF1');
+      r(-7, -15, 1, 7, '#60A5FA'); r(6, -15, 1, 7, '#60A5FA');
+    } else if (ofName === 'adidas_jogger') {
+      r(-8, -12, 16, 7, '#334155'); r(-7, -12, 1, 7, '#FFFFFF'); r(6, -12, 1, 7, '#FFFFFF');
+      r(-8, -16, 16, 4, '#F8FAFC'); r(-2, -15, 4, 2, '#111827');
+    } else if (ofName === 'adidas_kit') {
+      r(-8, -16, 16, 10, '#DC2626'); r(-7, -16, 1, 8, '#FACC15'); r(6, -16, 1, 8, '#FACC15');
+      // Số 10 pixel sau lưng áo đấu
+      r(-3, -13, 1, 5, '#FFFBF1'); r(0, -13, 3, 5, '#FFFBF1'); r(1, -12, 1, 3, '#DC2626');
+    } else if (ofName === 'aodai') {
       r(-8, -16, 16, 11, '#DC2626'); r(-2, -14, 4, 4, '#FACC15');
-    } else if (outfit === 'vn_kit') {
+    } else if (ofName === 'vn_kit') {
       r(-8, -16, 16, 10, '#DC2626'); r(-2, -14, 4, 4, '#FFFF00');
+    }
+    if (hasBag) {
+      r(8, -12, 5, 7, '#111827'); r(9, -14, 3, 2, '#FACC15'); r(9, -10, 3, 1, '#FFFFFF'); r(9, -8, 3, 1, '#FFFFFF');
     }
     r(-8, -22, 4, 5, '#2B2118');   r(-7, -21, 2, 3, '#F596A8');
     r(4, -22, 4, 5, '#2B2118');    r(5, -21, 2, 3, '#F596A8');
     r(-3, -16, 6, 2, '#2B2118');   r(-2, -16, 4, 1, '#F4B93B');
     r(-2 + st, -11, 4, 3, '#2B2118'); r(-1 + st, -10, 2, 1, '#FDBAC7');
   } else if (view === 'front') {
-    r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, '#F596A8');
-    r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, '#F596A8');
+    r(-6, -4 + st, 4, 4, '#2B2118'); r(-5, -4 + st, 2, 3, legMainCol || '#F596A8');
+    r(2, -4 - st, 4, 4, '#2B2118');  r(3, -4 - st, 2, 3, legMainCol || '#F596A8');
+    if (shoeSamba) { r(-6, -1 + st, 4, 1, '#FFFBF1'); r(2, -1 - st, 4, 1, '#FFFBF1'); }
     r(-8, -18, 16, 15, '#2B2118'); r(-10, -16, 20, 11, '#2B2118');
     r(-7, -17, 14, 13, '#F596A8'); r(-9, -15, 18, 9, '#F596A8');
     r(-7, -17, 14, 4, '#FDBAC7');
-    if (outfit === 'adidas_jacket') {
+    if (ofName === 'adidas_jacket') {
       r(-8, -11, 16, 5, '#111827'); r(-1, -11, 2, 5, '#FFFFFF');
-    } else if (outfit === 'aodai') {
+    } else if (ofName === 'adidas_polo') {
+      r(-8, -11, 16, 5, '#1E3A8A'); r(-5, -11, 3, 2, '#FFFBF1'); r(2, -11, 3, 2, '#FFFBF1'); r(-1, -10, 2, 3, '#FFFFFF');
+    } else if (ofName === 'adidas_jogger') {
+      r(-8, -11, 16, 5, '#334155'); r(-7, -11, 1, 5, '#FFFFFF'); r(6, -11, 1, 5, '#FFFFFF'); r(-2, -10, 4, 1, '#FFFBF1');
+    } else if (ofName === 'adidas_kit') {
+      r(-8, -11, 16, 5, '#DC2626'); r(-7, -11, 2, 4, '#FACC15'); r(5, -11, 2, 4, '#FACC15');
+    } else if (ofName === 'aodai') {
       r(-8, -11, 16, 6, '#DC2626'); r(-1, -10, 2, 2, '#FACC15');
-    } else if (outfit === 'vn_kit') {
+    } else if (ofName === 'vn_kit') {
       r(-8, -11, 16, 5, '#DC2626'); r(-1, -10, 2, 2, '#FFFF00');
+    }
+    if (hasBag) {
+      r(-12, -11, 4, 7, '#111827'); r(-11, -13, 2, 2, '#FACC15'); r(-11, -9, 2, 1, '#FFFFFF');
     }
     r(-8, -22, 4, 5, '#2B2118');   r(-7, -21, 2, 3, '#FDBAC7');
     r(4, -22, 4, 5, '#2B2118');    r(5, -21, 2, 3, '#FDBAC7');
@@ -1767,15 +1798,26 @@ function renderPigBillboardCanvas(view, stepPhase, seated, blink, eating, isAiCo
     function sr(ox, oy, rw, rh, col) {
       r(dir > 0 ? ox : -(ox + rw), oy, rw, rh, col);
     }
-    sr(-7, -4 + st, 3, 4, '#2B2118'); sr(-6, -4 + st, 2, 3, '#D96D85');
-    sr(4, -4 - st, 3, 4, '#2B2118');  sr(5, -4 - st, 2, 3, '#F596A8');
+    sr(-7, -4 + st, 3, 4, '#2B2118'); sr(-6, -4 + st, 2, 3, legMainCol || '#D96D85');
+    sr(4, -4 - st, 3, 4, '#2B2118');  sr(5, -4 - st, 2, 3, legMainCol || '#F596A8');
+    if (shoeSamba) { sr(-7, -1 + st, 3, 1, '#B45309'); sr(4, -1 - st, 3, 1, '#B45309'); }
     sr(-9, -17, 17, 14, '#2B2118');   sr(-11, -15, 21, 10, '#2B2118');
     sr(-8, -16, 15, 12, '#F596A8');   sr(-10, -14, 19, 8, '#F596A8');
     sr(-8, -16, 15, 3, '#FDBAC7');
-    if (outfit === 'adidas_jacket') {
+    if (ofName === 'adidas_jacket') {
       sr(-8, -12, 15, 6, '#111827'); sr(-2, -12, 3, 6, '#FFFFFF');
-    } else if (outfit === 'aodai' || outfit === 'vn_kit') {
+    } else if (ofName === 'adidas_polo') {
+      sr(-8, -13, 15, 6, '#1E3A8A'); sr(3, -14, 4, 2, '#FFFBF1'); sr(-2, -12, 3, 5, '#60A5FA');
+    } else if (ofName === 'adidas_jogger') {
+      sr(-8, -10, 15, 5, '#334155'); sr(-1, -10, 2, 5, '#FFFFFF');
+      sr(-8, -14, 15, 4, '#F8FAFC');
+    } else if (ofName === 'adidas_kit') {
+      sr(-8, -13, 15, 7, '#DC2626'); sr(-2, -13, 3, 6, '#FACC15');
+    } else if (ofName === 'aodai' || ofName === 'vn_kit') {
       sr(-8, -12, 15, 7, '#DC2626'); sr(-1, -10, 2, 2, '#FACC15');
+    }
+    if (hasBag) {
+      sr(-4, -10, 5, 6, '#111827'); sr(-3, -12, 3, 2, '#FACC15'); sr(-3, -8, 3, 1, '#FFFFFF');
     }
     sr(-2, -17, 5, 2, '#F4B93B');
     sr(2, -21, 4, 5, '#2B2118');      sr(3, -20, 2, 3, '#FDBAC7');
@@ -1838,7 +1880,8 @@ function drawPigBillboardWebgl(wgl, cam, pig, t, isAiCoach) {
   var blink = (t % 3.8) < 0.14 ? 1 : 0;
   var eating = pig.eating ? 1 : 0;
   var ai = (isAiCoach || pig.isAiCoach) ? 1 : 0;
-  var outfit = pig.outfit || (pig.wearingJacket ? 'adidas_jacket' : (pig.wearingAoDai ? 'aodai' : (pig.wearingKit ? 'vn_kit' : 'none')));
+  var baseOutfit = pig.outfit || (pig.wearingJacket ? 'adidas_jacket' : (pig.wearingAoDai ? 'aodai' : (pig.wearingKit ? 'vn_kit' : 'none')));
+  var outfit = (pig.boughtSamba && baseOutfit.indexOf('+bag') < 0) ? (baseOutfit + '+bag') : baseOutfit;
   var texKey = ensurePigBillboardTex(wgl, view, stepPhase, seated, blink, eating, ai, outfit);
 
   wgl.setBlend('alpha');
@@ -1917,6 +1960,10 @@ function renderHumanBillboardCanvas(role, angleKey, stepPhase, seated, blink, ea
     if (role === 'vn_captain') hr(-5, -18, 2, 2, '#FACC15');
   } else if (role === 'referee') {
     hr(-3, -20, 1, 11, '#F8FAFC'); hr(0, -20, 1, 11, '#F8FAFC'); hr(3, -20, 1, 11, '#F8FAFC');
+  } else if (role === 'gk') {
+    hr(-5, -20, 1, 10, '#FACC15'); hr(4, -20, 1, 10, '#FACC15');
+    hr(-2, -17, 4, 2, '#FFFBF1');
+    hr(-8, -16, 3, 4, '#FDE047'); hr(5, -16, 3, 4, '#FDE047');
   } else if (role === 'press') {
     hr(-4, -19, 8, 9, '#78716C');
     hr(-3, -14, 3, 3, '#44403C'); hr(1, -14, 3, 3, '#44403C');
@@ -2891,13 +2938,13 @@ function planMarketRealtimePath(st, tx, ty, tz, extraOpts) {
         var wp = p.waypoints[i];
         // Tránh xuyên qua Sạp 1044 (X ∈ [-2.0, 2.0], Z ∈ [19.4, 23.2])
         if (Math.min(prevX, wp.x) < 2.0 && Math.max(prevX, wp.x) > -2.0 &&
-            Math.min(prevZ, wp.z) < 19.5 && Math.max(prevZ, wp.z) > 23.1) {
+            Math.min(prevZ, wp.z) < 23.2 && Math.max(prevZ, wp.z) > 19.4) {
           var sideX = ((prevX + wp.x) * 0.5 >= 0) ? 2.55 : -2.55;
           out.push({ x: sideX, y: 0, z: 21.3 });
         }
         // Tránh xuyên qua Đảo Trái Cây 1029 (X ∈ [9.6, 13.6], Z ∈ [18.5, 22.3])
         if (Math.min(prevX, wp.x) < 13.5 && Math.max(prevX, wp.x) > 9.7 &&
-            Math.min(prevZ, wp.z) < 18.6 && Math.max(prevZ, wp.z) > 22.2) {
+            Math.min(prevZ, wp.z) < 22.3 && Math.max(prevZ, wp.z) > 18.5) {
           var fSideX = ((prevX + wp.x) * 0.5 >= 11.6) ? 14.05 : 9.15;
           out.push({ x: fSideX, y: 0, z: 20.4 });
         }
@@ -9929,9 +9976,9 @@ function renderCafeTpsScene(ctx, cam, st, W, H) {
 }
 `}},860,[]);
 __d(function(g,r,i,a,m,_e,_d){"use strict";function e(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"AdidasStoreView",{enumerable:!0,get:function(){return l}}),r(_d[0]),r(_d[1]);var t=e(r(_d[2])),o=e(r(_d[3])),n=e(r(_d[4])),d=r(_d[5]),c=(function(e){if(e&&e.__esModule)return e;var t={};return e&&Object.keys(e).forEach(function(o){if('default'!==o){var n=Object.getOwnPropertyDescriptor(e,o);Object.defineProperty(t,o,n.get?n:{enumerable:!0,get:function(){return e[o]}})}}),t.default=e,t})(r(_d[6])),s=r(_d[7]),u=r(_d[8]);const l=({onBack:e})=>(0,u.jsxs)(n.default,{style:f.fullscreenContainer,children:[(0,u.jsx)(s.AdidasStoreBannerWebView,{onExitAdidas:e}),(0,u.jsx)(o.default,{style:f.backButton,onPress:()=>{c.impactAsync(c.ImpactFeedbackStyle.Light).catch(()=>{}),e()},activeOpacity:.85,hitSlop:{top:10,bottom:10,left:10,right:10},children:(0,u.jsx)(d.ArrowLeft,{size:20,color:"#2B2118",strokeWidth:2.8})})]}),f=t.default.create({fullscreenContainer:{flex:1,width:'100%',height:'100%',backgroundColor:'#181B22'},backButton:{position:'absolute',top:16,left:16,width:42,height:42,borderRadius:14,backgroundColor:'#FFFBF1',borderWidth:3,borderColor:'#2B2118',alignItems:'center',justifyContent:'center',shadowColor:'#2B2118',shadowOffset:{width:0,height:3},shadowOpacity:1,shadowRadius:0,elevation:4,zIndex:20}})},861,[39,29,80,270,154,777,775,862,60]);
-__d(function(g,r,i,a,m,_e,_d){"use strict";Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"AdidasStoreBannerWebView",{enumerable:!0,get:function(){return o}});var t=r(_d[0]),n=(function(t){if(t&&t.__esModule)return t;var n={};return t&&Object.keys(t).forEach(function(e){if('default'!==e){var s=Object.getOwnPropertyDescriptor(t,e);Object.defineProperty(n,e,s.get?s:{enumerable:!0,get:function(){return t[e]}})}}),n.default=t,n})(r(_d[1])),e=r(_d[2]),s=r(_d[3]),c=r(_d[4]),l=r(_d[5]);const o=({onExitAdidas:o})=>{const d=(0,t.useRef)(null);(0,t.useEffect)(()=>()=>{d.current&&clearTimeout(d.current)},[]);const u=(0,t.useMemo)(()=>(0,s.buildAdidasWallArtScript)(),[]),p=(0,t.useMemo)(()=>(0,c.buildAdidasTps3dSceneScript)(),[]),x=(0,t.useMemo)(()=>"\n(function() {\n  var cv = document.getElementById('tpsCv');\n  var ctxPillBtn = document.getElementById('ctxPillBtn');\n  var wgl = typeof createPixelWebglRenderer === 'function' ? createPixelWebglRenderer(cv) : null;\n  var ctx = wgl ? null : cv.getContext('2d');\n  if (wgl && typeof buildAdidasProceduralTextures === 'function') {\n    buildAdidasProceduralTextures(wgl);\n  }\n\n  var W = 400, H = 720;\n  function resizeCanvas() {\n    var dw = Math.max(320, window.innerWidth || 390);\n    var dh = Math.max(480, window.innerHeight || 760);\n    var dpr = wgl ? Math.min(2, window.devicePixelRatio || 1) : (dw > 460 ? 0.72 : 0.84);\n    W = Math.round(dw * dpr);\n    H = Math.round(dh * dpr);\n    cv.width = W; cv.height = H;\n    if (ctx) ctx.imageSmoothingEnabled = false;\n  }\n  resizeCanvas();\n  window.addEventListener('resize', resizeCanvas);\n\n  var st = createAdidasTpsState();\n  var cam = createTpsCamera({ yaw: 0.04, pitch: -0.30, dist: 4.65, targetHeight: 0.72 });\n  var adidasBounds = { minX: -6.0, maxX: 15.6, minZ: 0.0, maxZ: 14.8, maxY: 6.75 };\n  var currentAction = null;\n  var exitSent = false;\n\n  function runContextAction(act) {\n    if (!act) return;\n    postRN({ type: 'HAPTIC_MEDIUM' });\n    if (act.id === 'try_jacket') {\n      st.pig.wearingJacket = !st.pig.wearingJacket;\n      st.pig.outfit = st.pig.wearingJacket ? 'adidas_jacket' : 'none';\n      planAdidasRealtimePath(st, 13.4, 0, 9.0, null);\n      st.ripples.push({ x: 13.4, y: 0, z: 9.0, t: 0 });\n    } else if (act.id === 'buy_samba') {\n      st.pig.boughtSamba = true;\n      st.ripples.push({ x: 3.8, y: 3.4, z: 6.8, t: 0 });\n    } else if (act.id === 'inspect_island') {\n      st.ripples.push({ x: 0, y: 0.05, z: 6.2, t: 0 });\n    } else if (act.id === 'inspect_vn_col') {\n      st.ripples.push({ x: -4.2, y: 3.4, z: 4.7, t: 0 });\n    } else if (act.id === 'exit_adidas') {\n      if (!st.exiting) {\n        st.exiting = true;\n      }\n    }\n  }\n\n  if (ctxPillBtn) {\n    ctxPillBtn.addEventListener('click', function(e) {\n      e.stopPropagation();\n      runContextAction(currentAction);\n    });\n  }\n\n  function syncContextPill() {\n    if (!ctxPillBtn) return;\n    currentAction = getAdidasContextAction(st);\n    if (currentAction && !st.exiting) {\n      if (ctxPillBtn.textContent !== currentAction.label) {\n        ctxPillBtn.textContent = currentAction.label;\n      }\n      ctxPillBtn.hidden = false;\n    } else {\n      ctxPillBtn.hidden = true;\n    }\n  }\n\n  bindTpsCanvasGestures(cv, cam, {\n    getSize: function() { return { w: W, h: H }; },\n    onTap: function(sx, sy) {\n      var target = wgl ? pickAdidasTarget3D(cam, st, sx, sy) : null;\n      if (!wgl && !target) {\n        var hit = unprojectFloorTap(cam, sx, sy);\n        if (hit) target = { kind: 'floor', x: hit.x, y: st.pig.y >= 1.9 ? 3.4 : 0, z: hit.z };\n      }\n      if (target) {\n        planAdidasRealtimePath(st, target.x, target.y, target.z, target.action || null);\n        st.ripples.push({ x: target.x, y: target.y || 0, z: target.z, t: 0 });\n        postRN({ type: target.action ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });\n      }\n    }\n  });\n\n  var lastNow = performance.now();\n  function loop(now) {\n    var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));\n    lastNow = now;\n    if (window.__isActive !== false) {\n      stepAdidasTps(st, dt);\n      if (st.exiting && !exitSent && st.exitFade >= 0.85) {\n        exitSent = true;\n        postRN({ type: 'EXIT_ADIDAS' });\n      }\n      if (wgl) {\n        cam.vw = W; cam.vh = H;\n        var asp = W / Math.max(1, H);\n        var fovy = asp < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, asp))) : 0.82;\n        cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);\n        renderAdidasWebglScene(wgl, cam, st, W, H);\n      } else {\n        updateTpsCamera(cam, st.pig.x, st.pig.y || 0, st.pig.z, W, H, adidasBounds);\n        renderAdidasTpsScene(ctx, cam, st, W, H);\n      }\n      syncContextPill();\n    }\n    requestAnimationFrame(loop);\n  }\n  requestAnimationFrame(loop);\n})();\n",[]);return(0,l.jsx)(e.WebglTpsBannerShell,{title:"Adidas Originals H\u1ed9i An WebGL 3D",backgroundHex:"#2B180E",wallArtScript:u,sceneScript:p,initScript:x,onPayload:t=>{t&&'EXIT_ADIDAS'===t.type&&o&&(n.impactAsync(n.ImpactFeedbackStyle.Medium).catch(()=>{}),d.current&&clearTimeout(d.current),d.current=setTimeout(()=>o(),120))}})}},862,[39,775,837,863,864,60]);
+__d(function(g,r,i,a,m,_e,_d){"use strict";Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"AdidasStoreBannerWebView",{enumerable:!0,get:function(){return c}});var t=r(_d[0]),n=(function(t){if(t&&t.__esModule)return t;var n={};return t&&Object.keys(t).forEach(function(e){if('default'!==e){var s=Object.getOwnPropertyDescriptor(t,e);Object.defineProperty(n,e,s.get?s:{enumerable:!0,get:function(){return t[e]}})}}),n.default=t,n})(r(_d[1])),e=r(_d[2]),s=r(_d[3]),o=r(_d[4]),l=r(_d[5]);const c=({onExitAdidas:c})=>{const d=(0,t.useRef)(null);(0,t.useEffect)(()=>()=>{d.current&&clearTimeout(d.current)},[]);const u=(0,t.useMemo)(()=>(0,s.buildAdidasWallArtScript)(),[]),p=(0,t.useMemo)(()=>(0,o.buildAdidasTps3dSceneScript)(),[]),f=(0,t.useMemo)(()=>"\n(function() {\n  var cv = document.getElementById('tpsCv');\n  var ctxPillBtn = document.getElementById('ctxPillBtn');\n  var wgl = typeof createPixelWebglRenderer === 'function' ? createPixelWebglRenderer(cv) : null;\n  var ctx = wgl ? null : cv.getContext('2d');\n  if (wgl && typeof buildAdidasProceduralTextures === 'function') {\n    buildAdidasProceduralTextures(wgl);\n  }\n\n  // HUD g\u1ecdn n\u1ed5i g\xf3c tr\xean ph\u1ea3i ch\u1ec9 hi\u1ec7n khi v\xe0o S\xe2n S\xfat B\xf3ng ho\u1eb7c v\u1eeba th\u1eed \u0111\u1ed3\n  var hudEl = document.createElement('div');\n  hudEl.style.cssText = 'position:fixed;top:52px;right:14px;z-index:16;pointer-events:none;background:#FFFBF1;color:#2B2118;border:3px solid #2B2118;border-radius:14px;padding:6px 12px;font:900 13px/1.2 -apple-system,sans-serif;box-shadow:0 3px 0 #2B2118;';\n  hudEl.hidden = true;\n  document.body.appendChild(hudEl);\n\n  var W = 400, H = 720;\n  function resizeCanvas() {\n    var dw = Math.max(320, window.innerWidth || 390);\n    var dh = Math.max(480, window.innerHeight || 760);\n    var dpr = wgl ? Math.min(2, window.devicePixelRatio || 1) : (dw > 460 ? 0.72 : 0.84);\n    W = Math.round(dw * dpr);\n    H = Math.round(dh * dpr);\n    cv.width = W; cv.height = H;\n    if (ctx) ctx.imageSmoothingEnabled = false;\n  }\n  resizeCanvas();\n  window.addEventListener('resize', resizeCanvas);\n\n  var st = createAdidasTpsState();\n  var cam = createTpsCamera({ yaw: 0.04, pitch: -0.30, dist: 4.85, targetHeight: 0.72 });\n  var adidasBounds = { minX: -10.0, maxX: 14.0, minZ: 0.0, maxZ: 24.0, maxY: 4.65 };\n  var currentAction = null;\n  var exitSent = false;\n\n  function toggleOutfit(ofKey, toast) {\n    st.pig.outfit = (st.pig.outfit === ofKey) ? 'none' : ofKey;\n    st.pig.wearingJacket = (st.pig.outfit === 'adidas_jacket');\n    st.actionFlashText = st.pig.outfit === ofKey ? toast : '\ud83d\udc55 \u0110\xc3 C\u1edeI TRANG PH\u1ee4C';\n    st.actionFlashUntil = st.t + 2.6;\n  }\n\n  function runContextAction(act) {\n    if (!act) return;\n    postRN({ type: 'HAPTIC_MEDIUM' });\n    if (act.id === 'kick_shoot') {\n      if (st.kickGame && st.kickGame.active) {\n        if (typeof triggerAdidasGoalKick === 'function') triggerAdidasGoalKick(st, null);\n      } else {\n        planAdidasRealtimePath(st, 10.0, 0, 17.8, 'kick_spot');\n        st.ripples.push({ x: 10.0, y: 0, z: 17.8, t: 0 });\n      }\n    } else if (act.id === 'try_jacket') {\n      toggleOutfit('adidas_jacket', '\ud83e\udde5 M\u1eb6C \xc1O KHO\xc1C 3 S\u1eccC');\n      planAdidasRealtimePath(st, 11.8, 0, 9.8, null);\n      st.ripples.push({ x: 11.8, y: 0, z: 9.8, t: 0 });\n    } else if (act.id === 'try_polo') {\n      toggleOutfit('adidas_polo', '\ud83d\udc54 M\u1eb6C \xc1O POLO C\u1ed4 B\u1eba 3 S\u1eccC');\n      st.ripples.push({ x: st.pig.x, y: 0, z: st.pig.z, t: 0 });\n    } else if (act.id === 'try_jogger') {\n      toggleOutfit('adidas_jogger', '\ud83d\udc56 M\u1eb6C QU\u1ea6N JOGGER + SAMBA');\n      st.ripples.push({ x: st.pig.x, y: 0, z: st.pig.z, t: 0 });\n    } else if (act.id === 'try_kit') {\n      toggleOutfit('adidas_kit', '\u26bd M\u1eb6C \xc1O \u0110\u1ea4U #10');\n      st.ripples.push({ x: st.pig.x, y: 0, z: st.pig.z, t: 0 });\n    } else if (act.id === 'maker_custom') {\n      st.pig.customBadge = 'VIP-10';\n      st.pig.outfit = 'adidas_kit';\n      st.actionFlashText = '\ud83c\udfa8 MAKER LAB \xb7 \xc9P NHI\u1ec6T S\u1ed0 10!';\n      st.actionFlashUntil = st.t + 2.8;\n      st.ripples.push({ x: 1.0, y: 0, z: 19.7, t: 0 });\n    } else if (act.id === 'buy_bag') {\n      st.pig.boughtSamba = true;\n      st.actionFlashText = '\ud83d\udecd\ufe0f CHECKOUT POS \xb7 NH\u1eacN T\xdaI 3 S\u1eccC!';\n      st.actionFlashUntil = st.t + 3.0;\n      st.ripples.push({ x: 9.4, y: 0, z: 3.4, t: 0 });\n    } else if (act.id === 'inspect_shoes') {\n      st.actionFlashText = '\ud83d\udc5f SAMBA OG \xb7 ADILETTE \xb7 ULTRABOOST';\n      st.actionFlashUntil = st.t + 2.6;\n      st.ripples.push({ x: st.pig.x, y: 0, z: st.pig.z, t: 0 });\n    } else if (act.id === 'exit_adidas') {\n      if (!st.exiting) st.exiting = true;\n    }\n  }\n\n  if (ctxPillBtn) {\n    ctxPillBtn.addEventListener('click', function(e) {\n      e.stopPropagation();\n      runContextAction(currentAction);\n    });\n  }\n\n  function syncContextPill() {\n    if (!ctxPillBtn) return;\n    currentAction = getAdidasContextAction(st);\n    if (currentAction && !st.exiting) {\n      if (ctxPillBtn.textContent !== currentAction.label) {\n        ctxPillBtn.textContent = currentAction.label;\n      }\n      ctxPillBtn.hidden = false;\n    } else {\n      ctxPillBtn.hidden = true;\n    }\n    var showKickHud = st.kickGame && st.kickGame.active;\n    var showFlash = st.actionFlashUntil > st.t && st.actionFlashText;\n    if (showKickHud) {\n      var arrowPct = Math.round(((st.kickGame.aimAngle + 0.46) / 0.92) * 100);\n      var txt = '\u26bd B\xc0N TH\u1eaeNG: ' + st.kickGame.goals + ' \xb7 CHU\u1ed6I: ' + st.kickGame.streak + ' | H\u01af\u1edaNG: ' + arrowPct + '%';\n      if (hudEl.textContent !== txt) hudEl.textContent = txt;\n      hudEl.hidden = false;\n    } else if (showFlash) {\n      if (hudEl.textContent !== st.actionFlashText) hudEl.textContent = st.actionFlashText;\n      hudEl.hidden = false;\n    } else {\n      hudEl.hidden = true;\n    }\n  }\n\n  bindTpsCanvasGestures(cv, cam, {\n    getSize: function() { return { w: W, h: H }; },\n    onTap: function(sx, sy) {\n      var target = wgl ? pickAdidasTarget3D(cam, st, sx, sy) : null;\n      if (!wgl && !target) {\n        var hit = unprojectFloorTap(cam, sx, sy);\n        if (hit) target = { kind: 'floor', x: hit.x, y: 0, z: hit.z };\n      }\n      if (!target) return;\n      if (target.kind === 'goal_shoot') {\n        if (typeof triggerAdidasGoalKick === 'function') {\n          triggerAdidasGoalKick(st, target.aimOffset);\n          postRN({ type: 'HAPTIC_MEDIUM' });\n        }\n        return;\n      }\n      planAdidasRealtimePath(st, target.x, 0, target.z, target.action || null);\n      st.ripples.push({ x: target.x, y: 0, z: target.z, t: 0 });\n      postRN({ type: target.action ? 'HAPTIC_MEDIUM' : 'HAPTIC_LIGHT' });\n    }\n  });\n\n  var lastNow = performance.now();\n  function loop(now) {\n    var dt = Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));\n    lastNow = now;\n    if (window.__isActive !== false) {\n      stepAdidasTps(st, dt);\n      if (st.exiting && !exitSent && st.exitFade >= 0.85) {\n        exitSent = true;\n        postRN({ type: 'EXIT_ADIDAS' });\n      }\n      if (wgl) {\n        cam.vw = W; cam.vh = H;\n        var asp = W / Math.max(1, H);\n        var fovy = asp < 1 ? Math.min(1.68, 2 * Math.atan(Math.tan(0.54) / Math.max(0.42, asp))) : 0.82;\n        cam.focal = (H * 0.5) / Math.tan(fovy * 0.5);\n        renderAdidasWebglScene(wgl, cam, st, W, H);\n      } else {\n        updateTpsCamera(cam, st.pig.x, 0, st.pig.z, W, H, adidasBounds);\n        renderAdidasTpsScene(ctx, cam, st, W, H);\n      }\n      syncContextPill();\n    }\n    requestAnimationFrame(loop);\n  }\n  requestAnimationFrame(loop);\n})();\n",[]);return(0,l.jsx)(e.WebglTpsBannerShell,{title:"Adidas Mall Flagship WebGL 3D",backgroundHex:"#2B180E",wallArtScript:u,sceneScript:p,initScript:f,onPayload:t=>{t&&'EXIT_ADIDAS'===t.type&&c&&(n.impactAsync(n.ImpactFeedbackStyle.Medium).catch(()=>{}),d.current&&clearTimeout(d.current),d.current=setTimeout(()=>c(),120))}})}},862,[39,775,837,863,864,60]);
 __d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.buildAdidasWallArtScript=function(){return String.raw`
-/* ==================== 1. BỘ SINH TEXTURE THỦ TỤC ADIDAS ORIGINALS HỘI AN (WEBGL 3D) ==================== */
+/* ==================== 1. BỘ SINH TEXTURE THỦ TỤC ADIDAS MALL FLAGSHIP (WEBGL 3D) ==================== */
 function makeAdidasSeedRng(seed) {
   var s = seed | 0;
   return function() {
@@ -9955,11 +10002,18 @@ function drawAdidasTrefoil2D(g, cx, cy, r, col) {
     g.fill();
     g.restore();
   }
-  g.fillStyle = '#2B180E';
+  g.fillStyle = '#181B22';
   for (var s = -1; s <= 1; s++) {
     g.fillRect(cx - r * 0.58, cy + s * r * 0.13 + r * 0.02, r * 1.16, Math.max(2, r * 0.07));
   }
   g.restore();
+}
+
+function drawAdidasPerfLogo2D(g, cx, cy, s, col) {
+  g.fillStyle = col || '#FFFBF1';
+  g.fillRect(cx - s * 1.3, cy + s * 0.2, s * 0.6, s * 0.8);
+  g.fillRect(cx - s * 0.3, cy - s * 0.3, s * 0.6, s * 1.3);
+  g.fillRect(cx + s * 0.7, cy - s * 0.9, s * 0.6, s * 1.9);
 }
 
 function buildAdidasProceduralTextures(wgl) {
@@ -9968,93 +10022,79 @@ function buildAdidasProceduralTextures(wgl) {
     var c = document.createElement('canvas'); c.width = w; c.height = h; return c;
   }
 
-  // 1. Vôi vàng Hội An cổ kính (hoiAnYellowWall)
+  // 1. Tường kem ấm hiện đại nẹp phào TTTM (mallWarmWall)
   (function() {
-    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2501);
-    g.fillStyle = '#E0B452'; g.fillRect(0, 0, 256, 256);
-    for (var i = 0; i < 240; i++) {
-      g.fillStyle = rng() > 0.45 ? 'rgba(244,205,112,0.18)' : 'rgba(176,126,38,0.16)';
-      g.beginPath(); g.arc(rng() * 256, rng() * 256, 10 + rng() * 34, 0, Math.PI * 2); g.fill();
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2551);
+    g.fillStyle = '#E6C77D'; g.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 200; i++) {
+      g.fillStyle = rng() > 0.45 ? 'rgba(255,244,214,0.22)' : 'rgba(186,144,68,0.14)';
+      g.beginPath(); g.arc(rng() * 256, rng() * 256, 10 + rng() * 30, 0, Math.PI * 2); g.fill();
     }
-    g.strokeStyle = 'rgba(116,74,24,0.16)'; g.lineWidth = 1;
-    for (var k = 0; k < 24; k++) {
-      var cx = rng() * 256, cy = rng() * 256;
-      g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + (rng() - 0.5) * 24, cy + rng() * 28); g.stroke();
-    }
-    wgl.registerTextureCanvas('hoiAnYellowWall', c, true);
+    g.fillStyle = 'rgba(92,52,29,0.22)';
+    g.fillRect(0, 248, 256, 8);
+    g.fillRect(0, 0, 256, 6);
+    g.fillStyle = 'rgba(255,251,241,0.28)';
+    g.fillRect(126, 0, 4, 256);
+    wgl.registerTextureCanvas('mallWarmWall', c, true);
   })();
 
-  // 2. Gạch bông di sản Hội An (gachBong)
+  // 2. Sàn Terrazzo đá mài TTTM xen dải đồng (mallTerrazzoFloor)
   (function() {
-    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2502);
-    g.fillStyle = '#E6DBC2'; g.fillRect(0, 0, 256, 256);
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2552);
+    g.fillStyle = '#E9E0CE'; g.fillRect(0, 0, 256, 256);
     for (var ty = 0; ty < 256; ty += 128) {
       for (var tx = 0; tx < 256; tx += 128) {
-        var cx = tx + 64, cy = ty + 64;
-        g.fillStyle = ((tx + ty) / 128) % 2 === 0 ? '#EAE0CA' : '#DDD0B4';
+        g.fillStyle = ((tx + ty) / 128) % 2 === 0 ? '#EFE7D6' : '#E2D6BF';
         g.fillRect(tx + 2, ty + 2, 124, 124);
-        g.strokeStyle = '#9C8A67'; g.lineWidth = 3; g.strokeRect(tx + 3, ty + 3, 122, 122);
-        g.fillStyle = '#8C5E28';
-        for (var k = 0; k < 4; k++) {
-          g.save(); g.translate(cx, cy); g.rotate(k * Math.PI / 2);
-          g.beginPath(); g.ellipse(0, -26, 11, 22, 0, 0, Math.PI * 2); g.fill();
-          g.restore();
+        g.strokeStyle = '#B8A582'; g.lineWidth = 2; g.strokeRect(tx + 2, ty + 2, 124, 124);
+        // Vân đá terrazzo chi tiết
+        var chips = ['#9C8A67', '#5C341D', '#334155', '#FFFBF1', '#C89B3C'];
+        for (var k = 0; k < 28; k++) {
+          g.fillStyle = chips[Math.floor(rng() * chips.length)];
+          g.fillRect(tx + 6 + rng() * 112, ty + 6 + rng() * 112, 2 + rng() * 4, 2 + rng() * 4);
         }
-        g.fillStyle = '#2F5241';
-        for (var d = 0; d < 4; d++) {
-          g.save(); g.translate(cx, cy); g.rotate(d * Math.PI / 2 + Math.PI / 4);
-          g.beginPath(); g.ellipse(0, -20, 7, 15, 0, 0, Math.PI * 2); g.fill();
-          g.restore();
-        }
-        g.fillStyle = '#F7EED8'; g.beginPath(); g.arc(cx, cy, 11, 0, Math.PI * 2); g.fill();
-        g.fillStyle = '#C88A2E'; g.beginPath(); g.arc(cx, cy, 5, 0, Math.PI * 2); g.fill();
       }
     }
-    for (var s = 0; s < 100; s++) {
-      g.fillStyle = 'rgba(92,74,48,0.08)';
-      g.beginPath(); g.arc(rng() * 256, rng() * 256, 4 + rng() * 12, 0, Math.PI * 2); g.fill();
-    }
-    wgl.registerTextureCanvas('gachBong', c, true);
+    wgl.registerTextureCanvas('mallTerrazzoFloor', c, true);
   })();
 
-  // 3. Gỗ lim Hội An (limWood)
+  // 3. Gỗ sồi/lim ấm nhiều thớ cho bục trưng bày & quầy (limWood)
   (function() {
-    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2503);
-    g.fillStyle = '#6B4226'; g.fillRect(0, 0, 256, 256);
+    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2553);
+    g.fillStyle = '#74482A'; g.fillRect(0, 0, 256, 256);
     for (var y = 0; y < 256; y += 3) {
-      g.fillStyle = (y % 6 === 0) ? 'rgba(43,24,14,0.34)' : 'rgba(150,97,55,0.22)';
+      g.fillStyle = (y % 6 === 0) ? 'rgba(43,24,14,0.30)' : 'rgba(166,112,68,0.22)';
       g.fillRect(0, y, 256, 2);
     }
     for (var p = 0; p < 256; p += 64) {
-      g.fillStyle = 'rgba(28,14,8,0.45)'; g.fillRect(0, p, 256, 2);
+      g.fillStyle = 'rgba(28,14,8,0.40)'; g.fillRect(0, p, 256, 2);
     }
     for (var m = 0; m < 10; m++) {
-      g.strokeStyle = 'rgba(35,18,8,0.25)'; g.beginPath();
+      g.strokeStyle = 'rgba(35,18,8,0.22)'; g.beginPath();
       g.ellipse(rng() * 256, rng() * 256, 18, 4, 0, 0, Math.PI * 2); g.stroke();
     }
     wgl.registerTextureCanvas('limWood', c, true);
   })();
 
-  // 4. Bảng Trefoil Origin Hội An (trefoilOriginSign)
+  // 4. Bảng Hero ADIDAS ORIGINALS · MALL FLAGSHIP (trefoilOriginSign)
   (function() {
     var c = mkCanvas(512, 256), g = c.getContext('2d');
-    g.fillStyle = '#2B180E'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#141820'; g.fillRect(0, 0, 512, 256);
     g.strokeStyle = '#F4B93B'; g.lineWidth = 8; g.strokeRect(10, 10, 492, 236);
-    g.strokeStyle = '#7C4F2B'; g.lineWidth = 3; g.strokeRect(20, 20, 472, 216);
-    drawAdidasTrefoil2D(g, 256, 86, 50, '#F4B93B');
+    g.strokeStyle = '#FFFBF1'; g.lineWidth = 2; g.strokeRect(20, 20, 472, 216);
+    drawAdidasTrefoil2D(g, 256, 84, 48, '#F4B93B');
     g.fillStyle = '#FFFBF1'; g.font = 'bold 38px sans-serif'; g.textAlign = 'center';
     g.fillText('ADIDAS ORIGINALS', 256, 168);
-    g.fillStyle = '#FDE047'; g.font = 'bold 24px monospace';
-    g.fillText('· HỘI AN HERITAGE ·', 256, 212);
+    g.fillStyle = '#FDE047'; g.font = 'bold 22px monospace';
+    g.fillText('· MALL FLAGSHIP STORE ·', 256, 210);
     wgl.registerTextureCanvas('trefoilOriginSign', c, false);
   })();
 
-  // 5. Tranh Nón Lá × Hoa Sen × 3 Sọc (vnLotusStripeArt)
+  // 5. Tranh VIỆT NAM × 3 SỌC · FLAGSHIP EDITION (vnLotusStripeArt)
   (function() {
     var c = mkCanvas(512, 256), g = c.getContext('2d');
-    g.fillStyle = '#1E3A3D'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#182F32'; g.fillRect(0, 0, 512, 256);
     g.strokeStyle = '#F4B93B'; g.lineWidth = 8; g.strokeRect(8, 8, 496, 240);
-    // 3 Dải sọc vàng di sản chéo
     g.fillStyle = 'rgba(244,185,59,0.28)';
     for (var st = -1; st <= 1; st++) {
       g.beginPath();
@@ -10062,13 +10102,11 @@ function buildAdidasProceduralTextures(wgl) {
       g.lineTo(350 + st * 46, 12);  g.lineTo(320 + st * 46, 12);
       g.closePath(); g.fill();
     }
-    // Nón Lá Việt Nam trái
     g.fillStyle = '#E8C574'; g.strokeStyle = '#78350F'; g.lineWidth = 3;
     g.beginPath(); g.moveTo(124, 62); g.lineTo(54, 158); g.lineTo(194, 158); g.closePath(); g.fill(); g.stroke();
     g.fillStyle = '#DC2626'; g.fillRect(102, 114, 44, 12);
     g.fillStyle = '#FFFBF1';
     g.fillRect(110, 116, 6, 8); g.fillRect(121, 116, 6, 8); g.fillRect(132, 116, 6, 8);
-    // Đóa Hoa Sen Hồng & Lá Sen phải
     g.fillStyle = '#15803D'; g.beginPath(); g.ellipse(340, 184, 72, 20, 0, 0, Math.PI * 2); g.fill();
     var petals = [[-44, 10, -0.5], [44, 10, 0.5], [-24, -6, -0.25], [24, -6, 0.25], [0, -18, 0]];
     for (var pi = 0; pi < petals.length; pi++) {
@@ -10078,124 +10116,301 @@ function buildAdidasProceduralTextures(wgl) {
       g.restore();
     }
     g.fillStyle = '#FDE047'; g.beginPath(); g.arc(340, 146, 14, 0, Math.PI * 2); g.fill();
-    g.fillStyle = '#FFFBF1'; g.font = 'bold 24px serif'; g.textAlign = 'center';
-    g.fillText('NÓN LÁ × HOA SEN × 3 SỌC · HỘI AN', 256, 228);
+    g.fillStyle = '#FFFBF1'; g.font = 'bold 22px serif'; g.textAlign = 'center';
+    g.fillText('VIỆT NAM × 3 SỌC · FLAGSHIP', 256, 228);
     wgl.registerTextureCanvas('vnLotusStripeArt', c, false);
   })();
 
-  // 6. Bảng BST Việt Nam (vnCollectionSign)
+  // 6. Kệ Sneaker Wall LED 12 ô chi tiết da lộn, mũi sò & 3 sọc (shoeDisplayBoard)
   (function() {
     var c = mkCanvas(512, 256), g = c.getContext('2d');
-    g.fillStyle = '#5C341D'; g.fillRect(0, 0, 512, 256);
-    g.fillStyle = '#FFF5D6'; g.fillRect(14, 52, 484, 190);
-    g.fillStyle = '#991B1B'; g.fillRect(10, 10, 492, 44);
-    g.strokeStyle = '#FDE047'; g.lineWidth = 4; g.strokeRect(10, 10, 492, 236);
-    g.fillStyle = '#FDE047'; g.font = 'bold 22px monospace'; g.textAlign = 'center';
-    g.fillText('★ BỘ SƯU TẬP VIỆT NAM · 3 SỌC ★', 256, 39);
-    // 3 Nón Lá hàng trên
-    for (var ni = -1; ni <= 1; ni++) {
-      var nx = 256 + ni * 144, ny = 92;
-      g.fillStyle = '#E8C574'; g.strokeStyle = '#78350F'; g.lineWidth = 2;
-      g.beginPath(); g.moveTo(nx, ny - 26); g.lineTo(nx - 42, ny + 18); g.lineTo(nx + 42, ny + 18); g.closePath();
-      g.fill(); g.stroke();
-      g.fillStyle = '#DA251D'; g.fillRect(nx - 18, ny, 36, 8);
-    }
-    // 3 Áo Đấu Việt Nam 3 Sọc hàng dưới
-    var jCols = [['#DA251D', '#FDE047'], ['#FFFBF1', '#DA251D'], ['#0F766E', '#FDE047']];
-    for (var ji = 0; ji < 3; ji++) {
-      var jx = 112 + ji * 144, jy = 140;
-      g.fillStyle = jCols[ji][0]; g.fillRect(jx - 38, jy, 76, 22); g.fillRect(jx - 24, jy, 48, 86);
-      g.strokeStyle = '#2B180E'; g.lineWidth = 2; g.strokeRect(jx - 24, jy, 48, 86);
-      g.fillStyle = jCols[ji][1];
-      for (var s = 0; s < 3; s++) {
-        g.fillRect(jx - 34 + s * 5, jy + 2, 3, 18);
-        g.fillRect(jx + 22 + s * 5, jy + 2, 3, 18);
+    g.fillStyle = '#1A1412'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#FDE047'; g.font = 'bold 21px monospace'; g.textAlign = 'center';
+    g.fillText('FOOTWEAR LIBRARY · ORIGINALS', 256, 32);
+    var sh = [
+      { n: 'SAMBA OG',  b: '#FFFBF1', st: '#111827', so: '#B45309', toe: '#D6D3D1' },
+      { n: 'SUPERSTAR', b: '#FFFFFF', st: '#0F172A', so: '#CBD5E1', toe: '#F1F5F9' },
+      { n: 'GAZELLE',   b: '#DC2626', st: '#FFFBF1', so: '#F8FAFC', toe: '#B91C1C' },
+      { n: 'PREDATOR',  b: '#0F172A', st: '#F97316', so: '#1E293B', toe: '#F97316' }
+    ];
+    for (var i = 0; i < 4; i++) {
+      var bx = 18 + i * 121;
+      g.fillStyle = '#2B2118'; g.fillRect(bx, 48, 113, 196);
+      g.strokeStyle = '#F4B93B'; g.lineWidth = 3; g.strokeRect(bx, 48, 113, 196);
+      g.fillStyle = '#FFF7DF'; g.fillRect(bx + 7, 56, 99, 146);
+      g.fillStyle = '#E2E8F0'; g.fillRect(bx + 10, 58, 93, 4); // Dải đèn LED hắt tủ
+      g.fillStyle = '#6B4226'; g.fillRect(bx + 7, 126, 99, 8);
+      for (var row = 0; row < 2; row++) {
+        var sx = bx + 56, sy = 96 + row * 72;
+        g.fillStyle = sh[i].so; g.fillRect(sx - 36, sy + 6, 72, 11);
+        g.fillStyle = sh[i].b;  g.fillRect(sx - 32, sy - 14, 52, 21);
+        g.fillStyle = sh[i].toe; g.fillRect(sx + 18, sy - 5, 16, 12);
+        // Dây giày chi tiết
+        g.fillStyle = '#FFFBF1';
+        g.fillRect(sx - 4, sy - 16, 18, 3);
+        g.fillStyle = sh[i].st;
+        for (var k = 0; k < 3; k++) g.fillRect(sx - 16 + k * 9, sy - 12, 5, 17);
+        g.strokeStyle = '#1E1B18'; g.lineWidth = 2; g.strokeRect(sx - 36, sy - 14, 72, 31);
       }
-      g.fillRect(jx - 7, jy + 24, 14, 14);
+      g.fillStyle = '#FDE047'; g.font = 'bold 14px monospace';
+      g.fillText(sh[i].n, bx + 56, 227);
     }
-    wgl.registerTextureCanvas('vnCollectionSign', c, false);
+    wgl.registerTextureCanvas('shoeDisplayBoard', c, false);
   })();
 
-  // 7. Tường 3 sọc Adidas (threeStripesWall)
+  // 7. Quầy Áo Polo Cổ Bẻ 3 Sọc dệt Piqué chi tiết từng pixel (poloDisplayTex)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#2B180E'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 5; g.strokeRect(6, 6, 500, 244);
+    g.fillStyle = '#FFF7DF'; g.fillRect(14, 48, 484, 194);
+    g.fillStyle = '#FDE047'; g.font = 'bold 21px monospace'; g.textAlign = 'center';
+    g.fillText('POLO & TEES · PIQUÉ 3 SỌC', 256, 34);
+    var polos = [
+      { body: '#1E3A8A', collar: '#FFFBF1', stripe: '#60A5FA', label: 'POLO NAVY' },
+      { body: '#F8FAFC', collar: '#0F172A', stripe: '#111827', label: 'POLO CREAM' },
+      { body: '#991B1B', collar: '#FFFBF1', stripe: '#FACC15', label: 'POLO RUBY' },
+      { body: '#14532D', collar: '#FFFBF1', stripe: '#86EFAC', label: 'POLO PINE' }
+    ];
+    for (var i = 0; i < 4; i++) {
+      var px = 76 + i * 120, py = 74;
+      // Móc gỗ
+      g.strokeStyle = '#78350F'; g.lineWidth = 3;
+      g.beginPath(); g.moveTo(px - 34, py + 12); g.lineTo(px, py - 4); g.lineTo(px + 34, py + 12); g.stroke();
+      // Vai & tay áo Polo
+      g.fillStyle = polos[i].body;
+      g.fillRect(px - 44, py + 12, 88, 32);
+      g.fillRect(px - 28, py + 12, 56, 110);
+      // Vân dệt piqué mắt chim
+      g.fillStyle = 'rgba(255,255,255,0.12)';
+      for (var wy = py + 24; wy < py + 116; wy += 6) {
+        for (var wx = px - 24; wx < px + 24; wx += 6) g.fillRect(wx, wy, 2, 2);
+      }
+      // Cổ bẻ Polo & nẹp cúc 2 khuy
+      g.fillStyle = polos[i].collar;
+      g.fillRect(px - 16, py + 8, 32, 12);
+      g.fillRect(px - 4, py + 18, 8, 28);
+      g.fillStyle = '#CBD5E1'; g.fillRect(px - 1, py + 25, 2, 3); g.fillRect(px - 1, py + 36, 2, 3);
+      // 3 Sọc vai & gấu tay
+      g.fillStyle = polos[i].stripe;
+      for (var s = 0; s < 3; s++) {
+        g.fillRect(px - 40 + s * 6, py + 14, 3, 26);
+        g.fillRect(px + 25 + s * 6, py + 14, 3, 26);
+      }
+      g.strokeStyle = '#1E1B18'; g.lineWidth = 2; g.strokeRect(px - 28, py + 12, 56, 110);
+      g.fillStyle = '#2B180E'; g.font = 'bold 13px monospace';
+      g.fillText(polos[i].label, px, 224);
+    }
+    wgl.registerTextureCanvas('poloDisplayTex', c, false);
+  })();
+
+  // 8. Giá Quần Jogger & Track Pants nỉ 3 sọc dọc chân thực từng pixel (joggerRackTex)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#1E242B'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 5; g.strokeRect(6, 6, 500, 244);
+    g.fillStyle = '#FDE047'; g.font = 'bold 21px monospace'; g.textAlign = 'center';
+    g.fillText('JOGGERS & TRACK PANTS · NỈ 3 SỌC', 256, 34);
+    var pants = [
+      { col: '#111827', st: '#FFFBF1', name: 'FIREBIRD BLK' },
+      { col: '#475569', st: '#F8FAFC', name: 'FLEECE GREY' },
+      { col: '#14532D', st: '#FDE047', name: 'OLIVE TRACK' },
+      { col: '#1E3A8A', st: '#FFFBF1', name: 'NAVY JOGGER' }
+    ];
+    for (var i = 0; i < 4; i++) {
+      var x = 76 + i * 120, y = 62;
+      g.fillStyle = '#334155'; g.fillRect(x - 42, y - 4, 84, 152);
+      g.fillStyle = pants[i].col;
+      // Cạp chun + dây rút trắng
+      g.fillRect(x - 28, y + 8, 56, 28);
+      // Hai ống quần Jogger + gấu bo
+      g.fillRect(x - 28, y + 36, 24, 90);
+      g.fillRect(x + 4, y + 36, 24, 90);
+      g.fillStyle = '#FFFBF1'; // Dây rút
+      g.fillRect(x - 4, y + 16, 2, 16); g.fillRect(x + 2, y + 16, 2, 16);
+      // 3 sọc dọc bên hông mỗi ống quần
+      g.fillStyle = pants[i].st;
+      for (var s = 0; s < 3; s++) {
+        g.fillRect(x - 27 + s * 3, y + 12, 2, 110);
+        g.fillRect(x + 20 + s * 3, y + 12, 2, 110);
+      }
+      // Bo thun gấu quần Jogger
+      g.fillStyle = '#0F172A';
+      g.fillRect(x - 26, y + 122, 20, 8); g.fillRect(x + 6, y + 122, 20, 8);
+      g.fillStyle = '#F8FAFC'; g.font = 'bold 12px monospace';
+      g.fillText(pants[i].name, x, 232);
+    }
+    wgl.registerTextureCanvas('joggerRackTex', c, false);
+  })();
+
+  // 9. Kệ Dép Adilette Slides quai sọc nổi (slidesBoardTex)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#1F2937'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#60A5FA'; g.lineWidth = 5; g.strokeRect(6, 6, 500, 244);
+    g.fillStyle = '#F8FAFC'; g.font = 'bold 21px monospace'; g.textAlign = 'center';
+    g.fillText('ADILETTE SLIDES · SANDALS', 256, 34);
+    var slides = [
+      { sole: '#0F172A', strap: '#1E293B', st: '#FFFBF1', n: 'ADILETTE OG' },
+      { sole: '#1D4ED8', strap: '#2563EB', st: '#FFFBF1', n: 'AQUA COBALT' },
+      { sole: '#D6C4A1', strap: '#78350F', st: '#FFF5D6', n: 'SAND COMFORT' }
+    ];
+    for (var i = 0; i < 3; i++) {
+      var bx = 26 + i * 160;
+      g.fillStyle = '#FFF7DF'; g.fillRect(bx, 52, 144, 152);
+      g.strokeStyle = '#2B180E'; g.lineWidth = 2; g.strokeRect(bx, 52, 144, 152);
+      for (var p = 0; p < 2; p++) {
+        var sx = bx + 42 + p * 60, sy = 128;
+        g.fillStyle = slides[i].sole; g.fillRect(sx - 18, sy - 54, 36, 108);
+        g.fillStyle = slides[i].strap; g.fillRect(sx - 20, sy - 24, 40, 40);
+        g.fillStyle = slides[i].st;
+        for (var k = 0; k < 3; k++) g.fillRect(sx - 14 + k * 10, sy - 22, 6, 36);
+        g.strokeStyle = '#1E1B18'; g.lineWidth = 2; g.strokeRect(sx - 18, sy - 54, 36, 108);
+      }
+      g.fillStyle = '#FDE047'; g.font = 'bold 14px monospace';
+      g.fillText(slides[i].n, bx + 72, 232);
+    }
+    wgl.registerTextureCanvas('slidesBoardTex', c, false);
+  })();
+
+  // 10. Kệ Áo Đấu Bóng Đá, Tất & Bóng (footballGearTex)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#142E22'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 244);
+    g.fillStyle = '#FFF5D6'; g.fillRect(14, 48, 484, 194);
+    g.fillStyle = '#FDE047'; g.font = 'bold 21px monospace'; g.textAlign = 'center';
+    g.fillText('FOOTBALL KITS · TẤT & BÓNG THI ĐẤU', 256, 34);
+    var kits = [['#DC2626', '#FACC15'], ['#FFFBF1', '#1D4ED8'], ['#0F766E', '#FFFBF1'], ['#111827', '#F97316']];
+    for (var ji = 0; ji < 4; ji++) {
+      var jx = 76 + ji * 120, jy = 76;
+      g.fillStyle = kits[ji][0];
+      g.fillRect(jx - 38, jy, 76, 24); g.fillRect(jx - 24, jy, 48, 86);
+      g.strokeStyle = '#1E1B18'; g.lineWidth = 2; g.strokeRect(jx - 24, jy, 48, 86);
+      g.fillStyle = kits[ji][1];
+      for (var s = 0; s < 3; s++) {
+        g.fillRect(jx - 34 + s * 5, jy + 2, 3, 20);
+        g.fillRect(jx + 22 + s * 5, jy + 2, 3, 20);
+      }
+      g.font = 'bold 24px monospace'; g.fillText('10', jx, jy + 62);
+      // Tất bóng đá bên dưới
+      g.fillStyle = kits[ji][0]; g.fillRect(jx - 16, 178, 12, 42); g.fillRect(jx + 4, 178, 12, 42);
+      g.fillStyle = kits[ji][1]; g.fillRect(jx - 16, 184, 12, 6); g.fillRect(jx + 4, 184, 12, 6);
+    }
+    wgl.registerTextureCanvas('footballGearTex', c, false);
+  })();
+
+  // 11. Kệ Running / Gym / Pickleball (gymPickleTex)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#17253B'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#38BDF8'; g.lineWidth = 5; g.strokeRect(6, 6, 500, 244);
+    g.fillStyle = '#E0F2FE'; g.font = 'bold 20px monospace'; g.textAlign = 'center';
+    g.fillText('RUNNING · GYM · PICKLEBALL STUDIO', 256, 34);
+    g.fillStyle = '#F8FAFC'; g.fillRect(16, 50, 480, 190);
+    // 2 Vợt Pickleball Carbon 3 sọc
+    for (var p = 0; p < 2; p++) {
+      var px = 96 + p * 105;
+      g.fillStyle = p === 0 ? '#0F172A' : '#1E3A8A'; g.fillRect(px - 28, 72, 56, 84);
+      g.fillStyle = '#38BDF8';
+      for (var s = 0; s < 3; s++) g.fillRect(px - 14 + s * 11, 84, 6, 58);
+      g.fillStyle = '#F4B93B'; g.fillRect(px - 7, 156, 14, 38);
+    }
+    // Áo Tank Gym & Quần Short chạy bộ
+    g.fillStyle = '#0F172A'; g.fillRect(306, 72, 56, 86);
+    g.fillStyle = '#FFFBF1'; g.fillRect(320, 72, 28, 22);
+    g.fillStyle = '#EF4444'; g.fillRect(390, 74, 72, 46); // Thảm & bình nước
+    g.fillStyle = '#111827'; g.fillRect(408, 134, 36, 70);
+    g.fillStyle = '#0F172A'; g.font = 'bold 13px monospace';
+    g.fillText('PRO PADDLE · SINGLET · HYDRATION', 256, 224);
+    wgl.registerTextureCanvas('gymPickleTex', c, false);
+  })();
+
+  // 12. Maker Lab Custom Studio (makerLabTex)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#111827'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#F97316'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 244);
+    g.fillStyle = '#FDBA74'; g.font = 'bold 22px monospace'; g.textAlign = 'center';
+    g.fillText('MAKER LAB · IN ÁO & CUSTOM GIÀY', 256, 36);
+    var badges = ['07', '10', '23', 'VN'];
+    for (var i = 0; i < 4; i++) {
+      var bx = 30 + i * 116;
+      g.fillStyle = '#1E293B'; g.fillRect(bx, 62, 98, 116);
+      g.strokeStyle = '#F4B93B'; g.lineWidth = 3; g.strokeRect(bx, 62, 98, 116);
+      g.fillStyle = '#FFFBF1'; g.font = 'bold 34px monospace';
+      g.fillText(badges[i], bx + 49, 132);
+    }
+    g.fillStyle = '#FDE047'; g.font = 'bold 15px monospace';
+    g.fillText('HEAT PRESS · PATCHES · LACES · SPRAY', 256, 220);
+    wgl.registerTextureCanvas('makerLabTex', c, false);
+  })();
+
+  // 13. Quầy Balo, Túi Trống, Nón & Vớ Trefoil (accessoriesWallTex)
+  (function() {
+    var c = mkCanvas(512, 256), g = c.getContext('2d');
+    g.fillStyle = '#2B180E'; g.fillRect(0, 0, 512, 256);
+    g.strokeStyle = '#F4B93B'; g.lineWidth = 5; g.strokeRect(6, 6, 500, 244);
+    g.fillStyle = '#FFF5D6'; g.fillRect(14, 48, 484, 194);
+    g.fillStyle = '#FDE047'; g.font = 'bold 20px monospace'; g.textAlign = 'center';
+    g.fillText('BACKPACKS · CAPS · TREFOIL SOCKS', 256, 34);
+    // 4 Balo & Nón
+    for (var i = 0; i < 4; i++) {
+      var x = 76 + i * 120;
+      g.fillStyle = ['#111827', '#1D4ED8', '#991B1B', '#065F46'][i];
+      g.fillRect(x - 28, 108, 56, 80); // Balo
+      g.fillStyle = '#FFFBF1';
+      g.fillRect(x - 16, 128, 32, 6); g.fillRect(x - 16, 140, 32, 6); g.fillRect(x - 16, 152, 32, 6);
+      // Nón Cap trên kệ
+      g.fillStyle = ['#0F172A', '#FFFBF1', '#DC2626', '#1E3A8A'][i];
+      g.fillRect(x - 22, 64, 44, 24);
+      g.fillStyle = '#334155'; g.fillRect(x - 26, 86, 52, 7);
+    }
+    wgl.registerTextureCanvas('accessoriesWallTex', c, false);
+  })();
+
+  // 14. Tường 3 sọc & Rèm nhung & Tường phòng thử đồ (threeStripesWall, velvetCurtain, fittingGreenWall)
   (function() {
     var c = mkCanvas(256, 256), g = c.getContext('2d');
     g.fillStyle = '#18241C'; g.fillRect(0, 0, 256, 256);
     g.strokeStyle = '#F4B93B'; g.lineWidth = 6; g.strokeRect(8, 8, 240, 240);
     g.fillStyle = '#FFFBF1';
-    for (var s = -1; s <= 1; s++) {
-      g.fillRect(128 + s * 36 - 10, 28, 20, 200);
-    }
+    for (var s = -1; s <= 1; s++) g.fillRect(128 + s * 36 - 10, 28, 20, 200);
     g.fillStyle = '#F4B93B'; g.fillRect(28, 204, 200, 8);
     wgl.registerTextureCanvas('threeStripesWall', c, false);
-  })();
 
-  // 8. Rèm nhung đỏ đô (velvetCurtain)
-  (function() {
-    var c = mkCanvas(256, 256), g = c.getContext('2d');
-    g.fillStyle = '#7F1D1D'; g.fillRect(0, 0, 256, 256);
+    var vc = mkCanvas(256, 256), vg = vc.getContext('2d');
+    vg.fillStyle = '#7F1D1D'; vg.fillRect(0, 0, 256, 256);
     for (var f = 0; f < 8; f++) {
-      g.fillStyle = f % 2 === 0 ? '#991B1B' : '#5F1111';
-      g.fillRect(f * 32, 0, 32, 256);
-      g.fillStyle = 'rgba(255,200,200,0.08)';
-      g.fillRect(f * 32 + 6, 0, 6, 256);
+      vg.fillStyle = f % 2 === 0 ? '#991B1B' : '#5F1111';
+      vg.fillRect(f * 32, 0, 32, 256);
+      vg.fillStyle = 'rgba(255,200,200,0.08)';
+      vg.fillRect(f * 32 + 6, 0, 6, 256);
     }
-    g.fillStyle = '#F4B93B'; g.fillRect(0, 148, 256, 12);
-    g.strokeStyle = '#450A0A'; g.lineWidth = 4; g.strokeRect(2, 2, 252, 252);
-    wgl.registerTextureCanvas('velvetCurtain', c, false);
+    vg.fillStyle = '#F4B93B'; vg.fillRect(0, 148, 256, 12);
+    wgl.registerTextureCanvas('velvetCurtain', vc, false);
+
+    var fg = mkCanvas(256, 256), gg = fg.getContext('2d'), rng = makeAdidasSeedRng(2559);
+    gg.fillStyle = '#243C2B'; gg.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 160; i++) {
+      gg.fillStyle = rng() > 0.5 ? 'rgba(54,88,63,0.18)' : 'rgba(24,40,28,0.20)';
+      gg.beginPath(); gg.arc(rng() * 256, rng() * 256, 8 + rng() * 26, 0, Math.PI * 2); gg.fill();
+    }
+    gg.strokeStyle = '#C89B3C'; gg.lineWidth = 4; gg.strokeRect(2, 2, 252, 252);
+    wgl.registerTextureCanvas('fittingGreenWall', fg, true);
   })();
 
-  // 9. Tường xanh ngọc-rêu boutique Phòng Thay Đồ (fittingGreenWall)
+  // 15. Quầy Thu Ngân POS & Checkout Phụ Kiện (posShelfTex)
   (function() {
-    var c = mkCanvas(256, 256), g = c.getContext('2d'), rng = makeAdidasSeedRng(2509);
-    g.fillStyle = '#253C2B'; g.fillRect(0, 0, 256, 256);
-    for (var i = 0; i < 180; i++) {
-      g.fillStyle = rng() > 0.5 ? 'rgba(54,88,63,0.18)' : 'rgba(24,40,28,0.20)';
-      g.beginPath(); g.arc(rng() * 256, rng() * 256, 8 + rng() * 28, 0, Math.PI * 2); g.fill();
-    }
-    g.strokeStyle = '#C89B3C'; g.lineWidth = 4; g.strokeRect(2, 2, 252, 252);
-    wgl.registerTextureCanvas('fittingGreenWall', c, true);
-  })();
-
-  // 10. Kệ Trưng Bày Giày Shoe Wall (shoeDisplayBoard) & Quầy Thu Ngân Hộp Giày (posShelfTex)
-  (function() {
-    var c = mkCanvas(512, 256), g = c.getContext('2d');
-    g.fillStyle = '#2B180E'; g.fillRect(0, 0, 512, 256);
-    g.fillStyle = '#FDE047'; g.font = 'bold 24px monospace'; g.textAlign = 'center';
-    g.fillText('SHOE WALL · ADIDAS ORIGINALS', 256, 34);
-    var sh = [
-      { n: 'SAMBA OG', b: '#FFFBF1', st: '#111827', so: '#B45309' },
-      { n: 'SUPERSTAR', b: '#FFFFFF', st: '#0F172A', so: '#CBD5E1' },
-      { n: 'GAZELLE', b: '#DC2626', st: '#FFFBF1', so: '#F8FAFC' },
-      { n: 'PREDATOR', b: '#1E293B', st: '#F97316', so: '#0F172A' }
-    ];
-    for (var i = 0; i < 4; i++) {
-      var bx = 20 + i * 120;
-      g.fillStyle = '#3D2616'; g.fillRect(bx, 50, 112, 192);
-      g.strokeStyle = '#C89B3C'; g.lineWidth = 3; g.strokeRect(bx, 50, 112, 192);
-      g.fillStyle = '#FFF5D6'; g.fillRect(bx + 8, 60, 96, 134);
-      g.fillStyle = '#7C4F2B'; g.fillRect(bx + 8, 124, 96, 10);
-      for (var row = 0; row < 2; row++) {
-        var sx = bx + 56, sy = 96 + row * 66;
-        g.fillStyle = sh[i].so; g.fillRect(sx - 34, sy + 6, 68, 12);
-        g.fillStyle = sh[i].b; g.fillRect(sx - 30, sy - 14, 52, 22); g.fillRect(sx + 16, sy - 6, 16, 14);
-        g.fillStyle = sh[i].st;
-        for (var k = 0; k < 3; k++) g.fillRect(sx - 12 + k * 9, sy - 12, 5, 18);
-        g.strokeStyle = '#2B180E'; g.lineWidth = 2; g.strokeRect(sx - 34, sy - 14, 68, 32);
-      }
-      g.fillStyle = '#FDE047'; g.font = 'bold 15px monospace';
-      g.fillText(sh[i].n, bx + 56, 224);
-    }
-    wgl.registerTextureCanvas('shoeDisplayBoard', c, false);
-
     var p = mkCanvas(512, 256), pg = p.getContext('2d');
-    pg.fillStyle = '#3B2314'; pg.fillRect(0, 0, 512, 256);
+    pg.fillStyle = '#261810'; pg.fillRect(0, 0, 512, 256);
     pg.strokeStyle = '#F4B93B'; pg.lineWidth = 6; pg.strokeRect(6, 6, 500, 244);
-    pg.fillStyle = '#FDE047'; pg.font = 'bold 22px monospace'; pg.textAlign = 'center';
-    pg.fillText('QUẦY THU NGÂN · SAMBA OG', 256, 36);
-    var cols = ['#1D4ED8', '#2563EB', '#D97706', '#1E40AF'];
+    pg.fillStyle = '#FDE047'; pg.font = 'bold 21px monospace'; pg.textAlign = 'center';
+    pg.fillText('QUẦY THU NGÂN POS · CHECKOUT', 256, 34);
+    var cols = ['#1D4ED8', '#2563EB', '#EA580C', '#0F172A', '#1E40AF'];
     for (var r = 0; r < 3; r++) {
-      var ry = 60 + r * 62;
-      pg.fillStyle = '#2B180E'; pg.fillRect(24, ry + 36, 464, 10);
+      var ry = 56 + r * 62;
+      pg.fillStyle = '#18100A'; pg.fillRect(24, ry + 36, 464, 10);
       for (var col = 0; col < 5; col++) {
         var px = 34 + col * 90;
         pg.fillStyle = cols[(r + col) % cols.length]; pg.fillRect(px, ry, 76, 34);
@@ -10205,7 +10420,48 @@ function buildAdidasProceduralTextures(wgl) {
     wgl.registerTextureCanvas('posShelfTex', p, false);
   })();
 
-  // 11. Mặt kính gương & Cửa gỗ-kính Hội An (mirrorGlass, vnDoorWood)
+  // 16. Sân Turf Bóng Đá 2 tông màu + Chấm 11m + Vạch Vôi (turfPitchTex) & Lưới Gôn (goalNetTex) & Bảng LED Gôn (scoreboardLedTex)
+  (function() {
+    var tf = mkCanvas(512, 512), tg = tf.getContext('2d');
+    for (var strip = 0; strip < 8; strip++) {
+      tg.fillStyle = strip % 2 === 0 ? '#15803D' : '#166534';
+      tg.fillRect(0, strip * 64, 512, 64);
+    }
+    tg.strokeStyle = '#FFFBF1'; tg.lineWidth = 10;
+    tg.strokeRect(18, 18, 476, 476);
+    // Vòng cấm địa trước khung thành (phía top canvas -> Z lớn)
+    tg.strokeRect(104, 18, 304, 170);
+    // Chấm đá phạt đền 11m
+    tg.fillStyle = '#FFFBF1';
+    tg.beginPath(); tg.arc(256, 260, 14, 0, Math.PI * 2); tg.fill();
+    tg.strokeStyle = 'rgba(255,251,241,0.75)'; tg.lineWidth = 6;
+    tg.beginPath(); tg.arc(256, 260, 42, 0, Math.PI * 2); tg.stroke();
+    wgl.registerTextureCanvas('turfPitchTex', tf, false);
+
+    var nt = mkCanvas(256, 256), ng = nt.getContext('2d');
+    ng.clearRect(0, 0, 256, 256);
+    ng.fillStyle = 'rgba(248,250,252,0.14)'; ng.fillRect(0, 0, 256, 256);
+    ng.strokeStyle = 'rgba(255,255,255,0.82)'; ng.lineWidth = 3;
+    for (var gx = 0; gx <= 256; gx += 24) {
+      ng.beginPath(); ng.moveTo(gx, 0); ng.lineTo(gx, 256); ng.stroke();
+    }
+    for (var gy = 0; gy <= 256; gy += 24) {
+      ng.beginPath(); ng.moveTo(0, gy); ng.lineTo(256, gy); ng.stroke();
+    }
+    wgl.registerTextureCanvas('goalNetTex', nt, false, true);
+
+    var sb = mkCanvas(512, 256), sg = sb.getContext('2d');
+    sg.fillStyle = '#0B1220'; sg.fillRect(0, 0, 512, 256);
+    sg.strokeStyle = '#22C55E'; sg.lineWidth = 8; sg.strokeRect(8, 8, 496, 240);
+    drawAdidasPerfLogo2D(sg, 84, 128, 30, '#FFFBF1');
+    sg.fillStyle = '#4ADE80'; sg.font = 'bold 34px monospace'; sg.textAlign = 'center';
+    sg.fillText('FOOTBALL KICK ZONE', 286, 108);
+    sg.fillStyle = '#FACC15'; sg.font = 'bold 24px monospace';
+    sg.fillText('CHẠM GÓC GÔN ĐỂ SÚT!', 286, 168);
+    wgl.registerTextureCanvas('scoreboardLedTex', sb, false);
+  })();
+
+  // 17. Mặt kính gương & Cửa gỗ-kính mặt tiền (mirrorGlass, vnDoorWood)
   (function() {
     var m = mkCanvas(256, 256), mg = m.getContext('2d');
     mg.fillStyle = '#CBE7F5'; mg.fillRect(0, 0, 256, 256);
@@ -10227,13 +10483,13 @@ function buildAdidasProceduralTextures(wgl) {
     wgl.registerTextureCanvas('vnDoorWood', d, false);
   })();
 
-  // 12. Bộ Sprite Chú Heo Mascot 24×20 (gl.NEAREST) kèm outfit áo khoác 3 Sọc Adidas
+  // 18. Đăng ký 4 bộ trang phục Chú Heo 24×20 (gl.NEAREST)
   if (typeof buildPigBillboardTextures === 'function') {
-    buildPigBillboardTextures(wgl, ['adidas_jacket']);
+    buildPigBillboardTextures(wgl, ['adidas_jacket', 'adidas_polo', 'adidas_jogger', 'adidas_kit']);
   }
 }
 
-/* ==================== 2. FALLBACK CANVAS2D CHO HEADLESS SMOKE TEST 182 ==================== */
+/* ==================== 2. FALLBACK CANVAS2D CHO HEADLESS SMOKE TEST 182 & NON-WEBGL ==================== */
 function drawAdidasClippedQuad(ctx, cam, pts, bgCol, borderCol, lineW, drawInner) {
   drawPoly3D(ctx, cam, pts, bgCol, borderCol, lineW || 2);
   var p0 = projectPoint3D(cam, pts[0][0], pts[0][1], pts[0][2]);
@@ -10266,8 +10522,7 @@ function drawPixelSneakerIcon(ctx, x, y, w, h, bodyCol, stripeCol, soleCol) {
   for (var s = 0; s < 3; s++) {
     ctx.fillRect(x - w * 0.16 + s * w * 0.12, y - h * 0.12, w * 0.06, h * 0.26);
   }
-  ctx.strokeStyle = '#2B180E';
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#2B180E'; ctx.lineWidth = 1;
   ctx.strokeRect(x - w * 0.44, y - h * 0.16, w * 0.88, h * 0.52);
 }
 
@@ -10282,290 +10537,268 @@ function drawPixelJerseyIcon(ctx, cx, cy, w, h, mainCol, stripeCol, accentCol) {
   }
   ctx.fillStyle = accentCol || '#FDE047';
   ctx.fillRect(cx - w * 0.10, cy - h * 0.36, w * 0.20, h * 0.08);
-  ctx.fillRect(cx + w * 0.05, cy - h * 0.14, w * 0.12, h * 0.10);
-  ctx.strokeStyle = '#2B180E';
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#2B180E'; ctx.lineWidth = 1;
   ctx.strokeRect(cx - w * 0.28, cy - h * 0.36, w * 0.56, h * 0.72);
 }
 
-function drawAdidasHallWalls3D(ctx, cam) {
+function drawAdidasRoomWalls3D(ctx, cam, room, pig, _t) {
+  if (room === 'fitting' || room === 'fitting_pos') {
+    drawAdidasClippedQuad(
+      ctx, cam,
+      [[-5.93, 2.62, 2.4], [-5.93, 2.62, 10.4], [-5.93, 0.92, 10.4], [-5.93, 0.92, 2.4]],
+      '#3B2314', '#C89B3C', 2.0,
+      function(cx, cy, bw, bh) {
+        ctx.fillStyle = '#243B2B';
+        ctx.fillRect(cx - bw * 0.46, cy - bh * 0.44, bw * 0.92, bh * 0.88);
+        drawPixelJerseyIcon(ctx, cx - bw * 0.28, cy + bh * 0.04, bw * 0.22, bh * 0.56, '#111827', '#FFFBF1', '#FDE047');
+        drawPixelJerseyIcon(ctx, cx,            cy + bh * 0.04, bw * 0.22, bh * 0.56, '#1E3A8A', '#FFFBF1', '#60A5FA');
+        drawPixelJerseyIcon(ctx, cx + bw * 0.28, cy + bh * 0.04, bw * 0.22, bh * 0.56, '#991B1B', '#FFFBF1', '#FDE047');
+      }
+    );
+    drawAdidasClippedQuad(
+      ctx, cam,
+      [[-1.75, 3.32, 14.70], [1.75, 3.32, 14.70], [1.75, 0.22, 14.70], [-1.75, 0.22, 14.70]],
+      '#CBE7F5', '#5C341D', 3.4,
+      function(cx, cy, bw, bh, safeW) {
+        ctx.fillStyle = '#DCEFF8';
+        ctx.fillRect(cx - bw * 0.46, cy - bh * 0.46, bw * 0.92, bh * 0.62);
+        var tPx = Math.max(4, Math.min(9, Math.round(bh * 0.07)));
+        ctx.font = 'bold ' + tPx + 'px monospace';
+        ctx.fillStyle = '#2B180E'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(pig && pig.outfit && pig.outfit !== 'none' ? '✨ 3 SỌC CỰC CHẤT ✨' : 'GƯƠNG TOÀN THÂN', cx, cy - bh * 0.38, safeW);
+      }
+    );
+    return;
+  }
   drawAdidasClippedQuad(
     ctx, cam,
-    [[-5.93, 3.42, 1.8], [-5.93, 3.42, 7.6], [-5.93, 2.86, 7.6], [-5.93, 2.86, 1.8]],
+    [[-9.9, 3.42, 1.8], [-9.9, 3.42, 11.4], [-9.9, 2.86, 11.4], [-9.9, 2.86, 1.8]],
     '#2B180E', '#F4B93B', 2.2,
     function(cx, cy, bw, bh, safeW) {
       var px = Math.max(5, Math.min(13, Math.round(bh * 0.42)));
       ctx.font = 'bold ' + px + 'px monospace';
       ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('SHOE WALL · ADIDAS ORIGINALS', cx, cy, safeW);
-    }
-  );
-  var shoes = [
-    { z1: 1.9, z2: 3.6, name: 'SAMBA OG', body: '#FFFBF1', stripe: '#111827', sole: '#B45309' },
-    { z1: 3.9, z2: 5.6, name: 'SUPERSTAR', body: '#FFFFFF', stripe: '#0F172A', sole: '#E2E8F0' },
-    { z1: 5.9, z2: 7.5, name: 'GAZELLE', body: '#DC2626', stripe: '#FFFBF1', sole: '#F8FAFC' }
-  ];
-  for (var si = 0; si < shoes.length; si++) {
-    (function(sh) {
-      drawAdidasClippedQuad(
-        ctx, cam,
-        [[-5.93, 2.74, sh.z1], [-5.93, 2.74, sh.z2], [-5.93, 1.05, sh.z2], [-5.93, 1.05, sh.z1]],
-        '#3D2616', '#C89B3C', 2.0,
-        function(cx, cy, bw, bh, safeW) {
-          ctx.fillStyle = '#FFF5D6';
-          ctx.fillRect(cx - bw * 0.44, cy - bh * 0.42, bw * 0.88, bh * 0.62);
-          ctx.fillStyle = '#7C4F2B';
-          ctx.fillRect(cx - bw * 0.44, cy + bh * 0.14, bw * 0.88, bh * 0.08);
-          drawPixelSneakerIcon(ctx, cx, cy - bh * 0.22, bw * 0.66, bh * 0.28, sh.body, sh.stripe, sh.sole);
-          drawPixelSneakerIcon(ctx, cx, cy + bh * 0.02, bw * 0.66, bh * 0.28, sh.body, sh.stripe, sh.sole);
-          var tPx = Math.max(4, Math.min(10, Math.round(bh * 0.13)));
-          ctx.font = 'bold ' + tPx + 'px monospace';
-          ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText(sh.name, cx, cy + bh * 0.34, safeW);
-        }
-      );
-    })(shoes[si]);
-  }
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[5.93, 3.30, 7.4], [5.93, 3.30, 1.9], [5.93, 1.05, 1.9], [5.93, 1.05, 7.4]],
-    '#4A2C1A', '#C89B3C', 2.2,
-    function(cx, cy, bw, bh, safeW) {
-      ctx.fillStyle = '#F3DFAC';
-      ctx.fillRect(cx - bw * 0.46, cy - bh * 0.34, bw * 0.92, bh * 0.78);
-      var tPx = Math.max(5, Math.min(11, Math.round(bh * 0.12)));
-      ctx.font = 'bold ' + tPx + 'px monospace';
-      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('SPORTSWEAR · 3 SỌC', cx, cy - bh * 0.42, safeW);
-      ctx.fillStyle = '#B45309';
-      ctx.fillRect(cx - bw * 0.44, cy - bh * 0.22, bw * 0.88, Math.max(2, bh * 0.04));
-      drawPixelJerseyIcon(ctx, cx - bw * 0.28, cy + bh * 0.08, bw * 0.24, bh * 0.50, '#111827', '#FFFBF1', '#FDE047');
-      drawPixelJerseyIcon(ctx, cx,            cy + bh * 0.08, bw * 0.24, bh * 0.50, '#1D4ED8', '#FFFBF1', '#93C5FD');
-      drawPixelJerseyIcon(ctx, cx + bw * 0.28, cy + bh * 0.08, bw * 0.24, bh * 0.50, '#B91C1C', '#FDE047', '#FDE047');
+      ctx.fillText('FOOTWEAR LIBRARY · ORIGINALS', cx, cy, safeW);
     }
   );
   drawAdidasClippedQuad(
     ctx, cam,
-    [[-1.35, 3.32, 14.72], [4.95, 3.32, 14.72], [4.95, 1.82, 14.72], [-1.35, 1.82, 14.72]],
-    '#2B180E', '#F4B93B', 2.6,
+    [[-3.2, 3.45, 23.85], [3.2, 3.45, 23.85], [3.2, 1.82, 23.85], [-3.2, 1.82, 23.85]],
+    '#141820', '#F4B93B', 2.6,
     function(cx, cy, bw, bh, safeW) {
-      ctx.fillStyle = '#F4B93B';
-      for (var k = -1; k <= 1; k++) {
-        ctx.fillRect(cx + k * bw * 0.055 - bw * 0.015, cy - bh * 0.38, bw * 0.03, bh * 0.16);
-      }
       var p1 = Math.max(6, Math.min(14, Math.round(bh * 0.22)));
       var p2 = Math.max(5, Math.min(11, Math.round(bh * 0.16)));
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.font = 'bold ' + p1 + 'px monospace'; ctx.fillStyle = '#FFFBF1';
       ctx.fillText('ADIDAS ORIGINALS', cx, cy + bh * 0.02, safeW);
       ctx.font = 'bold ' + p2 + 'px monospace'; ctx.fillStyle = '#FDE047';
-      ctx.fillText('· HỘI AN HERITAGE ·', cx, cy + bh * 0.28, safeW);
+      ctx.fillText('· MALL FLAGSHIP STORE ·', cx, cy + bh * 0.28, safeW);
     }
   );
-}
-
-function drawAdidasFittingWalls3D(ctx, cam, pig, t) {
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[-5.93, 2.62, 2.4], [-5.93, 2.62, 10.4], [-5.93, 0.92, 10.4], [-5.93, 0.92, 2.4]],
-    '#3B2314', '#C89B3C', 2.0,
-    function(cx, cy, bw, bh) {
-      ctx.fillStyle = '#243B2B';
-      ctx.fillRect(cx - bw * 0.46, cy - bh * 0.44, bw * 0.92, bh * 0.88);
-      drawPixelJerseyIcon(ctx, cx - bw * 0.28, cy + bh * 0.04, bw * 0.22, bh * 0.56, '#111827', '#FFFBF1', '#FDE047');
-      drawPixelJerseyIcon(ctx, cx,            cy + bh * 0.04, bw * 0.22, bh * 0.56, '#14532D', '#FDE047', '#FDE047');
-      drawPixelJerseyIcon(ctx, cx + bw * 0.28, cy + bh * 0.04, bw * 0.22, bh * 0.56, '#991B1B', '#FFFBF1', '#FDE047');
-    }
-  );
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[-1.75, 3.32, 14.70], [1.75, 3.32, 14.70], [1.75, 0.22, 14.70], [-1.75, 0.22, 14.70]],
-    '#CBE7F5', '#5C341D', 3.4,
-    function(cx, cy, bw, bh, safeW) {
-      ctx.fillStyle = '#DCEFF8';
-      ctx.fillRect(cx - bw * 0.46, cy - bh * 0.46, bw * 0.92, bh * 0.62);
-      var tPx = Math.max(4, Math.min(9, Math.round(bh * 0.07)));
-      ctx.font = 'bold ' + tPx + 'px monospace';
-      ctx.fillStyle = '#2B180E'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(pig && pig.wearingJacket ? '✨ 3 SỌC CỰC CHẤT ✨' : 'GƯƠNG TOÀN THÂN', cx, cy - bh * 0.38, safeW);
-    }
-  );
-}
-
-function drawAdidasUpperWalls3D(ctx, cam) {
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[-5.93, 2.70, 1.8], [-5.93, 2.70, 7.6], [-5.93, 1.00, 7.6], [-5.93, 1.00, 1.8]],
-    '#5C341D', '#C89B3C', 2.2,
-    function(cx, cy, bw, bh) {
-      ctx.fillStyle = '#FFF5D6';
-      ctx.fillRect(cx - bw * 0.46, cy - bh * 0.44, bw * 0.92, bh * 0.88);
-      drawPixelJerseyIcon(ctx, cx - bw * 0.28, cy + bh * 0.18, bw * 0.22, bh * 0.44, '#DA251D', '#FDE047', '#FDE047');
-      drawPixelJerseyIcon(ctx, cx,            cy + bh * 0.18, bw * 0.22, bh * 0.44, '#FFFBF1', '#DA251D', '#F43F5E');
-      drawPixelJerseyIcon(ctx, cx + bw * 0.28, cy + bh * 0.18, bw * 0.22, bh * 0.44, '#0F766E', '#FDE047', '#FFFBF1');
-    }
-  );
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[-1.45, 3.36, 14.72], [5.10, 3.36, 14.72], [5.10, 1.15, 14.72], [-1.45, 1.15, 14.72]],
-    '#1F3A3D', '#F4B93B', 2.6,
-    function(cx, cy, bw, bh, safeW) {
-      var p1 = Math.max(5, Math.min(11, Math.round(bh * 0.12)));
-      ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FFFBF1'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('HOA SEN × 3 SỌC · HỘI AN', cx, cy - bh * 0.36, safeW);
-    }
-  );
-  drawAdidasClippedQuad(
-    ctx, cam,
-    [[5.93, 3.30, 10.6], [5.93, 3.30, 3.6], [5.93, 1.25, 3.6], [5.93, 1.25, 10.6]],
-    '#3B2314', '#F4B93B', 2.2,
-    function(cx, cy, bw, bh, safeW) {
-      var p1 = Math.max(5, Math.min(11, Math.round(bh * 0.12)));
-      ctx.font = 'bold ' + p1 + 'px monospace';
-      ctx.fillStyle = '#FDE047'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('QUẦY THU NGÂN · SAMBA OG', cx, cy - bh * 0.38, safeW);
-    }
-  );
-}
-
-function drawAdidasRoomWalls3D(ctx, cam, room, pig, t) {
-  if (room === 'fitting') {
-    drawAdidasFittingWalls3D(ctx, cam, pig, t);
-  } else if (room === 'upper') {
-    drawAdidasUpperWalls3D(ctx, cam);
-  } else {
-    drawAdidasHallWalls3D(ctx, cam);
-  }
 }
 `}},863,[]);
 __d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.buildAdidasTps3dSceneScript=function(){return String.raw`
-/* ==================== 1. ĐỒ THỊ KHÔNG GIAN LIÊN HOÀN ADIDAS HỘI AN (QĐ 250) ==================== */
+/* ==================== 1. ĐỒ THỊ KHÔNG GIAN MEGA MALL 1 TẦNG 24×24M (QĐ 255) ==================== */
 var ADIDAS_NAV_GRAPH = {
-  outerBounds: { minX: -6.0, maxX: 15.6, minZ: 0.0, maxZ: 14.8, minY: 0.45, maxY: 6.8 },
+  outerBounds: { minX: -10.0, maxX: 14.0, minZ: 0.0, maxZ: 24.0, minY: 0.45, maxY: 4.65 },
   wallMargin: 0.38,
   zones: [
-    { id: 'hall',    minX: -5.65, maxX: 5.95,  minZ: 0.35, maxZ: 14.40, floorY: 0 },
-    { id: 'fitting', minX: 6.00,  maxX: 15.25, minZ: 5.15, maxZ: 12.85, floorY: 0 },
-    { id: 'upper',   minX: -5.65, maxX: 5.65,  minZ: 0.35, maxZ: 14.45, floorY: 3.4 }
+    { id: 'hall',           minX: -9.65, maxX: 5.95,  minZ: 0.35,  maxZ: 13.95, floorY: 0 },
+    { id: 'apparel_sports', minX: -9.65, maxX: 5.95,  minZ: 13.95, maxZ: 23.65, floorY: 0 },
+    { id: 'fitting_pos',    minX: 6.00,  maxX: 13.65, minZ: 0.35,  maxZ: 13.95, floorY: 0 },
+    { id: 'kick_zone',      minX: 6.00,  maxX: 13.65, minZ: 13.95, maxZ: 23.65, floorY: 0 }
   ],
-  ramps: [
-    {
-      id: 'adidas_stair',
-      axis: 'z',
-      minX: -5.0, maxX: -3.0,
-      zStart: 8.6, zEnd: 13.4,
-      yStart: 0, yEnd: 3.4
-    }
-  ],
+  ramps: [],
   dividerWalls: [
-    // Vách ngăn X = 6.0 Tầng 1, mở Vòm Phòng Thay Đồ tại Z ∈ [8.4, 11.2], Y ∈ [0, 2.8]
+    // Vách ngăn X = 6.0 chia đôi Đông-Tây, mở 3 vòm rộng: POS [1.8..4.8], Phòng Thay Đồ [8.0..11.4], Sân Bóng [16.5..20.5]
     {
-      axis: 'x', pos: 6.0, minSpan: 0.0, maxSpan: 14.8, minY: 0.0, maxY: 3.45,
-      openings: [{ a1: 8.4, a2: 11.2, y1: 0.0, y2: 2.8 }]
+      axis: 'x', pos: 6.0, minSpan: 0.0, maxSpan: 24.0, minY: 0.0, maxY: 4.65,
+      openings: [
+        { a1: 1.8,  a2: 4.8,  y1: 0.0, y2: 3.3 },
+        { a1: 8.0,  a2: 11.4, y1: 0.0, y2: 3.3 },
+        { a1: 16.5, a2: 20.5, y1: 0.0, y2: 3.5 }
+      ]
     },
-    // Tường Nam & Bắc của cánh Phòng Thay Đồ
-    { axis: 'z', pos: 4.8,  minSpan: 6.0, maxSpan: 15.6, minY: 0.0, maxY: 3.45, openings: [] },
-    { axis: 'z', pos: 13.2, minSpan: 6.0, maxSpan: 15.6, minY: 0.0, maxY: 3.45, openings: [] },
-    // Vách X = 6.0 Lầu 2 kín 100%
-    { axis: 'x', pos: 6.0,  minSpan: 0.0, maxSpan: 14.8, minY: 3.4, maxY: 6.8,  openings: [] }
+    // Vách ngăn Z = 14.0 bên cánh Đông (giữa Phòng Thay Đồ và Sân Bóng), mở cửa rộng X ∈ [8.2..11.8]
+    {
+      axis: 'z', pos: 14.0, minSpan: 6.0, maxSpan: 14.0, minY: 0.0, maxY: 4.65,
+      openings: [
+        { a1: 8.2, a2: 11.8, y1: 0.0, y2: 3.4 }
+      ]
+    }
   ],
   edges: [
     {
       from: 'hall',
-      to: 'fitting',
-      waypointsForward: [{ x: 5.15, y: 0, z: 9.8 }, { x: 6.85, y: 0, z: 9.8 }],
-      waypointsBackward: [{ x: 6.85, y: 0, z: 9.8 }, { x: 5.15, y: 0, z: 9.8 }]
+      to: 'fitting_pos',
+      waypointsForward: [{ x: 5.05, y: 0, z: 9.7 }, { x: 6.95, y: 0, z: 9.7 }],
+      waypointsBackward: [{ x: 6.95, y: 0, z: 9.7 }, { x: 5.05, y: 0, z: 9.7 }]
     },
     {
       from: 'hall',
-      to: 'upper',
-      waypointsForward: [
-        { x: -4.0, y: 0,   z: 8.15 },
-        { x: -4.0, y: 3.4, z: 13.95 },
-        { x: -2.2, y: 3.4, z: 13.95 }
-      ],
-      waypointsBackward: [
-        { x: -2.2, y: 3.4, z: 13.95 },
-        { x: -4.0, y: 3.4, z: 13.95 },
-        { x: -4.0, y: 0,   z: 8.15 }
-      ]
+      to: 'apparel_sports',
+      waypointsForward: [{ x: -1.8, y: 0, z: 13.8 }],
+      waypointsBackward: [{ x: -1.8, y: 0, z: 13.8 }]
+    },
+    {
+      from: 'apparel_sports',
+      to: 'kick_zone',
+      waypointsForward: [{ x: 5.05, y: 0, z: 18.5 }, { x: 6.95, y: 0, z: 18.5 }],
+      waypointsBackward: [{ x: 6.95, y: 0, z: 18.5 }, { x: 5.05, y: 0, z: 18.5 }]
+    },
+    {
+      from: 'fitting_pos',
+      to: 'kick_zone',
+      waypointsForward: [{ x: 10.0, y: 0, z: 13.1 }, { x: 10.0, y: 0, z: 14.9 }],
+      waypointsBackward: [{ x: 10.0, y: 0, z: 14.9 }, { x: 10.0, y: 0, z: 13.1 }]
     }
   ]
 };
 
-function getAdidasSurfaceY(x, z, curY) {
-  if (x >= -5.05 && x <= -2.95 && z >= 8.55 && z <= 13.45) {
-    if (z <= 8.6) return 0;
-    if (z >= 13.4) return 3.4;
-    if (curY >= 3.2 && z < 12.95 && x > -3.10) return 3.4;
-    return ((z - 8.6) / 4.8) * 3.4;
-  }
-  if (x > 6.0) return 0;
-  return curY >= 1.9 ? 3.4 : 0;
+function getAdidasSurfaceY(_x, _z, _curY) {
+  return 0;
+}
+
+function getAdidasObstacles() {
+  return [
+    // Gian 1: Sneaker Wall LED trái (Tường Tây hall)
+    { id: 'sneaker_wall', x1: -9.95, z1: 1.80,  x2: -8.65, z2: 12.20 },
+    // Gian 2: Đảo Running Ultraboost
+    { id: 'ultra_island', x1: -6.20, z1: 4.60,  x2: -4.00, z2: 6.40  },
+    // Gian 3: Đảo Predator Trung Tâm
+    { id: 'pred_island',  x1: -1.40, z1: 5.20,  x2: 1.40,  z2: 7.40  },
+    // Gian 4: Đảo Áo Polo Cổ Bẻ 3 Sọc + Kệ Polo tường phải giữa 2 vòm
+    { id: 'polo_island',  x1: 2.20,  z1: 5.40,  x2: 4.00,  z2: 7.50  },
+    { id: 'polo_wall',    x1: 4.75,  z1: 5.40,  x2: 5.95,  z2: 7.40  },
+    // Gian 5: Đảo Quần Jogger & Track Pants
+    { id: 'jogger_rack',  x1: -6.40, z1: 9.60,  x2: -4.00, z2: 11.60 },
+    // Gian 6: Giá Áo Khoác Firebird & Hoodie
+    { id: 'jacket_rack',  x1: 4.65,  z1: 11.80, x2: 5.95,  z2: 13.70 },
+    // Gian 7: Kệ Dép Adilette Slides
+    { id: 'slides_rack',  x1: -5.80, z1: 1.60,  x2: -3.60, z2: 3.00  },
+    // Gian 8: 3 Bục Mannequin Styling Pods
+    { id: 'man_polo',     x1: 1.35,  z1: 9.35,  x2: 2.25,  z2: 10.25 },
+    { id: 'man_track',    x1: -2.45, z1: 9.35,  x2: -1.55, z2: 10.25 },
+    { id: 'man_kit',      x1: 3.15,  z1: 14.75, x2: 4.05,  z2: 15.65 },
+    // Gian 9: Quầy Áo Đấu Bóng Đá (apparel_sports Tây)
+    { id: 'football_wall',x1: -9.95, z1: 15.00, x2: -8.65, z2: 21.20 },
+    // Gian 10: Đảo Gym / Running / Pickleball
+    { id: 'gym_island',   x1: -6.40, z1: 16.00, x2: -3.80, z2: 18.20 },
+    // Gian 11: Maker Lab Custom Studio
+    { id: 'maker_lab',    x1: 1.70,  z1: 18.60, x2: 4.30,  z2: 20.80 },
+    // Gian 12: Tường Balo / Nón / Túi / Vớ Trefoil (Z = 22.6..23.95)
+    { id: 'acc_wall',     x1: -6.20, z1: 22.65, x2: 2.20,  z2: 23.95 },
+    // Gian 13: Phòng Thay Đồ VIP (Gương + Giá đồ + Ghế Băng gọn góc Tây để thông thoáng cửa X=8.2..11.8 sang Sân Bóng)
+    { id: 'fit_rack',     x1: 7.80,  z1: 6.75,  x2: 12.20, z2: 7.65  },
+    { id: 'fit_mirror',   x1: 13.15, z1: 7.95,  x2: 13.95, z2: 11.65 },
+    { id: 'fit_bench',    x1: 6.65,  z1: 11.95, x2: 7.95,  z2: 12.95 },
+    // Gian 14: Quầy Thu Ngân POS Đôi & Kệ Phụ Kiện Checkout
+    { id: 'pos_desk',     x1: 10.20, z1: 1.40,  x2: 11.65, z2: 5.40  },
+    { id: 'pos_shelf',    x1: 12.80, z1: 1.20,  x2: 13.95, z2: 5.80  },
+    { id: 'pos_acc',      x1: 7.50,  z1: 0.90,  x2: 9.00,  z2: 1.95  },
+    // Gian 15 & 16: Khung Thành Gôn 3D & Kệ Bóng World Cup / Ghế CĐV
+    { id: 'goal_frame',   x1: 7.95,  z1: 22.20, x2: 12.05, z2: 23.75 },
+    { id: 'ball_shelf',   x1: 12.60, z1: 15.20, x2: 13.95, z2: 21.20 }
+  ];
 }
 
 function createAdidasNpcs() {
   var routes = [
+    // 1. Nhân viên tư vấn Giày Sneaker Wall
     {
-      id: 'staff_island', role: 'adidas_staff', shirt: '#111827', hair: '#1C1917', carryProp: 'shoebox',
-      state: 'SIT', timer: 3.2, stepIdx: 0,
+      id: 'staff_sneaker', role: 'adidas_staff', shirt: '#111827', hair: '#1C1917', carryProp: 'shoebox',
+      state: 'WALK', timer: 1.2, stepIdx: 0,
       pts: [
-        { x: -2.35, y: 0, z: 6.2, sit: false, yaw: Math.PI * 0.5 },
-        { x: -2.35, y: 0, z: 4.2, sit: false, yaw: -Math.PI * 0.5 },
-        { x: -3.65, y: 0, z: 4.2, sit: false, yaw: -Math.PI * 0.5 },
-        { x: -2.35, y: 0, z: 6.2, sit: false, yaw: Math.PI * 0.5 }
+        { x: -7.5, y: 0, z: 3.4, yaw: -Math.PI * 0.5 },
+        { x: -7.5, y: 0, z: 9.8, yaw: -Math.PI * 0.5 },
+        { x: -2.4, y: 0, z: 6.2, yaw: Math.PI * 0.5 },
+        { x: -7.5, y: 0, z: 6.4, yaw: -Math.PI * 0.5 }
       ]
     },
+    // 2. Nhân viên Quầy Polo & Jogger
     {
-      id: 'staff_fitting', role: 'adidas_staff', shirt: '#111827', hair: '#292524', carryProp: 'none',
+      id: 'staff_apparel', role: 'adidas_staff', shirt: '#111827', hair: '#292524', carryProp: 'none',
       state: 'WALK', timer: 0, stepIdx: 0,
       pts: [
-        { x: 3.6,  y: 0, z: 7.8, yaw: -Math.PI * 0.5 },
-        { x: 5.2,  y: 0, z: 9.8, yaw: Math.PI * 0.5 },
-        { x: 8.6,  y: 0, z: 9.2, yaw: Math.PI * 0.35 },
-        { x: 8.6,  y: 0, z: 9.2, sit: false, yaw: Math.PI * 0.5 },
-        { x: 5.2,  y: 0, z: 9.8, yaw: -Math.PI * 0.5 },
-        { x: 3.6,  y: 0, z: 5.2, yaw: -Math.PI * 0.5 }
+        { x: 1.6, y: 0, z: 6.4, yaw: Math.PI * 0.5 },
+        { x: -3.2, y: 0, z: 10.6, yaw: -Math.PI * 0.5 },
+        { x: 1.8, y: 0, z: 12.4, yaw: Math.PI * 0.5 },
+        { x: 4.8, y: 0, z: 9.6, yaw: Math.PI * 0.5 }
       ]
     },
+    // 3. Nhân viên Maker Lab Custom Studio
     {
-      id: 'staff_cashier', role: 'adidas_staff', shirt: '#111827', hair: '#1C1917', carryProp: 'shoebox',
+      id: 'staff_maker', role: 'adidas_staff', shirt: '#111827', hair: '#0F172A', carryProp: 'none',
+      state: 'SIT', timer: 3.0, stepIdx: 0,
+      pts: [
+        { x: 1.2, y: 0, z: 19.6, yaw: Math.PI * 0.5 },
+        { x: 3.0, y: 0, z: 21.6, yaw: Math.PI }
+      ]
+    },
+    // 4-5. Hai Thu Ngân Quầy POS Đôi
+    {
+      id: 'staff_cashier_1', role: 'adidas_staff', shirt: '#111827', hair: '#1C1917', carryProp: 'shoebox',
       state: 'SIT', timer: 999, stepIdx: 0,
-      pts: [
-        { x: 4.95, y: 3.4, z: 6.8, sit: true, yaw: -Math.PI * 0.5 }
-      ]
+      pts: [{ x: 12.15, y: 0, z: 2.5, sit: false, yaw: -Math.PI * 0.5 }]
     },
     {
-      id: 'customer_stairs', role: 'customer', shirt: '#DC2626', hair: '#1E1B18', carryProp: 'none',
+      id: 'staff_cashier_2', role: 'adidas_staff', shirt: '#111827', hair: '#451A03', carryProp: 'none',
+      state: 'SIT', timer: 999, stepIdx: 0,
+      pts: [{ x: 12.15, y: 0, z: 4.3, sit: false, yaw: -Math.PI * 0.5 }]
+    },
+    // 6. Thủ môn đứng gác gôn tại Football Kick Zone (Z = 22.0)
+    {
+      id: 'kick_goalkeeper', role: 'gk', shirt: '#16A34A', hair: '#111827', carryProp: 'none',
+      state: 'SIT', timer: 999, stepIdx: 0,
+      pts: [{ x: 10.0, y: 0, z: 22.0, sit: false, yaw: Math.PI }]
+    },
+    // 7-12. 6 Khách hàng vào mua sắm khắp 16 gian hàng
+    {
+      id: 'cust_sneaker', role: 'customer', shirt: '#DC2626', hair: '#1E1B18', carryProp: 'none',
       state: 'WALK', timer: 0, stepIdx: 0,
       pts: [
-        { x: 1.8,  y: 0,   z: 3.2 },
-        { x: -1.8, y: 0,   z: 7.9 },
-        { x: -4.0, y: 0,   z: 8.2 },
-        { x: -4.0, y: 3.4, z: 13.95 },
-        { x: -2.2, y: 3.4, z: 13.95 },
-        { x: -2.2, y: 3.4, z: 7.6 },
-        { x: 1.8,  y: 3.4, z: 7.4 },
-        { x: 1.8,  y: 3.4, z: 7.4, sit: false, yaw: Math.PI * 0.5 },
-        { x: -2.2, y: 3.4, z: 13.95 },
-        { x: -4.0, y: 3.4, z: 13.95 },
-        { x: -4.0, y: 0,   z: 8.2 },
-        { x: 0.4,  y: 0,   z: 2.8 }
+        { x: -7.8, y: 0, z: 4.2 }, { x: -7.8, y: 0, z: 10.8 },
+        { x: -4.8, y: 0, z: 2.6 }, { x: -1.8, y: 0, z: 4.4 }
       ]
     },
     {
-      id: 'customer_fitting', role: 'customer', shirt: '#2563EB', hair: '#451A03', carryProp: 'none',
+      id: 'cust_polo', role: 'customer', shirt: '#2563EB', hair: '#451A03', carryProp: 'none',
       state: 'WALK', timer: 0, stepIdx: 1,
       pts: [
-        { x: -1.5, y: 0, z: 2.4 },
-        { x: 2.6,  y: 0, z: 8.8 },
-        { x: 5.2,  y: 0, z: 9.8 },
-        { x: 12.6, y: 0, z: 9.0 },
-        { x: 12.6, y: 0, z: 9.0, sit: false, yaw: Math.PI * 0.5 },
-        { x: 10.6, y: 0, z: 9.8 },
-        { x: 5.2,  y: 0, z: 9.8 },
-        { x: 1.9,  y: 0, z: 4.5 }
+        { x: 1.5, y: 0, z: 4.8 }, { x: 4.3, y: 0, z: 6.4 },
+        { x: 5.2, y: 0, z: 9.7 }, { x: 8.6, y: 0, z: 9.7 }, { x: 5.2, y: 0, z: 9.7 }
+      ]
+    },
+    {
+      id: 'cust_jogger', role: 'customer', shirt: '#0F766E', hair: '#292524', carryProp: 'none',
+      state: 'WALK', timer: 0, stepIdx: 0,
+      pts: [
+        { x: -3.2, y: 0, z: 9.0 }, { x: -7.2, y: 0, z: 11.4 },
+        { x: -7.8, y: 0, z: 17.5 }, { x: -3.0, y: 0, z: 19.4 }
+      ]
+    },
+    {
+      id: 'cust_fitting', role: 'customer', shirt: '#F59E0B', hair: '#111827', carryProp: 'shoebox',
+      state: 'WALK', timer: 0, stepIdx: 0,
+      pts: [
+        { x: 11.8, y: 0, z: 9.8 }, { x: 8.4, y: 0, z: 10.2 },
+        { x: 8.8, y: 0, z: 3.4 }, { x: 9.6, y: 0, z: 4.8 }, { x: 8.6, y: 0, z: 9.4 }
+      ]
+    },
+    {
+      id: 'cust_sports', role: 'customer', shirt: '#7C3AED', hair: '#1C1917', carryProp: 'none',
+      state: 'WALK', timer: 0, stepIdx: 1,
+      pts: [
+        { x: -7.6, y: 0, z: 19.6 }, { x: -2.4, y: 0, z: 21.8 },
+        { x: 2.8, y: 0, z: 21.6 },  { x: 5.0, y: 0, z: 18.6 }
+      ]
+    },
+    {
+      id: 'cust_fan', role: 'customer', shirt: '#E11D48', hair: '#451A03', carryProp: 'ball',
+      state: 'WALK', timer: 0, stepIdx: 0,
+      pts: [
+        { x: 7.4, y: 0, z: 16.5 }, { x: 11.6, y: 0, z: 16.0 },
+        { x: 11.8, y: 0, z: 19.8 }, { x: 7.4, y: 0, z: 19.8 }
       ]
     }
   ];
@@ -10585,7 +10818,7 @@ function createAdidasNpcs() {
       timer: r.timer,
       stepIdx: r.stepIdx,
       pts: r.pts,
-      phase: i * 0.85,
+      phase: i * 0.72,
       moving: r.state === 'WALK',
       seated: false
     });
@@ -10595,14 +10828,14 @@ function createAdidasNpcs() {
 
 function createAdidasTpsState() {
   var npcs = createAdidasNpcs();
-  var hallStaff = [npcs[0], npcs[1]];
-  var upperCashier = npcs[2];
+  var hallStaff = [npcs[0], npcs[1], npcs[2]];
+  var upperCashier = npcs[3];
   var particles = [];
-  for (var i = 0; i < 18; i++) {
+  for (var i = 0; i < 24; i++) {
     particles.push({
-      x: -4.2 + ((i * 37) % 140) * 0.12,
-      y: 1.2 + ((i * 23) % 45) * 0.10,
-      z: 1.2 + ((i * 19) % 120) * 0.10,
+      x: -8.5 + ((i * 37) % 210) * 0.10,
+      y: 1.0 + ((i * 23) % 30) * 0.10,
+      z: 1.2 + ((i * 19) % 215) * 0.10,
       phase: i * 0.63
     });
   }
@@ -10620,7 +10853,8 @@ function createAdidasTpsState() {
       wearingJacket: false,
       boughtSamba: false,
       outfit: 'none',
-      pendingAction: null
+      pendingAction: null,
+      customBadge: ''
     },
     npcs: npcs,
     hallStaff: hallStaff,
@@ -10631,167 +10865,219 @@ function createAdidasTpsState() {
     exitFade: 0,
     exiting: false,
     ripples: [],
+    kickGame: {
+      active: false,
+      aimAngle: 0,
+      aimDir: 1,
+      goals: 0,
+      attempts: 0,
+      streak: 0,
+      netRipple: 0,
+      justEnteredAt: 0,
+      sparks: [],
+      ball: {
+        x: 10.0, y: 0.22, z: 18.6,
+        vx: 0, vy: 0, vz: 0,
+        shooting: false,
+        shootT: 0,
+        goalieX: 10.0,
+        goalieTargetX: 10.0,
+        resultText: ''
+      }
+    },
     actionFlashUntil: 0,
     actionFlashText: '',
     t: 0
   };
 }
 
-function clampAdidasWalkPos(st, x, z, floorY) {
-  var fy = typeof floorY === 'number' ? floorY : (st.pig.y >= 1.9 ? 3.4 : 0);
-  var nx = x, nz = z;
-  var boxes = [];
-
-  if (fy >= 1.9) {
-    // Lầu 2 (upper): X ∈ [-6.0, 6.0], Z ∈ [0, 14.8]
-    nx = Math.max(-5.65, Math.min(5.65, nx));
-    nz = Math.max(0.55, Math.min(14.45, nz));
-    boxes = [
-      { x1: -5.95, z1: 1.8,  x2: -4.65, z2: 7.6 },   // Kệ BST VN
-      { x1: -0.65, z1: 7.15, x2: 1.05,  z2: 8.45 },  // Bục Samba
-      { x1: 3.15,  z1: 4.2,  x2: 5.95,  z2: 9.6 },   // Thu ngân POS
-      // Lan can lỗ sàn Lầu 2 (X ∈ [-5.1, -2.9], Z ∈ [8.55, 13.35]), để ngỏ chiếu nghỉ sau Z ∈ [13.4, 14.8]
-      { x1: -3.10, z1: 8.55, x2: -2.85, z2: 13.35 },
-      { x1: -5.10, z1: 8.45, x2: -2.90, z2: 8.70 },
-      { x1: -5.30, z1: 8.55, x2: -4.95, z2: 13.35 }
-    ];
-  } else if (nx >= 6.0) {
-    // Phòng Thay Đồ (fitting): X ∈ [6.0, 15.6], Z ∈ [4.8, 13.2]
-    nx = Math.min(15.25, nx);
-    nz = Math.max(5.15, Math.min(12.85, nz));
-    if (nx < 6.35 && (nz < 8.65 || nz > 10.95)) nx = 6.35;
-    boxes = [
-      { x1: 7.6,   z1: 4.85, x2: 13.8,  z2: 5.95 },  // Giá Áo Khoác 3 Sọc tường Nam
-      { x1: 14.85, z1: 7.2,  x2: 15.55, z2: 10.8 },  // Bục Gương toàn thân tường Đông
-      { x1: 9.8,   z1: 10.4, x2: 11.4,  z2: 11.4 }   // Ghế Băng Gỗ Thử Giày + hộp giày
-    ];
-  } else {
-    // Sảnh Tầng 1 (hall): X ∈ [-6.0, 6.0], Z ∈ [0, 14.8]
-    nx = Math.max(-5.65, nx);
-    nz = Math.max(0.55, Math.min(14.40, nz));
-    if (nx > 5.65 && (nz < 8.65 || nz > 10.95)) nx = 5.65;
-    boxes = [
-      { x1: -1.35, z1: 5.15, x2: 1.35,  z2: 7.25 },  // Đảo Sneaker trung tâm
-      { x1: -5.95, z1: 1.8,  x2: -4.65, z2: 7.6 },   // Kệ giày trái thu gọn
-      { x1: 4.65,  z1: 1.9,  x2: 5.95,  z2: 7.4 },   // Giá áo phải thu gọn
-      // Chặn đi vòng sau gầm thang Tầng 1
-      { x1: -5.95, z1: 13.45, x2: -2.90, z2: 14.8 },
-      { x1: -3.05, z1: 8.85,  x2: -2.85, z2: 13.45 }
-    ];
-  }
-
-  for (var i = 0; i < boxes.length; i++) {
-    var b = boxes[i];
-    if (nx > b.x1 - 0.34 && nx < b.x2 + 0.34 && nz > b.z1 - 0.34 && nz < b.z2 + 0.34) {
-      var dl = Math.abs(nx - (b.x1 - 0.34)), dr = Math.abs(nx - (b.x2 + 0.34));
-      var dt = Math.abs(nz - (b.z1 - 0.34)), db = Math.abs(nz - (b.z2 + 0.34));
-      var m = Math.min(dl, dr, dt, db);
-      if (m === dl) nx = b.x1 - 0.34;
-      else if (m === dr) nx = b.x2 + 0.34;
-      else if (m === dt) nz = b.z1 - 0.34;
-      else nz = b.z2 + 0.34;
+function adidasSegIntersectsBox(ax, az, bx, bz, box, pad) {
+  var minX = box.x1 - pad, maxX = box.x2 + pad;
+  var minZ = box.z1 - pad, maxZ = box.z2 + pad;
+  var t0 = 0, t1 = 1, dx = bx - ax, dz = bz - az;
+  var p = [-dx, dx, -dz, dz];
+  var q = [ax - minX, maxX - ax, az - minZ, maxZ - az];
+  for (var i = 0; i < 4; i++) {
+    if (Math.abs(p[i]) < 1e-6) {
+      if (q[i] < 0) return false;
+    } else {
+      var t = q[i] / p[i];
+      if (p[i] < 0) { if (t > t1) return false; if (t > t0) t0 = t; }
+      else { if (t < t0) return false; if (t < t1) t1 = t; }
     }
   }
-  return { x: nx, z: nz };
+  return t0 < t1;
 }
 
-function planAdidasRealtimePath(st, tx, targetFloorY, tz, pendingAction) {
+function clampAdidasWalkPos(_st, x, z, _floorY) {
+  var nx = Math.max(-9.65, Math.min(13.65, x));
+  var nz = Math.max(0.45, Math.min(23.55, z));
+
+  // Kẹp theo 2 vách ngăn X = 6.0 (mở 3 vòm) và Z = 14.0 [6..14] (mở cửa X ∈ [8.2..11.8])
+  if (nx > 5.65 && nx < 6.35) {
+    var inArch1 = (nz >= 1.95 && nz <= 4.65);
+    var inArch2 = (nz >= 8.15 && nz <= 11.25);
+    var inArch3 = (nz >= 16.65 && nz <= 20.35);
+    if (!inArch1 && !inArch2 && !inArch3) {
+      nx = (x < 6.0) ? 5.65 : 6.35;
+    }
+  }
+  if (nx >= 6.0 && nz > 13.65 && nz < 14.35) {
+    if (nx < 8.35 || nx > 11.65) {
+      nz = (z < 14.0) ? 13.65 : 14.35;
+    }
+  }
+
+  var boxes = getAdidasObstacles();
+  var pad = 0.34;
+  for (var i = 0; i < boxes.length; i++) {
+    var b = boxes[i];
+    if (nx > b.x1 - pad && nx < b.x2 + pad && nz > b.z1 - pad && nz < b.z2 + pad) {
+      var dl = Math.abs(nx - (b.x1 - pad)), dr = Math.abs(nx - (b.x2 + pad));
+      var dt = Math.abs(nz - (b.z1 - pad)), db = Math.abs(nz - (b.z2 + pad));
+      var m = Math.min(dl, dr, dt, db);
+      if (m === dl) nx = b.x1 - pad;
+      else if (m === dr) nx = b.x2 + pad;
+      else if (m === dt) nz = b.z1 - pad;
+      else nz = b.z2 + pad;
+    }
+  }
+  return { x: Math.max(-9.65, Math.min(13.65, nx)), z: Math.max(0.45, Math.min(23.55, nz)) };
+}
+
+function routeAroundAdidasObstacles(startPt, endPt) {
+  var obs = getAdidasObstacles();
+  var out = [];
+  var cur = { x: startPt.x, z: startPt.z, y: 0 };
+  var pad = 0.30;
+  for (var iter = 0; iter < 4; iter++) {
+    var hitBox = null;
+    for (var i = 0; i < obs.length; i++) {
+      if (adidasSegIntersectsBox(cur.x, cur.z, endPt.x, endPt.z, obs[i], pad)) {
+        hitBox = obs[i];
+        break;
+      }
+    }
+    if (!hitBox) break;
+    var cands = [
+      { x: hitBox.x1 - 0.44, z: hitBox.z1 - 0.44, y: 0 },
+      { x: hitBox.x2 + 0.44, z: hitBox.z1 - 0.44, y: 0 },
+      { x: hitBox.x1 - 0.44, z: hitBox.z2 + 0.44, y: 0 },
+      { x: hitBox.x2 + 0.44, z: hitBox.z2 + 0.44, y: 0 }
+    ];
+    var best = null, bestScore = 99999;
+    for (var ci = 0; ci < cands.length; ci++) {
+      var cp = cands[ci];
+      if (cp.x < -9.55 || cp.x > 13.55 || cp.z < 0.50 || cp.z > 23.45) continue;
+      // Không chọn lại đúng góc đang đứng & không vượt ngang qua vách tường đóng X=6.0 hoặc Z=14.0
+      if (Math.hypot(cp.x - cur.x, cp.z - cur.z) < 0.25) continue;
+      if ((cur.x < 6.0 && cp.x > 6.0) || (cur.x > 6.0 && cp.x < 6.0)) continue;
+      if (cur.x >= 6.0 && ((cur.z < 14.0 && cp.z > 14.0) || (cur.z > 14.0 && cp.z < 14.0))) continue;
+      var blockedFirst = false;
+      for (var j = 0; j < obs.length; j++) {
+        if (adidasSegIntersectsBox(cur.x, cur.z, cp.x, cp.z, obs[j], 0.20)) {
+          blockedFirst = true;
+          break;
+        }
+      }
+      if (blockedFirst) continue;
+      var stillHits = adidasSegIntersectsBox(cp.x, cp.z, endPt.x, endPt.z, hitBox, pad) ? 40 : 0;
+      var score = stillHits + Math.hypot(cp.x - cur.x, cp.z - cur.z) + Math.hypot(endPt.x - cp.x, endPt.z - cp.z);
+      if (score < bestScore) { bestScore = score; best = cp; }
+    }
+    if (!best) break;
+    out.push(best);
+    cur = best;
+  }
+  out.push({ x: endPt.x, z: endPt.z, y: 0 });
+  return out;
+}
+
+function planAdidasRealtimePath(st, tx, _targetFloorY, tz, pendingAction) {
   var p = st.pig;
   p.seated = false;
   p.eating = false;
   p.pendingAction = pendingAction || null;
 
-  var isStairTarget = (tx >= -5.0 && tx <= -3.0 && tz >= 8.6 && tz <= 13.4 && targetFloorY > 0.05 && targetFloorY < 3.35);
-  var cl = isStairTarget
-    ? { x: Math.max(-4.7, Math.min(-3.3, tx)), z: Math.max(8.6, Math.min(13.4, tz)) }
-    : clampAdidasWalkPos(st, tx, tz, targetFloorY);
+  var cl = clampAdidasWalkPos(st, tx, tz, 0);
   tx = cl.x; tz = cl.z;
 
-  var onStairsNow = (p.x >= -5.05 && p.x <= -2.95 && p.z > 8.65 && p.z < 13.35 && p.y > 0.15 && p.y < 3.25);
-
-  if (onStairsNow || isStairTarget) {
-    var wps = [];
-    if (onStairsNow) {
-      if (isStairTarget) {
-        wps.push({ x: tx, y: targetFloorY, z: tz });
-      } else if (targetFloorY >= 3.0) {
-        wps.push({ x: -4.0, y: 3.4, z: 13.95 });
-        wps.push({ x: -2.2, y: 3.4, z: 13.95 });
-        if (tz < 8.55 && tx < -2.6) wps.push({ x: -2.2, y: 3.4, z: 8.0 });
-        wps.push({ x: tx, y: 3.4, z: tz });
-      } else {
-        wps.push({ x: -4.0, y: 0, z: 8.15 });
-        if (tx >= 6.0) {
-          wps.push({ x: 2.4, y: 0, z: 8.8 });
-          wps.push({ x: 5.15, y: 0, z: 9.8 });
-          wps.push({ x: 6.85, y: 0, z: 9.8 });
-        }
-        wps.push({ x: tx, y: 0, z: tz });
-      }
-    } else {
-      // Điểm đến nằm ngay giữa bậc cầu thang
-      if (p.y >= 1.9) {
-        if (p.z < 8.55 && p.x < -2.6) wps.push({ x: -2.2, y: 3.4, z: 8.0 });
-        wps.push({ x: -2.2, y: 3.4, z: 13.95 });
-        wps.push({ x: -4.0, y: 3.4, z: 13.95 });
-      } else {
-        if (p.x >= 6.0) {
-          wps.push({ x: 6.85, y: 0, z: 9.8 });
-          wps.push({ x: 5.15, y: 0, z: 9.8 });
-        }
-        wps.push({ x: -4.0, y: 0, z: 8.15 });
-      }
-      wps.push({ x: tx, y: targetFloorY, z: tz });
-    }
-    p.waypoints = wps;
-    p.targetX = wps[0].x; p.targetZ = wps[0].z;
-    p.walking = true;
-    return;
-  }
-
   if (typeof planNavGraphRealtimePath === 'function') {
-    planNavGraphRealtimePath(ADIDAS_NAV_GRAPH, st, tx, targetFloorY, tz, { pendingAction: pendingAction });
-    // Tránh lỗ cầu thang Lầu 2 nếu đi từ chiếu nghỉ sang cánh trái Lầu 2 hoặc ngược lại
-    if (targetFloorY >= 3.0 && p.waypoints && p.waypoints.length) {
-      var fixed = [];
-      var prevX = p.x, prevY = p.y, prevZ = p.z;
+    planNavGraphRealtimePath(ADIDAS_NAV_GRAPH, st, tx, 0, tz, { pendingAction: pendingAction });
+    // Chèn điểm né vật cản AABB nội khu cho từng đoạn trong đồ thị (0% kẹt quầy/đảo)
+    if (p.waypoints && p.waypoints.length > 0) {
+      var routed = [];
+      var prev = { x: p.x, z: p.z, y: 0 };
       for (var wi = 0; wi < p.waypoints.length; wi++) {
         var wp = p.waypoints[wi];
-        if (prevY >= 3.0 && wp.y >= 3.0 && Math.min(prevX, wp.x) < -2.6 && Math.max(prevZ, wp.z) > 8.45 && Math.min(prevZ, wp.z) < 13.45) {
-          if (prevZ > 11.0 && wp.z < 8.6) fixed.push({ x: -2.2, y: 3.4, z: 13.95 }, { x: -2.2, y: 3.4, z: 8.0 });
-          else if (prevZ < 8.6 && wp.z > 11.0) fixed.push({ x: -2.2, y: 3.4, z: 8.0 }, { x: -2.2, y: 3.4, z: 13.95 });
+        var sameSide = !((prev.x < 6.0 && wp.x > 6.0) || (prev.x > 6.0 && wp.x < 6.0)) &&
+                       !(prev.x >= 6.0 && ((prev.z < 14.0 && wp.z > 14.0) || (prev.z > 14.0 && wp.z < 14.0)));
+        if (sameSide) {
+          var segs = routeAroundAdidasObstacles(prev, wp);
+          for (var si = 0; si < segs.length; si++) routed.push(segs[si]);
+        } else {
+          routed.push({ x: wp.x, z: wp.z, y: 0 });
         }
-        fixed.push(wp);
-        prevX = wp.x; prevY = wp.y; prevZ = wp.z;
+        prev = routed[routed.length - 1];
       }
-      p.waypoints = fixed;
-      p.targetX = fixed[0].x; p.targetZ = fixed[0].z;
-    }
-    // Tránh Đảo Sneaker trung tâm khi đi ngang Sảnh Tầng 1 sang Fitting
-    if (targetFloorY < 1.0 && p.x < 1.8 && tx >= 6.0 && p.z < 6.0) {
-      p.waypoints.unshift({ x: 2.35, y: 0, z: 8.6 });
-      p.targetX = p.waypoints[0].x; p.targetZ = p.waypoints[0].z;
-    }
-    if (p.waypoints && p.waypoints.length > 0) {
-      var lastWp = p.waypoints[p.waypoints.length - 1];
-      lastWp.x = tx; lastWp.z = tz;
+      routed[routed.length - 1].x = tx;
+      routed[routed.length - 1].z = tz;
+      p.waypoints = routed;
+      p.targetX = routed[0].x; p.targetZ = routed[0].z;
+      p.walking = true;
     }
     return;
   }
 
-  p.waypoints = [{ x: tx, y: targetFloorY, z: tz }];
-  p.targetX = tx; p.targetZ = tz;
+  var segFallback = routeAroundAdidasObstacles({ x: p.x, z: p.z, y: 0 }, { x: tx, z: tz, y: 0 });
+  p.waypoints = segFallback;
+  p.targetX = segFallback[0].x; p.targetZ = segFallback[0].z;
   p.walking = true;
+}
+
+function triggerAdidasGoalKick(st, aimOffset) {
+  if (!st || !st.kickGame) return false;
+  var kg = st.kickGame;
+  var b = kg.ball;
+  if (b.shooting) return false;
+  kg.active = true;
+  var ang = (typeof aimOffset === 'number' && isFinite(aimOffset))
+    ? Math.max(-0.46, Math.min(0.46, aimOffset))
+    : kg.aimAngle;
+  b.x = 10.0; b.y = 0.22; b.z = 18.6;
+  b.vx = Math.sin(ang) * 7.8;
+  b.vy = 2.45;
+  b.vz = 9.2;
+  b.shooting = true;
+  b.shootT = 0;
+  b.resultText = '';
+  // Thủ môn bay ngẫu nhiên nhẹ theo phán đoán
+  b.goalieTargetX = 10.0 + ((Math.sin(st.t * 4.3) > 0 ? 1 : -1) * 1.15);
+  st.pig.yaw = ang * 0.7;
+  kg.attempts += 1;
+  return true;
 }
 
 function stepAdidasNpcs(st, dt) {
   if (!st.npcs) return;
   for (var i = 0; i < st.npcs.length; i++) {
     var n = st.npcs[i];
+    if (n.id === 'kick_goalkeeper') {
+      var kg = st.kickGame;
+      var targetGx = (kg && kg.ball && kg.ball.shooting)
+        ? kg.ball.goalieTargetX
+        : (10.0 + Math.sin(st.t * 2.1) * 1.25);
+      var gkSpd = (kg && kg.ball && kg.ball.shooting) ? 4.4 : 1.7;
+      n.x += (targetGx - n.x) * Math.min(1, dt * gkSpd);
+      n.moving = Math.abs(targetGx - n.x) > 0.08;
+      n.yaw = Math.PI;
+      if (kg && kg.ball) kg.ball.goalieX = n.x;
+      continue;
+    }
     if (n.state === 'SIT') {
       n.moving = false;
       n.timer -= dt;
-      if (n.timer <= 0) {
+      if (n.timer <= 0 && n.pts.length > 1) {
         n.state = 'WALK';
         n.stepIdx = (n.stepIdx + 1) % n.pts.length;
       }
@@ -10800,28 +11086,18 @@ function stepAdidasNpcs(st, dt) {
     var tgt = n.pts[(n.stepIdx + 1) % n.pts.length];
     var dx = tgt.x - n.x, dz = tgt.z - n.z;
     var d = Math.hypot(dx, dz);
-    if (d < 0.10) {
+    if (d < 0.12) {
       n.x = tgt.x; n.z = tgt.z;
-      n.y = typeof tgt.y === 'number' ? tgt.y : getAdidasSurfaceY(n.x, n.z, n.y);
       n.stepIdx = (n.stepIdx + 1) % n.pts.length;
-      if (tgt.sit || n.pts.length === 1) {
-        n.state = 'SIT';
-        n.moving = false;
-        n.timer = n.pts.length === 1 ? 999 : (2.6 + (i % 3) * 1.1);
-        if (typeof tgt.yaw === 'number') n.yaw = tgt.yaw;
-      } else {
-        n.state = 'SIT';
-        n.moving = false;
-        n.timer = 1.6 + (i % 3) * 0.9;
-        if (typeof tgt.yaw === 'number') n.yaw = tgt.yaw;
-      }
+      n.state = 'SIT';
+      n.moving = false;
+      n.timer = n.pts.length === 1 ? 999 : (1.8 + (i % 4) * 0.7);
+      if (typeof tgt.yaw === 'number') n.yaw = tgt.yaw;
     } else {
       n.moving = true;
-      var onStairNpc = (n.x >= -5.0 && n.x <= -3.0 && n.z >= 8.6 && n.z <= 13.4);
-      var spd = Math.min(d, (onStairNpc ? 1.25 : 1.55) * dt);
+      var spd = Math.min(d, 1.55 * dt);
       n.x += (dx / d) * spd;
       n.z += (dz / d) * spd;
-      n.y = getAdidasSurfaceY(n.x, n.z, n.y);
       n.yaw = Math.atan2(dx, dz);
     }
   }
@@ -10841,10 +11117,10 @@ function stepAdidasTps(st, dt) {
   stepAdidasNpcs(st, dt);
 
   if (!p.seated && p.walking) {
-    var curWp = (p.waypoints && p.waypoints.length > 0) ? p.waypoints[0] : { x: p.targetX, z: p.targetZ, y: p.y };
+    var curWp = (p.waypoints && p.waypoints.length > 0) ? p.waypoints[0] : { x: p.targetX, z: p.targetZ };
     var dx = curWp.x - p.x, dz = curWp.z - p.z;
     var dist = Math.hypot(dx, dz);
-    if (dist < 0.10) {
+    if (dist < 0.12) {
       p.x = curWp.x; p.z = curWp.z;
       if (p.waypoints && p.waypoints.length > 0) p.waypoints.shift();
       if (p.waypoints && p.waypoints.length > 0) {
@@ -10852,53 +11128,143 @@ function stepAdidasTps(st, dt) {
         p.targetZ = p.waypoints[0].z;
       } else {
         p.walking = false;
-        if (p.pendingAction === 'inspect_island') {
-          p.yaw = Math.atan2(-p.x, 6.2 - p.z);
-          st.actionFlashText = '👟 SAMBA OG · PREDATOR';
-          st.actionFlashUntil = st.t + 2.8;
-        } else if (p.pendingAction === 'try_jacket') {
-          p.wearingJacket = !p.wearingJacket;
-          p.outfit = p.wearingJacket ? 'adidas_jacket' : 'none';
+        if (p.pendingAction === 'try_jacket') {
+          p.outfit = (p.outfit === 'adidas_jacket') ? 'none' : 'adidas_jacket';
+          p.wearingJacket = (p.outfit === 'adidas_jacket');
           p.yaw = Math.PI * 0.5;
-          st.actionFlashText = p.wearingJacket ? '👕 3 SỌC VIP' : '👕 ĐÃ CỞI ÁO';
+          st.actionFlashText = p.wearingJacket ? '🧥 ÁO KHOÁC FIREBIRD 3 SỌC' : '👕 ĐÃ THAY ĐỒ MẶC ĐỊNH';
           st.actionFlashUntil = st.t + 2.8;
-        } else if (p.pendingAction === 'buy_samba') {
+        } else if (p.pendingAction === 'try_polo') {
+          p.outfit = (p.outfit === 'adidas_polo') ? 'none' : 'adidas_polo';
+          p.wearingJacket = false;
+          p.yaw = Math.PI * 0.5;
+          st.actionFlashText = p.outfit === 'adidas_polo' ? '👔 ÁO POLO CỔ BẺ 3 SỌC NAVY' : '👕 ĐÃ CỞI ÁO POLO';
+          st.actionFlashUntil = st.t + 2.8;
+        } else if (p.pendingAction === 'try_jogger') {
+          p.outfit = (p.outfit === 'adidas_jogger') ? 'none' : 'adidas_jogger';
+          p.wearingJacket = false;
+          p.yaw = -Math.PI * 0.5;
+          st.actionFlashText = p.outfit === 'adidas_jogger' ? '👖 QUẦN JOGGER NỈ + GIÀY SAMBA' : '👕 ĐÃ ĐỔI TRANG PHỤC';
+          st.actionFlashUntil = st.t + 2.8;
+        } else if (p.pendingAction === 'try_kit') {
+          p.outfit = (p.outfit === 'adidas_kit') ? 'none' : 'adidas_kit';
+          p.wearingJacket = false;
+          p.yaw = -Math.PI * 0.5;
+          st.actionFlashText = p.outfit === 'adidas_kit' ? '⚽ ÁO ĐẤU #10 + TẤT DÀI 3 SỌC' : '👕 ĐÃ ĐỔI TRANG PHỤC';
+          st.actionFlashUntil = st.t + 2.8;
+        } else if (p.pendingAction === 'buy_bag') {
           p.boughtSamba = true;
           p.yaw = Math.PI * 0.5;
-          st.actionFlashText = '🛍️ SAMBA OG HỘI AN';
+          st.actionFlashText = '🛍️ CHECKOUT POS · NHẬN TÚI 3 SỌC!';
           st.actionFlashUntil = st.t + 3.2;
-        } else if (p.pendingAction === 'inspect_vn_col') {
+        } else if (p.pendingAction === 'maker_custom') {
+          p.customBadge = 'VIP-10';
+          p.outfit = 'adidas_kit';
+          st.actionFlashText = '🎨 MAKER LAB · ÉP NHIỆT SỐ 10!';
+          st.actionFlashUntil = st.t + 3.0;
+        } else if (p.pendingAction === 'inspect_shoes') {
           p.yaw = -Math.PI * 0.5;
-          st.actionFlashText = '🇻🇳 NÓN LÁ × 3 SỌC';
+          st.actionFlashText = '👟 SAMBA OG · ADILETTE SLIDES · ULTRABOOST';
           st.actionFlashUntil = st.t + 2.8;
+        } else if (p.pendingAction === 'kick_spot') {
+          if (st.kickGame) {
+            st.kickGame.active = true;
+            st.kickGame.justEnteredAt = st.t;
+          }
+          p.yaw = 0;
+          st.actionFlashText = '⚽ CHẠM GÓC GÔN HOẶC BẤM NÚT ĐỂ SÚT!';
+          st.actionFlashUntil = st.t + 3.0;
         } else if (p.pendingAction === 'exit_adidas') {
           st.exiting = true;
         }
         p.pendingAction = null;
       }
     } else {
-      var onStairs = (p.x >= -5.05 && p.x <= -2.95 && p.z > 8.55 && p.z < 13.45);
-      var spd = Math.min(dist, (onStairs ? 2.6 : 3.6) * dt);
+      var spd = Math.min(dist, 3.6 * dt);
       var nx = p.x + (dx / dist) * spd;
       var nz = p.z + (dz / dist) * spd;
-      if (onStairs) {
-        p.x = Math.max(-4.85, Math.min(-3.15, nx));
-        p.z = nz;
-      } else {
-        var next = clampAdidasWalkPos(st, nx, nz, p.y);
-        p.x = next.x; p.z = next.z;
-      }
+      var next = clampAdidasWalkPos(st, nx, nz, 0);
+      p.x = next.x; p.z = next.z;
       var tyaw = Math.atan2(dx, dz);
       p.yaw = (typeof tpsLerpAngle === 'function') ? tpsLerpAngle(p.yaw || 0, tyaw, Math.min(1, dt * 12)) : tyaw;
     }
-    p.y = getAdidasSurfaceY(p.x, p.z, p.y);
-    st.floor = p.y >= 1.9 ? 2 : 1;
-    st.room = p.y >= 1.9 ? 'upper' : (p.x >= 6.0 ? 'fitting' : 'hall');
+    p.y = 0;
+    st.floor = 1;
+    st.room = p.x >= 6.0 ? (p.z >= 14.0 ? 'kick_zone' : 'fitting') : (p.z >= 14.0 ? 'apparel_sports' : 'hall');
   }
 
-  p.outfit = p.wearingJacket ? 'adidas_jacket' : 'none';
+  // Cập nhật Mini-Game Sút Bóng 3D khi ở vùng sân cỏ
+  if (st.kickGame) {
+    var kg = st.kickGame;
+    var inSpot = (p.x >= 7.2 && p.x <= 12.8 && p.z >= 15.6 && p.z <= 21.8);
+    if (!inSpot && !kg.ball.shooting) kg.active = false;
+    else if (Math.hypot(p.x - 10.0, p.z - 17.8) < 1.35 && !p.walking) {
+      if (!kg.active) { kg.active = true; kg.justEnteredAt = st.t; }
+    }
 
-  var targetDoor = (p.y < 1.9 && p.x < 6.0 && st.exiting) ? 0.92 : 0.0;
+    if (kg.active && !kg.ball.shooting) {
+      kg.aimAngle += kg.aimDir * dt * 0.92;
+      if (kg.aimAngle > 0.44) { kg.aimAngle = 0.44; kg.aimDir = -1; }
+      if (kg.aimAngle < -0.44) { kg.aimAngle = -0.44; kg.aimDir = 1; }
+    }
+
+    var kb = kg.ball;
+    if (kb.shooting) {
+      kb.shootT += dt;
+      kb.x += kb.vx * dt;
+      kb.y = Math.max(0.22, kb.y + kb.vy * dt);
+      kb.vy -= 5.8 * dt;
+      kb.z += kb.vz * dt;
+      // Kiểm tra chạm vạch vôi khung thành Z = 22.4
+      if (kb.z >= 22.15) {
+        var blocked = Math.abs(kb.x - kb.goalieX) < 0.62 && kb.y < 1.55;
+        var inFrame = (kb.x >= 8.2 && kb.x <= 11.8 && kb.y <= 1.85);
+        if (blocked) {
+          kb.shooting = false;
+          kg.streak = 0;
+          kb.resultText = '🧤 THỦ MÔN CẢN PHÁ!';
+          st.actionFlashText = '🧤 SUÝT VÀO! CHỈNH GÓC KHÁC SÚT LẠI!';
+          st.actionFlashUntil = st.t + 2.4;
+        } else if (inFrame) {
+          kb.shooting = false;
+          kg.goals += 1;
+          kg.streak += 1;
+          kg.netRipple = 1.0;
+          kb.resultText = '⚽ VÀOOO! (' + kg.goals + ' BÀN)';
+          st.actionFlashText = '⚽ VÀOOO! CHUỖI ' + kg.streak + ' BÀN THẮNG!';
+          st.actionFlashUntil = st.t + 3.0;
+          for (var sp = 0; sp < 14; sp++) {
+            kg.sparks.push({
+              x: kb.x, y: Math.max(0.5, kb.y), z: 22.4,
+              vx: (Math.sin(sp * 1.9) * 2.4),
+              vy: 1.8 + (sp % 4) * 0.65,
+              vz: -0.9 + Math.cos(sp * 1.3) * 0.9,
+              t: 0
+            });
+          }
+        } else if (kb.z >= 23.4 || kb.shootT > 1.4) {
+          kb.shooting = false;
+          kg.streak = 0;
+          kb.resultText = 'BÓNG CHỆCH CỘT DỌC!';
+          st.actionFlashText = '😬 CHỆCH KHUNG THÀNH! CANH LẠI GÓC SÚT!';
+          st.actionFlashUntil = st.t + 2.2;
+        }
+        if (!kb.shooting) {
+          kb.x = 10.0; kb.y = 0.22; kb.z = 18.6;
+        }
+      }
+    }
+    if (kg.netRipple > 0) kg.netRipple = Math.max(0, kg.netRipple - dt * 1.4);
+    for (var ksi = kg.sparks.length - 1; ksi >= 0; ksi--) {
+      var ksp = kg.sparks[ksi];
+      ksp.t += dt; ksp.x += ksp.vx * dt; ksp.y += ksp.vy * dt; ksp.z += ksp.vz * dt;
+      ksp.vy -= 4.5 * dt;
+      if (ksp.t > 1.1) kg.sparks.splice(ksi, 1);
+    }
+  }
+
+  p.wearingJacket = (p.outfit === 'adidas_jacket');
+  var targetDoor = (p.x < 6.0 && st.exiting) ? 0.92 : 0.0;
   st.rightDoorOpen += (targetDoor - st.rightDoorOpen) * Math.min(1, dt * 6.0);
   if (st.exiting) st.exitFade = Math.min(1, st.exitFade + dt * 4.5);
 
@@ -10908,20 +11274,14 @@ function stepAdidasTps(st, dt) {
   }
 }
 
-/* ==================== 2. CAMERA SPRING-ARM PORTAL-AWARE & RAYCAST 3D ADIDAS ==================== */
+/* ==================== 2. CAMERA SPRING-ARM & RAYCAST 3D CHỐNG XUYÊN TƯỜNG ==================== */
 function computeAdidasWebglCamera(cam, st) {
   var p = st.pig;
-  var inFitting = p.y < 1.9 && p.x >= 6.0;
-  var onUpper = p.y >= 2.1;
   var navCfg = {
     wallMargin: 0.38,
     zones: ADIDAS_NAV_GRAPH.zones,
     dividerWalls: ADIDAS_NAV_GRAPH.dividerWalls,
-    outerBounds: onUpper
-      ? { minX: -6.0, maxX: 6.0, minZ: 0.0, maxZ: 14.8, minY: 0.45, maxY: 6.75 }
-      : (inFitting
-        ? { minX: -6.0, maxX: 15.6, minZ: 4.8, maxZ: 13.2, minY: 0.45, maxY: 3.35 }
-        : { minX: -6.0, maxX: 15.6, minZ: 0.0, maxZ: 14.8, minY: 0.45, maxY: 3.32 })
+    outerBounds: ADIDAS_NAV_GRAPH.outerBounds
   };
   if (typeof computeWebglTpsCamera === 'function') {
     computeWebglTpsCamera(cam, p, navCfg, st._lastDt || 0.016);
@@ -10931,7 +11291,7 @@ function computeAdidasWebglCamera(cam, st) {
 function adidasRaySphereDist(ox, oy, oz, dx, dy, dz, cx, cy, cz, rad) {
   var ocx = cx - ox, ocy = cy - oy, ocz = cz - oz;
   var proj = ocx * dx + ocy * dy + ocz * dz;
-  if (proj < 0.2 || proj > 26) return -1;
+  if (proj < 0.25 || proj > 28) return -1;
   var d2 = (ocx * ocx + ocy * ocy + ocz * ocz) - proj * proj;
   return d2 <= rad * rad ? proj : -1;
 }
@@ -10946,109 +11306,124 @@ function pickAdidasTarget3D(cam, st, sx, sy) {
   dx /= dl; dy /= dl; dz /= dl;
   var ox = cam.pos.x, oy = cam.pos.y, oz = cam.pos.z;
 
-  // 1. Hotspots tương tác trực tiếp bằng chạm 3D
-  if (adidasRaySphereDist(ox, oy, oz, dx, dy, dz, 0, 0.75, 6.2, 1.35) > 0) {
-    var standZ = st.pig.z >= 6.2 ? 7.85 : 4.55;
-    return { kind: 'hotspot', action: 'inspect_island', x: 0, y: 0, z: standZ };
+  // Chặn tuyệt đối tia đi xuyên vách ngăn X=6.0 hoặc Z=14.0 [6..14] & tường bao ngoài
+  var maxVisibleT = 32;
+  if (typeof raySplitDividerWall === 'function') {
+    for (var wi = 0; wi < ADIDAS_NAV_GRAPH.dividerWalls.length; wi++) {
+      var wt = raySplitDividerWall(ox, oy, oz, dx, dy, dz, ADIDAS_NAV_GRAPH.dividerWalls[wi]);
+      if (wt > 0) maxVisibleT = Math.min(maxVisibleT, wt + 0.36);
+    }
   }
-  if (adidasRaySphereDist(ox, oy, oz, dx, dy, dz, 15.1, 1.4, 9.0, 1.45) > 0 ||
-      adidasRaySphereDist(ox, oy, oz, dx, dy, dz, 10.7, 1.2, 5.4, 1.35) > 0 ||
-      adidasRaySphereDist(ox, oy, oz, dx, dy, dz, 10.6, 0.45, 10.9, 0.95) > 0) {
-    return { kind: 'hotspot', action: 'try_jacket', x: 13.4, y: 0, z: 9.0 };
-  }
-  if (adidasRaySphereDist(ox, oy, oz, dx, dy, dz, 4.1, 4.3, 6.8, 1.45) > 0 ||
-      adidasRaySphereDist(ox, oy, oz, dx, dy, dz, 0.2, 4.1, 7.8, 0.95) > 0) {
-    return { kind: 'hotspot', action: 'buy_samba', x: 2.35, y: 3.4, z: 6.8 };
-  }
-  if (adidasRaySphereDist(ox, oy, oz, dx, dy, dz, -5.2, 4.8, 4.7, 1.35) > 0) {
-    return { kind: 'hotspot', action: 'inspect_vn_col', x: -3.75, y: 3.4, z: 4.7 };
+  if (dx < -0.001) { var tLx = (-10.0 - ox) / dx; if (tLx > 0.1) maxVisibleT = Math.min(maxVisibleT, tLx); }
+  if (dx >  0.001) { var tRx = (14.0 - ox) / dx;  if (tRx > 0.1) maxVisibleT = Math.min(maxVisibleT, tRx); }
+  if (dz >  0.001) { var tBz = (24.0 - oz) / dz;  if (tBz > 0.1) maxVisibleT = Math.min(maxVisibleT, tBz); }
+
+  // 1. Khi đang đứng ở chấm phạt Football Kick Zone và chạm thẳng vào Gôn 3D -> sút về đúng góc chạm!
+  if (st.kickGame && st.kickGame.active && !st.kickGame.ball.shooting && dz > 0.05) {
+    var tGoal = (22.3 - oz) / dz;
+    if (tGoal > 0.4 && tGoal <= maxVisibleT + 0.2) {
+      var gx = ox + dx * tGoal, gy = oy + dy * tGoal;
+      if (gx >= 7.8 && gx <= 12.2 && gy >= 0.0 && gy <= 2.35) {
+        return { kind: 'goal_shoot', aimOffset: (gx - 10.0) * 0.22 };
+      }
+    }
   }
 
-  // Cửa mặt tiền Z = 0 -> bước ra Đại lộ Sài Gòn
+  // 2. Cửa mặt tiền Z = 0 -> bước ra Đại lộ Sài Gòn
   if (dz < -0.02) {
     var td = (0.20 - oz) / dz;
-    if (td > 0.3 && td < 18) {
+    if (td > 0.3 && td <= maxVisibleT + 0.2) {
       var ddx = ox + dx * td, ddy = oy + dy * td;
-      if (ddy >= 0 && ddy <= 2.75 && Math.abs(ddx) <= 1.35) {
+      if (ddy >= 0 && ddy <= 3.0 && Math.abs(ddx) <= 1.65) {
         return { kind: 'exit', action: 'exit_adidas', x: 0, y: 0, z: 0.90 };
       }
     }
   }
 
-  // 2. Bắn tia trực tiếp lên 12 bậc cầu thang gỗ Hội An (rayRampQuad)
-  if (typeof rayRampQuad === 'function') {
-    var stairHit = rayRampQuad(ox, oy, oz, dx, dy, dz, {
-      axis: 'z', minX: -5.0, maxX: -3.0, zStart: 8.6, zEnd: 13.4, yStart: 0, yEnd: 3.4
-    });
-    if (stairHit) {
-      return { kind: 'stair', x: stairHit.x, y: stairHit.y, z: stairHit.z };
+  // 3. Điểm chạm sàn Y = 0 hợp lệ (tFloor <= maxVisibleT)
+  var tFloor = 9999, floorHit = null;
+  if (dy < -0.025) {
+    var tf = (0 - oy) / dy;
+    if (tf > 0.2 && tf <= maxVisibleT + 0.15) {
+      var x1 = ox + dx * tf, z1 = oz + dz * tf;
+      if (x1 >= -9.9 && x1 <= 13.9 && z1 >= 0.3 && z1 <= 23.9) {
+        tFloor = tf;
+        floorHit = { kind: 'floor', x: x1, y: 0, z: z1 };
+      }
     }
   }
 
-  // 3. Sàn Lầu 2 (Y = 3.4, trừ lỗ thông thang X ∈ [-5.1, -2.9], Z ∈ [8.55, 13.35]) & Sàn Tầng 1 (hall + fitting)
-  if (dy < -0.025) {
-    var t2 = (3.4 - oy) / dy;
-    if (t2 > 0.2 && t2 < 26) {
-      var x2 = ox + dx * t2, z2 = oz + dz * t2;
-      var inHole = (x2 >= -5.1 && x2 <= -2.9 && z2 >= 8.55 && z2 <= 13.35);
-      if (x2 >= -5.9 && x2 <= 5.9 && z2 >= 0.3 && z2 <= 14.6 && !inHole) {
-        return { kind: 'floor', x: x2, y: 3.4, z: z2 };
-      }
-    }
-    var t1 = (0 - oy) / dy;
-    if (t1 > 0.2 && t1 < 30) {
-      var x1 = ox + dx * t1, z1 = oz + dz * t1;
-      var inHall = (x1 >= -5.9 && x1 <= 6.0 && z1 >= 0.3 && z1 <= 14.6);
-      var inFit  = (x1 >= 6.0 && x1 <= 15.5 && z1 >= 4.9 && z1 <= 13.1);
-      if (inHall || inFit) {
-        return { kind: 'floor', x: x1, y: 0, z: z1 };
-      }
+  // 4. Chọn Hotspot gần nhất (t < maxVisibleT và gần hơn điểm sàn phía sau)
+  var hotspots = [
+    { cx: -9.1, cy: 1.3, cz: 6.8,  rad: 1.5, target: { kind: 'hotspot', action: 'inspect_shoes', x: -7.6, y: 0, z: 6.8 } },
+    { cx:  0.0, cy: 0.8, cz: 6.3,  rad: 1.4, target: { kind: 'hotspot', action: 'inspect_shoes', x: 0.0,  y: 0, z: st.pig.z >= 6.3 ? 8.1 : 4.5 } },
+    { cx: -4.7, cy: 0.6, cz: 2.3,  rad: 1.2, target: { kind: 'hotspot', action: 'inspect_shoes', x: -4.7, y: 0, z: 3.6 } },
+    { cx:  3.1, cy: 1.1, cz: 6.45, rad: 1.3, target: { kind: 'hotspot', action: 'try_polo',      x: 1.6,  y: 0, z: 6.45 } },
+    { cx: -5.2, cy: 1.0, cz: 10.6, rad: 1.3, target: { kind: 'hotspot', action: 'try_jogger',    x: -3.2, y: 0, z: 10.6 } },
+    { cx: -9.1, cy: 1.2, cz: 18.0, rad: 1.4, target: { kind: 'hotspot', action: 'try_kit',       x: -7.6, y: 0, z: 18.0 } },
+    { cx:  3.0, cy: 1.0, cz: 19.7, rad: 1.4, target: { kind: 'hotspot', action: 'maker_custom',  x: 1.0,  y: 0, z: 19.7 } },
+    { cx: 13.4, cy: 1.4, cz: 9.8,  rad: 1.6, target: { kind: 'hotspot', action: 'try_jacket',    x: 11.8, y: 0, z: 9.8 } },
+    { cx: 10.0, cy: 1.1, cz: 7.2,  rad: 1.3, target: { kind: 'hotspot', action: 'try_jacket',    x: 10.0, y: 0, z: 8.6 } },
+    { cx: 11.0, cy: 1.1, cz: 3.4,  rad: 1.6, target: { kind: 'hotspot', action: 'buy_bag',       x: 9.4,  y: 0, z: 3.4 } },
+    { cx: 10.0, cy: 1.1, cz: 22.4, rad: 2.1, target: { kind: 'hotspot', action: 'kick_spot',     x: 10.0, y: 0, z: 17.8 } }
+  ];
+
+  var bestHotT = maxVisibleT, bestHot = null;
+  for (var hi = 0; hi < hotspots.length; hi++) {
+    var hs = hotspots[hi];
+    var th = adidasRaySphereDist(ox, oy, oz, dx, dy, dz, hs.cx, hs.cy, hs.cz, hs.rad);
+    if (th > 0 && th < bestHotT && th <= tFloor + 0.55) {
+      bestHotT = th;
+      bestHot = hs.target;
     }
   }
-  return null;
+  if (bestHot) return bestHot;
+  return floorHit;
 }
 
 function getAdidasContextAction(st) {
   var p = st.pig;
-  if (p.y >= 1.9) {
-    if ((p.x > 1.35 && p.z >= 3.8 && p.z <= 10.4) || Math.hypot(p.x - 0.2, p.z - 7.8) < 1.85) {
-      return { id: 'buy_samba', label: '🛍️ Chọn mua giày Samba' };
-    }
-    if (p.x < -2.35 && p.z >= 1.6 && p.z <= 8.2) {
-      return { id: 'inspect_vn_col', label: '🇻🇳 Ngắm BST Nón Lá & Áo 3 Sọc' };
-    }
-    return null;
+  if (st.kickGame && st.kickGame.active) {
+    return { id: 'kick_shoot', label: '⚽ Sút Bóng Vào Gôn! (' + st.kickGame.goals + ' bàn)' };
   }
-  if (p.x >= 6.0) {
-    return { id: 'try_jacket', label: p.wearingJacket ? '👕 Cởi áo khoác 3 Sọc' : '👕 Thử áo khoác 3 Sọc' };
+  if (p.x >= 6.0 && p.z >= 14.0) {
+    return { id: 'kick_shoot', label: '⚽ Vào Chấm Sút Phạt 11m' };
   }
-  if (Math.hypot(p.x, p.z - 6.2) < 2.35) {
-    return { id: 'inspect_island', label: '👟 Ngắm Đảo Giày Samba & Predator' };
+  if (p.x >= 6.0 && p.z < 6.4) {
+    return { id: 'buy_bag', label: '🛍️ Thanh Toán POS & Nhận Túi 3 Sọc' };
   }
-  if (p.z <= 1.95 && Math.abs(p.x) <= 2.35) {
+  if (p.x >= 6.0 && p.z >= 6.4 && p.z < 14.0) {
+    return { id: 'try_jacket', label: p.outfit === 'adidas_jacket' ? '🧥 Cởi Áo Khoác 3 Sọc' : '🧥 Thử Áo Khoác 3 Sọc' };
+  }
+  if (Math.hypot(p.x - 3.1, p.z - 6.45) < 2.2) {
+    return { id: 'try_polo', label: p.outfit === 'adidas_polo' ? '👔 Cởi Áo Polo' : '👔 Thử Áo Polo Cổ Bẻ' };
+  }
+  if (Math.hypot(p.x + 5.2, p.z - 10.6) < 2.3) {
+    return { id: 'try_jogger', label: p.outfit === 'adidas_jogger' ? '👖 Cởi Quần Jogger' : '👖 Thử Quần Jogger + Samba' };
+  }
+  if (p.x < -6.4 && p.z >= 14.2) {
+    return { id: 'try_kit', label: p.outfit === 'adidas_kit' ? '⚽ Cởi Áo Đấu #10' : '⚽ Thử Áo Đấu Bóng Đá #10' };
+  }
+  if (Math.hypot(p.x - 3.0, p.z - 19.7) < 2.6) {
+    return { id: 'maker_custom', label: '🎨 Custom In Số 10 · Maker Lab' };
+  }
+  if (p.x < -6.4 && p.z < 13.0 || Math.hypot(p.x, p.z - 6.3) < 2.3) {
+    return { id: 'inspect_shoes', label: '👟 Ngắm Giày & Dép Adilette' };
+  }
+  if (p.z <= 2.2 && Math.abs(p.x) <= 2.6) {
     return { id: 'exit_adidas', label: '🚪 Ra lại Đại Lộ Sài Gòn' };
   }
   return null;
 }
 
-/* ==================== 3. RENDER WEBGL 3D TOÀN BỘ ADIDAS ORIGINALS HỘI AN ==================== */
-function drawAdidasLanternWebgl(wgl, x, y, z, colRgb, ceilY) {
-  var dm = wgl.drawMesh;
-  var hCord = Math.max(0.15, (ceilY || 3.4) - y - 0.22);
-  dm('cyl', 'white', x, y + 0.22 + hCord * 0.5, z, 0, 0, 0, 0.025, hCord, 0.025, { tint: [0.18, 0.12, 0.08, 1] });
-  dm('cyl', 'white', x, y + 0.22, z, 0, 0, 0, 0.16, 0.05, 0.16, { tint: [0.95, 0.74, 0.22, 1] });
-  dm('sphere', 'white', x, y, z, 0, 0, 0, 0.42, 0.44, 0.42, { tint: [colRgb[0], colRgb[1], colRgb[2], 1], emissive: 1.15 });
-  dm('cyl', 'white', x, y - 0.22, z, 0, 0, 0, 0.14, 0.05, 0.14, { tint: [0.95, 0.74, 0.22, 1] });
-  dm('cyl', 'white', x, y - 0.34, z, 0, 0, 0, 0.03, 0.18, 0.03, { tint: [0.92, 0.24, 0.18, 1] });
-}
-
+/* ==================== 3. RENDER WEBGL 3D 16 GIAN HÀNG + FOOTBALL KICK ZONE ==================== */
 function drawAdidasTrefoilLampWebgl(wgl, x, y, z, ry) {
   var dm = wgl.drawMesh;
-  var c = [1.0, 0.92, 0.58, 1];
+  var c = [1.0, 0.94, 0.68, 1];
   dm('sphere', 'white', x, y + 0.14, z, 0, ry, 0, 0.22, 0.38, 0.10, { tint: c, emissive: 1.25 });
   dm('sphere', 'white', x - Math.cos(ry) * 0.16, y + 0.04, z + Math.sin(ry) * 0.16, 0, ry, 0.55, 0.20, 0.34, 0.10, { tint: c, emissive: 1.25 });
   dm('sphere', 'white', x + Math.cos(ry) * 0.16, y + 0.04, z - Math.sin(ry) * 0.16, 0, ry, -0.55, 0.20, 0.34, 0.10, { tint: c, emissive: 1.25 });
-  dm('box', 'white', x, y - 0.06, z, 0, ry, 0, 0.36, 0.05, 0.08, { tint: [0.16, 0.10, 0.06, 1] });
+  dm('box', 'white', x, y - 0.06, z, 0, ry, 0, 0.38, 0.05, 0.08, { tint: [0.10, 0.12, 0.16, 1] });
 }
 
 function drawAdidasSneaker3D(wgl, x, y, z, bodyCol, stripeCol, soleCol) {
@@ -11061,211 +11436,309 @@ function drawAdidasSneaker3D(wgl, x, y, z, bodyCol, stripeCol, soleCol) {
   }
 }
 
-function drawAdidasHangingJacket3D(wgl, x, y, z, ry, colRgb) {
+function drawAdidasSlide3D(wgl, x, y, z, soleCol, strapCol) {
   var dm = wgl.drawMesh;
-  dm('box', 'white', x, y, z, 0, ry, 0, 0.44, 0.56, 0.10, { tint: colRgb });
-  dm('box', 'white', x, y + 0.18, z, 0, ry, 0, 0.64, 0.18, 0.10, { tint: colRgb });
+  dm('box', 'white', x - 0.09, y + 0.03, z, 0, 0, 0, 0.13, 0.05, 0.30, { tint: soleCol });
+  dm('box', 'white', x - 0.09, y + 0.07, z + 0.02, 0, 0, 0, 0.14, 0.04, 0.12, { tint: strapCol });
+  dm('box', 'white', x - 0.09, y + 0.095, z + 0.02, 0, 0, 0, 0.142, 0.015, 0.02, { tint: [1, 1, 1, 1] });
+  dm('box', 'white', x + 0.09, y + 0.03, z, 0, 0, 0, 0.13, 0.05, 0.30, { tint: soleCol });
+  dm('box', 'white', x + 0.09, y + 0.07, z + 0.02, 0, 0, 0, 0.14, 0.04, 0.12, { tint: strapCol });
+  dm('box', 'white', x + 0.09, y + 0.095, z + 0.02, 0, 0, 0, 0.142, 0.015, 0.02, { tint: [1, 1, 1, 1] });
+}
+
+function drawAdidasHangingGarment3D(wgl, x, y, z, ry, colRgb, isPolo, collarRgb) {
+  var dm = wgl.drawMesh;
+  dm('box', 'white', x, y, z, 0, ry, 0, 0.42, 0.56, 0.09, { tint: colRgb });
+  dm('box', 'white', x, y + 0.18, z, 0, ry, 0, 0.62, 0.18, 0.09, { tint: colRgb });
   var sx = Math.cos(ry), sz = -Math.sin(ry);
-  dm('box', 'white', x - sx * 0.27, y + 0.06, z - sz * 0.27, 0, ry, 0, 0.06, 0.44, 0.11, { tint: [1, 0.98, 0.94, 1] });
-  dm('box', 'white', x + sx * 0.27, y + 0.06, z + sz * 0.27, 0, ry, 0, 0.06, 0.44, 0.11, { tint: [1, 0.98, 0.94, 1] });
+  dm('box', 'white', x - sx * 0.25, y + 0.07, z - sz * 0.25, 0, ry, 0, 0.05, 0.40, 0.10, { tint: [1, 0.98, 0.94, 1] });
+  dm('box', 'white', x + sx * 0.25, y + 0.07, z + sz * 0.25, 0, ry, 0, 0.05, 0.40, 0.10, { tint: [1, 0.98, 0.94, 1] });
+  if (isPolo) {
+    dm('box', 'white', x, y + 0.28, z, 0, ry, 0, 0.20, 0.07, 0.11, { tint: collarRgb || [1, 0.98, 0.94, 1] });
+  }
+}
+
+function drawAdidasHangingJogger3D(wgl, x, y, z, ry, colRgb) {
+  var dm = wgl.drawMesh;
+  var sx = Math.cos(ry), sz = -Math.sin(ry);
+  dm('box', 'white', x - sx * 0.10, y, z - sz * 0.10, 0, ry, 0, 0.16, 0.66, 0.09, { tint: colRgb });
+  dm('box', 'white', x + sx * 0.10, y, z + sz * 0.10, 0, ry, 0, 0.16, 0.66, 0.09, { tint: colRgb });
+  dm('box', 'white', x - sx * 0.17, y, z - sz * 0.17, 0, ry, 0, 0.025, 0.62, 0.10, { tint: [1, 1, 1, 1] });
+  dm('box', 'white', x + sx * 0.17, y, z + sz * 0.17, 0, ry, 0, 0.025, 0.62, 0.10, { tint: [1, 1, 1, 1] });
+  dm('box', 'white', x, y + 0.30, z, 0, ry, 0, 0.38, 0.08, 0.10, { tint: [0.95, 0.96, 0.98, 1] });
+}
+
+function drawAdidasMannequin3D(wgl, x, z, topCol, pantCol, stripeCol) {
+  var dm = wgl.drawMesh;
+  dm('box', 'limWood', x, 0.12, z, 0, 0, 0, 0.84, 0.24, 0.84, { tint: [1.05, 0.90, 0.72, 1] });
+  dm('box', 'white',   x, 0.25, z, 0, 0, 0, 0.76, 0.04, 0.76, { tint: [0.95, 0.74, 0.22, 1], emissive: 0.45 });
+  // Đôi chân mặc Jogger/Short + Giày
+  dm('box', 'white', x - 0.10, 0.62, z, 0, 0, 0, 0.14, 0.66, 0.16, { tint: pantCol });
+  dm('box', 'white', x + 0.10, 0.62, z, 0, 0, 0, 0.14, 0.66, 0.16, { tint: pantCol });
+  dm('box', 'white', x - 0.10, 0.31, z + 0.04, 0, 0, 0, 0.15, 0.10, 0.26, { tint: [1, 0.98, 0.94, 1] });
+  dm('box', 'white', x + 0.10, 0.31, z + 0.04, 0, 0, 0, 0.15, 0.10, 0.26, { tint: [1, 0.98, 0.94, 1] });
+  // Thân áo + 3 sọc vai
+  dm('box', 'white', x, 1.24, z, 0, 0, 0, 0.46, 0.58, 0.24, { tint: topCol });
+  dm('box', 'white', x - 0.28, 1.22, z, 0, 0, 0, 0.11, 0.50, 0.14, { tint: topCol });
+  dm('box', 'white', x + 0.28, 1.22, z, 0, 0, 0, 0.11, 0.50, 0.14, { tint: topCol });
+  dm('box', 'white', x - 0.32, 1.22, z, 0, 0, 0, 0.04, 0.46, 0.15, { tint: stripeCol || [1, 1, 1, 1] });
+  dm('box', 'white', x + 0.32, 1.22, z, 0, 0, 0, 0.04, 0.46, 0.15, { tint: stripeCol || [1, 1, 1, 1] });
+  // Đầu Mannequin tối giản chuẩn boutique
+  dm('sphere', 'white', x, 1.72, z, 0, 0, 0, 0.22, 0.24, 0.22, { tint: [0.92, 0.90, 0.86, 1], specPow: 64 });
 }
 
 function renderAdidasWebglScene(wgl, cam, st, W, H) {
   computeAdidasWebglCamera(cam, st);
 
   var adidasAtmo = {
-    clearColor: [0.17, 0.09, 0.05, 1.0],
-    hemiLow: [0.34, 0.24, 0.16],
-    hemiHigh: [0.76, 0.62, 0.42],
-    sunDir: [0.25, 0.72, 0.64],
-    sunCol: [1.06, 0.88, 0.60],
-    wrapBias: 0.46,
+    clearColor: [0.14, 0.11, 0.08, 1.0],
+    hemiLow: [0.38, 0.32, 0.24],
+    hemiHigh: [0.84, 0.76, 0.62],
+    sunDir: [0.22, 0.80, 0.56],
+    sunCol: [1.08, 0.96, 0.78],
+    wrapBias: 0.48,
     lights: [
-      { pos: [0.0, 2.9, 6.2],   col: [1.15, 0.80, 0.36] }, // Đèn lồng & Spotlight Đảo Sneaker
-      { pos: [12.5, 2.7, 9.0],  col: [1.05, 0.76, 0.42] }, // Ánh sáng ấm Phòng Thay Đồ & Gương
-      { pos: [-4.0, 2.6, 11.2], col: [1.05, 0.68, 0.28] }, // Đèn lồng cầu thang Hội An
-      { pos: [1.2, 6.0, 7.2],   col: [1.12, 0.84, 0.46] }  // Ánh sáng Lầu 2 BST VN & POS
+      { pos: [-2.0, 3.6, 6.2],  col: [1.12, 0.94, 0.64] },
+      { pos: [-2.0, 3.6, 18.0], col: [1.06, 0.92, 0.72] },
+      { pos: [10.4, 3.5, 6.8],  col: [1.10, 0.88, 0.58] },
+      { pos: [10.0, 3.8, 19.5], col: [1.10, 1.12, 0.95] }
     ],
     outdoorRect: [0.0, 0.0, 0.0, 0.0],
-    fogCol: [0.22, 0.14, 0.08],
-    fogParams: [12.0, 28.0, 0.35]
+    fogCol: [0.20, 0.16, 0.11],
+    fogParams: [16.0, 38.0, 0.22]
   };
   wgl.beginFrame(W, H, cam, adidasAtmo);
   var dm = wgl.drawMesh;
 
-  // ==================== A. KIẾN TRÚC CHẾ ĐỘ A KÍN 100% (HALL + FITTING + UPPER) ====================
-  // 1. Sàn Tầng 1 'hall' (Gạch bông Hội An + thảm sọc lối vào)
-  dm('box', 'gachBong', 0, -0.05, 7.4, 0, 0, 0, 12.0, 0.10, 14.8, { tint: [1, 1, 1, 1], us: 5, vs: 6 });
-  dm('box', 'limWood', 0, 0.008, 2.6, 0, 0, 0, 2.2, 0.014, 4.2, { tint: [0.55, 0.34, 0.20, 1] });
+  // ==================== A. KIẾN TRÚC MEGA MALL 1 TẦNG 24×24M (KÍN 100%, QĐ 255) ====================
+  // 1. Sàn Terrazzo khu West ('hall' + 'apparel_sports': X ∈ [-10, 6], Z ∈ [0, 24])
+  dm('box', 'mallTerrazzoFloor', -2.0, -0.05, 12.0, 0, 0, 0, 16.0, 0.10, 24.0, { tint: [1, 1, 1, 1], us: 8, vs: 12 });
+  // Đường băng gỗ dẫn lối trung tâm từ Cửa Chính vào khu Thể Thao
+  dm('box', 'limWood', 0.0, 0.008, 12.0, 0, 0, 0, 2.4, 0.014, 23.2, { tint: [0.85, 0.70, 0.54, 1], us: 2, vs: 12 });
 
-  // 2. Sàn Cánh Phải 'fitting' (X ∈ [6.0, 15.6], Z ∈ [4.8, 13.2], Y = 0) + Thảm thử đồ xanh-vàng
-  dm('box', 'limWood', 10.8, -0.05, 9.0, 0, 0, 0, 9.6, 0.10, 8.4, { tint: [1.15, 0.92, 0.74, 1], us: 5, vs: 4 });
-  dm('box', 'fittingGreenWall', 13.3, 0.008, 9.0, 0, 0, 0, 3.0, 0.014, 4.2, { tint: [1.1, 1.15, 1.05, 1] });
+  // 2. Sàn Cánh Đông: POS + Phòng Thay Đồ ('fitting_pos': X ∈ [6, 14], Z ∈ [0, 14])
+  dm('box', 'limWood', 10.0, -0.05, 7.0, 0, 0, 0, 8.0, 0.10, 14.0, { tint: [1.12, 0.94, 0.76, 1], us: 5, vs: 8 });
+  dm('box', 'fittingGreenWall', 11.4, 0.008, 9.8, 0, 0, 0, 3.2, 0.014, 4.4, { tint: [1.1, 1.15, 1.05, 1] });
 
-  // 3. Tường bao ngoài Tầng 1 & Lầu 2 (kín 100%, 0 hở trời)
-  dm('box', 'hoiAnYellowWall', -6.06, 3.4, 7.4, 0, 0, 0, 0.14, 6.8, 14.8, { tint: [1, 1, 1, 1], us: 5, vs: 2.4 });
-  dm('box', 'hoiAnYellowWall',  0,    3.4, 14.86, 0, 0, 0, 12.1, 6.8, 0.14, { tint: [1, 1, 1, 1], us: 4.5, vs: 2.4 });
-  // Tường mặt tiền Z = 0 với khung cửa gỗ-kính Hội An (cánh phải mở khi thoát)
-  dm('box', 'hoiAnYellowWall', -3.68, 3.4, -0.06, 0, 0, 0, 4.65, 6.8, 0.14, { tint: [1, 1, 1, 1], us: 2, vs: 2.4 });
-  dm('box', 'hoiAnYellowWall',  3.68, 3.4, -0.06, 0, 0, 0, 4.65, 6.8, 0.14, { tint: [1, 1, 1, 1], us: 2, vs: 2.4 });
-  dm('box', 'hoiAnYellowWall',  0,    4.77, -0.06, 0, 0, 0, 2.72, 4.06, 0.14, { tint: [1, 1, 1, 1], us: 1.5, vs: 1.5 });
-  // Vệt nắng ngược sáng khi cánh phải hé mở rời cửa hàng
-  dm('quad', 'white', 0, 1.37, -0.04, 0, 0, 0, 2.66, 2.74, 1, { tint: [1.0, 0.96, 0.80, 1], emissive: 1.1 });
-  // Cánh cửa trái đóng kín & cánh cửa phải xoay bản lề
-  dm('quad', 'vnDoorWood', -0.67, 1.37, 0.04, 0, 0, 0, 1.33, 2.72, 1, { tint: [1, 1, 1, 1], us: 0.5, vs: 1 });
+  // 3. Sàn Cánh Đông Bắc: Sân Turf Football Kick Zone ('kick_zone': X ∈ [6, 14], Z ∈ [14, 24])
+  dm('box', 'mallTerrazzoFloor', 10.0, -0.05, 19.0, 0, 0, 0, 8.0, 0.10, 10.0, { tint: [0.95, 0.95, 0.92, 1], us: 4, vs: 5 });
+  dm('box', 'turfPitchTex', 10.0, 0.012, 19.2, 0, 0, 0, 6.2, 0.014, 8.2, { tint: [1, 1, 1, 1] });
+
+  // 4. Tường Bao Ngoài Kín 100% (Y = 0..4.65) + Trần Gỗ & Hệ Đèn LED 3 Sọc TTTM
+  dm('box', 'mallWarmWall', -10.08, 2.32, 12.0, 0, 0, 0, 0.16, 4.65, 24.0, { tint: [1, 1, 1, 1], us: 10, vs: 2 });
+  dm('box', 'mallWarmWall',  14.08, 2.32, 12.0, 0, 0, 0, 0.16, 4.65, 24.0, { tint: [1, 1, 1, 1], us: 10, vs: 2 });
+  dm('box', 'mallWarmWall',   2.0,  2.32, 24.08, 0, 0, 0, 24.2, 4.65, 0.16, { tint: [1, 1, 1, 1], us: 10, vs: 2 });
+  // Tường mặt tiền Z = 0 với cửa kính-gỗ mở ra Đại Lộ
+  dm('box', 'mallWarmWall', -5.75, 2.32, -0.08, 0, 0, 0, 8.5, 4.65, 0.16, { tint: [1, 1, 1, 1], us: 3.5, vs: 2 });
+  dm('box', 'mallWarmWall',  7.75, 2.32, -0.08, 0, 0, 0, 12.5, 4.65, 0.16, { tint: [1, 1, 1, 1], us: 5, vs: 2 });
+  dm('box', 'mallWarmWall',  0.0,  3.75, -0.08, 0, 0, 0, 3.0, 1.80, 0.16, { tint: [1, 1, 1, 1], us: 1.5, vs: 1 });
+  dm('quad', 'white', 0, 1.42, -0.04, 0, 0, 0, 2.9, 2.84, 1, { tint: [1.0, 0.96, 0.82, 1], emissive: 1.1 });
+  dm('quad', 'vnDoorWood', -0.72, 1.42, 0.04, 0, 0, 0, 1.44, 2.82, 1, { tint: [1, 1, 1, 1], us: 0.5, vs: 1 });
   var rAng = st.rightDoorOpen * 0.92;
-  dm('box', 'limWood', 1.35 - Math.cos(rAng) * 0.66, 1.37, 0.04 + Math.sin(rAng) * 0.66, 0, -rAng, 0, 1.33, 2.72, 0.06, { tint: [1.05, 0.95, 0.85, 1] });
-  dm('quad', 'vnDoorWood', 1.35 - Math.cos(rAng) * 0.66, 1.37, 0.08 + Math.sin(rAng) * 0.66, 0, -rAng, 0, 1.25, 2.64, 1, { tint: [1, 1, 1, 1], us: 0.5, uo: 0.5 });
+  dm('box', 'limWood', 1.44 - Math.cos(rAng) * 0.72, 1.42, 0.04 + Math.sin(rAng) * 0.72, 0, -rAng, 0, 1.44, 2.82, 0.06, { tint: [1.05, 0.95, 0.85, 1] });
+  dm('quad', 'vnDoorWood', 1.44 - Math.cos(rAng) * 0.72, 1.42, 0.08 + Math.sin(rAng) * 0.72, 0, -rAng, 0, 1.36, 2.74, 1, { tint: [1, 1, 1, 1], us: 0.5, uo: 0.5 });
 
-  // 4. Vách ngăn X = 6.0 giữa 'hall' và 'fitting' (Vòm mở Z ∈ [8.4, 11.2], Y ∈ [0, 2.8]) + Lầu 2 kín
-  dm('box', 'hoiAnYellowWall', 6.0, 1.7, 4.2,  0, 0, 0, 0.14, 3.4, 8.4, { tint: [1, 1, 1, 1], us: 3, vs: 1.2 });
-  dm('box', 'hoiAnYellowWall', 6.0, 1.7, 13.0, 0, 0, 0, 0.14, 3.4, 3.6, { tint: [1, 1, 1, 1], us: 1.4, vs: 1.2 });
-  dm('box', 'hoiAnYellowWall', 6.0, 3.1, 9.8,  0, 0, 0, 0.14, 0.6, 2.8, { tint: [1, 1, 1, 1], us: 1.2, vs: 0.4 });
-  dm('box', 'limWood',         6.0, 2.8, 9.8,  0, 0, 0, 0.24, 0.16, 2.9, { tint: [0.9, 0.8, 0.7, 1] });
-  dm('box', 'limWood',         6.0, 1.4, 8.38, 0, 0, 0, 0.24, 2.8, 0.16, { tint: [0.9, 0.8, 0.7, 1] });
-  dm('box', 'limWood',         6.0, 1.4, 11.22,0, 0, 0, 0.24, 2.8, 0.16, { tint: [0.9, 0.8, 0.7, 1] });
-  dm('box', 'hoiAnYellowWall', 6.0, 5.1, 7.4,  0, 0, 0, 0.14, 3.4, 14.8, { tint: [1, 1, 1, 1], us: 5, vs: 1.2 });
-
-  // 5. Tường & Trần Phòng Thay Đồ 'fitting' (X ∈ [6.0, 15.6], Z ∈ [4.8, 13.2], Y = 0..3.4)
-  dm('box', 'fittingGreenWall', 10.8, 1.7, 4.74, 0, 0, 0, 9.6, 3.4, 0.14, { tint: [1, 1, 1, 1], us: 3.5, vs: 1.2 });
-  dm('box', 'fittingGreenWall', 10.8, 1.7, 13.26,0, 0, 0, 9.6, 3.4, 0.14, { tint: [1, 1, 1, 1], us: 3.5, vs: 1.2 });
-  dm('box', 'fittingGreenWall', 15.66,1.7, 9.0,  0, 0, 0, 0.14, 3.4, 8.4, { tint: [1, 1, 1, 1], us: 3, vs: 1.2 });
-  dm('box', 'limWood',          10.8, 3.45, 9.0, 0, 0, 0, 9.7, 0.14, 8.5, { tint: [0.85, 0.75, 0.65, 1], us: 4, vs: 3 });
-  for (var fbx = 7.4; fbx <= 14.2; fbx += 2.2) {
-    dm('box', 'limWood', fbx, 3.32, 9.0, 0, 0, 0, 0.18, 0.16, 8.4, { tint: [0.65, 0.50, 0.36, 1] });
+  // Trần nhà rộng 24×24m + hệ thanh đèn LED 3 sọc trắng chạy dọc đại sảnh
+  dm('box', 'limWood', 2.0, 4.70, 12.0, 0, 0, 0, 24.2, 0.14, 24.2, { tint: [0.85, 0.75, 0.64, 1], us: 10, vs: 10 });
+  for (var lx = -1; lx <= 1; lx++) {
+    dm('box', 'white', lx * 1.1, 4.58, 12.0, 0, 0, 0, 0.18, 0.06, 22.0, { tint: [1.0, 0.98, 0.90, 1], emissive: 1.15 });
+  }
+  for (var bz = 3.0; bz <= 22.0; bz += 4.5) {
+    dm('box', 'limWood', 2.0, 4.54, bz, 0, 0, 0, 24.0, 0.16, 0.24, { tint: [0.55, 0.42, 0.30, 1] });
   }
 
-  // 6. Sàn Lầu 2 'upper' (Y = 3.35) CHIA 4 MẢNG KHỚP LỖ THANG X ∈ [-5.1, -2.9], Z ∈ [8.55, 13.35] & CHIẾU NGHỈ SAU Z ∈ [13.4, 14.8]
-  dm('box', 'limWood',  1.55, 3.35, 7.4,   0, 0, 0, 8.9, 0.12, 14.8,  { tint: [1.15, 0.96, 0.78, 1], us: 4.5, vs: 7 });
-  dm('box', 'limWood', -5.55, 3.35, 7.4,   0, 0, 0, 0.9, 0.12, 14.8,  { tint: [1.15, 0.96, 0.78, 1], us: 0.6, vs: 7 });
-  dm('box', 'limWood', -4.00, 3.35, 4.275, 0, 0, 0, 2.2, 0.12, 8.55,  { tint: [1.15, 0.96, 0.78, 1], us: 1.4, vs: 4 });
-  dm('box', 'limWood', -4.00, 3.35, 14.075,0, 0, 0, 2.2, 0.12, 1.45,  { tint: [1.15, 0.96, 0.78, 1], us: 1.4, vs: 1 });
-  // Thảm đỏ-vàng Lầu 2 dẫn tới Tranh Hoa Sen × 3 Sọc
-  dm('box', 'velvetCurtain', 0.2, 3.42, 7.2, 0, 0, 0, 2.8, 0.012, 9.6, { tint: [1.05, 0.85, 0.75, 1] });
-
-  // 7. Trần gỗ lim chính Lầu 2 (Y = 6.8) & hệ xà gồ Hội An
-  dm('box', 'limWood', 0, 6.85, 7.4, 0, 0, 0, 12.1, 0.16, 14.9, { tint: [0.85, 0.75, 0.65, 1], us: 5, vs: 6 });
-  for (var bz = 2.0; bz <= 13.6; bz += 2.6) {
-    dm('box', 'limWood', 0, 6.68, bz, 0, 0, 0, 12.0, 0.18, 0.22, { tint: [0.60, 0.45, 0.32, 1] });
-    dm('box', 'limWood', 1.8, 3.22, bz, 0, 0, 0, 8.4, 0.14, 0.18, { tint: [0.62, 0.48, 0.34, 1] });
+  // 5. Vách Ngăn X = 6.0 với 3 Vòm Rộng (POS [1.8..4.8], Thay Đồ [8.0..11.4], Sân Bóng [16.5..20.5])
+  dm('box', 'mallWarmWall', 6.0, 2.32, 0.9,  0, 0, 0, 0.16, 4.65, 1.8, { tint: [1, 1, 1, 1], us: 1, vs: 2 });
+  dm('box', 'mallWarmWall', 6.0, 2.32, 6.4,  0, 0, 0, 0.16, 4.65, 3.2, { tint: [1, 1, 1, 1], us: 1.5, vs: 2 });
+  dm('box', 'mallWarmWall', 6.0, 2.32, 13.95,0, 0, 0, 0.16, 4.65, 5.1, { tint: [1, 1, 1, 1], us: 2.2, vs: 2 });
+  dm('box', 'mallWarmWall', 6.0, 2.32, 22.25,0, 0, 0, 0.16, 4.65, 3.5, { tint: [1, 1, 1, 1], us: 1.5, vs: 2 });
+  // Dầm vòm trên 3 cổng mở
+  dm('box', 'mallWarmWall', 6.0, 3.98, 3.3,  0, 0, 0, 0.16, 1.34, 3.0, { tint: [1, 1, 1, 1] });
+  dm('box', 'mallWarmWall', 6.0, 3.98, 9.7,  0, 0, 0, 0.16, 1.34, 3.4, { tint: [1, 1, 1, 1] });
+  dm('box', 'mallWarmWall', 6.0, 4.08, 18.5, 0, 0, 0, 0.16, 1.15, 4.0, { tint: [1, 1, 1, 1] });
+  // Khung gỗ viền 3 vòm
+  var arches = [[1.8, 4.8, 3.3], [8.0, 11.4, 3.3], [16.5, 20.5, 3.5]];
+  for (var ai = 0; ai < arches.length; ai++) {
+    var ar = arches[ai];
+    dm('box', 'limWood', 6.0, ar[2], (ar[0] + ar[1]) * 0.5, 0, 0, 0, 0.24, 0.14, ar[1] - ar[0] + 0.12, { tint: [0.85, 0.72, 0.56, 1] });
+    dm('box', 'limWood', 6.0, ar[2] * 0.5, ar[0], 0, 0, 0, 0.24, ar[2], 0.14, { tint: [0.85, 0.72, 0.56, 1] });
+    dm('box', 'limWood', 6.0, ar[2] * 0.5, ar[1], 0, 0, 0, 0.24, ar[2], 0.14, { tint: [0.85, 0.72, 0.56, 1] });
   }
+  // Vách Z = 14.0 [6..14] chia Thay Đồ và Sân Bóng (cửa thông X ∈ [8.2..11.8])
+  dm('box', 'mallWarmWall', 7.1,  2.32, 14.0, 0, 0, 0, 2.2, 4.65, 0.16, { tint: [1, 1, 1, 1] });
+  dm('box', 'mallWarmWall', 12.9, 2.32, 14.0, 0, 0, 0, 2.2, 4.65, 0.16, { tint: [1, 1, 1, 1] });
+  dm('box', 'mallWarmWall', 10.0, 4.02, 14.0, 0, 0, 0, 3.6, 1.25, 0.16, { tint: [1, 1, 1, 1] });
 
-  // ==================== B. CẦU THANG GỖ HỘI AN 12 BẬC (X ∈ [-5.0, -3.0], Z ∈ [8.6, 13.4]) ====================
-  for (var s = 0; s < 12; s++) {
-    var sz = 8.6 + (s + 0.5) * (4.8 / 12);
-    var sy = (s + 0.5) * (3.4 / 12);
-    dm('box', 'limWood', -4.0, sy * 0.5, sz, 0, 0, 0, 2.0, sy, 0.42, { tint: [1.10, 0.92, 0.76, 1], us: 1.5, vs: 1 });
-  }
-  // Lan can tay vịn gỗ bên phải cầu thang & lan can lỗ sàn Lầu 2 (chừa lối chiếu nghỉ sau Z ∈ [13.4, 14.8])
-  dm('box', 'limWood', -2.96, 2.25, 11.0, -0.61, 0, 0, 0.10, 0.12, 5.8, { tint: [0.8, 0.65, 0.48, 1] });
-  dm('box', 'limWood', -2.96, 3.85, 10.95, 0, 0, 0, 0.10, 0.85, 4.8, { tint: [0.75, 0.60, 0.45, 1] });
-  dm('box', 'limWood', -4.00, 3.85, 8.55,  0, 0, 0, 2.20, 0.85, 0.10, { tint: [0.75, 0.60, 0.45, 1] });
+  // ==================== B. 8 GIAN HÀNG ĐẠI SẢNH CHÍNH ('hall': X ∈ [-10, 6], Z ∈ [0, 14]) ====================
+  // Gian 1: Sneaker Wall LED 12 ô dọc tường Tây (X = -9.30, Z ∈ [1.8..12.2])
+  dm('box', 'limWood', -9.30, 0.44, 7.0, 0, 0, 0, 1.25, 0.88, 10.4, { tint: [1.05, 0.90, 0.76, 1] });
+  dm('quad', 'shoeDisplayBoard', -9.88, 2.25, 4.4,  0, Math.PI * 0.5, 0, 5.0, 2.2, 1, { tint: [1, 1, 1, 1] });
+  dm('quad', 'shoeDisplayBoard', -9.88, 2.25, 9.6,  0, Math.PI * 0.5, 0, 5.0, 2.2, 1, { tint: [1, 1, 1, 1] });
+  drawAdidasSneaker3D(wgl, -9.15, 0.90, 2.8, [1, 0.98, 0.94, 1], [0.07, 0.09, 0.15, 1], [0.71, 0.33, 0.04, 1]);
+  drawAdidasSneaker3D(wgl, -9.15, 0.90, 5.4, [0.86, 0.15, 0.15, 1], [1, 0.98, 0.94, 1], [0.95, 0.96, 0.98, 1]);
+  drawAdidasSneaker3D(wgl, -9.15, 0.90, 8.2, [0.96, 0.97, 0.99, 1], [0.08, 0.50, 0.24, 1], [0.92, 0.94, 0.96, 1]);
+  drawAdidasSneaker3D(wgl, -9.15, 0.90, 10.9,[0.12, 0.16, 0.23, 1], [0.98, 0.45, 0.09, 1], [0.06, 0.09, 0.16, 1]);
 
-  // ==================== C. NỘI THẤT & MỸ THUẬT TƯỜNG TẦNG 1 ('hall') ====================
-  // Tường Trái Kệ giày thu gọn X ∈ [-5.95, -4.65], Z ∈ [1.8, 7.6] (thoáng >= 0.66m trước cầu thang)
-  dm('box', 'limWood', -5.30, 0.42, 4.70, 0, 0, 0, 1.25, 0.84, 5.8, { tint: [1.05, 0.90, 0.76, 1] });
-  dm('quad', 'shoeDisplayBoard', -5.90, 2.05, 4.70, 0, Math.PI * 0.5, 0, 5.6, 1.95, 1, { tint: [1, 1, 1, 1] });
-  drawAdidasSneaker3D(wgl, -5.15, 0.85, 2.8, [1, 0.98, 0.94, 1], [0.07, 0.09, 0.15, 1], [0.71, 0.33, 0.04, 1]);
-  drawAdidasSneaker3D(wgl, -5.15, 0.85, 4.7, [0.86, 0.15, 0.15, 1], [1, 0.98, 0.94, 1], [0.95, 0.96, 0.98, 1]);
-  drawAdidasSneaker3D(wgl, -5.15, 0.85, 6.6, [0.12, 0.16, 0.23, 1], [0.98, 0.45, 0.09, 1], [0.06, 0.09, 0.16, 1]);
+  // Gian 2: Đảo Giày Running Ultraboost (X = -5.1, Z = 5.5)
+  dm('box', 'limWood', -5.1, 0.42, 5.5, 0, 0, 0, 2.1, 0.84, 1.7, { tint: [0.96, 0.84, 0.72, 1] });
+  dm('box', 'white',   -5.1, 0.90, 5.5, 0, 0, 0, 1.6, 0.12, 1.2, { tint: [0.12, 0.16, 0.23, 1], specPow: 64 });
+  drawAdidasSneaker3D(wgl, -5.5, 0.98, 5.5, [0.12, 0.16, 0.23, 1], [0.22, 0.74, 0.97, 1], [0.98, 0.98, 0.98, 1]);
+  drawAdidasSneaker3D(wgl, -4.7, 0.98, 5.5, [0.98, 0.98, 0.98, 1], [0.98, 0.45, 0.09, 1], [0.94, 0.94, 0.96, 1]);
 
-  // Tường Phải Giá áo thu gọn X ∈ [4.65, 5.95], Z ∈ [1.9, 7.4] (thoáng >= 0.66m trước vòm)
-  dm('box', 'limWood', 5.30, 0.36, 4.65, 0, 0, 0, 1.20, 0.72, 5.5, { tint: [1.05, 0.90, 0.76, 1] });
-  dm('quad', 'threeStripesWall', 5.90, 2.10, 4.65, 0, -Math.PI * 0.5, 0, 5.3, 1.85, 1, { tint: [1, 1, 1, 1] });
-  dm('cyl', 'white', 5.35, 2.18, 4.65, Math.PI * 0.5, 0, 0, 0.05, 5.0, 0.05, { tint: [0.82, 0.64, 0.24, 1] });
-  drawAdidasHangingJacket3D(wgl, 5.35, 1.72, 2.9, -Math.PI * 0.5, [0.07, 0.09, 0.15, 1]);
-  drawAdidasHangingJacket3D(wgl, 5.35, 1.72, 4.65,-Math.PI * 0.5, [0.11, 0.31, 0.85, 1]);
-  drawAdidasHangingJacket3D(wgl, 5.35, 1.72, 6.4, -Math.PI * 0.5, [0.72, 0.11, 0.11, 1]);
+  // Gian 3: Đảo Predator & Samba OG Trung Tâm (X = 0, Z = 6.3)
+  dm('box', 'limWood', 0, 0.42, 6.3, 0, 0, 0, 2.7, 0.84, 2.1, { tint: [0.95, 0.82, 0.70, 1] });
+  dm('box', 'mallWarmWall', 0, 0.88, 6.3, 0, 0, 0, 2.8, 0.08, 2.2, { tint: [1.05, 0.96, 0.82, 1], specPow: 64 });
+  drawAdidasSneaker3D(wgl, -0.78, 1.04, 6.3, [1, 0.98, 0.94, 1], [0.07, 0.09, 0.15, 1], [0.71, 0.33, 0.04, 1]);
+  drawAdidasSneaker3D(wgl,  0.00, 1.12, 6.3, [0.12, 0.16, 0.23, 1], [0.98, 0.45, 0.09, 1], [0.06, 0.09, 0.16, 1]);
+  drawAdidasSneaker3D(wgl,  0.78, 1.04, 6.3, [0.86, 0.15, 0.15, 1], [1, 0.98, 0.94, 1], [0.95, 0.96, 0.98, 1]);
 
-  // Tường Sau Tầng 1 (Z = 14.74): Bảng hiệu ADIDAS ORIGINALS · HỘI AN HERITAGE
-  dm('quad', 'trefoilOriginSign', 1.8, 2.45, 14.74, 0, Math.PI, 0, 5.8, 1.55, 1, { tint: [1, 1, 1, 1] });
+  // Gian 4: Đảo & Giá Áo Polo Cổ Bẻ 3 Sọc (X = 3.1, Z = 6.45 & tường X = 5.35, Z = 6.4)
+  dm('box', 'limWood', 3.1, 0.38, 6.45, 0, 0, 0, 1.7, 0.76, 2.0, { tint: [1.0, 0.86, 0.72, 1] });
+  dm('cyl', 'white',   3.1, 1.54, 6.45, Math.PI * 0.5, 0, 0, 0.04, 1.9, 0.04, { tint: [0.82, 0.64, 0.24, 1] });
+  drawAdidasHangingGarment3D(wgl, 3.1, 1.18, 5.85, Math.PI * 0.5, [0.12, 0.23, 0.54, 1], true, [1, 0.98, 0.94, 1]);
+  drawAdidasHangingGarment3D(wgl, 3.1, 1.18, 6.45, Math.PI * 0.5, [0.97, 0.98, 0.99, 1], true, [0.06, 0.09, 0.16, 1]);
+  drawAdidasHangingGarment3D(wgl, 3.1, 1.18, 7.05, Math.PI * 0.5, [0.60, 0.11, 0.11, 1], true, [1, 0.98, 0.94, 1]);
+  dm('box', 'limWood', 5.35, 0.36, 6.40, 0, 0, 0, 1.15, 0.72, 1.9, { tint: [1.05, 0.90, 0.76, 1] });
+  dm('quad', 'poloDisplayTex', 5.88, 2.15, 6.40, 0, -Math.PI * 0.5, 0, 2.8, 1.9, 1, { tint: [1, 1, 1, 1] });
 
-  // Đảo Sneaker Trung Tâm (X ∈ [-1.35, 1.35], Z ∈ [5.15, 7.25])
-  dm('box', 'limWood', 0, 0.42, 6.2, 0, 0, 0, 2.55, 0.84, 1.95, { tint: [0.95, 0.82, 0.70, 1] });
-  dm('box', 'hoiAnYellowWall', 0, 0.88, 6.2, 0, 0, 0, 2.68, 0.08, 2.08, { tint: [1.05, 0.96, 0.82, 1], specPow: 64 });
-  dm('box', 'white', -0.75, 0.99, 6.2, 0, 0, 0, 0.56, 0.14, 0.56, { tint: [0.98, 0.96, 0.90, 1] });
-  dm('box', 'white',  0.00, 1.03, 6.2, 0, 0, 0, 0.62, 0.22, 0.62, { tint: [0.08, 0.10, 0.16, 1], specPow: 80 });
-  dm('box', 'white',  0.75, 0.99, 6.2, 0, 0, 0, 0.56, 0.14, 0.56, { tint: [0.98, 0.96, 0.90, 1] });
-  drawAdidasSneaker3D(wgl, -0.75, 1.06, 6.2, [1, 0.98, 0.94, 1], [0.07, 0.09, 0.15, 1], [0.71, 0.33, 0.04, 1]);
-  drawAdidasSneaker3D(wgl,  0.00, 1.14, 6.2, [0.12, 0.16, 0.23, 1], [0.98, 0.45, 0.09, 1], [0.06, 0.09, 0.16, 1]);
-  drawAdidasSneaker3D(wgl,  0.75, 1.06, 6.2, [0.86, 0.15, 0.15, 1], [1, 0.98, 0.94, 1], [0.95, 0.96, 0.98, 1]);
+  // Gian 5: Đảo Quần Jogger & Track Pants Nỉ 3 Sọc (X = -5.2, Z = 10.6)
+  dm('box', 'limWood', -5.2, 0.36, 10.6, 0, 0, 0, 2.3, 0.72, 1.9, { tint: [0.92, 0.80, 0.68, 1] });
+  dm('cyl', 'white',   -5.2, 1.62, 10.6, 0, 0, Math.PI * 0.5, 0.04, 2.1, 0.04, { tint: [0.82, 0.64, 0.24, 1] });
+  drawAdidasHangingJogger3D(wgl, -5.85, 1.24, 10.6, 0, [0.07, 0.09, 0.15, 1]);
+  drawAdidasHangingJogger3D(wgl, -5.20, 1.24, 10.6, 0, [0.28, 0.33, 0.41, 1]);
+  drawAdidasHangingJogger3D(wgl, -4.55, 1.24, 10.6, 0, [0.08, 0.32, 0.18, 1]);
+  dm('quad', 'joggerRackTex', -5.2, 1.20, 9.63, 0, Math.PI, 0, 2.2, 1.15, 1, { tint: [1, 1, 1, 1] });
 
-  // ==================== D. NỘI THẤT PHÒNG THAY ĐỒ ('fitting') ====================
-  // 1. Gương toàn thân + bục tường Đông (X ∈ [14.85, 15.55], Z ∈ [7.2, 10.8])
-  dm('box', 'limWood', 15.20, 0.10, 9.0, 0, 0, 0, 0.70, 0.20, 3.60, { tint: [1.05, 0.88, 0.72, 1] });
-  dm('quad', 'mirrorGlass', 15.50, 1.72, 9.0, 0, -Math.PI * 0.5, 0, 3.45, 3.04, 1, { tint: [1, 1, 1, 1], specPow: 96, rim: 0.25 });
-  // Phản chiếu chú Heo trực tiếp trong Gương toàn thân khi bước vào Phòng Thay Đồ!
-  if (st.pig.y < 1.9 && st.pig.x >= 5.5) {
-    var mirrorZ = Math.max(7.85, Math.min(10.15, st.pig.z));
+  // Gian 6: Giá Áo Khoác Firebird & Hoodie (X = 5.30, Z = 12.75)
+  dm('box', 'limWood', 5.30, 0.36, 12.75, 0, 0, 0, 1.2, 0.72, 1.85, { tint: [1.05, 0.90, 0.76, 1] });
+  dm('quad', 'threeStripesWall', 5.88, 2.15, 12.75, 0, -Math.PI * 0.5, 0, 2.4, 1.85, 1, { tint: [1, 1, 1, 1] });
+  drawAdidasHangingGarment3D(wgl, 5.20, 1.55, 12.25, -Math.PI * 0.5, [0.07, 0.09, 0.15, 1], false);
+  drawAdidasHangingGarment3D(wgl, 5.20, 1.55, 13.20, -Math.PI * 0.5, [0.72, 0.11, 0.11, 1], false);
+
+  // Gian 7: Quầy Dép Adilette Slides & Sandal Thể Thao (X = -4.7, Z = 2.3)
+  dm('box', 'limWood', -4.7, 0.40, 2.3, 0, 0, 0, 2.1, 0.80, 1.3, { tint: [0.98, 0.88, 0.76, 1] });
+  dm('quad', 'slidesBoardTex', -4.7, 1.65, 2.3, 0, Math.PI, 0, 2.1, 1.15, 1, { tint: [1, 1, 1, 1] });
+  drawAdidasSlide3D(wgl, -5.3, 0.82, 2.3, [0.06, 0.09, 0.16, 1], [0.12, 0.16, 0.23, 1]);
+  drawAdidasSlide3D(wgl, -4.7, 0.82, 2.3, [0.11, 0.31, 0.85, 1], [0.15, 0.39, 0.92, 1]);
+  drawAdidasSlide3D(wgl, -4.1, 0.82, 2.3, [0.84, 0.77, 0.63, 1], [0.47, 0.21, 0.06, 1]);
+
+  // Gian 8: Cụm 3 Mannequin Styling Pods Full Outfit (Polo+Jogger, Track Jacket, Football Kit)
+  drawAdidasMannequin3D(wgl,  1.8, 9.8,  [0.12, 0.23, 0.54, 1], [0.20, 0.25, 0.33, 1], [1, 1, 1, 1]);
+  drawAdidasMannequin3D(wgl, -2.0, 9.8,  [0.72, 0.11, 0.11, 1], [0.07, 0.09, 0.15, 1], [1, 1, 1, 1]);
+  drawAdidasMannequin3D(wgl,  3.6, 15.2, [0.86, 0.15, 0.15, 1], [0.86, 0.15, 0.15, 1], [0.98, 0.80, 0.08, 1]);
+
+  // ==================== C. 4 GIAN THỂ THAO & SÁNG TẠO ('apparel_sports': Z ∈ [14, 24]) ====================
+  // Gian 9: Quầy Áo Đấu Bóng Đá, Tất & Bóng (Tường Tây X = -9.30, Z ∈ [15..21.2])
+  dm('box', 'limWood', -9.30, 0.44, 18.1, 0, 0, 0, 1.25, 0.88, 6.2, { tint: [1.05, 0.90, 0.76, 1] });
+  dm('quad', 'footballGearTex', -9.88, 2.25, 18.1, 0, Math.PI * 0.5, 0, 5.8, 2.25, 1, { tint: [1, 1, 1, 1] });
+  drawAdidasHangingGarment3D(wgl, -9.0, 1.55, 16.5, Math.PI * 0.5, [0.86, 0.15, 0.15, 1], false);
+  drawAdidasHangingGarment3D(wgl, -9.0, 1.55, 19.6, Math.PI * 0.5, [0.97, 0.98, 0.99, 1], false);
+  dm('sphere', 'white', -9.15, 1.05, 18.1, 0, 0, 0, 0.34, 0.34, 0.34, { tint: [0.98, 0.98, 0.98, 1] });
+
+  // Gian 10: Đảo Running, Gym & Pickleball Studio (X = -5.1, Z = 17.1)
+  dm('box', 'limWood', -5.1, 0.42, 17.1, 0, 0, 0, 2.5, 0.84, 2.1, { tint: [0.95, 0.84, 0.72, 1] });
+  dm('quad', 'gymPickleTex', -5.1, 1.65, 17.1, 0, Math.PI, 0, 2.4, 1.25, 1, { tint: [1, 1, 1, 1] });
+  dm('box', 'white', -5.6, 0.90, 17.1, 0, 0.2, 0, 0.42, 0.06, 0.62, { tint: [0.07, 0.09, 0.15, 1] });
+  dm('cyl', 'white', -4.6, 1.02, 17.1, 0, 0, 0, 0.14, 0.34, 0.14, { tint: [0.22, 0.74, 0.97, 1] });
+
+  // Gian 11: Quầy Maker Lab Custom Studio (X = 3.0, Z = 19.7)
+  dm('box', 'limWood', 3.0, 0.46, 19.7, 0, 0, 0, 2.5, 0.92, 2.1, { tint: [0.92, 0.80, 0.68, 1] });
+  dm('box', 'white',   3.0, 1.04, 19.7, 0, 0, 0, 0.92, 0.24, 0.76, { tint: [0.98, 0.45, 0.09, 1], specPow: 64 }); // Máy ép nhiệt
+  dm('box', 'white',   3.0, 1.22, 19.7, 0.25, 0, 0, 0.84, 0.08, 0.68, { tint: [0.12, 0.16, 0.23, 1] });
+  dm('quad', 'makerLabTex', 3.0, 2.25, 20.6, 0, Math.PI, 0, 2.6, 1.35, 1, { tint: [1, 1, 1, 1] });
+
+  // Gian 12: Tường Balo, Túi Trống, Nón & Vớ Trefoil + Tranh Hero & Việt Nam × 3 Sọc (Tường Bắc Z = 23.8)
+  dm('box', 'limWood', -2.0, 0.46, 23.3, 0, 0, 0, 8.2, 0.92, 1.25, { tint: [1.0, 0.86, 0.72, 1] });
+  dm('quad', 'accessoriesWallTex', -4.2, 1.95, 23.90, 0, Math.PI, 0, 4.2, 1.95, 1, { tint: [1, 1, 1, 1] });
+  dm('quad', 'vnLotusStripeArt',    1.6, 2.15, 23.90, 0, Math.PI, 0, 5.4, 2.25, 1, { tint: [1, 1, 1, 1] });
+  dm('quad', 'trefoilOriginSign',  -4.2, 3.65, 23.90, 0, Math.PI, 0, 5.6, 1.45, 1, { tint: [1, 1, 1, 1] });
+
+  // ==================== D. PHÒNG THAY ĐỒ VIP & THU NGÂN POS ('fitting_pos': X ∈ [6, 14], Z ∈ [0, 14]) ====================
+  // Gian 13: Phòng Thay Đồ Gương Toàn Thân 360° + Rèm + Giá Đồ + Ghế Băng Thử Giày
+  dm('box', 'limWood', 13.55, 0.10, 9.8, 0, 0, 0, 0.72, 0.20, 3.60, { tint: [1.05, 0.88, 0.72, 1] });
+  dm('quad', 'mirrorGlass', 13.88, 1.72, 9.8, 0, -Math.PI * 0.5, 0, 3.55, 3.04, 1, { tint: [1, 1, 1, 1], specPow: 96, rim: 0.25 });
+  if (st.pig.x >= 5.6 && st.pig.z >= 6.4 && st.pig.z <= 13.8) {
+    var mirrorZ = Math.max(8.35, Math.min(11.25, st.pig.z));
     var mTex = typeof ensurePigBillboardTex === 'function'
       ? ensurePigBillboardTex(wgl, 'front', st.pig.walking ? 1 : 0, 0, 0, 0, 0, st.pig.outfit || 'none')
       : 'white';
-    dm('quad', mTex, 15.44, 0.62, mirrorZ, 0, -Math.PI * 0.5, 0, 0.66, 0.66, 1, {
-      tint: [0.90, 0.96, 1.0, 1], emissive: 1.0
+    dm('quad', mTex, 13.82, 0.62, mirrorZ, 0, -Math.PI * 0.5, 0, 0.68, 0.68, 1, { tint: [0.90, 0.96, 1.0, 1], emissive: 1.0 });
+  }
+  dm('quad', 'velvetCurtain', 13.90, 1.70, 7.25,  0, -Math.PI * 0.5, 0, 1.4, 3.3, 1, { tint: [1, 1, 1, 1] });
+  dm('quad', 'velvetCurtain', 13.90, 1.70, 12.35, 0, -Math.PI * 0.5, 0, 1.4, 3.3, 1, { tint: [1, 1, 1, 1] });
+
+  dm('box', 'limWood', 10.0, 0.29, 7.2, 0, 0, 0, 4.4, 0.58, 0.9, { tint: [1.0, 0.85, 0.72, 1] });
+  dm('cyl', 'white',   10.0, 2.25, 7.2, 0, 0, Math.PI * 0.5, 0.04, 4.1, 0.04, { tint: [0.84, 0.66, 0.24, 1] });
+  drawAdidasHangingGarment3D(wgl, 8.6,  1.80, 7.2, 0, [0.07, 0.09, 0.15, 1], false);
+  drawAdidasHangingGarment3D(wgl, 10.0, 1.80, 7.2, 0, [0.12, 0.23, 0.54, 1], true, [1, 1, 1, 1]);
+  drawAdidasHangingGarment3D(wgl, 11.4, 1.80, 7.2, 0, [0.72, 0.11, 0.11, 1], false);
+
+  dm('box', 'limWood', 7.3, 0.21, 12.45, 0, 0, 0, 1.3, 0.42, 0.96, { tint: [1.05, 0.88, 0.72, 1] });
+  dm('box', 'fittingGreenWall', 7.3, 0.48, 12.45, 0, 0, 0, 1.2, 0.12, 0.86, { tint: [1.1, 1.25, 1.0, 1] });
+  drawAdidasSneaker3D(wgl, 7.3, 0.55, 12.45, [1, 0.98, 0.94, 1], [0.07, 0.09, 0.15, 1], [0.71, 0.33, 0.04, 1]);
+
+  // Gian 14: Quầy Thu Ngân POS Đôi & Kệ Hộp Giày Checkout (X ∈ [6..14], Z ∈ [0.8..6.0])
+  dm('box', 'limWood', 10.9, 0.52, 3.4, 0, 0, 0, 1.35, 1.04, 3.9, { tint: [1.05, 0.88, 0.72, 1] });
+  dm('box', 'mallWarmWall', 10.9, 1.08, 3.4, 0, 0, 0, 1.48, 0.10, 4.05, { tint: [1.05, 0.95, 0.80, 1] });
+  dm('box', 'white', 10.85, 1.32, 2.4, 0, 0, 0, 0.38, 0.36, 0.46, { tint: [0.12, 0.16, 0.23, 1], specPow: 80 });
+  dm('box', 'white', 10.85, 1.32, 4.3, 0, 0, 0, 0.38, 0.36, 0.46, { tint: [0.12, 0.16, 0.23, 1], specPow: 80 });
+  dm('box', 'white', 10.85, 1.24, 3.35, 0, 0, 0, 0.44, 0.22, 0.62, { tint: [0.11, 0.31, 0.85, 1] });
+  dm('quad', 'posShelfTex', 13.90, 2.25, 3.5, 0, -Math.PI * 0.5, 0, 5.4, 2.2, 1, { tint: [1, 1, 1, 1] });
+  dm('box', 'limWood', 8.25, 0.44, 1.4, 0, 0, 0, 1.4, 0.88, 0.95, { tint: [0.92, 0.80, 0.68, 1] });
+  dm('quad', 'accessoriesWallTex', 8.25, 1.45, 0.95, 0, 0, 0, 1.4, 0.95, 1, { tint: [1, 1, 1, 1] });
+
+  // ==================== E. GIAN 15 & 16: SÂN TURF MINI-GAME SÚT BÓNG 3D & KỆ BÓNG ====================
+  // Khung thành 3D + Lưới gôn rung sóng (X ∈ [8.1..11.9], Z ∈ [22.4..23.5])
+  var netShake = (st.kickGame && st.kickGame.netRipple) ? Math.sin(st.t * 28) * st.kickGame.netRipple * 0.12 : 0;
+  dm('box', 'white',  8.15, 0.95, 22.4, 0, 0, 0, 0.12, 1.90, 0.12, { tint: [0.98, 0.99, 1.0, 1], specPow: 64 });
+  dm('box', 'white', 11.85, 0.95, 22.4, 0, 0, 0, 0.12, 1.90, 0.12, { tint: [0.98, 0.99, 1.0, 1], specPow: 64 });
+  dm('box', 'white', 10.00, 1.90, 22.4, 0, 0, 0, 3.82, 0.12, 0.12, { tint: [0.98, 0.99, 1.0, 1], specPow: 64 });
+  wgl.setBlend('alpha');
+  dm('quad', 'goalNetTex', 10.00, 0.95, 23.45 + netShake, 0, Math.PI, 0, 3.70, 1.90, 1, { tint: [1, 1, 1, 0.88], emissive: 0.45 });
+  dm('quad', 'goalNetTex',  8.15, 0.95, 22.92, 0,  Math.PI * 0.5, 0, 1.05, 1.90, 1, { tint: [1, 1, 1, 0.82] });
+  dm('quad', 'goalNetTex', 11.85, 0.95, 22.92, 0, -Math.PI * 0.5, 0, 1.05, 1.90, 1, { tint: [1, 1, 1, 0.82] });
+  wgl.setBlend(null);
+  // 3 Bia mục tiêu phát sáng ở 3 góc Gôn & Bảng LED tỷ số trên nóc Gôn
+  dm('quad', 'scoreboardLedTex', 10.0, 2.75, 23.85, 0, Math.PI, 0, 4.6, 1.45, 1, { tint: [1, 1, 1, 1], emissive: 0.6 });
+  var goalTargetsX = [8.75, 10.0, 11.25];
+  for (var gi = 0; gi < 3; gi++) {
+    dm('torus', 'white', goalTargetsX[gi], gi === 1 ? 1.42 : 1.32, 23.38, 0, 0, 0, 0.48, 0.48, 0.48, {
+      tint: [0.98, 0.80, 0.12, 1], emissive: 1.1
     });
   }
-  // 2. Hai dải Rèm Nhung Đỏ kẹp 2 bên gương tại X = 15.52 (Z ∈ [5.0, 7.1] & [10.9, 13.0])
-  dm('quad', 'velvetCurtain', 15.52, 1.70, 6.05,  0, -Math.PI * 0.5, 0, 2.1, 3.3, 1, { tint: [1, 1, 1, 1] });
-  dm('quad', 'velvetCurtain', 15.52, 1.70, 11.95, 0, -Math.PI * 0.5, 0, 2.1, 3.3, 1, { tint: [1, 1, 1, 1] });
-
-  // 3. Giá Áo Khoác 3 Sọc tường Nam (X ∈ [7.6, 13.8], Z ∈ [4.85, 5.95])
-  dm('box', 'limWood', 10.7, 0.29, 5.40, 0, 0, 0, 6.2, 0.58, 1.10, { tint: [1.0, 0.85, 0.72, 1] });
-  dm('cyl', 'white', 10.7, 2.28, 5.35, 0, 0, Math.PI * 0.5, 0.05, 5.8, 0.05, { tint: [0.84, 0.66, 0.24, 1] });
-  dm('quad', 'threeStripesWall', 10.7, 2.75, 4.86, 0, 0, 0, 4.4, 0.95, 1, { tint: [1, 1, 1, 1] });
-  drawAdidasHangingJacket3D(wgl, 8.4,  1.82, 5.35, 0, [0.07, 0.09, 0.15, 1]);
-  drawAdidasHangingJacket3D(wgl, 10.0, 1.82, 5.35, 0, [0.08, 0.32, 0.18, 1]);
-  drawAdidasHangingJacket3D(wgl, 11.6, 1.82, 5.35, 0, [0.60, 0.11, 0.11, 1]);
-  drawAdidasHangingJacket3D(wgl, 13.1, 1.82, 5.35, 0, [0.07, 0.09, 0.15, 1]);
-
-  // 4. Ghế Băng Gỗ Thử Giày + hộp giày (X ∈ [9.8, 11.4], Z ∈ [10.4, 11.4])
-  dm('box', 'limWood', 10.6, 0.21, 10.9, 0, 0, 0, 1.58, 0.42, 0.96, { tint: [1.05, 0.88, 0.72, 1] });
-  dm('box', 'fittingGreenWall', 10.6, 0.48, 10.9, 0, 0, 0, 1.48, 0.12, 0.86, { tint: [1.1, 1.25, 1.0, 1] });
-  dm('box', 'white', 11.15, 0.12, 10.55, 0, 0.15, 0, 0.42, 0.22, 0.54, { tint: [0.11, 0.31, 0.85, 1] });
-  drawAdidasSneaker3D(wgl, 11.15, 0.23, 10.55, [1, 0.98, 0.94, 1], [0.07, 0.09, 0.15, 1], [0.71, 0.33, 0.04, 1]);
-
-  // ==================== E. NỘI THẤT & MỸ THUẬT LẦU 2 ('upper', Y = 3.4) ====================
-  // 1. Kệ BST VN (X ∈ [-5.95, -4.65], Z ∈ [1.8, 7.6])
-  dm('box', 'limWood', -5.30, 3.82, 4.70, 0, 0, 0, 1.25, 0.84, 5.8, { tint: [1.05, 0.90, 0.76, 1] });
-  dm('quad', 'vnCollectionSign', -5.90, 5.45, 4.70, 0, Math.PI * 0.5, 0, 5.6, 2.05, 1, { tint: [1, 1, 1, 1] });
-  dm('box', 'white', -5.20, 4.33, 3.4, 0, 0, 0, 0.46, 0.18, 0.56, { tint: [0.85, 0.15, 0.12, 1] });
-  dm('box', 'white', -5.20, 4.33, 6.0, 0, 0, 0, 0.46, 0.18, 0.56, { tint: [0.06, 0.46, 0.43, 1] });
-
-  // 2. Bục Samba trung tâm Lầu 2 (X ∈ [-0.65, 1.05], Z ∈ [7.15, 8.45])
-  dm('box', 'limWood', 0.20, 3.84, 7.80, 0, 0, 0, 1.60, 0.88, 1.20, { tint: [0.95, 0.82, 0.70, 1] });
-  dm('box', 'white',   0.20, 4.35, 7.80, 0, 0, 0, 0.72, 0.14, 0.62, { tint: [0.11, 0.31, 0.85, 1] });
-  drawAdidasSneaker3D(wgl, 0.20, 4.42, 7.80, [1, 0.98, 0.94, 1], [0.07, 0.09, 0.15, 1], [0.71, 0.33, 0.04, 1]);
-
-  // 3. Quầy Thu Ngân POS (X ∈ [3.15, 5.95], Z ∈ [4.2, 9.6])
-  dm('box', 'limWood', 3.85, 3.92, 6.90, 0, 0, 0, 1.18, 1.04, 5.2, { tint: [1.05, 0.88, 0.72, 1] });
-  dm('box', 'hoiAnYellowWall', 3.85, 4.48, 6.90, 0, 0, 0, 1.32, 0.10, 5.35, { tint: [1.05, 0.95, 0.80, 1] });
-  dm('box', 'white', 3.82, 4.70, 6.10, 0, 0, 0, 0.36, 0.34, 0.44, { tint: [0.12, 0.16, 0.23, 1], specPow: 80 });
-  dm('box', 'white', 3.82, 4.65, 7.65, 0, 0, 0, 0.44, 0.24, 0.62, { tint: [0.11, 0.31, 0.85, 1] });
-  drawAdidasSneaker3D(wgl, 3.82, 4.77, 7.65, [1, 0.98, 0.94, 1], [0.07, 0.09, 0.15, 1], [0.71, 0.33, 0.04, 1]);
-  dm('quad', 'posShelfTex', 5.90, 5.50, 6.90, 0, -Math.PI * 0.5, 0, 5.6, 2.0, 1, { tint: [1, 1, 1, 1] });
-
-  // 4. Tường Sau Lầu 2 (Z = 14.74): Tranh Nón Lá × Hoa Sen × 3 Sọc
-  dm('quad', 'vnLotusStripeArt', 1.75, 5.45, 14.74, 0, Math.PI, 0, 6.2, 2.25, 1, { tint: [1, 1, 1, 1] });
-
-  // ==================== F. 8 ĐÈN LỒNG LỤA HỘI AN + 3 ĐÈN CỎ BA LÁ TREFOIL LED ====================
-  var lanterns = [
-    [-2.4, 2.82, 3.4,  [0.94, 0.27, 0.27], 3.35],
-    [ 2.4, 2.82, 3.4,  [0.96, 0.62, 0.04], 3.35],
-    [-2.4, 2.82, 7.6,  [0.98, 0.80, 0.08], 3.35],
-    [ 2.4, 2.82, 7.6,  [0.86, 0.15, 0.15], 3.35],
-    [10.8, 2.86, 7.2,  [0.96, 0.62, 0.04], 3.40],
-    [10.8, 2.86, 11.0, [0.98, 0.80, 0.08], 3.40],
-    [-2.0, 6.05, 5.0,  [0.94, 0.27, 0.27], 6.80],
-    [ 2.2, 6.05, 9.8,  [0.96, 0.62, 0.04], 6.80]
-  ];
-  for (var li = 0; li < lanterns.length; li++) {
-    drawAdidasLanternWebgl(wgl, lanterns[li][0], lanterns[li][1], lanterns[li][2], lanterns[li][3], lanterns[li][4]);
+  // Quả bóng đá 3D & Vòng Aim hướng sút trên mặt cỏ
+  if (st.kickGame) {
+    var kb = st.kickGame.ball;
+    dm('sphere', 'white', kb.x, kb.y, kb.z, st.t * 2, 0, 0, 0.40, 0.40, 0.40, { tint: [0.98, 0.98, 0.98, 1], specPow: 72 });
+    dm('box', 'white', kb.x, kb.y + 0.02, kb.z, 0, st.t * 2, 0, 0.16, 0.36, 0.36, { tint: [0.10, 0.12, 0.18, 1] });
+    if (st.kickGame.active && !kb.shooting) {
+      wgl.setBlend('add');
+      for (var dot = 1; dot <= 4; dot++) {
+        var ax = kb.x + Math.sin(st.kickGame.aimAngle) * dot * 0.75;
+        var az = kb.z + Math.cos(st.kickGame.aimAngle) * dot * 0.75;
+        dm('cyl', 'white', ax, 0.035, az, 0, 0, 0, 0.14, 0.02, 0.14, { tint: [0.98, 0.85, 0.15, 0.85], emissive: 1.3 });
+      }
+      wgl.setBlend(null);
+    }
+    for (var ksi = 0; ksi < st.kickGame.sparks.length; ksi++) {
+      var sp = st.kickGame.sparks[ksi];
+      dm('sphere', 'white', sp.x, sp.y, sp.z, 0, 0, 0, 0.10, 0.10, 0.10, { tint: [1.0, 0.85, 0.20, 1], emissive: 1.4 });
+    }
   }
-  // 3 Đèn Cỏ Ba Lá Trefoil LED (Hall + Fitting + Upper)
-  drawAdidasTrefoilLampWebgl(wgl, 0.0, 2.55, 6.2, 0);
-  drawAdidasTrefoilLampWebgl(wgl, 14.8, 2.68, 9.0, -Math.PI * 0.5);
-  drawAdidasTrefoilLampWebgl(wgl, 0.2, 5.95, 7.8, 0);
+  // Gian 16: Kệ Bóng Thi Đấu & Ghế Cổ Động Viên (X = 13.25, Z ∈ [15.2..21.2])
+  dm('box', 'limWood', 13.30, 0.46, 18.2, 0, 0, 0, 1.25, 0.92, 5.8, { tint: [1.0, 0.88, 0.74, 1] });
+  dm('quad', 'footballGearTex', 13.88, 2.25, 18.2, 0, -Math.PI * 0.5, 0, 5.4, 2.1, 1, { tint: [1, 1, 1, 1] });
+  for (var wb = 0; wb < 3; wb++) {
+    dm('sphere', 'white', 13.15, 1.06, 16.4 + wb * 1.8, 0, 0, 0, 0.34, 0.34, 0.34, { tint: [0.98, 0.96, 0.90, 1] });
+  }
 
-  // ==================== G. 5 NPC PIXEL ART (gl.NEAREST) & CHÚ HEO MASCOT 24×20 ====================
+  // Đèn Cỏ Ba Lá Trefoil LED nổi bật khắp Mega Mall
+  drawAdidasTrefoilLampWebgl(wgl, 0.0,  3.65, 6.3,  0);
+  drawAdidasTrefoilLampWebgl(wgl, 0.0,  3.65, 17.5, 0);
+  drawAdidasTrefoilLampWebgl(wgl, 10.6, 3.65, 9.8,  -Math.PI * 0.5);
+  drawAdidasTrefoilLampWebgl(wgl, 10.0, 3.85, 19.2, 0);
+
+  // ==================== F. 12 NPC PIXEL ART (gl.NEAREST) & CHÚ HEO 4 OUTFIT ====================
   if (st.npcs) {
     for (var ni = 0; ni < st.npcs.length; ni++) {
       if (typeof drawHumanBillboardWebgl === 'function') {
@@ -11277,7 +11750,7 @@ function renderAdidasWebglScene(wgl, cam, st, W, H) {
     drawPigBillboardWebgl(wgl, cam, st.pig, st.t, false);
   }
 
-  // Vòng sóng chạm sàn + hạt bụi ánh vàng Hội An
+  // Vòng sóng chạm sàn + hạt bụi ánh sáng
   wgl.setBlend('add');
   for (var rIdx = 0; rIdx < st.ripples.length; rIdx++) {
     var rp = st.ripples[rIdx];
@@ -11288,11 +11761,10 @@ function renderAdidasWebglScene(wgl, cam, st, W, H) {
   }
   for (var pIdx = 0; pIdx < (st.particles ? st.particles.length : 0); pIdx++) {
     var pt = st.particles[pIdx];
-    dm('sphere', 'white', pt.x, pt.y, pt.z, 0, 0, 0, 0.024, 0.024, 0.024, { tint: [1.0, 0.88, 0.52, 0.42], emissive: 1.1 });
+    dm('sphere', 'white', pt.x, pt.y, pt.z, 0, 0, 0, 0.024, 0.024, 0.024, { tint: [1.0, 0.90, 0.62, 0.40], emissive: 1.1 });
   }
   wgl.setBlend(null);
 
-  // Fade thoát cửa hàng ra Đại Lộ Sài Gòn
   if (st.exitFade > 0.01) {
     wgl.setBlend('alpha');
     dm('quad', 'white', cam.pos.x + cam.F.x * 0.6, cam.pos.y + cam.F.y * 0.6, cam.pos.z + cam.F.z * 0.6, 0, cam.yaw, 0, 6, 6, 1, {
@@ -11303,173 +11775,79 @@ function renderAdidasWebglScene(wgl, cam, st, W, H) {
 }
 
 /* ==================== 4. FALLBACK CANVAS2D CHO HEADLESS SMOKE TEST 182 & NON-WEBGL ==================== */
-function drawAdidasStaircase3D(ctx, cam, isGoingUp) {
-  for (var s = 0; s < 12; s++) {
-    var sy = isGoingUp ? (s * 0.283) : ((11 - s) * 0.22);
-    var sz = 8.6 + s * 0.40;
-    drawBox3D(ctx, cam, -4.0, 0, sz, 2.0, Math.max(0.22, sy + 0.26), 0.42, {
-      top: '#966137', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E'
-    });
-  }
-  drawBox3D(ctx, cam, -2.96, 0, 8.6, 0.08, 1.05, 0.08, { top: '#4A2C1A', front: '#2B180E', side: '#2B180E' });
-  drawBox3D(ctx, cam, -2.96, 0, 13.4, 0.08, 2.95, 0.08, { top: '#4A2C1A', front: '#2B180E', side: '#2B180E' });
-  drawPoly3D(ctx, cam, [[-2.96, 1.02, 8.6], [-2.96, 2.92, 13.4], [-2.96, 3.00, 13.4], [-2.96, 1.10, 8.6]], '#4A2C1A', '#2B180E', 1.5);
-}
-
 function drawSneakerSprite3D(ctx, cam, wx, wy, wz, bodyCol, stripeCol, soleCol) {
   var pr = projectPoint3D(cam, wx, wy, wz);
-  if (!pr || pr.cz > 16 || pr.cz < 0.35) return;
+  if (!pr || pr.cz > 24 || pr.cz < 0.35) return;
   var u = Math.max(0.45, Math.min(2.8, pr.scale / 40));
   var px = Math.round(pr.sx), py = Math.round(pr.sy);
   ctx.save();
-  ctx.fillStyle = 'rgba(43,24,14,0.28)';
-  ctx.beginPath(); ctx.ellipse(px, py + 1 * u, 7 * u, 2.2 * u, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = soleCol || '#B45309';
   ctx.fillRect(px - 6 * u, py - 2.2 * u, 12 * u, 2.6 * u);
   ctx.fillStyle = bodyCol || '#FFFBF1';
   ctx.fillRect(px - 5.5 * u, py - 6.2 * u, 9.5 * u, 4.2 * u);
-  ctx.fillRect(px + 2.8 * u, py - 4.4 * u, 3.0 * u, 2.4 * u);
   ctx.fillStyle = stripeCol || '#111827';
-  ctx.fillRect(px - 2.6 * u, py - 5.6 * u, 1.1 * u, 3.2 * u);
-  ctx.fillRect(px - 0.8 * u, py - 5.6 * u, 1.1 * u, 3.2 * u);
-  ctx.fillRect(px + 1.0 * u, py - 5.6 * u, 1.1 * u, 3.2 * u);
-  ctx.strokeStyle = '#2B180E'; ctx.lineWidth = 1;
-  ctx.strokeRect(px - 6 * u, py - 6.2 * u, 12 * u, 6.6 * u);
+  for (var k = 0; k < 3; k++) ctx.fillRect(px + (-2.6 + k * 1.8) * u, py - 5.6 * u, 1.1 * u, 3.2 * u);
   ctx.restore();
 }
 
 function renderAdidasTpsScene(ctx, cam, st, W, H) {
-  var room = st.room || (st.pig.y >= 1.9 ? 'upper' : (st.pig.x >= 6.0 ? 'fitting' : 'hall'));
-  var isHall = room === 'hall';
-  var isFitting = room === 'fitting';
-
-  ctx.fillStyle = isFitting ? '#213527' : (!isHall ? '#5C341D' : '#4A2C1A');
+  var room = st.room || (st.pig.x >= 6.0 ? (st.pig.z >= 14.0 ? 'kick_zone' : 'fitting') : 'hall');
+  var isFitting = room === 'fitting' || room === 'fitting_pos';
+  ctx.fillStyle = isFitting ? '#213527' : '#3B2618';
   ctx.fillRect(0, 0, W, H);
 
-  if (isHall) {
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [6, 0, 0], [6, 0, 14.8], [-6, 0, 14.8]], '#E8DEC8', '#8C7A5B', 1);
-    for (var tz = 0; tz < 14.4; tz += 1.6) {
-      for (var tx = -6; tx < 6; tx += 1.6) {
-        if ((Math.round(tx / 1.6) + Math.round(tz / 1.6)) % 2 === 0) {
-          drawPoly3D(ctx, cam, [[tx, 0.004, tz], [tx + 1.6, 0.004, tz], [tx + 1.6, 0.004, tz + 1.6], [tx, 0.004, tz + 1.6]], '#D6C4A1', '#B5A17D', 0.6);
-        }
+  drawPoly3D(ctx, cam, [[-10, 0, 0], [14, 0, 0], [14, 0, 24], [-10, 0, 24]], isFitting ? '#8F6038' : '#E8DEC8', '#8C7A5B', 1);
+  for (var tz = 0; tz < 24; tz += 2.4) {
+    for (var tx = -10; tx < 14; tx += 2.4) {
+      if ((Math.round(tx / 2.4) + Math.round(tz / 2.4)) % 2 === 0) {
+        drawPoly3D(ctx, cam, [[tx, 0.004, tz], [tx + 2.4, 0.004, tz], [tx + 2.4, 0.004, tz + 2.4], [tx, 0.004, tz + 2.4]], '#D6C4A1', '#B5A17D', 0.5);
       }
     }
-    drawPoly3D(ctx, cam, [[-1.1, 0.008, 0.4], [1.1, 0.008, 0.4], [1.1, 0.008, 4.8], [-1.1, 0.008, 4.8]], '#3B2314', '#F4B93B', 1.2);
-  } else if (isFitting) {
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [6, 0, 0], [6, 0, 14.8], [-6, 0, 14.8]], '#8F6038', '#4A2C1A', 1);
-    for (var fx = -6; fx < 6; fx += 1.2) {
-      drawPoly3D(ctx, cam, [[fx, 0.004, 0], [fx + 0.6, 0.004, 0], [fx + 0.6, 0.004, 14.8], [fx, 0.004, 14.8]], '#7D512D', '#5C341D', 0.5);
-    }
-    drawPoly3D(ctx, cam, [[-2.0, 0.01, 9.6], [2.0, 0.01, 9.6], [2.0, 0.01, 13.6], [-2.0, 0.01, 13.6]], '#1F3D2B', '#F4B93B', 1.8);
-  } else {
-    drawPoly3D(ctx, cam, [[-6, 0, 0], [6, 0, 0], [6, 0, 14.8], [-6, 0, 14.8]], '#9C6D44', '#5C341D', 1);
-    for (var ux = -6; ux < 6; ux += 1.2) {
-      drawPoly3D(ctx, cam, [[ux, 0.004, 0], [ux + 0.6, 0.004, 0], [ux + 0.6, 0.004, 14.8], [ux, 0.004, 14.8]], '#8B5E38', '#6B4226', 0.5);
-    }
-    drawPoly3D(ctx, cam, [[-1.6, 0.01, 2.0], [1.8, 0.01, 2.0], [1.8, 0.01, 13.2], [-1.6, 0.01, 13.2]], '#7F1D1D', '#F4B93B', 1.4);
   }
-
-  drawPoly3D(ctx, cam, [[-6, 3.85, 0], [6, 3.85, 0], [6, 3.85, 14.8], [-6, 3.85, 14.8]], isFitting ? '#3B2314' : '#5C341D', '#2B180E', 1);
-  for (var bz = 2.0; bz <= 13.6; bz += 2.6) {
-    drawPoly3D(ctx, cam, [[-6, 3.74, bz - 0.14], [6, 3.74, bz - 0.14], [6, 3.74, bz + 0.14], [-6, 3.74, bz + 0.14]], '#3B2314', '#2B180E', 1);
-  }
-
-  var wLeft  = isFitting ? '#2F4A36' : (!isHall ? '#F1D27A' : '#E3B857');
-  var wRight = isFitting ? '#28402F' : (!isHall ? '#E8C468' : '#D9AE4E');
-  var wBack  = isFitting ? '#243A2A' : (!isHall ? '#E3BE5E' : '#D4A745');
-  drawPoly3D(ctx, cam, [[-6, 0, 0], [-6, 0, 14.8], [-6, 3.85, 14.8], [-6, 3.85, 0]], wLeft, '#5C341D', 1);
-  drawPoly3D(ctx, cam, [[6, 0, 14.8], [6, 0, 0], [6, 3.85, 0], [6, 3.85, 14.8]], wRight, '#5C341D', 1);
-  drawPoly3D(ctx, cam, [[-6, 0, 14.8], [6, 0, 14.8], [6, 3.85, 14.8], [-6, 3.85, 14.8]], wBack, '#5C341D', 1);
-  drawPoly3D(ctx, cam, [[-6, 0, 0], [6, 0, 0], [6, 3.85, 0], [-6, 3.85, 0]], wLeft, '#5C341D', 1);
+  drawPoly3D(ctx, cam, [[-10, 0, 24], [14, 0, 24], [14, 4.65, 24], [-10, 4.65, 24]], '#E6C77D', '#5C341D', 1);
+  drawPoly3D(ctx, cam, [[-10, 0, 0], [-10, 0, 24], [-10, 4.65, 24], [-10, 4.65, 0]], '#DFBA66', '#5C341D', 1);
+  drawPoly3D(ctx, cam, [[14, 0, 24], [14, 0, 0], [14, 4.65, 0], [14, 4.65, 24]], '#DFBA66', '#5C341D', 1);
 
   if (typeof drawAdidasRoomWalls3D === 'function') {
     drawAdidasRoomWalls3D(ctx, cam, room, st.pig, st.t);
-  }
-
-  var lanterns = isHall
-    ? [[-2.4, 3.6, '#EF4444', '#FCA5A5'], [2.4, 3.6, '#F59E0B', '#FDE68A'], [-2.6, 7.8, '#FACC15', '#FEF08A'], [2.6, 7.8, '#DC2626', '#FCA5A5'], [0, 11.2, '#10B981', '#A7F3D0'], [0, 5.2, '#F59E0B', '#FDE68A']]
-    : (isFitting
-      ? [[-2.0, 5.4, '#F59E0B', '#FDE68A'], [2.0, 5.4, '#FACC15', '#FEF08A'], [0, 11.8, '#FFF3C4', '#FDE68A']]
-      : [[-2.2, 4.2, '#EF4444', '#FCA5A5'], [2.2, 4.2, '#FACC15', '#FEF08A'], [-2.2, 8.6, '#F59E0B', '#FDE68A'], [2.2, 8.6, '#DC2626', '#FCA5A5'], [0.4, 12.2, '#F43F5E', '#FDA4AF']]);
-  for (var li = 0; li < lanterns.length; li++) {
-    drawLanternGlow3D(ctx, cam, lanterns[li][0], 2.95, lanterns[li][1], lanterns[li][2], lanterns[li][3], 0.22, 3.85);
   }
 
   var items = [];
   function pushItem(wx, wz, fn) {
     items.push({ d: Math.hypot(wx - cam.pos.x, wz - cam.pos.z), fn: fn });
   }
-
-  if (isHall) {
-    pushItem(-4.0, 11.0, function() { drawAdidasStaircase3D(ctx, cam, true); });
-    pushItem(0, 6.2, function() {
-      drawBox3D(ctx, cam, 0, 0, 6.2, 2.4, 0.84, 1.8, { top: '#7C4F2B', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
-      drawBox3D(ctx, cam, 0, 0.84, 6.2, 2.52, 0.08, 1.92, { top: '#E3B857', front: '#C89B3C', side: '#A67C2E', stroke: '#2B180E' });
-      drawSneakerSprite3D(ctx, cam, -0.72, 1.07, 6.2, '#FFFBF1', '#111827', '#B45309');
-      drawSneakerSprite3D(ctx, cam,  0.00, 1.15, 6.2, '#1E293B', '#F97316', '#0F172A');
-      drawSneakerSprite3D(ctx, cam,  0.72, 1.07, 6.2, '#DC2626', '#FFFBF1', '#F8FAFC');
-    });
-    pushItem(-5.2, 4.7, function() {
-      drawBox3D(ctx, cam, -5.3, 0, 4.7, 1.1, 0.82, 5.6, { top: '#7C4F2B', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
-    });
-    pushItem(5.2, 4.65, function() {
-      drawBox3D(ctx, cam, 5.3, 0, 4.65, 1.0, 0.72, 5.4, { top: '#7C4F2B', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
-    });
-    for (var si = 0; si < st.hallStaff.length; si++) {
-      (function(emp) {
-        pushItem(emp.x, emp.z, function() {
-          drawHumanTps3D(ctx, cam, { x: emp.x, z: emp.z, yaw: emp.yaw, role: 'adidas_staff', shirt: '#111827', hair: '#1C1917' }, st.t);
+  pushItem(0, 6.3, function() {
+    drawBox3D(ctx, cam, 0, 0, 6.3, 2.5, 0.84, 1.9, { top: '#7C4F2B', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
+    drawSneakerSprite3D(ctx, cam, 0, 1.05, 6.3, '#FFFBF1', '#111827', '#B45309');
+  });
+  pushItem(3.1, 6.45, function() {
+    drawBox3D(ctx, cam, 3.1, 0, 6.45, 1.7, 0.76, 1.9, { top: '#7C4F2B', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
+  });
+  pushItem(-5.2, 10.6, function() {
+    drawBox3D(ctx, cam, -5.2, 0, 10.6, 2.2, 0.72, 1.8, { top: '#334155', front: '#1E293B', side: '#0F172A', stroke: '#2B180E' });
+  });
+  pushItem(10.0, 22.4, function() {
+    drawBox3D(ctx, cam, 10.0, 0, 22.4, 3.6, 1.9, 1.1, { top: '#15803D', front: '#166534', side: '#14532D', stroke: '#FFFBF1' });
+  });
+  if (st.npcs) {
+    for (var ni = 0; ni < st.npcs.length; ni++) {
+      (function(npc) {
+        pushItem(npc.x, npc.z, function() {
+          drawHumanTps3D(ctx, cam, npc, st.t);
         });
-      })(st.hallStaff[si]);
+      })(st.npcs[ni]);
     }
-  } else if (isFitting) {
-    pushItem(-2.35, 7.4, function() {
-      drawBox3D(ctx, cam, -2.35, 0, 7.4, 1.55, 0.42, 0.92, { top: '#5C341D', front: '#4A2C1A', side: '#3B2314', stroke: '#2B180E' });
-      drawBox3D(ctx, cam, -2.35, 0.42, 7.4, 1.45, 0.12, 0.82, { top: '#14532D', front: '#166534', side: '#052E16', stroke: '#F4B93B' });
-      drawBox3D(ctx, cam, -1.25, 0, 7.75, 0.42, 0.22, 0.56, { top: '#1D4ED8', front: '#1E40AF', side: '#1E3A8A', stroke: '#2B180E' });
-      drawSneakerSprite3D(ctx, cam, -1.25, 0.24, 7.75, '#FFFBF1', '#111827', '#B45309');
-    });
-    pushItem(-5.0, 6.4, function() {
-      drawBox3D(ctx, cam, -5.1, 0, 6.4, 1.2, 0.58, 7.8, { top: '#6B4226', front: '#4A2C1A', side: '#3B2314', stroke: '#2B180E' });
-    });
-    pushItem(0, 14.2, function() {
-      drawBox3D(ctx, cam, 0, 0, 14.3, 3.6, 0.20, 0.65, { top: '#7C4F2B', front: '#5C341D', side: '#4A2C1A', stroke: '#F4B93B' });
-    });
-  } else {
-    pushItem(-4.0, 11.0, function() { drawAdidasStaircase3D(ctx, cam, false); });
-    pushItem(-5.2, 4.7, function() {
-      drawBox3D(ctx, cam, -5.3, 0, 4.7, 1.1, 0.84, 5.6, { top: '#7C4F2B', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
-    });
-    pushItem(0.2, 7.8, function() {
-      drawBox3D(ctx, cam, 0.2, 0, 7.8, 1.35, 0.88, 1.05, { top: '#5C341D', front: '#4A2C1A', side: '#3B2314', stroke: '#F4B93B' });
-      drawSneakerSprite3D(ctx, cam, 0.2, 1.04, 7.8, '#FFFBF1', '#111827', '#B45309');
-    });
-    pushItem(3.95, 6.8, function() {
-      drawBox3D(ctx, cam, 3.95, 0, 6.8, 1.15, 1.04, 5.2, { top: '#8C5229', front: '#5C341D', side: '#4A2C1A', stroke: '#2B180E' });
-      drawBox3D(ctx, cam, 3.92, 1.04, 6.8, 1.32, 0.10, 5.4, { top: '#E3B857', front: '#C89B3C', side: '#A67C2E', stroke: '#2B180E' });
-      drawSneakerSprite3D(ctx, cam, 3.85, 1.40, 7.6, '#FFFBF1', '#111827', '#B45309');
-    });
-    pushItem(st.upperCashier.x, st.upperCashier.z, function() {
-      drawHumanTps3D(ctx, cam, { x: st.upperCashier.x, z: st.upperCashier.z, yaw: st.upperCashier.yaw, role: 'adidas_staff', shirt: '#111827', hair: '#1C1917' }, st.t);
-    });
   }
-
   pushItem(st.pig.x, st.pig.z, function() {
     drawPigTps3D(ctx, cam, st.pig, st.t);
   });
-
   items.sort(function(a, b) { return b.d - a.d; });
   for (var ii = 0; ii < items.length; ii++) items[ii].fn();
 
-  ctx.save();
-  ctx.fillStyle = isFitting ? 'rgba(255, 214, 130, 0.08)' : 'rgba(255, 220, 140, 0.07)';
-  ctx.fillRect(0, 0, W, H);
   if (st.exitFade > 0.01) {
     ctx.fillStyle = 'rgba(246, 238, 220, ' + st.exitFade.toFixed(2) + ')';
     ctx.fillRect(0, 0, W, H);
   }
-  ctx.restore();
 }
 `}},864,[]);
 __d(function(g,r,i,a,m,_e,_d){"use strict";function e(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(_e,'__esModule',{value:!0}),Object.defineProperty(_e,"StadiumView",{enumerable:!0,get:function(){return s}}),r(_d[0]),r(_d[1]);var t=e(r(_d[2])),o=e(r(_d[3])),n=e(r(_d[4])),c=r(_d[5]),u=(function(e){if(e&&e.__esModule)return e;var t={};return e&&Object.keys(e).forEach(function(o){if('default'!==o){var n=Object.getOwnPropertyDescriptor(e,o);Object.defineProperty(t,o,n.get?n:{enumerable:!0,get:function(){return e[o]}})}}),t.default=e,t})(r(_d[6])),d=r(_d[7]),l=r(_d[8]);const s=({onBack:e})=>(0,l.jsxs)(n.default,{style:f.fullscreenContainer,children:[(0,l.jsx)(d.StadiumBannerWebView,{onExitStadium:e}),(0,l.jsx)(o.default,{style:f.backButton,onPress:()=>{u.impactAsync(u.ImpactFeedbackStyle.Light).catch(()=>{}),e()},activeOpacity:.85,hitSlop:{top:10,bottom:10,left:10,right:10},children:(0,l.jsx)(c.ArrowLeft,{size:20,color:"#2B2118",strokeWidth:2.8})})]}),f=t.default.create({fullscreenContainer:{flex:1,width:'100%',height:'100%',backgroundColor:'#1E293B'},backButton:{position:'absolute',top:16,left:16,width:42,height:42,borderRadius:14,backgroundColor:'#FFFBF1',borderWidth:3,borderColor:'#2B2118',alignItems:'center',justifyContent:'center',shadowColor:'#2B2118',shadowOffset:{width:0,height:3},shadowOpacity:1,shadowRadius:0,elevation:4,zIndex:20}})},865,[39,29,80,270,154,777,775,866,60]);
